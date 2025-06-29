@@ -93,7 +93,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className={`relative rounded-2xl transition-all duration-300 group ${
+      className={`relative w-full h-full transition-all duration-300 group ${
         audio 
           ? `${isPlaying ? 'ring-2 ring-blue-400/50' : ''}`
           : ''
@@ -105,25 +105,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       onDrop={handleDrop}
       whileHover={{ scale: audio ? 1.01 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
-      style={audio ? {
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
-        backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(59, 130, 246, 0.2)',
-        boxShadow: isPlaying 
-          ? '0 0 30px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-          : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-        padding: '20px',
-        height: '136px',
-        minHeight: '136px',
-        maxHeight: '136px'
-      } : {
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 41, 59, 0.3) 100%)',
-        backdropFilter: 'blur(4px)',
-        border: '2px dashed rgba(107, 114, 128, 0.3)',
-        padding: '20px',
-        height: '136px',
-        minHeight: '136px',
-        maxHeight: '136px'
+      style={{
+        height: '100%',
+        minHeight: '100%'
       }}
     >
       {audio ? (
@@ -174,7 +158,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-gray-300">
+        <div className="flex flex-col items-center justify-center h-full text-gray-300">
           <div 
             className="p-4 rounded-full mb-4"
             style={{

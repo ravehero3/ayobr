@@ -23,7 +23,7 @@ function App() {
 
   const handleGenerateVideos = async () => {
     const completePairs = getCompletePairs();
-    
+
     if (completePairs.length === 0) {
       alert('Please add at least one complete pair (audio + image) to generate videos.');
       return;
@@ -82,7 +82,7 @@ function App() {
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileDrop(files);

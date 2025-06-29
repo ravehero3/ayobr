@@ -30,15 +30,15 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
       layout
       transition={{ duration: 0.3 }}
     >
-      <div className="flex space-x-6">
+      <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
         {/* Audio Container */}
-        <div className="relative flex-1">
+        <div className="relative w-full sm:w-1/2">
           <div
-            className="relative w-full backdrop-blur-xl p-6 border rounded-3xl"
+            className="relative w-full backdrop-blur-xl border rounded-3xl overflow-hidden"
             style={{
-              height: '176px',
-              minHeight: '176px',
-              maxHeight: '176px',
+              height: '200px',
+              minHeight: '200px',
+              maxHeight: '200px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.4)',
               borderWidth: '2px',
@@ -52,32 +52,34 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           >
             {/* Top-right brilliant highlight */}
             <div 
-              className="absolute top-4 right-6 w-3 h-3 rounded-full"
+              className="absolute top-4 right-6 w-3 h-3 rounded-full z-10"
               style={{
                 background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(59, 130, 246, 0.8) 40%, transparent 70%)',
                 boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
               }}
             />
 
-            <AudioContainer
-              audio={pair.audio}
-              pairId={pair.id}
-              onSwap={onSwap}
-              draggedItem={draggedItem}
-              onDragStart={onDragStart}
-              onDragEnd={onDragEnd}
-            />
+            <div className="absolute inset-0 p-6">
+              <AudioContainer
+                audio={pair.audio}
+                pairId={pair.id}
+                onSwap={onSwap}
+                draggedItem={draggedItem}
+                onDragStart={onDragStart}
+                onDragEnd={onDragEnd}
+              />
+            </div>
           </div>
         </div>
 
         {/* Image Container */}
-        <div className="relative flex-1">
+        <div className="relative w-full sm:w-1/2">
           <div
-            className="relative w-full backdrop-blur-xl p-6 border rounded-3xl"
+            className="relative w-full backdrop-blur-xl border rounded-3xl overflow-hidden"
             style={{
-              height: '176px',
-              minHeight: '176px',
-              maxHeight: '176px',
+              height: '200px',
+              minHeight: '200px',
+              maxHeight: '200px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.4)',
               borderWidth: '2px',
@@ -91,47 +93,49 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           >
             {/* Top-right brilliant highlight */}
             <div 
-              className="absolute top-4 right-6 w-3 h-3 rounded-full"
+              className="absolute top-4 right-6 w-3 h-3 rounded-full z-10"
               style={{
                 background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(59, 130, 246, 0.8) 40%, transparent 70%)',
                 boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
               }}
             />
 
-            <ImageContainer
-              image={pair.image}
-              pairId={pair.id}
-              onSwap={onSwap}
-              draggedItem={draggedItem}
-              onDragStart={onDragStart}
-              onDragEnd={onDragEnd}
-            />
+            <div className="absolute inset-0 p-6">
+              <ImageContainer
+                image={pair.image}
+                pairId={pair.id}
+                onSwap={onSwap}
+                draggedItem={draggedItem}
+                onDragStart={onDragStart}
+                onDragEnd={onDragEnd}
+              />
+            </div>
           </div>
         </div>
-
-        {/* Video Generation Animation Overlay */}
-        <VideoGenerationAnimation
-          pair={pair}
-          isGenerating={videoState.isGenerating}
-          progress={videoState.progress}
-          isComplete={videoState.isComplete}
-          generatedVideo={generatedVideo}
-          onComplete={handleVideoGenerationComplete}
-        />
-
-        {/* Delete button positioned at top right of container */}
-        <button
-          onClick={handleDelete}
-          className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-red-400 hover:border-red-400/50 hover:bg-red-500/20 transition-all duration-300"
-          style={{
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-          }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
+
+      {/* Video Generation Animation Overlay */}
+      <VideoGenerationAnimation
+        pair={pair}
+        isGenerating={videoState.isGenerating}
+        progress={videoState.progress}
+        isComplete={videoState.isComplete}
+        generatedVideo={generatedVideo}
+        onComplete={handleVideoGenerationComplete}
+      />
+
+      {/* Delete button positioned at top right of container */}
+      <button
+        onClick={handleDelete}
+        className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-red-400 hover:border-red-400/50 hover:bg-red-500/20 transition-all duration-300"
+        style={{
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+        }}
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
 
       {/* Hover enhancement for entire pair */}
       <div 
