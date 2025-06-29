@@ -2,13 +2,26 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import AudioContainer from './AudioContainer';
 import ImageContainer from './ImageContainer';
+import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
 const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) => {
-  const { removePair } = useAppStore();
+  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
+  
+  const videoState = getVideoGenerationState(pair.id);
+  const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
 
   const handleDelete = () => {
     removePair(pair.id);
+  };
+
+  const handleVideoGenerationComplete = () => {
+    setTimeout(() => {
+      setVideoGenerationState(pair.id, { 
+        ...videoState, 
+        isComplete: false 
+      });
+    }, 500);
   };
 
   return (
@@ -17,9 +30,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
       layout
       transition={{ duration: 0.3 }}
     >
-      <div className="space-y-6">
+      <div className="flex space-x-6">
         {/* Audio Container */}
-        <div className="relative">
+        <div className="relative flex-1">
           <div
             className="relative w-full h-48 backdrop-blur-xl p-6 border rounded-3xl"
             style={{
@@ -55,7 +68,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
         </div>
 
         {/* Image Container */}
-        <div className="relative">
+        <div className="relative flex-1">
           <div
             className="relative w-full h-48 backdrop-blur-xl p-6 border rounded-3xl"
             style={{
@@ -89,6 +102,16 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
             />
           </div>
         </div>
+
+        {/* Video Generation Animation Overlay */}
+        <VideoGenerationAnimation
+          pair={pair}
+          isGenerating={videoState.isGenerating}
+          progress={videoState.progress}
+          isComplete={videoState.isComplete}
+          generatedVideo={generatedVideo}
+          onComplete={handleVideoGenerationComplete}
+        />
 
         {/* Delete button positioned at top right of container */}
         <button

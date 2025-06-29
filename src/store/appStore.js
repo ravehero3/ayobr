@@ -11,6 +11,7 @@ export const useAppStore = create((set, get) => ({
   generatedVideos: [],
   isGenerating: false,
   currentProgress: 0,
+  videoGenerationStates: {}, // Track generation progress for each pair
 
   // Actions
   addPair: (pair) => set(state => ({
@@ -54,6 +55,24 @@ export const useAppStore = create((set, get) => ({
   setIsGenerating: (isGenerating) => set({ isGenerating }),
   
   setProgress: (progress) => set({ currentProgress: progress }),
+
+  // Video generation state management for individual pairs
+  setVideoGenerationState: (pairId, state) => set(store => ({
+    videoGenerationStates: {
+      ...store.videoGenerationStates,
+      [pairId]: state
+    }
+  })),
+
+  getVideoGenerationState: (pairId) => {
+    const { videoGenerationStates } = get();
+    return videoGenerationStates[pairId] || { 
+      isGenerating: false, 
+      progress: 0, 
+      isComplete: false, 
+      video: null 
+    };
+  },
 
   // Utility actions
   getCompletePairs: () => {

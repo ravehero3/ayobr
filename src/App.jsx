@@ -7,9 +7,9 @@ import PairContainer from './components/PairContainer';
 import VideoPreviewCard from './components/VideoPreviewCard';
 
 function App() {
-  const { pairs, generatedVideos, isGenerating } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs } = useAppStore();
   const { handleFileDrop, swapContainers } = usePairingLogic();
-  const { generateVideos, progress } = useFFmpeg();
+  const { processVideoWithFFmpeg } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -22,13 +22,107 @@ function App() {
   }, []);
 
   const handleGenerateVideos = async () => {
-    const validPairs = pairs.filter(pair => pair.audio && pair.image);
-    if (validPairs.length === 0) {
-      alert('Please add at least one complete audio-image pair to generate videos.');
+    const completePairs = getCompletePairs();
+    
+    if (completePairs.length === 0) {
+      alert('Please add at least one complete pair (audio + image) to generate videos.');
       return;
     }
-    
-    await generateVideos(validPairs);
+
+    setIsGenerating(true);
+    clearGeneratedVideos();
+
+    try {
+      // Process pairs in parallel with individual animations
+      const promises = completePairs.map(async (pair) => {
+        // Set initial generating state for this pair
+        setVideoGenerationState(pair.id, {
+          isGenerating: true,
+          progress: 0,
+          isComplete: false,
+          video: null
+        });
+
+        try {
+          const videoBlob = await processVideoWithFFmpeg(
+            pair.audio, 
+            pair.image, 
+            (progress) => {
+              setVideoGenerationState(pair.id, {
+                isGenerating: true,
+                progress: progress,
+                isComplete: false,
+                video: null
+              });
+            }
+          );
+
+          const videoUrl = URL.createObjectURL(videoBlob);
+          const video = {
+            id: crypto.randomUUID(),
+            pairId: pair.id,
+            url: videoUrl,
+            blob: videoBlob,
+            filename: `video_${pair.audio.name.split('.')[0]}_${pair.image.name.split('.')[0]}.mp4`,
+            createdAt: new Date()
+          };
+
+          addGeneratedVideo(video);
+
+          // Set completion state for this pair
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: video
+          });
+
+        } catch (error) {
+          console.error(`Error generating video for pair ${pair.id}:`, error);
+          // Reset state on error
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 0,
+            isComplete: false,
+            video: null
+          });
+        }
+      });
+
+      await Promise.all(promises);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleDownloadVideos = async () => {
+    if (generatedVideos.length === 0) {
+      alert('No videos to download. Generate some videos first!');
+      return;
+    }
+
+    if (generatedVideos.length === 1) {
+      // Single video download
+      const video = generatedVideos[0];
+      const link = document.createElement('a');
+      link.href = video.url;
+      link.download = video.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Multiple videos - create ZIP (simplified approach)
+      for (const video of generatedVideos) {
+        const link = document.createElement('a');
+        link.href = video.url;
+        link.download = video.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Small delay between downloads
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
   };
 
   const handleDragOver = useCallback((e) => {
@@ -125,7 +219,7 @@ function App() {
 
         {/* Pairs Grid */}
         {pairs.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-8 max-w-full mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 max-w-7xl mx-auto">
             <AnimatePresence>
               {pairs.map((pair) => (
                 <motion.div
@@ -134,7 +228,7 @@ function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full max-w-sm mx-auto"
+                  className="w-full"
                 >
                   <PairContainer
                     pair={pair}
@@ -149,9 +243,9 @@ function App() {
           </div>
         )}
 
-        {/* Generate Button */}
+        {/* Action Buttons */}
         {pairs.length > 0 && (
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center gap-4 mb-8">
             <motion.button
               onClick={handleGenerateVideos}
               disabled={isGenerating}
@@ -162,12 +256,31 @@ function App() {
               {isGenerating ? (
                 <div className="flex items-center space-x-3">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Generating Videos... {Math.round(progress)}%</span>
+                  <span>Generating Videos...</span>
                 </div>
               ) : (
                 'Generate Videos'
               )}
             </motion.button>
+
+            {generatedVideos.length > 0 && (
+              <motion.button
+                onClick={handleDownloadVideos}
+                className="px-8 py-4 bg-green-600 hover:bg-green-500 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Download Videos</span>
+                </div>
+              </motion.button>
+            )}
           </div>
         )}
 
