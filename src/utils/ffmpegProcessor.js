@@ -8,182 +8,160 @@ let initPromise = null;
 
 // File cache to avoid re-reading the same files
 const fileCache = new Map();
-const maxCacheSize = 5; // Smaller cache for better memory management in WASM
+const maxCacheSize = 10; // Limit cache size to prevent memory issues
 
-// Simple initialization without preloading for Replit compatibility
-const initializeFFmpegInstance = async () => {
-  const ffmpegInstance = new FFmpeg();
-
-  // Try default initialization first (works better in Replit)
-  try {
-    await ffmpegInstance.load();
-    return ffmpegInstance;
-  } catch (error) {
-    console.warn('Default FFmpeg load failed, trying with specific URLs:', error);
-
-    // Fallback to CDN with simplified approach
-    try {
-      await ffmpegInstance.load({
-        coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-        wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-        workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
-      });
-      return ffmpegInstance;
-    } catch (cdnError) {
-      console.error('Both FFmpeg initialization methods failed:', cdnError);
-      throw new Error('Unable to initialize video processor. Please refresh the page and try again.');
-    }
-  }
-};
-
-const initializeFFmpeg = async () => {
+export const initializeFFmpeg = async () => {
   // Return existing instance if already loaded
-  if (ffmpeg && isLoaded) {
+  if (isLoaded && ffmpeg) {
     return ffmpeg;
   }
 
-  // Prevent multiple simultaneous initializations
-  if (isInitializing) {
-    while (isInitializing) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    if (ffmpeg && isLoaded) {
-      return ffmpeg;
-    }
+  // Return existing promise if already initializing
+  if (isInitializing && initPromise) {
+    return initPromise;
   }
 
   isInitializing = true;
 
-  try {
-    ffmpeg = await initializeFFmpegInstance();
-    isLoaded = true;
-    isInitializing = false;
-    return ffmpeg;
-  } catch (error) {
-    isInitializing = false;
-    throw error;
-  }
+  initPromise = (async () => {
+    try {
+      if (!ffmpeg) {
+        ffmpeg = new FFmpeg();
+      }
+
+      if (!isLoaded) {
+        // Load FFmpeg with Replit-compatible URLs
+        await ffmpeg.load({
+          coreURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'text/javascript'),
+          wasmURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'application/wasm'),
+          workerURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.worker.js', 'text/javascript')
+        });
+        isLoaded = true;
+      }
+
+      return ffmpeg;
+    } catch (error) {
+      console.error('FFmpeg initialization error:', error);
+      isLoaded = false;
+      ffmpeg = null;
+      throw error;
+    } finally {
+      isInitializing = false;
+    }
+  })();
+
+  return initPromise;
 };
 
 export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel) => {
-  let ffmpeg = null;
-
   try {
-    ffmpeg = FFmpeg();
+    const ffmpeg = await initializeFFmpeg();
 
-    // Set up progress tracking with smooth 1-100 progression
-    ffmpeg.on('progress', ({ progress, time }) => {
-      // Check for cancellation first
-      if (shouldCancel && shouldCancel()) {
-        ffmpeg.terminate();
-        return;
+    // Clear any previous progress listeners to prevent memory leaks
+    ffmpeg.off('progress');
+    
+    // Set up progress callback with throttling for better performance
+    let lastProgressTime = 0;
+    ffmpeg.on('progress', ({ progress }) => {
+      const now = Date.now();
+      // Throttle progress updates to every 100ms for better performance
+      if (onProgress && (now - lastProgressTime > 100)) {
+        const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
+        onProgress(normalizedProgress);
+        lastProgressTime = now;
       }
-
-      // Convert progress to percentage (0-1 to 0-100) with precise increments
-      const percentage = Math.min(Math.max(Math.floor(progress * 100), 0), 100);
-      onProgress(percentage);
     });
 
-    // Load FFmpeg
-    await ffmpeg.load({
-      coreURL: '/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js',
-      wasmURL: '/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm'
-    });
+    // Optimized file reading with caching
+    const getCachedFileData = async (file, type) => {
+      const cacheKey = `${file.name}_${file.size}_${file.lastModified}`;
+      
+      if (fileCache.has(cacheKey)) {
+        return fileCache.get(cacheKey);
+      }
+      
+      const data = await fetchFile(file);
+      
+      // Manage cache size
+      if (fileCache.size >= maxCacheSize) {
+        const firstKey = fileCache.keys().next().value;
+        fileCache.delete(firstKey);
+      }
+      
+      fileCache.set(cacheKey, data);
+      return data;
+    };
 
-    // Check for cancellation after loading
-    if (shouldCancel && shouldCancel()) {
-      throw new Error('Generation cancelled by user');
-    }
+    const audioData = await getCachedFileData(audioFile, 'audio');
+    const imageData = await getCachedFileData(imageFile, 'image');
+    
+    // Use unique filenames to avoid conflicts
+    const audioFileName = `audio_${Date.now()}.mp3`;
+    const imageFileName = `image_${Date.now()}.jpg`;
+    const outputFileName = `output_${Date.now()}.mp4`;
 
-    const imageFileName = 'image.jpg';
-    const audioFileName = 'audio.mp3';
-    const outputFileName = 'output.mp4';
-
-    // Write input files
-    const imageData = new Uint8Array(await imageFile.arrayBuffer());
-    const audioData = new Uint8Array(await audioFile.arrayBuffer());
-
-    await ffmpeg.writeFile(imageFileName, imageData);
+    // Write files to FFmpeg filesystem
     await ffmpeg.writeFile(audioFileName, audioData);
+    await ffmpeg.writeFile(imageFileName, imageData);
 
-    // Check for cancellation after writing files
-    if (shouldCancel && shouldCancel()) {
-      throw new Error('Generation cancelled by user');
-    }
-
-    // Get audio duration
+    // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
-
-    const targetWidth = 1920;
-    const targetHeight = 1040; // 1080 - 40px for top/bottom padding
-
-    // Ultra-fast optimized FFmpeg command implementing speed recommendations
+    
+    // Maximum speed FFmpeg command - optimized for fastest possible encoding
     // Create 1920x1080 video with image centered and 20px white space above/below
     await ffmpeg.exec([
-      '-benchmark',                  // Add benchmarking for performance analysis
       '-loop', '1',
       '-i', imageFileName,
       '-i', audioFileName,
       '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
-      '-r', '10',                    // Higher framerate for better progress granularity
       '-c:v', 'libx264',
-      '-preset', 'ultrafast',        // Fastest encoding preset from recommendations
-      '-tune', 'stillimage',         // Optimized for still images
-      '-crf', '40',                  // Balanced CRF for speed vs quality
-      '-g', '10',                    // Smaller GOP for more frequent progress updates
-      '-x264-params', 'keyint=10:min-keyint=10:bframes=0:ref=1:me=dia:subme=0:analyse=none:trellis=0:no-fast-pskip=1:no-mbtree=1:aq-mode=0:no-mixed-refs=1:direct=none:weightb=0:weightp=0',
-      '-movflags', '+faststart',     // Enable fast start for web playback
-      '-c:a', 'copy',                // Copy audio without re-encoding for maximum speed and quality
+      '-preset', 'ultrafast',        // Fastest encoding preset
+      '-tune', 'zerolatency',        // Ultra-low latency encoding
+      '-crf', '35',                  // Higher CRF for maximum speed (acceptable quality)
+      '-g', '15',                    // Very low GOP size for fastest processing
+      '-keyint_min', '15',           // Match GOP size
+      '-sc_threshold', '0',          // Disable scene change detection
+      '-r', '1',                     // 1 FPS since image is static
+      '-c:a', 'aac',
+      '-b:a', '64k',                 // Minimal audio bitrate for speed
+      '-ac', '1',                    // Mono audio for speed (most beats are mono anyway)
+      '-ar', '22050',                // Lower sample rate for speed
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
       '-avoid_negative_ts', 'make_zero',
-      '-fflags', '+fastseek+genpts',
-      '-threads', '0',               // Use all available threads for maximum speed
+      '-fflags', '+fastseek+genpts', // Fast seeking and PTS generation
+      '-threads', '1',               // Single thread for WASM efficiency
       '-y',
       outputFileName
     ]);
 
-    // Final check for cancellation
-    if (shouldCancel && shouldCancel()) {
-      throw new Error('Generation cancelled by user');
-    }
+    // Read the output file
+    const data = await ffmpeg.readFile(outputFileName);
+    
+    // Clean up files
+    await ffmpeg.deleteFile(audioFileName);
+    await ffmpeg.deleteFile(imageFileName);
+    await ffmpeg.deleteFile(outputFileName);
 
-    // Read output
-    const outputData = await ffmpeg.readFile(outputFileName);
+    return data;
 
-    return outputData;
   } catch (error) {
-    if (error.message === 'Generation cancelled by user') {
-      console.log('Video generation cancelled by user');
-      throw error;
-    }
     console.error('FFmpeg processing error:', error);
     throw error;
   }
 };
 
-// Use Web Audio API for more reliable duration detection
 export const getAudioDuration = (audioFile) => {
   return new Promise((resolve, reject) => {
     const audio = new Audio();
-
-    const cleanup = () => {
-      URL.revokeObjectURL(audio.src);
+    audio.onloadedmetadata = () => {
+      resolve(audio.duration);
     };
-
-    audio.addEventListener('loadedmetadata', () => {
-      const duration = audio.duration;
-      cleanup();
-      resolve(duration || 30); // Fallback to 30 seconds if duration is invalid
-    });
-
-    audio.addEventListener('error', (error) => {
-      cleanup();
-      console.warn('Could not determine audio duration, using default');
-      resolve(30); // Use default instead of rejecting
-    });
-
+    audio.onerror = (error) => {
+      console.error('Error loading audio metadata:', error);
+      reject(error);
+    };
     audio.src = URL.createObjectURL(audioFile);
   });
 };
