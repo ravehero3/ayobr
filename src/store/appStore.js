@@ -54,15 +54,15 @@ export const useAppStore = create((set, get) => ({
 
   // Generation state
   setIsGenerating: (isGenerating) => set({ isGenerating }),
-  
+
   setIsCancelling: (isCancelling) => set({ isCancelling }),
-  
+
   cancelGeneration: () => set({ 
     isCancelling: true
   }),
-  
+
   resetCancellation: () => set({ isCancelling: false }),
-  
+
   setProgress: (progress) => set({ currentProgress: progress }),
 
   // Video generation state management for individual pairs

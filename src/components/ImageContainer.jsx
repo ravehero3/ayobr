@@ -8,7 +8,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     if (image) {
       const url = URL.createObjectURL(image);
       setImageUrl(url);
-      
+
       return () => {
         URL.revokeObjectURL(url);
       };
@@ -124,7 +124,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
         </div>
       ) : (
-        <div className="h-full flex flex-col items-center justify-center text-gray-300">
+        <div className="flex flex-col items-center justify-center h-full text-gray-300">
           <div 
             className="p-4 rounded-full mb-4"
             style={{
@@ -133,11 +133,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             }}
           >
             <svg className="w-8 h-8 text-blue-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-gray-300 mb-1">Drop image file here</p>
-          <p className="text-xs text-gray-500 font-light">PNG, JPG, HEIC</p>
+          <p className="text-sm font-medium text-gray-300 mb-1 text-center">Drop image file here</p>
+          <p className="text-xs text-gray-500 font-light text-center">PNG, JPG, HEIC</p>
         </div>
       )}
     </motion.div>

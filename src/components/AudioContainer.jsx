@@ -117,7 +117,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className={`relative w-full h-full transition-all duration-300 group ${
+      className={`relative w-full h-full transition-all duration-300 group flex items-center justify-center ${
         audio 
           ? `${isPlaying ? 'ring-2 ring-blue-400/50' : ''}`
           : ''
@@ -135,9 +135,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       }}
     >
       {audio ? (
-        <div className="space-y-3">
+        <div className="w-full space-y-3 flex flex-col justify-center items-center">
           {/* Audio info */}
-          <div className="flex items-center justify-between">
+          <div className="w-full flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <svg className="w-5 h-5 text-neon-blue" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 011.414 0A9.972 9.972 0 0119 12a9.972 9.972 0 01-1.929 5.657 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 12a7.971 7.971 0 00-1.343-4.243 1 1 0 010-1.414z" clipRule="evenodd" />
@@ -158,7 +158,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           />
 
           {/* Controls */}
-          <div className="flex items-center justify-center mt-4">
+          <div className="flex items-center justify-center">
             <button
               onClick={handlePlayPause}
               className="group p-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
@@ -194,8 +194,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-gray-300 mb-1">Drop audio file here</p>
-          <p className="text-xs text-gray-500 font-light">MP3, WAV</p>
+          <p className="text-sm font-medium text-gray-300 mb-1 text-center">Drop audio file here</p>
+          <p className="text-xs text-gray-500 font-light text-center">MP3, WAV</p>
         </div>
       )}
     </motion.div>
