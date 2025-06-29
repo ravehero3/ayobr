@@ -31,7 +31,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
       transition={{ duration: 0.3 }}
     >
       <div className="flex flex-col sm:flex-row items-center relative">
-        {/* Audio Container */}
+        {/* Audio Container */}  
         <div className="relative w-full sm:w-1/2">
           <div
             className="relative w-full backdrop-blur-xl border overflow-hidden"
@@ -40,19 +40,15 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
               minHeight: '200px',
               maxHeight: '200px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.4)',
+              borderColor: 'rgba(59, 130, 246, 0.6)',
               borderWidth: '2px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.2),
-                0 0 40px rgba(59, 130, 246, 0.15),
-                0 0 80px rgba(59, 130, 246, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05)
+                0 0 0 1px rgba(59, 130, 246, 0.3),
+                0 0 20px rgba(59, 130, 246, 0.4),
+                0 0 40px rgba(59, 130, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1)
               `,
-              borderTopLeftRadius: '24px',
-              borderBottomLeftRadius: '24px',
-              borderTopRightRadius: '0px',
-              borderBottomRightRadius: '0px',
-              clipPath: 'polygon(0% 0%, 90% 0%, 100% 30%, 100% 70%, 90% 100%, 0% 100%)'
+              borderRadius: '16px'
             }}
           >
             {/* Top-right brilliant highlight */}
@@ -77,21 +73,22 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           </div>
         </div>
 
-        {/* Connector */}
-        <div className="relative z-20 hidden sm:block" style={{ width: '40px', height: '80px', marginLeft: '-20px', marginRight: '-20px' }}>
+        {/* Connecting Bridge */}
+        <div className="relative z-20 hidden sm:block" style={{ width: '80px', height: '60px', margin: '0 -8px' }}>
           <div
             className="w-full h-full backdrop-blur-xl border"
             style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.4)',
+              borderColor: 'rgba(59, 130, 246, 0.6)',
               borderWidth: '2px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.2),
-                0 0 40px rgba(59, 130, 246, 0.15),
-                0 0 80px rgba(59, 130, 246, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05)
+                0 0 0 1px rgba(59, 130, 246, 0.3),
+                0 0 20px rgba(59, 130, 246, 0.4),
+                0 0 40px rgba(59, 130, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1)
               `,
-              borderRadius: '20px'
+              borderRadius: '12px',
+              transform: 'translateY(0px)'
             }}
           />
         </div>
@@ -105,19 +102,15 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
               minHeight: '200px',
               maxHeight: '200px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.4)',
+              borderColor: 'rgba(59, 130, 246, 0.6)',
               borderWidth: '2px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.2),
-                0 0 40px rgba(59, 130, 246, 0.15),
-                0 0 80px rgba(59, 130, 246, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05)
+                0 0 0 1px rgba(59, 130, 246, 0.3),
+                0 0 20px rgba(59, 130, 246, 0.4),
+                0 0 40px rgba(59, 130, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1)
               `,
-              borderTopLeftRadius: '0px',
-              borderBottomLeftRadius: '0px',
-              borderTopRightRadius: '24px',
-              borderBottomRightRadius: '24px',
-              clipPath: 'polygon(10% 0%, 100% 0%, 100% 100%, 10% 100%, 0% 70%, 0% 30%)'
+              borderRadius: '16px'
             }}
           >
             {/* Top-right brilliant highlight */}
