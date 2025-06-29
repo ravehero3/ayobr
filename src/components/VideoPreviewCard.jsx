@@ -17,19 +17,18 @@ const VideoPreviewCard = ({ video }) => {
     }
   };
 
-  const handleSaveVideo = async () => {
+  const handleSaveVideo = () => {
     try {
-      const outputDir = await window.electronAPI.selectOutputDirectory();
-      if (outputDir) {
-        const fileName = `${video.name || 'video'}.mp4`;
-        const filePath = `${outputDir}/${fileName}`;
-        
-        await window.electronAPI.writeFile(filePath, video.data);
-        alert(`Video saved successfully to: ${filePath}`);
-      }
+      // Create download link for web environment
+      const link = document.createElement('a');
+      link.href = video.url;
+      link.download = video.filename || `video_${new Date().getTime()}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
-      console.error('Error saving video:', error);
-      alert('Failed to save video. Please try again.');
+      console.error('Error downloading video:', error);
+      alert('Failed to download video. Please try again.');
     }
   };
 

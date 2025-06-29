@@ -30,26 +30,42 @@ export const initializeFFmpeg = async () => {
       }
 
       if (!isLoaded) {
-        // Load FFmpeg from public directory for Replit compatibility
+        // Load FFmpeg with simplified initialization for Replit
         try {
+          // Use fetch to load files directly and create blob URLs
+          const coreResponse = await fetch('/ffmpeg/ffmpeg-core.js');
+          const wasmResponse = await fetch('/ffmpeg/ffmpeg-core.wasm');
+          
+          if (!coreResponse.ok || !wasmResponse.ok) {
+            throw new Error('Failed to fetch FFmpeg files');
+          }
+          
+          const coreBlob = await coreResponse.blob();
+          const wasmBlob = await wasmResponse.blob();
+          
+          const coreURL = URL.createObjectURL(coreBlob);
+          const wasmURL = URL.createObjectURL(wasmBlob);
+          
           await ffmpeg.load({
-            coreURL: await toBlobURL('/ffmpeg/ffmpeg-core.js', 'text/javascript'),
-            wasmURL: await toBlobURL('/ffmpeg/ffmpeg-core.wasm', 'application/wasm')
+            coreURL: coreURL,
+            wasmURL: wasmURL
           });
-        } catch (blobError) {
-          console.log('Public directory blob URLs failed, trying node_modules:', blobError);
-          // Fallback to node_modules if public directory fails
+          
+          console.log('FFmpeg loaded successfully');
+        } catch (fetchError) {
+          console.log('Fetch method failed, trying toBlobURL:', fetchError);
+          // Fallback to toBlobURL method
           try {
+            await ffmpeg.load({
+              coreURL: await toBlobURL('/ffmpeg/ffmpeg-core.js', 'text/javascript'),
+              wasmURL: await toBlobURL('/ffmpeg/ffmpeg-core.wasm', 'application/wasm')
+            });
+          } catch (blobError) {
+            console.log('toBlobURL failed, trying node_modules:', blobError);
+            // Final fallback to node_modules
             await ffmpeg.load({
               coreURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'text/javascript'),
               wasmURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'application/wasm')
-            });
-          } catch (nodeError) {
-            console.log('Node modules blob URLs failed, trying direct paths:', nodeError);
-            // Last resort: direct paths
-            await ffmpeg.load({
-              coreURL: '/ffmpeg/ffmpeg-core.js',
-              wasmURL: '/ffmpeg/ffmpeg-core.wasm'
             });
           }
         }
