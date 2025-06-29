@@ -34,8 +34,8 @@ export const useFFmpeg = () => {
             pair.audio, 
             pair.image, 
             (progress) => {
-              // Update progress for this specific pair
-              const clampedProgress = Math.min(Math.max(progress, 0), 100);
+              // Ensure smooth 1-100 progress tracking
+              const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
               setVideoGenerationState(pair.id, {
                 isGenerating: true,
                 progress: clampedProgress,
@@ -43,8 +43,14 @@ export const useFFmpeg = () => {
                 video: null
               });
             },
-            // Pass cancellation checker function
-            () => isCancelling
+            // Pass cancellation checker function that properly stops FFmpeg
+            () => {
+              if (isCancelling) {
+                console.log('Cancellation detected, stopping FFmpeg process');
+                return true;
+              }
+              return false;
+            }
           );
 
           // Check for cancellation before creating blob

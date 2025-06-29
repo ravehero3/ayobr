@@ -73,13 +73,14 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Set up progress tracking with smooth 1-100 progression
     ffmpeg.on('progress', ({ progress, time }) => {
-      // Check for cancellation
+      // Check for cancellation first
       if (shouldCancel && shouldCancel()) {
-        throw new Error('Generation cancelled by user');
+        ffmpeg.terminate();
+        return;
       }
 
-      // Convert progress to percentage (0-1 to 0-100) with smooth increments
-      const percentage = Math.min(Math.max(Math.round(progress * 100), 0), 100);
+      // Convert progress to percentage (0-1 to 0-100) with precise increments
+      const percentage = Math.min(Math.max(Math.floor(progress * 100), 0), 100);
       onProgress(percentage);
     });
 
@@ -116,20 +117,21 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     const targetWidth = 1920;
     const targetHeight = 1040; // 1080 - 40px for top/bottom padding
 
-    // Maximum speed FFmpeg command - optimized for fastest encoding while preserving audio quality
+    // Ultra-fast optimized FFmpeg command implementing speed recommendations
     // Create 1920x1080 video with image centered and 20px white space above/below
     await ffmpeg.exec([
+      '-benchmark',                  // Add benchmarking for performance analysis
       '-loop', '1',
       '-i', imageFileName,
       '-i', audioFileName,
       '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
-      '-r', '1',                     // Increased framerate for smoother progress reporting
+      '-r', '10',                    // Higher framerate for better progress granularity
       '-c:v', 'libx264',
-      '-preset', 'ultrafast',        // Fastest encoding preset
+      '-preset', 'ultrafast',        // Fastest encoding preset from recommendations
       '-tune', 'stillimage',         // Optimized for still images
-      '-crf', '45',                  // Higher CRF for maximum speed
-      '-g', '30',                    // GOP size for better progress tracking
-      '-x264-params', 'bframes=0:ref=1:me=dia:subme=0:analyse=none:trellis=0:no-fast-pskip=1:no-mbtree=1:aq-mode=0:no-mixed-refs=1',
+      '-crf', '40',                  // Balanced CRF for speed vs quality
+      '-g', '10',                    // Smaller GOP for more frequent progress updates
+      '-x264-params', 'keyint=10:min-keyint=10:bframes=0:ref=1:me=dia:subme=0:analyse=none:trellis=0:no-fast-pskip=1:no-mbtree=1:aq-mode=0:no-mixed-refs=1:direct=none:weightb=0:weightp=0',
       '-movflags', '+faststart',     // Enable fast start for web playback
       '-c:a', 'copy',                // Copy audio without re-encoding for maximum speed and quality
       '-pix_fmt', 'yuv420p',
@@ -137,8 +139,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-t', audioDuration.toString(),
       '-avoid_negative_ts', 'make_zero',
       '-fflags', '+fastseek+genpts',
-      '-threads', '1',               // Single thread for WASM
-      '-progress', 'pipe:1',         // Enable detailed progress reporting
+      '-threads', '0',               // Use all available threads for maximum speed
       '-y',
       outputFileName
     ]);

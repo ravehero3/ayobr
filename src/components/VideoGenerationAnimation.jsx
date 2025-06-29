@@ -40,7 +40,7 @@ const VideoGenerationAnimation = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {showMerging && isGenerating && !showVideoPreview && (
           <motion.div
             key="merging"
