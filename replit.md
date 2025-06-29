@@ -17,7 +17,7 @@ The Type Beat Video Generator is a desktop application built for music producers
 - **Platform**: Electron 37.1.0 for cross-platform desktop deployment
 - **Architecture**: Main process handles system interactions, renderer process runs React app
 - **Security**: Context isolation enabled with secure IPC communication via preload scripts
-- **Window Management**: Hidden title bar with custom styling and minimum size constraints
+- **Window Management**: Hidden title bar with custom styling, optimized for wide desktop displays (1800x1000 default, 1600x900 minimum)
 
 ### Media Processing
 - **Video Generation**: FFmpeg.wasm 0.12.15 for client-side video processing
