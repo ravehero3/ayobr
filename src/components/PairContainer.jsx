@@ -17,17 +17,17 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
       layout
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-center relative">
-        {/* Audio Container with puzzle piece connection */}
-        <div className="w-96 h-48 relative">
+      <div className="space-y-6">
+        {/* Audio Container */}
+        <div className="relative">
           <div
-            className="relative w-full h-full backdrop-blur-xl p-6 border"
+            className="relative w-full h-48 backdrop-blur-xl p-6 border rounded-3xl"
             style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.3)',
-              clipPath: 'polygon(0% 0%, 85% 0%, 85% 35%, 95% 35%, 95% 40%, 100% 40%, 100% 60%, 95% 60%, 95% 65%, 85% 65%, 85% 100%, 0% 100%)',
+              borderColor: 'rgba(59, 130, 246, 0.4)',
+              borderWidth: '2px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.3),
+                0 0 0 1px rgba(59, 130, 246, 0.2),
                 0 0 40px rgba(59, 130, 246, 0.15),
                 0 0 80px rgba(59, 130, 246, 0.08),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05)
@@ -36,7 +36,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           >
             {/* Top-right brilliant highlight */}
             <div 
-              className="absolute top-4 right-6 w-2 h-2 rounded-full"
+              className="absolute top-4 right-6 w-3 h-3 rounded-full"
               style={{
                 background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(59, 130, 246, 0.8) 40%, transparent 70%)',
                 boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
@@ -54,16 +54,16 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           </div>
         </div>
 
-        {/* Image Container with puzzle piece connection */}
-        <div className="w-96 h-48 relative -ml-4">
+        {/* Image Container */}
+        <div className="relative">
           <div
-            className="relative w-full h-full backdrop-blur-xl p-6 border"
+            className="relative w-full h-48 backdrop-blur-xl p-6 border rounded-3xl"
             style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.3)',
-              clipPath: 'polygon(0% 40%, 5% 40%, 5% 35%, 15% 35%, 15% 0%, 100% 0%, 100% 100%, 15% 100%, 15% 65%, 5% 65%, 5% 60%, 0% 60%)',
+              borderColor: 'rgba(59, 130, 246, 0.4)',
+              borderWidth: '2px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.3),
+                0 0 0 1px rgba(59, 130, 246, 0.2),
                 0 0 40px rgba(59, 130, 246, 0.15),
                 0 0 80px rgba(59, 130, 246, 0.08),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05)
@@ -72,7 +72,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           >
             {/* Top-right brilliant highlight */}
             <div 
-              className="absolute top-4 right-6 w-2 h-2 rounded-full"
+              className="absolute top-4 right-6 w-3 h-3 rounded-full"
               style={{
                 background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(59, 130, 246, 0.8) 40%, transparent 70%)',
                 boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
@@ -90,7 +90,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           </div>
         </div>
 
-        {/* Delete button positioned at top right */}
+        {/* Delete button positioned at top right of container */}
         <button
           onClick={handleDelete}
           className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-red-400 hover:border-red-400/50 hover:bg-red-500/20 transition-all duration-300"
