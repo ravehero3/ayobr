@@ -87,8 +87,11 @@ export const initializeFFmpeg = async () => {
 };
 
 export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel) => {
+  console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
+  
   try {
     const ffmpeg = await initializeFFmpeg();
+    console.log('FFmpeg initialized successfully');
 
     // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
@@ -142,6 +145,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     
     // Maximum speed FFmpeg command - optimized for fastest possible encoding
     // Create 1920x1080 video with image centered and 20px white space above/below
+    console.log('Executing FFmpeg command...');
     await ffmpeg.exec([
       '-loop', '1',
       '-i', imageFileName,
@@ -168,9 +172,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-y',
       outputFileName
     ]);
+    
+    console.log('FFmpeg execution completed successfully');
 
     // Read the output file
     const data = await ffmpeg.readFile(outputFileName);
+    console.log('Output file read successfully, size:', data.length);
     
     // Clean up files
     await ffmpeg.deleteFile(audioFileName);

@@ -29,10 +29,15 @@ function App() {
       return;
     }
 
+    console.log('Starting video generation for pairs:', completePairs);
+
     try {
+      setIsGenerating(true);
       await generateVideos(completePairs);
+      console.log('Video generation completed successfully');
     } catch (error) {
       console.error('Error generating videos:', error);
+      setIsGenerating(false);
       alert('Failed to generate videos. Please try again.');
     }
   };

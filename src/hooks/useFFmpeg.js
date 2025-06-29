@@ -7,6 +7,7 @@ export const useFFmpeg = () => {
   const { setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState, isCancelling, cancelGeneration, resetCancellation } = useAppStore();
 
   const generateVideos = useCallback(async (pairs) => {
+    console.log('generateVideos called with pairs:', pairs);
     try {
       setIsGenerating(true);
       resetCancellation();
@@ -30,6 +31,7 @@ export const useFFmpeg = () => {
         });
 
         try {
+          console.log(`Processing video for pair ${pair.id}:`, pair);
           const videoData = await processVideoWithFFmpeg(
             pair.audio, 
             pair.image, 
