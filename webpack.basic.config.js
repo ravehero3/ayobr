@@ -44,9 +44,22 @@ module.exports = {
     port: 5000,
     hot: true,
     historyApiFallback: true,
+    allowedHosts: 'all',
+    client: {
+      webSocketURL: 'auto://0.0.0.0:0/ws',
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    },
     headers: {
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Opener-Policy': 'same-origin',
     }
-  }
+  },
+  ignoreWarnings: [
+    {
+      module: /node_modules\/@ffmpeg\/ffmpeg/,
+    },
+  ]
 };
