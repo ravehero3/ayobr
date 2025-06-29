@@ -89,7 +89,10 @@ const DropZone = ({ onFileDrop }) => {
       {/* Animated background glow */}
       {isDragOver && (
         <motion.div
-          className="absolute inset-0 rounded-3xl bg-gradient-to-r from-neon-blue/20 to-neon-cyan/20"
+          className="absolute inset-0 rounded-3xl"
+          style={{
+            background: 'linear-gradient(to right, rgba(30, 144, 255, 0.2), rgba(0, 207, 255, 0.2))'
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

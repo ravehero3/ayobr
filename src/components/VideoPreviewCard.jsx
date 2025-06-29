@@ -97,7 +97,7 @@ const VideoPreviewCard = ({ video }) => {
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
               <motion.button
                 onClick={handlePlayPause}
-                className="p-4 rounded-full bg-neon-cyan/20 hover:bg-neon-cyan/30 transition-colors duration-200"
+                className="p-4 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 transition-colors duration-200"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -117,7 +117,7 @@ const VideoPreviewCard = ({ video }) => {
       </div>
 
       {/* Highlight flare */}
-      <div className="absolute top-2 right-6 w-2 h-2 bg-neon-cyan rounded-full animate-ping opacity-75" />
+      <div className="absolute top-2 right-6 w-2 h-2 bg-cyan-400 rounded-full animate-ping opacity-75" />
     </motion.div>
   );
 };
