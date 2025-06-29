@@ -123,29 +123,27 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     const targetWidth = 1920;
     const targetHeight = 1040; // 1080 - 40px for top/bottom padding
     
-    // Ultra-fast FFmpeg command - maximum speed optimizations for simple static video
+    // Maximum speed FFmpeg command - optimized for fastest encoding while preserving audio quality
     // Create 1920x1080 video with image centered and 20px white space above/below
     await ffmpeg.exec([
       '-loop', '1',
       '-i', imageFileName,
       '-i', audioFileName,
-      '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white,fps=1`,
+      '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
+      '-r', '0.5',                   // Ultra-low framerate for static content
       '-c:v', 'libx264',
       '-preset', 'ultrafast',        // Fastest encoding preset
       '-tune', 'stillimage',         // Optimized for still images
-      '-crf', '40',                  // Even higher CRF for maximum speed
-      '-g', '999999',                // Single keyframe for static content
-      '-x264-params', 'bframes=0:ref=1:me=dia:subme=1:analyse=none:trellis=0:no-fast-pskip=0:8x8dct=0',
+      '-crf', '45',                  // Higher CRF for maximum speed
+      '-g', '1',                     // Single frame GOP for static content
+      '-x264-params', 'keyint=1:min-keyint=1:bframes=0:ref=1:me=dia:subme=0:analyse=none:trellis=0:no-fast-pskip=1:no-mbtree=1:aq-mode=0:no-mixed-refs=1',
       '-movflags', '+faststart',     // Enable fast start for web playback
-      '-c:a', 'aac',
-      '-b:a', '48k',                 // Minimal audio bitrate
-      '-ac', '1',                    // Mono audio
-      '-ar', '22050',                // Lower sample rate
+      '-c:a', 'copy',                // Copy audio without re-encoding for maximum speed and quality
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
       '-avoid_negative_ts', 'make_zero',
-      '-fflags', '+bitexact+fastseek',
+      '-fflags', '+fastseek+genpts',
       '-threads', '1',               // Single thread for WASM
       '-y',
       outputFileName
