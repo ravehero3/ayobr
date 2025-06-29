@@ -13,16 +13,18 @@ export const useFFmpeg = () => {
       setProgress(0);
       clearGeneratedVideos();
 
-      // Process pairs sequentially for maximum speed and efficiency
-      for (let i = 0; i < pairs.length; i++) {
-        const pair = pairs[i];
-        
-        // Check for cancellation before starting each pair
-        if (isCancelling) {
-          console.log('Video generation cancelled by user');
-          break;
+      // Process pairs with controlled concurrency for optimal resource utilization
+      const maxConcurrentJobs = Math.min(pairs.length, 2); // Process up to 2 videos simultaneously
+      const processingQueue = [...pairs];
+      const activeJobs = new Map();
+
+      const processNextPair = async () => {
+        if (processingQueue.length === 0 || isCancelling) {
+          return;
         }
 
+        const pair = processingQueue.shift();
+        
         // Set initial generating state for this pair
         setVideoGenerationState(pair.id, {
           isGenerating: true,
@@ -54,7 +56,7 @@ export const useFFmpeg = () => {
           // Check for cancellation before creating blob
           if (isCancelling) {
             console.log('Video generation cancelled during blob creation');
-            break;
+            return;
           }
 
           const videoBlob = new Blob([videoData], { type: 'video/mp4' });
@@ -78,9 +80,6 @@ export const useFFmpeg = () => {
             video: video
           });
 
-          // Small delay to prevent UI blocking
-          await new Promise(resolve => setTimeout(resolve, 100));
-
         } catch (error) {
           console.error(`Error generating video for pair ${pair.id}:`, error);
           // Reset state on error
@@ -90,14 +89,23 @@ export const useFFmpeg = () => {
             isComplete: false,
             video: null
           });
-          
-          // Continue with next pair instead of stopping all generation
-          if (!isCancelling) {
-            continue;
-          } else {
-            break;
+        } finally {
+          activeJobs.delete(pair.id);
+          // Process next pair in queue
+          if (processingQueue.length > 0 && !isCancelling) {
+            processNextPair();
           }
         }
+      };
+
+      // Start initial concurrent jobs
+      for (let i = 0; i < maxConcurrentJobs && i < pairs.length; i++) {
+        processNextPair();
+      }
+
+      // Wait for all jobs to complete
+      while (activeJobs.size > 0 && !isCancelling) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     } catch (error) {
       console.error('Error in video generation process:', error);
