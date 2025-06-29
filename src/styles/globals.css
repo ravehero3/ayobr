@@ -1,0 +1,217 @@
+@import 'tailwindcss';
+
+/* Custom fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #050A13;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+body {
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0F1C;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E90FF;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00CFFF;
+}
+
+/* Custom animations */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(30, 144, 255, 0.6);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(30, 144, 255, 0.2),
+    transparent
+  );
+  background-size: 1000px 100%;
+}
+
+/* Drag and drop styles */
+.drag-over {
+  background: rgba(30, 144, 255, 0.1);
+  border-color: #1E90FF;
+  box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+}
+
+.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+  z-index: 1000;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 2px solid rgba(30, 144, 255, 0.3);
+  border-radius: 50%;
+  border-top: 2px solid #1E90FF;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Waveform container */
+.waveform-container {
+  background: rgba(30, 144, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+/* Video controls overlay */
+.video-controls {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 0, 0, 0.7)
+  );
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 hover:shadow-neon-blue/50 hover:scale-105 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-space-navy text-white font-medium py-2 px-4 rounded-lg border border-neon-blue/30 hover:border-neon-blue/50 transition-all duration-300;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(10, 15, 28, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 144, 255, 0.2);
+}
+
+/* Neon text effect */
+.neon-text {
+  text-shadow: 
+    0 0 5px rgba(30, 144, 255, 0.5),
+    0 0 10px rgba(30, 144, 255, 0.3),
+    0 0 15px rgba(30, 144, 255, 0.2);
+}
+
+/* Progress bar */
+.progress-bar {
+  background: linear-gradient(
+    90deg,
+    #1E90FF,
+    #00CFFF,
+    #1E90FF
+  );
+  background-size: 200% 100%;
+  animation: gradient-shift 2s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-300;
+}
+
+.tooltip.show {
+  @apply opacity-100;
+}
+
+/* File input styling */
+input[type="file"] {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Custom focus styles */
+*:focus {
+  outline: 2px solid rgba(30, 144, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Responsive typography */
+@screen sm {
+  html {
+    font-size: 14px;
+  }
+}
+
+@screen md {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Print styles */
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}

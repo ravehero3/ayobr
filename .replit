@@ -1,0 +1,41 @@
+modules = ["nodejs-20"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Install Dependencies"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Dev Server"
+
+[[workflows.workflow]]
+name = "Install Dependencies"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install electron react react-dom @babel/core @babel/preset-env @babel/preset-react @babel/plugin-proposal-class-properties @babel/plugin-syntax-dynamic-import babel-loader webpack webpack-cli webpack-dev-server html-webpack-plugin style-loader css-loader postcss-loader tailwindcss autoprefixer file-loader framer-motion wavesurfer.js zustand uuid @ffmpeg/ffmpeg @ffmpeg/util"
+
+[[workflows.workflow]]
+name = "Dev Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx webpack serve --config webpack.simple.config.js"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
