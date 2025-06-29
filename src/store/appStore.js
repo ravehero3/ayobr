@@ -13,6 +13,14 @@ export const useAppStore = create((set, get) => ({
   isCancelling: false,
   currentProgress: 0,
   videoGenerationStates: {}, // Track generation progress for each pair
+  
+  // Concurrency settings
+  concurrencySettings: {
+    small: 3,    // 1-5 videos
+    medium: 5,   // 6-15 videos
+    large: 8,    // 16-25 videos
+    xlarge: 10   // 25+ videos
+  },
 
   // Actions
   addPair: (pair) => set(state => ({
@@ -92,5 +100,10 @@ export const useAppStore = create((set, get) => ({
   hasIncompleteData: () => {
     const { pairs } = get();
     return pairs.some(pair => (pair.audio && !pair.image) || (!pair.audio && pair.image));
-  }
+  },
+
+  // Settings actions
+  setConcurrencySettings: (settings) => set(state => ({
+    concurrencySettings: { ...state.concurrencySettings, ...settings }
+  }))
 }));

@@ -5,6 +5,7 @@ import { usePairingLogic } from './hooks/usePairingLogic';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import PairContainer from './components/PairContainer';
 import VideoPreviewCard from './components/VideoPreviewCard';
+import SettingsPanel from './components/SettingsPanel';
 
 function App() {
   const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs } = useAppStore();
@@ -295,6 +296,9 @@ function App() {
           </div>
         )}
       </main>
+      
+      {/* Settings Panel */}
+      <SettingsPanel />
     </div>
   );
 }

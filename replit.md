@@ -137,6 +137,9 @@ Changelog:
 - June 29, 2025. Implemented immediate cancellation with forceStopAllProcesses() function
 - June 29, 2025. Optimized concurrent video generation (2-3 videos simultaneously for best performance)
 - June 29, 2025. Enhanced cancellation system - stop button now terminates all processes instantly
+- June 29, 2025. Added user-friendly settings panel with gear icon for customizable concurrent video limits
+- June 29, 2025. Implemented performance presets (Conservative, Balanced, Aggressive) and custom settings
+- June 29, 2025. Dynamic concurrency scaling: 1-5 videos (2-3), 6-15 videos (4-5), 16-25 videos (6-8), 25+ videos (8-10)
 ```
 
 ## User Preferences
