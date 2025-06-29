@@ -12,8 +12,8 @@ export const validateAudioFile = (file) => {
 };
 
 export const validateImageFile = (file) => {
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-  const validExtensions = ['.jpg', '.jpeg', '.png'];
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif'];
+  const validExtensions = ['.jpg', '.jpeg', '.png', '.heic', '.heif'];
   
   const hasValidType = validTypes.includes(file.type);
   const hasValidExtension = validExtensions.some(ext => 
@@ -57,6 +57,11 @@ export const readFileAsDataURL = (file) => {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+};
+
+export const isHEICFile = (file) => {
+  const name = file.name.toLowerCase();
+  return name.endsWith('.heic') || name.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
 };
 
 // Create download link for generated videos

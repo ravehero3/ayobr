@@ -69,13 +69,26 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
 
           {/* Image preview */}
-          <div className="flex-1 relative overflow-hidden rounded-xl">
+          <div className="flex-1 relative overflow-hidden rounded-xl bg-gray-900/50">
             <img
               src={imageUrl}
               alt={image.name}
-              className="w-full h-full object-cover"
-              style={{ padding: '10px 0' }}
+              className="w-full h-32 object-cover rounded-lg"
+              onError={(e) => {
+                // Fallback for HEIC files that might not display
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
             />
+            <div className="hidden w-full h-32 items-center justify-center bg-gray-800/50 rounded-lg">
+              <div className="text-center">
+                <svg className="w-8 h-8 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-xs text-gray-400">Image Preview</p>
+                <p className="text-xs text-gray-500">{image.name.split('.').pop()?.toUpperCase()}</p>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
@@ -92,7 +105,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             </svg>
           </div>
           <p className="text-sm font-medium text-gray-300 mb-1">Drop image file here</p>
-          <p className="text-xs text-gray-500 font-light">PNG, JPG</p>
+          <p className="text-xs text-gray-500 font-light">PNG, JPG, HEIC</p>
         </div>
       )}
     </motion.div>

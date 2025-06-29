@@ -65,13 +65,13 @@ const DropZone = ({ onFileDrop }) => {
         </h3>
         
         <p className="text-gray-400 mb-4">
-          Support for MP3, WAV audio files and PNG, JPG images
+          Support for MP3, WAV audio files and PNG, JPG, HEIC images
         </p>
         
         <div className="space-y-2">
           <input
             type="file"
-            accept=".mp3,.wav,.png,.jpg,.jpeg"
+            accept=".mp3,.wav,.png,.jpg,.jpeg,.heic,.heif"
             multiple
             onChange={handleFileInput}
             className="hidden"

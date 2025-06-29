@@ -63,24 +63,50 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
         </button>
 
         {/* Content with subtle inner glow */}
-        <div className="relative space-y-6">
-          <AudioContainer
-            audio={pair.audio}
-            pairId={pair.id}
-            onSwap={onSwap}
-            draggedItem={draggedItem}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-          />
+        <div className="relative flex items-center space-x-5">
+          <div className="flex-1">
+            <AudioContainer
+              audio={pair.audio}
+              pairId={pair.id}
+              onSwap={onSwap}
+              draggedItem={draggedItem}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+            />
+          </div>
           
-          <ImageContainer
-            image={pair.image}
-            pairId={pair.id}
-            onSwap={onSwap}
-            draggedItem={draggedItem}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-          />
+          {/* Connection element */}
+          <div className="flex flex-col items-center">
+            <div 
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(147, 51, 234, 0.6) 100%)',
+                boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div 
+              className="w-0.5 h-4 mt-1 mb-1"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.4))'
+              }}
+            />
+            <div className="text-xs text-gray-400 font-medium">PAIR</div>
+          </div>
+          
+          <div className="flex-1">
+            <ImageContainer
+              image={pair.image}
+              pairId={pair.id}
+              onSwap={onSwap}
+              draggedItem={draggedItem}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+            />
+          </div>
         </div>
 
         {/* Subtle inner light reflection */}
