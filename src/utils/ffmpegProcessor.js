@@ -30,12 +30,29 @@ export const initializeFFmpeg = async () => {
       }
 
       if (!isLoaded) {
-        // Load FFmpeg with Replit-compatible URLs
-        await ffmpeg.load({
-          coreURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'text/javascript'),
-          wasmURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'application/wasm'),
-          workerURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.worker.js', 'text/javascript')
-        });
+        // Load FFmpeg from public directory for Replit compatibility
+        try {
+          await ffmpeg.load({
+            coreURL: await toBlobURL('/ffmpeg/ffmpeg-core.js', 'text/javascript'),
+            wasmURL: await toBlobURL('/ffmpeg/ffmpeg-core.wasm', 'application/wasm')
+          });
+        } catch (blobError) {
+          console.log('Public directory blob URLs failed, trying node_modules:', blobError);
+          // Fallback to node_modules if public directory fails
+          try {
+            await ffmpeg.load({
+              coreURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'text/javascript'),
+              wasmURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'application/wasm')
+            });
+          } catch (nodeError) {
+            console.log('Node modules blob URLs failed, trying direct paths:', nodeError);
+            // Last resort: direct paths
+            await ffmpeg.load({
+              coreURL: '/ffmpeg/ffmpeg-core.js',
+              wasmURL: '/ffmpeg/ffmpeg-core.wasm'
+            });
+          }
+        }
         isLoaded = true;
       }
 
