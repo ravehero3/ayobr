@@ -9,7 +9,7 @@ let initPromise = null;
 
 // File cache to avoid re-reading the same files
 const fileCache = new Map();
-const maxCacheSize = 10; // Limit cache size to prevent memory issues
+const maxCacheSize = 5; // Smaller cache for better memory management in WASM
 
 // Simple initialization without preloading for Replit compatibility
 const initializeFFmpegInstance = async () => {
@@ -119,31 +119,34 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
     
-    // Maximum speed FFmpeg command - optimized for fastest possible encoding
+    // Pre-compute optimal dimensions to avoid complex scaling during encoding
+    const targetWidth = 1920;
+    const targetHeight = 1040; // 1080 - 40px for top/bottom padding
+    
+    // Ultra-fast FFmpeg command - maximum speed optimizations for simple static video
     // Create 1920x1080 video with image centered and 20px white space above/below
     await ffmpeg.exec([
       '-loop', '1',
       '-i', imageFileName,
       '-i', audioFileName,
-      '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
+      '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white,fps=1`,
       '-c:v', 'libx264',
       '-preset', 'ultrafast',        // Fastest encoding preset
-      '-tune', 'zerolatency',        // Ultra-low latency encoding
-      '-crf', '35',                  // Higher CRF for maximum speed (acceptable quality)
-      '-g', '15',                    // Very low GOP size for fastest processing
-      '-keyint_min', '15',           // Match GOP size
-      '-sc_threshold', '0',          // Disable scene change detection
-      '-r', '1',                     // 1 FPS since image is static
+      '-tune', 'stillimage',         // Optimized for still images
+      '-crf', '40',                  // Even higher CRF for maximum speed
+      '-g', '999999',                // Single keyframe for static content
+      '-x264-params', 'bframes=0:ref=1:me=dia:subme=1:analyse=none:trellis=0:no-fast-pskip=0:8x8dct=0',
+      '-movflags', '+faststart',     // Enable fast start for web playback
       '-c:a', 'aac',
-      '-b:a', '64k',                 // Minimal audio bitrate for speed
-      '-ac', '1',                    // Mono audio for speed (most beats are mono anyway)
-      '-ar', '22050',                // Lower sample rate for speed
+      '-b:a', '48k',                 // Minimal audio bitrate
+      '-ac', '1',                    // Mono audio
+      '-ar', '22050',                // Lower sample rate
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
       '-avoid_negative_ts', 'make_zero',
-      '-fflags', '+fastseek+genpts', // Fast seeking and PTS generation
-      '-threads', '1',               // Single thread for WASM efficiency
+      '-fflags', '+bitexact+fastseek',
+      '-threads', '1',               // Single thread for WASM
       '-y',
       outputFileName
     ]);
