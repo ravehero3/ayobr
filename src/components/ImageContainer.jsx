@@ -89,38 +89,37 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       }}
     >
       {image ? (
-        <div className="h-full flex flex-col">
-          {/* Image info */}
-          <div className="flex items-center space-x-2 mb-3">
-            <svg className="w-5 h-5 text-neon-cyan" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-            </svg>
-            <span className="text-white text-sm font-medium truncate flex-1">
-              {image.name}
-            </span>
+        <div className="relative h-full w-full overflow-hidden rounded-lg">
+          {/* Full container image */}
+          <img
+            src={imageUrl}
+            alt={image.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback for HEIC files that might not display
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+          <div className="hidden w-full h-full items-center justify-center bg-gray-800/50">
+            <div className="text-center">
+              <svg className="w-8 h-8 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-xs text-gray-400">Image Preview</p>
+              <p className="text-xs text-gray-500">{image.name.split('.').pop()?.toUpperCase()}</p>
+            </div>
           </div>
 
-          {/* Image preview with 10px padding above/below as specified */}
-          <div className="flex-1 relative overflow-hidden rounded-xl bg-gray-900/50" style={{ padding: '10px 0' }}>
-            <img
-              src={imageUrl}
-              alt={image.name}
-              className="w-full h-full object-contain rounded-lg"
-              style={{ maxHeight: 'calc(100% - 20px)' }}
-              onError={(e) => {
-                // Fallback for HEIC files that might not display
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-            <div className="hidden w-full h-full items-center justify-center bg-gray-800/50 rounded-lg">
-              <div className="text-center">
-                <svg className="w-8 h-8 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
-                </svg>
-                <p className="text-xs text-gray-400">Image Preview</p>
-                <p className="text-xs text-gray-500">{image.name.split('.').pop()?.toUpperCase()}</p>
-              </div>
+          {/* Hover overlay with filename */}
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="text-center">
+              <svg className="w-6 h-6 mx-auto text-neon-cyan mb-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+              </svg>
+              <p className="text-white text-sm font-medium truncate max-w-32">
+                {image.name}
+              </p>
             </div>
           </div>
         </div>
