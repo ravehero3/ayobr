@@ -84,18 +84,31 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className={`relative p-4 rounded-2xl border transition-all duration-300 ${
+      className={`relative rounded-2xl transition-all duration-300 ${
         audio 
-          ? `bg-gradient-to-r from-space-dark to-space-navy border-neon-blue/50 ${isPlaying ? 'shadow-lg shadow-neon-blue/30' : ''}`
-          : 'bg-space-dark border-dashed border-gray-600'
+          ? `${isPlaying ? 'ring-2 ring-blue-400/50' : ''}`
+          : ''
       }`}
       draggable={!!audio}
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      whileHover={{ scale: audio ? 1.02 : 1 }}
-      animate={isPlaying ? { boxShadow: '0 0 30px rgba(30, 144, 255, 0.4)' } : {}}
+      whileHover={{ scale: audio ? 1.01 : 1 }}
+      style={audio ? {
+        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(59, 130, 246, 0.2)',
+        boxShadow: isPlaying 
+          ? '0 0 30px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+        padding: '20px'
+      } : {
+        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 41, 59, 0.3) 100%)',
+        backdropFilter: 'blur(4px)',
+        border: '2px dashed rgba(107, 114, 128, 0.3)',
+        padding: '20px'
+      }}
     >
       {audio ? (
         <div className="space-y-3">
@@ -121,17 +134,23 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           />
 
           {/* Controls */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center mt-4">
             <button
               onClick={handlePlayPause}
-              className="p-2 rounded-full bg-neon-blue/20 hover:bg-neon-blue/30 transition-colors duration-200"
+              className="group p-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
+              style={{
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.15) 100%)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+              }}
             >
               {isPlaying ? (
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-white group-hover:text-blue-200 transition-colors" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-white group-hover:text-blue-200 transition-colors" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               )}
@@ -139,12 +158,20 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-          <svg className="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-          </svg>
-          <p className="text-sm">Drop audio file here</p>
-          <p className="text-xs text-gray-500">MP3, WAV</p>
+        <div className="flex flex-col items-center justify-center py-12 text-gray-300">
+          <div 
+            className="p-4 rounded-full mb-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%)',
+              border: '1px solid rgba(59, 130, 246, 0.2)'
+            }}
+          >
+            <svg className="w-8 h-8 text-blue-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-gray-300 mb-1">Drop audio file here</p>
+          <p className="text-xs text-gray-500 font-light">MP3, WAV</p>
         </div>
       )}
     </motion.div>
