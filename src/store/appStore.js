@@ -58,8 +58,7 @@ export const useAppStore = create((set, get) => ({
   setIsCancelling: (isCancelling) => set({ isCancelling }),
   
   cancelGeneration: () => set({ 
-    isCancelling: true,
-    isGenerating: false
+    isCancelling: true
   }),
   
   resetCancellation: () => set({ isCancelling: false }),

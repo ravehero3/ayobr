@@ -206,7 +206,7 @@ function App() {
             </motion.button>
 
             {/* Stop Generation Button */}
-            {isGenerating && (
+            {isGenerating && !isCancelling && (
               <motion.button
                 onClick={stopGeneration}
                 className="px-8 py-4 bg-red-600 hover:bg-red-500 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-red-500/25 hover:shadow-red-500/40 transition-all duration-300"
@@ -224,6 +224,22 @@ function App() {
                   <span>Stop Generation</span>
                 </div>
               </motion.button>
+            )}
+
+            {/* Cancelling Status */}
+            {isCancelling && (
+              <motion.div
+                className="px-8 py-4 bg-yellow-600 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-yellow-500/25"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Stopping Generation...</span>
+                </div>
+              </motion.div>
             )}
 
             {generatedVideos.length > 0 && (

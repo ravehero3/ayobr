@@ -13,17 +13,13 @@ export const useFFmpeg = () => {
       setProgress(0);
       clearGeneratedVideos();
 
-      // Process pairs with controlled concurrency for optimal resource utilization
-      const maxConcurrentJobs = Math.min(pairs.length, 2); // Process up to 2 videos simultaneously
-      const processingQueue = [...pairs];
-      const activeJobs = new Map();
-
-      const processNextPair = async () => {
-        if (processingQueue.length === 0 || isCancelling) {
-          return;
+      // Process pairs sequentially to avoid resource conflicts and enable proper cancellation
+      for (const pair of pairs) {
+        // Check for cancellation before starting each pair
+        if (isCancelling) {
+          console.log('Video generation cancelled');
+          break;
         }
-
-        const pair = processingQueue.shift();
         
         // Set initial generating state for this pair
         setVideoGenerationState(pair.id, {
@@ -38,11 +34,7 @@ export const useFFmpeg = () => {
             pair.audio, 
             pair.image, 
             (progress) => {
-              // Check for cancellation during progress updates
-              if (isCancelling) {
-                throw new Error('Generation cancelled');
-              }
-              
+              // Update progress for this specific pair
               const clampedProgress = Math.min(Math.max(progress, 0), 100);
               setVideoGenerationState(pair.id, {
                 isGenerating: true,
@@ -50,13 +42,15 @@ export const useFFmpeg = () => {
                 isComplete: false,
                 video: null
               });
-            }
+            },
+            // Pass cancellation checker function
+            () => isCancelling
           );
 
           // Check for cancellation before creating blob
           if (isCancelling) {
             console.log('Video generation cancelled during blob creation');
-            return;
+            break;
           }
 
           const videoBlob = new Blob([videoData], { type: 'video/mp4' });
@@ -81,6 +75,17 @@ export const useFFmpeg = () => {
           });
 
         } catch (error) {
+          if (error.message === 'Generation cancelled by user') {
+            console.log(`Video generation cancelled for pair ${pair.id}`);
+            setVideoGenerationState(pair.id, {
+              isGenerating: false,
+              progress: 0,
+              isComplete: false,
+              video: null
+            });
+            break;
+          }
+          
           console.error(`Error generating video for pair ${pair.id}:`, error);
           // Reset state on error
           setVideoGenerationState(pair.id, {
@@ -89,31 +94,16 @@ export const useFFmpeg = () => {
             isComplete: false,
             video: null
           });
-        } finally {
-          activeJobs.delete(pair.id);
-          // Process next pair in queue
-          if (processingQueue.length > 0 && !isCancelling) {
-            processNextPair();
-          }
         }
-      };
-
-      // Start initial concurrent jobs
-      for (let i = 0; i < maxConcurrentJobs && i < pairs.length; i++) {
-        processNextPair();
-      }
-
-      // Wait for all jobs to complete
-      while (activeJobs.size > 0 && !isCancelling) {
-        await new Promise(resolve => setTimeout(resolve, 100));
       }
     } catch (error) {
       console.error('Error in video generation process:', error);
       throw error;
     } finally {
       setIsGenerating(false);
+      resetCancellation();
     }
-  }, [setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState]);
+  }, [setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState, isCancelling, resetCancellation]);
 
   const stopGeneration = useCallback(() => {
     cancelGeneration();
