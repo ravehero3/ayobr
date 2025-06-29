@@ -2,6 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import WaveSurfer from 'wavesurfer.js';
 
+// Global reference to track currently playing audio
+let currentlyPlayingWaveSurfer = null;
+
 const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDragEnd }) => {
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
@@ -40,8 +43,16 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         setCurrentTime(wavesurfer.current.getCurrentTime());
       });
 
-      wavesurfer.current.on('play', () => setIsPlaying(true));
-      wavesurfer.current.on('pause', () => setIsPlaying(false));
+      wavesurfer.current.on('play', () => {
+        setIsPlaying(true);
+        currentlyPlayingWaveSurfer = wavesurfer.current;
+      });
+      wavesurfer.current.on('pause', () => {
+        setIsPlaying(false);
+        if (currentlyPlayingWaveSurfer === wavesurfer.current) {
+          currentlyPlayingWaveSurfer = null;
+        }
+      });
 
       return () => {
         if (wavesurfer.current) {
@@ -54,7 +65,20 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handlePlayPause = () => {
     if (wavesurfer.current) {
+      // Stop any currently playing audio
+      if (currentlyPlayingWaveSurfer && currentlyPlayingWaveSurfer !== wavesurfer.current) {
+        currentlyPlayingWaveSurfer.pause();
+      }
+      
+      // Play/pause this audio
       wavesurfer.current.playPause();
+      
+      // Update the global reference
+      if (!wavesurfer.current.isPlaying()) {
+        currentlyPlayingWaveSurfer = wavesurfer.current;
+      } else {
+        currentlyPlayingWaveSurfer = null;
+      }
     }
   };
 
