@@ -1,16 +1,15 @@
+
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
   entry: './src/index.js',
-  
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
-    clean: true
+    publicPath: '/',
   },
-
   module: {
     rules: [
       {
@@ -19,52 +18,60 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+            plugins: [
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-syntax-dynamic-import'
+            ]
           }
         }
       },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader']
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg)$/,
+        use: ['file-loader']
       }
     ]
   },
-
-  resolve: {
-    extensions: ['.js', '.jsx'],
-    fallback: {
-      "fs": false,
-      "path": false,
-      "crypto": false
-    }
-  },
-
-  ignoreWarnings: [
-    {
-      module: /node_modules\/@ffmpeg\/ffmpeg/,
-      message: /Critical dependency: the request of a dependency is an expression/,
-    },
-  ],
-
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html'
     })
   ],
-
+  resolve: {
+    extensions: ['.js', '.jsx']
+  },
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-      publicPath: '/'
-    },
     host: '0.0.0.0',
     port: 5000,
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
     hot: true,
+    liveReload: true,
     open: false,
     historyApiFallback: true,
-    allowedHosts: 'all',
     headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
-  }
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+    client: {
+      reconnect: 5,
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    },
+    devMiddleware: {
+      writeToDisk: false,
+    },
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
 };

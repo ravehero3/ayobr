@@ -1,3 +1,4 @@
+
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
@@ -11,37 +12,46 @@ const initializeFFmpeg = async () => {
 
   ffmpeg = new FFmpeg();
   
-  // Load FFmpeg with progress callback
-  await ffmpeg.load({
-    coreURL: await toBlobURL('/ffmpeg-core.js', 'text/javascript'),
-    wasmURL: await toBlobURL('/ffmpeg-core.wasm', 'application/wasm'),
-    workerURL: await toBlobURL('/ffmpeg-core.worker.js', 'text/javascript')
-  });
+  try {
+    // Load FFmpeg with proper URLs - use the CDN versions
+    await ffmpeg.load({
+      coreURL: await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js', 'text/javascript'),
+      wasmURL: await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm', 'application/wasm'),
+      workerURL: await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js', 'text/javascript')
+    });
 
-  isLoaded = true;
-  return ffmpeg;
+    isLoaded = true;
+    return ffmpeg;
+  } catch (error) {
+    console.error('Failed to initialize FFmpeg:', error);
+    throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
+  }
 };
 
 export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) => {
   try {
     const ffmpeg = await initializeFFmpeg();
 
+    // Clear any previous progress listeners
+    ffmpeg.off('progress');
+    
     // Set up progress callback
     ffmpeg.on('progress', ({ progress }) => {
       if (onProgress) {
-        onProgress(Math.min(progress * 100, 100));
+        const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
+        onProgress(normalizedProgress);
       }
     });
 
     // Convert files to Uint8Array for FFmpeg
-    const audioData = new Uint8Array(await audioFile.arrayBuffer());
-    const imageData = new Uint8Array(await imageFile.arrayBuffer());
+    const audioData = await fetchFile(audioFile);
+    const imageData = await fetchFile(imageFile);
     
     await ffmpeg.writeFile('audio.mp3', audioData);
     await ffmpeg.writeFile('image.jpg', imageData);
 
-    // Get audio duration
-    const audioDuration = await getAudioDurationFFmpeg(ffmpeg, 'audio.mp3');
+    // Get audio duration using Web Audio API
+    const audioDuration = await getAudioDuration(audioFile);
     
     // FFmpeg command to create 1920x1080 video with image centered vertically 
     // and 30px space above/below as specified in requirements
@@ -72,9 +82,13 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     const data = await ffmpeg.readFile('output.mp4');
     
     // Clean up
-    await ffmpeg.deleteFile('audio.mp3');
-    await ffmpeg.deleteFile('image.jpg');
-    await ffmpeg.deleteFile('output.mp4');
+    try {
+      await ffmpeg.deleteFile('audio.mp3');
+      await ffmpeg.deleteFile('image.jpg');
+      await ffmpeg.deleteFile('output.mp4');
+    } catch (cleanupError) {
+      console.warn('Cleanup error (non-critical):', cleanupError);
+    }
 
     return data;
     
@@ -84,34 +98,25 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
   }
 };
 
-const getAudioDurationFFmpeg = async (ffmpeg, filename) => {
-  try {
-    // Use ffprobe to get duration
-    await ffmpeg.exec([
-      '-i', filename,
-      '-f', 'null', '-'
-    ]);
-    
-    // For now, return a default duration - in a real implementation,
-    // you'd parse the FFmpeg output to get the exact duration
-    return 30; // Default 30 seconds
-  } catch (error) {
-    console.warn('Could not determine audio duration, using default');
-    return 30;
-  }
-};
-
-// Alternative method using Web Audio API for duration
+// Use Web Audio API for more reliable duration detection
 export const getAudioDuration = (audioFile) => {
   return new Promise((resolve, reject) => {
     const audio = new Audio();
     
+    const cleanup = () => {
+      URL.revokeObjectURL(audio.src);
+    };
+    
     audio.addEventListener('loadedmetadata', () => {
-      resolve(audio.duration);
+      const duration = audio.duration;
+      cleanup();
+      resolve(duration || 30); // Fallback to 30 seconds if duration is invalid
     });
     
     audio.addEventListener('error', (error) => {
-      reject(error);
+      cleanup();
+      console.warn('Could not determine audio duration, using default');
+      resolve(30); // Use default instead of rejecting
     });
     
     audio.src = URL.createObjectURL(audioFile);

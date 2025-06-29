@@ -4,7 +4,7 @@ modules = ["nodejs-20", "web"]
 channel = "stable-24_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Start Dev Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -35,6 +35,19 @@ author = "agent"
 task = "shell.exec"
 args = "npx webpack serve --config webpack.simple.config.js"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Start Dev Server"
+author = 44399019
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx webpack serve --config webpack.simple.config.js --host 0.0.0.0 --port 5000"
 
 [[ports]]
 localPort = 5000
