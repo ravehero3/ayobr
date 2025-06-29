@@ -7,7 +7,7 @@ import { useAppStore } from '../store/appStore';
 
 const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
-  
+
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
 
@@ -38,9 +38,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
             style={{
               height: '176px',
               minHeight: '176px',
-              maxHeight: '176px'
-            }}
-            style={{
+              maxHeight: '176px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.4)',
               borderWidth: '2px',
@@ -60,7 +58,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
                 boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
               }}
             />
-            
+
             <AudioContainer
               audio={pair.audio}
               pairId={pair.id}
@@ -79,9 +77,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
             style={{
               height: '176px',
               minHeight: '176px',
-              maxHeight: '176px'
-            }}
-            style={{
+              maxHeight: '176px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.4)',
               borderWidth: '2px',
@@ -101,7 +97,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
                 boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
               }}
             />
-            
+
             <ImageContainer
               image={pair.image}
               pairId={pair.id}
@@ -136,7 +132,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           </svg>
         </button>
       </div>
-      
+
       {/* Hover enhancement for entire pair */}
       <div 
         className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"

@@ -4,67 +4,79 @@ import { processVideoWithFFmpeg } from '../utils/ffmpegProcessor';
 
 export const useFFmpeg = () => {
   const [progress, setProgress] = useState(0);
-  const { setIsGenerating, addGeneratedVideo, setGeneratedVideos } = useAppStore();
+  const { setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState } = useAppStore();
 
   const generateVideos = useCallback(async (pairs) => {
     try {
       setIsGenerating(true);
       setProgress(0);
-      setGeneratedVideos([]);
+      clearGeneratedVideos();
 
-      const totalPairs = pairs.length;
-      const generatedVideos = [];
+      // Process pairs in parallel with individual animations
+      const promises = pairs.map(async (pair) => {
+        // Set initial generating state for this pair
+        setVideoGenerationState(pair.id, {
+          isGenerating: true,
+          progress: 0,
+          isComplete: false,
+          video: null
+        });
 
-      for (let i = 0; i < totalPairs; i++) {
-        const pair = pairs[i];
-        
         try {
-          setProgress((i / totalPairs) * 100);
-          
           const videoData = await processVideoWithFFmpeg(
-            pair.audio,
-            pair.image,
-            (progressPercent) => {
-              const overallProgress = ((i + progressPercent / 100) / totalPairs) * 100;
-              setProgress(overallProgress);
+            pair.audio, 
+            pair.image, 
+            (progress) => {
+              setVideoGenerationState(pair.id, {
+                isGenerating: true,
+                progress: progress,
+                isComplete: false,
+                video: null
+              });
             }
           );
 
           const videoBlob = new Blob([videoData], { type: 'video/mp4' });
           const videoUrl = URL.createObjectURL(videoBlob);
-
-          const generatedVideo = {
-            id: pair.id,
-            name: `${pair.audio.name.split('.')[0]}_video`,
+          const video = {
+            id: crypto.randomUUID(),
+            pairId: pair.id,
             url: videoUrl,
-            data: videoData,
-            duration: await getAudioDuration(pair.audio),
-            size: videoData.byteLength
+            blob: videoBlob,
+            filename: `video_${pair.audio.name.split('.')[0]}_${pair.image.name.split('.')[0]}.mp4`,
+            createdAt: new Date()
           };
 
-          generatedVideos.push(generatedVideo);
-          addGeneratedVideo(generatedVideo);
+          addGeneratedVideo(video);
+
+          // Set completion state for this pair
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: video
+          });
+
         } catch (error) {
           console.error(`Error generating video for pair ${pair.id}:`, error);
-          // Continue with other pairs even if one fails
+          // Reset state on error
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 0,
+            isComplete: false,
+            video: null
+          });
         }
-      }
+      });
 
-      setProgress(100);
-      
-      // Clean up after a delay
-      setTimeout(() => {
-        setProgress(0);
-        setIsGenerating(false);
-      }, 1000);
-
+      await Promise.all(promises);
     } catch (error) {
       console.error('Error in video generation process:', error);
-      setIsGenerating(false);
-      setProgress(0);
       throw error;
+    } finally {
+      setIsGenerating(false);
     }
-  }, [setIsGenerating, addGeneratedVideo, setGeneratedVideos]);
+  }, [setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState]);
 
   return {
     generateVideos,

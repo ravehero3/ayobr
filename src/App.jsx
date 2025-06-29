@@ -9,7 +9,7 @@ import VideoPreviewCard from './components/VideoPreviewCard';
 function App() {
   const { pairs, generatedVideos, isGenerating, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs } = useAppStore();
   const { handleFileDrop, swapContainers } = usePairingLogic();
-  const { processVideoWithFFmpeg } = useFFmpeg();
+  const { generateVideos } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -29,69 +29,11 @@ function App() {
       return;
     }
 
-    setIsGenerating(true);
-    clearGeneratedVideos();
-
     try {
-      // Process pairs in parallel with individual animations
-      const promises = completePairs.map(async (pair) => {
-        // Set initial generating state for this pair
-        setVideoGenerationState(pair.id, {
-          isGenerating: true,
-          progress: 0,
-          isComplete: false,
-          video: null
-        });
-
-        try {
-          const videoBlob = await processVideoWithFFmpeg(
-            pair.audio, 
-            pair.image, 
-            (progress) => {
-              setVideoGenerationState(pair.id, {
-                isGenerating: true,
-                progress: progress,
-                isComplete: false,
-                video: null
-              });
-            }
-          );
-
-          const videoUrl = URL.createObjectURL(videoBlob);
-          const video = {
-            id: crypto.randomUUID(),
-            pairId: pair.id,
-            url: videoUrl,
-            blob: videoBlob,
-            filename: `video_${pair.audio.name.split('.')[0]}_${pair.image.name.split('.')[0]}.mp4`,
-            createdAt: new Date()
-          };
-
-          addGeneratedVideo(video);
-
-          // Set completion state for this pair
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: video
-          });
-
-        } catch (error) {
-          console.error(`Error generating video for pair ${pair.id}:`, error);
-          // Reset state on error
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 0,
-            isComplete: false,
-            video: null
-          });
-        }
-      });
-
-      await Promise.all(promises);
-    } finally {
-      setIsGenerating(false);
+      await generateVideos(completePairs);
+    } catch (error) {
+      console.error('Error generating videos:', error);
+      alert('Failed to generate videos. Please try again.');
     }
   };
 
