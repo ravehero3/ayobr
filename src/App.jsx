@@ -125,7 +125,7 @@ function App() {
 
         {/* Pairs Grid */}
         {pairs.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <AnimatePresence>
               {pairs.map((pair) => (
                 <motion.div
@@ -134,6 +134,7 @@ function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3 }}
+                  className="w-full"
                 >
                   <PairContainer
                     pair={pair}
