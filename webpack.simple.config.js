@@ -41,10 +41,18 @@ module.exports = {
   ],
 
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: {
+      directory: path.join(__dirname, 'dist'),
+      publicPath: '/'
+    },
     host: '0.0.0.0',
     port: 5000,
     hot: true,
-    open: false
+    open: false,
+    historyApiFallback: true,
+    allowedHosts: 'all',
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
   }
 };
