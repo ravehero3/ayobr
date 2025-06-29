@@ -13,11 +13,14 @@ export const useFFmpeg = () => {
       setProgress(0);
       clearGeneratedVideos();
 
-      // Process pairs in parallel with individual animations
-      const promises = pairs.map(async (pair) => {
+      // Process pairs sequentially for maximum speed and efficiency
+      for (let i = 0; i < pairs.length; i++) {
+        const pair = pairs[i];
+        
         // Check for cancellation before starting each pair
         if (isCancelling) {
-          throw new Error('Generation cancelled');
+          console.log('Video generation cancelled by user');
+          break;
         }
 
         // Set initial generating state for this pair
@@ -48,6 +51,12 @@ export const useFFmpeg = () => {
             }
           );
 
+          // Check for cancellation before creating blob
+          if (isCancelling) {
+            console.log('Video generation cancelled during blob creation');
+            break;
+          }
+
           const videoBlob = new Blob([videoData], { type: 'video/mp4' });
           const videoUrl = URL.createObjectURL(videoBlob);
           const video = {
@@ -69,6 +78,9 @@ export const useFFmpeg = () => {
             video: video
           });
 
+          // Small delay to prevent UI blocking
+          await new Promise(resolve => setTimeout(resolve, 100));
+
         } catch (error) {
           console.error(`Error generating video for pair ${pair.id}:`, error);
           // Reset state on error
@@ -78,10 +90,15 @@ export const useFFmpeg = () => {
             isComplete: false,
             video: null
           });
+          
+          // Continue with next pair instead of stopping all generation
+          if (!isCancelling) {
+            continue;
+          } else {
+            break;
+          }
         }
-      });
-
-      await Promise.all(promises);
+      }
     } catch (error) {
       console.error('Error in video generation process:', error);
       throw error;

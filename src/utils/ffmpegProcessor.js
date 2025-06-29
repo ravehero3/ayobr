@@ -7,6 +7,10 @@ let isLoaded = false;
 let isInitializing = false;
 let initPromise = null;
 
+// File cache to avoid re-reading the same files
+const fileCache = new Map();
+const maxCacheSize = 10; // Limit cache size to prevent memory issues
+
 // Simple initialization without preloading for Replit compatibility
 const initializeFFmpegInstance = async () => {
   const ffmpegInstance = new FFmpeg();
@@ -66,20 +70,43 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
   try {
     const ffmpeg = await initializeFFmpeg();
 
-    // Clear any previous progress listeners
+    // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
     
-    // Set up progress callback
+    // Set up progress callback with throttling for better performance
+    let lastProgressTime = 0;
     ffmpeg.on('progress', ({ progress }) => {
-      if (onProgress) {
+      const now = Date.now();
+      // Throttle progress updates to every 100ms for better performance
+      if (onProgress && (now - lastProgressTime > 100)) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         onProgress(normalizedProgress);
+        lastProgressTime = now;
       }
     });
 
-    // Convert files to Uint8Array for FFmpeg with better error handling
-    const audioData = await fetchFile(audioFile);
-    const imageData = await fetchFile(imageFile);
+    // Optimized file reading with caching
+    const getCachedFileData = async (file, type) => {
+      const cacheKey = `${file.name}_${file.size}_${file.lastModified}`;
+      
+      if (fileCache.has(cacheKey)) {
+        return fileCache.get(cacheKey);
+      }
+      
+      const data = await fetchFile(file);
+      
+      // Manage cache size
+      if (fileCache.size >= maxCacheSize) {
+        const firstKey = fileCache.keys().next().value;
+        fileCache.delete(firstKey);
+      }
+      
+      fileCache.set(cacheKey, data);
+      return data;
+    };
+
+    const audioData = await getCachedFileData(audioFile, 'audio');
+    const imageData = await getCachedFileData(imageFile, 'image');
     
     // Use unique filenames to avoid conflicts
     const audioFileName = `audio_${Date.now()}.mp3`;
@@ -92,7 +119,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
     
-    // Ultra-fast FFmpeg command optimized for simple static image + audio
+    // Maximum speed FFmpeg command - optimized for fastest possible encoding
     // Create 1920x1080 video with image centered and 20px white space above/below
     await ffmpeg.exec([
       '-loop', '1',
@@ -101,19 +128,22 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
       '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
       '-c:v', 'libx264',
       '-preset', 'ultrafast',        // Fastest encoding preset
-      '-tune', 'stillimage',         // Optimized for static images
-      '-crf', '30',                  // Higher CRF for faster encoding (still good quality)
-      '-g', '30',                    // Lower GOP size for faster processing
-      '-r', '1',                     // 1 FPS since image is static (much faster)
+      '-tune', 'zerolatency',        // Ultra-low latency encoding
+      '-crf', '35',                  // Higher CRF for maximum speed (acceptable quality)
+      '-g', '15',                    // Very low GOP size for fastest processing
+      '-keyint_min', '15',           // Match GOP size
+      '-sc_threshold', '0',          // Disable scene change detection
+      '-r', '1',                     // 1 FPS since image is static
       '-c:a', 'aac',
-      '-b:a', '96k',                 // Lower audio bitrate for faster processing
-      '-ac', '2',                    // Stereo audio
-      '-ar', '44100',                // Standard sample rate
+      '-b:a', '64k',                 // Minimal audio bitrate for speed
+      '-ac', '1',                    // Mono audio for speed (most beats are mono anyway)
+      '-ar', '22050',                // Lower sample rate for speed
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
       '-avoid_negative_ts', 'make_zero',
-      '-fflags', '+genpts',          // Generate presentation timestamps
+      '-fflags', '+fastseek+genpts', // Fast seeking and PTS generation
+      '-threads', '1',               // Single thread for WASM efficiency
       '-y',
       outputFileName
     ]);
