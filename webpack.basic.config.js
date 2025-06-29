@@ -1,4 +1,3 @@
-
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -8,7 +7,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
-    publicPath: '/',
+    clean: true,
   },
   module: {
     rules: [
@@ -29,10 +28,6 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader']
-      },
-      {
-        test: /\.(png|jpg|jpeg|gif|svg)$/,
-        use: ['file-loader']
       }
     ]
   },
@@ -48,27 +43,10 @@ module.exports = {
     host: '0.0.0.0',
     port: 5000,
     hot: true,
-    liveReload: true,
-    open: false,
     historyApiFallback: true,
     headers: {
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Opener-Policy': 'same-origin',
-    },
-    client: {
-      reconnect: 5,
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
-    },
-    devMiddleware: {
-      writeToDisk: false,
-    },
-  },
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-    },
-  },
+    }
+  }
 };
