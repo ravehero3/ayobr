@@ -4,27 +4,53 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 let ffmpeg = null;
 let isLoaded = false;
+let isInitializing = false;
 
 const initializeFFmpeg = async () => {
   if (ffmpeg && isLoaded) {
     return ffmpeg;
   }
 
+  if (isInitializing) {
+    // Wait for existing initialization to complete
+    while (isInitializing) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    if (ffmpeg && isLoaded) {
+      return ffmpeg;
+    }
+  }
+
+  isInitializing = true;
   ffmpeg = new FFmpeg();
   
   try {
-    // Load FFmpeg with proper URLs - use the CDN versions
+    // Try to load FFmpeg with CDN URLs first
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    
     await ffmpeg.load({
-      coreURL: await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js', 'text/javascript'),
-      wasmURL: await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm', 'application/wasm'),
-      workerURL: await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js', 'text/javascript')
+      coreURL: `${baseURL}/ffmpeg-core.js`,
+      wasmURL: `${baseURL}/ffmpeg-core.wasm`,
+      workerURL: `${baseURL}/ffmpeg-core.worker.js`
     });
 
     isLoaded = true;
+    isInitializing = false;
     return ffmpeg;
   } catch (error) {
-    console.error('Failed to initialize FFmpeg:', error);
-    throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
+    console.error('Failed to initialize FFmpeg with CDN, trying alternative method:', error);
+    
+    // Try alternative loading method
+    try {
+      await ffmpeg.load();
+      isLoaded = true;
+      isInitializing = false;
+      return ffmpeg;
+    } catch (fallbackError) {
+      console.error('FFmpeg initialization completely failed:', fallbackError);
+      isInitializing = false;
+      throw new Error('Failed to initialize FFmpeg. This may be due to browser compatibility or network restrictions. Please try refreshing the page or use a different browser.');
+    }
   }
 };
 
