@@ -8,6 +8,20 @@ export const useFFmpeg = () => {
 
   const generateVideos = useCallback(async (pairs) => {
     console.log('generateVideos called with pairs:', pairs);
+    
+    // Validate pairs
+    if (!pairs || pairs.length === 0) {
+      console.error('No pairs provided for video generation');
+      throw new Error('No pairs provided for video generation');
+    }
+
+    // Validate each pair has both audio and image
+    const invalidPairs = pairs.filter(pair => !pair.audio || !pair.image);
+    if (invalidPairs.length > 0) {
+      console.error('Invalid pairs found:', invalidPairs);
+      throw new Error('All pairs must have both audio and image files');
+    }
+
     try {
       setIsGenerating(true);
       resetCancellation();

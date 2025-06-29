@@ -31,6 +31,21 @@ function App() {
 
     console.log('Starting video generation for pairs:', completePairs);
 
+    // Check if FFmpeg files are accessible
+    try {
+      const response = await fetch('/ffmpeg/ffmpeg-core.js');
+      if (!response.ok) {
+        console.error('FFmpeg core file not accessible:', response.status);
+        alert('FFmpeg files are not accessible. Please ensure they are in the public/ffmpeg folder.');
+        return;
+      }
+      console.log('FFmpeg files are accessible');
+    } catch (error) {
+      console.error('Error checking FFmpeg files:', error);
+      alert('Error checking FFmpeg files. Please check the console for details.');
+      return;
+    }
+
     try {
       setIsGenerating(true);
       await generateVideos(completePairs);

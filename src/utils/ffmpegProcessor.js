@@ -11,16 +11,21 @@ const fileCache = new Map();
 const maxCacheSize = 10; // Limit cache size to prevent memory issues
 
 export const initializeFFmpeg = async () => {
+  console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing);
+  
   // Return existing instance if already loaded
   if (isLoaded && ffmpeg) {
+    console.log('Returning existing FFmpeg instance');
     return ffmpeg;
   }
 
   // Return existing promise if already initializing
   if (isInitializing && initPromise) {
+    console.log('Returning existing initialization promise');
     return initPromise;
   }
 
+  console.log('Starting FFmpeg initialization...');
   isInitializing = true;
 
   initPromise = (async () => {
@@ -53,20 +58,29 @@ export const initializeFFmpeg = async () => {
           
           console.log('FFmpeg loaded successfully');
         } catch (fetchError) {
-          console.log('Fetch method failed, trying toBlobURL:', fetchError);
+          console.error('Fetch method failed:', fetchError);
+          console.log('Trying toBlobURL method...');
           // Fallback to toBlobURL method
           try {
             await ffmpeg.load({
               coreURL: await toBlobURL('/ffmpeg/ffmpeg-core.js', 'text/javascript'),
               wasmURL: await toBlobURL('/ffmpeg/ffmpeg-core.wasm', 'application/wasm')
             });
+            console.log('toBlobURL method succeeded');
           } catch (blobError) {
-            console.log('toBlobURL failed, trying node_modules:', blobError);
+            console.error('toBlobURL failed:', blobError);
+            console.log('Trying node_modules fallback...');
             // Final fallback to node_modules
-            await ffmpeg.load({
-              coreURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'text/javascript'),
-              wasmURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'application/wasm')
-            });
+            try {
+              await ffmpeg.load({
+                coreURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'text/javascript'),
+                wasmURL: await toBlobURL('/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'application/wasm')
+              });
+              console.log('Node_modules fallback succeeded');
+            } catch (finalError) {
+              console.error('All FFmpeg loading methods failed:', finalError);
+              throw finalError;
+            }
           }
         }
         isLoaded = true;
