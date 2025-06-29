@@ -40,15 +40,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     // Get audio duration
     const audioDuration = await getAudioDurationFFmpeg(ffmpeg, 'audio.mp3');
     
-    // FFmpeg command to create video
-    // Create a 1920x1080 video with white background, centered image, and audio
+    // FFmpeg command to create 1920x1080 video with image centered vertically 
+    // and 30px space above/below as specified in requirements
     await ffmpeg.exec([
       '-loop', '1',
       '-i', 'image.jpg',
       '-i', 'audio.mp3',
       '-filter_complex', `
-        [0:v]scale=1920:1080:force_original_aspect_ratio=decrease,
-        pad=1920:1080:(ow-iw)/2:(oh-ih)/2:white,
+        [0:v]scale=1920:1020:force_original_aspect_ratio=decrease,
+        pad=1920:1020:(ow-iw)/2:(oh-ih)/2:white,
+        pad=1920:1080:0:30:white,
         setpts=PTS-STARTPTS[v];
         [1:a]asetpts=PTS-STARTPTS[a]
       `,

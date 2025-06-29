@@ -11,19 +11,20 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   useEffect(() => {
     if (audio && waveformRef.current) {
-      // Initialize WaveSurfer
+      // Initialize WaveSurfer with exactly 40 bars
       wavesurfer.current = WaveSurfer.create({
         container: waveformRef.current,
         waveColor: '#1E90FF',
         progressColor: '#00CFFF',
         cursorColor: '#FFFFFF',
-        barWidth: 3,
+        barWidth: 6,
         barRadius: 3,
-        barGap: 2,
+        barGap: 3,
         height: 60,
         normalize: true,
         backend: 'WebAudio',
-        interact: true
+        interact: true,
+        barMinHeight: 2
       });
 
       // Load audio file
@@ -82,9 +83,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   return (
     <motion.div
-      className={`relative rounded-2xl transition-all duration-300 ${
+      className={`relative rounded-2xl transition-all duration-300 group ${
         audio 
           ? `${isPlaying ? 'ring-2 ring-blue-400/50' : ''}`
           : ''
@@ -95,6 +104,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       whileHover={{ scale: audio ? 1.01 : 1 }}
+      title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={audio ? {
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
         backdropFilter: 'blur(8px)',
