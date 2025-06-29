@@ -27,9 +27,10 @@ export const useFFmpeg = () => {
             pair.audio, 
             pair.image, 
             (progress) => {
+              const clampedProgress = Math.min(Math.max(progress, 0), 100);
               setVideoGenerationState(pair.id, {
                 isGenerating: true,
-                progress: progress,
+                progress: clampedProgress,
                 isComplete: false,
                 video: null
               });

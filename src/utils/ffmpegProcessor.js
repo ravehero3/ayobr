@@ -29,13 +29,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     // Set up progress callback
     ffmpeg.on('progress', ({ progress }) => {
       if (onProgress) {
-        onProgress(progress * 100);
+        onProgress(Math.min(progress * 100, 100));
       }
     });
 
-    // Convert files to FFmpeg format
-    await ffmpeg.writeFile('audio.mp3', await fetchFile(audioFile));
-    await ffmpeg.writeFile('image.jpg', await fetchFile(imageFile));
+    // Convert files to Uint8Array for FFmpeg
+    const audioData = new Uint8Array(await audioFile.arrayBuffer());
+    const imageData = new Uint8Array(await imageFile.arrayBuffer());
+    
+    await ffmpeg.writeFile('audio.mp3', audioData);
+    await ffmpeg.writeFile('image.jpg', imageData);
 
     // Get audio duration
     const audioDuration = await getAudioDurationFFmpeg(ffmpeg, 'audio.mp3');
