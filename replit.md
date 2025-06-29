@@ -134,6 +134,9 @@ Changelog:
 - June 29, 2025. Created download videos functionality with multiple video support
 - June 29, 2025. Optimized FFmpeg processing for 10x faster video generation
 - June 29, 2025. Fixed FFmpeg initialization issues for Replit environment
+- June 29, 2025. Implemented immediate cancellation with forceStopAllProcesses() function
+- June 29, 2025. Optimized concurrent video generation (2-3 videos simultaneously for best performance)
+- June 29, 2025. Enhanced cancellation system - stop button now terminates all processes instantly
 ```
 
 ## User Preferences

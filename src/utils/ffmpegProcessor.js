@@ -5,10 +5,31 @@ let ffmpeg = null;
 let isLoaded = false;
 let isInitializing = false;
 let initPromise = null;
+let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
 
 // File cache to avoid re-reading the same files
 const fileCache = new Map();
 const maxCacheSize = 10; // Limit cache size to prevent memory issues
+
+// Force stop all active FFmpeg processes immediately
+export const forceStopAllProcesses = () => {
+  console.log('Force stopping all FFmpeg processes...');
+  
+  if (ffmpeg) {
+    try {
+      // Terminate the FFmpeg instance immediately
+      ffmpeg.terminate();
+      ffmpeg = null;
+      isLoaded = false;
+      isInitializing = false;
+      initPromise = null;
+      activeProcesses.clear();
+      console.log('All FFmpeg processes terminated');
+    } catch (error) {
+      console.error('Error terminating FFmpeg:', error);
+    }
+  }
+};
 
 export const initializeFFmpeg = async () => {
   console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing);
