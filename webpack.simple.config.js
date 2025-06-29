@@ -31,8 +31,20 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx'],
+    fallback: {
+      "fs": false,
+      "path": false,
+      "crypto": false
+    }
   },
+
+  ignoreWarnings: [
+    {
+      module: /node_modules\/@ffmpeg\/ffmpeg/,
+      message: /Critical dependency: the request of a dependency is an expression/,
+    },
+  ],
 
   plugins: [
     new HtmlWebpackPlugin({
