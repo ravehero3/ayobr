@@ -79,27 +79,22 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
     
-    // FFmpeg command to create 1920x1080 video with image centered vertically 
-    // and 30px space above/below as specified in requirements
+    // Optimized FFmpeg command for faster processing
+    // Create 1920x1080 video with image centered and 20px spacing above/below
     await ffmpeg.exec([
       '-loop', '1',
       '-i', 'image.jpg',
       '-i', 'audio.mp3',
-      '-filter_complex', `
-        [0:v]scale=1920:1020:force_original_aspect_ratio=decrease,
-        pad=1920:1020:(ow-iw)/2:(oh-ih)/2:white,
-        pad=1920:1080:0:30:white,
-        setpts=PTS-STARTPTS[v];
-        [1:a]asetpts=PTS-STARTPTS[a]
-      `,
-      '-map', '[v]',
-      '-map', '[a]',
+      '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
       '-c:v', 'libx264',
+      '-preset', 'ultrafast',
+      '-crf', '28',
       '-c:a', 'aac',
-      '-b:a', '192k',
+      '-b:a', '128k',
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
+      '-avoid_negative_ts', 'make_zero',
       '-y',
       'output.mp4'
     ]);
