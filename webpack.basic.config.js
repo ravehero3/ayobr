@@ -45,6 +45,16 @@ module.exports = {
     hot: true,
     historyApiFallback: true,
     allowedHosts: 'all',
+    static: [
+      {
+        directory: path.join(__dirname, 'public'),
+        publicPath: '/',
+      },
+      {
+        directory: path.join(__dirname, 'node_modules/@ffmpeg/core/dist/esm'),
+        publicPath: '/node_modules/@ffmpeg/core/dist/esm',
+      }
+    ],
     client: {
       webSocketURL: 'auto://0.0.0.0:0/ws',
       overlay: {
