@@ -19,7 +19,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
     >
       <div className="flex items-center justify-center relative">
         {/* Audio Container with puzzle piece connection */}
-        <div className="w-80 h-64 relative">
+        <div className="w-96 h-48 relative">
           <div
             className="relative w-full h-full backdrop-blur-xl p-6 border"
             style={{
@@ -55,7 +55,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
         </div>
 
         {/* Image Container with puzzle piece connection */}
-        <div className="w-80 h-64 relative -ml-4">
+        <div className="w-96 h-48 relative -ml-4">
           <div
             className="relative w-full h-full backdrop-blur-xl p-6 border"
             style={{
