@@ -7,59 +7,39 @@ let isLoaded = false;
 let isInitializing = false;
 let initPromise = null;
 
-// Preload FFmpeg as soon as the module is imported
-const preloadFFmpeg = async () => {
-  if (initPromise) return initPromise;
+// Simple initialization without preloading for Replit compatibility
+const initializeFFmpegInstance = async () => {
+  const ffmpegInstance = new FFmpeg();
   
-  initPromise = (async () => {
+  // Try default initialization first (works better in Replit)
+  try {
+    await ffmpegInstance.load();
+    return ffmpegInstance;
+  } catch (error) {
+    console.warn('Default FFmpeg load failed, trying with specific URLs:', error);
+    
+    // Fallback to CDN with simplified approach
     try {
-      const ffmpegInstance = new FFmpeg();
-      
-      // Use toBlobURL for more reliable CDN access
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
-      
-      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
-      const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
-      const workerURL = await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript');
-      
       await ffmpegInstance.load({
-        coreURL,
-        wasmURL,
-        workerURL
+        coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+        wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+        workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
       });
-
-      ffmpeg = ffmpegInstance;
-      isLoaded = true;
       return ffmpegInstance;
-    } catch (error) {
-      console.warn('FFmpeg preload failed, will try on demand:', error);
-      return null;
+    } catch (cdnError) {
+      console.error('Both FFmpeg initialization methods failed:', cdnError);
+      throw new Error('Unable to initialize video processor. Please refresh the page and try again.');
     }
-  })();
-  
-  return initPromise;
+  }
 };
 
-// Start preloading immediately but catch any errors
-preloadFFmpeg().catch(() => {
-  // Silently fail, will initialize on demand
-});
-
 const initializeFFmpeg = async () => {
-  // If preload succeeded, use the preloaded instance
+  // Return existing instance if already loaded
   if (ffmpeg && isLoaded) {
     return ffmpeg;
   }
 
-  // Wait for preload to complete if it's still running
-  if (initPromise) {
-    const preloadedInstance = await initPromise;
-    if (preloadedInstance && isLoaded) {
-      return preloadedInstance;
-    }
-  }
-
-  // Fallback to on-demand initialization if preload failed
+  // Prevent multiple simultaneous initializations
   if (isInitializing) {
     while (isInitializing) {
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -70,39 +50,15 @@ const initializeFFmpeg = async () => {
   }
 
   isInitializing = true;
-  ffmpeg = new FFmpeg();
   
   try {
-    // Use toBlobURL for more reliable CDN access
-    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
-    
-    const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
-    const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
-    const workerURL = await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript');
-    
-    await ffmpeg.load({
-      coreURL,
-      wasmURL,
-      workerURL
-    });
-
+    ffmpeg = await initializeFFmpegInstance();
     isLoaded = true;
     isInitializing = false;
     return ffmpeg;
   } catch (error) {
-    console.error('Failed to initialize FFmpeg with CDN, trying default method:', error);
-    
-    // Try default loading method
-    try {
-      await ffmpeg.load();
-      isLoaded = true;
-      isInitializing = false;
-      return ffmpeg;
-    } catch (fallbackError) {
-      console.error('FFmpeg initialization completely failed:', fallbackError);
-      isInitializing = false;
-      throw new Error('Failed to initialize FFmpeg. This may be due to browser compatibility or network restrictions. Please try refreshing the page or use a different browser.');
-    }
+    isInitializing = false;
+    throw error;
   }
 };
 
