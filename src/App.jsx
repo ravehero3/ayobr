@@ -7,9 +7,9 @@ import PairContainer from './components/PairContainer';
 import VideoPreviewCard from './components/VideoPreviewCard';
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs } = useAppStore();
   const { handleFileDrop, swapContainers } = usePairingLogic();
-  const { generateVideos } = useFFmpeg();
+  const { generateVideos, stopGeneration } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -204,6 +204,27 @@ function App() {
                 'Generate Videos'
               )}
             </motion.button>
+
+            {/* Stop Generation Button */}
+            {isGenerating && (
+              <motion.button
+                onClick={stopGeneration}
+                className="px-8 py-4 bg-red-600 hover:bg-red-500 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-red-500/25 hover:shadow-red-500/40 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Stop Generation</span>
+                </div>
+              </motion.button>
+            )}
 
             {generatedVideos.length > 0 && (
               <motion.button

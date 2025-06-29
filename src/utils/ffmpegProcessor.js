@@ -77,12 +77,17 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
       }
     });
 
-    // Convert files to Uint8Array for FFmpeg
+    // Convert files to Uint8Array for FFmpeg with better error handling
     const audioData = await fetchFile(audioFile);
     const imageData = await fetchFile(imageFile);
     
-    await ffmpeg.writeFile('audio.mp3', audioData);
-    await ffmpeg.writeFile('image.jpg', imageData);
+    // Use unique filenames to avoid conflicts
+    const audioFileName = `audio_${Date.now()}.mp3`;
+    const imageFileName = `image_${Date.now()}.jpg`;
+    const outputFileName = `output_${Date.now()}.mp4`;
+    
+    await ffmpeg.writeFile(audioFileName, audioData);
+    await ffmpeg.writeFile(imageFileName, imageData);
 
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
@@ -91,8 +96,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
     // Create 1920x1080 video with image centered and 20px white space above/below
     await ffmpeg.exec([
       '-loop', '1',
-      '-i', 'image.jpg',
-      '-i', 'audio.mp3',
+      '-i', imageFileName,
+      '-i', audioFileName,
       '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
       '-c:v', 'libx264',
       '-preset', 'ultrafast',        // Fastest encoding preset
@@ -110,19 +115,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress) =
       '-avoid_negative_ts', 'make_zero',
       '-fflags', '+genpts',          // Generate presentation timestamps
       '-y',
-      'output.mp4'
+      outputFileName
     ]);
 
     // Read the output file
-    const data = await ffmpeg.readFile('output.mp4');
+    const data = await ffmpeg.readFile(outputFileName);
     
-    // Clean up
-    try {
-      await ffmpeg.deleteFile('audio.mp3');
-      await ffmpeg.deleteFile('image.jpg');
-      await ffmpeg.deleteFile('output.mp4');
-    } catch (cleanupError) {
-      console.warn('Cleanup error (non-critical):', cleanupError);
+    // Clean up with better error handling
+    const filesToClean = [audioFileName, imageFileName, outputFileName];
+    for (const fileName of filesToClean) {
+      try {
+        await ffmpeg.deleteFile(fileName);
+      } catch (cleanupError) {
+        // Ignore cleanup errors - they're non-critical
+      }
     }
 
     return data;

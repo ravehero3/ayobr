@@ -4,16 +4,22 @@ import { processVideoWithFFmpeg } from '../utils/ffmpegProcessor';
 
 export const useFFmpeg = () => {
   const [progress, setProgress] = useState(0);
-  const { setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState } = useAppStore();
+  const { setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState, isCancelling, cancelGeneration, resetCancellation } = useAppStore();
 
   const generateVideos = useCallback(async (pairs) => {
     try {
       setIsGenerating(true);
+      resetCancellation();
       setProgress(0);
       clearGeneratedVideos();
 
       // Process pairs in parallel with individual animations
       const promises = pairs.map(async (pair) => {
+        // Check for cancellation before starting each pair
+        if (isCancelling) {
+          throw new Error('Generation cancelled');
+        }
+
         // Set initial generating state for this pair
         setVideoGenerationState(pair.id, {
           isGenerating: true,
@@ -27,6 +33,11 @@ export const useFFmpeg = () => {
             pair.audio, 
             pair.image, 
             (progress) => {
+              // Check for cancellation during progress updates
+              if (isCancelling) {
+                throw new Error('Generation cancelled');
+              }
+              
               const clampedProgress = Math.min(Math.max(progress, 0), 100);
               setVideoGenerationState(pair.id, {
                 isGenerating: true,
@@ -79,8 +90,13 @@ export const useFFmpeg = () => {
     }
   }, [setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState]);
 
+  const stopGeneration = useCallback(() => {
+    cancelGeneration();
+  }, [cancelGeneration]);
+
   return {
     generateVideos,
+    stopGeneration,
     progress
   };
 };
