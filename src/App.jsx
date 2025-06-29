@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/appStore';
 import { usePairingLogic } from './hooks/usePairingLogic';
 import { useFFmpeg } from './hooks/useFFmpeg';
-import DropZone from './components/DropZone';
 import PairContainer from './components/PairContainer';
 import VideoPreviewCard from './components/VideoPreviewCard';
 
@@ -12,6 +11,7 @@ function App() {
   const { handleFileDrop, swapContainers } = usePairingLogic();
   const { generateVideos, progress } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragStart = useCallback((item) => {
     setDraggedItem(item);
@@ -31,8 +31,64 @@ function App() {
     await generateVideos(validPairs);
   };
 
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileDrop(files);
+    }
+  }, [handleFileDrop]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-space-dark via-space-navy to-space-black">
+    <div 
+      className={`min-h-screen bg-gradient-to-br from-space-dark via-space-navy to-space-black transition-all duration-300 ${
+        isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
+      }`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag Overlay */}
+      <AnimatePresence>
+        {isDragOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-space-dark/90 backdrop-blur-sm"
+          >
+            <div className="text-center">
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.8 }}
+                className="inline-flex items-center justify-center w-32 h-32 mb-6 rounded-full bg-neon-blue/20 border-4 border-dashed border-neon-blue"
+              >
+                <svg className="w-16 h-16 text-neon-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </motion.div>
+              <h2 className="text-3xl font-bold text-white mb-2">Drop Files Anywhere</h2>
+              <p className="text-xl text-gray-300">Audio and images will be automatically paired</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <header className="p-6 border-b border-neon-blue/20">
         <div className="max-w-full mx-auto">
@@ -40,38 +96,57 @@ function App() {
             Type Beat Video Generator
           </h1>
           <p className="text-gray-400">
-            Create stunning type beat videos by pairing audio files with images
+            Drop audio files and images anywhere to create stunning type beat videos
           </p>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-full mx-auto p-6">
-        {/* Drop Zone */}
-        <DropZone onFileDrop={handleFileDrop} />
+        {/* Empty State */}
+        {pairs.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center min-h-[60vh] text-center"
+          >
+            <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-full bg-neon-blue/10 border-2 border-dashed border-neon-blue/30">
+              <svg className="w-12 h-12 text-neon-blue/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">Drop Your Files</h2>
+            <p className="text-gray-400 text-lg max-w-md">
+              Drag and drop your audio files (MP3, WAV) and images (PNG, JPG) anywhere on this page. 
+              They will automatically pair together to create your type beat videos.
+            </p>
+          </motion.div>
+        )}
 
         {/* Pairs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8">
-          <AnimatePresence>
-            {pairs.map((pair) => (
-              <motion.div
-                key={pair.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-              >
-                <PairContainer
-                  pair={pair}
-                  onSwap={swapContainers}
-                  draggedItem={draggedItem}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+        {pairs.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8">
+            <AnimatePresence>
+              {pairs.map((pair) => (
+                <motion.div
+                  key={pair.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <PairContainer
+                    pair={pair}
+                    onSwap={swapContainers}
+                    draggedItem={draggedItem}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* Generate Button */}
         {pairs.length > 0 && (

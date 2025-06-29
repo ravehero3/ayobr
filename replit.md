@@ -93,6 +93,9 @@ The Type Beat Video Generator is a desktop application built for music producers
 ```
 Changelog:
 - June 29, 2025. Initial setup
+- June 29, 2025. Migrated from Replit Agent to standard Replit environment
+- June 29, 2025. Transformed app into full-window drop zone with automatic file pairing
+- June 29, 2025. Fixed FFmpeg webpack compilation warnings with ignoreWarnings configuration
 ```
 
 ## User Preferences
