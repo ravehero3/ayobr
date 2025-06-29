@@ -34,8 +34,26 @@ export const useFFmpeg = () => {
       setProgress(0);
       clearGeneratedVideos();
 
-      // Process pairs with optimized concurrency (2-3 concurrent for best performance)
-      const maxConcurrent = Math.min(3, pairs.length);
+      // Dynamic concurrency based on pair count and system optimization
+      // Performance Guidelines:
+      // • 1-5 videos: 2-3 concurrent (safe for all systems)
+      // • 6-15 videos: 4-5 concurrent (good for medium loads)  
+      // • 16+ videos: 6-8 concurrent (requires good CPU/RAM)
+      // • 20+ videos: Can handle but may slow individual video speed
+      
+      let maxConcurrent;
+      if (pairs.length <= 5) {
+        maxConcurrent = Math.min(3, pairs.length);
+      } else if (pairs.length <= 15) {
+        maxConcurrent = Math.min(5, pairs.length);
+      } else if (pairs.length <= 25) {
+        maxConcurrent = Math.min(8, pairs.length);
+      } else {
+        // For 25+ videos, cap at 10 concurrent to prevent system overload
+        maxConcurrent = Math.min(10, pairs.length);
+      }
+      
+      console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);
       const processingQueue = [...pairs];
       const activePromises = new Set();
 
