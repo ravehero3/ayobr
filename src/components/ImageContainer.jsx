@@ -61,7 +61,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className="relative rounded-2xl transition-all duration-300 aspect-video group"
+      className="relative rounded-2xl transition-all duration-300 group"
       draggable={!!image}
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
@@ -74,12 +74,18 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         backdropFilter: 'blur(8px)',
         border: '1px solid rgba(59, 130, 246, 0.2)',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-        padding: '20px'
+        padding: '20px',
+        height: '136px',
+        minHeight: '136px',
+        maxHeight: '136px'
       } : {
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 41, 59, 0.3) 100%)',
         backdropFilter: 'blur(4px)',
         border: '2px dashed rgba(107, 114, 128, 0.3)',
-        padding: '20px'
+        padding: '20px',
+        height: '136px',
+        minHeight: '136px',
+        maxHeight: '136px'
       }}
     >
       {image ? (

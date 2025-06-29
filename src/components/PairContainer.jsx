@@ -34,7 +34,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
         {/* Audio Container */}
         <div className="relative flex-1">
           <div
-            className="relative w-full h-48 backdrop-blur-xl p-6 border rounded-3xl"
+            className="relative w-full backdrop-blur-xl p-6 border rounded-3xl"
+            style={{
+              height: '176px',
+              minHeight: '176px',
+              maxHeight: '176px'
+            }}
             style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.4)',
@@ -70,7 +75,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
         {/* Image Container */}
         <div className="relative flex-1">
           <div
-            className="relative w-full h-48 backdrop-blur-xl p-6 border rounded-3xl"
+            className="relative w-full backdrop-blur-xl p-6 border rounded-3xl"
+            style={{
+              height: '176px',
+              minHeight: '176px',
+              maxHeight: '176px'
+            }}
             style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.4)',
