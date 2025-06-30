@@ -26,6 +26,11 @@ export const usePairingLogic = () => {
 
     console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files`);
 
+    // If no valid files, don't change anything
+    if (audioFiles.length === 0 && imageFiles.length === 0) {
+      return;
+    }
+
     // Start with existing pairs that have content
     const existingPairs = pairs.filter(pair => pair.audio || pair.image);
     const audioToProcess = [...audioFiles];
@@ -50,15 +55,6 @@ export const usePairingLogic = () => {
         id: uuidv4(),
         audio: audioToProcess[i] || null,
         image: imageToProcess[i] || null
-      });
-    }
-
-    // Only add one empty pair if we have no pairs at all
-    if (finalPairs.length === 0) {
-      finalPairs.push({
-        id: uuidv4(),
-        audio: null,
-        image: null
       });
     }
 

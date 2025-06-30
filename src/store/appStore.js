@@ -3,11 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const useAppStore = create((set, get) => ({
   // State
-  pairs: [{
-    id: uuidv4(),
-    audio: null,
-    image: null
-  }],
+  pairs: [],
   generatedVideos: [],
   isGenerating: false,
   isCancelling: false,
@@ -48,11 +44,7 @@ export const useAppStore = create((set, get) => ({
   setPairs: (pairs) => set({ pairs }),
 
   clearAllPairs: () => set({
-    pairs: [{
-      id: uuidv4(),
-      audio: null,
-      image: null
-    }]
+    pairs: []
   }),
 
   // Generated videos
