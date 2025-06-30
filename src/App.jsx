@@ -291,17 +291,7 @@ function App() {
           </div>
         )}
 
-        {/* Generated Videos */}
-        {generatedVideos.length > 0 && (
-          <div className="space-y-4" style={{ width: '1200px', maxHeight: '200px', overflowY: 'auto' }}>
-            <h2 className="text-xl font-bold text-white text-center">Generated Videos</h2>
-            <div className="grid grid-cols-6 gap-4 justify-items-center">
-              {generatedVideos.map((video) => (
-                <VideoPreviewCard key={video.id} video={video} />
-              ))}
-            </div>
-          </div>
-        )}
+        
 
         {/* Batch Status Indicator */}
         {pairs.some(pair => pair.audio || pair.image) && (
