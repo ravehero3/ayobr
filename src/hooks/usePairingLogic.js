@@ -37,12 +37,12 @@ export const usePairingLogic = () => {
     const imageToProcess = [...imageFiles];
     
     // Fill existing pairs first (optimized for large batches)
+    // Only fill one slot per pair to avoid creating multiple pairs from single files
     for (let i = 0; i < filteredPairs.length && (audioToProcess.length > 0 || imageToProcess.length > 0); i++) {
       const pair = filteredPairs[i];
       if (!pair.audio && audioToProcess.length > 0) {
         pair.audio = audioToProcess.shift();
-      }
-      if (!pair.image && imageToProcess.length > 0) {
+      } else if (!pair.image && imageToProcess.length > 0) {
         pair.image = imageToProcess.shift();
       }
     }

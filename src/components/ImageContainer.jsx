@@ -75,9 +75,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         border: '1px solid rgba(59, 130, 246, 0.2)',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         padding: '20px',
-        height: '136px',
-        minHeight: '136px',
-        maxHeight: '136px'
+        height: '180px',
+        minHeight: '180px',
+        maxHeight: '180px'
       } : {
         background: '#040608', // Darker matte black container fill
         backgroundColor: '#080C14', // Darker navy background
@@ -91,9 +91,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         `,
         borderRadius: '14px',
         padding: '20px',
-        height: '136px',
-        minHeight: '136px',
-        maxHeight: '136px'
+        height: '180px',
+        minHeight: '180px',
+        maxHeight: '180px'
       }}
     >
       {image ? (
