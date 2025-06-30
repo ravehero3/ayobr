@@ -11,6 +11,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
     if (audio && waveformRef.current) {
@@ -89,14 +90,22 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
-    if (draggedItem?.type === 'audio') {
+    if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOver(false);
     }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    setIsDragOver(false);
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
       onSwap(draggedItem.pairId, pairId, 'audio');
     }
@@ -123,25 +132,32 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
       onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       whileHover={{ scale: audio ? 1.005 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={{
         background: audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
         borderRadius: '8px',
-        border: audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
-        boxShadow: audio 
-          ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
-          : `
-          0 0 0 1px rgba(30, 144, 255, 0.15),
-          0 0 8px rgba(30, 144, 255, 0.2),
-          0 0 15px rgba(0, 207, 255, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.02)
-        `,
+        border: isDragOver 
+          ? '2px solid rgba(34, 197, 94, 0.6)' // Green border when valid drop target
+          : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
+        boxShadow: isDragOver
+          ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
+          : audio 
+            ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
+            : `
+            0 0 0 1px rgba(30, 144, 255, 0.15),
+            0 0 8px rgba(30, 144, 255, 0.2),
+            0 0 15px rgba(0, 207, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.02)
+          `,
         padding: audio ? '16px' : '20px',
         height: '136px',
         minHeight: '136px',
-        maxHeight: '136px'
+        maxHeight: '136px',
+        transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
+        transition: 'all 0.2s ease-in-out'
       }}
     >
       {audio ? (

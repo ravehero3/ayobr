@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd }) => {
   const [imageUrl, setImageUrl] = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   React.useEffect(() => {
     if (image) {
@@ -21,14 +22,22 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
-    if (draggedItem?.type === 'image') {
+    if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOver(false);
     }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    setIsDragOver(false);
     if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
       onSwap(draggedItem.pairId, pairId, 'image');
     }
@@ -66,24 +75,35 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
       onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       whileHover={{ scale: image ? 1.01 : 1 }}
       title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
       style={image ? {
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
         backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(59, 130, 246, 0.2)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+        border: isDragOver 
+          ? '2px solid rgba(34, 197, 94, 0.6)' 
+          : '1px solid rgba(59, 130, 246, 0.2)',
+        boxShadow: isDragOver
+          ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
+          : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         padding: '20px',
         height: '180px',
         minHeight: '180px',
-        maxHeight: '180px'
+        maxHeight: '180px',
+        transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
+        transition: 'all 0.2s ease-in-out'
       } : {
         background: '#040608', // Darker matte black container fill
         backgroundColor: '#080C14', // Darker navy background
         backdropFilter: 'blur(4px)',
-        border: '1.5px solid rgba(30, 144, 255, 0.3)',
-        boxShadow: `
+        border: isDragOver
+          ? '2px solid rgba(34, 197, 94, 0.6)'
+          : '1.5px solid rgba(30, 144, 255, 0.3)',
+        boxShadow: isDragOver
+          ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
+          : `
           0 0 0 1px rgba(30, 144, 255, 0.15),
           0 0 8px rgba(30, 144, 255, 0.2),
           0 0 15px rgba(0, 207, 255, 0.1),
@@ -93,7 +113,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         padding: '20px',
         height: '180px',
         minHeight: '180px',
-        maxHeight: '180px'
+        maxHeight: '180px',
+        transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
+        transition: 'all 0.2s ease-in-out'
       }}
     >
       {image ? (
