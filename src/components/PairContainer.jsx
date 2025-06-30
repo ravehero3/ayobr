@@ -36,9 +36,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           <div
             className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
             style={{
-              height: '350px',
-              minHeight: '350px',
-              maxHeight: '350px',
+              height: '300px',
+              minHeight: '300px',
+              maxHeight: '300px',
+              width: '500px',
+              minWidth: '500px',
+              maxWidth: '500px',
               background: '#050A13', // Matte black container fill
               backgroundColor: '#0A0F1C', // Deep navy background
               borderColor: '#1E90FF',
@@ -49,7 +52,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
                 0 0 30px rgba(0, 207, 255, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05)
               `,
-              borderRadius: '28px',
+              borderRadius: '14px',
               animation: 'border-pulse 3s ease-in-out infinite alternate'
             }}
           >
@@ -102,9 +105,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           <div
             className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
             style={{
-              height: '350px',
-              minHeight: '350px',
-              maxHeight: '350px',
+              height: '300px',
+              minHeight: '300px',
+              maxHeight: '300px',
+              width: '500px',
+              minWidth: '500px',
+              maxWidth: '500px',
               background: '#050A13', // Matte black container fill
               backgroundColor: '#0A0F1C', // Deep navy background
               borderColor: '#1E90FF',
@@ -115,7 +121,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
                 0 0 30px rgba(0, 207, 255, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05)
               `,
-              borderRadius: '28px',
+              borderRadius: '14px',
               animation: 'border-pulse 3s ease-in-out infinite alternate'
             }}
           >

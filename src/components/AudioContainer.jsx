@@ -128,7 +128,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={{
         background: audio ? 'rgba(15, 23, 42, 0.6)' : '#050A13', // Dark theme adapted
-        borderRadius: '16px',
+        borderRadius: '8px',
         border: audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid #1E90FF',
         boxShadow: audio 
           ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'

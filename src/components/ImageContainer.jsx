@@ -89,7 +89,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           0 0 30px rgba(0, 207, 255, 0.2),
           inset 0 1px 0 rgba(255, 255, 255, 0.05)
         `,
-        borderRadius: '28px',
+        borderRadius: '14px',
         padding: '20px',
         height: '136px',
         minHeight: '136px',

@@ -183,10 +183,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-keyint_min', '15',           // Match GOP size
       '-sc_threshold', '0',          // Disable scene change detection
       '-r', '1',                     // 1 FPS since image is static
-      '-c:a', 'aac',
-      '-b:a', '64k',                 // Minimal audio bitrate for speed
-      '-ac', '1',                    // Mono audio for speed (most beats are mono anyway)
-      '-ar', '22050',                // Lower sample rate for speed
+      '-c:a', 'copy'
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
