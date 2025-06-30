@@ -47,40 +47,42 @@ export const usePairingLogic = () => {
       return;
     }
 
-    // Create pairs by adding to existing pairs or creating new ones
+    // Start with existing pairs
     const newPairs = [...pairs];
     
-    // Process new audio files
-    newAudioFiles.forEach(audioFile => {
-      // Find an existing pair without audio
-      const existingPair = newPairs.find(pair => !pair.audio);
-      if (existingPair) {
-        existingPair.audio = audioFile;
-      } else {
-        // Create new pair with just audio
-        newPairs.push({
-          id: uuidv4(),
-          audio: audioFile,
-          image: null
-        });
+    // Create pairs by pairing audio and image files together
+    const maxFiles = Math.max(newAudioFiles.length, newImageFiles.length);
+    
+    for (let i = 0; i < maxFiles; i++) {
+      const audioFile = newAudioFiles[i] || null;
+      const imageFile = newImageFiles[i] || null;
+      
+      // Try to fill existing incomplete pairs first
+      if (audioFile && !imageFile) {
+        // Audio only - find a pair without audio
+        const existingPair = newPairs.find(pair => !pair.audio);
+        if (existingPair) {
+          existingPair.audio = audioFile;
+          continue;
+        }
       }
-    });
-
-    // Process new image files
-    newImageFiles.forEach(imageFile => {
-      // Find an existing pair without image
-      const existingPair = newPairs.find(pair => !pair.image);
-      if (existingPair) {
-        existingPair.image = imageFile;
-      } else {
-        // Create new pair with just image
-        newPairs.push({
-          id: uuidv4(),
-          audio: null,
-          image: imageFile
-        });
+      
+      if (imageFile && !audioFile) {
+        // Image only - find a pair without image
+        const existingPair = newPairs.find(pair => !pair.image);
+        if (existingPair) {
+          existingPair.image = imageFile;
+          continue;
+        }
       }
-    });
+      
+      // Create new pair (either both files or single file if no existing pairs to fill)
+      newPairs.push({
+        id: uuidv4(),
+        audio: audioFile,
+        image: imageFile
+      });
+    }
 
     console.log(`Updated pairs count: ${newPairs.length}`);
     setPairs(newPairs);
