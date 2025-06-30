@@ -98,33 +98,35 @@ export const usePairingLogic = () => {
         // Start with current pairs
         const newPairs = [...currentPairs];
         
-        // Create pairs by pairing audio and image files together
-        const maxFiles = Math.max(newAudioFiles.length, newImageFiles.length);
+        // First, try to fill existing empty containers
+        let audioIndex = 0;
+        let imageIndex = 0;
         
-        for (let i = 0; i < maxFiles; i++) {
-          const audioFile = newAudioFiles[i] || null;
-          const imageFile = newImageFiles[i] || null;
-          
-          // Try to fill existing incomplete pairs first
-          if (audioFile && !imageFile) {
-            // Audio only - find a pair without audio
-            const existingPair = newPairs.find(pair => !pair.audio);
-            if (existingPair) {
-              existingPair.audio = audioFile;
-              continue;
-            }
+        // Fill existing empty audio slots
+        for (const pair of newPairs) {
+          if (!pair.audio && audioIndex < newAudioFiles.length) {
+            pair.audio = newAudioFiles[audioIndex];
+            audioIndex++;
           }
-          
-          if (imageFile && !audioFile) {
-            // Image only - find a pair without image
-            const existingPair = newPairs.find(pair => !pair.image);
-            if (existingPair) {
-              existingPair.image = imageFile;
-              continue;
-            }
+        }
+        
+        // Fill existing empty image slots
+        for (const pair of newPairs) {
+          if (!pair.image && imageIndex < newImageFiles.length) {
+            pair.image = newImageFiles[imageIndex];
+            imageIndex++;
           }
+        }
+        
+        // If we still have files left, create new pairs for them
+        const remainingAudioFiles = newAudioFiles.slice(audioIndex);
+        const remainingImageFiles = newImageFiles.slice(imageIndex);
+        const maxRemaining = Math.max(remainingAudioFiles.length, remainingImageFiles.length);
+        
+        for (let i = 0; i < maxRemaining; i++) {
+          const audioFile = remainingAudioFiles[i] || null;
+          const imageFile = remainingImageFiles[i] || null;
           
-          // Create new pair (either both files or single file if no existing pairs to fill)
           newPairs.push({
             id: uuidv4(),
             audio: audioFile,

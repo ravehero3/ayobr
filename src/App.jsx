@@ -166,7 +166,7 @@ function App() {
         <main className="flex-1 flex flex-col p-6 overflow-y-auto">
           <div className="max-w-6xl mx-auto w-full space-y-6">
         {/* Empty State */}
-        {pairs.length === 0 && (
+        {pairs.every(pair => !pair.audio && !pair.image) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -186,7 +186,7 @@ function App() {
         )}
 
         {/* Pairs Grid - Updated for wider containers */}
-        {pairs.length > 0 && (
+        {pairs.some(pair => pair.audio || pair.image) && (
           <div className="w-full flex flex-col items-center mb-8">
             <div className="flex flex-col gap-12 max-w-[1200px] w-full px-6">
               <AnimatePresence>
@@ -214,7 +214,7 @@ function App() {
         )}
 
         {/* Action Buttons */}
-        {pairs.length > 0 && (
+        {pairs.some(pair => pair.audio || pair.image) && (
           <div className="flex justify-center gap-4 mb-8">
             <motion.button
               onClick={handleGenerateVideos}
