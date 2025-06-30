@@ -160,7 +160,7 @@ function App() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center justify-start p-6 max-w-7xl mx-auto w-full">
+        <main className="flex-1 flex flex-col items-center justify-start p-6 w-full">
         {/* Empty State */}
         {pairs.length === 0 && (
           <motion.div
@@ -184,7 +184,7 @@ function App() {
         {/* Pairs Grid */}
         {pairs.length > 0 && (
           <div className="w-full flex flex-col items-center mb-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full px-4">
               <AnimatePresence>
                 {pairs.map((pair) => (
                   <motion.div
