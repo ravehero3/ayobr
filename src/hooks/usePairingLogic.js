@@ -31,21 +31,44 @@ export const usePairingLogic = () => {
       return;
     }
 
-    // Simple approach: create pairs directly from files
-    const newPairs = [];
-    const maxFiles = Math.max(audioFiles.length, imageFiles.length);
+    // Create pairs by adding to existing pairs or creating new ones
+    const newPairs = [...pairs];
     
-    for (let i = 0; i < maxFiles; i++) {
-      newPairs.push({
-        id: uuidv4(),
-        audio: audioFiles[i] || null,
-        image: imageFiles[i] || null
-      });
-    }
+    // Process audio files
+    audioFiles.forEach(audioFile => {
+      // Find an existing pair without audio
+      const existingPair = newPairs.find(pair => !pair.audio);
+      if (existingPair) {
+        existingPair.audio = audioFile;
+      } else {
+        // Create new pair with just audio
+        newPairs.push({
+          id: uuidv4(),
+          audio: audioFile,
+          image: null
+        });
+      }
+    });
+
+    // Process image files
+    imageFiles.forEach(imageFile => {
+      // Find an existing pair without image
+      const existingPair = newPairs.find(pair => !pair.image);
+      if (existingPair) {
+        existingPair.image = imageFile;
+      } else {
+        // Create new pair with just image
+        newPairs.push({
+          id: uuidv4(),
+          audio: null,
+          image: imageFile
+        });
+      }
+    });
 
     console.log(`Created ${newPairs.length} pairs`);
     setPairs(newPairs);
-  }, [setPairs]);
+  }, [pairs, setPairs]);
 
   const swapContainers = useCallback((fromPairId, toPairId, type) => {
     const newPairs = [...pairs];

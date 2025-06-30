@@ -84,25 +84,56 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           </div>
         </div>
 
-        {/* Connecting Bridge */}
-        <div className="relative z-20 hidden lg:block" style={{ width: '100px', height: '80px', margin: '0 -12px' }}>
-          <div
-            className="w-full h-full backdrop-blur-xl border"
-            style={{
-              background: '#050A13',
-              backgroundColor: '#0A0F1C',
-              borderColor: '#1E90FF',
-              borderWidth: '1.5px',
-              boxShadow: `
-                0 0 0 1px rgba(30, 144, 255, 0.3),
-                0 0 12px rgba(30, 144, 255, 0.4),
-                0 0 25px rgba(0, 207, 255, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05)
-              `,
-              borderRadius: '20px',
-              transform: 'translateY(0px)'
-            }}
-          />
+        {/* Connecting Bridge - Plus Symbol */}
+        <div className="relative z-20 hidden lg:block flex items-center justify-center" style={{ width: '100px', height: '80px', margin: '0 -12px' }}>
+          <div className="relative flex items-center justify-center" style={{ width: '60px', height: '60px' }}>
+            {/* Horizontal bar of plus */}
+            <div
+              className="absolute backdrop-blur-xl border"
+              style={{
+                width: '50px',
+                height: '12px',
+                background: '#050A13',
+                backgroundColor: '#0A0F1C',
+                borderColor: '#1E90FF',
+                borderWidth: '1.5px',
+                boxShadow: `
+                  0 0 0 1px rgba(30, 144, 255, 0.3),
+                  0 0 8px rgba(30, 144, 255, 0.4),
+                  0 0 15px rgba(0, 207, 255, 0.2),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.05)
+                `,
+                borderRadius: '6px'
+              }}
+            />
+            {/* Vertical bar of plus */}
+            <div
+              className="absolute backdrop-blur-xl border"
+              style={{
+                width: '12px',
+                height: '50px',
+                background: '#050A13',
+                backgroundColor: '#0A0F1C',
+                borderColor: '#1E90FF',
+                borderWidth: '1.5px',
+                boxShadow: `
+                  0 0 0 1px rgba(30, 144, 255, 0.3),
+                  0 0 8px rgba(30, 144, 255, 0.4),
+                  0 0 15px rgba(0, 207, 255, 0.2),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.05)
+                `,
+                borderRadius: '6px'
+              }}
+            />
+            {/* Center glow effect */}
+            <div 
+              className="absolute w-3 h-3 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(30, 144, 255, 0.8) 0%, rgba(0, 207, 255, 0.4) 50%, transparent 70%)',
+                boxShadow: '0 0 15px rgba(30, 144, 255, 0.6)'
+              }}
+            />
+          </div>
         </div>
 
         {/* Image Container - Made wider for better content display */}
