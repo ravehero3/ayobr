@@ -112,7 +112,7 @@ function App() {
 
   return (
     <div 
-      className={`min-h-screen bg-gradient-to-br from-space-dark via-space-navy to-space-black transition-all duration-300 ${
+      className={`fixed inset-0 w-screen h-screen bg-gradient-to-br from-space-dark via-space-navy to-space-black transition-all duration-300 overflow-auto ${
         isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
       }`}
       onDragOver={handleDragOver}
@@ -146,26 +146,27 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <header className="p-6 border-b border-neon-blue/20">
-        <div className="max-w-full mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Type Beat Video Generator
-          </h1>
-          <p className="text-gray-400">
-            Drop audio files and images anywhere to create stunning type beat videos
-          </p>
-        </div>
-      </header>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <header className="p-6 border-b border-neon-blue/20 flex-shrink-0">
+          <div className="max-w-full mx-auto text-center">
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Type Beat Video Generator
+            </h1>
+            <p className="text-gray-400">
+              Drop audio files and images anywhere to create stunning type beat videos
+            </p>
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-full mx-auto p-6">
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col items-center justify-start p-6 max-w-7xl mx-auto w-full">
         {/* Empty State */}
         {pairs.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center min-h-[60vh] text-center"
+            className="flex flex-col items-center justify-center flex-1 text-center w-full"
           >
             <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-full bg-neon-blue/10 border-2 border-dashed border-neon-blue/30">
               <svg className="w-12 h-12 text-neon-blue/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,27 +183,29 @@ function App() {
 
         {/* Pairs Grid */}
         {pairs.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 max-w-7xl mx-auto">
-            <AnimatePresence>
-              {pairs.map((pair) => (
-                <motion.div
-                  key={pair.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full"
-                >
-                  <PairContainer
-                    pair={pair}
-                    onSwap={swapContainers}
-                    draggedItem={draggedItem}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          <div className="w-full flex flex-col items-center mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl">
+              <AnimatePresence>
+                {pairs.map((pair) => (
+                  <motion.div
+                    key={pair.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full"
+                  >
+                    <PairContainer
+                      pair={pair}
+                      onSwap={swapContainers}
+                      draggedItem={draggedItem}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
           </div>
         )}
 
@@ -286,16 +289,17 @@ function App() {
 
         {/* Generated Videos */}
         {generatedVideos.length > 0 && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Generated Videos</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          <div className="space-y-6 w-full">
+            <h2 className="text-2xl font-bold text-white text-center">Generated Videos</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 justify-items-center">
               {generatedVideos.map((video) => (
                 <VideoPreviewCard key={video.id} video={video} />
               ))}
             </div>
           </div>
         )}
-      </main>
+        </main>
+      </div>
       
       {/* Settings Panel */}
       <SettingsPanel />
