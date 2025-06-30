@@ -7,15 +7,26 @@ let isInitializing = false;
 let initPromise = null;
 let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
 
+// Scalable concurrency management for up to 100 files
+const getOptimalConcurrency = (totalFiles) => {
+  if (totalFiles <= 5) return 4;      // Small batches: 4 concurrent
+  if (totalFiles <= 20) return 6;     // Medium batches: 6 concurrent  
+  if (totalFiles <= 50) return 8;     // Large batches: 8 concurrent
+  if (totalFiles <= 75) return 10;    // Very large batches: 10 concurrent
+  return 12;                          // Maximum 100 files: 12 concurrent
+};
+
 // Memory management for large batches
 const memoryCache = new Map();
-const MAX_CACHE_SIZE = 50; // Cache up to 50 processed items
+const MAX_CACHE_SIZE = 100; // Increased cache for 100-file batches
 let processedCount = 0;
+const MEMORY_CLEANUP_INTERVAL = 10; // Clean memory every 10 processed videos
 
 // Enhanced file cache for faster processing
 const fileCache = new Map();
-const maxCacheSize = 25; // Increased cache size for better performance
-const processedImageCache = new Map(); // Cache for processed image data
+const maxCacheSize = 50; // Increased cache size for 100 files
+const processedImageCache = new Map();
+const audioBufferCache = new Map(); // Cache for audio file buffers
 
 // Force stop all active FFmpeg processes immediately
 export const forceStopAllProcesses = () => {
@@ -37,12 +48,36 @@ export const forceStopAllProcesses = () => {
   }
 };
 
-// Memory cleanup for large batches
+// Enhanced memory cleanup for 100-file batches
 const cleanupMemory = () => {
-  if (memoryCache.size > MAX_CACHE_SIZE) {
-    const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - MAX_CACHE_SIZE);
-    keysToDelete.forEach(key => memoryCache.delete(key));
-    console.log(`Cleaned up ${keysToDelete.length} cached items`);
+  processedCount++;
+  
+  // Clean memory every 10 processed videos
+  if (processedCount % MEMORY_CLEANUP_INTERVAL === 0) {
+    console.log(`Performing memory cleanup after ${processedCount} processed videos`);
+    
+    // Clear excessive cache entries
+    if (memoryCache.size > MAX_CACHE_SIZE) {
+      const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - MAX_CACHE_SIZE);
+      keysToDelete.forEach(key => memoryCache.delete(key));
+      console.log(`Cleaned up ${keysToDelete.length} cached items`);
+    }
+
+    // Clear file caches
+    if (fileCache.size > maxCacheSize) {
+      const oldestKeys = Array.from(fileCache.keys()).slice(0, fileCache.size - maxCacheSize);
+      oldestKeys.forEach(key => fileCache.delete(key));
+    }
+
+    if (audioBufferCache.size > 20) {
+      audioBufferCache.clear();
+      console.log('Cleared audio buffer cache');
+    }
+
+    if (processedImageCache.size > 30) {
+      processedImageCache.clear();
+      console.log('Cleared processed image cache');
+    }
   }
 
   // Force garbage collection if available

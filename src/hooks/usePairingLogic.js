@@ -19,35 +19,43 @@ export const usePairingLogic = () => {
   };
 
   const handleFileDrop = useCallback((files) => {
-    console.log(`Processing ${files.length} files for pairing`);
+    console.log(`Processing ${files.length} files for pairing (optimized for up to 100 files)`);
     
     const audioFiles = files.filter(isAudioFile);
     const imageFiles = files.filter(isImageFile);
 
     console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files`);
 
-    // Optimized batch processing for large file counts
+    // Enhanced batch processing for up to 100 files
     const newPairs = [...pairs];
     
-    // Remove any completely empty pairs before processing
+    // Remove completely empty pairs for efficiency
     const filteredPairs = newPairs.filter(pair => pair.audio || pair.image);
     
-    // Process audio files efficiently
+    // Efficient pairing algorithm for large batches
     const audioToProcess = [...audioFiles];
-    filteredPairs.forEach(pair => {
+    const imageToProcess = [...imageFiles];
+    
+    // Fill existing pairs first (optimized for large batches)
+    for (let i = 0; i < filteredPairs.length && (audioToProcess.length > 0 || imageToProcess.length > 0); i++) {
+      const pair = filteredPairs[i];
       if (!pair.audio && audioToProcess.length > 0) {
         pair.audio = audioToProcess.shift();
       }
-    });
+      if (!pair.image && imageToProcess.length > 0) {
+        pair.image = imageToProcess.shift();
+      }
+    }
 
-    // Process remaining audio files
-    audioToProcess.forEach(audioFile => {
+    // Create new pairs for remaining files (batch optimized)
+    const maxRemaining = Math.max(audioToProcess.length, imageToProcess.length);
+    for (let i = 0; i < maxRemaining; i++) {
       filteredPairs.push({
         id: uuidv4(),
-        audio: audioFile,
-        image: null
+        audio: audioToProcess[i] || null,
+        image: imageToProcess[i] || null
       });
-    });
+    }
 
     // Process image files efficiently
     const imagesToProcess = [...imageFiles];

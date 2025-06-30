@@ -35,23 +35,44 @@ export const useFFmpeg = () => {
       setProgress(0);
       clearGeneratedVideos();
 
-      // Dynamic concurrency scaling for up to 100 files
+      // Scalable concurrency for up to 100 files with optimized performance
       let maxConcurrent;
-      if (pairs.length <= 10) {
-        maxConcurrent = Math.min(concurrencySettings.small, pairs.length);
-      } else if (pairs.length <= 25) {
-        maxConcurrent = Math.min(concurrencySettings.medium, pairs.length);
+      if (pairs.length <= 5) {
+        maxConcurrent = 4;       // Small batches: 4 concurrent
+      } else if (pairs.length <= 20) {
+        maxConcurrent = 6;       // Medium batches: 6 concurrent  
       } else if (pairs.length <= 50) {
-        maxConcurrent = Math.min(concurrencySettings.large, pairs.length);
+        maxConcurrent = 8;       // Large batches: 8 concurrent
       } else if (pairs.length <= 75) {
-        maxConcurrent = Math.min(concurrencySettings.xlarge, pairs.length);
+        maxConcurrent = 10;      // Very large batches: 10 concurrent
       } else {
-        maxConcurrent = Math.min(concurrencySettings.massive, pairs.length);
+        maxConcurrent = 12;      // Maximum 100 files: 12 concurrent
       }
       
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);
       const processingQueue = [...pairs];
       const activePromises = new Set();
+      let completedCount = 0;
+      
+      // Enhanced progress tracking for large batches
+      const updateBatchProgress = () => {
+        const overallProgress = Math.floor((completedCount / pairs.length) * 100);
+        setProgress(overallProgress);
+        
+        // Log progress for large batches
+        if (pairs.length > 20) {
+          console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
+        }
+        
+        // Memory cleanup every 10 completed videos for large batches
+        if (pairs.length > 20 && completedCount % 10 === 0 && completedCount > 0) {
+          console.log(`Performing memory cleanup after ${completedCount} completed videos`);
+          // Force garbage collection if available
+          if (window.gc) {
+            window.gc();
+          }
+        }
+      };
 
       while (processingQueue.length > 0 || activePromises.size > 0) {
         if (isCancelling) {
@@ -64,7 +85,11 @@ export const useFFmpeg = () => {
           const pair = processingQueue.shift();
           const promise = processPairAsync(pair);
           activePromises.add(promise);
-          promise.finally(() => activePromises.delete(promise));
+          promise.finally(() => {
+            activePromises.delete(promise);
+            completedCount++;
+            updateBatchProgress();
+          });
         }
 
         if (activePromises.size > 0) {
