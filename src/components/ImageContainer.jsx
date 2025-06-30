@@ -79,9 +79,17 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '136px',
         maxHeight: '136px'
       } : {
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 41, 59, 0.3) 100%)',
+        background: '#050A13', // Matte black container fill
+        backgroundColor: '#0A0F1C', // Deep navy background
         backdropFilter: 'blur(4px)',
-        border: '2px dashed rgba(107, 114, 128, 0.3)',
+        border: '1.5px solid #1E90FF',
+        boxShadow: `
+          0 0 0 1px rgba(30, 144, 255, 0.3),
+          0 0 15px rgba(30, 144, 255, 0.4),
+          0 0 30px rgba(0, 207, 255, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05)
+        `,
+        borderRadius: '28px',
         padding: '20px',
         height: '136px',
         minHeight: '136px',
