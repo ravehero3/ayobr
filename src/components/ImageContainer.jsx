@@ -79,15 +79,15 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '136px',
         maxHeight: '136px'
       } : {
-        background: '#050A13', // Matte black container fill
-        backgroundColor: '#0A0F1C', // Deep navy background
+        background: '#040608', // Darker matte black container fill
+        backgroundColor: '#080C14', // Darker navy background
         backdropFilter: 'blur(4px)',
-        border: '1.5px solid #1E90FF',
+        border: '1.5px solid rgba(30, 144, 255, 0.3)',
         boxShadow: `
-          0 0 0 1px rgba(30, 144, 255, 0.3),
-          0 0 15px rgba(30, 144, 255, 0.4),
-          0 0 30px rgba(0, 207, 255, 0.2),
-          inset 0 1px 0 rgba(255, 255, 255, 0.05)
+          0 0 0 1px rgba(30, 144, 255, 0.15),
+          0 0 8px rgba(30, 144, 255, 0.2),
+          0 0 15px rgba(0, 207, 255, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.02)
         `,
         borderRadius: '14px',
         padding: '20px',

@@ -70,10 +70,10 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       if (currentlyPlayingWaveSurfer && currentlyPlayingWaveSurfer !== wavesurfer.current) {
         currentlyPlayingWaveSurfer.pause();
       }
-      
+
       // Play/pause this audio
       wavesurfer.current.playPause();
-      
+
       // Update the global reference
       if (!wavesurfer.current.isPlaying()) {
         currentlyPlayingWaveSurfer = wavesurfer.current;
@@ -127,12 +127,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       whileHover={{ scale: audio ? 1.005 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={{
-        background: audio ? 'rgba(15, 23, 42, 0.6)' : '#050A13', // Dark theme adapted
+        background: audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
         borderRadius: '8px',
-        border: audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid #1E90FF',
+        border: audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
         boxShadow: audio 
           ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
-          : `0 0 0 1px rgba(30, 144, 255, 0.3), 0 0 15px rgba(30, 144, 255, 0.4)`,
+          : `
+          0 0 0 1px rgba(30, 144, 255, 0.15),
+          0 0 8px rgba(30, 144, 255, 0.2),
+          0 0 15px rgba(0, 207, 255, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.02)
+        `,
         padding: audio ? '16px' : '20px',
         height: '136px',
         minHeight: '136px',

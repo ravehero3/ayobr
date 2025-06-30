@@ -42,18 +42,23 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
               width: '500px',
               minWidth: '500px',
               maxWidth: '500px',
-              background: '#050A13', // Matte black container fill
-              backgroundColor: '#0A0F1C', // Deep navy background
-              borderColor: '#1E90FF',
+              background: pair.audio ? '#050A13' : '#040608', // Darker for empty containers
+              backgroundColor: pair.audio ? '#0A0F1C' : '#080C14', // Darker navy background for empty
+              borderColor: pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)',
               borderWidth: '1.5px',
-              boxShadow: `
+              boxShadow: pair.audio ? `
                 0 0 0 1px rgba(30, 144, 255, 0.3),
                 0 0 15px rgba(30, 144, 255, 0.4),
                 0 0 30px rgba(0, 207, 255, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05)
+              ` : `
+                0 0 0 1px rgba(30, 144, 255, 0.15),
+                0 0 8px rgba(30, 144, 255, 0.2),
+                0 0 15px rgba(0, 207, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.02)
               `,
               borderRadius: '14px',
-              animation: 'border-pulse 3s ease-in-out infinite alternate'
+              animation: pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
             }}
           >
             {/* Top-right highlight flare */}
@@ -111,18 +116,23 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
               width: '500px',
               minWidth: '500px',
               maxWidth: '500px',
-              background: '#050A13', // Matte black container fill
-              backgroundColor: '#0A0F1C', // Deep navy background
-              borderColor: '#1E90FF',
+              background: pair.image ? '#050A13' : '#040608', // Darker for empty containers
+              backgroundColor: pair.image ? '#0A0F1C' : '#080C14', // Darker navy background for empty
+              borderColor: pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)',
               borderWidth: '1.5px',
-              boxShadow: `
+              boxShadow: pair.image ? `
                 0 0 0 1px rgba(30, 144, 255, 0.3),
                 0 0 15px rgba(30, 144, 255, 0.4),
                 0 0 30px rgba(0, 207, 255, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05)
+              ` : `
+                0 0 0 1px rgba(30, 144, 255, 0.15),
+                0 0 8px rgba(30, 144, 255, 0.2),
+                0 0 15px rgba(0, 207, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.02)
               `,
               borderRadius: '14px',
-              animation: 'border-pulse 3s ease-in-out infinite alternate'
+              animation: pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
             }}
           >
             {/* Top-right highlight flare */}
