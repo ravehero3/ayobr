@@ -145,6 +145,13 @@ Changelog:
 - June 30, 2025. Enhanced container dimensions to 450px minimum width for better content display
 - June 30, 2025. Added ambient border pulse and flare flicker animations for sci-fi HUD feel
 - June 30, 2025. Updated layout system to single-column vertical stack for optimal wide container viewing
+- June 30, 2025. Completely removed settings wheel/gear icon from interface for cleaner design
+- June 30, 2025. Eliminated dotted lines from image containers, replaced with solid neon blue borders
+- June 30, 2025. Redesigned audio preview to perfectly match GNOME Decibels app interface
+- June 30, 2025. Implemented clean waveform visualization with GNOME blue progress and muted gray bars
+- June 30, 2025. Added large, prominent play/pause button with GNOME-style circular design
+- June 30, 2025. Created minimal filename display (no extensions) with time counter like Decibels
+- June 30, 2025. Successfully integrated custom Decibels-style UI with existing audio functionality
 ```
 
 ## User Preferences
