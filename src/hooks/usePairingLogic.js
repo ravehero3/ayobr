@@ -31,36 +31,21 @@ export const usePairingLogic = () => {
       return;
     }
 
-    // Start with existing pairs that have content
-    const existingPairs = pairs.filter(pair => pair.audio || pair.image);
-    const audioToProcess = [...audioFiles];
-    const imageToProcess = [...imageFiles];
+    // Simple approach: create pairs directly from files
+    const newPairs = [];
+    const maxFiles = Math.max(audioFiles.length, imageFiles.length);
     
-    // Fill existing incomplete pairs first
-    for (const pair of existingPairs) {
-      if (!pair.audio && audioToProcess.length > 0) {
-        pair.audio = audioToProcess.shift();
-      }
-      if (!pair.image && imageToProcess.length > 0) {
-        pair.image = imageToProcess.shift();
-      }
-    }
-
-    // Create new pairs only for remaining files
-    const finalPairs = [...existingPairs];
-    const maxRemaining = Math.max(audioToProcess.length, imageToProcess.length);
-    
-    for (let i = 0; i < maxRemaining; i++) {
-      finalPairs.push({
+    for (let i = 0; i < maxFiles; i++) {
+      newPairs.push({
         id: uuidv4(),
-        audio: audioToProcess[i] || null,
-        image: imageToProcess[i] || null
+        audio: audioFiles[i] || null,
+        image: imageFiles[i] || null
       });
     }
 
-    console.log(`Created ${finalPairs.length} pairs`);
-    setPairs(finalPairs);
-  }, [pairs, setPairs]);
+    console.log(`Created ${newPairs.length} pairs`);
+    setPairs(newPairs);
+  }, [setPairs]);
 
   const swapContainers = useCallback((fromPairId, toPairId, type) => {
     const newPairs = [...pairs];
