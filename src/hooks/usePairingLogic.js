@@ -1,9 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useAppStore } from '../store/appStore';
 import { v4 as uuidv4 } from 'uuid';
 
 export const usePairingLogic = () => {
   const { pairs, addPair, updatePair, setPairs } = useAppStore();
+  const processingRef = useRef(false);
 
   const isAudioFile = (file) => {
     return file.type.startsWith('audio/') || 
@@ -19,41 +20,50 @@ export const usePairingLogic = () => {
   };
 
   const handleFileDrop = useCallback((files) => {
-    // Add a unique identifier to track this specific drop operation
-    const dropId = Date.now();
-    console.log(`Processing ${files.length} files for pairing (Drop ID: ${dropId})`);
-    
-    const audioFiles = files.filter(isAudioFile);
-    const imageFiles = files.filter(isImageFile);
-
-    console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files (Drop ID: ${dropId})`);
-
-    // If no valid files, don't change anything
-    if (audioFiles.length === 0 && imageFiles.length === 0) {
+    // Prevent concurrent processing
+    if (processingRef.current) {
+      console.log('Already processing files, ignoring duplicate call');
       return;
     }
-
-    // Use a ref to get current pairs to avoid stale closure issues
-    const currentPairs = useAppStore.getState().pairs;
     
-    // Get existing file names to avoid duplicates
-    const existingAudioNames = currentPairs.filter(pair => pair.audio).map(pair => pair.audio.name);
-    const existingImageNames = currentPairs.filter(pair => pair.image).map(pair => pair.image.name);
+    processingRef.current = true;
+    
+    try {
+      // Add a unique identifier to track this specific drop operation
+      const dropId = Date.now();
+      console.log(`Processing ${files.length} files for pairing (Drop ID: ${dropId})`);
+      
+      const audioFiles = files.filter(isAudioFile);
+      const imageFiles = files.filter(isImageFile);
 
-    // Filter out files that are already in pairs
-    const newAudioFiles = audioFiles.filter(file => !existingAudioNames.includes(file.name));
-    const newImageFiles = imageFiles.filter(file => !existingImageNames.includes(file.name));
+      console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files (Drop ID: ${dropId})`);
 
-    console.log(`After filtering duplicates: ${newAudioFiles.length} new audio files, ${newImageFiles.length} new image files (Drop ID: ${dropId})`);
+      // If no valid files, don't change anything
+      if (audioFiles.length === 0 && imageFiles.length === 0) {
+        return;
+      }
 
-    // If no new files after filtering, don't change anything
-    if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
-      console.log(`No new files to add - all files already exist in pairs (Drop ID: ${dropId})`);
-      return;
-    }
+      // Use current pairs from the hook, not from store state
+      const currentPairs = pairs;
+      
+      // Get existing file names to avoid duplicates
+      const existingAudioNames = currentPairs.filter(pair => pair.audio).map(pair => pair.audio.name);
+      const existingImageNames = currentPairs.filter(pair => pair.image).map(pair => pair.image.name);
 
-    // Start with current pairs
-    const newPairs = [...currentPairs];
+      // Filter out files that are already in pairs
+      const newAudioFiles = audioFiles.filter(file => !existingAudioNames.includes(file.name));
+      const newImageFiles = imageFiles.filter(file => !existingImageNames.includes(file.name));
+
+      console.log(`After filtering duplicates: ${newAudioFiles.length} new audio files, ${newImageFiles.length} new image files (Drop ID: ${dropId})`);
+
+      // If no new files after filtering, don't change anything
+      if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
+        console.log(`No new files to add - all files already exist in pairs (Drop ID: ${dropId})`);
+        return;
+      }
+
+      // Start with current pairs
+      const newPairs = [...currentPairs];
     
     // Create pairs by pairing audio and image files together
     const maxFiles = Math.max(newAudioFiles.length, newImageFiles.length);
@@ -90,8 +100,14 @@ export const usePairingLogic = () => {
     }
 
     console.log(`Updated pairs count: ${newPairs.length} (Drop ID: ${dropId})`);
-    setPairs(newPairs);
-  }, [setPairs]);
+      setPairs(newPairs);
+    } finally {
+      // Reset processing lock
+      setTimeout(() => {
+        processingRef.current = false;
+      }, 100); // Small delay to prevent rapid consecutive calls
+    }
+  }, [pairs, setPairs]);
 
   const swapContainers = useCallback((fromPairId, toPairId, type) => {
     const newPairs = [...pairs];
