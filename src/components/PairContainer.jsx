@@ -30,37 +30,40 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
       layout
       transition={{ duration: 0.3 }}
     >
-      <div className="flex flex-col sm:flex-row items-center relative">
-        {/* Audio Container */}  
-        <div className="relative w-full sm:w-1/2">
+      <div className="flex flex-col lg:flex-row items-center relative gap-4 lg:gap-6">
+        {/* Audio Container - Made wider for better content display */}  
+        <div className="relative w-full lg:w-1/2 min-w-[450px]">
           <div
-            className="relative w-full backdrop-blur-xl border overflow-hidden"
+            className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
             style={{
-              height: '300px',
-              minHeight: '300px',
-              maxHeight: '300px',
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.6)',
-              borderWidth: '2px',
+              height: '350px',
+              minHeight: '350px',
+              maxHeight: '350px',
+              background: '#050A13', // Matte black container fill
+              backgroundColor: '#0A0F1C', // Deep navy background
+              borderColor: '#1E90FF',
+              borderWidth: '1.5px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.3),
-                0 0 20px rgba(59, 130, 246, 0.4),
-                0 0 40px rgba(59, 130, 246, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                0 0 0 1px rgba(30, 144, 255, 0.3),
+                0 0 15px rgba(30, 144, 255, 0.4),
+                0 0 30px rgba(0, 207, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05)
               `,
-              borderRadius: '16px'
+              borderRadius: '28px',
+              animation: 'border-pulse 3s ease-in-out infinite alternate'
             }}
           >
-            {/* Top-right brilliant highlight */}
+            {/* Top-right highlight flare */}
             <div 
-              className="absolute top-4 right-6 w-3 h-3 rounded-full z-10"
+              className="absolute top-6 right-8 w-4 h-4 rounded-full z-10"
               style={{
-                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(59, 130, 246, 0.8) 40%, transparent 70%)',
-                boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
+                background: 'radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(30, 144, 255, 0.9) 30%, rgba(0, 207, 255, 0.6) 60%, transparent 80%)',
+                boxShadow: '0 0 25px rgba(255, 255, 255, 0.8), 0 0 50px rgba(30, 144, 255, 0.5)',
+                animation: 'flare-flicker 2s ease-in-out infinite alternate'
               }}
             />
 
-            <div className="absolute inset-0 p-6">
+            <div className="absolute inset-0 p-8">
               <AudioContainer
                 audio={pair.audio}
                 pairId={pair.id}
@@ -74,55 +77,59 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
         </div>
 
         {/* Connecting Bridge */}
-        <div className="relative z-20 hidden sm:block" style={{ width: '80px', height: '60px', margin: '0 -8px' }}>
+        <div className="relative z-20 hidden lg:block" style={{ width: '100px', height: '80px', margin: '0 -12px' }}>
           <div
             className="w-full h-full backdrop-blur-xl border"
             style={{
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.6)',
-              borderWidth: '2px',
+              background: '#050A13',
+              backgroundColor: '#0A0F1C',
+              borderColor: '#1E90FF',
+              borderWidth: '1.5px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.3),
-                0 0 20px rgba(59, 130, 246, 0.4),
-                0 0 40px rgba(59, 130, 246, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                0 0 0 1px rgba(30, 144, 255, 0.3),
+                0 0 12px rgba(30, 144, 255, 0.4),
+                0 0 25px rgba(0, 207, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05)
               `,
-              borderRadius: '12px',
+              borderRadius: '20px',
               transform: 'translateY(0px)'
             }}
           />
         </div>
 
-        {/* Image Container */}
-        <div className="relative w-full sm:w-1/2">
+        {/* Image Container - Made wider for better content display */}
+        <div className="relative w-full lg:w-1/2 min-w-[450px]">
           <div
-            className="relative w-full backdrop-blur-xl border overflow-hidden"
+            className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
             style={{
-              height: '300px',
-              minHeight: '300px',
-              maxHeight: '300px',
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
-              borderColor: 'rgba(59, 130, 246, 0.6)',
-              borderWidth: '2px',
+              height: '350px',
+              minHeight: '350px',
+              maxHeight: '350px',
+              background: '#050A13', // Matte black container fill
+              backgroundColor: '#0A0F1C', // Deep navy background
+              borderColor: '#1E90FF',
+              borderWidth: '1.5px',
               boxShadow: `
-                0 0 0 1px rgba(59, 130, 246, 0.3),
-                0 0 20px rgba(59, 130, 246, 0.4),
-                0 0 40px rgba(59, 130, 246, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                0 0 0 1px rgba(30, 144, 255, 0.3),
+                0 0 15px rgba(30, 144, 255, 0.4),
+                0 0 30px rgba(0, 207, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05)
               `,
-              borderRadius: '16px'
+              borderRadius: '28px',
+              animation: 'border-pulse 3s ease-in-out infinite alternate'
             }}
           >
-            {/* Top-right brilliant highlight */}
+            {/* Top-right highlight flare */}
             <div 
-              className="absolute top-4 right-6 w-3 h-3 rounded-full z-10"
+              className="absolute top-6 right-8 w-4 h-4 rounded-full z-10"
               style={{
-                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(59, 130, 246, 0.8) 40%, transparent 70%)',
-                boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)'
+                background: 'radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(30, 144, 255, 0.9) 30%, rgba(0, 207, 255, 0.6) 60%, transparent 80%)',
+                boxShadow: '0 0 25px rgba(255, 255, 255, 0.8), 0 0 50px rgba(30, 144, 255, 0.5)',
+                animation: 'flare-flicker 2s ease-in-out infinite alternate'
               }}
             />
 
-            <div className="absolute inset-0 p-6">
+            <div className="absolute inset-0 p-8">
               <ImageContainer
                 image={pair.image}
                 pairId={pair.id}

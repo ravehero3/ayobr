@@ -210,6 +210,37 @@ body {
   100% { background-position: -200% 0; }
 }
 
+/* Futuristic container animations */
+@keyframes border-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 1px rgba(30, 144, 255, 0.3),
+      0 0 15px rgba(30, 144, 255, 0.4),
+      0 0 30px rgba(0, 207, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 1px rgba(30, 144, 255, 0.5),
+      0 0 20px rgba(30, 144, 255, 0.6),
+      0 0 40px rgba(0, 207, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+}
+
+@keyframes flare-flicker {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 0 50px rgba(30, 144, 255, 0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 35px rgba(255, 255, 255, 1), 0 0 70px rgba(30, 144, 255, 0.7);
+  }
+}
+
 /* Tooltip styles */
 .tooltip {
   @apply absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-300;
