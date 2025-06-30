@@ -303,39 +303,13 @@ function App() {
           </div>
         )}
 
-        {/* Pairs Section */}
-        {pairs.length === 0 ? (
-          <DropZone onFileDrop={handleFileDrop} />
-        ) : (
-          <>
-            <BatchStatusIndicator 
-              totalPairs={pairs.length} 
-              completedPairs={generatedVideos.length}
-              isProcessing={isGenerating}
-            />
-            {pairs.length > 20 && (
-              <div className="bg-neon-blue/10 border border-neon-blue/30 rounded-lg p-4 w-full text-center mb-6">
-                <p className="text-neon-blue font-semibold">
-                  Processing {pairs.length} pairs - Large batch mode activated
-                </p>
-                <p className="text-gray-400 text-sm">
-                  Optimized for efficient processing of up to 100 file pairs
-                </p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 gap-4 w-full" style={{ 
-              maxHeight: pairs.length > 20 ? '60vh' : 'auto',
-              overflowY: pairs.length > 20 ? 'auto' : 'visible'
-            }}>
-              {pairs.map((pair) => (
-                <PairContainer
-                  key={pair.id}
-                  pair={pair}
-                  onSwap={swapContainers}
-                />
-              ))}
-            </div>
-          </>
+        {/* Batch Status Indicator */}
+        {pairs.some(pair => pair.audio || pair.image) && (
+          <BatchStatusIndicator 
+            totalPairs={pairs.length} 
+            completedPairs={generatedVideos.length}
+            isProcessing={isGenerating}
+          />
         )}
           </div>
         </main>
