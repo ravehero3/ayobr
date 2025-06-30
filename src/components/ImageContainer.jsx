@@ -102,7 +102,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           <img
             src={imageUrl}
             alt={image.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             onError={(e) => {
               // Fallback for HEIC files that might not display
               e.target.style.display = 'none';

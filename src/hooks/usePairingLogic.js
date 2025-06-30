@@ -52,9 +52,9 @@ export const usePairingLogic = () => {
       }
     });
 
-    // Ensure we always have at least one empty pair for new drops
-    const hasEmptyPair = newPairs.some(pair => !pair.audio || !pair.image);
-    if (!hasEmptyPair && newPairs.length > 0) {
+    // Always ensure we have at least one empty pair for new drops
+    const hasCompletelyEmptyPair = newPairs.some(pair => !pair.audio && !pair.image);
+    if (!hasCompletelyEmptyPair) {
       newPairs.push({
         id: uuidv4(),
         audio: null,

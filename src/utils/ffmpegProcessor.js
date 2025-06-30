@@ -14,7 +14,7 @@ const maxCacheSize = 10; // Limit cache size to prevent memory issues
 // Force stop all active FFmpeg processes immediately
 export const forceStopAllProcesses = () => {
   console.log('Force stopping all FFmpeg processes...');
-  
+
   if (ffmpeg) {
     try {
       // Terminate the FFmpeg instance immediately
@@ -33,7 +33,7 @@ export const forceStopAllProcesses = () => {
 
 export const initializeFFmpeg = async () => {
   console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing);
-  
+
   // Return existing instance if already loaded
   if (isLoaded && ffmpeg) {
     console.log('Returning existing FFmpeg instance');
@@ -59,14 +59,14 @@ export const initializeFFmpeg = async () => {
         // Direct initialization without blob URLs for Replit compatibility
         try {
           console.log('Initializing FFmpeg with CDN...');
-          
+
           // Try the default CDN approach first
           await ffmpeg.load();
           console.log('FFmpeg loaded successfully via CDN');
-          
+
         } catch (cdnError) {
           console.error('CDN loading failed:', cdnError);
-          
+
           try {
             console.log('Trying direct URL loading...');
             // Use direct URLs without blob conversion
@@ -75,10 +75,10 @@ export const initializeFFmpeg = async () => {
               wasmURL: '/ffmpeg/ffmpeg-core.wasm'
             });
             console.log('FFmpeg loaded successfully from local files');
-            
+
           } catch (localError) {
             console.error('Local files failed:', localError);
-            
+
             // Final fallback to node_modules with direct paths
             try {
               console.log('Trying node_modules fallback...');
@@ -112,14 +112,14 @@ export const initializeFFmpeg = async () => {
 
 export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel) => {
   console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
-  
+
   try {
     const ffmpeg = await initializeFFmpeg();
     console.log('FFmpeg initialized successfully');
 
     // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
-    
+
     // Set up progress callback with throttling for better performance
     let lastProgressTime = 0;
     ffmpeg.on('progress', ({ progress }) => {
@@ -135,26 +135,26 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Optimized file reading with caching
     const getCachedFileData = async (file, type) => {
       const cacheKey = `${file.name}_${file.size}_${file.lastModified}`;
-      
+
       if (fileCache.has(cacheKey)) {
         return fileCache.get(cacheKey);
       }
-      
+
       const data = await fetchFile(file);
-      
+
       // Manage cache size
       if (fileCache.size >= maxCacheSize) {
         const firstKey = fileCache.keys().next().value;
         fileCache.delete(firstKey);
       }
-      
+
       fileCache.set(cacheKey, data);
       return data;
     };
 
     const audioData = await getCachedFileData(audioFile, 'audio');
     const imageData = await getCachedFileData(imageFile, 'image');
-    
+
     // Use unique filenames to avoid conflicts
     const audioFileName = `audio_${Date.now()}.mp3`;
     const imageFileName = `image_${Date.now()}.jpg`;
@@ -166,7 +166,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
-    
+
     // Maximum speed FFmpeg command - optimized for fastest possible encoding
     // Create 1920x1080 video with image centered and 20px white space above/below
     console.log('Executing FFmpeg command...');
@@ -193,13 +193,13 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-y',
       outputFileName
     ]);
-    
+
     console.log('FFmpeg execution completed successfully');
 
     // Read the output file
     const data = await ffmpeg.readFile(outputFileName);
     console.log('Output file read successfully, size:', data.length);
-    
+
     // Clean up files
     await ffmpeg.deleteFile(audioFileName);
     await ffmpeg.deleteFile(imageFileName);
