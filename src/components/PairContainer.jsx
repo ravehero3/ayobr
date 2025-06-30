@@ -36,9 +36,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           <div
             className="relative w-full backdrop-blur-xl border overflow-hidden"
             style={{
-              height: '200px',
-              minHeight: '200px',
-              maxHeight: '200px',
+              height: '300px',
+              minHeight: '300px',
+              maxHeight: '300px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.6)',
               borderWidth: '2px',
@@ -98,9 +98,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
           <div
             className="relative w-full backdrop-blur-xl border overflow-hidden"
             style={{
-              height: '200px',
-              minHeight: '200px',
-              maxHeight: '200px',
+              height: '300px',
+              minHeight: '300px',
+              maxHeight: '300px',
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
               borderColor: 'rgba(59, 130, 246, 0.6)',
               borderWidth: '2px',
