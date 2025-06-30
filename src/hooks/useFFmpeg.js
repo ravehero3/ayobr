@@ -35,16 +35,16 @@ export const useFFmpeg = () => {
       setProgress(0);
       clearGeneratedVideos();
 
-      // Dynamic concurrency based on user settings and pair count
+      // Optimized concurrency for 3x faster processing
       let maxConcurrent;
       if (pairs.length <= 5) {
-        maxConcurrent = Math.min(concurrencySettings.small, pairs.length);
+        maxConcurrent = Math.min(Math.max(concurrencySettings.small, 2), pairs.length);
       } else if (pairs.length <= 15) {
-        maxConcurrent = Math.min(concurrencySettings.medium, pairs.length);
+        maxConcurrent = Math.min(Math.max(concurrencySettings.medium, 3), pairs.length);
       } else if (pairs.length <= 25) {
-        maxConcurrent = Math.min(concurrencySettings.large, pairs.length);
+        maxConcurrent = Math.min(Math.max(concurrencySettings.large, 4), pairs.length);
       } else {
-        maxConcurrent = Math.min(concurrencySettings.xlarge, pairs.length);
+        maxConcurrent = Math.min(Math.max(concurrencySettings.xlarge, 5), pairs.length);
       }
       
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);
