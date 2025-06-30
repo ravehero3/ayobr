@@ -19,50 +19,62 @@ export const usePairingLogic = () => {
   };
 
   const handleFileDrop = useCallback((files) => {
+    console.log(`Processing ${files.length} files for pairing`);
+    
     const audioFiles = files.filter(isAudioFile);
     const imageFiles = files.filter(isImageFile);
 
-    // Create pairs from existing pairs and new files
+    console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files`);
+
+    // Optimized batch processing for large file counts
     const newPairs = [...pairs];
     
-    // Try to fill existing empty slots first
-    audioFiles.forEach(audioFile => {
-      const emptyAudioPair = newPairs.find(pair => !pair.audio);
-      if (emptyAudioPair) {
-        emptyAudioPair.audio = audioFile;
-      } else {
-        newPairs.push({
-          id: uuidv4(),
-          audio: audioFile,
-          image: null
-        });
+    // Remove any completely empty pairs before processing
+    const filteredPairs = newPairs.filter(pair => pair.audio || pair.image);
+    
+    // Process audio files efficiently
+    const audioToProcess = [...audioFiles];
+    filteredPairs.forEach(pair => {
+      if (!pair.audio && audioToProcess.length > 0) {
+        pair.audio = audioToProcess.shift();
       }
     });
 
-    imageFiles.forEach(imageFile => {
-      const emptyImagePair = newPairs.find(pair => !pair.image);
-      if (emptyImagePair) {
-        emptyImagePair.image = imageFile;
-      } else {
-        newPairs.push({
-          id: uuidv4(),
-          audio: null,
-          image: imageFile
-        });
+    // Process remaining audio files
+    audioToProcess.forEach(audioFile => {
+      filteredPairs.push({
+        id: uuidv4(),
+        audio: audioFile,
+        image: null
+      });
+    });
+
+    // Process image files efficiently
+    const imagesToProcess = [...imageFiles];
+    filteredPairs.forEach(pair => {
+      if (!pair.image && imagesToProcess.length > 0) {
+        pair.image = imagesToProcess.shift();
       }
+    });
+
+    // Process remaining image files
+    imagesToProcess.forEach(imageFile => {
+      filteredPairs.push({
+        id: uuidv4(),
+        audio: null,
+        image: imageFile
+      });
     });
 
     // Always ensure we have at least one empty pair for new drops
-    const hasCompletelyEmptyPair = newPairs.some(pair => !pair.audio && !pair.image);
-    if (!hasCompletelyEmptyPair) {
-      newPairs.push({
-        id: uuidv4(),
-        audio: null,
-        image: null
-      });
-    }
+    filteredPairs.push({
+      id: uuidv4(),
+      audio: null,
+      image: null
+    });
 
-    setPairs(newPairs);
+    console.log(`Created ${filteredPairs.length} pairs`);
+    setPairs(filteredPairs);
   }, [pairs, setPairs]);
 
   const swapContainers = useCallback((fromPairId, toPairId, type) => {

@@ -7,6 +7,11 @@ let isInitializing = false;
 let initPromise = null;
 let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
 
+// Memory management for large batches
+const memoryCache = new Map();
+const MAX_CACHE_SIZE = 50; // Cache up to 50 processed items
+let processedCount = 0;
+
 // Enhanced file cache for faster processing
 const fileCache = new Map();
 const maxCacheSize = 25; // Increased cache size for better performance
@@ -30,6 +35,29 @@ export const forceStopAllProcesses = () => {
       console.error('Error terminating FFmpeg:', error);
     }
   }
+};
+
+// Memory cleanup for large batches
+const cleanupMemory = () => {
+  if (memoryCache.size > MAX_CACHE_SIZE) {
+    const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - MAX_CACHE_SIZE);
+    keysToDelete.forEach(key => memoryCache.delete(key));
+    console.log(`Cleaned up ${keysToDelete.length} cached items`);
+  }
+
+  // Force garbage collection if available
+  if (window.gc) {
+    window.gc();
+  }
+};
+
+// Progress tracking for large batches
+export const getBatchProgress = () => {
+  return {
+    processed: processedCount,
+    active: activeProcesses.size,
+    cached: memoryCache.size
+  };
 };
 
 export const initializeFFmpeg = async () => {
@@ -156,19 +184,19 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Pre-process image if not cached
     const getOptimizedImageData = async (file) => {
       const cacheKey = `opt_${file.name}_${file.size}_${file.lastModified}`;
-      
+
       if (processedImageCache.has(cacheKey)) {
         return processedImageCache.get(cacheKey);
       }
 
       const data = await getCachedFileData(file, 'image');
-      
+
       // Cache the processed image data
       if (processedImageCache.size >= maxCacheSize) {
         const firstKey = processedImageCache.keys().next().value;
         processedImageCache.delete(firstKey);
       }
-      
+
       processedImageCache.set(cacheKey, data);
       return data;
     };
@@ -212,7 +240,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-aq-mode', '0',               // Disable adaptive quantization
       '-fast-pskip', '1',            // Enable fast P-frame skip
       '-mbtree', '0',                // Disable macroblock tree
-      '-rc-lookahead', '0',          // Disable lookahead
+      '-rc_lookahead', '0',          // Disable lookahead
       '-sc_threshold', '0',          // Disable scene change detection
       '-partitions', 'none',         // Disable all partitions
       '-me_range', '4',              // Minimal motion estimation range
@@ -242,6 +270,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       ffmpeg.deleteFile(outputFileName).catch(() => {})
     ];
     await Promise.allSettled(cleanupPromises);
+
+    // Increment processed count and cleanup memory for large batches
+    processedCount++;
+    if (processedCount % 10 === 0) {
+      cleanupMemory();
+    }
 
     return data;
 

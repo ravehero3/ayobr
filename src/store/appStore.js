@@ -14,12 +14,20 @@ export const useAppStore = create((set, get) => ({
   currentProgress: 0,
   videoGenerationStates: {}, // Track generation progress for each pair
   
-  // Concurrency settings
+  // Concurrency settings optimized for up to 100 files
   concurrencySettings: {
-    small: 3,    // 1-5 videos
-    medium: 5,   // 6-15 videos
-    large: 8,    // 16-25 videos
-    xlarge: 10   // 25+ videos
+    small: 4,     // 1-10 videos
+    medium: 6,    // 11-25 videos
+    large: 8,     // 26-50 videos
+    xlarge: 10,   // 51-75 videos
+    massive: 12   // 76-100 videos
+  },
+
+  // Batch processing settings
+  batchSettings: {
+    maxConcurrentPairs: 100,
+    chunkSize: 20,  // Process in chunks of 20
+    memoryThreshold: 500 * 1024 * 1024, // 500MB memory threshold
   },
 
   // Actions

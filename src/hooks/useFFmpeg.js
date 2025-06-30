@@ -35,16 +35,18 @@ export const useFFmpeg = () => {
       setProgress(0);
       clearGeneratedVideos();
 
-      // Optimized concurrency for 3x faster processing
+      // Dynamic concurrency scaling for up to 100 files
       let maxConcurrent;
-      if (pairs.length <= 5) {
-        maxConcurrent = Math.min(Math.max(concurrencySettings.small, 2), pairs.length);
-      } else if (pairs.length <= 15) {
-        maxConcurrent = Math.min(Math.max(concurrencySettings.medium, 3), pairs.length);
+      if (pairs.length <= 10) {
+        maxConcurrent = Math.min(concurrencySettings.small, pairs.length);
       } else if (pairs.length <= 25) {
-        maxConcurrent = Math.min(Math.max(concurrencySettings.large, 4), pairs.length);
+        maxConcurrent = Math.min(concurrencySettings.medium, pairs.length);
+      } else if (pairs.length <= 50) {
+        maxConcurrent = Math.min(concurrencySettings.large, pairs.length);
+      } else if (pairs.length <= 75) {
+        maxConcurrent = Math.min(concurrencySettings.xlarge, pairs.length);
       } else {
-        maxConcurrent = Math.min(Math.max(concurrencySettings.xlarge, 5), pairs.length);
+        maxConcurrent = Math.min(concurrencySettings.massive, pairs.length);
       }
       
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);

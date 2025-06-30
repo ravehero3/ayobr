@@ -5,6 +5,9 @@ import { usePairingLogic } from './hooks/usePairingLogic';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import PairContainer from './components/PairContainer';
 import VideoPreviewCard from './components/VideoPreviewCard';
+import ScreenSizeWarning from './components/ScreenSizeWarning';
+import DropZone from './components/DropZone';
+import BatchStatusIndicator from './components/BatchStatusIndicator';
 
 
 function App() {
@@ -301,6 +304,42 @@ function App() {
         </main>
       </div>
 
+{/* Pairs Section */}
+        <main className="flex-1 p-6" style={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}>
+          <div className="flex flex-col items-center space-y-6" style={{ width: '1200px', margin: '0 auto' }}>
+            {pairs.length === 0 ? (
+              <DropZone onFileDrop={handleFileDrop} />
+            ) : (
+              <>
+                <BatchStatusIndicator 
+                  totalPairs={pairs.length} 
+                  completedPairs={generatedVideos.length} 
+                />
+                {pairs.length > 20 && (
+                  <div className="bg-neon-blue/10 border border-neon-blue/30 rounded-lg p-4 w-full text-center">
+                    <p className="text-neon-blue font-semibold">
+                      Processing {pairs.length} pairs - Large batch mode activated
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      Optimized for efficient processing of up to 100 file pairs
+                    </p>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 gap-4 w-full" style={{ 
+                  maxHeight: pairs.length > 20 ? '60vh' : 'auto',
+                  overflowY: pairs.length > 20 ? 'auto' : 'visible'
+                }}>
+                  {pairs.map((pair) => (
+                    <PairContainer
+                      key={pair.id}
+                      pair={pair}
+                      onSwap={swapContainers}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+    </main>
 
     </div>
   );
