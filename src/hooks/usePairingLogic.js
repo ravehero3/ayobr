@@ -19,36 +19,41 @@ export const usePairingLogic = () => {
   };
 
   const handleFileDrop = useCallback((files) => {
-    console.log(`Processing ${files.length} files for pairing`);
+    // Add a unique identifier to track this specific drop operation
+    const dropId = Date.now();
+    console.log(`Processing ${files.length} files for pairing (Drop ID: ${dropId})`);
     
     const audioFiles = files.filter(isAudioFile);
     const imageFiles = files.filter(isImageFile);
 
-    console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files`);
+    console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files (Drop ID: ${dropId})`);
 
     // If no valid files, don't change anything
     if (audioFiles.length === 0 && imageFiles.length === 0) {
       return;
     }
 
+    // Use a ref to get current pairs to avoid stale closure issues
+    const currentPairs = useAppStore.getState().pairs;
+    
     // Get existing file names to avoid duplicates
-    const existingAudioNames = pairs.filter(pair => pair.audio).map(pair => pair.audio.name);
-    const existingImageNames = pairs.filter(pair => pair.image).map(pair => pair.image.name);
+    const existingAudioNames = currentPairs.filter(pair => pair.audio).map(pair => pair.audio.name);
+    const existingImageNames = currentPairs.filter(pair => pair.image).map(pair => pair.image.name);
 
     // Filter out files that are already in pairs
     const newAudioFiles = audioFiles.filter(file => !existingAudioNames.includes(file.name));
     const newImageFiles = imageFiles.filter(file => !existingImageNames.includes(file.name));
 
-    console.log(`After filtering duplicates: ${newAudioFiles.length} new audio files, ${newImageFiles.length} new image files`);
+    console.log(`After filtering duplicates: ${newAudioFiles.length} new audio files, ${newImageFiles.length} new image files (Drop ID: ${dropId})`);
 
     // If no new files after filtering, don't change anything
     if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
-      console.log('No new files to add - all files already exist in pairs');
+      console.log(`No new files to add - all files already exist in pairs (Drop ID: ${dropId})`);
       return;
     }
 
-    // Start with existing pairs
-    const newPairs = [...pairs];
+    // Start with current pairs
+    const newPairs = [...currentPairs];
     
     // Create pairs by pairing audio and image files together
     const maxFiles = Math.max(newAudioFiles.length, newImageFiles.length);
@@ -84,9 +89,9 @@ export const usePairingLogic = () => {
       });
     }
 
-    console.log(`Updated pairs count: ${newPairs.length}`);
+    console.log(`Updated pairs count: ${newPairs.length} (Drop ID: ${dropId})`);
     setPairs(newPairs);
-  }, [pairs, setPairs]);
+  }, [setPairs]);
 
   const swapContainers = useCallback((fromPairId, toPairId, type) => {
     const newPairs = [...pairs];
