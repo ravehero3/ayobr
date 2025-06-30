@@ -31,11 +31,27 @@ export const usePairingLogic = () => {
       return;
     }
 
+    // Get existing file names to avoid duplicates
+    const existingAudioNames = pairs.filter(pair => pair.audio).map(pair => pair.audio.name);
+    const existingImageNames = pairs.filter(pair => pair.image).map(pair => pair.image.name);
+
+    // Filter out files that are already in pairs
+    const newAudioFiles = audioFiles.filter(file => !existingAudioNames.includes(file.name));
+    const newImageFiles = imageFiles.filter(file => !existingImageNames.includes(file.name));
+
+    console.log(`After filtering duplicates: ${newAudioFiles.length} new audio files, ${newImageFiles.length} new image files`);
+
+    // If no new files after filtering, don't change anything
+    if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
+      console.log('No new files to add - all files already exist in pairs');
+      return;
+    }
+
     // Create pairs by adding to existing pairs or creating new ones
     const newPairs = [...pairs];
     
-    // Process audio files
-    audioFiles.forEach(audioFile => {
+    // Process new audio files
+    newAudioFiles.forEach(audioFile => {
       // Find an existing pair without audio
       const existingPair = newPairs.find(pair => !pair.audio);
       if (existingPair) {
@@ -50,8 +66,8 @@ export const usePairingLogic = () => {
       }
     });
 
-    // Process image files
-    imageFiles.forEach(imageFile => {
+    // Process new image files
+    newImageFiles.forEach(imageFile => {
       // Find an existing pair without image
       const existingPair = newPairs.find(pair => !pair.image);
       if (existingPair) {
@@ -66,7 +82,7 @@ export const usePairingLogic = () => {
       }
     });
 
-    console.log(`Created ${newPairs.length} pairs`);
+    console.log(`Updated pairs count: ${newPairs.length}`);
     setPairs(newPairs);
   }, [pairs, setPairs]);
 
