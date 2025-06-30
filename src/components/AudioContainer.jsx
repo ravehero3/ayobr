@@ -14,20 +14,21 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   useEffect(() => {
     if (audio && waveformRef.current) {
-      // Initialize WaveSurfer with exactly 40 bars
+      // Initialize WaveSurfer with Decibels-style waveform
       wavesurfer.current = WaveSurfer.create({
         container: waveformRef.current,
-        waveColor: '#1E90FF',
-        progressColor: '#00CFFF',
-        cursorColor: '#FFFFFF',
-        barWidth: 6,
-        barRadius: 3,
-        barGap: 3,
-        height: 60,
+        waveColor: '#6C737F', // Muted gray for unplayed portions (like Decibels)
+        progressColor: '#3584E4', // GNOME blue for played portions
+        cursorColor: 'rgba(53, 132, 228, 0.6)',
+        barWidth: 2,
+        barRadius: 1,
+        barGap: 1,
+        height: 80, // Taller for prominence like Decibels
         normalize: true,
         backend: 'WebAudio',
         interact: true,
-        barMinHeight: 2
+        barMinHeight: 1,
+        responsive: true
       });
 
       // Load audio file
@@ -117,65 +118,76 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className={`relative w-full h-full transition-all duration-300 group flex items-center justify-center ${
-        audio 
-          ? `${isPlaying ? 'ring-2 ring-blue-400/50' : ''}`
-          : ''
-      }`}
+      className="relative w-full h-full transition-all duration-300 group"
       draggable={!!audio}
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      whileHover={{ scale: audio ? 1.01 : 1 }}
+      whileHover={{ scale: audio ? 1.005 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={{
-        height: '100%',
-        minHeight: '100%'
+        background: audio ? 'rgba(15, 23, 42, 0.6)' : '#050A13', // Dark theme adapted
+        borderRadius: '16px',
+        border: audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid #1E90FF',
+        boxShadow: audio 
+          ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
+          : `0 0 0 1px rgba(30, 144, 255, 0.3), 0 0 15px rgba(30, 144, 255, 0.4)`,
+        padding: audio ? '16px' : '20px',
+        height: '136px',
+        minHeight: '136px',
+        maxHeight: '136px'
       }}
     >
       {audio ? (
-        <div className="w-full space-y-3 flex flex-col justify-center items-center">
-          {/* Audio info */}
-          <div className="w-full flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-neon-blue" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 011.414 0A9.972 9.972 0 0119 12a9.972 9.972 0 01-1.929 5.657 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 12a7.971 7.971 0 00-1.343-4.243 1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-              <span className="text-white text-sm font-medium truncate max-w-32">
-                {audio.name}
+        <div className="w-full h-full flex flex-col justify-between">
+          {/* Header with filename and time */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2 min-w-0 flex-1">
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="text-white text-sm font-medium truncate">
+                {audio.name.replace(/\.[^/.]+$/, "")} {/* Remove file extension like Decibels */}
               </span>
             </div>
-            <span className="text-gray-400 text-xs">
+            <div className="text-xs text-gray-400 flex-shrink-0">
               {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
+            </div>
           </div>
 
-          {/* Waveform */}
-          <div 
-            ref={waveformRef}
-            className="w-full cursor-pointer"
-          />
+          {/* Large Waveform - The centerpiece like in Decibels */}
+          <div className="flex-1 flex items-center">
+            <div 
+              ref={waveformRef}
+              className="w-full cursor-pointer"
+              style={{ height: '60px' }}
+            />
+          </div>
 
-          {/* Controls */}
-          <div className="flex items-center justify-center">
+          {/* Bottom controls - Large play button like Decibels */}
+          <div className="flex items-center justify-center mt-2">
             <button
               onClick={handlePlayPause}
-              className="group p-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
               style={{
-                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.15) 100%)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
+                border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
+                boxShadow: isPlaying 
+                  ? '0 0 20px rgba(53, 132, 228, 0.4)'
+                  : '0 0 10px rgba(53, 132, 228, 0.2)',
+                color: isPlaying ? 'white' : '#3584E4'
               }}
             >
               {isPlaying ? (
-                <svg className="w-5 h-5 text-white group-hover:text-blue-200 transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-white group-hover:text-blue-200 transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="m7 4 10 6L7 16V4z"/>
                 </svg>
               )}
             </button>
