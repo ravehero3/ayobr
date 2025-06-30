@@ -157,6 +157,8 @@ Changelog:
 - June 30, 2025. Enhanced automatic pairing system to intelligently match audio and image files
 - June 30, 2025. Implemented smart container display: empty state when no files, only filled containers when files uploaded
 - June 30, 2025. Removed all unnecessary empty containers - app now creates exactly the number of containers needed
+- June 30, 2025. Enhanced drag and drop system: containers can be dragged to empty containers and entire container is draggable
+- June 30, 2025. Added visual feedback for drag operations: green borders, scaling effects, and smooth transitions
 ```
 
 ## User Preferences

@@ -90,6 +90,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
+    // Allow dropping audio on any audio container (including empty ones)
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
@@ -127,7 +128,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className="relative w-full h-full transition-all duration-300 group"
+      className="relative w-full h-full transition-all duration-300 group cursor-pointer"
       draggable={!!audio}
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
@@ -137,6 +138,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       whileHover={{ scale: audio ? 1.005 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={{
+        pointerEvents: 'auto',
+        userSelect: 'none',
         background: audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
         borderRadius: '8px',
         border: isDragOver 

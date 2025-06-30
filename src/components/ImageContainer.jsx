@@ -22,6 +22,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
+    // Allow dropping image on any image container (including empty ones)
     if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
@@ -70,7 +71,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className="relative rounded-2xl transition-all duration-300 group"
+      className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
       draggable={!!image}
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
@@ -93,7 +94,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '180px',
         maxHeight: '180px',
         transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
-        transition: 'all 0.2s ease-in-out'
+        transition: 'all 0.2s ease-in-out',
+        pointerEvents: 'auto',
+        userSelect: 'none'
       } : {
         background: '#040608', // Darker matte black container fill
         backgroundColor: '#080C14', // Darker navy background
@@ -115,7 +118,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '180px',
         maxHeight: '180px',
         transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
-        transition: 'all 0.2s ease-in-out'
+        transition: 'all 0.2s ease-in-out',
+        pointerEvents: 'auto',
+        userSelect: 'none'
       }}
     >
       {image ? (
