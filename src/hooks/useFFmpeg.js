@@ -33,7 +33,7 @@ export const useFFmpeg = () => {
       setIsGenerating(true);
       resetCancellation();
       setProgress(0);
-      clearGeneratedVideos();
+      // Don't clear existing videos - let users accumulate multiple generations
 
       // Scalable concurrency for up to 100 files with optimized performance
       let maxConcurrent;

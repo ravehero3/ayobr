@@ -15,14 +15,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
     removePair(pair.id);
   };
 
-  const handleVideoGenerationComplete = () => {
-    setTimeout(() => {
-      setVideoGenerationState(pair.id, { 
-        ...videoState, 
-        isComplete: false 
-      });
-    }, 500);
-  };
+
 
   return (
     <motion.div
