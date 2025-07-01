@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import AudioContainer from './AudioContainer';
 import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache }) => {
+const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, draggedContainer, isDragOverContainer }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
+  const [isDragging, setIsDragging] = useState(false);
 
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -27,14 +28,62 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     // The video should remain visible after generation is complete
   };
 
+  const handleContainerDragStart = (e) => {
+    e.dataTransfer.effectAllowed = 'move';
+    setIsDragging(true);
+    onContainerDrag?.(pair.id, 'start');
+  };
+
+  const handleContainerDragEnd = (e) => {
+    setIsDragging(false);
+    onContainerDrag?.(pair.id, 'end');
+  };
+
+  const handleContainerDragOver = (e) => {
+    if (draggedContainer && draggedContainer !== pair.id) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+  };
+
+  const handleContainerDrop = (e) => {
+    e.preventDefault();
+    if (draggedContainer && draggedContainer !== pair.id) {
+      onContainerDrag?.(draggedContainer, 'swap', pair.id);
+    }
+  };
+
 
 
   return (
     <motion.div
-      className="relative group w-full"
+      className={`relative group w-full cursor-move ${isDragging ? 'opacity-50' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
       layout
       transition={{ duration: 0.3 }}
+      draggable={!generatedVideo} // Only allow dragging if video isn't generated
+      onDragStart={handleContainerDragStart}
+      onDragEnd={handleContainerDragEnd}
+      onDragOver={handleContainerDragOver}
+      onDrop={handleContainerDrop}
     >
+      {/* Drop zone indicator */}
+      {isDragOverContainer && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: '120px' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="absolute -bottom-32 left-0 right-0 border-2 border-dashed border-blue-400 bg-blue-400/10 rounded-2xl flex items-center justify-center backdrop-blur-sm"
+        >
+          <div className="text-center text-blue-400">
+            <div className="w-12 h-12 mx-auto mb-2 bg-blue-500 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+            </div>
+            <p className="font-semibold">Drop here to swap containers</p>
+          </div>
+        </motion.div>
+      )}
       {/* Show generated video if available, otherwise show the original containers */}
       {generatedVideo ? (
         <div className="flex justify-center">

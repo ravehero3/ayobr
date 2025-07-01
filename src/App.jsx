@@ -11,11 +11,13 @@ import DropZone from './components/DropZone';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs } = useAppStore();
   const { handleFileDrop, swapContainers, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [draggedContainer, setDraggedContainer] = useState(null);
+  const [dragOverContainer, setDragOverContainer] = useState(null);
 
   const handleDragStart = useCallback((item) => {
     setDraggedItem(item);
@@ -24,6 +26,36 @@ function App() {
   const handleDragEnd = useCallback(() => {
     setDraggedItem(null);
   }, []);
+
+  const handleContainerDrag = useCallback((containerId, action, targetId = null) => {
+    switch (action) {
+      case 'start':
+        setDraggedContainer(containerId);
+        break;
+      case 'end':
+        setDraggedContainer(null);
+        setDragOverContainer(null);
+        break;
+      case 'swap':
+        if (targetId && containerId !== targetId) {
+          // Swap the positions of the containers
+          const newPairs = [...pairs];
+          const draggedIndex = newPairs.findIndex(p => p.id === containerId);
+          const targetIndex = newPairs.findIndex(p => p.id === targetId);
+          
+          if (draggedIndex !== -1 && targetIndex !== -1) {
+            // Swap the pairs
+            const temp = newPairs[draggedIndex];
+            newPairs[draggedIndex] = newPairs[targetIndex];
+            newPairs[targetIndex] = temp;
+            setPairs(newPairs);
+          }
+        }
+        setDraggedContainer(null);
+        setDragOverContainer(null);
+        break;
+    }
+  }, [pairs, setPairs]);
 
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');
@@ -198,6 +230,9 @@ function App() {
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                       clearFileCache={clearFileCache}
+                      onContainerDrag={handleContainerDrag}
+                      draggedContainer={draggedContainer}
+                      isDragOverContainer={draggedContainer && draggedContainer !== pair.id}
                     />
                   </motion.div>
                 ))}

@@ -130,6 +130,8 @@ export const useAppStore = create((set, get) => ({
     const { pairs } = get();
     return pairs.filter(pair => pair.audio && pair.image);
   },
+  
+  setPairs: (newPairs) => set({ pairs: newPairs }),
 
   hasIncompleteData: () => {
     const { pairs } = get();
