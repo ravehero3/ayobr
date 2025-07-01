@@ -265,41 +265,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
         onComplete={handleVideoGenerationComplete}
       />
 
-      {/* Drag handle positioned at top left of container */}
-      {!generatedVideo && (
-        <div
-          className="absolute top-4 left-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-blue-400 hover:border-blue-400/50 hover:bg-blue-500/20 transition-all duration-300 cursor-move"
-          style={{
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-          }}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Start drag directly on the container
-            const containerElement = e.target.closest('.group');
-            if (containerElement) {
-              // Create a synthetic drag event
-              const dragEvent = new MouseEvent('mousedown', {
-                bubbles: true,
-                cancelable: true,
-                clientX: e.clientX,
-                clientY: e.clientY,
-                button: 0
-              });
-              
-              // Trigger the container's drag behavior
-              setIsDragging(true);
-              onContainerDrag?.(pair.id, 'start');
-            }
-          }}
-          title="Drag to reorder container"
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-          </svg>
-        </div>
-      )}
+
 
       {/* Delete button positioned at top right of container */}
       <button
