@@ -36,35 +36,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const handleContainerDragStart = (e) => {
     if (generatedVideo) return; // Don't allow dragging if video is generated
 
-    e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
     onContainerDrag?.(pair.id, 'start', pair);
-
-    // Create a draggable element for the whole container
-    const containerElement = e.target.closest('.group');
-    if (containerElement) {
-      containerElement.setAttribute('draggable', 'true');
-
-      // Set up drag start event on the container
-      const dragStartHandler = (dragEvent) => {
-        dragEvent.dataTransfer.effectAllowed = 'move';
-        dragEvent.dataTransfer.setData('text/plain', ''); // Required for Firefox
-      };
-
-      containerElement.addEventListener('dragstart', dragStartHandler, { once: true });
-      containerElement.addEventListener('dragend', () => {
-        handleContainerDragEnd();
-        containerElement.removeAttribute('draggable');
-      }, { once: true });
-
-      // Simulate drag start
-      const dragEvent = new DragEvent('dragstart', {
-        bubbles: true,
-        cancelable: true,
-        dataTransfer: new DataTransfer()
-      });
-      containerElement.dispatchEvent(dragEvent);
-    }
   };
 
   const handleContainerDragEnd = () => {
@@ -89,17 +63,42 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     e.preventDefault();
     setIsDragOverContainer(false);
     
-    // Handle container swapping when dragged container is dropped on this one
+    try {
+      const dragDataString = e.dataTransfer.getData('application/json');
+      if (dragDataString) {
+        const dragData = JSON.parse(dragDataString);
+        
+        if (dragData.type === 'container' && dragData.pairId !== pair.id) {
+          const draggedPairData = dragData.pairData;
+          
+          // Determine what type of content to swap based on what the dragged container has
+          const draggedHasAudio = !!draggedPairData.audio;
+          const draggedHasImage = !!draggedPairData.image;
+          const targetHasAudio = !!pair.audio;
+          const targetHasImage = !!pair.image;
+          
+          // Only allow same-type swapping
+          if (draggedHasAudio && targetHasAudio) {
+            // Swap audio content
+            onSwap(dragData.pairId, pair.id, 'audio');
+          } else if (draggedHasImage && targetHasImage) {
+            // Swap image content
+            onSwap(dragData.pairId, pair.id, 'image');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error handling container drop:', error);
+    }
+    
+    // Also handle the old drag system for compatibility
     if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
-      // Determine what type of content to swap based on what the dragged container has
       const draggedHasAudio = !!draggedContainer.audio;
       const draggedHasImage = !!draggedContainer.image;
       
       if (draggedHasAudio) {
-        // Swap audio content
         onSwap(draggedContainer.id, pair.id, 'audio');
       } else if (draggedHasImage) {
-        // Swap image content
         onSwap(draggedContainer.id, pair.id, 'image');
       }
     }
@@ -389,10 +388,17 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
           style={{
             boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
-          onMouseDown={(e) => {
-            // Trigger container drag start
+          draggable="true"
+          onDragStart={(e) => {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('application/json', JSON.stringify({
+              type: 'container',
+              pairId: pair.id,
+              pairData: pair
+            }));
             handleContainerDragStart(e);
           }}
+          onDragEnd={handleContainerDragEnd}
           title="Drag to reorder container"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

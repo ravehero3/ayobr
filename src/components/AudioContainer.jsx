@@ -256,20 +256,37 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
           {/* Move button below audio preview - centered */}
           <div className="flex items-center justify-center mt-2">
-            <button
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100"
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 cursor-move"
               style={{
                 backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
                 border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
                 color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#3584E4'
               }}
-              title="Click to activate drag mode for audio containers"
-              onClick={handleMoveButtonClick}
+              title="Drag to move audio container"
+              draggable="true"
+              onDragStart={(e) => {
+                e.stopPropagation();
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('application/json', JSON.stringify({
+                  type: 'container',
+                  pairId: pairId,
+                  pairData: { id: pairId, audio: audio, image: null }
+                }));
+                if (onContainerDragStart) {
+                  onContainerDragStart(pairId, 'start', { id: pairId, audio: audio, image: null });
+                }
+              }}
+              onDragEnd={(e) => {
+                if (onContainerDragEnd) {
+                  onContainerDragEnd(pairId, 'end');
+                }
+              }}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
               </svg>
-            </button>
+            </div>
           </div>
         </div>
       ) : (
