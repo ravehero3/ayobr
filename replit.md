@@ -172,6 +172,10 @@ Changelog:
 - July 1, 2025. Cleaned up audio container interface for simpler, more intuitive user experience
 - July 1, 2025. Added bottom-left move button to audio containers matching image container placement and functionality
 - July 1, 2025. Enhanced audio container visual feedback with green glow effect during container drag mode
+- July 1, 2025. Removed unnecessary icon button from audio container header for cleaner interface
+- July 1, 2025. Moved audio drag handle below audio preview (below waveform and play button) for better positioning
+- July 1, 2025. Fixed image container swapping by correcting move button function calls to match container drag system
+- July 1, 2025. Fixed container drag parameter mismatch between individual move buttons and main container drag functionality
 - July 1, 2025. Implemented same-type container swapping rule: audio containers can only swap with audio containers, image containers with image containers
 - July 1, 2025. Enhanced drag validation to enforce content type restrictions for better organization
 - July 1, 2025. Fixed drag detection conflict between container moving and file dropping from computer

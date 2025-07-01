@@ -135,7 +135,10 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
-    onContainerDragStart?.('audio');
+    // Trigger container drag start with the proper parameters
+    if (onContainerDragStart) {
+      onContainerDragStart(pairId, 'start', { id: pairId, audio, image: null });
+    }
   };
 
 
@@ -207,16 +210,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         <div className="w-full h-full flex flex-col justify-between relative">
           {/* Header with filename and time */}
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2 min-w-0 flex-1">
-              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className="text-white text-sm font-medium truncate">
-                {audio.name.replace(/\.[^/.]+$/, "")} {/* Remove file extension like Decibels */}
-              </span>
-            </div>
+            <span className="text-white text-sm font-medium truncate">
+              {audio.name.replace(/\.[^/.]+$/, "")} {/* Remove file extension like Decibels */}
+            </span>
             <div className="text-xs text-gray-400 flex-shrink-0">
               {formatTime(currentTime)} / {formatTime(duration)}
             </div>
@@ -258,21 +254,23 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             </button>
           </div>
 
-          {/* Move button - positioned at bottom left */}
-          <button
-            className="absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10"
-            style={{
-              backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
-              border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
-              color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#3584E4'
-            }}
-            title="Click to activate drag mode for audio containers"
-            onClick={handleMoveButtonClick}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </button>
+          {/* Move button below audio preview - centered */}
+          <div className="flex items-center justify-center mt-2">
+            <button
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100"
+              style={{
+                backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
+                border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
+                color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#3584E4'
+              }}
+              title="Click to activate drag mode for audio containers"
+              onClick={handleMoveButtonClick}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+              </svg>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-gray-300">

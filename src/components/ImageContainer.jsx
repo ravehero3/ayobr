@@ -88,7 +88,10 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
-    onContainerDragStart?.('image');
+    // Trigger container drag start with the proper parameters
+    if (onContainerDragStart) {
+      onContainerDragStart(pairId, 'start', { id: pairId, image, audio: null });
+    }
   };
 
   return (
