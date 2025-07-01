@@ -159,6 +159,8 @@ Changelog:
 - June 30, 2025. Removed all unnecessary empty containers - app now creates exactly the number of containers needed
 - June 30, 2025. Enhanced drag and drop system: containers can be dragged to empty containers and entire container is draggable
 - June 30, 2025. Added visual feedback for drag operations: green borders, scaling effects, and smooth transitions
+- July 1, 2025. Updated video display to show only the generated video without "Generated Video" text or status indicators
+- July 1, 2025. Fixed audio issues in generated videos - ensured high-quality audio preservation with AAC codec at 320k bitrate
 ```
 
 ## User Preferences

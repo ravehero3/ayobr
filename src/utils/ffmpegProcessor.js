@@ -254,13 +254,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
 
-    // Ultra-fast FFmpeg command - 3x speed optimization
+    // Ultra-fast FFmpeg command - with guaranteed high-quality audio
     // Create 1920x1080 video with image centered and 20px white space above/below
     console.log('Executing FFmpeg command...');
     await ffmpeg.exec([
       '-loop', '1',
       '-i', imageFileName,
       '-i', audioFileName,
+      '-map', '0:v',                 // Map video from first input (image)
+      '-map', '1:a',                 // Map audio from second input (audio file)
       '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
       '-c:v', 'libx264',
       '-preset', 'ultrafast',        // Fastest encoding preset
@@ -280,7 +282,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-partitions', 'none',         // Disable all partitions
       '-me_range', '4',              // Minimal motion estimation range
       '-r', '1',                     // 1 FPS since image is static
-      '-c:a', 'copy',                // Copy audio without re-encoding
+      '-c:a', 'aac',                 // Use AAC codec for audio (guaranteed compatibility)
+      '-b:a', '320k',                // High bitrate for uncompressed quality
+      '-ar', '48000',                // High sample rate
+      '-ac', '2',                    // Stereo audio
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
