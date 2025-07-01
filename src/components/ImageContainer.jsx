@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAppStore } from '../store/appStore';
 import { motion } from 'framer-motion';
 
-const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete }) => {
+const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete, isDraggingContainer, draggedContainer }) => {
   const { updatePair } = useAppStore();
   const [imageUrl, setImageUrl] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -86,6 +86,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   }, [image]);
 
+  // Check if we should highlight this container when another image container is being dragged
+  const shouldHighlight = isDraggingContainer && draggedContainer && 
+                         draggedContainer.id !== pairId && 
+                         draggedContainerType === 'image';
+
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
     // Trigger container drag start for individual image container
@@ -137,6 +142,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         backdropFilter: 'blur(8px)',
         border: isDragOver 
           ? '3px solid rgba(34, 197, 94, 0.8)' 
+          : shouldHighlight
+          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another image container is being dragged
           : (isContainerDragMode && draggedContainerType === 'image')
           ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for images
           : '1px solid rgba(59, 130, 246, 0.2)',
@@ -144,6 +151,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
           : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
+          : shouldHighlight
+          ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : (isContainerDragMode && draggedContainerType === 'image')
           ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
@@ -167,11 +176,15 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         backdropFilter: 'blur(4px)',
         border: isDragOver
           ? '2px solid rgba(34, 197, 94, 0.6)'
+          : shouldHighlight
+          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another image container is being dragged
           : (isContainerDragMode && draggedContainerType === 'image')
           ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow for empty image containers too
           : '1.5px solid rgba(30, 144, 255, 0.3)',
         boxShadow: isDragOver
           ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
+          : shouldHighlight
+          ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : (isContainerDragMode && draggedContainerType === 'image')
           ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : `
