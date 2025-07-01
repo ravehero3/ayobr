@@ -110,8 +110,8 @@ export const useFFmpeg = () => {
       if (isCancelling) return;
       
       // Check if this pair already has a generated video
-      const { generatedVideos } = get();
-      const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
+      const store = useAppStore.getState();
+      const existingVideo = store.generatedVideos.find(v => v.pairId === pair.id);
       if (existingVideo) {
         console.log(`Video already exists for pair ${pair.id}, skipping`);
         return;

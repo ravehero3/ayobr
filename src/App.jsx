@@ -26,32 +26,24 @@ function App() {
   }, []);
 
   const handleGenerateVideos = async () => {
+    console.log('Generate Videos button clicked');
     const completePairs = getCompletePairs();
 
+    console.log('Complete pairs found:', completePairs.length);
+    console.log('Complete pairs data:', completePairs);
+
     if (completePairs.length === 0) {
-      alert('Please add at least one complete pair (audio + image) to generate videos.');
+      console.log('No complete pairs found - showing alert');
+      alert('Please add audio and image files first.');
       return;
     }
 
     console.log('Starting video generation for pairs:', completePairs);
 
-    // Check if FFmpeg files are accessible
     try {
-      const response = await fetch('/ffmpeg/ffmpeg-core.js');
-      if (!response.ok) {
-        console.error('FFmpeg core file not accessible:', response.status);
-        alert('FFmpeg files are not accessible. Please ensure they are in the public/ffmpeg folder.');
-        return;
-      }
-      console.log('FFmpeg files are accessible');
-    } catch (error) {
-      console.error('Error checking FFmpeg files:', error);
-      alert('Error checking FFmpeg files. Please check the console for details.');
-      return;
-    }
-
-    try {
+      console.log('Setting isGenerating to true');
       setIsGenerating(true);
+      console.log('Calling generateVideos function');
       await generateVideos(completePairs);
       console.log('Video generation completed successfully');
     } catch (error) {
@@ -291,7 +283,7 @@ function App() {
           </div>
         )}
 
-        
+
 
         {/* Batch Status Indicator */}
         {pairs.some(pair => pair.audio || pair.image) && (
