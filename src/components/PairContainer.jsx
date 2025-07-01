@@ -67,10 +67,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     setIsDragOverContainer(false);
     
     try {
+      // Handle both main container drag and individual container drag
       const dragDataString = e.dataTransfer.getData('application/json');
       if (dragDataString) {
         const dragData = JSON.parse(dragDataString);
         
+        // Handle main container drag (from drag handle)
         if (dragData.type === 'container' && dragData.pairId !== pair.id) {
           const draggedPairData = dragData.pairData;
           
@@ -89,19 +91,30 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
             onSwap(dragData.pairId, pair.id, 'image');
           }
         }
+        // Handle individual container drag (from move buttons)
+        else if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
+          const draggedContainerType = dragData.containerType;
+          
+          // Only allow same-type swapping
+          if (draggedContainerType === 'audio' && pair.audio) {
+            onSwap(dragData.pairId, pair.id, 'audio');
+          } else if (draggedContainerType === 'image' && pair.image) {
+            onSwap(dragData.pairId, pair.id, 'image');
+          }
+        }
       }
     } catch (error) {
       console.error('Error handling container drop:', error);
     }
     
-    // Also handle the old drag system for compatibility
+    // Also handle the state-based drag system for compatibility
     if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
       const draggedHasAudio = !!draggedContainer.audio;
       const draggedHasImage = !!draggedContainer.image;
       
-      if (draggedHasAudio) {
+      if (draggedHasAudio && pair.audio) {
         onSwap(draggedContainer.id, pair.id, 'audio');
-      } else if (draggedHasImage) {
+      } else if (draggedHasImage && pair.image) {
         onSwap(draggedContainer.id, pair.id, 'image');
       }
     }
