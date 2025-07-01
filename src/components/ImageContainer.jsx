@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useAppStore } from '../store/appStore';
 import { motion } from 'framer-motion';
 
 const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd }) => {
+  const { updatePair } = useAppStore();
   const [imageUrl, setImageUrl] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -46,9 +48,17 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
-    if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
-      onSwap(draggedItem.pairId, pairId, 'image');
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+
+    if (imageFile) {
+      updatePair(pairId, { image: imageFile });
     }
+  };
+
+  const handleDelete = () => {
+    updatePair(pairId, { image: null });
   };
 
   const formatFileSize = (bytes) => {
@@ -154,6 +164,22 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
       {image ? (
         <div className="relative h-full w-full overflow-hidden rounded-lg">
+          {/* Delete button - positioned at top right */}
+          <button
+            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
+            style={{
+              backgroundColor: 'rgba(220, 38, 38, 0.15)',
+              border: '1px solid rgba(220, 38, 38, 0.3)',
+              color: '#DC2626'
+            }}
+            title="Delete image"
+            onClick={handleDelete}
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           {/* Full container image */}
           <img
             src={imageUrl}
@@ -203,20 +229,14 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center h-full text-gray-300">
-          <div 
-            className="p-4 rounded-full mb-4"
-            style={{
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%)',
-              border: '1px solid rgba(59, 130, 246, 0.2)'
-            }}
-          >
-            <svg className="w-8 h-8 text-blue-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
+        <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
+          <div className="w-16 h-16 mb-4 bg-gray-500/10 rounded-full flex items-center justify-center border-2 border-dashed border-gray-500/30">
+            <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-gray-300 mb-1 text-center">Drop image file here</p>
-          <p className="text-xs text-gray-500 font-light text-center">PNG, JPG, HEIC</p>
+          <p className="text-gray-500 text-sm font-medium mb-1">Empty Image Container</p>
+          <p className="text-gray-600 text-xs">Drop an image here</p>
         </div>
       )}
     </motion.div>
