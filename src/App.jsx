@@ -30,34 +30,43 @@ function App() {
     setDraggedItem(null);
   }, []);
 
-  const handleContainerDrag = (pairId, action, pairData) => {
+  const handleContainerDrag = (pairIdOrType, action, pairData) => {
     if (action === 'start') {
-      setDraggedContainer(pairData);
-      setIsDraggingContainer(true);
-      // Determine the type of container being dragged
-      if (pairData.audio && !pairData.image) {
-        setDraggedContainerType('audio');
-      } else if (pairData.image && !pairData.audio) {
-        setDraggedContainerType('image');
+      // Check if this is a container type (audio/image) or actual pair data
+      if (typeof pairIdOrType === 'string' && (pairIdOrType === 'audio' || pairIdOrType === 'image')) {
+        // Individual container drag (move button)
+        setIsContainerDragMode(true);
+        setIsDraggingContainer(true);
+        setDraggedContainerType(pairIdOrType);
+        setDraggedContainer({ type: pairIdOrType, ...pairData });
+        
+        // Auto-reset after 10 seconds
+        setTimeout(() => {
+          setIsContainerDragMode(false);
+          setIsDraggingContainer(false);
+          setDraggedContainerType(null);
+          setDraggedContainer(null);
+        }, 10000);
       } else {
-        setDraggedContainerType('mixed');
+        // Main container drag (drag handle)
+        setDraggedContainer(pairData);
+        setIsDraggingContainer(true);
+        setIsContainerDragMode(false);
+        
+        // Determine the type of container being dragged
+        if (pairData.audio && !pairData.image) {
+          setDraggedContainerType('audio');
+        } else if (pairData.image && !pairData.audio) {
+          setDraggedContainerType('image');
+        } else {
+          setDraggedContainerType('mixed');
+        }
       }
     } else if (action === 'end') {
       setDraggedContainer(null);
       setIsDraggingContainer(false);
       setDraggedContainerType(null);
-    } else if (typeof pairId === 'string' && (pairId === 'audio' || pairId === 'image')) {
-      // Handle move button clicks - pairId is actually the container type
-      setIsContainerDragMode(true);
-      setDraggedContainerType(pairId);
-      setDraggedContainer({ type: pairId });
-      
-      // Auto-reset after 10 seconds
-      setTimeout(() => {
-        setIsContainerDragMode(false);
-        setDraggedContainerType(null);
-        setDraggedContainer(null);
-      }, 10000);
+      setIsContainerDragMode(false);
     }
   };
 

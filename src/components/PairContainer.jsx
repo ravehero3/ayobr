@@ -310,7 +310,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   onContainerDragEnd={onContainerDrag}
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
-                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio) || (draggedItem?.type === 'audio' && draggedItem.pairId !== pair.id)}
+                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio) || (draggedItem?.type === 'audio' && draggedItem.pairId !== pair.id && !!pair.audio)}
                 />
               </div>
             </div>
@@ -417,7 +417,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   onContainerDragEnd={onContainerDrag}
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
-                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image) || (draggedItem?.type === 'image' && draggedItem.pairId !== pair.id)}
+                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image) || (draggedItem?.type === 'image' && draggedItem.pairId !== pair.id && !!pair.image)}
                 />
               </div>
             </div>

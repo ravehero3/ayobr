@@ -144,7 +144,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     e.stopPropagation();
     // Trigger container drag start for individual image container
     if (onContainerDragStart) {
-      onContainerDragStart(pairId, 'start', { 
+      onContainerDragStart('image', 'start', { 
         id: pairId, 
         type: 'image',
         content: image 
@@ -348,7 +348,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
                 content: image
               }));
               if (onContainerDragStart) {
-                onContainerDragStart(pairId, 'start', { 
+                onContainerDragStart('image', 'start', { 
                   id: pairId, 
                   type: 'image',
                   content: image 
@@ -357,7 +357,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             }}
             onDragEnd={(e) => {
               if (onContainerDragEnd) {
-                onContainerDragEnd(pairId, 'end');
+                onContainerDragEnd('image', 'end');
               }
             }}
           >

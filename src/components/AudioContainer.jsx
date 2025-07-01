@@ -5,7 +5,9 @@ import WaveSurfer from 'wavesurfer.js';
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
-const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete, isDraggingContainer, shouldShowGlow, updatePair }) => {
+const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete, isDraggingContainer, shouldShowGlow }) => {
+  // Import updatePair from store
+  const { updatePair } = require('../store/appStore').useAppStore();
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -192,7 +194,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     e.stopPropagation();
     // Trigger container drag start for individual audio container
     if (onContainerDragStart) {
-      onContainerDragStart(pairId, 'start', { 
+      onContainerDragStart('audio', 'start', { 
         id: pairId, 
         type: 'audio',
         content: audio 
@@ -343,7 +345,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 content: audio
               }));
               if (onContainerDragStart) {
-                onContainerDragStart(pairId, 'start', { 
+                onContainerDragStart('audio', 'start', { 
                   id: pairId, 
                   type: 'audio',
                   content: audio 
@@ -352,7 +354,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             }}
             onDragEnd={(e) => {
               if (onContainerDragEnd) {
-                onContainerDragEnd(pairId, 'end');
+                onContainerDragEnd('audio', 'end');
               }
             }}
             onClick={handleMoveButtonClick}
