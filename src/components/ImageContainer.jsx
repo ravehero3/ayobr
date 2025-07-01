@@ -175,6 +175,21 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             </div>
           </div>
 
+          {/* Move button - positioned at bottom left */}
+          <button
+            className="absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10"
+            style={{
+              backgroundColor: 'rgba(53, 132, 228, 0.15)',
+              border: '1px solid rgba(53, 132, 228, 0.3)',
+              color: '#3584E4'
+            }}
+            title="Drag to move image"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+
           {/* Hover overlay with filename */}
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <div className="text-center">
