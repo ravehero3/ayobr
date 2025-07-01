@@ -168,6 +168,8 @@ Changelog:
 - July 1, 2025. Enhanced drag and drop swapping functionality with improved visual feedback - audio files can be dragged to swap with other audio files, images can be swapped with other images
 - July 1, 2025. Successfully completed migration from Replit Agent to standard Replit environment with all functionality intact
 - July 1, 2025. Confirmed move buttons are present in each container for dragging and reordering containers
+- July 1, 2025. Removed redundant move button from audio containers - consolidated all move functionality into main drag handle
+- July 1, 2025. Cleaned up audio container interface for simpler, more intuitive user experience
 ```
 
 ## User Preferences

@@ -5,7 +5,7 @@ import WaveSurfer from 'wavesurfer.js';
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
-const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd }) => {
+const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDragEnd }) => {
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -133,10 +133,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleMoveButtonClick = (e) => {
-    e.stopPropagation();
-    onContainerDragStart?.('audio');
-  };
+
 
   return (
     <motion.div
@@ -156,15 +153,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         borderRadius: '8px',
         border: isDragOver 
           ? '3px solid rgba(34, 197, 94, 0.8)' // Stronger green border when valid drop target
-          : (isContainerDragMode && draggedContainerType === 'audio')
-          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for audio
           : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
         boxShadow: isDragging
           ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
           : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
-          : (isContainerDragMode && draggedContainerType === 'audio')
-          ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : audio 
             ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
             : `
@@ -230,23 +223,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
 
           {/* Bottom controls - Large play button like Decibels */}
-          <div className="flex items-center justify-center mt-2 relative">
-            {/* Move button - positioned at bottom left */}
-            <button
-              className="absolute left-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100"
-              style={{
-                backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
-                border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
-                color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#3584E4'
-              }}
-              title="Click to activate drag mode for audio containers"
-              onClick={handleMoveButtonClick}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-              </svg>
-            </button>
-
+          <div className="flex items-center justify-center mt-2">
             {/* Play button - centered */}
             <button
               onClick={handlePlayPause}
