@@ -16,9 +16,6 @@ function App() {
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [draggedContainer, setDraggedContainer] = useState(null);
-  const [dragOverContainer, setDragOverContainer] = useState(null);
-
   const handleDragStart = useCallback((item) => {
     setDraggedItem(item);
   }, []);
@@ -26,27 +23,6 @@ function App() {
   const handleDragEnd = useCallback(() => {
     setDraggedItem(null);
   }, []);
-
-  const handleContainerDrag = useCallback((containerId, action, targetId = null) => {
-    if (action === 'start') {
-      setDraggedContainer(containerId);
-    } else if (action === 'end') {
-      setDraggedContainer(null);
-    } else if (action === 'swap' && targetId) {
-      // Swap the entire containers by reordering the array
-      const newPairs = [...pairs];
-      const draggedIndex = newPairs.findIndex(pair => pair.id === containerId);
-      const targetIndex = newPairs.findIndex(pair => pair.id === targetId);
-
-      if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
-        // Remove the dragged item and insert it at the target position
-        const [draggedItem] = newPairs.splice(draggedIndex, 1);
-        newPairs.splice(targetIndex, 0, draggedItem);
-        setPairs(newPairs);
-      }
-      setDraggedContainer(null);
-    }
-  }, [pairs, setPairs]);
 
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');
@@ -221,9 +197,6 @@ function App() {
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                       clearFileCache={clearFileCache}
-                      onContainerDrag={handleContainerDrag}
-                      draggedContainer={draggedContainer}
-                      isDragOverContainer={draggedContainer && draggedContainer !== pair.id}
                     />
                   </motion.div>
                 ))}

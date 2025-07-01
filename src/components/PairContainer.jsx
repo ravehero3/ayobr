@@ -5,9 +5,8 @@ import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, draggedContainer, isDragOverContainer }) => {
+const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
-  const [isDragging, setIsDragging] = useState(false);
 
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -28,136 +27,16 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     // The video should remain visible after generation is complete
   };
 
-  const handleContainerDragStart = (e) => {
-    if (generatedVideo) return; // Don't allow dragging if video is generated
-    
-    setIsDragging(true);
-    onContainerDrag?.(pair.id, 'start');
-    
-    // Enable dragging on the main container
-    const containerElement = e.target.closest('.group');
-    if (containerElement) {
-      containerElement.setAttribute('draggable', 'true');
-      
-      // Set up the drag data
-      const dragStartHandler = (dragEvent) => {
-        dragEvent.dataTransfer.effectAllowed = 'move';
-        dragEvent.dataTransfer.setData('text/plain', pair.id);
-      };
-      
-      // Add the drag start event listener
-      containerElement.addEventListener('dragstart', dragStartHandler, { once: true });
-      
-      // Add drag end event listener
-      containerElement.addEventListener('dragend', () => {
-        handleContainerDragEnd();
-        containerElement.removeAttribute('draggable');
-      }, { once: true });
-      
-      // Create and dispatch a drag event
-      setTimeout(() => {
-        const rect = containerElement.getBoundingClientRect();
-        const dragEvent = new DragEvent('dragstart', {
-          bubbles: true,
-          cancelable: true,
-          clientX: e.clientX,
-          clientY: e.clientY,
-          dataTransfer: new DataTransfer()
-        });
-        
-        dragEvent.dataTransfer.effectAllowed = 'move';
-        dragEvent.dataTransfer.setData('text/plain', pair.id);
-        containerElement.dispatchEvent(dragEvent);
-      }, 0);
-    }
-  };
 
-  const handleContainerDragEnd = (e) => {
-    setIsDragging(false);
-    onContainerDrag?.(pair.id, 'end');
-  };
-
-  const handleContainerDragOver = (e) => {
-    if (draggedContainer && draggedContainer !== pair.id) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    }
-  };
-
-  const handleContainerDrop = (e) => {
-    e.preventDefault();
-    const draggedPairId = e.dataTransfer.getData('text/plain');
-    if (draggedPairId && draggedPairId !== pair.id) {
-      onContainerDrag?.(draggedPairId, 'swap', pair.id);
-    }
-  };
 
 
 
   return (
     <motion.div
-      className={`relative group w-full ${isDragging ? 'opacity-30' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
+      className="relative group w-full"
       layout
       transition={{ duration: 0.3 }}
-      draggable={!generatedVideo && !isDragging}
-      onDragStart={(e) => {
-        if (generatedVideo) {
-          e.preventDefault();
-          return;
-        }
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', pair.id);
-        setIsDragging(true);
-        onContainerDrag?.(pair.id, 'start');
-      }}
-      onDragEnd={handleContainerDragEnd}
-      onDragOver={handleContainerDragOver}
-      onDrop={handleContainerDrop}
-      style={{
-        visibility: isDragging ? 'visible' : 'visible',
-        minHeight: isDragging ? '450px' : 'auto',
-        cursor: !generatedVideo ? 'move' : 'default'
-      }}
     >
-      {/* Empty state placeholder when this container is being dragged */}
-      {isDragging && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 border-2 border-dashed border-gray-500/50 bg-gray-800/20 rounded-2xl flex items-center justify-center backdrop-blur-sm"
-          style={{ minHeight: '450px' }}
-        >
-          <div className="text-center text-gray-500">
-            <div className="w-16 h-16 mx-auto mb-4 border-2 border-dashed border-gray-500/50 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 12h14m-7-7v14" />
-              </svg>
-            </div>
-            <p className="font-medium text-lg">Container moved</p>
-            <p className="text-sm opacity-75">Drop to place or return here</p>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Drop zone indicator */}
-      {isDragOverContainer && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: '120px' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="absolute -bottom-32 left-0 right-0 border-2 border-dashed border-blue-400 bg-blue-400/10 rounded-2xl flex items-center justify-center backdrop-blur-sm"
-        >
-          <div className="text-center text-blue-400">
-            <div className="w-12 h-12 mx-auto mb-2 bg-blue-500 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
-            </div>
-            <p className="font-semibold">Drop here to swap containers</p>
-          </div>
-        </motion.div>
-      )}
       {/* Show generated video if available, otherwise show the original containers */}
       {generatedVideo ? (
         <div className="flex justify-center">
