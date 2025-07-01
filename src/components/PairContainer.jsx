@@ -29,9 +29,37 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   };
 
   const handleContainerDragStart = (e) => {
-    e.dataTransfer.effectAllowed = 'move';
+    if (generatedVideo) return; // Don't allow dragging if video is generated
+    
+    e.preventDefault();
     setIsDragging(true);
     onContainerDrag?.(pair.id, 'start');
+
+    // Create a draggable element for the whole container
+    const containerElement = e.target.closest('.group');
+    if (containerElement) {
+      containerElement.setAttribute('draggable', 'true');
+      
+      // Set up drag start event on the container
+      const dragStartHandler = (dragEvent) => {
+        dragEvent.dataTransfer.effectAllowed = 'move';
+        dragEvent.dataTransfer.setData('text/plain', ''); // Required for Firefox
+      };
+      
+      containerElement.addEventListener('dragstart', dragStartHandler, { once: true });
+      containerElement.addEventListener('dragend', () => {
+        handleContainerDragEnd();
+        containerElement.removeAttribute('draggable');
+      }, { once: true });
+      
+      // Simulate drag start
+      const dragEvent = new DragEvent('dragstart', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: new DataTransfer()
+      });
+      containerElement.dispatchEvent(dragEvent);
+    }
   };
 
   const handleContainerDragEnd = (e) => {
@@ -57,12 +85,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
   return (
     <motion.div
-      className={`relative group w-full cursor-move ${isDragging ? 'opacity-50' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
+      className={`relative group w-full ${isDragging ? 'opacity-50' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
       layout
       transition={{ duration: 0.3 }}
-      draggable={!generatedVideo} // Only allow dragging if video isn't generated
-      onDragStart={handleContainerDragStart}
-      onDragEnd={handleContainerDragEnd}
       onDragOver={handleContainerDragOver}
       onDrop={handleContainerDrop}
     >
@@ -311,6 +336,25 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
         generatedVideo={generatedVideo}
         onComplete={handleVideoGenerationComplete}
       />
+
+      {/* Drag handle positioned at top left of container */}
+      {!generatedVideo && (
+        <div
+          className="absolute top-4 left-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-blue-400 hover:border-blue-400/50 hover:bg-blue-500/20 transition-all duration-300 cursor-move"
+          style={{
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          }}
+          onMouseDown={(e) => {
+            // Trigger container drag start
+            handleContainerDragStart(e);
+          }}
+          title="Drag to reorder container"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </div>
+      )}
 
       {/* Delete button positioned at top right of container */}
       <button
