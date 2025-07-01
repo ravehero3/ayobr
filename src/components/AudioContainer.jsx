@@ -230,10 +230,10 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
 
           {/* Bottom controls - Large play button like Decibels */}
-          <div className="flex items-center justify-between mt-2">
-            {/* Move button */}
+          <div className="flex items-center justify-center mt-2 relative">
+            {/* Move button - positioned at bottom left */}
             <button
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100"
+              className="absolute left-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100"
               style={{
                 backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
                 border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
@@ -247,7 +247,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               </svg>
             </button>
 
-            {/* Play button */}
+            {/* Play button - centered */}
             <button
               onClick={handlePlayPause}
               className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
@@ -270,9 +270,6 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 </svg>
               )}
             </button>
-
-            {/* Spacer to balance the layout */}
-            <div className="w-8 h-8"></div>
           </div>
         </div>
       ) : (
