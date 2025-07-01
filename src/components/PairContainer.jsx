@@ -17,9 +17,11 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   // Determine if this container should glow based on drag type
   const shouldShowGlow = isDraggingContainer && draggedContainer && draggedContainer.id !== pair.id && (() => {
     if (draggedContainerType === 'audio') {
-      return !!pair.audio; // Audio containers glow when audio is being dragged
+      // Only highlight audio containers when dragging audio
+      return !!pair.audio && !pair.image; // Must have audio and not be a mixed container
     } else if (draggedContainerType === 'image') {
-      return !!pair.image; // Image containers glow when image is being dragged
+      // Only highlight image containers when dragging image
+      return !!pair.image && !pair.audio; // Must have image and not be a mixed container
     }
     return false;
   })();
