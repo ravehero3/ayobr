@@ -77,12 +77,24 @@ export const useAppStore = create((set, get) => ({
   setProgress: (progress) => set({ currentProgress: progress }),
 
   // Video generation state management for individual pairs
-  setVideoGenerationState: (pairId, state) => set(store => ({
-    videoGenerationStates: {
-      ...store.videoGenerationStates,
-      [pairId]: state
+  setVideoGenerationState: (pairId, state) => set(store => {
+    const currentState = store.videoGenerationStates[pairId];
+    
+    // Prevent unnecessary state updates that could trigger re-renders
+    if (currentState && 
+        currentState.isGenerating === state.isGenerating &&
+        currentState.progress === state.progress &&
+        currentState.isComplete === state.isComplete) {
+      return store; // No change needed
     }
-  })),
+    
+    return {
+      videoGenerationStates: {
+        ...store.videoGenerationStates,
+        [pairId]: state
+      }
+    };
+  }),
 
   getVideoGenerationState: (pairId) => {
     const { videoGenerationStates } = get();

@@ -163,6 +163,8 @@ export const useFFmpeg = () => {
         video: video
       });
 
+      console.log(`Video generation completed for pair ${pair.id}`);
+
     } catch (error) {
       if (error.message === 'Generation cancelled by user') {
         console.log(`Video generation cancelled for pair ${pair.id}`);

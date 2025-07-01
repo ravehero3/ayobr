@@ -17,8 +17,16 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
 
   const handleVideoGenerationComplete = () => {
     // This function is called when video generation animation completes
-    // The video is already stored in the store, so no additional action needed
+    // Reset the video generation state to prevent re-triggering
     console.log(`Video generation animation completed for pair ${pair.id}`);
+    
+    // Ensure the generation state is properly reset
+    setVideoGenerationState(pair.id, {
+      isGenerating: false,
+      progress: 100,
+      isComplete: false, // Reset to false to prevent re-animation
+      video: generatedVideo
+    });
   };
 
 
