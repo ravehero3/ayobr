@@ -310,7 +310,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   onContainerDragEnd={onContainerDrag}
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
-                  shouldShowGlow={isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio}
+                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio) || (draggedItem?.type === 'audio' && draggedItem.pairId !== pair.id)}
                 />
               </div>
             </div>
@@ -417,7 +417,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   onContainerDragEnd={onContainerDrag}
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
-                  shouldShowGlow={isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image}
+                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image) || (draggedItem?.type === 'image' && draggedItem.pairId !== pair.id)}
                 />
               </div>
             </div>

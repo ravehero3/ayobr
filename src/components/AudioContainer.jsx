@@ -5,7 +5,7 @@ import WaveSurfer from 'wavesurfer.js';
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
-const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete, isDraggingContainer, shouldShowGlow }) => {
+const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete, isDraggingContainer, shouldShowGlow, updatePair }) => {
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -97,10 +97,16 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
-    // Allow dropping audio on any audio container (including empty ones)
+    // Allow dropping audio on any audio container for swapping
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      setIsDragOver(true);
+    }
+    // Also allow file drops
+    else if (e.dataTransfer.types.includes('Files')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
       setIsDragOver(true);
     }
   };
@@ -114,8 +120,21 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
+
+    // Handle audio swapping
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
-      onSwap(draggedItem.pairId, pairId, 'audio');
+      if (onSwap) {
+        onSwap(draggedItem.pairId, pairId, 'audio');
+      }
+      return;
+    }
+
+    // Handle file drops
+    const files = Array.from(e.dataTransfer.files);
+    const audioFile = files.find(file => file.type.startsWith('audio/'));
+
+    if (audioFile) {
+      updatePair(pairId, { audio: audioFile });
     }
   };
 
@@ -145,6 +164,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   };
 
+  // Use the shouldShowGlow prop for targeted highlighting, plus highlight when another audio is being dragged
+  const shouldHighlight = shouldShowGlow || (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && !!audio);
+
 
 
   return (
@@ -172,7 +194,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
           : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
-          : shouldShowGlow
+          : shouldHighlight
           ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : (isContainerDragMode && draggedContainerType === 'audio')
           ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'

@@ -31,10 +31,16 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
-    // Allow dropping image on any image container (including empty ones)
+    // Allow dropping image on any image container for swapping
     if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      setIsDragOver(true);
+    }
+    // Also allow file drops
+    else if (e.dataTransfer.types.includes('Files')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
       setIsDragOver(true);
     }
   };
@@ -49,6 +55,15 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     setIsDragOver(false);
 
+    // Handle image swapping
+    if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
+      if (onSwap) {
+        onSwap(draggedItem.pairId, pairId, 'image');
+      }
+      return;
+    }
+
+    // Handle file drops
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
 
@@ -86,8 +101,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   }, [image]);
 
-  // Use the shouldShowGlow prop passed from PairContainer for targeted highlighting
-  const shouldHighlight = shouldShowGlow;
+  // Use the shouldShowGlow prop for targeted highlighting, plus highlight when another image is being dragged
+  const shouldHighlight = shouldShowGlow || (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && !!image);
 
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
@@ -102,8 +117,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleContainerDragOver = (e) => {
-    // Allow container dropping when in container drag mode
-    if (isContainerDragMode && draggedContainerType === 'image') {
+    // Allow container dropping when in container drag mode or when dragging images
+    if ((isContainerDragMode && draggedContainerType === 'image') || 
+        (draggedItem?.type === 'image' && draggedItem.pairId !== pairId)) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
     }
@@ -111,9 +127,25 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleContainerDrop = (e) => {
     e.preventDefault();
+    
+    // Handle image swapping via drag data
+    try {
+      const dragDataString = e.dataTransfer.getData('application/json');
+      if (dragDataString) {
+        const dragData = JSON.parse(dragDataString);
+        if (dragData.type === 'individual-container' && dragData.containerType === 'image' && dragData.pairId !== pairId) {
+          if (onSwap) {
+            onSwap(dragData.pairId, pairId, 'image');
+          }
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing drag data:', error);
+    }
+    
     // Handle container drop when in container drag mode
     if (isContainerDragMode && draggedContainerType === 'image' && onSwap) {
-      // This will be handled by the parent component's container drag logic
       console.log('Container drop detected in ImageContainer');
     }
   };
