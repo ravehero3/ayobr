@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAppStore } from '../store/appStore';
 import { motion } from 'framer-motion';
 
-const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd }) => {
+const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete }) => {
   const { updatePair } = useAppStore();
   const [imageUrl, setImageUrl] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -207,16 +207,21 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
       {image ? (
         <div className="relative h-full w-full overflow-hidden rounded-lg">
-          {/* Delete button - positioned at top right */}
+          {/* Delete button - positioned at bottom right */}
           <button
-            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
+            className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
             style={{
               backgroundColor: 'rgba(220, 38, 38, 0.15)',
               border: '1px solid rgba(220, 38, 38, 0.3)',
               color: '#DC2626'
             }}
             title="Delete image"
-            onClick={handleDelete}
+            onClick={() => {
+              handleDelete();
+              if (onDelete) {
+                onDelete();
+              }
+            }}
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

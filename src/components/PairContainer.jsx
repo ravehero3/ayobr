@@ -9,7 +9,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
-  
+
   // Check if this container is a valid drop target
   const isValidDropTarget = draggedContainer && isValidContainerDragTarget && isValidContainerDragTarget(pair);
   const [isContainerDragTarget, setIsContainerDragTarget] = useState(false); // New state for container drag target
@@ -48,16 +48,16 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
   const handleContainerDragOver = (e) => {
     e.preventDefault();
-    
+
     // Check for individual container drag data
     try {
       const dragDataString = e.dataTransfer.getData('application/json');
       if (dragDataString) {
         const dragData = JSON.parse(dragDataString);
-        
+
         if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
           const draggedContainerType = dragData.containerType;
-          
+
           // Only highlight if same type containers can be swapped
           if ((draggedContainerType === 'audio' && pair.audio) || 
               (draggedContainerType === 'image' && pair.image)) {
@@ -82,16 +82,16 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const handleContainerDrop = (e) => {
     e.preventDefault();
     setIsDragOverContainer(false);
-    
+
     try {
       const dragDataString = e.dataTransfer.getData('application/json');
       if (dragDataString) {
         const dragData = JSON.parse(dragDataString);
-        
+
         // Handle individual container swapping (audio with audio, image with image)
         if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
           const draggedContainerType = dragData.containerType;
-          
+
           // Only allow same-type swapping
           if (draggedContainerType === 'audio' && pair.audio) {
             // Swap audio content only
@@ -231,15 +231,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
             >
-              {/* Top-right highlight flare */}
-              <div 
-                className="absolute top-6 right-8 w-4 h-4 rounded-full z-10"
-                style={{
-                  background: 'radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(30, 144, 255, 0.9) 30%, rgba(0, 207, 255, 0.6) 60%, transparent 80%)',
-                  boxShadow: '0 0 25px rgba(255, 255, 255, 0.8), 0 0 50px rgba(30, 144, 255, 0.5)',
-                  animation: 'flare-flicker 2s ease-in-out infinite alternate'
-                }}
-              />
+              
 
               <div className="absolute inset-0 p-8">
                 <AudioContainer
@@ -345,15 +337,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
             >
-              {/* Top-right highlight flare */}
-              <div 
-                className="absolute top-6 right-8 w-4 h-4 rounded-full z-10"
-                style={{
-                  background: 'radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(30, 144, 255, 0.9) 30%, rgba(0, 207, 255, 0.6) 60%, transparent 80%)',
-                  boxShadow: '0 0 25px rgba(255, 255, 255, 0.8), 0 0 50px rgba(30, 144, 255, 0.5)',
-                  animation: 'flare-flicker 2s ease-in-out infinite alternate'
-                }}
-              />
+              
 
               <div className="absolute inset-0 p-8">
                 <ImageContainer
@@ -384,12 +368,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
         onComplete={handleVideoGenerationComplete}
       />
 
-      
+
 
       {/* Delete button positioned at top right of container */}
       <button
         onClick={handleDelete}
-        className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-red-400 hover:border-red-400/50 hover:bg-red-500/20 transition-all duration-300"
+        className="absolute bottom-4 right-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-red-400 hover:border-red-400/50 hover:bg-red-500/20 transition-all duration-300"
         style={{
           boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
         }}
