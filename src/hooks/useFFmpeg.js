@@ -108,6 +108,14 @@ export const useFFmpeg = () => {
   const processPairAsync = async (pair) => {
     try {
       if (isCancelling) return;
+      
+      // Check if this pair already has a generated video
+      const { generatedVideos } = get();
+      const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
+      if (existingVideo) {
+        console.log(`Video already exists for pair ${pair.id}, skipping`);
+        return;
+      }
         
       setVideoGenerationState(pair.id, {
         isGenerating: true,

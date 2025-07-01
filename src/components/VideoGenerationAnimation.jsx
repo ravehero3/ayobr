@@ -40,6 +40,14 @@ const VideoGenerationAnimation = ({
     }
   }, [isComplete, generatedVideo, showSuccess, animationComplete, onComplete]);
 
+  // Reset animation state when video generation starts fresh
+  useEffect(() => {
+    if (isGenerating && progress === 0) {
+      setAnimationComplete(false);
+      setShowSuccess(false);
+    }
+  }, [isGenerating, progress]);
+
   // Don't show overlay if generation is complete and animation is done
   if (!isGenerating && !showMerging && !showSuccess) {
     return null;
