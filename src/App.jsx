@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/appStore';
 import { usePairingLogic } from './hooks/usePairingLogic';
 import { useFFmpeg } from './hooks/useFFmpeg';
-import PairContainer from './components/PairContainer';
+import Pairs from './components/Pairs';
 import VideoPreviewCard from './components/VideoPreviewCard';
 import BatchStatusIndicator from './components/BatchStatusIndicator';
 import ScreenSizeWarning from './components/ScreenSizeWarning';
@@ -323,7 +323,7 @@ function App() {
                     transition={{ duration: 0.3 }}
                     className="w-full"
                   >
-                    <PairContainer
+                    <Pairs
                       pair={pair}
                       onSwap={swapContainers}
                       draggedItem={draggedItem}

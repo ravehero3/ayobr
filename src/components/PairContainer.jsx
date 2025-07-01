@@ -5,7 +5,7 @@ import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType }) => {
+const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
@@ -427,4 +427,4 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   );
 };
 
-export default PairContainer;
+export default Pairs;
