@@ -13,9 +13,6 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   // Check if this container is a valid drop target
   const isValidDropTarget = draggedContainer && isValidContainerDragTarget && isValidContainerDragTarget(pair);
   const [isContainerDragTarget, setIsContainerDragTarget] = useState(false); // New state for container drag target
-  
-  // Don't highlight the entire pair container - let individual containers handle their own highlighting
-  const shouldShowGlow = false;
 
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -51,32 +48,15 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
   const handleContainerDragOver = (e) => {
     e.preventDefault();
-
-    // Check for individual container drag data
-    try {
-      const dragDataString = e.dataTransfer.getData('application/json');
-      if (dragDataString) {
-        const dragData = JSON.parse(dragDataString);
-
-        if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
-          const draggedContainerType = dragData.containerType;
-
-          // Only highlight if same type containers can be swapped
-          if ((draggedContainerType === 'audio' && pair.audio) || 
-              (draggedContainerType === 'image' && pair.image)) {
-            setIsDragOverContainer(true);
-          }
-        }
-      }
-    } catch (error) {
-      // Fallback to original logic if drag data parsing fails
-      if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
-        setIsDragOverContainer(true);
-      }
+    
+    // Only show drag over state if this is a valid drop target for container swapping
+    if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
+      setIsDragOverContainer(true);
     }
   };
 
   const handleContainerDragLeave = (e) => {
+    e.preventDefault();
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setIsDragOverContainer(false);
     }
@@ -85,22 +65,27 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const handleContainerDrop = (e) => {
     e.preventDefault();
     setIsDragOverContainer(false);
-
+    
     try {
       const dragDataString = e.dataTransfer.getData('application/json');
       if (dragDataString) {
         const dragData = JSON.parse(dragDataString);
-
-        // Handle individual container swapping (audio with audio, image with image)
-        if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
-          const draggedContainerType = dragData.containerType;
-
+        
+        if (dragData.type === 'container' && dragData.pairId !== pair.id) {
+          const draggedPairData = dragData.pairData;
+          
+          // Determine what type of content to swap based on what the dragged container has
+          const draggedHasAudio = !!draggedPairData.audio;
+          const draggedHasImage = !!draggedPairData.image;
+          const targetHasAudio = !!pair.audio;
+          const targetHasImage = !!pair.image;
+          
           // Only allow same-type swapping
-          if (draggedContainerType === 'audio' && pair.audio) {
-            // Swap audio content only
+          if (draggedHasAudio && targetHasAudio) {
+            // Swap audio content
             onSwap(dragData.pairId, pair.id, 'audio');
-          } else if (draggedContainerType === 'image' && pair.image) {
-            // Swap image content only
+          } else if (draggedHasImage && targetHasImage) {
+            // Swap image content
             onSwap(dragData.pairId, pair.id, 'image');
           }
         }
@@ -108,37 +93,104 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     } catch (error) {
       console.error('Error handling container drop:', error);
     }
+    
+    // Also handle the old drag system for compatibility
+    if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
+      const draggedHasAudio = !!draggedContainer.audio;
+      const draggedHasImage = !!draggedContainer.image;
+      
+      if (draggedHasAudio) {
+        onSwap(draggedContainer.id, pair.id, 'audio');
+      } else if (draggedHasImage) {
+        onSwap(draggedContainer.id, pair.id, 'image');
+      }
+    }
+  };
+
+  const handleFileDrop = async (e) => {
+    e.preventDefault();
+    setIsDragOverContainer(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      // Handle file drops through the main drop handler
+      const dropEvent = new Event('drop', { bubbles: true });
+      dropEvent.dataTransfer = e.dataTransfer;
+      document.dispatchEvent(dropEvent);
+    }
+  };
+
+  const handleFilesDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if this is a file drag (not container drag)
+    const types = Array.from(e.dataTransfer.types);
+    if (types.includes('Files')) {
+      setIsDragOverContainer(true);
+    }
+  };
+
+  const handleFilesDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOverContainer(false);
+    }
   };
 
   return (
-    <motion.div
-      className={`relative group w-full ${isDragging ? 'opacity-50' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
-      layout
-      transition={{ duration: 0.3 }}
-      onDragOver={handleContainerDragOver}
-      onDragLeave={handleContainerDragLeave}
-      onDrop={handleContainerDrop}
-      style={{
-        border: isDragOverContainer ? '2px solid rgba(16, 185, 129, 0.8)' : 'none',
-        borderRadius: isDragOverContainer ? '16px' : '0px',
-        padding: isDragOverContainer ? '4px' : '0px',
-        boxShadow: isDragOverContainer ? '0 0 20px rgba(16, 185, 129, 0.4)' : 'none'
-      }}
-    >
-      {/* Empty space layer - shown when dragging */}
-      {isDragging && (
-        <motion.div
-          className="absolute inset-0 z-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+    <motion.div className="relative">
+      {/* Delete button - positioned at top right of container */}
+      {!generatedVideo && (
+        <button
+          onClick={handleDelete}
+          className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-red-500/20 backdrop-blur-sm border border-red-400/40 text-red-400 hover:text-red-300 hover:border-red-300/50 hover:bg-red-500/30 transition-all duration-300"
           style={{
-            background: '#2A2A2A',
-            border: '2px dashed #4A5568',
-            borderRadius: '16px',
-            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.5)',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
-        />
+          title="Delete this pair"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
+      {/* Video Generation Animation */}
+      <VideoGenerationAnimation
+        pairId={pair.id}
+        isGenerating={videoState?.isGenerating || false}
+        progress={videoState?.progress || 0}
+        generatedVideo={generatedVideo}
+        onComplete={handleVideoGenerationComplete}
+      />
+
+      {/* Drag handle positioned at top left of container */}
+      {!generatedVideo && (
+        <div
+          className="absolute top-4 left-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-blue-400 hover:border-blue-400/50 hover:bg-blue-500/20 transition-all duration-300 cursor-move"
+          style={{
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          }}
+          draggable="true"
+          onDragStart={(e) => {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('application/json', JSON.stringify({
+              type: 'container',
+              pairId: pair.id,
+              pairData: pair
+            }));
+            handleContainerDragStart(e);
+          }}
+          onDragEnd={handleContainerDragEnd}
+          title="Drag to reorder container"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </div>
       )}
 
       {/* Show generated video if available, otherwise show the original containers */}
@@ -212,7 +264,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 maxWidth: '500px',
                 background: pair.audio ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.audio ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: isValidDropTarget ? '#10B981' : (pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'),
+                borderColor: isValidDropTarget ? '#10B981' : (pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'), // Green border for valid drop targets
                 borderWidth: isValidDropTarget ? '3px' : '1.5px',
                 boxShadow: isValidDropTarget ? `
                   0 0 0 1px rgba(16, 185, 129, 0.5),
@@ -229,13 +281,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   0 0 8px rgba(30, 144, 255, 0.2),
                   0 0 15px rgba(0, 207, 255, 0.1),
                   inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `)),
+                `),
                 borderRadius: '14px',
                 animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
             >
               
-
               <div className="absolute inset-0 p-8">
                 <AudioContainer
                   audio={pair.audio}
@@ -272,9 +323,11 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                     0 0 15px rgba(0, 207, 255, 0.2),
                     inset 0 1px 0 rgba(255, 255, 255, 0.05)
                   `,
-                  borderRadius: '6px'
+                  borderRadius: '6px',
+                  animation: 'border-pulse 3s ease-in-out infinite alternate'
                 }}
               />
+              
               {/* Vertical bar of plus */}
               <div
                 className="absolute backdrop-blur-xl border"
@@ -291,10 +344,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                     0 0 15px rgba(0, 207, 255, 0.2),
                     inset 0 1px 0 rgba(255, 255, 255, 0.05)
                   `,
-                  borderRadius: '6px'
+                  borderRadius: '6px',
+                  animation: 'border-pulse 3s ease-in-out infinite alternate'
                 }}
               />
-              {/* Center glow effect */}
+              
+              {/* Center flare effect */}
               <div 
                 className="absolute w-3 h-3 rounded-full"
                 style={{
@@ -318,7 +373,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 maxWidth: '500px',
                 background: pair.image ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.image ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: isValidDropTarget ? '#10B981' : (pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'),
+                borderColor: isValidDropTarget ? '#10B981' : (pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'), // Green border for valid drop targets
                 borderWidth: isValidDropTarget ? '3px' : '1.5px',
                 boxShadow: isValidDropTarget ? `
                   0 0 0 1px rgba(16, 185, 129, 0.5),
@@ -335,13 +390,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   0 0 8px rgba(30, 144, 255, 0.2),
                   0 0 15px rgba(0, 207, 255, 0.1),
                   inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `)),
+                `),
                 borderRadius: '14px',
                 animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
             >
               
-
               <div className="absolute inset-0 p-8">
                 <ImageContainer
                   image={pair.image}
@@ -354,48 +408,15 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   draggedContainerType={draggedContainer?.type}
                   onContainerDragStart={onContainerDrag}
                   onContainerDragEnd={onContainerDrag}
+                  // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
-                  draggedContainer={draggedContainer}
+                  shouldShowGlow={isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image}
                 />
               </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Video Generation Animation Overlay */}
-      <VideoGenerationAnimation
-        pair={pair}
-        isGenerating={videoState.isGenerating}
-        progress={videoState.progress}
-        isComplete={videoState.isComplete}
-        generatedVideo={generatedVideo}
-        onComplete={handleVideoGenerationComplete}
-      />
-
-
-
-      {/* Delete button positioned at top right of container */}
-      <button
-        onClick={handleDelete}
-        className="absolute bottom-4 right-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-red-400 hover:border-red-400/50 hover:bg-red-500/20 transition-all duration-300"
-        style={{
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-        }}
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      {/* Hover enhancement for entire pair */}
-      <div 
-        className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.03) 100%)',
-          boxShadow: '0 0 80px rgba(59, 130, 246, 0.15)'
-        }}
-      />
     </motion.div>
   );
 };

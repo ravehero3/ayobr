@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAppStore } from '../store/appStore';
 import { motion } from 'framer-motion';
 
-const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete, isDraggingContainer, draggedContainer }) => {
+const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd, onDelete, isDraggingContainer, draggedContainer, shouldShowGlow }) => {
   const { updatePair } = useAppStore();
   const [imageUrl, setImageUrl] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -86,10 +86,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   }, [image]);
 
-  // Check if we should highlight this container when another image container is being dragged
-  const shouldHighlight = isDraggingContainer && draggedContainer && 
-                         draggedContainer.id !== pairId && 
-                         draggedContainerType === 'image';
+  // Use the shouldShowGlow prop passed from PairContainer for targeted highlighting
+  const shouldHighlight = shouldShowGlow;
 
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
