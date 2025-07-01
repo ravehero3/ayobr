@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import AudioContainer from './AudioContainer';
@@ -10,6 +9,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
+  const [isContainerDragTarget, setIsContainerDragTarget] = useState(false); // New state for container drag target
 
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -25,14 +25,14 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const handleVideoGenerationComplete = () => {
     // This function is called when video generation animation completes
     console.log(`Video generation animation completed for pair ${pair.id}`);
-    
+
     // Don't reset the state - let the generated video stay displayed
     // The video should remain visible after generation is complete
   };
 
   const handleContainerDragStart = (e) => {
     if (generatedVideo) return; // Don't allow dragging if video is generated
-    
+
     e.preventDefault();
     setIsDragging(true);
     onContainerDrag?.(pair.id, 'start');
@@ -41,19 +41,19 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     const containerElement = e.target.closest('.group');
     if (containerElement) {
       containerElement.setAttribute('draggable', 'true');
-      
+
       // Set up drag start event on the container
       const dragStartHandler = (dragEvent) => {
         dragEvent.dataTransfer.effectAllowed = 'move';
         dragEvent.dataTransfer.setData('text/plain', ''); // Required for Firefox
       };
-      
+
       containerElement.addEventListener('dragstart', dragStartHandler, { once: true });
       containerElement.addEventListener('dragend', () => {
         handleContainerDragEnd();
         containerElement.removeAttribute('draggable');
       }, { once: true });
-      
+
       // Simulate drag start
       const dragEvent = new DragEvent('dragstart', {
         bubbles: true,
@@ -142,7 +142,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 preload="metadata"
               />
             </div>
-            
+
             {/* Download button - positioned subtly */}
             <button
               onClick={() => {

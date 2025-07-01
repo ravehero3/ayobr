@@ -16,6 +16,8 @@ function App() {
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [draggedContainer, setDraggedContainer] = useState(null);
+
   const handleDragStart = useCallback((item) => {
     setDraggedItem(item);
   }, []);
@@ -23,6 +25,28 @@ function App() {
   const handleDragEnd = useCallback(() => {
     setDraggedItem(null);
   }, []);
+
+  const handleContainerDrag = (pairId, action, pairData) => {
+    if (action === 'start') {
+      setDraggedContainer(pairData);
+    } else if (action === 'end') {
+      setDraggedContainer(null);
+    }
+  };
+
+  const isValidContainerDragTarget = (targetPair) => {
+    if (!draggedContainer || targetPair.id === draggedContainer.id) return false;
+
+    // Check if both containers have the same type of content
+    const draggedHasAudio = !!draggedContainer.audio;
+    const draggedHasImage = !!draggedContainer.image;
+    const targetHasAudio = !!targetPair.audio;
+    const targetHasImage = !!targetPair.image;
+
+    // Allow swapping if both have audio or both have images, or if target is empty
+    return (draggedHasAudio && (targetHasAudio || (!targetHasAudio && !targetHasImage))) ||
+           (draggedHasImage && (targetHasImage || (!targetHasAudio && !targetHasImage)));
+  };
 
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');
@@ -197,6 +221,9 @@ function App() {
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                       clearFileCache={clearFileCache}
+                      onContainerDrag={handleContainerDrag}
+                      isValidContainerDragTarget={isValidContainerDragTarget}
+                      draggedContainer={draggedContainer}
                     />
                   </motion.div>
                 ))}
