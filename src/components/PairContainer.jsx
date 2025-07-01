@@ -53,65 +53,37 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
               animation: 'border-pulse 3s ease-in-out infinite alternate'
             }}
           >
-            {/* Success indicator */}
-            <div 
-              className="absolute top-6 right-8 w-6 h-6 rounded-full z-10 flex items-center justify-center"
-              style={{
-                background: 'radial-gradient(circle, rgba(16, 185, 129, 1) 0%, rgba(34, 197, 94, 0.8) 50%, transparent 80%)',
-                boxShadow: '0 0 20px rgba(16, 185, 129, 0.8)'
+            {/* Clean video display - just the video */}
+            <div className="absolute inset-0 p-6 flex items-center justify-center">
+              <video
+                src={generatedVideo.url}
+                controls
+                className="w-full h-full rounded-lg shadow-lg object-contain"
+                style={{
+                  maxHeight: '400px',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
+                }}
+                preload="metadata"
+              />
+            </div>
+            
+            {/* Download button - positioned subtly */}
+            <button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = generatedVideo.url;
+                link.download = generatedVideo.filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
               }}
+              className="absolute bottom-4 right-4 p-2 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-lg text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 opacity-0 group-hover:opacity-100"
             >
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-            </div>
-
-            <div className="absolute inset-0 p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white text-lg font-bold">Generated Video</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-green-400 text-sm font-medium">Complete</span>
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-              
-              <div className="flex-1 flex items-center justify-center">
-                <video
-                  src={generatedVideo.url}
-                  controls
-                  className="max-w-full max-h-full rounded-lg shadow-lg"
-                  style={{
-                    maxHeight: '320px',
-                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
-                  }}
-                  preload="metadata"
-                />
-              </div>
-              
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-gray-300 text-sm">
-                  <span className="text-neon-blue">{pair.audio?.name}</span>
-                  <span className="mx-2">+</span>
-                  <span className="text-neon-blue">{pair.image?.name}</span>
-                </div>
-                <button
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = generatedVideo.url;
-                    link.download = generatedVideo.filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg text-white text-sm font-medium transition-all duration-300 flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Download
-                </button>
-              </div>
-            </div>
+              Download
+            </button>
           </div>
         </div>
       ) : (
