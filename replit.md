@@ -182,6 +182,10 @@ Changelog:
 - July 1, 2025. App now correctly distinguishes between internal container dragging and external file dropping
 - July 1, 2025. Implemented container drop swapping logic - containers now properly swap content when dropped on valid targets
 - July 1, 2025. Fixed issue where drag visual feedback worked but actual swapping didn't occur
+- July 1, 2025. Successfully migrated project from Replit Agent to standard Replit environment
+- July 1, 2025. Fixed container swapping functionality - image containers now properly swap with other image containers
+- July 1, 2025. Enhanced drag and drop visual feedback with proper validation and target highlighting
+- July 1, 2025. Completed migration with all features intact: drag-drop file pairing, container swapping, video generation
 ```
 
 ## User Preferences

@@ -74,8 +74,14 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
   const handleContainerDragOver = (e) => {
     e.preventDefault();
-    if (!isDragOverContainer) {
+    if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
       setIsDragOverContainer(true);
+    }
+  };
+
+  const handleContainerDragLeave = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOverContainer(false);
     }
   };
 
@@ -84,7 +90,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     setIsDragOverContainer(false);
     
     // Handle container swapping when dragged container is dropped on this one
-    if (draggedContainer && draggedContainer.id !== pair.id) {
+    if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
       // Determine what type of content to swap based on what the dragged container has
       const draggedHasAudio = !!draggedContainer.audio;
       const draggedHasImage = !!draggedContainer.image;
@@ -105,7 +111,14 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
       layout
       transition={{ duration: 0.3 }}
       onDragOver={handleContainerDragOver}
+      onDragLeave={handleContainerDragLeave}
       onDrop={handleContainerDrop}
+      style={{
+        border: isDragOverContainer ? '2px solid rgba(16, 185, 129, 0.8)' : 'none',
+        borderRadius: isDragOverContainer ? '16px' : '0px',
+        padding: isDragOverContainer ? '4px' : '0px',
+        boxShadow: isDragOverContainer ? '0 0 20px rgba(16, 185, 129, 0.4)' : 'none'
+      }}
     >
       {/* Empty space layer - shown when dragging */}
       {isDragging && (
