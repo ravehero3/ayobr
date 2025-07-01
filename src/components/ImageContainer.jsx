@@ -90,7 +90,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     e.stopPropagation();
     // Trigger container drag start with the proper parameters
     if (onContainerDragStart) {
-      onContainerDragStart(pairId, 'start', { id: pairId, image, audio: null });
+      onContainerDragStart(pairId, 'start');
     }
   };
 
