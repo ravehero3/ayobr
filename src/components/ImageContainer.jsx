@@ -21,6 +21,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      type: 'image',
+      pairId: pairId,
+      data: image
+    }));
     setIsDragging(true);
     onDragStart({ type: 'image', pairId, data: image });
   };
@@ -31,15 +36,30 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
-    // Allow dropping image on any image container for swapping
-    if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      setIsDragOver(true);
+    e.preventDefault();
+
+    // Check if this is an image drag from another container
+    try {
+      const types = Array.from(e.dataTransfer.types);
+      if (types.includes('application/json')) {
+        const dragData = JSON.parse(e.dataTransfer.getData('application/json') || '{}');
+        if (dragData.type === 'image' && dragData.pairId !== pairId && image) {
+          e.dataTransfer.dropEffect = 'move';
+          setIsDragOver(true);
+          return;
+        }
+      }
+    } catch (error) {
+      // Fallback to checking draggedItem state
+      if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && image) {
+        e.dataTransfer.dropEffect = 'move';
+        setIsDragOver(true);
+        return;
+      }
     }
+
     // Also allow file drops
-    else if (e.dataTransfer.types.includes('Files')) {
-      e.preventDefault();
+    if (e.dataTransfer.types.includes('Files')) {
       e.dataTransfer.dropEffect = 'copy';
       setIsDragOver(true);
     }
@@ -55,8 +75,24 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     setIsDragOver(false);
 
-    // Handle image swapping
-    if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
+    // Handle image swapping from drag data
+    try {
+      const types = Array.from(e.dataTransfer.types);
+      if (types.includes('application/json')) {
+        const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
+        if (dragData.type === 'image' && dragData.pairId !== pairId && image) {
+          if (onSwap) {
+            onSwap(dragData.pairId, pairId, 'image');
+          }
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing drag data:', error);
+    }
+
+    // Fallback to state-based swapping
+    if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && image) {
       if (onSwap) {
         onSwap(draggedItem.pairId, pairId, 'image');
       }
@@ -127,7 +163,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleContainerDrop = (e) => {
     e.preventDefault();
-    
+
     // Handle image swapping via drag data
     try {
       const dragDataString = e.dataTransfer.getData('application/json');
@@ -143,7 +179,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     } catch (error) {
       console.error('Error parsing drag data:', error);
     }
-    
+
     // Handle container drop when in container drag mode
     if (isContainerDragMode && draggedContainerType === 'image' && onSwap) {
       console.log('Container drop detected in ImageContainer');

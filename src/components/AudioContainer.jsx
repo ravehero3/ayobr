@@ -87,6 +87,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      type: 'audio',
+      pairId: pairId,
+      data: audio
+    }));
     setIsDragging(true);
     onDragStart({ type: 'audio', pairId, data: audio });
   };
@@ -97,15 +102,30 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragOver = (e) => {
-    // Allow dropping audio on any audio container for swapping
-    if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      setIsDragOver(true);
+    e.preventDefault();
+    
+    // Check if this is an audio drag from another container
+    try {
+      const types = Array.from(e.dataTransfer.types);
+      if (types.includes('application/json')) {
+        const dragData = JSON.parse(e.dataTransfer.getData('application/json') || '{}');
+        if (dragData.type === 'audio' && dragData.pairId !== pairId && audio) {
+          e.dataTransfer.dropEffect = 'move';
+          setIsDragOver(true);
+          return;
+        }
+      }
+    } catch (error) {
+      // Fallback to checking draggedItem state
+      if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && audio) {
+        e.dataTransfer.dropEffect = 'move';
+        setIsDragOver(true);
+        return;
+      }
     }
+    
     // Also allow file drops
-    else if (e.dataTransfer.types.includes('Files')) {
-      e.preventDefault();
+    if (e.dataTransfer.types.includes('Files')) {
       e.dataTransfer.dropEffect = 'copy';
       setIsDragOver(true);
     }
@@ -121,8 +141,24 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     setIsDragOver(false);
 
-    // Handle audio swapping
-    if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
+    // Handle audio swapping from drag data
+    try {
+      const types = Array.from(e.dataTransfer.types);
+      if (types.includes('application/json')) {
+        const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
+        if (dragData.type === 'audio' && dragData.pairId !== pairId && audio) {
+          if (onSwap) {
+            onSwap(dragData.pairId, pairId, 'audio');
+          }
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing drag data:', error);
+    }
+
+    // Fallback to state-based swapping
+    if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && audio) {
       if (onSwap) {
         onSwap(draggedItem.pairId, pairId, 'audio');
       }
@@ -164,8 +200,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   };
 
-  // Use the shouldShowGlow prop for targeted highlighting, plus highlight when another audio is being dragged
-  const shouldHighlight = shouldShowGlow || (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && !!audio);
+  // Enhanced highlighting logic - show glow when:
+  // 1. Explicitly told to via shouldShowGlow prop
+  // 2. Another audio container is being dragged and this container has audio
+  // 3. This container is a valid drop target during audio drag
+  const shouldHighlight = shouldShowGlow || 
+    (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && !!audio) ||
+    (isDraggingContainer && draggedContainerType === 'audio' && !!audio);
 
 
 
