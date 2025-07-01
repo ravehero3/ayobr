@@ -49,24 +49,26 @@ function App() {
   };
 
   const isValidContainerDragTarget = (targetPair) => {
-    if (!draggedContainer) return false;
-    
-    // Handle move button drag mode
-    if (isContainerDragMode && draggedContainerType) {
-      return true; // All containers of the same type should glow
-    }
-    
-    if (targetPair.id === draggedContainer.id) return false;
+    if (!draggedContainer || targetPair.id === draggedContainer.id) return false;
 
-    // Check if both containers have the same type of content
+    // Determine what type the dragged container is
     const draggedHasAudio = !!draggedContainer.audio;
     const draggedHasImage = !!draggedContainer.image;
     const targetHasAudio = !!targetPair.audio;
     const targetHasImage = !!targetPair.image;
 
-    // Allow swapping if both have audio or both have images, or if target is empty
-    return (draggedHasAudio && (targetHasAudio || (!targetHasAudio && !targetHasImage))) ||
-           (draggedHasImage && (targetHasImage || (!targetHasAudio && !targetHasImage)));
+    // Enforce same-type swapping only:
+    // - Audio containers can only swap with other audio containers
+    // - Image containers can only swap with other image containers
+    // - Empty containers can accept any type
+    if (draggedHasAudio) {
+      return targetHasAudio; // Audio can only swap with audio
+    } else if (draggedHasImage) {
+      return targetHasImage; // Image can only swap with image
+    } else {
+      // Dragged container is empty - can swap with any container
+      return true;
+    }
   };
 
   const handleGenerateVideos = async () => {

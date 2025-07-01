@@ -170,6 +170,8 @@ Changelog:
 - July 1, 2025. Confirmed move buttons are present in each container for dragging and reordering containers
 - July 1, 2025. Removed redundant move button from audio containers - consolidated all move functionality into main drag handle
 - July 1, 2025. Cleaned up audio container interface for simpler, more intuitive user experience
+- July 1, 2025. Implemented same-type container swapping rule: audio containers can only swap with audio containers, image containers with image containers
+- July 1, 2025. Enhanced drag validation to enforce content type restrictions for better organization
 ```
 
 ## User Preferences
