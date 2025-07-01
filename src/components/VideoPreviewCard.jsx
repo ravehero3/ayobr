@@ -1,22 +1,34 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useVideoPlayback } from '../hooks/useVideoPlayback';
 
 const VideoPreviewCard = ({ video }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const videoRef = useRef(null);
+  const { currentlyPlayingId, setCurrentlyPlaying, pauseAll, isPlaying } = useVideoPlayback();
+  
+  // Check if this video is currently playing
+  const isVideoPlaying = isPlaying(video.id);
 
   useEffect(() => {
     const videoElement = videoRef.current;
     if (videoElement) {
       const updateTime = () => setCurrentTime(videoElement.currentTime);
       const updateDuration = () => setDuration(videoElement.duration);
-      const handlePlay = () => setIsPlaying(true);
-      const handlePause = () => setIsPlaying(false);
-      const handleEnded = () => setIsPlaying(false);
+      const handlePlay = () => setCurrentlyPlaying(video.id);
+      const handlePause = () => {
+        if (isPlaying(video.id)) {
+          pauseAll();
+        }
+      };
+      const handleEnded = () => {
+        if (isPlaying(video.id)) {
+          pauseAll();
+        }
+      };
 
       videoElement.addEventListener('timeupdate', updateTime);
       videoElement.addEventListener('loadedmetadata', updateDuration);
@@ -32,13 +44,23 @@ const VideoPreviewCard = ({ video }) => {
         videoElement.removeEventListener('ended', handleEnded);
       };
     }
-  }, []);
+  }, [video.id, setCurrentlyPlaying, pauseAll, isPlaying]);
+
+  // Effect to pause this video when another video starts playing
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (videoElement && currentlyPlayingId !== video.id && !videoElement.paused) {
+      videoElement.pause();
+    }
+  }, [currentlyPlayingId, video.id]);
 
   const handlePlayPause = () => {
     if (videoRef.current) {
-      if (isPlaying) {
+      if (isVideoPlaying) {
         videoRef.current.pause();
       } else {
+        // Pause all other videos and play this one
+        setCurrentlyPlaying(video.id);
         videoRef.current.play();
       }
     }
@@ -174,15 +196,15 @@ const VideoPreviewCard = ({ video }) => {
             disabled={videoError}
             className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
-              border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
-              boxShadow: isPlaying 
+              backgroundColor: isVideoPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
+              border: `2px solid ${isVideoPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
+              boxShadow: isVideoPlaying 
                 ? '0 0 20px rgba(53, 132, 228, 0.4)'
                 : '0 0 10px rgba(53, 132, 228, 0.2)',
-              color: isPlaying ? 'white' : '#3584E4'
+              color: isVideoPlaying ? 'white' : '#3584E4'
             }}
           >
-            {isPlaying ? (
+            {isVideoPlaying ? (
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
               </svg>
