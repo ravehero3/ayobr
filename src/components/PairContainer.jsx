@@ -173,9 +173,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
       {/* Video Generation Animation */}
       <VideoGenerationAnimation
-        pairId={pair.id}
+        pair={pair}
         isGenerating={videoState?.isGenerating || false}
         progress={videoState?.progress || 0}
+        isComplete={videoState?.isComplete || false}
         generatedVideo={generatedVideo}
         onComplete={handleVideoGenerationComplete}
       />
