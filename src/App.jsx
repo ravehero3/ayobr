@@ -237,52 +237,7 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Drag Preview - Container that follows cursor */}
-      <AnimatePresence>
-        {isDraggingContainer && draggedContainer && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 0.8, scale: 0.9 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed pointer-events-none z-50"
-            style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%) rotate(-5deg)', // Center the preview and add rotation
-              marginLeft: (dragPosition.x - window.innerWidth / 2) * 0.1, // Subtle follow effect
-              marginTop: (dragPosition.y - window.innerHeight / 2) * 0.1
-            }}
-          >
-            <div
-              className="w-48 h-24 rounded-2xl border-2 flex items-center justify-center backdrop-blur-sm"
-              style={{
-                background: 'linear-gradient(135deg, #0A0F1C 0%, #050A13 100%)',
-                borderColor: draggedContainerType === 'audio' ? '#10B981' : '#10B981',
-                boxShadow: `
-                  0 0 25px rgba(16, 185, 129, 0.6),
-                  0 0 50px rgba(16, 185, 129, 0.4),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
-                `
-              }}
-            >
-              <div className="text-center">
-                {draggedContainerType === 'audio' ? (
-                  <svg className="w-8 h-8 mx-auto text-green-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                  </svg>
-                ) : (
-                  <svg className="w-8 h-8 mx-auto text-green-400 mb-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                  </svg>
-                )}
-                <p className="text-green-400 text-xs font-medium">
-                  {draggedContainerType === 'audio' ? 'Audio' : 'Image'}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
 
       <div className="fixed inset-0 flex flex-col">
         {/* Header */}

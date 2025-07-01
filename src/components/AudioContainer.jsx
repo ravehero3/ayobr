@@ -233,6 +233,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     e.stopPropagation();
 
+    console.log('AudioContainer handleContainerDrop called', {
+      isContainerDragMode,
+      draggedContainerType,
+      pairId,
+      audio: !!audio
+    });
+
     // Handle container swapping from move button drag
     if (isContainerDragMode && draggedContainerType === 'audio') {
       // Get the dragged container data from dataTransfer or sessionStorage
@@ -243,10 +250,15 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         draggedData = sessionStorage.getItem('currentDragData');
       }
 
+      console.log('Container drag mode detected, draggedData:', draggedData);
+
       if (draggedData) {
         try {
           const parsedData = JSON.parse(draggedData);
+          console.log('Parsed drag data:', parsedData);
+          
           if (parsedData.type === 'audio' && parsedData.pairId !== pairId) {
+            console.log('Triggering audio swap:', parsedData.pairId, '->', pairId);
             // Trigger the swap
             if (onSwap) {
               onSwap(parsedData.pairId, pairId, 'audio');
@@ -257,16 +269,30 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             }
             // Clear the stored drag data
             sessionStorage.removeItem('currentDragData');
+            return;
+          } else if (parsedData.type === 'individual-container' && parsedData.containerType === 'audio' && parsedData.pairId !== pairId) {
+            console.log('Triggering individual container audio swap:', parsedData.pairId, '->', pairId);
+            // Handle individual container swapping
+            if (onSwap) {
+              onSwap(parsedData.pairId, pairId, 'audio');
+            }
+            // End the container drag mode
+            if (onContainerDragEnd) {
+              onContainerDragEnd('audio', 'end');
+            }
+            // Clear the stored drag data
+            sessionStorage.removeItem('currentDragData');
+            return;
           }
         } catch (error) {
           console.error('Error parsing dragged data:', error);
         }
       }
-      return;
     }
 
     // Handle regular audio file dropping from main container drag
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
+      console.log('Regular audio drag detected, triggering swap');
       if (onSwap) {
         onSwap(draggedItem.pairId, pairId, 'audio');
       }
@@ -280,11 +306,15 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       draggable={!!audio}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}
+      onDragOver={(e) => {
+        handleDragOver(e);
+        handleContainerDragOver(e);
+      }}
       onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onDragEnter={handleContainerDragOver}
-      onDrop={handleContainerDrop}
+      onDrop={(e) => {
+        handleDrop(e);
+        handleContainerDrop(e);
+      }}
       whileHover={{ scale: audio ? 1.005 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={{
@@ -402,12 +432,20 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             onDragStart={(e) => {
               e.stopPropagation();
               e.dataTransfer.effectAllowed = 'move';
-              e.dataTransfer.setData('application/json', JSON.stringify({
+              const dragData = {
                 type: 'individual-container',
                 containerType: 'audio',
                 pairId: pairId,
                 content: audio
-              }));
+              };
+              e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+              e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+              
+              // Also store in sessionStorage for reliable access
+              sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+              
+              console.log('Move button drag started:', dragData);
+              
               if (onContainerDragStart) {
                 onContainerDragStart('audio', 'start', { 
                   id: pairId, 
