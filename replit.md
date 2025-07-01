@@ -162,6 +162,8 @@ Changelog:
 - July 1, 2025. Updated video display to show only the generated video without "Generated Video" text or status indicators
 - July 1, 2025. Fixed audio issues in generated videos - ensured high-quality audio preservation with AAC codec at 320k bitrate
 - July 1, 2025. Fixed video preview persistence issue - videos now stay displayed after generation instead of disappearing
+- July 1, 2025. Successfully completed migration from Replit Agent to standard Replit environment
+- July 1, 2025. Fixed progress bar reloading issue - videos now generate once and display properly without progress bar loops
 ```
 
 ## User Preferences
