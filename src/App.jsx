@@ -131,7 +131,15 @@ function App() {
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
-    setIsDragOver(true);
+    
+    // Only show file drop overlay if dragging external files (not internal containers)
+    const hasFiles = e.dataTransfer.types.includes('Files');
+    const hasContainerData = e.dataTransfer.types.includes('text/plain');
+    
+    // Only trigger file drop UI if we have files and no container drag data
+    if (hasFiles && !hasContainerData) {
+      setIsDragOver(true);
+    }
   }, []);
 
   const handleDragLeave = useCallback((e) => {
@@ -145,8 +153,11 @@ function App() {
     e.preventDefault();
     setIsDragOver(false);
 
+    // Only process files if this is an external file drop (not internal container dragging)
     const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
+    const hasContainerData = e.dataTransfer.types.includes('text/plain');
+    
+    if (files.length > 0 && !hasContainerData) {
       handleFileDrop(files);
     }
   }, [handleFileDrop]);

@@ -172,6 +172,8 @@ Changelog:
 - July 1, 2025. Cleaned up audio container interface for simpler, more intuitive user experience
 - July 1, 2025. Implemented same-type container swapping rule: audio containers can only swap with audio containers, image containers with image containers
 - July 1, 2025. Enhanced drag validation to enforce content type restrictions for better organization
+- July 1, 2025. Fixed drag detection conflict between container moving and file dropping from computer
+- July 1, 2025. App now correctly distinguishes between internal container dragging and external file dropping
 ```
 
 ## User Preferences
