@@ -174,6 +174,8 @@ Changelog:
 - July 1, 2025. Enhanced drag validation to enforce content type restrictions for better organization
 - July 1, 2025. Fixed drag detection conflict between container moving and file dropping from computer
 - July 1, 2025. App now correctly distinguishes between internal container dragging and external file dropping
+- July 1, 2025. Implemented container drop swapping logic - containers now properly swap content when dropped on valid targets
+- July 1, 2025. Fixed issue where drag visual feedback worked but actual swapping didn't occur
 ```
 
 ## User Preferences

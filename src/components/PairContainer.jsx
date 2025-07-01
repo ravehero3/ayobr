@@ -82,7 +82,21 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const handleContainerDrop = (e) => {
     e.preventDefault();
     setIsDragOverContainer(false);
-    // Handle container drop logic here if needed
+    
+    // Handle container swapping when dragged container is dropped on this one
+    if (draggedContainer && draggedContainer.id !== pair.id) {
+      // Determine what type of content to swap based on what the dragged container has
+      const draggedHasAudio = !!draggedContainer.audio;
+      const draggedHasImage = !!draggedContainer.image;
+      
+      if (draggedHasAudio) {
+        // Swap audio content
+        onSwap(draggedContainer.id, pair.id, 'audio');
+      } else if (draggedHasImage) {
+        // Swap image content
+        onSwap(draggedContainer.id, pair.id, 'image');
+      }
+    }
   };
 
   return (
