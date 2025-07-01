@@ -31,81 +31,45 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   const handleContainerDragStart = (e) => {
     if (generatedVideo) return; // Don't allow dragging if video is generated
     
-    e.preventDefault();
     setIsDragging(true);
     onContainerDrag?.(pair.id, 'start');
-
+    
+    // Enable dragging on the main container
     const containerElement = e.target.closest('.group');
-    if (!containerElement) return;
-
-    // Create a clone of the container for dragging
-    const dragClone = containerElement.cloneNode(true);
-    dragClone.style.position = 'fixed';
-    dragClone.style.pointerEvents = 'none';
-    dragClone.style.zIndex = '9999';
-    dragClone.style.transform = 'rotate(5deg) scale(1.05)';
-    dragClone.style.opacity = '0.9';
-    dragClone.style.transition = 'none';
-    dragClone.style.width = containerElement.offsetWidth + 'px';
-    dragClone.style.height = containerElement.offsetHeight + 'px';
-    
-    // Position the clone at the cursor
-    const rect = containerElement.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
-    
-    dragClone.style.left = (e.clientX - offsetX) + 'px';
-    dragClone.style.top = (e.clientY - offsetY) + 'px';
-    
-    document.body.appendChild(dragClone);
-
-    // Mouse move handler to follow cursor
-    const handleMouseMove = (moveEvent) => {
-      dragClone.style.left = (moveEvent.clientX - offsetX) + 'px';
-      dragClone.style.top = (moveEvent.clientY - offsetY) + 'px';
-    };
-
-    // Mouse up handler to end drag
-    const handleMouseUp = (upEvent) => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+    if (containerElement) {
+      containerElement.setAttribute('draggable', 'true');
       
-      // Remove the drag clone
-      if (dragClone.parentNode) {
-        document.body.removeChild(dragClone);
-      }
+      // Set up the drag data
+      const dragStartHandler = (dragEvent) => {
+        dragEvent.dataTransfer.effectAllowed = 'move';
+        dragEvent.dataTransfer.setData('text/plain', pair.id);
+      };
       
-      // Check if dropped on another container
-      const elementBelow = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
-      const targetContainer = elementBelow?.closest('.group');
+      // Add the drag start event listener
+      containerElement.addEventListener('dragstart', dragStartHandler, { once: true });
       
-      if (targetContainer && targetContainer !== containerElement) {
-        // Find the target pair ID
-        const allContainers = document.querySelectorAll('.group');
-        let targetPairId = null;
-        
-        allContainers.forEach((container, index) => {
-          if (container === targetContainer) {
-            const pairContainers = Array.from(document.querySelectorAll('.group'));
-            const targetIndex = pairContainers.indexOf(container);
-            // Get pair ID from the container's data or use the store
-            const allPairs = useAppStore.getState().pairs;
-            if (allPairs[targetIndex]) {
-              targetPairId = allPairs[targetIndex].id;
-            }
-          }
+      // Add drag end event listener
+      containerElement.addEventListener('dragend', () => {
+        handleContainerDragEnd();
+        containerElement.removeAttribute('draggable');
+      }, { once: true });
+      
+      // Create and dispatch a drag event
+      setTimeout(() => {
+        const rect = containerElement.getBoundingClientRect();
+        const dragEvent = new DragEvent('dragstart', {
+          bubbles: true,
+          cancelable: true,
+          clientX: e.clientX,
+          clientY: e.clientY,
+          dataTransfer: new DataTransfer()
         });
         
-        if (targetPairId && targetPairId !== pair.id) {
-          onContainerDrag?.(pair.id, 'swap', targetPairId);
-        }
-      }
-      
-      handleContainerDragEnd();
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+        dragEvent.dataTransfer.effectAllowed = 'move';
+        dragEvent.dataTransfer.setData('text/plain', pair.id);
+        containerElement.dispatchEvent(dragEvent);
+      }, 0);
+    }
   };
 
   const handleContainerDragEnd = (e) => {
@@ -122,8 +86,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
   const handleContainerDrop = (e) => {
     e.preventDefault();
-    if (draggedContainer && draggedContainer !== pair.id) {
-      onContainerDrag?.(draggedContainer, 'swap', pair.id);
+    const draggedPairId = e.dataTransfer.getData('text/plain');
+    if (draggedPairId && draggedPairId !== pair.id) {
+      onContainerDrag?.(draggedPairId, 'swap', pair.id);
     }
   };
 
@@ -134,11 +99,24 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
       className={`relative group w-full ${isDragging ? 'opacity-30' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
       layout
       transition={{ duration: 0.3 }}
+      draggable={!generatedVideo && !isDragging}
+      onDragStart={(e) => {
+        if (generatedVideo) {
+          e.preventDefault();
+          return;
+        }
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', pair.id);
+        setIsDragging(true);
+        onContainerDrag?.(pair.id, 'start');
+      }}
+      onDragEnd={handleContainerDragEnd}
       onDragOver={handleContainerDragOver}
       onDrop={handleContainerDrop}
       style={{
         visibility: isDragging ? 'visible' : 'visible',
-        minHeight: isDragging ? '450px' : 'auto'
+        minHeight: isDragging ? '450px' : 'auto',
+        cursor: !generatedVideo ? 'move' : 'default'
       }}
     >
       {/* Empty state placeholder when this container is being dragged */}
@@ -416,8 +394,25 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
             boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
           onMouseDown={(e) => {
-            // Trigger container drag start
-            handleContainerDragStart(e);
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Start drag directly on the container
+            const containerElement = e.target.closest('.group');
+            if (containerElement) {
+              // Create a synthetic drag event
+              const dragEvent = new MouseEvent('mousedown', {
+                bubbles: true,
+                cancelable: true,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                button: 0
+              });
+              
+              // Trigger the container's drag behavior
+              setIsDragging(true);
+              onContainerDrag?.(pair.id, 'start');
+            }
           }}
           title="Drag to reorder container"
         >
