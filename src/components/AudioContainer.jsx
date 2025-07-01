@@ -12,6 +12,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (audio && waveformRef.current) {
@@ -86,7 +87,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = 'move';
+    setIsDragging(true);
     onDragStart({ type: 'audio', pairId, data: audio });
+  };
+
+  const handleDragEnd = (e) => {
+    setIsDragging(false);
+    onDragEnd();
   };
 
   const handleDragOver = (e) => {
@@ -131,7 +138,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       className="relative w-full h-full transition-all duration-300 group cursor-pointer"
       draggable={!!audio}
       onDragStart={handleDragStart}
-      onDragEnd={onDragEnd}
+      onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -145,7 +152,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         border: isDragOver 
           ? '3px solid rgba(34, 197, 94, 0.8)' // Stronger green border when valid drop target
           : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
-        boxShadow: isDragOver
+        boxShadow: isDragging
+          ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
+          : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
           : audio 
             ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
@@ -159,8 +168,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '136px',
         minHeight: '136px',
         maxHeight: '136px',
-        transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
-        transition: 'all 0.2s ease-in-out'
+        transform: isDragging 
+          ? 'scale(1.05) translateY(-8px) rotate(2deg)' 
+          : isDragOver 
+          ? 'scale(1.02)' 
+          : 'scale(1)',
+        opacity: isDragging ? 0.8 : 1,
+        transition: 'all 0.2s ease-in-out',
+        zIndex: isDragging ? 1000 : 1
       }}
     >
       {/* Drag and Drop Overlay */}

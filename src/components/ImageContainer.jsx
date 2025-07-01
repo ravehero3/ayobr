@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd }) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   React.useEffect(() => {
     if (image) {
@@ -18,7 +19,13 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = 'move';
+    setIsDragging(true);
     onDragStart({ type: 'image', pairId, data: image });
+  };
+
+  const handleDragEnd = (e) => {
+    setIsDragging(false);
+    onDragEnd();
   };
 
   const handleDragOver = (e) => {
@@ -74,7 +81,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
       draggable={!!image}
       onDragStart={handleDragStart}
-      onDragEnd={onDragEnd}
+      onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -86,15 +93,23 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         border: isDragOver 
           ? '3px solid rgba(34, 197, 94, 0.8)' 
           : '1px solid rgba(59, 130, 246, 0.2)',
-        boxShadow: isDragOver
+        boxShadow: isDragging
+          ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
+          : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
           : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         padding: '20px',
         height: '180px',
         minHeight: '180px',
         maxHeight: '180px',
-        transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
+        transform: isDragging 
+          ? 'scale(1.05) translateY(-8px) rotate(2deg)' 
+          : isDragOver 
+          ? 'scale(1.02)' 
+          : 'scale(1)',
+        opacity: isDragging ? 0.8 : 1,
         transition: 'all 0.2s ease-in-out',
+        zIndex: isDragging ? 1000 : 1,
         pointerEvents: 'auto',
         userSelect: 'none'
       } : {
