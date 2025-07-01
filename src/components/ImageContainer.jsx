@@ -88,9 +88,13 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
-    // Trigger container drag start with the proper parameters
+    // Trigger container drag start for individual image container
     if (onContainerDragStart) {
-      onContainerDragStart('image');
+      onContainerDragStart(pairId, 'start', { 
+        id: pairId, 
+        type: 'image',
+        content: image 
+      });
     }
   };
 
@@ -254,12 +258,17 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
               e.stopPropagation();
               e.dataTransfer.effectAllowed = 'move';
               e.dataTransfer.setData('application/json', JSON.stringify({
-                type: 'container',
+                type: 'individual-container',
+                containerType: 'image',
                 pairId: pairId,
-                pairData: { id: pairId, audio: null, image: image }
+                content: image
               }));
               if (onContainerDragStart) {
-                onContainerDragStart(pairId, 'start', { id: pairId, audio: null, image: image });
+                onContainerDragStart(pairId, 'start', { 
+                  id: pairId, 
+                  type: 'image',
+                  content: image 
+                });
               }
             }}
             onDragEnd={(e) => {

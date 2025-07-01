@@ -135,9 +135,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
-    // Trigger container drag start with the proper parameters
+    // Trigger container drag start for individual audio container
     if (onContainerDragStart) {
-      onContainerDragStart(pairId, 'start', { id: pairId, audio, image: null });
+      onContainerDragStart(pairId, 'start', { 
+        id: pairId, 
+        type: 'audio',
+        content: audio 
+      });
     }
   };
 
@@ -269,12 +273,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 e.stopPropagation();
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('application/json', JSON.stringify({
-                  type: 'container',
+                  type: 'individual-container',
+                  containerType: 'audio',
                   pairId: pairId,
-                  pairData: { id: pairId, audio: audio, image: null }
+                  content: audio
                 }));
                 if (onContainerDragStart) {
-                  onContainerDragStart(pairId, 'start', { id: pairId, audio: audio, image: null });
+                  onContainerDragStart(pairId, 'start', { 
+                    id: pairId, 
+                    type: 'audio',
+                    content: audio 
+                  });
                 }
               }}
               onDragEnd={(e) => {

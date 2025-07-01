@@ -48,8 +48,28 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
   const handleContainerDragOver = (e) => {
     e.preventDefault();
-    if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
-      setIsDragOverContainer(true);
+    
+    // Check for individual container drag data
+    try {
+      const dragDataString = e.dataTransfer.getData('application/json');
+      if (dragDataString) {
+        const dragData = JSON.parse(dragDataString);
+        
+        if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
+          const draggedContainerType = dragData.containerType;
+          
+          // Only highlight if same type containers can be swapped
+          if ((draggedContainerType === 'audio' && pair.audio) || 
+              (draggedContainerType === 'image' && pair.image)) {
+            setIsDragOverContainer(true);
+          }
+        }
+      }
+    } catch (error) {
+      // Fallback to original logic if drag data parsing fails
+      if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
+        setIsDragOverContainer(true);
+      }
     }
   };
 
@@ -68,39 +88,22 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
       if (dragDataString) {
         const dragData = JSON.parse(dragDataString);
         
-        if (dragData.type === 'container' && dragData.pairId !== pair.id) {
-          const draggedPairData = dragData.pairData;
-          
-          // Determine what type of content to swap based on what the dragged container has
-          const draggedHasAudio = !!draggedPairData.audio;
-          const draggedHasImage = !!draggedPairData.image;
-          const targetHasAudio = !!pair.audio;
-          const targetHasImage = !!pair.image;
+        // Handle individual container swapping (audio with audio, image with image)
+        if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
+          const draggedContainerType = dragData.containerType;
           
           // Only allow same-type swapping
-          if (draggedHasAudio && targetHasAudio) {
-            // Swap audio content
+          if (draggedContainerType === 'audio' && pair.audio) {
+            // Swap audio content only
             onSwap(dragData.pairId, pair.id, 'audio');
-          } else if (draggedHasImage && targetHasImage) {
-            // Swap image content
+          } else if (draggedContainerType === 'image' && pair.image) {
+            // Swap image content only
             onSwap(dragData.pairId, pair.id, 'image');
           }
         }
       }
     } catch (error) {
       console.error('Error handling container drop:', error);
-    }
-    
-    // Also handle the old drag system for compatibility
-    if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
-      const draggedHasAudio = !!draggedContainer.audio;
-      const draggedHasImage = !!draggedContainer.image;
-      
-      if (draggedHasAudio) {
-        onSwap(draggedContainer.id, pair.id, 'audio');
-      } else if (draggedHasImage) {
-        onSwap(draggedContainer.id, pair.id, 'image');
-      }
     }
   };
 
@@ -381,31 +384,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
         onComplete={handleVideoGenerationComplete}
       />
 
-      {/* Drag handle positioned at top left of container */}
-      {!generatedVideo && (
-        <div
-          className="absolute top-4 left-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-blue-400 hover:border-blue-400/50 hover:bg-blue-500/20 transition-all duration-300 cursor-move"
-          style={{
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-          }}
-          draggable="true"
-          onDragStart={(e) => {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('application/json', JSON.stringify({
-              type: 'container',
-              pairId: pair.id,
-              pairData: pair
-            }));
-            handleContainerDragStart(e);
-          }}
-          onDragEnd={handleContainerDragEnd}
-          title="Drag to reorder container"
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-          </svg>
-        </div>
-      )}
+      
 
       {/* Delete button positioned at top right of container */}
       <button
