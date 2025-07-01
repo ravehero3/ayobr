@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAppStore } from '../store/appStore';
 import { motion } from 'framer-motion';
 
-const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd }) => {
+const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDragEnd, isContainerDragMode, draggedContainerType, onContainerDragStart, onContainerDragEnd }) => {
   const { updatePair } = useAppStore();
   const [imageUrl, setImageUrl] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -86,6 +86,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   }, [image]);
 
+  const handleMoveButtonClick = (e) => {
+    e.stopPropagation();
+    onContainerDragStart?.('image');
+  };
+
   return (
     <motion.div
       className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
@@ -102,11 +107,15 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         backdropFilter: 'blur(8px)',
         border: isDragOver 
           ? '3px solid rgba(34, 197, 94, 0.8)' 
+          : (isContainerDragMode && draggedContainerType === 'image')
+          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for images
           : '1px solid rgba(59, 130, 246, 0.2)',
         boxShadow: isDragging
           ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
           : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
+          : (isContainerDragMode && draggedContainerType === 'image')
+          ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         padding: '20px',
         height: '180px',
@@ -128,9 +137,13 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         backdropFilter: 'blur(4px)',
         border: isDragOver
           ? '2px solid rgba(34, 197, 94, 0.6)'
+          : (isContainerDragMode && draggedContainerType === 'image')
+          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow for empty image containers too
           : '1.5px solid rgba(30, 144, 255, 0.3)',
         boxShadow: isDragOver
           ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
+          : (isContainerDragMode && draggedContainerType === 'image')
+          ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
           : `
           0 0 0 1px rgba(30, 144, 255, 0.15),
           0 0 8px rgba(30, 144, 255, 0.2),
@@ -205,11 +218,12 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           <button
             className="absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10"
             style={{
-              backgroundColor: 'rgba(53, 132, 228, 0.15)',
-              border: '1px solid rgba(53, 132, 228, 0.3)',
-              color: '#3584E4'
+              backgroundColor: (isContainerDragMode && draggedContainerType === 'image') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
+              border: (isContainerDragMode && draggedContainerType === 'image') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
+              color: (isContainerDragMode && draggedContainerType === 'image') ? '#10B981' : '#3584E4'
             }}
-            title="Drag to move image"
+            title="Click to activate drag mode for image containers"
+            onClick={handleMoveButtonClick}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>

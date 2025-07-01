@@ -17,6 +17,8 @@ function App() {
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [draggedContainer, setDraggedContainer] = useState(null);
+  const [isContainerDragMode, setIsContainerDragMode] = useState(false);
+  const [draggedContainerType, setDraggedContainerType] = useState(null);
 
   const handleDragStart = useCallback((item) => {
     setDraggedItem(item);
@@ -31,11 +33,30 @@ function App() {
       setDraggedContainer(pairData);
     } else if (action === 'end') {
       setDraggedContainer(null);
+    } else if (typeof pairId === 'string' && (pairId === 'audio' || pairId === 'image')) {
+      // Handle move button clicks - pairId is actually the container type
+      setIsContainerDragMode(true);
+      setDraggedContainerType(pairId);
+      setDraggedContainer({ type: pairId });
+      
+      // Auto-reset after 10 seconds
+      setTimeout(() => {
+        setIsContainerDragMode(false);
+        setDraggedContainerType(null);
+        setDraggedContainer(null);
+      }, 10000);
     }
   };
 
   const isValidContainerDragTarget = (targetPair) => {
-    if (!draggedContainer || targetPair.id === draggedContainer.id) return false;
+    if (!draggedContainer) return false;
+    
+    // Handle move button drag mode
+    if (isContainerDragMode && draggedContainerType) {
+      return true; // All containers of the same type should glow
+    }
+    
+    if (targetPair.id === draggedContainer.id) return false;
 
     // Check if both containers have the same type of content
     const draggedHasAudio = !!draggedContainer.audio;

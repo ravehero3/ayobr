@@ -220,6 +220,10 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   draggedItem={draggedItem}
                   onDragStart={onDragStart}
                   onDragEnd={onDragEnd}
+                  isContainerDragMode={isContainerDragTarget}
+                  draggedContainerType={draggedContainer?.type}
+                  onContainerDragStart={onContainerDrag}
+                  onContainerDragEnd={onContainerDrag}
                 />
               </div>
             </div>
@@ -330,6 +334,10 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   draggedItem={draggedItem}
                   onDragStart={onDragStart}
                   onDragEnd={onDragEnd}
+                  isContainerDragMode={isContainerDragTarget}
+                  draggedContainerType={draggedContainer?.type}
+                  onContainerDragStart={onContainerDrag}
+                  onContainerDragEnd={onContainerDrag}
                 />
               </div>
             </div>
