@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import AudioContainer from './AudioContainer';
@@ -5,8 +6,10 @@ import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache }) => {
+const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
+  const [isDragging, setIsDragging] = useState(false);
+  const [isDragOverContainer, setIsDragOverContainer] = useState(false);
 
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -27,19 +30,85 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     // The video should remain visible after generation is complete
   };
 
+  const handleContainerDragStart = (e) => {
+    if (generatedVideo) return; // Don't allow dragging if video is generated
+    
+    e.preventDefault();
+    setIsDragging(true);
+    onContainerDrag?.(pair.id, 'start');
 
+    // Create a draggable element for the whole container
+    const containerElement = e.target.closest('.group');
+    if (containerElement) {
+      containerElement.setAttribute('draggable', 'true');
+      
+      // Set up drag start event on the container
+      const dragStartHandler = (dragEvent) => {
+        dragEvent.dataTransfer.effectAllowed = 'move';
+        dragEvent.dataTransfer.setData('text/plain', ''); // Required for Firefox
+      };
+      
+      containerElement.addEventListener('dragstart', dragStartHandler, { once: true });
+      containerElement.addEventListener('dragend', () => {
+        handleContainerDragEnd();
+        containerElement.removeAttribute('draggable');
+      }, { once: true });
+      
+      // Simulate drag start
+      const dragEvent = new DragEvent('dragstart', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: new DataTransfer()
+      });
+      containerElement.dispatchEvent(dragEvent);
+    }
+  };
 
+  const handleContainerDragEnd = () => {
+    setIsDragging(false);
+    onContainerDrag?.(pair.id, 'end');
+  };
 
+  const handleContainerDragOver = (e) => {
+    e.preventDefault();
+    if (!isDragOverContainer) {
+      setIsDragOverContainer(true);
+    }
+  };
+
+  const handleContainerDrop = (e) => {
+    e.preventDefault();
+    setIsDragOverContainer(false);
+    // Handle container drop logic here if needed
+  };
 
   return (
     <motion.div
-      className="relative group w-full"
+      className={`relative group w-full ${isDragging ? 'opacity-50' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
       layout
       transition={{ duration: 0.3 }}
+      onDragOver={handleContainerDragOver}
+      onDrop={handleContainerDrop}
     >
+      {/* Empty space layer - shown when dragging */}
+      {isDragging && (
+        <motion.div
+          className="absolute inset-0 z-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{
+            background: '#2A2A2A',
+            border: '2px dashed #4A5568',
+            borderRadius: '16px',
+            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.5)',
+          }}
+        />
+      )}
+
       {/* Show generated video if available, otherwise show the original containers */}
       {generatedVideo ? (
-        <div className="flex justify-center">
+        <div className="flex justify-center relative z-10">
           <div
             className="relative w-full max-w-[800px] backdrop-blur-xl border overflow-hidden group/container"
             style={{
@@ -94,7 +163,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
           </div>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row items-center relative gap-4 lg:gap-6">
+        <div className="flex flex-col lg:flex-row items-center relative gap-4 lg:gap-6 z-10">
           {/* Audio Container - Made wider for better content display */}  
           <div className="relative w-full lg:w-1/2 min-w-[450px]">
             <div
@@ -265,7 +334,24 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
         onComplete={handleVideoGenerationComplete}
       />
 
-
+      {/* Drag handle positioned at top left of container */}
+      {!generatedVideo && (
+        <div
+          className="absolute top-4 left-4 z-30 p-2 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 text-gray-400 hover:text-blue-400 hover:border-blue-400/50 hover:bg-blue-500/20 transition-all duration-300 cursor-move"
+          style={{
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          }}
+          onMouseDown={(e) => {
+            // Trigger container drag start
+            handleContainerDragStart(e);
+          }}
+          title="Drag to reorder container"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </div>
+      )}
 
       {/* Delete button positioned at top right of container */}
       <button
