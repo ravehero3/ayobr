@@ -143,10 +143,10 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         background: audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
         borderRadius: '8px',
         border: isDragOver 
-          ? '2px solid rgba(34, 197, 94, 0.6)' // Green border when valid drop target
+          ? '3px solid rgba(34, 197, 94, 0.8)' // Stronger green border when valid drop target
           : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
         boxShadow: isDragOver
-          ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
+          ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
           : audio 
             ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
             : `
@@ -163,6 +163,20 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         transition: 'all 0.2s ease-in-out'
       }}
     >
+      {/* Drag and Drop Overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 bg-green-500/20 rounded-lg flex items-center justify-center z-10">
+          <div className="text-center">
+            <div className="w-12 h-12 mx-auto mb-2 bg-green-500 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+            </div>
+            <p className="text-green-400 font-semibold text-sm">Drop to Swap Audio</p>
+          </div>
+        </div>
+      )}
+
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between">
           {/* Header with filename and time */}

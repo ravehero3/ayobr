@@ -84,10 +84,10 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
         backdropFilter: 'blur(8px)',
         border: isDragOver 
-          ? '2px solid rgba(34, 197, 94, 0.6)' 
+          ? '3px solid rgba(34, 197, 94, 0.8)' 
           : '1px solid rgba(59, 130, 246, 0.2)',
         boxShadow: isDragOver
-          ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
+          ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
           : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         padding: '20px',
         height: '180px',
@@ -123,6 +123,20 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         userSelect: 'none'
       }}
     >
+      {/* Drag and Drop Overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 bg-green-500/20 rounded-lg flex items-center justify-center z-10">
+          <div className="text-center">
+            <div className="w-12 h-12 mx-auto mb-2 bg-green-500 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+            </div>
+            <p className="text-green-400 font-semibold text-sm">Drop to Swap Image</p>
+          </div>
+        </div>
+      )}
+
       {image ? (
         <div className="relative h-full w-full overflow-hidden rounded-lg">
           {/* Full container image */}

@@ -165,6 +165,7 @@ Changelog:
 - July 1, 2025. Successfully completed migration from Replit Agent to standard Replit environment
 - July 1, 2025. Fixed progress bar reloading issue - videos now generate once and display properly without progress bar loops
 - July 1, 2025. Fixed file drop issue after deleting pairs - users can now delete pairs and drop new files properly
+- July 1, 2025. Enhanced drag and drop swapping functionality with improved visual feedback - audio files can be dragged to swap with other audio files, images can be swapped with other images
 ```
 
 ## User Preferences
