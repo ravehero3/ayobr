@@ -35,31 +35,77 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
     setIsDragging(true);
     onContainerDrag?.(pair.id, 'start');
 
-    // Create a draggable element for the whole container
     const containerElement = e.target.closest('.group');
-    if (containerElement) {
-      containerElement.setAttribute('draggable', 'true');
+    if (!containerElement) return;
+
+    // Create a clone of the container for dragging
+    const dragClone = containerElement.cloneNode(true);
+    dragClone.style.position = 'fixed';
+    dragClone.style.pointerEvents = 'none';
+    dragClone.style.zIndex = '9999';
+    dragClone.style.transform = 'rotate(5deg) scale(1.05)';
+    dragClone.style.opacity = '0.9';
+    dragClone.style.transition = 'none';
+    dragClone.style.width = containerElement.offsetWidth + 'px';
+    dragClone.style.height = containerElement.offsetHeight + 'px';
+    
+    // Position the clone at the cursor
+    const rect = containerElement.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    
+    dragClone.style.left = (e.clientX - offsetX) + 'px';
+    dragClone.style.top = (e.clientY - offsetY) + 'px';
+    
+    document.body.appendChild(dragClone);
+
+    // Mouse move handler to follow cursor
+    const handleMouseMove = (moveEvent) => {
+      dragClone.style.left = (moveEvent.clientX - offsetX) + 'px';
+      dragClone.style.top = (moveEvent.clientY - offsetY) + 'px';
+    };
+
+    // Mouse up handler to end drag
+    const handleMouseUp = (upEvent) => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
       
-      // Set up drag start event on the container
-      const dragStartHandler = (dragEvent) => {
-        dragEvent.dataTransfer.effectAllowed = 'move';
-        dragEvent.dataTransfer.setData('text/plain', ''); // Required for Firefox
-      };
+      // Remove the drag clone
+      if (dragClone.parentNode) {
+        document.body.removeChild(dragClone);
+      }
       
-      containerElement.addEventListener('dragstart', dragStartHandler, { once: true });
-      containerElement.addEventListener('dragend', () => {
-        handleContainerDragEnd();
-        containerElement.removeAttribute('draggable');
-      }, { once: true });
+      // Check if dropped on another container
+      const elementBelow = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+      const targetContainer = elementBelow?.closest('.group');
       
-      // Simulate drag start
-      const dragEvent = new DragEvent('dragstart', {
-        bubbles: true,
-        cancelable: true,
-        dataTransfer: new DataTransfer()
-      });
-      containerElement.dispatchEvent(dragEvent);
-    }
+      if (targetContainer && targetContainer !== containerElement) {
+        // Find the target pair ID
+        const allContainers = document.querySelectorAll('.group');
+        let targetPairId = null;
+        
+        allContainers.forEach((container, index) => {
+          if (container === targetContainer) {
+            const pairContainers = Array.from(document.querySelectorAll('.group'));
+            const targetIndex = pairContainers.indexOf(container);
+            // Get pair ID from the container's data or use the store
+            const allPairs = useAppStore.getState().pairs;
+            if (allPairs[targetIndex]) {
+              targetPairId = allPairs[targetIndex].id;
+            }
+          }
+        });
+        
+        if (targetPairId && targetPairId !== pair.id) {
+          onContainerDrag?.(pair.id, 'swap', targetPairId);
+        }
+      }
+      
+      handleContainerDragEnd();
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   const handleContainerDragEnd = (e) => {
@@ -85,12 +131,37 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
   return (
     <motion.div
-      className={`relative group w-full ${isDragging ? 'opacity-50' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
+      className={`relative group w-full ${isDragging ? 'opacity-30' : ''} ${isDragOverContainer ? 'mb-32' : ''}`}
       layout
       transition={{ duration: 0.3 }}
       onDragOver={handleContainerDragOver}
       onDrop={handleContainerDrop}
+      style={{
+        visibility: isDragging ? 'visible' : 'visible',
+        minHeight: isDragging ? '450px' : 'auto'
+      }}
     >
+      {/* Empty state placeholder when this container is being dragged */}
+      {isDragging && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 border-2 border-dashed border-gray-500/50 bg-gray-800/20 rounded-2xl flex items-center justify-center backdrop-blur-sm"
+          style={{ minHeight: '450px' }}
+        >
+          <div className="text-center text-gray-500">
+            <div className="w-16 h-16 mx-auto mb-4 border-2 border-dashed border-gray-500/50 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 12h14m-7-7v14" />
+              </svg>
+            </div>
+            <p className="font-medium text-lg">Container moved</p>
+            <p className="text-sm opacity-75">Drop to place or return here</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Drop zone indicator */}
       {isDragOverContainer && (
         <motion.div

@@ -28,32 +28,23 @@ function App() {
   }, []);
 
   const handleContainerDrag = useCallback((containerId, action, targetId = null) => {
-    switch (action) {
-      case 'start':
-        setDraggedContainer(containerId);
-        break;
-      case 'end':
-        setDraggedContainer(null);
-        setDragOverContainer(null);
-        break;
-      case 'swap':
-        if (targetId && containerId !== targetId) {
-          // Swap the positions of the containers
-          const newPairs = [...pairs];
-          const draggedIndex = newPairs.findIndex(p => p.id === containerId);
-          const targetIndex = newPairs.findIndex(p => p.id === targetId);
-          
-          if (draggedIndex !== -1 && targetIndex !== -1) {
-            // Swap the pairs
-            const temp = newPairs[draggedIndex];
-            newPairs[draggedIndex] = newPairs[targetIndex];
-            newPairs[targetIndex] = temp;
-            setPairs(newPairs);
-          }
-        }
-        setDraggedContainer(null);
-        setDragOverContainer(null);
-        break;
+    if (action === 'start') {
+      setDraggedContainer(containerId);
+    } else if (action === 'end') {
+      setDraggedContainer(null);
+    } else if (action === 'swap' && targetId) {
+      // Swap the entire containers by reordering the array
+      const newPairs = [...pairs];
+      const draggedIndex = newPairs.findIndex(pair => pair.id === containerId);
+      const targetIndex = newPairs.findIndex(pair => pair.id === targetId);
+
+      if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
+        // Remove the dragged item and insert it at the target position
+        const [draggedItem] = newPairs.splice(draggedIndex, 1);
+        newPairs.splice(targetIndex, 0, draggedItem);
+        setPairs(newPairs);
+      }
+      setDraggedContainer(null);
     }
   }, [pairs, setPairs]);
 
