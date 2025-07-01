@@ -15,6 +15,12 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
     removePair(pair.id);
   };
 
+  const handleVideoGenerationComplete = () => {
+    // This function is called when video generation animation completes
+    // The video is already stored in the store, so no additional action needed
+    console.log(`Video generation animation completed for pair ${pair.id}`);
+  };
+
 
 
   return (
