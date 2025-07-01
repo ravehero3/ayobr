@@ -5,10 +5,13 @@ import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag }) => {
+const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
+  
+  // Check if this container is a valid drop target
+  const isValidDropTarget = draggedContainer && isValidContainerDragTarget && isValidContainerDragTarget(pair);
   const [isContainerDragTarget, setIsContainerDragTarget] = useState(false); // New state for container drag target
 
   const videoState = getVideoGenerationState(pair.id);
@@ -35,7 +38,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
 
     e.preventDefault();
     setIsDragging(true);
-    onContainerDrag?.(pair.id, 'start');
+    onContainerDrag?.(pair.id, 'start', pair);
 
     // Create a draggable element for the whole container
     const containerElement = e.target.closest('.group');
@@ -177,9 +180,14 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 maxWidth: '500px',
                 background: pair.audio ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.audio ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)',
-                borderWidth: '1.5px',
-                boxShadow: pair.audio ? `
+                borderColor: isValidDropTarget ? '#10B981' : (pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'), // Green border for valid drop targets
+                borderWidth: isValidDropTarget ? '3px' : '1.5px',
+                boxShadow: isValidDropTarget ? `
+                  0 0 0 1px rgba(16, 185, 129, 0.5),
+                  0 0 20px rgba(16, 185, 129, 0.6),
+                  0 0 40px rgba(16, 185, 129, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                ` : (pair.audio ? `
                   0 0 0 1px rgba(30, 144, 255, 0.3),
                   0 0 15px rgba(30, 144, 255, 0.4),
                   0 0 30px rgba(0, 207, 255, 0.2),
@@ -189,9 +197,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   0 0 8px rgba(30, 144, 255, 0.2),
                   0 0 15px rgba(0, 207, 255, 0.1),
                   inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `,
+                `),
                 borderRadius: '14px',
-                animation: pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
+                animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
             >
               {/* Top-right highlight flare */}
@@ -282,9 +290,14 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 maxWidth: '500px',
                 background: pair.image ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.image ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)',
-                borderWidth: '1.5px',
-                boxShadow: pair.image ? `
+                borderColor: isValidDropTarget ? '#10B981' : (pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'), // Green border for valid drop targets
+                borderWidth: isValidDropTarget ? '3px' : '1.5px',
+                boxShadow: isValidDropTarget ? `
+                  0 0 0 1px rgba(16, 185, 129, 0.5),
+                  0 0 20px rgba(16, 185, 129, 0.6),
+                  0 0 40px rgba(16, 185, 129, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                ` : (pair.image ? `
                   0 0 0 1px rgba(30, 144, 255, 0.3),
                   0 0 15px rgba(30, 144, 255, 0.4),
                   0 0 30px rgba(0, 207, 255, 0.2),
@@ -294,9 +307,9 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   0 0 8px rgba(30, 144, 255, 0.2),
                   0 0 15px rgba(0, 207, 255, 0.1),
                   inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `,
+                `),
                 borderRadius: '14px',
-                animation: pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
+                animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
             >
               {/* Top-right highlight flare */}
