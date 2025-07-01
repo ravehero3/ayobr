@@ -19,6 +19,8 @@ function App() {
   const [draggedContainer, setDraggedContainer] = useState(null);
   const [isContainerDragMode, setIsContainerDragMode] = useState(false);
   const [draggedContainerType, setDraggedContainerType] = useState(null);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingContainer, setIsDraggingContainer] = useState(false);
 
   const handleDragStart = useCallback((item) => {
     setDraggedItem(item);
@@ -31,8 +33,19 @@ function App() {
   const handleContainerDrag = (pairId, action, pairData) => {
     if (action === 'start') {
       setDraggedContainer(pairData);
+      setIsDraggingContainer(true);
+      // Determine the type of container being dragged
+      if (pairData.audio && !pairData.image) {
+        setDraggedContainerType('audio');
+      } else if (pairData.image && !pairData.audio) {
+        setDraggedContainerType('image');
+      } else {
+        setDraggedContainerType('mixed');
+      }
     } else if (action === 'end') {
       setDraggedContainer(null);
+      setIsDraggingContainer(false);
+      setDraggedContainerType(null);
     } else if (typeof pairId === 'string' && (pairId === 'audio' || pairId === 'image')) {
       // Handle move button clicks - pairId is actually the container type
       setIsContainerDragMode(true);
@@ -47,6 +60,23 @@ function App() {
       }, 10000);
     }
   };
+
+  // Mouse tracking for drag visualization
+  const handleMouseMove = useCallback((e) => {
+    if (isDraggingContainer) {
+      setDragPosition({ x: e.clientX, y: e.clientY });
+    }
+  }, [isDraggingContainer]);
+
+  // Add mouse move listener when dragging
+  React.useEffect(() => {
+    if (isDraggingContainer) {
+      document.addEventListener('mousemove', handleMouseMove);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
+  }, [isDraggingContainer, handleMouseMove]);
 
   const isValidContainerDragTarget = (targetPair) => {
     if (!draggedContainer || targetPair.id === draggedContainer.id) return false;
@@ -198,6 +228,51 @@ function App() {
         )}
       </AnimatePresence>
 
+      {/* Drag Preview - Container that follows cursor */}
+      <AnimatePresence>
+        {isDraggingContainer && draggedContainer && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.8, scale: 0.9 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed pointer-events-none z-50"
+            style={{
+              left: dragPosition.x - 100, // Offset to center the preview
+              top: dragPosition.y - 50,
+              transform: 'rotate(-5deg)' // Slight rotation for visual effect
+            }}
+          >
+            <div
+              className="w-48 h-24 rounded-2xl border-2 flex items-center justify-center backdrop-blur-sm"
+              style={{
+                background: 'linear-gradient(135deg, #0A0F1C 0%, #050A13 100%)',
+                borderColor: draggedContainerType === 'audio' ? '#10B981' : '#10B981',
+                boxShadow: `
+                  0 0 25px rgba(16, 185, 129, 0.6),
+                  0 0 50px rgba(16, 185, 129, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                `
+              }}
+            >
+              <div className="text-center">
+                {draggedContainerType === 'audio' ? (
+                  <svg className="w-8 h-8 mx-auto text-green-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                  </svg>
+                ) : (
+                  <svg className="w-8 h-8 mx-auto text-green-400 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                  </svg>
+                )}
+                <p className="text-green-400 text-xs font-medium">
+                  {draggedContainerType === 'audio' ? 'Audio' : 'Image'}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="fixed inset-0 flex flex-col">
         {/* Header */}
         <header className="p-6 border-b border-neon-blue/20 flex-shrink-0">
@@ -258,6 +333,8 @@ function App() {
                       onContainerDrag={handleContainerDrag}
                       isValidContainerDragTarget={isValidContainerDragTarget}
                       draggedContainer={draggedContainer}
+                      isDraggingContainer={isDraggingContainer}
+                      draggedContainerType={draggedContainerType}
                     />
                   </motion.div>
                 ))}

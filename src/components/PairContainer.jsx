@@ -5,7 +5,7 @@ import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer }) => {
+const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
@@ -13,6 +13,16 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
   // Check if this container is a valid drop target
   const isValidDropTarget = draggedContainer && isValidContainerDragTarget && isValidContainerDragTarget(pair);
   const [isContainerDragTarget, setIsContainerDragTarget] = useState(false); // New state for container drag target
+  
+  // Determine if this container should glow based on drag type
+  const shouldShowGlow = isDraggingContainer && draggedContainer && draggedContainer.id !== pair.id && (() => {
+    if (draggedContainerType === 'audio') {
+      return !!pair.audio; // Audio containers glow when audio is being dragged
+    } else if (draggedContainerType === 'image') {
+      return !!pair.image; // Image containers glow when image is being dragged
+    }
+    return false;
+  })();
 
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -209,9 +219,14 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 maxWidth: '500px',
                 background: pair.audio ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.audio ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: isValidDropTarget ? '#10B981' : (pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'), // Green border for valid drop targets
-                borderWidth: isValidDropTarget ? '3px' : '1.5px',
-                boxShadow: isValidDropTarget ? `
+                borderColor: (shouldShowGlow && draggedContainerType === 'audio') ? '#10B981' : (isValidDropTarget ? '#10B981' : (pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)')), // Green border for valid drop targets or glow
+                borderWidth: (shouldShowGlow && draggedContainerType === 'audio') ? '3px' : (isValidDropTarget ? '3px' : '1.5px'),
+                boxShadow: (shouldShowGlow && draggedContainerType === 'audio') ? `
+                  0 0 0 1px rgba(16, 185, 129, 0.5),
+                  0 0 25px rgba(16, 185, 129, 0.7),
+                  0 0 50px rgba(16, 185, 129, 0.5),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                ` : (isValidDropTarget ? `
                   0 0 0 1px rgba(16, 185, 129, 0.5),
                   0 0 20px rgba(16, 185, 129, 0.6),
                   0 0 40px rgba(16, 185, 129, 0.4),
@@ -226,7 +241,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   0 0 8px rgba(30, 144, 255, 0.2),
                   0 0 15px rgba(0, 207, 255, 0.1),
                   inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `),
+                `)),
                 borderRadius: '14px',
                 animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
@@ -315,9 +330,14 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                 maxWidth: '500px',
                 background: pair.image ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.image ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: isValidDropTarget ? '#10B981' : (pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)'), // Green border for valid drop targets
-                borderWidth: isValidDropTarget ? '3px' : '1.5px',
-                boxShadow: isValidDropTarget ? `
+                borderColor: (shouldShowGlow && draggedContainerType === 'image') ? '#10B981' : (isValidDropTarget ? '#10B981' : (pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)')), // Green border for valid drop targets or glow
+                borderWidth: (shouldShowGlow && draggedContainerType === 'image') ? '3px' : (isValidDropTarget ? '3px' : '1.5px'),
+                boxShadow: (shouldShowGlow && draggedContainerType === 'image') ? `
+                  0 0 0 1px rgba(16, 185, 129, 0.5),
+                  0 0 25px rgba(16, 185, 129, 0.7),
+                  0 0 50px rgba(16, 185, 129, 0.5),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                ` : (isValidDropTarget ? `
                   0 0 0 1px rgba(16, 185, 129, 0.5),
                   0 0 20px rgba(16, 185, 129, 0.6),
                   0 0 40px rgba(16, 185, 129, 0.4),
@@ -332,7 +352,7 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clea
                   0 0 8px rgba(30, 144, 255, 0.2),
                   0 0 15px rgba(0, 207, 255, 0.1),
                   inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `),
+                `)),
                 borderRadius: '14px',
                 animation: isValidDropTarget ? 'border-pulse 1.5s ease-in-out infinite alternate' : (pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none')
               }}
