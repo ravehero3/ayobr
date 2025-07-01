@@ -88,14 +88,24 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   const handleDragStart = (e) => {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('application/json', JSON.stringify({
+    if (!audio) return;
+
+    setIsDragging(true);
+    const dragData = {
       type: 'audio',
       pairId: pairId,
-      data: audio
-    }));
-    setIsDragging(true);
-    onDragStart({ type: 'audio', pairId, data: audio });
+      content: audio
+    };
+    e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+    e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Also store in sessionStorage for move button operations
+    sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+
+    if (onDragStart) {
+      onDragStart(dragData);
+    }
   };
 
   const handleDragEnd = (e) => {
@@ -105,7 +115,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    
+
     // Check if this is an audio drag from another container
     try {
       const types = Array.from(e.dataTransfer.types);
@@ -125,7 +135,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         return;
       }
     }
-    
+
     // Also allow file drops
     if (e.dataTransfer.types.includes('Files')) {
       e.dataTransfer.dropEffect = 'copy';
@@ -210,6 +220,58 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && !!audio) ||
     (isDraggingContainer && draggedContainerType === 'audio' && !!audio);
 
+  const handleContainerDragOver = (e) => {
+    // Allow container dropping when in container drag mode or when dragging audio
+    if ((isContainerDragMode && draggedContainerType === 'audio') || 
+        (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId)) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+  };
+
+  const handleContainerDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Handle container swapping from move button drag
+    if (isContainerDragMode && draggedContainerType === 'audio') {
+      // Get the dragged container data from dataTransfer or sessionStorage
+      let draggedData = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('application/json');
+
+      // Fallback to sessionStorage if dataTransfer is empty
+      if (!draggedData) {
+        draggedData = sessionStorage.getItem('currentDragData');
+      }
+
+      if (draggedData) {
+        try {
+          const parsedData = JSON.parse(draggedData);
+          if (parsedData.type === 'audio' && parsedData.pairId !== pairId) {
+            // Trigger the swap
+            if (onSwap) {
+              onSwap(parsedData.pairId, pairId, 'audio');
+            }
+            // End the container drag mode
+            if (onContainerDragEnd) {
+              onContainerDragEnd('audio', 'end');
+            }
+            // Clear the stored drag data
+            sessionStorage.removeItem('currentDragData');
+          }
+        } catch (error) {
+          console.error('Error parsing dragged data:', error);
+        }
+      }
+      return;
+    }
+
+    // Handle regular audio file dropping from main container drag
+    if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
+      if (onSwap) {
+        onSwap(draggedItem.pairId, pairId, 'audio');
+      }
+    }
+  };
 
 
   return (
@@ -221,6 +283,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onDragEnter={handleContainerDragOver}
+      onDrop={handleContainerDrop}
       whileHover={{ scale: audio ? 1.005 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       style={{

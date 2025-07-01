@@ -246,9 +246,11 @@ function App() {
             exit={{ opacity: 0, scale: 0.8 }}
             className="fixed pointer-events-none z-50"
             style={{
-              left: dragPosition.x - 100, // Offset to center the preview
-              top: dragPosition.y - 50,
-              transform: 'rotate(-5deg)' // Slight rotation for visual effect
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%) rotate(-5deg)', // Center the preview and add rotation
+              marginLeft: (dragPosition.x - window.innerWidth / 2) * 0.1, // Subtle follow effect
+              marginTop: (dragPosition.y - window.innerHeight / 2) * 0.1
             }}
           >
             <div
