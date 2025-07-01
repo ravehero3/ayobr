@@ -90,7 +90,24 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     e.stopPropagation();
     // Trigger container drag start with the proper parameters
     if (onContainerDragStart) {
-      onContainerDragStart(pairId, 'start');
+      onContainerDragStart(pairId, 'start', { id: pairId, audio: null, image });
+    }
+  };
+
+  const handleContainerDragOver = (e) => {
+    // Allow container dropping when in container drag mode
+    if (isContainerDragMode && draggedContainerType === 'image') {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+  };
+
+  const handleContainerDrop = (e) => {
+    e.preventDefault();
+    // Handle container drop when in container drag mode
+    if (isContainerDragMode && draggedContainerType === 'image' && onSwap) {
+      // This will be handled by the parent component's container drag logic
+      console.log('Container drop detected in ImageContainer');
     }
   };
 
@@ -100,9 +117,15 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       draggable={!!image}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}
+      onDragOver={(e) => {
+        handleDragOver(e);
+        handleContainerDragOver(e);
+      }}
       onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      onDrop={(e) => {
+        handleDrop(e);
+        handleContainerDrop(e);
+      }}
       whileHover={{ scale: image ? 1.01 : 1 }}
       title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
       style={image ? {
