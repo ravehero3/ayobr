@@ -161,8 +161,14 @@ export const usePairingLogic = () => {
     }
   }, [pairs, setPairs]);
 
+  const clearFileCache = useCallback(() => {
+    lastProcessedFiles.current.clear();
+    console.log('Cleared recent file cache');
+  }, []);
+
   return {
     handleFileDrop,
-    swapContainers
+    swapContainers,
+    clearFileCache
   };
 };

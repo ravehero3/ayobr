@@ -12,7 +12,7 @@ import DropZone from './components/DropZone';
 
 function App() {
   const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs } = useAppStore();
-  const { handleFileDrop, swapContainers } = usePairingLogic();
+  const { handleFileDrop, swapContainers, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -197,6 +197,7 @@ function App() {
                       draggedItem={draggedItem}
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
+                      clearFileCache={clearFileCache}
                     />
                   </motion.div>
                 ))}

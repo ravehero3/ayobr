@@ -164,6 +164,7 @@ Changelog:
 - July 1, 2025. Fixed video preview persistence issue - videos now stay displayed after generation instead of disappearing
 - July 1, 2025. Successfully completed migration from Replit Agent to standard Replit environment
 - July 1, 2025. Fixed progress bar reloading issue - videos now generate once and display properly without progress bar loops
+- July 1, 2025. Fixed file drop issue after deleting pairs - users can now delete pairs and drop new files properly
 ```
 
 ## User Preferences

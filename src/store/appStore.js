@@ -40,9 +40,28 @@ export const useAppStore = create((set, get) => ({
     )
   })),
 
-  removePair: (pairId) => set(state => ({
-    pairs: state.pairs.filter(pair => pair.id !== pairId)
-  })),
+  removePair: (pairId) => set(state => {
+    const filteredPairs = state.pairs.filter(pair => pair.id !== pairId);
+    
+    // Clean up video generation states for the removed pair
+    const newVideoGenerationStates = { ...state.videoGenerationStates };
+    delete newVideoGenerationStates[pairId];
+    
+    // Remove associated generated videos
+    const filteredVideos = state.generatedVideos.filter(video => video.pairId !== pairId);
+    
+    // Always ensure we have at least one empty pair after deletion
+    // This allows users to continue dropping files
+    if (filteredPairs.length === 0) {
+      filteredPairs.push({ id: uuidv4(), audio: null, image: null });
+    }
+    
+    return {
+      pairs: filteredPairs,
+      videoGenerationStates: newVideoGenerationStates,
+      generatedVideos: filteredVideos
+    };
+  }),
 
   setPairs: (pairs) => set({ pairs }),
 

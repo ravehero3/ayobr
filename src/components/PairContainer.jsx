@@ -5,7 +5,7 @@ import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) => {
+const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
 
   const videoState = getVideoGenerationState(pair.id);
@@ -13,6 +13,10 @@ const PairContainer = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd }) =>
 
   const handleDelete = () => {
     removePair(pair.id);
+    // Clear the file cache to allow the same files to be dropped again
+    if (clearFileCache) {
+      clearFileCache();
+    }
   };
 
   const handleVideoGenerationComplete = () => {
