@@ -325,23 +325,30 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         </div>
       )}
 
-      <motion.div
-        ref={containerRef}
-        className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
-        draggable={!!image}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragOver={(e) => {
-          handleDragOver(e);
-          handleContainerDragOver(e);
+      <div 
+        className="relative"
+        style={{
+          minHeight: isContainerDragging ? '260px' : '180px', // Reserve space when container is lifted
+          transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
         }}
-        onDragLeave={handleDragLeave}
-        onDrop={(e) => {
-          handleDrop(e);
-          handleContainerDrop(e);
-        }}
-        whileHover={{ scale: image ? 1.01 : 1 }}
-        title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
+      >
+        <motion.div
+          ref={containerRef}
+          className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
+          draggable={!!image}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragOver={(e) => {
+            handleDragOver(e);
+            handleContainerDragOver(e);
+          }}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => {
+            handleDrop(e);
+            handleContainerDrop(e);
+          }}
+          whileHover={{ scale: image ? 1.01 : 1 }}
+          title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
       style={image ? {
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
         backdropFilter: 'blur(8px)',
@@ -369,7 +376,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '180px',
         maxHeight: '180px',
         transform: isContainerDragging
-          ? 'translateY(-20px) rotate(10deg) scale(1.05)' // Lift up, tilt 10 degrees when move button clicked
+          ? 'translateY(-80px) translateX(50px) rotate(10deg) scale(1.1)' // Move up and right, tilt 10 degrees
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
           ? `translate(${containerDragPosition.x}px, ${containerDragPosition.y}px) scale(1.2) rotate(5deg)`
           : isDragging 
@@ -392,7 +399,6 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
           ? 1500 
           : isDragging ? 1000 : shouldHighlight ? 100 : 1,
-        marginBottom: isContainerDragging ? '40px' : '0px', // Add space below when lifted
         pointerEvents: 'auto',
         userSelect: 'none'
       } : {
@@ -574,7 +580,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           <p className="text-gray-600 text-xs">Drop an image here</p>
         </div>
       )}
-    </motion.div>
+      </motion.div>
+      </div>
     </>
   );
 };
