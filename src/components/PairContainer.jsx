@@ -311,6 +311,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   onDragEnd={onDragEnd}
                   isContainerDragMode={isContainerDragTarget}
                   draggedContainerType={draggedContainer?.type}
+                  draggedContainer={draggedContainer}
                   onContainerDragStart={onContainerDrag}
                   onContainerDragEnd={onContainerDrag}
                   // Pass the targeted highlighting props
