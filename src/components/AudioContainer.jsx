@@ -71,7 +71,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       // Event listeners
       wavesurfer.current.on('ready', () => {
         setDuration(wavesurfer.current.getDuration());
-        
+
         // Extract and store actual waveform peaks for drag preview
         setTimeout(() => {
           try {
@@ -84,33 +84,33 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 return;
               }
             }
-            
+
             // Method 2: Extract from audio buffer directly
             if (wavesurfer.current.backend && wavesurfer.current.backend.buffer) {
               const buffer = wavesurfer.current.backend.buffer;
               const peaks = [];
               const channelData = buffer.getChannelData(0);
               const sampleSize = Math.floor(channelData.length / 80);
-              
+
               for (let i = 0; i < 80; i++) {
                 const start = i * sampleSize;
                 const end = Math.min(start + sampleSize, channelData.length);
                 let max = 0;
-                
+
                 for (let j = start; j < end; j++) {
                   const value = Math.abs(channelData[j]);
                   if (value > max) max = value;
                 }
                 peaks.push(max);
               }
-              
+
               if (peaks.length > 0) {
                 setWaveformPeaks(peaks);
                 console.log('Extracted peaks from audio buffer:', peaks.length, 'peaks');
                 return;
               }
             }
-            
+
             // Method 3: Try to get peaks from the drawable peaks if available
             if (wavesurfer.current.drawer && wavesurfer.current.drawer.peaks) {
               const peaks = Array.from(wavesurfer.current.drawer.peaks).slice(0, 80);
@@ -120,7 +120,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 return;
               }
             }
-            
+
             console.log('No peaks could be extracted, will use fallback pattern');
           } catch (error) {
             console.log('Error extracting waveform peaks:', error);
@@ -320,7 +320,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       // Check if we're dropping on another audio container
       const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
       const audioContainer = elementBelow?.closest('[data-audio-container]');
-      
+
       if (audioContainer) {
         const targetPairId = audioContainer.getAttribute('data-pair-id');
         if (targetPairId && targetPairId !== pairId) {
@@ -336,12 +336,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       setMousePosition({ x: 0, y: 0 });
       setDragOffset({ x: 0, y: 0 });
       sessionStorage.removeItem('currentDragData');
-      
+
       // End container drag mode
       if (onContainerDragEnd) {
         onContainerDragEnd(pairId, 'end');
       }
-      
+
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -382,11 +382,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     // Handle container swapping when dropping on this audio container
     if (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pairId && audio) {
       console.log('Executing audio container swap:', draggedContainer.id, '->', pairId);
-      
+
       if (onSwap) {
         onSwap(draggedContainer.id, pairId, 'audio');
       }
-      
+
       // End the container drag mode
       if (onContainerDragEnd) {
         onContainerDragEnd('audio', 'end');
@@ -428,7 +428,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           >
             Audio container being moved...
           </div>
-          
+
           {/* Green box - Portal-based rendering to ensure it's always on top */}
           {audio && (isDraggingWithMouse && isContainerDragging) && createPortal(
             <div
@@ -492,70 +492,89 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                         {/* Display exact waveform from this specific audio file */}
                         <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
                           {(() => {
-                            // Try to get real-time peaks from the current wavesurfer instance
-                            let peaksToUse = waveformPeaks;
-                            
-                            // If we don't have stored peaks, try to get them from wavesurfer directly
-                            if (!peaksToUse || peaksToUse.length === 0) {
+                            // First try to get real-time peaks from wavesurfer
+                            if (wavesurfer.current && wavesurfer.current.backend) {
                               try {
-                                if (wavesurfer.current && wavesurfer.current.backend) {
-                                  if (wavesurfer.current.backend.getPeaks) {
-                                    peaksToUse = wavesurfer.current.backend.getPeaks(80, 0, wavesurfer.current.getDuration());
-                                  } else if (wavesurfer.current.backend.buffer) {
-                                    // Extract peaks from buffer in real-time
-                                    const buffer = wavesurfer.current.backend.buffer;
-                                    const channelData = buffer.getChannelData(0);
-                                    const sampleSize = Math.floor(channelData.length / 80);
-                                    const peaks = [];
-                                    
-                                    for (let i = 0; i < 80; i++) {
-                                      const start = i * sampleSize;
-                                      const end = Math.min(start + sampleSize, channelData.length);
-                                      let max = 0;
-                                      
-                                      for (let j = start; j < end; j++) {
-                                        const value = Math.abs(channelData[j]);
-                                        if (value > max) max = value;
-                                      }
-                                      peaks.push(max);
+                                let peaks = null;
+
+                                // Try multiple methods to get the peaks
+                                if (wavesurfer.current.backend.getPeaks) {
+                                  peaks = wavesurfer.current.backend.getPeaks(80, 0, wavesurfer.current.getDuration());
+                                } else if (wavesurfer.current.backend.buffer) {
+                                  // Extract peaks from audio buffer directly
+                                  const buffer = wavesurfer.current.backend.buffer;
+                                  const channelData = buffer.getChannelData(0);
+                                  const sampleSize = Math.floor(channelData.length / 80);
+                                  peaks = [];
+
+                                  for (let i = 0; i < 80; i++) {
+                                    const start = i * sampleSize;
+                                    const end = start + sampleSize;
+                                    let max = 0;
+
+                                    for (let j = start; j < end && j < channelData.length; j++) {
+                                      const value = Math.abs(channelData[j]);
+                                      if (value > max) max = value;
                                     }
-                                    peaksToUse = peaks;
+                                    peaks.push(max);
                                   }
                                 }
+
+                                if (peaks && peaks.length > 0) {
+                                  return peaks.map((peak, i) => {
+                                    const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
+                                    const progress = currentTime / duration;
+                                    const barProgress = i / peaks.length;
+                                    const isPlayed = barProgress <= progress;
+
+                                    return (
+                                      <div
+                                        key={i}
+                                        style={{
+                                          width: '2px',
+                                          height: `${height}%`,
+                                          backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
+                                          borderRadius: '1px',
+                                          minHeight: '8%',
+                                          flexShrink: 0
+                                        }}
+                                      />
+                                    );
+                                  });
+                                }
                               } catch (error) {
-                                console.log('Could not get real-time peaks:', error);
+                                console.log('Could not extract real-time peaks:', error);
                               }
                             }
-                            
-                            // Render the waveform if we have peaks
-                            if (peaksToUse && peaksToUse.length > 0) {
-                              return peaksToUse.slice(0, 80).map((peak, i) => {
-                                const normalizedPeak = Math.abs(peak);
-                                const height = Math.max(Math.min(normalizedPeak * 100, 90), 10);
+
+                            // Fallback to stored waveform peaks
+                            if (waveformPeaks && waveformPeaks.length > 0) {
+                              return waveformPeaks.slice(0, 80).map((peak, i) => {
+                                const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
                                 const progress = currentTime / duration;
                                 const barProgress = i / 80;
                                 const isPlayed = barProgress <= progress;
-                                
+
                                 return (
                                   <div
                                     key={i}
                                     style={{
-                                      width: '3px',
+                                      width: '2px',
                                       height: `${height}%`,
-                                      backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.8)',
+                                      backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
                                       borderRadius: '1px',
-                                      minHeight: '10%',
+                                      minHeight: '8%',
                                       flexShrink: 0
                                     }}
                                   />
                                 );
                               });
                             }
-                            
-                            // Final fallback - show a loading message
+
+                            // Final fallback - show audio filename
                             return (
-                              <div className="text-white/70 text-xs flex items-center justify-center w-full h-full">
-                                {audio?.name ? `${audio.name.replace(/\.[^/.]+$/, "")}` : "Loading waveform..."}
+                              <div className="text-white/80 text-xs flex items-center justify-center w-full h-full">
+                                {audio.name.replace(/\.[^/.]+$/, "")}
                               </div>
                             );
                           })()}
@@ -699,7 +718,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         <div className="w-full h-full flex flex-col justify-between relative">
           {/* Header with filename and time */}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-white text-sm font-medium truncate">
+            <span className="text-white text-sm font-medium truncate">```python
               {audio.name.replace(/\.[^/.]+$/, "")} {/* Remove file extension like Decibels */}
             </span>
             <div className="text-xs text-gray-400 flex-shrink-0">
