@@ -628,7 +628,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         <div 
           className="relative"
           style={{
-            minHeight: isContainerDragging ? '160px' : '120px', // Reserve space when container is lifted
+            minHeight: isContainerDragging ? '120px' : '100px', // Reserve space when container is lifted
             transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
           }}
         >

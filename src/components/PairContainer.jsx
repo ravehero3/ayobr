@@ -275,9 +275,9 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             <div
               className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
               style={{
-                height: '300px',
-                minHeight: '300px',
-                maxHeight: '300px',
+                height: '200px',
+                minHeight: '200px',
+                maxHeight: '200px',
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
@@ -301,7 +301,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
               }}
             >
               
-              <div className="absolute inset-0 p-8">
+              <div className="absolute inset-0 p-4">
                 <AudioContainer
                   audio={pair.audio}
                   pairId={pair.id}
@@ -323,7 +323,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           </div>
 
           {/* Connecting Bridge - Professional Plus Symbol */}
-          <div className="relative z-20 hidden lg:block flex items-center justify-center" style={{ width: '100px', height: '80px', margin: '0 -12px' }}>
+          <div className="relative z-20 hidden lg:flex items-center justify-center" style={{ width: '100px', height: '300px', margin: '0 -12px' }}>
             <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
               {/* Plus symbol container with elegant background */}
               <div
@@ -388,9 +388,9 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             <div
               className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
               style={{
-                height: '300px',
-                minHeight: '300px',
-                maxHeight: '300px',
+                height: '200px',
+                minHeight: '200px',
+                maxHeight: '200px',
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
@@ -414,7 +414,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
               }}
             >
               
-              <div className="absolute inset-0 p-8">
+              <div className="absolute inset-0 p-4">
                 <ImageContainer
                   image={pair.image}
                   pairId={pair.id}
