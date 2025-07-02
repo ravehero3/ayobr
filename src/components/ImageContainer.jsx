@@ -125,11 +125,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     console.log('Move button mouse down:', { type: 'individual-container', containerType: 'image', pairId, content: { image } });
 
-    // Calculate offset from container center
+    // Calculate offset to center the container on the cursor
     const rect = containerRef.current.getBoundingClientRect();
     const offset = {
-      x: e.clientX - (rect.left + rect.width / 2),
-      y: e.clientY - (rect.top + rect.height / 2)
+      x: rect.width / 2,  // Half container width to center horizontally
+      y: rect.height / 2  // Half container height to center vertically
     };
     setDragOffset(offset);
 
@@ -397,7 +397,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '180px',
         maxHeight: '180px',
         transform: isDraggingWithMouse && isContainerDragging
-          ? `translate(${mousePosition.x - window.innerWidth/2}px, ${mousePosition.y - window.innerHeight/2}px) rotate(10deg) scale(1.1)`
+          ? `translate(${mousePosition.x - dragOffset.x}px, ${mousePosition.y - dragOffset.y}px) rotate(10deg) scale(1.1)`
           : isContainerDragging
           ? 'translateY(-80px) translateX(50px) rotate(10deg) scale(1.1)' // Move up and right, tilt 10 degrees when move button clicked
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
@@ -417,7 +417,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         transition: (isDragging || (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)) 
           ? 'none' 
           : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
-        zIndex: isContainerDragging
+        zIndex: isDraggingWithMouse && isContainerDragging
+          ? 9999 // Highest z-index when dragging with mouse to appear above everything
+          : isContainerDragging
           ? 2000 // Higher z-index when lifted
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
           ? 1500 
