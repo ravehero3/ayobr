@@ -8,6 +8,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [isContainerDragging, setIsContainerDragging] = useState(false);
+  const [containerDragPosition, setContainerDragPosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
 
   React.useEffect(() => {
@@ -171,15 +173,21 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           y: e.clientY - rect.height / 2 
         });
       }
+      if (isContainerDragging) {
+        setContainerDragPosition({ 
+          x: e.clientX - 250, // Half the container width
+          y: e.clientY - 90   // Half the container height
+        });
+      }
     };
 
-    if (isDragging) {
+    if (isDragging || isContainerDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, isContainerDragging]);
 
 
 
@@ -261,23 +269,58 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   };
 
   return (
-    <motion.div
-      ref={containerRef}
-      className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
-      draggable={!!image}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragOver={(e) => {
-        handleDragOver(e);
-        handleContainerDragOver(e);
-      }}
-      onDragLeave={handleDragLeave}
-      onDrop={(e) => {
-        handleDrop(e);
-        handleContainerDrop(e);
-      }}
-      whileHover={{ scale: image ? 1.01 : 1 }}
-      title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
+    <>
+      {/* Floating drag preview */}
+      {isContainerDragging && image && (
+        <div
+          className="fixed z-[9999] pointer-events-none"
+          style={{
+            left: containerDragPosition.x,
+            top: containerDragPosition.y,
+            width: '500px',
+            height: '180px',
+            transform: 'scale(1.1) rotate(5deg)',
+            opacity: 0.9
+          }}
+        >
+          <div
+            className="w-full h-full rounded-2xl border-4 border-blue-400 shadow-2xl backdrop-blur-sm"
+            style={{
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%)',
+              boxShadow: `
+                0 0 0 4px rgba(59, 130, 246, 1),
+                0 0 50px rgba(59, 130, 246, 0.8),
+                0 30px 80px rgba(0, 0, 0, 0.6)
+              `,
+              padding: '20px'
+            }}
+          >
+            <img
+              src={imageUrl}
+              alt={image.name}
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+
+      <motion.div
+        ref={containerRef}
+        className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
+        draggable={!!image}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={(e) => {
+          handleDragOver(e);
+          handleContainerDragOver(e);
+        }}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => {
+          handleDrop(e);
+          handleContainerDrop(e);
+        }}
+        whileHover={{ scale: image ? 1.01 : 1 }}
+        title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
       style={image ? {
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
         backdropFilter: 'blur(8px)',
@@ -308,7 +351,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           : shouldHighlight
           ? 'scale(1.02)'
           : 'scale(1)',
-        opacity: isDragging ? 0.9 : 1,
+        opacity: isContainerDragging ? 0.4 : isDragging ? 0.9 : 1,
         transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         zIndex: isDragging ? 1000 : shouldHighlight ? 100 : 1,
         pointerEvents: 'auto',
@@ -420,6 +463,12 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             onDragStart={(e) => {
               e.stopPropagation();
               e.dataTransfer.effectAllowed = 'move';
+              
+              // Create a transparent drag image to hide the default browser drag preview
+              const dragImage = new Image();
+              dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+              e.dataTransfer.setDragImage(dragImage, 0, 0);
+              
               const dragData = {
                 type: 'individual-container',
                 containerType: 'image',
@@ -434,6 +483,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
               // Set local dragging state for visual feedback
               setIsDragging(true);
+              setIsContainerDragging(true);
 
               if (onContainerDragStart) {
                 onContainerDragStart('image', 'start', { 
@@ -447,6 +497,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             onDragEnd={(e) => {
               // Reset local dragging state
               setIsDragging(false);
+              setIsContainerDragging(false);
 
               if (onContainerDragEnd) {
                 onContainerDragEnd('image', 'end');
@@ -485,6 +536,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         </div>
       )}
     </motion.div>
+    </>
   );
 };
 
