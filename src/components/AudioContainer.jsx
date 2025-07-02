@@ -14,29 +14,29 @@ const generateRealisticWaveform = (fileName, fileSize) => {
     a = ((a << 5) - a) + b.charCodeAt(0);
     return a & a;
   }, 0);
-  
+
   // Use seeded random for consistent patterns per file
   const seededRandom = (s) => {
     const x = Math.sin(s) * 10000;
     return x - Math.floor(x);
   };
-  
+
   const peaks = [];
   const numBars = 120;
-  
+
   // Extract BPM from filename if present (common in music files)
   const bpmMatch = fileName.match(/(\d+)\s*bpm/i);
   const bpm = bpmMatch ? parseInt(bpmMatch[1]) : 120; // Default 120 BPM
-  
+
   // Create rhythm-based pattern
   const beatsPerBar = 4;
   const barsInPattern = 8;
   const totalBeats = beatsPerBar * barsInPattern;
-  
+
   for (let i = 0; i < numBars; i++) {
     let baseHeight = 0.3; // Base level
     const position = (i / numBars) * totalBeats;
-    
+
     // Add rhythm emphasis on beats
     const beatPosition = position % beatsPerBar;
     if (beatPosition < 0.1) { // On the beat
@@ -44,11 +44,11 @@ const generateRealisticWaveform = (fileName, fileSize) => {
     } else if (beatPosition < 0.3) { // Just after beat
       baseHeight += 0.2;
     }
-    
+
     // Add file-specific variation using seed
     const variation = seededRandom(seed + i * 100) * 0.4;
     baseHeight += variation;
-    
+
     // Add some musical structure (build-ups, drops)
     const songPosition = i / numBars;
     if (songPosition > 0.2 && songPosition < 0.4) { // Build-up
@@ -58,12 +58,12 @@ const generateRealisticWaveform = (fileName, fileSize) => {
     } else if (songPosition > 0.8) { // Outro fade
       baseHeight *= (1 - (songPosition - 0.8) * 2);
     }
-    
+
     // Ensure reasonable bounds
     baseHeight = Math.max(0.05, Math.min(0.95, baseHeight));
     peaks.push(baseHeight);
   }
-  
+
   return peaks;
 };
 
@@ -160,7 +160,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                   count++;
                   if (value > max) max = value;
                 }
-                
+
                 // Use RMS value for more accurate waveform representation
                 const rms = count > 0 ? Math.sqrt(sum / count) : 0;
                 peaks.push(Math.max(rms, max * 0.3)); // Blend RMS with peak for better visual
@@ -229,12 +229,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         if (currentlyPlayingWaveSurfer && currentlyPlayingWaveSurfer !== wavesurfer.current) {
           currentlyPlayingWaveSurfer.pause();
         }
-        
+
         setIsPlaying(true);
         currentlyPlayingWaveSurfer = wavesurfer.current;
         currentlyPlayingAudioId = pairId;
       });
-      
+
       wavesurfer.current.on('pause', () => {
         setIsPlaying(false);
         if (currentlyPlayingWaveSurfer === wavesurfer.current) {
@@ -242,7 +242,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           currentlyPlayingAudioId = null;
         }
       });
-      
+
       wavesurfer.current.on('finish', () => {
         setIsPlaying(false);
         if (currentlyPlayingWaveSurfer === wavesurfer.current) {
@@ -609,7 +609,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                           {(() => {
                             // Use the complete waveform data to show full song
                             let displayPeaks;
-                            
+
                             if (completeWaveformData && completeWaveformData.length > 0) {
                               // Use the complete extracted waveform data - shows entire song
                               displayPeaks = completeWaveformData;
@@ -623,7 +623,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                               displayPeaks = generateRealisticWaveform(audio.name, audio.size);
                               console.log('Using generated complete waveform for drag preview:', audio.name);
                             }
-                            
+
                             // Ensure we have enough bars to represent the complete song
                             const targetBars = 150; // More bars for complete representation
                             if (displayPeaks.length < targetBars) {
@@ -634,19 +634,19 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                 const lowerIndex = Math.floor(sourceIndex);
                                 const upperIndex = Math.min(Math.ceil(sourceIndex), displayPeaks.length - 1);
                                 const fraction = sourceIndex - lowerIndex;
-                                
+
                                 const interpolatedValue = displayPeaks[lowerIndex] * (1 - fraction) + 
                                                         displayPeaks[upperIndex] * fraction;
                                 interpolated.push(interpolatedValue);
                               }
                               displayPeaks = interpolated;
                             }
-                            
+
                             return displayPeaks.map((peak, i) => {
                               // Normalize peak value to percentage
                               const normalizedPeak = Math.abs(peak);
                               const height = Math.max(Math.min(normalizedPeak * 100, 95), 5);
-                              
+
                               // Calculate playback progress for visual feedback across complete song
                               const progress = duration > 0 ? currentTime / duration : 0;
                               const barProgress = i / displayPeaks.length;
@@ -745,7 +745,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : (isContainerDragMode && draggedContainerType === 'audio')
           ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
           : audio 
-            ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
+            ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228,0.1)'
             : `
             0 0 0 1px rgba(30, 144, 255, 0.15),
             0 0 8px rgba(30, 144, 255, 0.2),
@@ -826,12 +826,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
 
           {/* GNOME Decibels Waveform - Dark mode */}
-          <div className="flex-1 flex items-center mb-2" style={{ minHeight: '40px' }}>
+          <div className="flex-1 flex items-center mb-2" style={{ minHeight: '80px' }}>
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer rounded-sm"
               style={{ 
-                height: '40px',
+                height: '80px',
                 background: '#1a1a1a',
                 border: '1px solid #2d2d2d',
                 borderRadius: '4px'

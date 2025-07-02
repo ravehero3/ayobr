@@ -526,11 +526,16 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             </svg>
           </button>
 
-          {/* Full container image */}
+          {/* Full container image - 1.5x bigger */}
           <img
             src={imageUrl}
             alt={image.name}
             className="w-full h-full object-contain"
+            style={{
+              transform: 'scale(1.5)',
+              maxWidth: 'none',
+              maxHeight: 'none'
+            }}
             onError={(e) => {
               // Fallback for HEIC files that might not display
               e.target.style.display = 'none';
