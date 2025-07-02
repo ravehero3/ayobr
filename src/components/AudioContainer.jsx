@@ -366,9 +366,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           }}
         >
           <div
-            className="w-full h-full rounded-2xl border-4 border-green-400 shadow-2xl backdrop-blur-sm"
+            className="w-full h-full rounded-lg border-4 border-green-400 shadow-2xl backdrop-blur-sm"
             style={{
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%)',
+              background: 'rgba(15, 23, 42, 0.6)',
               boxShadow: `
                 0 0 0 4px rgba(16, 185, 129, 1),
                 0 0 50px rgba(16, 185, 129, 0.8),
@@ -377,49 +377,92 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               padding: '16px'
             }}
           >
-            <div className="w-full h-full flex flex-col justify-between">
+            <div className="w-full h-full flex flex-col justify-between relative">
               {/* Header with filename and time */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-white text-sm font-medium truncate">
                   {audio.name.replace(/\.[^/.]+$/, "")}
                 </span>
                 <div className="text-xs text-gray-400 flex-shrink-0">
-                  Audio File
+                  {formatTime(currentTime)} / {formatTime(duration)}
                 </div>
               </div>
 
-              {/* Waveform placeholder */}
+              {/* Actual Waveform - same as the real container */}
               <div className="flex-1 flex items-center">
-                <div className="w-full h-12 bg-gradient-to-r from-blue-500/20 to-blue-400/20 rounded flex items-end justify-center gap-1 px-2">
-                  {[...Array(20)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="bg-blue-400 rounded-sm"
-                      style={{
-                        width: '3px',
-                        height: `${Math.random() * 100 + 20}%`,
-                        opacity: 0.7
-                      }}
-                    />
-                  ))}
+                <div className="w-full h-full bg-gradient-to-r from-gray-700/20 to-gray-600/20 rounded flex items-center justify-center overflow-hidden">
+                  {/* Simulate waveform bars similar to wavesurfer */}
+                  <div className="w-full h-12 flex items-end justify-center gap-0.5 px-2">
+                    {[...Array(80)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="rounded-sm"
+                        style={{
+                          width: '2px',
+                          height: `${Math.random() * 60 + 10}%`,
+                          backgroundColor: i < 30 ? '#3584E4' : '#6C737F',
+                          opacity: 0.8
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Play button */}
+              {/* Bottom controls - Large play button like the real container */}
               <div className="flex items-center justify-center mt-2">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                <button
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
                   style={{
-                    backgroundColor: 'rgba(53, 132, 228, 0.15)',
-                    border: '2px solid rgba(53, 132, 228, 0.4)',
-                    color: '#3584E4'
+                    backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
+                    border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
+                    boxShadow: isPlaying 
+                      ? '0 0 20px rgba(53, 132, 228, 0.4)'
+                      : '0 0 10px rgba(53, 132, 228, 0.2)',
+                    color: isPlaying ? 'white' : '#3584E4'
                   }}
                 >
-                  <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="m7 4 10 6L7 16V4z"/>
+                  {isPlaying ? (
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="m7 4 10 6L7 16V4z"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              {/* Move button - same position as real container */}
+              <div className="flex items-center justify-center mt-2">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center opacity-60"
+                  style={{
+                    backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                    border: '1px solid rgba(16, 185, 129, 0.5)',
+                    color: '#10B981'
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                   </svg>
                 </div>
               </div>
+
+              {/* Delete button - same position as real container */}
+              <button
+                className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center opacity-60 z-10"
+                style={{
+                  backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                  border: '1px solid rgba(220, 38, 38, 0.3)',
+                  color: '#DC2626'
+                }}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
