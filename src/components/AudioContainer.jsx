@@ -37,7 +37,7 @@ const AudioContainer = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Initialize WaveSurfer
+  // Initialize WaveSurfer with GNOME Decibels style
   useEffect(() => {
     if (audio && waveformRef.current && !wavesurferRef.current) {
       try {
@@ -45,8 +45,8 @@ const AudioContainer = ({
         
         wavesurferRef.current = WaveSurfer.create({
           container: waveformRef.current,
-          waveColor: 'rgba(53, 132, 228, 0.3)',
-          progressColor: 'rgba(53, 132, 228, 0.8)',
+          waveColor: 'rgba(139, 145, 151, 0.4)',
+          progressColor: 'rgba(53, 132, 228, 0.9)',
           cursorColor: 'rgba(53, 132, 228, 1)',
           barWidth: 2,
           barRadius: 1,
@@ -151,11 +151,18 @@ const AudioContainer = ({
     e.preventDefault();
     setIsDragOver(false);
 
+    console.log('AudioContainer drop detected', {
+      isDraggingContainer,
+      currentPairId: pairId,
+      hasAudio: !!audio
+    });
+
     try {
       const types = Array.from(e.dataTransfer.types);
       if (types.includes('application/json')) {
         const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
         if (dragData.type === 'audio' && dragData.pairId !== pairId && audio) {
+          console.log('Regular audio drag detected, triggering swap');
           if (onSwap) {
             onSwap(dragData.pairId, pairId, 'audio');
           }
@@ -176,33 +183,14 @@ const AudioContainer = ({
     const files = Array.from(e.dataTransfer.files);
     const audioFile = files.find(file => file.type.startsWith('audio/'));
     if (audioFile) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        // Handle file drop logic here if needed
-      };
-      reader.readAsDataURL(audioFile);
-    }
-  };
-
-  const handleContainerMouseDown = (e) => {
-    console.log('Move button mouse down for audio container:', {
-      type: 'individual-container',
-      containerType: 'audio',
-      pairId: pairId,
-      content: { audio }
-    });
-
-    if (onContainerDragStart) {
-      onContainerDragStart('audio', 'start', { 
-        id: pairId, 
-        type: 'audio',
-        audio: audio
-      });
+      // Handle file drop logic here if needed
     }
   };
 
   const renderDragPreview = () => {
     if (!isDraggingContainer || draggedContainer?.pairId !== pairId) return null;
+
+    console.log('Using complete waveform data for drag preview:', audio?.name, '120', 'peaks (full song)');
 
     return createPortal(
       <motion.div
@@ -253,24 +241,10 @@ const AudioContainer = ({
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: 'rgba(53, 132, 228, 0.2)',
-                  border: '2px solid rgba(53, 132, 228, 0.4)',
-                  color: 'white'
-                }}
-              >
-                <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="m7 4 10 6L7 16V4z"/>
-                </svg>
-              </div>
-              
-              <div className="flex items-center space-x-2 text-xs text-gray-300 font-mono">
-                <span>0:00</span>
-                <span>/</span>
-                <span>0:00</span>
-              </div>
+            <div className="flex items-center space-x-2 text-xs text-gray-300 font-mono">
+              <span>0:00</span>
+              <span>/</span>
+              <span>0:00</span>
             </div>
           </div>
         </div>
@@ -328,73 +302,102 @@ const AudioContainer = ({
           transition={{ duration: 0.4, ease: [0.25, 0.8, 0.25, 1] }}
         >
           {audio ? (
-            <div className="w-full h-full flex flex-col relative" style={{
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
-              borderRadius: '12px',
-              padding: '20px'
-            }}>
-              <div className="mb-4">
-                <h3 className="text-white text-sm font-medium truncate">
-                  {audio.name.replace(/\.[^/.]+$/, "")}
-                </h3>
+            <div className="w-full h-full flex flex-col relative" 
+              style={{
+                borderRadius: '12px',
+                background: '#0d1117',
+                border: '1px solid #21262d',
+                padding: '16px'
+              }}>
+              {/* GNOME Decibels Header - Dark mode */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-3">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-white leading-tight truncate max-w-[200px]">
+                      {audio.name.replace(/\.[^/.]+$/, "")}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex-1 flex items-center justify-center mb-4">
+              {/* GNOME Decibels Waveform - Dark mode */}
+              <div className="flex-1 flex items-center mb-2" style={{ minHeight: '80px' }}>
                 <div 
                   ref={waveformRef}
-                  className="w-full cursor-pointer"
+                  className="w-full cursor-pointer rounded-sm"
                   style={{ 
                     height: '80px',
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    borderRadius: '8px',
-                    overflow: 'hidden'
+                    background: '#1a1a1a',
+                    borderRadius: '4px'
                   }}
                 />
               </div>
 
+              {/* Time display row - GNOME Decibels style */}
+              <div className="flex items-center justify-between mb-2 px-1">
+                <div className="text-xs text-gray-300 font-mono tabular-nums">
+                  {formatTime(currentTime)}
+                </div>
+                <div className="text-xs text-gray-400 font-mono tabular-nums">
+                  {formatTime(duration)}
+                </div>
+              </div>
+
+              {/* GNOME Decibels Controls - Dark mode */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  {/* Main play button - GNOME Decibels style */}
                   <button
                     onClick={handlePlayPause}
-                    className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
                     style={{
-                      backgroundColor: isPlaying ? '#3584e4' : 'rgba(53, 132, 228, 0.2)',
-                      border: `2px solid ${isPlaying ? '#3584e4' : 'rgba(53, 132, 228, 0.4)'}`,
+                      backgroundColor: isPlaying ? '#3584e4' : '#2d2d2d',
+                      border: `1px solid ${isPlaying ? '#3584e4' : '#404040'}`,
                       boxShadow: isPlaying 
-                        ? '0 0 20px rgba(53, 132, 228, 0.4)'
-                        : '0 0 10px rgba(53, 132, 228, 0.2)',
+                        ? '0 1px 3px rgba(53, 132, 228, 0.4)'
+                        : '0 1px 2px rgba(0, 0, 0, 0.2)',
                       color: 'white'
                     }}
                   >
                     {isPlaying ? (
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="m7 4 10 6L7 16V4z"/>
                       </svg>
                     )}
                   </button>
-                  
-                  <div className="flex items-center space-x-2 text-xs text-gray-300 font-mono">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>/</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
                 </div>
 
+                {/* Move button - Dark mode */}
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-move"
+                  className="w-6 h-6 rounded-sm flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 cursor-move"
                   style={{
-                    backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.9)' : 'rgba(53, 132, 228, 0.2)',
-                    border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 1)' : '1px solid rgba(53, 132, 228, 0.4)',
-                    color: 'white',
-                    backdropFilter: 'blur(4px)'
+                    backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.2)' : '#2d2d2d',
+                    border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid #404040',
+                    color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#babdb6',
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                   }}
                   title="Move audio container"
                   draggable="true"
-                  onMouseDown={handleContainerMouseDown}
+                  onMouseDown={(e) => {
+                    console.log('Move button mouse down for audio container:', {
+                      type: 'individual-container',
+                      containerType: 'audio',
+                      pairId: pairId,
+                      content: { audio }
+                    });
+
+                    if (onContainerDragStart) {
+                      onContainerDragStart('audio', 'start', { 
+                        id: pairId, 
+                        type: 'audio',
+                        audio: audio
+                      });
+                    }
+                  }}
                   onDragStart={(e) => {
                     e.stopPropagation();
                     e.dataTransfer.effectAllowed = 'move';
@@ -426,19 +429,20 @@ const AudioContainer = ({
                     }
                   }}
                 >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
                 </div>
               </div>
 
+              {/* Delete button - positioned at top right */}
               {onDelete && (
                 <button
                   onClick={() => onDelete(pairId)}
-                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+                  className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                   style={{
-                    backgroundColor: 'rgba(239, 68, 68, 0.9)',
-                    border: '1px solid rgba(239, 68, 68, 1)',
+                    backgroundColor: 'rgba(220, 38, 38, 0.9)',
+                    border: '1px solid rgba(220, 38, 38, 1)',
                     color: 'white',
                     backdropFilter: 'blur(4px)'
                   }}
