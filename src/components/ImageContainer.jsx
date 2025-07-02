@@ -138,6 +138,10 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && !!image) ||
     shouldShowGlow;
 
+  // Check if this is the currently dragged container
+  const isBeingDragged = (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId) ||
+    (draggedItem?.type === 'image' && draggedItem.pairId === pairId);
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -324,6 +328,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       style={image ? {
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
         backdropFilter: 'blur(8px)',
+        background: shouldHighlight 
+          ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%)'
+          : 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
         border: isDragOver 
           ? '3px solid rgba(34, 197, 94, 0.8)' 
           : shouldHighlight
@@ -344,16 +351,24 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '180px',
         minHeight: '180px',
         maxHeight: '180px',
-        transform: isDragging 
+        transform: (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+          ? `translate(${containerDragPosition.x}px, ${containerDragPosition.y}px) scale(1.2) rotate(5deg)`
+          : isDragging 
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
           : isDragOver 
           ? 'scale(1.02)' 
           : shouldHighlight
-          ? 'scale(1.02)'
+          ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
           : 'scale(1)',
-        opacity: isContainerDragging ? 0.4 : isDragging ? 0.9 : 1,
-        transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: isDragging ? 1000 : shouldHighlight ? 100 : 1,
+        opacity: (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId) 
+          ? 0.9 
+          : isDragging ? 0.9 : 1,
+        transition: (isDragging || (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId)) 
+          ? 'none' 
+          : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+          ? 1500 
+          : isDragging ? 1000 : shouldHighlight ? 100 : 1,
         pointerEvents: 'auto',
         userSelect: 'none'
       } : {

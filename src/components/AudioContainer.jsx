@@ -311,10 +311,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       style={{
         pointerEvents: 'auto',
         userSelect: 'none',
-        background: audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
+        background: shouldHighlight && audio
+          ? 'rgba(16, 185, 129, 0.15)' // Green background when highlighted
+          : audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
         borderRadius: '8px',
         border: isDragOver 
           ? '3px solid rgba(34, 197, 94, 0.8)' // Stronger green border when valid drop target
+          : shouldHighlight
+          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another audio container is being dragged
           : (isContainerDragMode && draggedContainerType === 'audio')
           ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for audio
           : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
@@ -338,16 +342,24 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '136px',
         minHeight: '136px',
         maxHeight: '136px',
-        transform: isDragging 
+        transform: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
+          : isDragging 
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
           : isDragOver 
           ? 'scale(1.02)' 
           : shouldHighlight
-          ? 'scale(1.02)'
+          ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
           : 'scale(1)',
-        opacity: isDragging ? 0.9 : 1,
-        transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: isDragging ? 1000 : shouldHighlight ? 100 : 1
+        opacity: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+          ? 0.9
+          : isDragging ? 0.9 : 1,
+        transition: (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
+          ? 'none' 
+          : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+          ? 1500
+          : isDragging ? 1000 : shouldHighlight ? 100 : 1
       }}
     >
       {/* Drag and Drop Overlay */}
@@ -415,58 +427,58 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           {/* Move button - positioned below audio preview */}
           <div className="flex items-center justify-center mt-2">
             <div
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
-            style={{
-              backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
-              border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
-              color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#3584E4'
-            }}
-            title="Drag to move audio container"
-            draggable="true"
-            onDragStart={(e) => {
-              e.stopPropagation();
-              e.dataTransfer.effectAllowed = 'move';
-              const dragData = {
-                type: 'individual-container',
-                containerType: 'audio',
-                pairId: pairId,
-                content: audio
-              };
-              e.dataTransfer.setData('application/json', JSON.stringify(dragData));
-              e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
+              style={{
+                backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
+                border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
+                color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#3584E4'
+              }}
+              title="Drag to move audio container"
+              draggable="true"
+              onDragStart={(e) => {
+                e.stopPropagation();
+                e.dataTransfer.effectAllowed = 'move';
+                const dragData = {
+                  type: 'individual-container',
+                  containerType: 'audio',
+                  pairId: pairId,
+                  content: audio
+                };
+                e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+                e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
 
-              // Also store in sessionStorage for reliable access
-              sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+                // Also store in sessionStorage for reliable access
+                sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
 
-              console.log('Move button drag started:', dragData);
+                console.log('Move button drag started:', dragData);
 
-              // Set local dragging state for visual feedback
-              setIsDragging(true);
+                // Set local dragging state for visual feedback
+                setIsDragging(true);
 
-              // Trigger the container drag system for cursor following
-              if (onContainerDragStart) {
-                onContainerDragStart('audio', 'start', { 
-                  id: pairId, 
-                  type: 'audio',
-                  content: audio,
-                  audio: audio // Include the audio file for proper container type detection
-                });
-              }
-            }}
-            onDragEnd={(e) => {
-              // Reset local dragging state
-              setIsDragging(false);
+                // Trigger the container drag system for cursor following
+                if (onContainerDragStart) {
+                  onContainerDragStart('audio', 'start', { 
+                    id: pairId, 
+                    type: 'audio',
+                    content: audio,
+                    audio: audio // Include the audio file for proper container type detection
+                  });
+                }
+              }}
+              onDragEnd={(e) => {
+                // Reset local dragging state
+                setIsDragging(false);
 
-              if (onContainerDragEnd) {
-                onContainerDragEnd('audio', 'end');
-              }
-            }}
-            onClick={handleMoveButtonClick}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </div>
+                if (onContainerDragEnd) {
+                  onContainerDragEnd('audio', 'end');
+                }
+              }}
+              onClick={handleMoveButtonClick}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+              </svg>
+            </div>
           </div>
 
           {/* Delete button - positioned at bottom right */}
