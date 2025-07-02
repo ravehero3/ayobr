@@ -463,7 +463,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       }}
                     >
                       <div className="flex items-center justify-center h-full relative">
-                        {wavesurfer.current && wavesurfer.current.backend && wavesurfer.current.backend.buffer ? (
+                        {(wavesurfer.current && wavesurfer.current.backend && wavesurfer.current.backend.buffer) ? (
                           // Use actual audio buffer data to create identical waveform
                           <div className="w-full h-full flex items-end justify-center px-2">
                             {(() => {
@@ -472,6 +472,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                               const samples = 120; // Number of bars to display
                               const sampleSize = Math.floor(channelData.length / samples);
                               const progress = currentTime / duration;
+                              
+                              // Debug log to check waveform data
+                              console.log(`Green box waveform: samples=${samples}, channelData.length=${channelData.length}, progress=${progress}`);
                               
                               return Array.from({ length: samples }).map((_, i) => {
                                 // Calculate actual peak for this section
