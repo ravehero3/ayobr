@@ -84,6 +84,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [waveformPeaks, setWaveformPeaks] = useState(null);
   const [realTimeWaveformData, setRealTimeWaveformData] = useState(null);
+  const [completeWaveformData, setCompleteWaveformData] = useState(null);
   const containerRef = useRef(null);
 
   // Mouse tracking for drag visualization
@@ -108,21 +109,22 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   React.useEffect(() => {
     if (audio && waveformRef.current) {
-      // Initialize WaveSurfer with Decibels-style waveform
+      // Initialize WaveSurfer with GNOME Decibels styling (player2)
       wavesurfer.current = WaveSurfer.create({
         container: waveformRef.current,
-        waveColor: '#6C737F', // Muted gray for unplayed portions (like Decibels)
-        progressColor: '#3584E4', // GNOME blue for played portions
-        cursorColor: 'rgba(53, 132, 228, 0.6)',
+        waveColor: '#babdb6', // Light gray for unplayed (GNOME style)
+        progressColor: '#3584e4', // GNOME blue for played portions
+        cursorColor: 'rgba(53, 132, 228, 0.8)',
         barWidth: 2,
-        barRadius: 1,
+        barRadius: 0, // Sharp edges like Decibels
         barGap: 1,
-        height: 80, // Taller for prominence like Decibels
+        height: 50, // Compact height like Decibels
         normalize: true,
         backend: 'WebAudio',
         interact: true,
-        barMinHeight: 1,
-        responsive: true
+        barMinHeight: 2,
+        responsive: true,
+        fillParent: true
       });
 
       // Load audio file
@@ -166,6 +168,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
               if (peaks.length > 0) {
                 setWaveformPeaks(peaks);
+                setCompleteWaveformData(peaks); // Store complete waveform for green box
                 console.log('Extracted RMS waveform peaks for', audio.name, ':', peaks.length, 'peaks', 'max:', Math.max(...peaks).toFixed(3));
                 return true;
               }
@@ -209,6 +212,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             console.log('Using fallback waveform generation for', audio.name);
             const fallbackPeaks = generateRealisticWaveform(audio.name, audio.size);
             setWaveformPeaks(fallbackPeaks);
+            setCompleteWaveformData(fallbackPeaks); // Store complete waveform for green box
           }
         };
 
@@ -600,22 +604,42 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       }}
                     >
                       <div className="flex items-center justify-center h-full relative">
-                        {/* Display exact waveform from this specific audio file */}
+                        {/* Display complete waveform from start to end */}
                         <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
                           {(() => {
-                            // Use the actual extracted waveform peaks if available, otherwise generate file-specific fallback
+                            // Use the complete waveform data to show full song
                             let displayPeaks;
                             
-                            if (waveformPeaks && waveformPeaks.length > 0) {
-                              // Use the real extracted waveform data
-                              displayPeaks = waveformPeaks.length > 120 ? 
-                                waveformPeaks.slice(0, 120) : 
-                                waveformPeaks;
-                              console.log('Using real waveform data for drag preview:', audio.name, displayPeaks.length, 'peaks');
+                            if (completeWaveformData && completeWaveformData.length > 0) {
+                              // Use the complete extracted waveform data - shows entire song
+                              displayPeaks = completeWaveformData;
+                              console.log('Using complete waveform data for drag preview:', audio.name, displayPeaks.length, 'peaks (full song)');
+                            } else if (waveformPeaks && waveformPeaks.length > 0) {
+                              // Fallback to regular waveform data
+                              displayPeaks = waveformPeaks;
+                              console.log('Using extracted waveform data for drag preview:', audio.name, displayPeaks.length, 'peaks');
                             } else {
-                              // Generate file-specific fallback pattern
+                              // Generate complete file-specific pattern showing full song
                               displayPeaks = generateRealisticWaveform(audio.name, audio.size);
-                              console.log('Using generated waveform for drag preview:', audio.name);
+                              console.log('Using generated complete waveform for drag preview:', audio.name);
+                            }
+                            
+                            // Ensure we have enough bars to represent the complete song
+                            const targetBars = 150; // More bars for complete representation
+                            if (displayPeaks.length < targetBars) {
+                              // Interpolate to fill more bars for complete visualization
+                              const interpolated = [];
+                              for (let i = 0; i < targetBars; i++) {
+                                const sourceIndex = (i / targetBars) * (displayPeaks.length - 1);
+                                const lowerIndex = Math.floor(sourceIndex);
+                                const upperIndex = Math.min(Math.ceil(sourceIndex), displayPeaks.length - 1);
+                                const fraction = sourceIndex - lowerIndex;
+                                
+                                const interpolatedValue = displayPeaks[lowerIndex] * (1 - fraction) + 
+                                                        displayPeaks[upperIndex] * fraction;
+                                interpolated.push(interpolatedValue);
+                              }
+                              displayPeaks = interpolated;
                             }
                             
                             return displayPeaks.map((peak, i) => {
@@ -623,7 +647,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                               const normalizedPeak = Math.abs(peak);
                               const height = Math.max(Math.min(normalizedPeak * 100, 95), 5);
                               
-                              // Calculate playback progress for visual feedback
+                              // Calculate playback progress for visual feedback across complete song
                               const progress = duration > 0 ? currentTime / duration : 0;
                               const barProgress = i / displayPeaks.length;
                               const isPlayed = barProgress <= progress;
@@ -632,7 +656,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                 <div
                                   key={i}
                                   style={{
-                                    width: '2px',
+                                    width: '1.5px', // Slightly thinner for more bars
                                     height: `${height}%`,
                                     backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.8)',
                                     borderRadius: '1px',
@@ -782,132 +806,161 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       )}
 
       {audio ? (
-        <div className="w-full h-full flex flex-col justify-between relative">
-          {/* Header with filename and time */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-white text-sm font-medium overflow-hidden whitespace-nowrap">
-              {audio.name.replace(/\.[^/.]+$/, "")}
-            </span>
-            <div className="text-xs text-gray-400 flex-shrink-0">
-              {formatTime(currentTime)} / {formatTime(duration)}
+        <div className="w-full h-full flex flex-col relative" style={{
+          background: 'linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%)',
+          borderRadius: '12px',
+          border: '1px solid #e1e5e9',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+          padding: '16px'
+        }}>
+          {/* GNOME Decibels Header - Minimal and clean */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              {/* Album art placeholder - GNOME style */}
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{
+                background: 'linear-gradient(135deg, #62a0ea 0%, #3584e4 100%)',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+              }}>
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+              </div>
+              
+              {/* Track info */}
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-gray-900 leading-tight">
+                  {audio.name.replace(/\.[^/.]+$/, "")}
+                </span>
+                <span className="text-xs text-gray-500 leading-tight">
+                  {formatTime(duration)}
+                </span>
+              </div>
+            </div>
+
+            {/* Time display - GNOME style */}
+            <div className="text-xs text-gray-600 font-mono tabular-nums">
+              {formatTime(currentTime)}
             </div>
           </div>
 
-          {/* Large Waveform - The centerpiece like in Decibels */}
-          <div className="flex-1 flex items-center">
+          {/* GNOME Decibels Waveform - Clean and minimal */}
+          <div className="flex-1 flex items-center mb-3" style={{ minHeight: '50px' }}>
             <div 
               ref={waveformRef}
-              className="w-full cursor-pointer"
-              style={{ height: '60px' }}
+              className="w-full cursor-pointer rounded-md"
+              style={{ 
+                height: '50px',
+                background: '#f6f8fa',
+                border: '1px solid #e1e5e9',
+                borderRadius: '6px'
+              }}
             />
           </div>
 
-          {/* Bottom controls - Large play button like Decibels */}
-          <div className="flex items-center justify-center mt-2">
-            {/* Play button - centered */}
-            <button
-              onClick={handlePlayPause}
-              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
-              style={{
-                backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
-                border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
-                boxShadow: isPlaying 
-                  ? '0 0 20px rgba(53, 132, 228, 0.4)'
-                  : '0 0 10px rgba(53, 132, 228, 0.2)',
-                color: isPlaying ? 'white' : '#3584E4'
-              }}
-            >
-              {isPlaying ? (
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+          {/* GNOME Decibels Controls - Minimal bottom bar */}
+          <div className="flex items-center justify-between">
+            {/* Left controls */}
+            <div className="flex items-center space-x-2">
+              {/* Main play button - GNOME style */}
+              <button
+                onClick={handlePlayPause}
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: isPlaying ? '#3584e4' : '#ffffff',
+                  border: `1px solid ${isPlaying ? '#3584e4' : '#ddd'}`,
+                  boxShadow: isPlaying 
+                    ? '0 1px 3px rgba(53, 132, 228, 0.3)'
+                    : '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  color: isPlaying ? 'white' : '#2e3436'
+                }}
+              >
+                {isPlaying ? (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="m7 4 10 6L7 16V4z"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {/* Right controls */}
+            <div className="flex items-center space-x-2">
+              {/* Move button - GNOME style */}
+              <div
+                className="w-7 h-7 rounded-md flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 cursor-move"
+                style={{
+                  backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.1)' : '#ffffff',
+                  border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #ddd',
+                  color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#5e6469',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}
+                title="Move audio container"
+                draggable="true"
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  e.dataTransfer.effectAllowed = 'move';
+                  const dragData = {
+                    type: 'individual-container',
+                    containerType: 'audio',
+                    pairId: pairId,
+                    content: audio
+                  };
+                  e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+                  e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+
+                  sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+                  setIsDragging(true);
+
+                  if (onContainerDragStart) {
+                    onContainerDragStart('audio', 'start', { 
+                      id: pairId, 
+                      type: 'audio',
+                      content: audio,
+                      audio: audio
+                    });
+                  }
+                }}
+                onDragEnd={(e) => {
+                  setIsDragging(false);
+                  if (onContainerDragEnd) {
+                    onContainerDragEnd('audio', 'end');
+                  }
+                }}
+                onMouseDown={handleMoveButtonMouseDown}
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                 </svg>
-              ) : (
-                <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="m7 4 10 6L7 16V4z"/>
+              </div>
+
+              {/* Delete button - GNOME style */}
+              <button
+                className="w-7 h-7 rounded-md flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #ddd',
+                  color: '#e01b24',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}
+                title="Delete audio"
+                onClick={() => {
+                  if (wavesurfer.current) {
+                    wavesurfer.current.pause();
+                  }
+                  if (onDelete) {
+                    onDelete();
+                  }
+                }}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              )}
-            </button>
-          </div>
-
-          {/* Move button - positioned below audio preview */}
-          <div className="flex items-center justify-center mt-2">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
-              style={{
-                backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
-                border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
-                color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#3584E4'
-              }}
-              title="Drag to move audio container"
-              draggable="true"
-              onDragStart={(e) => {
-                e.stopPropagation();
-                e.dataTransfer.effectAllowed = 'move';
-                const dragData = {
-                  type: 'individual-container',
-                  containerType: 'audio',
-                  pairId: pairId,
-                  content: audio
-                };
-                e.dataTransfer.setData('application/json', JSON.stringify(dragData));
-                e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-
-                // Also store in sessionStorage for reliable access
-                sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
-
-                console.log('Move button drag started:', dragData);
-
-                // Set local dragging state for visual feedback
-                setIsDragging(true);
-
-                // Trigger the container drag system for cursor following
-                if (onContainerDragStart) {
-                  onContainerDragStart('audio', 'start', { 
-                    id: pairId, 
-                    type: 'audio',
-                    content: audio,
-                    audio: audio // Include the audio file for proper container type detection
-                  });
-                }
-              }}
-              onDragEnd={(e) => {
-                // Reset local dragging state
-                setIsDragging(false);
-
-                if (onContainerDragEnd) {
-                  onContainerDragEnd('audio', 'end');
-                }
-              }}
-              onMouseDown={handleMoveButtonMouseDown}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-              </svg>
+              </button>
             </div>
           </div>
-
-          {/* Delete button - positioned at bottom right */}
-          <button
-            className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
-            style={{
-              backgroundColor: 'rgba(220, 38, 38, 0.15)',
-              border: '1px solid rgba(220, 38, 38, 0.3)',
-              color: '#DC2626'
-            }}
-            title="Delete audio"
-            onClick={() => {
-              if (wavesurfer.current) {
-                wavesurfer.current.pause();
-              }
-              if (onDelete) {
-                onDelete();
-              }
-            }}
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-gray-300">
