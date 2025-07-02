@@ -7,6 +7,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   const [imageUrl, setImageUrl] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef(null);
 
   React.useEffect(() => {
     if (image) {
@@ -137,6 +139,22 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   }, [image]);
 
+  // Mouse tracking for drag visualization
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isDragging) {
+        setDragPosition({ x: e.clientX, y: e.clientY });
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
+  }, [isDragging]);
+
   // Use the shouldShowGlow prop for targeted highlighting, plus highlight when another image is being dragged
   const shouldHighlight = shouldShowGlow || (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && !!image);
 
@@ -188,6 +206,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
+      ref={containerRef}
       className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
       draggable={!!image}
       onDragStart={handleDragStart}
@@ -227,7 +246,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '180px',
         maxHeight: '180px',
         transform: isDragging 
-          ? 'scale(1.05) translateY(-8px) rotate(2deg)' 
+          ? `scale(1.05) translate(${dragPosition.x - (containerRef.current?.getBoundingClientRect().left || 0) - (containerRef.current?.offsetWidth || 0) / 2}px, ${dragPosition.y - (containerRef.current?.getBoundingClientRect().top || 0) - (containerRef.current?.offsetHeight || 0) / 2}px) rotate(2deg)` 
           : isDragOver 
           ? 'scale(1.02)' 
           : 'scale(1)',

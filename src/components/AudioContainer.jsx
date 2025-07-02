@@ -15,8 +15,25 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
 
-  useEffect(() => {
+  // Mouse tracking for drag visualization
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isDragging) {
+        setDragPosition({ x: e.clientX, y: e.clientY });
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
+  }, [isDragging]);
+
+  React.useEffect(() => {
     if (audio && waveformRef.current) {
       // Initialize WaveSurfer with Decibels-style waveform
       wavesurfer.current = WaveSurfer.create({
@@ -256,7 +273,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         try {
           const parsedData = JSON.parse(draggedData);
           console.log('Parsed drag data:', parsedData);
-          
+
           if (parsedData.type === 'audio' && parsedData.pairId !== pairId) {
             console.log('Triggering audio swap:', parsedData.pairId, '->', pairId);
             // Trigger the swap
@@ -348,7 +365,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '136px',
         maxHeight: '136px',
         transform: isDragging 
-          ? 'scale(1.05) translateY(-8px) rotate(2deg)' 
+          ? `translate(${dragPosition.x}px, ${dragPosition.y}px)`
           : isDragOver 
           ? 'scale(1.02)' 
           : 'scale(1)',
@@ -440,15 +457,15 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               };
               e.dataTransfer.setData('application/json', JSON.stringify(dragData));
               e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-              
+
               // Also store in sessionStorage for reliable access
               sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
-              
+
               console.log('Move button drag started:', dragData);
-              
+
               // Set local dragging state for visual feedback
               setIsDragging(true);
-              
+
               // Trigger the container drag system for cursor following
               if (onContainerDragStart) {
                 onContainerDragStart('audio', 'start', { 
@@ -462,7 +479,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             onDragEnd={(e) => {
               // Reset local dragging state
               setIsDragging(false);
-              
+
               if (onContainerDragEnd) {
                 onContainerDragEnd('audio', 'end');
               }
