@@ -312,17 +312,18 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      {/* Floating drag preview */}
-      {isContainerDragging && image && (
+      {/* Floating drag preview - appears when mouse dragging */}
+      {isDraggingWithMouse && isContainerDragging && image && (
         <div
-          className="fixed z-[9999] pointer-events-none"
+          className="fixed pointer-events-none"
           style={{
-            left: containerDragPosition.x,
-            top: containerDragPosition.y,
-            width: '500px',
+            left: `${mousePosition.x - dragOffset.x}px`,
+            top: `${mousePosition.y - dragOffset.y}px`,
+            width: '450px',
             height: '180px',
-            transform: 'scale(1.1) rotate(5deg)',
-            opacity: 0.9
+            transform: 'rotate(10deg) scale(1.1)',
+            opacity: 0.95,
+            zIndex: 9999
           }}
         >
           <div
@@ -346,13 +347,34 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         </div>
       )}
 
-      <div 
-        className="relative"
-        style={{
-          minHeight: isContainerDragging ? '260px' : '180px', // Reserve space when container is lifted
-          transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
-        }}
-      >
+      {/* Empty space placeholder when container is being dragged with mouse */}
+      {isDraggingWithMouse && isContainerDragging ? (
+        <div
+          style={{
+            width: '450px',
+            height: '180px',
+            minWidth: '450px',
+            border: '2px dashed rgba(53, 132, 228, 0.3)',
+            borderRadius: '24px',
+            background: 'rgba(10, 15, 28, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'rgba(53, 132, 228, 0.5)',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          Container being moved...
+        </div>
+      ) : (
+        <div 
+          className="relative"
+          style={{
+            minHeight: isContainerDragging ? '260px' : '180px', // Reserve space when container is lifted
+            transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
+          }}
+        >
         <motion.div
           ref={containerRef}
           className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
@@ -396,8 +418,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '180px',
         minHeight: '180px',
         maxHeight: '180px',
+        position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
+        left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
+        top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
         transform: isDraggingWithMouse && isContainerDragging
-          ? `translate(${mousePosition.x - dragOffset.x}px, ${mousePosition.y - dragOffset.y}px) rotate(10deg) scale(1.1)`
+          ? 'rotate(10deg) scale(1.1)'
           : isContainerDragging
           ? 'translateY(-80px) translateX(50px) rotate(10deg) scale(1.1)' // Move up and right, tilt 10 degrees when move button clicked
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
@@ -561,6 +586,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       )}
       </motion.div>
       </div>
+      )}
     </>
   );
 };
