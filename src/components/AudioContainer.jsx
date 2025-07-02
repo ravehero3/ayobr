@@ -405,6 +405,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           {/* Green box - tilted container preview with full waveform */}
           {audio && (
             <div
+              className="green-box-drag-preview"
               style={{
                 position: 'fixed',
                 left: `${mousePosition.x - 225}px`, // Always center horizontally (450px / 2 = 225px)
@@ -412,14 +413,16 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 width: '450px',
                 height: '136px',
                 transform: 'rotate(10deg) scale(1.1)',
-                zIndex: 999999, // Highest possible z-index to be in front of everything
+                zIndex: 2147483647, // Maximum possible z-index value to be in front of everything
                 pointerEvents: 'none',
                 background: 'rgba(16, 185, 129, 0.95)',
                 borderRadius: '8px',
                 border: '2px solid rgba(16, 185, 129, 1)',
                 boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
                 padding: '16px',
-                opacity: 0.95
+                opacity: 0.95,
+                isolation: 'isolate', // Creates new stacking context
+                willChange: 'transform' // Forces hardware acceleration
               }}
             >
               <div className="w-full h-full flex flex-col justify-between">
