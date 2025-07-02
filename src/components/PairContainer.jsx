@@ -48,7 +48,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
   const handleContainerDragOver = (e) => {
     e.preventDefault();
-    
+
     // Only show drag over state if this is a valid drop target for container swapping
     if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
       setIsDragOverContainer(true);
@@ -65,23 +65,23 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   const handleContainerDrop = (e) => {
     e.preventDefault();
     setIsDragOverContainer(false);
-    
+
     try {
       // Handle both main container drag and individual container drag
       const dragDataString = e.dataTransfer.getData('application/json');
       if (dragDataString) {
         const dragData = JSON.parse(dragDataString);
-        
+
         // Handle main container drag (from drag handle)
         if (dragData.type === 'container' && dragData.pairId !== pair.id) {
           const draggedPairData = dragData.pairData;
-          
+
           // Determine what type of content to swap based on what the dragged container has
           const draggedHasAudio = !!draggedPairData.audio;
           const draggedHasImage = !!draggedPairData.image;
           const targetHasAudio = !!pair.audio;
           const targetHasImage = !!pair.image;
-          
+
           // Only allow same-type swapping
           if (draggedHasAudio && targetHasAudio) {
             // Swap audio content
@@ -94,7 +94,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         // Handle individual container drag (from move buttons)
         else if (dragData.type === 'individual-container' && dragData.pairId !== pair.id) {
           const draggedContainerType = dragData.containerType;
-          
+
           // Only allow same-type swapping
           if (draggedContainerType === 'audio' && pair.audio) {
             onSwap(dragData.pairId, pair.id, 'audio');
@@ -106,12 +106,12 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
     } catch (error) {
       console.error('Error handling container drop:', error);
     }
-    
+
     // Also handle the state-based drag system for compatibility
     if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
       const draggedHasAudio = !!draggedContainer.audio;
       const draggedHasImage = !!draggedContainer.image;
-      
+
       if (draggedHasAudio && pair.audio) {
         onSwap(draggedContainer.id, pair.id, 'audio');
       } else if (draggedHasImage && pair.image) {
@@ -123,7 +123,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   const handleFileDrop = async (e) => {
     e.preventDefault();
     setIsDragOverContainer(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       // Handle file drops through the main drop handler
@@ -136,7 +136,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   const handleFilesDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Check if this is a file drag (not container drag)
     const types = Array.from(e.dataTransfer.types);
     if (types.includes('Files')) {
@@ -147,7 +147,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   const handleFilesDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setIsDragOverContainer(false);
     }
@@ -181,7 +181,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         onComplete={handleVideoGenerationComplete}
       />
 
-      
+
 
       {/* Show generated video if available, otherwise show the original containers */}
       {generatedVideo ? (
@@ -276,7 +276,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 animation: pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
               }}
             >
-              
+
               <div className="absolute inset-0 p-4">
                 <AudioContainer
                   audio={pair.audio}
@@ -345,7 +345,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                     </linearGradient>
                   </defs>
                 </svg>
-                
+
                 {/* Subtle inner glow effect */}
                 <div
                   className="absolute inset-0"
@@ -389,7 +389,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 animation: pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
               }}
             >
-              
+
               <div className="absolute inset-0 p-4">
                 <ImageContainer
                   image={pair.image}

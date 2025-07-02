@@ -807,71 +807,61 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
       {audio ? (
         <div className="w-full h-full flex flex-col relative" style={{
-          background: 'linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%)',
+          background: 'linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)',
           borderRadius: '12px',
-          border: '1px solid #e1e5e9',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+          border: '1px solid #404040',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2)',
           padding: '16px'
         }}>
-          {/* GNOME Decibels Header - Minimal and clean */}
+          {/* GNOME Decibels Header - Dark mode */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-3">
-              {/* Album art placeholder - GNOME style */}
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{
-                background: 'linear-gradient(135deg, #62a0ea 0%, #3584e4 100%)',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
-              }}>
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                </svg>
-              </div>
-              
-              {/* Track info */}
+              {/* Track info without icon */}
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-gray-900 leading-tight">
+                <span className="text-sm font-semibold text-white leading-tight">
                   {audio.name.replace(/\.[^/.]+$/, "")}
                 </span>
-                <span className="text-xs text-gray-500 leading-tight">
+                <span className="text-xs text-gray-400 leading-tight">
                   {formatTime(duration)}
                 </span>
               </div>
             </div>
 
-            {/* Time display - GNOME style */}
-            <div className="text-xs text-gray-600 font-mono tabular-nums">
+            {/* Time display - Dark mode */}
+            <div className="text-xs text-gray-300 font-mono tabular-nums">
               {formatTime(currentTime)}
             </div>
           </div>
 
-          {/* GNOME Decibels Waveform - Clean and minimal */}
+          {/* GNOME Decibels Waveform - Dark mode */}
           <div className="flex-1 flex items-center mb-3" style={{ minHeight: '50px' }}>
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer rounded-md"
               style={{ 
                 height: '50px',
-                background: '#f6f8fa',
-                border: '1px solid #e1e5e9',
+                background: '#242424',
+                border: '1px solid #404040',
                 borderRadius: '6px'
               }}
             />
           </div>
 
-          {/* GNOME Decibels Controls - Minimal bottom bar */}
+          {/* GNOME Decibels Controls - Dark mode */}
           <div className="flex items-center justify-between">
             {/* Left controls */}
             <div className="flex items-center space-x-2">
-              {/* Main play button - GNOME style */}
+              {/* Main play button - Dark mode */}
               <button
                 onClick={handlePlayPause}
                 className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
                 style={{
-                  backgroundColor: isPlaying ? '#3584e4' : '#ffffff',
-                  border: `1px solid ${isPlaying ? '#3584e4' : '#ddd'}`,
+                  backgroundColor: isPlaying ? '#3584e4' : '#404040',
+                  border: `1px solid ${isPlaying ? '#3584e4' : '#555'}`,
                   boxShadow: isPlaying 
-                    ? '0 1px 3px rgba(53, 132, 228, 0.3)'
-                    : '0 1px 2px rgba(0, 0, 0, 0.1)',
-                  color: isPlaying ? 'white' : '#2e3436'
+                    ? '0 1px 3px rgba(53, 132, 228, 0.4)'
+                    : '0 1px 2px rgba(0, 0, 0, 0.2)',
+                  color: 'white'
                 }}
               >
                 {isPlaying ? (
@@ -888,14 +878,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
             {/* Right controls */}
             <div className="flex items-center space-x-2">
-              {/* Move button - GNOME style */}
+              {/* Move button - Dark mode */}
               <div
                 className="w-7 h-7 rounded-md flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 cursor-move"
                 style={{
-                  backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.1)' : '#ffffff',
-                  border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #ddd',
-                  color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#5e6469',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                  backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.2)' : '#404040',
+                  border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid #555',
+                  color: (isContainerDragMode && draggedContainerType === 'audio') ? '#10B981' : '#babdb6',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                 }}
                 title="Move audio container"
                 draggable="true"
@@ -936,14 +926,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 </svg>
               </div>
 
-              {/* Delete button - GNOME style */}
+              {/* Delete button - Dark mode */}
               <button
                 className="w-7 h-7 rounded-md flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
                 style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #ddd',
+                  backgroundColor: '#404040',
+                  border: '1px solid #555',
                   color: '#e01b24',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                 }}
                 title="Delete audio"
                 onClick={() => {
