@@ -353,124 +353,6 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      {/* Floating drag preview - appears when mouse dragging */}
-      {isDraggingWithMouse && isContainerDragging && audio && (
-        <div
-          className="fixed pointer-events-none"
-          style={{
-            left: `${mousePosition.x - dragOffset.x}px`,
-            top: `${mousePosition.y - dragOffset.y}px`,
-            width: '450px',
-            height: '136px',
-            transform: 'rotate(10deg) scale(1.1)',
-            opacity: 0.95,
-            zIndex: 999999,
-            transition: 'none' // Ensure smooth cursor following without lag
-          }}
-        >
-          <div
-            className="w-full h-full rounded-lg border-4 border-green-400 shadow-2xl backdrop-blur-sm"
-            style={{
-              background: 'rgba(15, 23, 42, 0.6)',
-              boxShadow: `
-                0 0 0 4px rgba(16, 185, 129, 1),
-                0 0 50px rgba(16, 185, 129, 0.8),
-                0 30px 80px rgba(0, 0, 0, 0.6)
-              `,
-              padding: '16px'
-            }}
-          >
-            <div className="w-full h-full flex flex-col justify-between relative">
-              {/* Header with filename and time */}
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white text-sm font-medium truncate">
-                  {audio.name.replace(/\.[^/.]+$/, "")}
-                </span>
-                <div className="text-xs text-gray-400 flex-shrink-0">
-                  {formatTime(currentTime)} / {formatTime(duration)}
-                </div>
-              </div>
-
-              {/* Actual Waveform - same as the real container */}
-              <div className="flex-1 flex items-center">
-                <div className="w-full h-full bg-gradient-to-r from-gray-700/20 to-gray-600/20 rounded flex items-center justify-center overflow-hidden">
-                  {/* Simulate waveform bars similar to wavesurfer */}
-                  <div className="w-full h-12 flex items-end justify-center gap-0.5 px-2">
-                    {[...Array(80)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="rounded-sm"
-                        style={{
-                          width: '2px',
-                          height: `${Math.random() * 60 + 10}%`,
-                          backgroundColor: i < 30 ? '#3584E4' : '#6C737F',
-                          opacity: 0.8
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom controls - Large play button like the real container */}
-              <div className="flex items-center justify-center mt-2">
-                <button
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
-                    border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
-                    boxShadow: isPlaying 
-                      ? '0 0 20px rgba(53, 132, 228, 0.4)'
-                      : '0 0 10px rgba(53, 132, 228, 0.2)',
-                    color: isPlaying ? 'white' : '#3584E4'
-                  }}
-                >
-                  {isPlaying ? (
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    </svg>
-                  ) : (
-                    <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="m7 4 10 6L7 16V4z"/>
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              {/* Move button - same position as real container */}
-              <div className="flex items-center justify-center mt-2">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center opacity-60"
-                  style={{
-                    backgroundColor: 'rgba(16, 185, 129, 0.25)',
-                    border: '1px solid rgba(16, 185, 129, 0.5)',
-                    color: '#10B981'
-                  }}
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                  </svg>
-                </div>
-              </div>
-
-              {/* Delete button - same position as real container */}
-              <button
-                className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center opacity-60 z-10"
-                style={{
-                  backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                  border: '1px solid rgba(220, 38, 38, 0.3)',
-                  color: '#DC2626'
-                }}
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Empty space placeholder when container is being dragged with mouse */}
       {isDraggingWithMouse && isContainerDragging ? (
         <div
@@ -552,8 +434,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '136px',
         minHeight: '136px',
         maxHeight: '136px',
-        position: 'relative', // Always relative - floating preview handles the cursor following
-        transform: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+        position: (isDraggingWithMouse && isContainerDragging) ? 'fixed' : 'relative',
+        left: (isDraggingWithMouse && isContainerDragging) ? `${mousePosition.x - dragOffset.x}px` : 'auto',
+        top: (isDraggingWithMouse && isContainerDragging) ? `${mousePosition.y - dragOffset.y}px` : 'auto',
+        transform: (isDraggingWithMouse && isContainerDragging)
+          ? 'rotate(10deg) scale(1.1)'
+          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
           : isDragging 
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
@@ -563,13 +449,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
           : 'scale(1)',
         opacity: (isDraggingWithMouse && isContainerDragging)
-          ? 0.3 // Make original container very transparent when mouse dragging
+          ? 0.95
           : isContainerDragging 
           ? 0.95
           : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? 0.9
           : isDragging ? 0.9 : 1,
-        transition: (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
+        transition: (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId) || (isDraggingWithMouse && isContainerDragging))
           ? 'none' 
           : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
         zIndex: isDraggingWithMouse && isContainerDragging
