@@ -347,40 +347,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      {/* Floating drag preview - appears when mouse dragging */}
-      {isDraggingWithMouse && isContainerDragging && image && (
-        <div
-          className="fixed pointer-events-none"
-          style={{
-            left: `${mousePosition.x - dragOffset.x}px`,
-            top: `${mousePosition.y - dragOffset.y}px`,
-            width: '450px',
-            height: '180px',
-            transform: 'rotate(10deg) scale(1.1)',
-            opacity: 0.95,
-            zIndex: 999999
-          }}
-        >
-          <div
-            className="w-full h-full rounded-2xl border-4 border-blue-400 shadow-2xl backdrop-blur-sm"
-            style={{
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%)',
-              boxShadow: `
-                0 0 0 4px rgba(59, 130, 246, 1),
-                0 0 50px rgba(59, 130, 246, 0.8),
-                0 30px 80px rgba(0, 0, 0, 0.6)
-              `,
-              padding: '20px'
-            }}
-          >
-            <img
-              src={imageUrl}
-              alt={image.name}
-              className="w-full h-full object-contain rounded-lg"
-            />
-          </div>
-        </div>
-      )}
+      
 
       {/* Empty space placeholder when container is being dragged with mouse */}
       {isDraggingWithMouse && isContainerDragging ? (
