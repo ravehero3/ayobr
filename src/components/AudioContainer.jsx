@@ -463,52 +463,54 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       }}
                     >
                       <div className="flex items-center justify-center h-full relative">
-                        {/* Copy the exact waveform from the main audio container */}
+                        {/* Copy the exact waveform from WaveSurfer */}
                         <div className="w-full h-full flex items-end justify-center px-2">
                           {(() => {
-                            // Try to get the existing waveform bars from the main container
-                            try {
-                              const waveformContainer = document.querySelector(`#waveform-${pairId}`);
-                              if (waveformContainer) {
-                                const waveBars = waveformContainer.querySelectorAll('wave');
-                                if (waveBars && waveBars.length > 0) {
-                                  // Extract heights and colors from existing waveform
-                                  const bars = Array.from(waveBars).slice(0, 120).map((bar, i) => {
-                                    const rect = bar.getBoundingClientRect();
-                                    const height = Math.max((rect.height / 80) * 100, 5); // Normalize to percentage
-                                    const color = window.getComputedStyle(bar).fill || '#6C737F';
-                                    const isPlayed = color.includes('rgb(53, 132, 228)') || color.includes('#3584E4');
-                                    
-                                    return {
-                                      height: height,
-                                      isPlayed: isPlayed
-                                    };
-                                  });
+                            // Try to get waveform data directly from WaveSurfer instance
+                            if (wavesurfer.current && wavesurfer.current.isReady) {
+                              try {
+                                // Get the canvas element from WaveSurfer
+                                const waveCanvas = wavesurfer.current.drawer.canvases[0];
+                                if (waveCanvas) {
+                                  // Extract the peak data from WaveSurfer's backend
+                                  const peaks = wavesurfer.current.backend.getPeaks ? 
+                                    wavesurfer.current.backend.getPeaks(120) : 
+                                    waveformPeaks;
                                   
-                                  return bars.map((bar, i) => (
-                                    <div
-                                      key={i}
-                                      style={{
-                                        width: '2px',
-                                        height: `${bar.height}%`,
-                                        backgroundColor: bar.isPlayed ? '#3584E4' : 'rgba(255, 255, 255, 0.7)',
-                                        borderRadius: '1px',
-                                        margin: '0 0.5px',
-                                        minHeight: '5%'
-                                      }}
-                                    />
-                                  ));
+                                  if (peaks && peaks.length > 0) {
+                                    const progress = currentTime / duration;
+                                    
+                                    return peaks.map((peak, i) => {
+                                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
+                                      const barProgress = i / peaks.length;
+                                      const isPlayed = barProgress <= progress;
+                                      
+                                      return (
+                                        <div
+                                          key={i}
+                                          style={{
+                                            width: '2px',
+                                            height: `${height}%`,
+                                            backgroundColor: isPlayed ? '#3584E4' : '#6C737F',
+                                            borderRadius: '1px',
+                                            margin: '0 0.5px',
+                                            minHeight: '5%'
+                                          }}
+                                        />
+                                      );
+                                    });
+                                  }
                                 }
+                              } catch (error) {
+                                console.log('Could not extract from WaveSurfer:', error);
                               }
-                            } catch (error) {
-                              console.log('Could not copy waveform from main container:', error);
                             }
                             
                             // Use stored peaks as fallback
                             if (waveformPeaks && waveformPeaks.length > 0) {
+                              const progress = currentTime / duration;
                               return waveformPeaks.map((peak, i) => {
                                 const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
-                                const progress = currentTime / duration;
                                 const barProgress = i / waveformPeaks.length;
                                 const isPlayed = barProgress <= progress;
                                 
@@ -518,7 +520,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                     style={{
                                       width: '2px',
                                       height: `${height}%`,
-                                      backgroundColor: isPlayed ? '#3584E4' : 'rgba(255, 255, 255, 0.7)',
+                                      backgroundColor: isPlayed ? '#3584E4' : '#6C737F',
                                       borderRadius: '1px',
                                       margin: '0 0.5px',
                                       minHeight: '5%'
@@ -528,7 +530,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                               });
                             }
                             
-                            // Final fallback: Generate pattern based on filename
+                            // Show realistic pattern while loading
                             const seed = audio.name ? audio.name.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 42;
                             return Array.from({ length: 120 }, (_, i) => {
                               const height = Math.abs(Math.sin((i + seed) * 0.5) * Math.cos(i * 0.3)) * 80 + 10;
@@ -539,7 +541,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                   style={{
                                     width: '2px',
                                     height: `${height}%`,
-                                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                    backgroundColor: '#6C737F',
                                     borderRadius: '1px',
                                     margin: '0 0.5px',
                                     minHeight: '5%'
