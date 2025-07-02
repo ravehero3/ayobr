@@ -20,6 +20,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [isDraggingWithMouse, setIsDraggingWithMouse] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [waveformPeaks, setWaveformPeaks] = useState(null);
   const containerRef = useRef(null);
 
   // Mouse tracking for drag visualization
@@ -68,6 +69,36 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       // Event listeners
       wavesurfer.current.on('ready', () => {
         setDuration(wavesurfer.current.getDuration());
+        
+        // Extract and store actual waveform peaks for drag preview
+        try {
+          if (wavesurfer.current.backend && wavesurfer.current.backend.getPeaks) {
+            const peaks = wavesurfer.current.backend.getPeaks(120, 0, wavesurfer.current.getDuration());
+            setWaveformPeaks(peaks);
+          } else if (wavesurfer.current.backend && wavesurfer.current.backend.buffer) {
+            // Alternative method to get peaks from audio buffer
+            const buffer = wavesurfer.current.backend.buffer;
+            const peaks = [];
+            const sampleSize = Math.floor(buffer.length / 120);
+            const channelData = buffer.getChannelData(0);
+            
+            for (let i = 0; i < 120; i++) {
+              const start = i * sampleSize;
+              const end = start + sampleSize;
+              let max = 0;
+              
+              for (let j = start; j < end && j < channelData.length; j++) {
+                const value = Math.abs(channelData[j]);
+                if (value > max) max = value;
+              }
+              peaks.push(max);
+            }
+            setWaveformPeaks(peaks);
+          }
+        } catch (error) {
+          console.log('Could not extract waveform peaks:', error);
+          // Will fall back to pattern generation in render
+        }
       });
 
       wavesurfer.current.on('audioprocess', () => {
@@ -420,28 +451,32 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       overflow: 'hidden'
                     }}
                   >
-                    {/* Full waveform visualization */}
+                    {/* Full waveform visualization using actual audio peaks */}
                     <div className="flex items-center justify-center h-full px-2">
-                      {wavesurfer.current && wavesurfer.current.backend && wavesurfer.current.backend.getPeaks ? (
-                        // Use actual waveform data from WaveSurfer if available
-                        wavesurfer.current.backend.getPeaks(100, 0, wavesurfer.current.getDuration()).map((peak, i) => (
+                      {waveformPeaks && waveformPeaks.length > 0 ? (
+                        // Use actual extracted waveform peaks from the audio file
+                        waveformPeaks.map((peak, i) => (
                           <div
                             key={i}
                             style={{
                               width: '2px',
-                              height: `${Math.abs(peak) * 80 + 20}%`,
-                              background: 'rgba(255, 255, 255, 0.9)',
+                              height: `${Math.max(Math.abs(peak) * 80, 5)}%`,
+                              background: 'rgba(255, 255, 255, 0.95)',
                               marginRight: '1px',
-                              borderRadius: '1px'
+                              borderRadius: '1px',
+                              minHeight: '5%'
                             }}
                           />
                         ))
                       ) : (
-                        // Fallback waveform pattern for consistent preview
-                        Array.from({ length: 60 }).map((_, i) => {
-                          // Create a realistic waveform pattern
-                          const intensity = Math.sin(i * 0.1) * Math.cos(i * 0.05) * Math.random();
-                          const height = Math.abs(intensity) * 60 + 15;
+                        // Fallback pattern while peaks are loading
+                        Array.from({ length: 80 }).map((_, i) => {
+                          // Create a more varied and realistic waveform pattern
+                          const base = Math.sin(i * 0.08) * Math.cos(i * 0.12);
+                          const variation = Math.sin(i * 0.25) * 0.5;
+                          const noise = (Math.random() - 0.5) * 0.3;
+                          const intensity = Math.abs(base + variation + noise);
+                          const height = intensity * 70 + 10;
                           return (
                             <div
                               key={i}
@@ -450,7 +485,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                 height: `${height}%`,
                                 background: 'rgba(255, 255, 255, 0.9)',
                                 marginRight: '1px',
-                                borderRadius: '1px'
+                                borderRadius: '1px',
+                                minHeight: '8%'
                               }}
                             />
                           );
