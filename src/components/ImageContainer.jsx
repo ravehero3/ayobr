@@ -114,6 +114,28 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     updatePair(pairId, { image: null });
   };
 
+  const handleMoveButtonClick = (e) => {
+    e.stopPropagation();
+    console.log('Move button clicked for image container:', pairId);
+    
+    // Trigger container drag start for individual image container
+    if (onContainerDragStart) {
+      onContainerDragStart('image', 'start', { 
+        id: pairId, 
+        audio: null, // Image container doesn't have audio
+        image: image
+      });
+    }
+  };
+
+  // Enhanced highlighting logic - show GREEN glow when:
+  // 1. Another image container is being dragged (container drag mode)
+  // 2. This container has image content (valid drop target)
+  // 3. This is not the container being dragged
+  const shouldHighlight = (isDraggingContainer && draggedContainerType === 'image' && !!image && draggedContainer?.id !== pairId) ||
+    (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && !!image) ||
+    shouldShowGlow;
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -159,20 +181,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   }, [isDragging]);
 
-  // Use the shouldShowGlow prop for targeted highlighting, plus highlight when another image is being dragged
-  const shouldHighlight = shouldShowGlow || (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && !!image);
 
-  const handleMoveButtonClick = (e) => {
-    e.stopPropagation();
-    // Trigger container drag start for individual image container
-    if (onContainerDragStart) {
-      onContainerDragStart('image', 'start', { 
-        id: pairId, 
-        type: 'image',
-        content: image 
-      });
-    }
-  };
 
   const handleContainerDragOver = (e) => {
     // Allow container dropping when in container drag mode or when dragging images
@@ -185,26 +194,37 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleContainerDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    // Handle image swapping via drag data
-    try {
-      const dragDataString = e.dataTransfer.getData('application/json');
-      if (dragDataString) {
-        const dragData = JSON.parse(dragDataString);
-        if (dragData.type === 'individual-container' && dragData.containerType === 'image' && dragData.pairId !== pairId) {
-          if (onSwap) {
-            onSwap(dragData.pairId, pairId, 'image');
-          }
-          return;
-        }
+    console.log('ImageContainer drop detected', {
+      isDraggingContainer,
+      draggedContainerType,
+      draggedContainerId: draggedContainer?.id,
+      currentPairId: pairId,
+      hasImage: !!image
+    });
+
+    // Handle container swapping when dropping on this image container
+    if (isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pairId && image) {
+      console.log('Executing image container swap:', draggedContainer.id, '->', pairId);
+      
+      if (onSwap) {
+        onSwap(draggedContainer.id, pairId, 'image');
       }
-    } catch (error) {
-      console.error('Error parsing drag data:', error);
+      
+      // End the container drag mode
+      if (onContainerDragEnd) {
+        onContainerDragEnd('image', 'end');
+      }
+      return;
     }
 
-    // Handle container drop when in container drag mode
-    if (isContainerDragMode && draggedContainerType === 'image' && onSwap) {
-      console.log('Container drop detected in ImageContainer');
+    // Handle regular image file dropping from main container drag
+    if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
+      console.log('Regular image drag detected, triggering swap');
+      if (onSwap) {
+        onSwap(draggedItem.pairId, pairId, 'image');
+      }
     }
   };
 
@@ -309,6 +329,63 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
       {image ? (
         <div className="relative h-full w-full overflow-hidden rounded-lg">
+          {/* Move button - positioned at bottom left */}
+          <button
+            className="absolute bottom-3 left-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-grab active:cursor-grabbing"
+            style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              color: '#10B981'
+            }}
+            title="Drag to move image container"
+            draggable="true"
+            onDragStart={(e) => {
+              // Set up drag data for container swapping
+              const dragData = {
+                type: 'individual-container',
+                containerType: 'image',
+                pairId: pairId,
+                content: image
+              };
+              
+              e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+              e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+              e.dataTransfer.effectAllowed = 'move';
+
+              // Store in sessionStorage as backup
+              sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+
+              // Set local dragging state for visual feedback
+              setIsDragging(true);
+
+              // Trigger the container drag system for cursor following
+              if (onContainerDragStart) {
+                onContainerDragStart('image', 'start', { 
+                  id: pairId, 
+                  type: 'image',
+                  content: image,
+                  image: image // Include the image file for proper container type detection
+                });
+              }
+            }}
+            onDragEnd={(e) => {
+              // Reset local dragging state
+              setIsDragging(false);
+
+              if (onContainerDragEnd) {
+                onContainerDragEnd('image', 'end');
+              }
+
+              // Clear the stored drag data
+              sessionStorage.removeItem('currentDragData');
+            }}
+            onClick={handleMoveButtonClick}
+          >
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+
           {/* Delete button - positioned at bottom right */}
           <button
             className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"

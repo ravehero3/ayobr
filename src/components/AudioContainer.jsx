@@ -224,23 +224,25 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleMoveButtonClick = (e) => {
     e.stopPropagation();
+    console.log('Move button clicked for audio container:', pairId);
+    
     // Trigger container drag start for individual audio container
     if (onContainerDragStart) {
       onContainerDragStart('audio', 'start', { 
         id: pairId, 
-        type: 'audio',
-        content: audio 
+        audio: audio,
+        image: null // Audio container doesn't have image
       });
     }
   };
 
-  // Enhanced highlighting logic - show glow when:
-  // 1. Explicitly told to via shouldShowGlow prop
-  // 2. Another audio container is being dragged and this container has audio
-  // 3. This container is a valid drop target during audio drag
-  const shouldHighlight = shouldShowGlow || 
+  // Enhanced highlighting logic - show GREEN glow when:
+  // 1. Another audio container is being dragged (container drag mode)
+  // 2. This container has audio content (valid drop target)
+  // 3. This is not the container being dragged
+  const shouldHighlight = (isDraggingContainer && draggedContainerType === 'audio' && !!audio && draggedContainer?.id !== pairId) ||
     (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && !!audio) ||
-    (isDraggingContainer && draggedContainerType === 'audio' && !!audio);
+    shouldShowGlow;
 
   const handleContainerDragOver = (e) => {
     // Allow container dropping when in container drag mode or when dragging audio
@@ -255,61 +257,27 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('AudioContainer handleContainerDrop called', {
-      isContainerDragMode,
+    console.log('AudioContainer drop detected', {
+      isDraggingContainer,
       draggedContainerType,
-      pairId,
-      audio: !!audio
+      draggedContainerId: draggedContainer?.id,
+      currentPairId: pairId,
+      hasAudio: !!audio
     });
 
-    // Handle container swapping from move button drag
-    if (isContainerDragMode && draggedContainerType === 'audio') {
-      // Get the dragged container data from dataTransfer or sessionStorage
-      let draggedData = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('application/json');
-
-      // Fallback to sessionStorage if dataTransfer is empty
-      if (!draggedData) {
-        draggedData = sessionStorage.getItem('currentDragData');
+    // Handle container swapping when dropping on this audio container
+    if (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pairId && audio) {
+      console.log('Executing audio container swap:', draggedContainer.id, '->', pairId);
+      
+      if (onSwap) {
+        onSwap(draggedContainer.id, pairId, 'audio');
       }
-
-      console.log('Container drag mode detected, draggedData:', draggedData);
-
-      if (draggedData) {
-        try {
-          const parsedData = JSON.parse(draggedData);
-          console.log('Parsed drag data:', parsedData);
-
-          if (parsedData.type === 'audio' && parsedData.pairId !== pairId) {
-            console.log('Triggering audio swap:', parsedData.pairId, '->', pairId);
-            // Trigger the swap
-            if (onSwap) {
-              onSwap(parsedData.pairId, pairId, 'audio');
-            }
-            // End the container drag mode
-            if (onContainerDragEnd) {
-              onContainerDragEnd('audio', 'end');
-            }
-            // Clear the stored drag data
-            sessionStorage.removeItem('currentDragData');
-            return;
-          } else if (parsedData.type === 'individual-container' && parsedData.containerType === 'audio' && parsedData.pairId !== pairId) {
-            console.log('Triggering individual container audio swap:', parsedData.pairId, '->', pairId);
-            // Handle individual container swapping
-            if (onSwap) {
-              onSwap(parsedData.pairId, pairId, 'audio');
-            }
-            // End the container drag mode
-            if (onContainerDragEnd) {
-              onContainerDragEnd('audio', 'end');
-            }
-            // Clear the stored drag data
-            sessionStorage.removeItem('currentDragData');
-            return;
-          }
-        } catch (error) {
-          console.error('Error parsing dragged data:', error);
-        }
+      
+      // End the container drag mode
+      if (onContainerDragEnd) {
+        onContainerDragEnd('audio', 'end');
       }
+      return;
     }
 
     // Handle regular audio file dropping from main container drag

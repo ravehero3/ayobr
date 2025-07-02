@@ -30,41 +30,36 @@ function App() {
     setDraggedItem(null);
   }, []);
 
-  const handleContainerDrag = (pairIdOrType, action, pairData) => {
+  const handleContainerDrag = (containerType, action, pairData) => {
+    console.log('Container drag event:', containerType, action, pairData);
+    
     if (action === 'start') {
-      // Check if this is a container type (audio/image) or actual pair data
-      if (typeof pairIdOrType === 'string' && (pairIdOrType === 'audio' || pairIdOrType === 'image')) {
-        // Individual container drag (move button)
-        setIsContainerDragMode(true);
-        setIsDraggingContainer(true);
-        setDraggedContainerType(pairIdOrType);
-        setDraggedContainer({ type: pairIdOrType, ...pairData });
-        
-        // Auto-reset after 10 seconds
-        setTimeout(() => {
+      // Start container drag mode
+      setIsContainerDragMode(true);
+      setIsDraggingContainer(true);
+      setDraggedContainerType(containerType); // 'audio' or 'image'
+      setDraggedContainer(pairData); // The actual pair data with id
+      
+      console.log('Started dragging container:', {
+        type: containerType,
+        pairId: pairData.id,
+        isDragging: true
+      });
+      
+      // Auto-reset after 15 seconds as safety
+      setTimeout(() => {
+        if (isDraggingContainer) {
+          console.log('Auto-resetting drag state');
           setIsContainerDragMode(false);
           setIsDraggingContainer(false);
           setDraggedContainerType(null);
           setDraggedContainer(null);
-        }, 10000);
-      } else {
-        // Main container drag (drag handle)
-        setDraggedContainer(pairData);
-        setIsDraggingContainer(true);
-        setIsContainerDragMode(false);
-        
-        // Determine the type of container being dragged
-        if (pairData.audio && !pairData.image) {
-          setDraggedContainerType('audio');
-        } else if (pairData.image && !pairData.audio) {
-          setDraggedContainerType('image');
-        } else {
-          setDraggedContainerType('mixed');
         }
-      }
+      }, 15000);
     } else if (action === 'end') {
+      console.log('Ending container drag');
       setDraggedContainer(null);
-      setIsDraggingContainer(false);
+      setIsDraggingContainer(false); 
       setDraggedContainerType(null);
       setIsContainerDragMode(false);
     }
