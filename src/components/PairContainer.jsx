@@ -264,7 +264,12 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           </div>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row items-center relative gap-4 lg:gap-6 z-10">
+        <div 
+          className="flex flex-col lg:flex-row items-center relative gap-4 lg:gap-6 z-10"
+          onDragOver={handleContainerDragOver}
+          onDragLeave={handleContainerDragLeave}
+          onDrop={handleContainerDrop}
+        >
           {/* Audio Container - Made wider for better content display */}  
           <div className="relative w-full lg:w-1/2 min-w-[450px]">
             <div
