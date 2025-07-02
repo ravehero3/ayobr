@@ -465,13 +465,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                     >
                       <div className="flex items-center justify-center h-full relative">
                         {/* Display exact waveform from this specific audio file */}
-                        <div className="w-full h-full flex items-end justify-center px-2">
+                        <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
                           {waveformPeaks && waveformPeaks.length > 0 ? (
-                            // Use the actual peaks from this audio file
-                            waveformPeaks.map((peak, i) => {
-                              const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
+                            // Use the actual peaks from this audio file - show more bars for detailed view
+                            waveformPeaks.slice(0, 80).map((peak, i) => {
+                              const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
                               const progress = currentTime / duration;
-                              const barProgress = i / waveformPeaks.length;
+                              const barProgress = i / 80;
                               const isPlayed = barProgress <= progress;
                               
                               return (
@@ -480,19 +480,56 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                   style={{
                                     width: '2px',
                                     height: `${height}%`,
-                                    backgroundColor: isPlayed ? '#3584E4' : '#6C737F',
+                                    backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
                                     borderRadius: '1px',
-                                    margin: '0 0.5px',
-                                    minHeight: '5%'
+                                    minHeight: '8%',
+                                    flexShrink: 0
                                   }}
                                 />
                               );
                             })
                           ) : (
-                            // Show loading message if waveform isn't ready yet
-                            <div className="text-white/60 text-xs">
-                              {audio.name.replace(/\.[^/.]+$/, "")}
-                            </div>
+                            // Fallback: Try to extract peaks from wavesurfer if available
+                            wavesurfer.current && wavesurfer.current.backend && (() => {
+                              try {
+                                // Get current wavesurfer peaks for real-time display
+                                const peaks = wavesurfer.current.backend.getPeaks ? 
+                                  wavesurfer.current.backend.getPeaks(80, 0, wavesurfer.current.getDuration()) :
+                                  null;
+                                
+                                if (peaks && peaks.length > 0) {
+                                  return peaks.map((peak, i) => {
+                                    const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
+                                    const progress = currentTime / duration;
+                                    const barProgress = i / peaks.length;
+                                    const isPlayed = barProgress <= progress;
+                                    
+                                    return (
+                                      <div
+                                        key={i}
+                                        style={{
+                                          width: '2px',
+                                          height: `${height}%`,
+                                          backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
+                                          borderRadius: '1px',
+                                          margin: '0 0.5px',
+                                          minHeight: '8%'
+                                        }}
+                                      />
+                                    );
+                                  });
+                                }
+                              } catch (error) {
+                                console.log('Could not get real-time peaks:', error);
+                              }
+                              
+                              // Final fallback
+                              return (
+                                <div className="text-white/60 text-xs flex items-center justify-center w-full h-full">
+                                  Loading waveform...
+                                </div>
+                              );
+                            })()
                           )}
                         </div>
                       </div>
