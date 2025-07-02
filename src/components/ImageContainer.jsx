@@ -161,7 +161,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       // Check if we're dropping on another image container
       const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
       const imageContainer = elementBelow?.closest('[data-image-container]');
-      
+
       if (imageContainer) {
         const targetPairId = imageContainer.getAttribute('data-pair-id');
         if (targetPairId && targetPairId !== pairId) {
@@ -175,12 +175,12 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
       sessionStorage.removeItem('currentDragData');
-      
+
       // End container drag mode
       if (onContainerDragEnd) {
         onContainerDragEnd(pairId, 'end');
       }
-      
+
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -279,7 +279,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     try {
       const dragDataString = e.dataTransfer.getData('application/json');
       let dragData = null;
-      
+
       if (dragDataString) {
         dragData = JSON.parse(dragDataString);
       } else {
@@ -347,7 +347,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      
+
 
       {/* Empty space placeholder when container is being dragged with mouse */}
       {isDraggingWithMouse && isContainerDragging ? (
@@ -419,9 +419,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
           : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         padding: '20px',
-        height: '180px',
-        minHeight: '180px',
-        maxHeight: '180px',
+        height: '140px',
+        minHeight: '140px',
+        maxHeight: '140px',
         position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
         left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
         top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
@@ -478,9 +478,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         `,
         borderRadius: '14px',
         padding: '20px',
-        height: '180px',
-        minHeight: '180px',
-        maxHeight: '180px',
+        height: '140px',
+        minHeight: '140px',
+        maxHeight: '140px',
         transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
         transition: 'all 0.2s ease-in-out',
         pointerEvents: 'auto',
@@ -503,7 +503,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
       {image ? (
         <div className="relative h-full w-full overflow-hidden rounded-lg">
-          
+
 
           {/* Delete button - positioned at bottom right */}
           <button

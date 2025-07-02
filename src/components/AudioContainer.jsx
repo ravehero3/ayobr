@@ -493,8 +493,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           <div
             style={{
               width: '100%',
-              height: '136px',
-              minHeight: '136px',
+              height: '120px',
+              minHeight: '120px',
               border: '2px dashed rgba(16, 185, 129, 0.4)',
               borderRadius: '8px',
               background: 'rgba(10, 15, 28, 0.3)',
@@ -516,9 +516,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               style={{
                 position: 'fixed',
                 left: `${mousePosition.x - 225}px`, // Always center horizontally (450px / 2 = 225px)
-                top: `${mousePosition.y - 68}px`,   // Always center vertically (136px / 2 = 68px)
+                top: `${mousePosition.y - 60}px`,   // Always center vertically (120px / 2 = 60px)
                 width: '450px',
-                height: '136px',
+                height: '120px',
                 transform: 'rotate(2deg) scale(1.1)',
                 zIndex: 999999999, // Extremely high z-index to ensure it's always on top
                 pointerEvents: 'none',
@@ -571,12 +571,16 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       <div className="flex items-center justify-center h-full relative">
                         {/* Display exact waveform from this specific audio file */}
                         <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
-                          {waveformPeaks && waveformPeaks.length > 0 ? (
-                            // Use the stored waveform peaks from this specific audio file
-                            waveformPeaks.map((peak, i) => {
+                          {(() => {
+                            // Always use the unique waveform for this specific audio file
+                            const uniquePeaks = waveformPeaks && waveformPeaks.length > 0 
+                              ? waveformPeaks 
+                              : generateRealisticWaveform(audio.name, audio.size);
+                            
+                            return uniquePeaks.map((peak, i) => {
                               const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
                               const progress = currentTime / duration;
-                              const barProgress = i / waveformPeaks.length;
+                              const barProgress = i / uniquePeaks.length;
                               const isPlayed = barProgress <= progress;
 
                               return (
@@ -592,33 +596,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                   }}
                                 />
                               );
-                            })
-                          ) : (
-                            // Generate and show realistic waveform immediately as fallback
-                            (() => {
-                              const fallbackPeaks = generateRealisticWaveform(audio.name, audio.size);
-                              return fallbackPeaks.map((peak, i) => {
-                                const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
-                                const progress = currentTime / duration;
-                                const barProgress = i / fallbackPeaks.length;
-                                const isPlayed = barProgress <= progress;
-
-                                return (
-                                  <div
-                                    key={i}
-                                    style={{
-                                      width: '2px',
-                                      height: `${height}%`,
-                                      backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
-                                      borderRadius: '1px',
-                                      minHeight: '8%',
-                                      flexShrink: 0
-                                    }}
-                                  />
-                                );
-                              });
-                            })()
-                          )}
+                            });
+                          })()}
                         </div>
                       </div>
                     </div>
@@ -649,7 +628,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         <div 
           className="relative"
           style={{
-            minHeight: isContainerDragging ? '180px' : '136px', // Reserve space when container is lifted
+            minHeight: isContainerDragging ? '160px' : '120px', // Reserve space when container is lifted
             transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
           }}
         >
@@ -703,9 +682,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             inset 0 1px 0 rgba(255, 255, 255, 0.02)
           `,
         padding: audio ? '16px' : '20px',
-        height: '136px',
-        minHeight: '136px',
-        maxHeight: '136px',
+        height: '120px',
+        minHeight: '120px',
+        maxHeight: '120px',
         position: (isDraggingWithMouse && isContainerDragging) ? 'fixed' : 'relative',
         left: (isDraggingWithMouse && isContainerDragging) ? `${mousePosition.x - dragOffset.x}px` : 'auto',
         top: (isDraggingWithMouse && isContainerDragging) ? `${mousePosition.y - dragOffset.y}px` : 'auto',
