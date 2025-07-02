@@ -446,15 +446,23 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               
               console.log('Move button drag started:', dragData);
               
+              // Set local dragging state for visual feedback
+              setIsDragging(true);
+              
+              // Trigger the container drag system for cursor following
               if (onContainerDragStart) {
                 onContainerDragStart('audio', 'start', { 
                   id: pairId, 
                   type: 'audio',
-                  content: audio 
+                  content: audio,
+                  audio: audio // Include the audio file for proper container type detection
                 });
               }
             }}
             onDragEnd={(e) => {
+              // Reset local dragging state
+              setIsDragging(false);
+              
               if (onContainerDragEnd) {
                 onContainerDragEnd('audio', 'end');
               }

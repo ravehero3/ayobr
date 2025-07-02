@@ -341,21 +341,34 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             onDragStart={(e) => {
               e.stopPropagation();
               e.dataTransfer.effectAllowed = 'move';
-              e.dataTransfer.setData('application/json', JSON.stringify({
+              const dragData = {
                 type: 'individual-container',
                 containerType: 'image',
                 pairId: pairId,
                 content: image
-              }));
+              };
+              e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+              e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+              
+              // Store in sessionStorage for reliable access
+              sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+              
+              // Set local dragging state for visual feedback
+              setIsDragging(true);
+              
               if (onContainerDragStart) {
                 onContainerDragStart('image', 'start', { 
                   id: pairId, 
                   type: 'image',
-                  content: image 
+                  content: image,
+                  image: image // Include the image file for proper container type detection
                 });
               }
             }}
             onDragEnd={(e) => {
+              // Reset local dragging state
+              setIsDragging(false);
+              
               if (onContainerDragEnd) {
                 onContainerDragEnd('image', 'end');
               }

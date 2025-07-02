@@ -186,6 +186,10 @@ Changelog:
 - July 1, 2025. Fixed container swapping functionality - image containers now properly swap with other image containers
 - July 1, 2025. Enhanced drag and drop visual feedback with proper validation and target highlighting
 - July 1, 2025. Completed migration with all features intact: drag-drop file pairing, container swapping, video generation
+- July 1, 2025. FINAL MIGRATION COMPLETE: Fixed missing Pairs component import issue by creating re-export file
+- July 1, 2025. Enhanced audio and image container drag behavior - containers now properly follow cursor when dragged by move handles
+- July 1, 2025. Improved visual feedback for container dragging - proper integration with App.jsx cursor following system
+- July 1, 2025. All container swapping functionality now working correctly with enhanced user experience
 ```
 
 ## User Preferences
