@@ -375,7 +375,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
           }}
         >
-        <motion.div
+          <motion.div
           ref={containerRef}
           className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
           draggable={!!image}
@@ -584,8 +584,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           <p className="text-gray-600 text-xs">Drop an image here</p>
         </div>
       )}
-      </motion.div>
-      </div>
+          </motion.div>
+        </div>
       )}
     </>
   );
