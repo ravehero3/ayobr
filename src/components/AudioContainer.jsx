@@ -73,34 +73,59 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         setDuration(wavesurfer.current.getDuration());
         
         // Extract and store actual waveform peaks for drag preview
-        try {
-          if (wavesurfer.current.backend && wavesurfer.current.backend.getPeaks) {
-            const peaks = wavesurfer.current.backend.getPeaks(120, 0, wavesurfer.current.getDuration());
-            setWaveformPeaks(peaks);
-          } else if (wavesurfer.current.backend && wavesurfer.current.backend.buffer) {
-            // Alternative method to get peaks from audio buffer
-            const buffer = wavesurfer.current.backend.buffer;
-            const peaks = [];
-            const sampleSize = Math.floor(buffer.length / 120);
-            const channelData = buffer.getChannelData(0);
-            
-            for (let i = 0; i < 120; i++) {
-              const start = i * sampleSize;
-              const end = start + sampleSize;
-              let max = 0;
-              
-              for (let j = start; j < end && j < channelData.length; j++) {
-                const value = Math.abs(channelData[j]);
-                if (value > max) max = value;
+        setTimeout(() => {
+          try {
+            // Method 1: Try to get peaks from the backend
+            if (wavesurfer.current.backend && wavesurfer.current.backend.getPeaks) {
+              const peaks = wavesurfer.current.backend.getPeaks(80, 0, wavesurfer.current.getDuration());
+              if (peaks && peaks.length > 0) {
+                setWaveformPeaks(peaks);
+                console.log('Extracted peaks using getPeaks method:', peaks.length, 'peaks');
+                return;
               }
-              peaks.push(max);
             }
-            setWaveformPeaks(peaks);
+            
+            // Method 2: Extract from audio buffer directly
+            if (wavesurfer.current.backend && wavesurfer.current.backend.buffer) {
+              const buffer = wavesurfer.current.backend.buffer;
+              const peaks = [];
+              const channelData = buffer.getChannelData(0);
+              const sampleSize = Math.floor(channelData.length / 80);
+              
+              for (let i = 0; i < 80; i++) {
+                const start = i * sampleSize;
+                const end = Math.min(start + sampleSize, channelData.length);
+                let max = 0;
+                
+                for (let j = start; j < end; j++) {
+                  const value = Math.abs(channelData[j]);
+                  if (value > max) max = value;
+                }
+                peaks.push(max);
+              }
+              
+              if (peaks.length > 0) {
+                setWaveformPeaks(peaks);
+                console.log('Extracted peaks from audio buffer:', peaks.length, 'peaks');
+                return;
+              }
+            }
+            
+            // Method 3: Try to get peaks from the drawable peaks if available
+            if (wavesurfer.current.drawer && wavesurfer.current.drawer.peaks) {
+              const peaks = Array.from(wavesurfer.current.drawer.peaks).slice(0, 80);
+              if (peaks.length > 0) {
+                setWaveformPeaks(peaks);
+                console.log('Extracted peaks from drawer:', peaks.length, 'peaks');
+                return;
+              }
+            }
+            
+            console.log('No peaks could be extracted, will use fallback pattern');
+          } catch (error) {
+            console.log('Error extracting waveform peaks:', error);
           }
-        } catch (error) {
-          console.log('Could not extract waveform peaks:', error);
-          // Will fall back to pattern generation in render
-        }
+        }, 100); // Small delay to ensure wavesurfer is fully loaded
       });
 
       wavesurfer.current.on('audioprocess', () => {
@@ -466,71 +491,74 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       <div className="flex items-center justify-center h-full relative">
                         {/* Display exact waveform from this specific audio file */}
                         <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
-                          {waveformPeaks && waveformPeaks.length > 0 ? (
-                            // Use the actual peaks from this audio file - show more bars for detailed view
-                            waveformPeaks.slice(0, 80).map((peak, i) => {
-                              const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
-                              const progress = currentTime / duration;
-                              const barProgress = i / 80;
-                              const isPlayed = barProgress <= progress;
-                              
-                              return (
-                                <div
-                                  key={i}
-                                  style={{
-                                    width: '2px',
-                                    height: `${height}%`,
-                                    backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
-                                    borderRadius: '1px',
-                                    minHeight: '8%',
-                                    flexShrink: 0
-                                  }}
-                                />
-                              );
-                            })
-                          ) : (
-                            // Fallback: Try to extract peaks from wavesurfer if available
-                            wavesurfer.current && wavesurfer.current.backend && (() => {
+                          {(() => {
+                            // Try to get real-time peaks from the current wavesurfer instance
+                            let peaksToUse = waveformPeaks;
+                            
+                            // If we don't have stored peaks, try to get them from wavesurfer directly
+                            if (!peaksToUse || peaksToUse.length === 0) {
                               try {
-                                // Get current wavesurfer peaks for real-time display
-                                const peaks = wavesurfer.current.backend.getPeaks ? 
-                                  wavesurfer.current.backend.getPeaks(80, 0, wavesurfer.current.getDuration()) :
-                                  null;
-                                
-                                if (peaks && peaks.length > 0) {
-                                  return peaks.map((peak, i) => {
-                                    const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
-                                    const progress = currentTime / duration;
-                                    const barProgress = i / peaks.length;
-                                    const isPlayed = barProgress <= progress;
+                                if (wavesurfer.current && wavesurfer.current.backend) {
+                                  if (wavesurfer.current.backend.getPeaks) {
+                                    peaksToUse = wavesurfer.current.backend.getPeaks(80, 0, wavesurfer.current.getDuration());
+                                  } else if (wavesurfer.current.backend.buffer) {
+                                    // Extract peaks from buffer in real-time
+                                    const buffer = wavesurfer.current.backend.buffer;
+                                    const channelData = buffer.getChannelData(0);
+                                    const sampleSize = Math.floor(channelData.length / 80);
+                                    const peaks = [];
                                     
-                                    return (
-                                      <div
-                                        key={i}
-                                        style={{
-                                          width: '2px',
-                                          height: `${height}%`,
-                                          backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
-                                          borderRadius: '1px',
-                                          margin: '0 0.5px',
-                                          minHeight: '8%'
-                                        }}
-                                      />
-                                    );
-                                  });
+                                    for (let i = 0; i < 80; i++) {
+                                      const start = i * sampleSize;
+                                      const end = Math.min(start + sampleSize, channelData.length);
+                                      let max = 0;
+                                      
+                                      for (let j = start; j < end; j++) {
+                                        const value = Math.abs(channelData[j]);
+                                        if (value > max) max = value;
+                                      }
+                                      peaks.push(max);
+                                    }
+                                    peaksToUse = peaks;
+                                  }
                                 }
                               } catch (error) {
                                 console.log('Could not get real-time peaks:', error);
                               }
-                              
-                              // Final fallback
-                              return (
-                                <div className="text-white/60 text-xs flex items-center justify-center w-full h-full">
-                                  Loading waveform...
-                                </div>
-                              );
-                            })()
-                          )}
+                            }
+                            
+                            // Render the waveform if we have peaks
+                            if (peaksToUse && peaksToUse.length > 0) {
+                              return peaksToUse.slice(0, 80).map((peak, i) => {
+                                const normalizedPeak = Math.abs(peak);
+                                const height = Math.max(Math.min(normalizedPeak * 100, 90), 10);
+                                const progress = currentTime / duration;
+                                const barProgress = i / 80;
+                                const isPlayed = barProgress <= progress;
+                                
+                                return (
+                                  <div
+                                    key={i}
+                                    style={{
+                                      width: '3px',
+                                      height: `${height}%`,
+                                      backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.8)',
+                                      borderRadius: '1px',
+                                      minHeight: '10%',
+                                      flexShrink: 0
+                                    }}
+                                  />
+                                );
+                              });
+                            }
+                            
+                            // Final fallback - show a loading message
+                            return (
+                              <div className="text-white/70 text-xs flex items-center justify-center w-full h-full">
+                                {audio?.name ? `${audio.name.replace(/\.[^/.]+$/, "")}` : "Loading waveform..."}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>
