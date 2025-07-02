@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useVideoPlayback } from '../hooks/useVideoPlayback';
 import { motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import WaveSurfer from 'wavesurfer.js';
 
 const AudioContainer = ({ 
   audio, 
@@ -19,8 +19,16 @@ const AudioContainer = ({
   draggedContainer,
   shouldShowGlow
 }) => {
-  const { wavesurferRef, currentTime, duration, isPlaying, handlePlayPause, initializeWaveform } = useVideoPlayback();
-  
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isContainerDragging, setIsContainerDragging] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const waveformRef = useRef(null);
+  const wavesurferRef = useRef(null);
+  const containerRef = useRef(null);
+
   // Format time utility function
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return '0:00';
@@ -28,17 +36,67 @@ const AudioContainer = ({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isContainerDragging, setIsContainerDragging] = useState(false);
-  const waveformRef = useRef(null);
-  const containerRef = useRef(null);
 
+  // Initialize WaveSurfer
   useEffect(() => {
-    if (audio && waveformRef.current) {
-      initializeWaveform(waveformRef.current, audio);
+    if (audio && waveformRef.current && !wavesurferRef.current) {
+      try {
+        console.log('Using fallback waveform generation for', audio.name);
+        
+        wavesurferRef.current = WaveSurfer.create({
+          container: waveformRef.current,
+          waveColor: 'rgba(53, 132, 228, 0.3)',
+          progressColor: 'rgba(53, 132, 228, 0.8)',
+          cursorColor: 'rgba(53, 132, 228, 1)',
+          barWidth: 2,
+          barRadius: 1,
+          responsive: true,
+          height: 80,
+          normalize: true,
+          backend: 'WebAudio',
+          mediaControls: false
+        });
+
+        wavesurferRef.current.loadBlob(audio);
+
+        wavesurferRef.current.on('ready', () => {
+          setDuration(wavesurferRef.current.getDuration());
+        });
+
+        wavesurferRef.current.on('audioprocess', () => {
+          setCurrentTime(wavesurferRef.current.getCurrentTime());
+        });
+
+        wavesurferRef.current.on('play', () => {
+          setIsPlaying(true);
+        });
+
+        wavesurferRef.current.on('pause', () => {
+          setIsPlaying(false);
+        });
+
+        wavesurferRef.current.on('finish', () => {
+          setIsPlaying(false);
+        });
+
+      } catch (error) {
+        console.error('Error initializing WaveSurfer:', error);
+      }
     }
-  }, [audio, initializeWaveform]);
+
+    return () => {
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+        wavesurferRef.current = null;
+      }
+    };
+  }, [audio]);
+
+  const handlePlayPause = () => {
+    if (wavesurferRef.current) {
+      wavesurferRef.current.playPause();
+    }
+  };
 
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = 'move';
