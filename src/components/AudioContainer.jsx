@@ -319,13 +319,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for audio
           : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
         boxShadow: isDragging
-          ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
+          ? '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8), 0 30px 80px rgba(0, 0, 0, 0.6)'
           : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
           : shouldHighlight
-          ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
+          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
           : (isContainerDragMode && draggedContainerType === 'audio')
-          ? '0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.5), 0 0 60px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.1)'
+          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
           : audio 
             ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
             : `
@@ -339,13 +339,15 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '136px',
         maxHeight: '136px',
         transform: isDragging 
-          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.05) rotate(1deg)`
+          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
           : isDragOver 
           ? 'scale(1.02)' 
+          : shouldHighlight
+          ? 'scale(1.02)'
           : 'scale(1)',
-        opacity: isDragging ? 0.8 : 1,
-        transition: 'all 0.2s ease-in-out',
-        zIndex: isDragging ? 1000 : 1
+        opacity: isDragging ? 0.9 : 1,
+        transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: isDragging ? 1000 : shouldHighlight ? 100 : 1
       }}
     >
       {/* Drag and Drop Overlay */}
