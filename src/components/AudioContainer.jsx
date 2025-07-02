@@ -5,6 +5,7 @@ import WaveSurfer from 'wavesurfer.js';
 
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
+let currentlyPlayingAudioId = null;
 
 // Function to generate realistic waveform patterns based on file characteristics
 const generateRealisticWaveform = (fileName, fileSize) => {
@@ -133,31 +134,40 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         setDuration(wavesurfer.current.getDuration());
 
         // Extract and store actual waveform peaks for drag preview
-        setTimeout(() => {
+        const extractWaveformPeaks = () => {
           try {
             // Method 1: Extract from audio buffer directly (most reliable)
             if (wavesurfer.current.backend && wavesurfer.current.backend.buffer) {
               const buffer = wavesurfer.current.backend.buffer;
               const peaks = [];
               const channelData = buffer.getChannelData(0);
-              const sampleSize = Math.floor(channelData.length / 120);
+              const targetBars = 120;
+              const sampleSize = Math.floor(channelData.length / targetBars);
 
-              for (let i = 0; i < 120; i++) {
+              for (let i = 0; i < targetBars; i++) {
                 const start = i * sampleSize;
                 const end = Math.min(start + sampleSize, channelData.length);
                 let max = 0;
 
+                // Calculate RMS (Root Mean Square) for better representation
+                let sum = 0;
+                let count = 0;
                 for (let j = start; j < end; j++) {
                   const value = Math.abs(channelData[j]);
+                  sum += value * value;
+                  count++;
                   if (value > max) max = value;
                 }
-                peaks.push(max);
+                
+                // Use RMS value for more accurate waveform representation
+                const rms = count > 0 ? Math.sqrt(sum / count) : 0;
+                peaks.push(Math.max(rms, max * 0.3)); // Blend RMS with peak for better visual
               }
 
               if (peaks.length > 0) {
                 setWaveformPeaks(peaks);
-                console.log('Extracted peaks from audio buffer for', audio.name, ':', peaks.length, 'peaks');
-                return;
+                console.log('Extracted RMS waveform peaks for', audio.name, ':', peaks.length, 'peaks', 'max:', Math.max(...peaks).toFixed(3));
+                return true;
               }
             }
 
@@ -165,47 +175,45 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             if (wavesurfer.current.backend && wavesurfer.current.backend.getPeaks) {
               const peaks = wavesurfer.current.backend.getPeaks(120, 0, wavesurfer.current.getDuration());
               if (peaks && peaks.length > 0) {
-                setWaveformPeaks(peaks);
+                setWaveformPeaks(peaks.map(p => Math.abs(p)));
                 console.log('Extracted peaks using getPeaks method for', audio.name, ':', peaks.length, 'peaks');
-                return;
+                return true;
               }
             }
 
-            // Method 3: Try to get peaks from the drawable peaks if available
-            if (wavesurfer.current.drawer && wavesurfer.current.drawer.peaks) {
-              const peaks = Array.from(wavesurfer.current.drawer.peaks).slice(0, 120);
+            // Method 3: Try to get peak data from wavesurfer drawer
+            if (wavesurfer.current.drawer && wavesurfer.current.drawer.normalizedPeaks) {
+              const peaks = Array.from(wavesurfer.current.drawer.normalizedPeaks).slice(0, 120);
               if (peaks.length > 0) {
-                setWaveformPeaks(peaks);
-                console.log('Extracted peaks from drawer for', audio.name, ':', peaks.length, 'peaks');
-                return;
+                setWaveformPeaks(peaks.map(p => Math.abs(p)));
+                console.log('Extracted normalized peaks from drawer for', audio.name, ':', peaks.length, 'peaks');
+                return true;
               }
             }
 
-            // Method 4: Extract from the actual DOM waveform bars
-            const waveformBars = waveformRef.current?.querySelectorAll('wave');
-            if (waveformBars && waveformBars.length > 0) {
-              const peaks = Array.from(waveformBars).map(bar => {
-                const height = parseFloat(bar.style.height || '0');
-                return height / 100; // Normalize to 0-1 range
-              });
-              if (peaks.length > 0) {
-                setWaveformPeaks(peaks);
-                console.log('Extracted peaks from DOM elements for', audio.name, ':', peaks.length, 'peaks');
-                return;
-              }
-            }
-
-            // Fallback: Generate realistic-looking waveform based on audio file characteristics
-            console.log('Generating fallback waveform pattern for', audio.name);
-            const fallbackPeaks = generateRealisticWaveform(audio.name, audio.size);
-            setWaveformPeaks(fallbackPeaks);
+            return false;
           } catch (error) {
             console.log('Error extracting waveform peaks for', audio.name, ':', error);
-            // Generate fallback even on error
+            return false;
+          }
+        };
+
+        // Try multiple times with different delays to catch the waveform data
+        const tryExtractPeaks = (attempt = 1, maxAttempts = 5) => {
+          const success = extractWaveformPeaks();
+          if (!success && attempt < maxAttempts) {
+            const delay = attempt * 200; // Increasing delay
+            setTimeout(() => tryExtractPeaks(attempt + 1, maxAttempts), delay);
+          } else if (!success) {
+            // Final fallback: Generate realistic-looking waveform based on audio file characteristics
+            console.log('Using fallback waveform generation for', audio.name);
             const fallbackPeaks = generateRealisticWaveform(audio.name, audio.size);
             setWaveformPeaks(fallbackPeaks);
           }
-        }, 500); // Longer delay to ensure wavesurfer is fully loaded
+        };
+
+        // Start extraction attempts
+        tryExtractPeaks();
       });
 
       wavesurfer.current.on('audioprocess', () => {
@@ -213,13 +221,29 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       });
 
       wavesurfer.current.on('play', () => {
+        // Stop any other currently playing audio
+        if (currentlyPlayingWaveSurfer && currentlyPlayingWaveSurfer !== wavesurfer.current) {
+          currentlyPlayingWaveSurfer.pause();
+        }
+        
         setIsPlaying(true);
         currentlyPlayingWaveSurfer = wavesurfer.current;
+        currentlyPlayingAudioId = pairId;
       });
+      
       wavesurfer.current.on('pause', () => {
         setIsPlaying(false);
         if (currentlyPlayingWaveSurfer === wavesurfer.current) {
           currentlyPlayingWaveSurfer = null;
+          currentlyPlayingAudioId = null;
+        }
+      });
+      
+      wavesurfer.current.on('finish', () => {
+        setIsPlaying(false);
+        if (currentlyPlayingWaveSurfer === wavesurfer.current) {
+          currentlyPlayingWaveSurfer = null;
+          currentlyPlayingAudioId = null;
         }
       });
 
@@ -234,19 +258,26 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handlePlayPause = () => {
     if (wavesurfer.current) {
-      // Stop any currently playing audio
+      // Stop any currently playing audio from other containers
       if (currentlyPlayingWaveSurfer && currentlyPlayingWaveSurfer !== wavesurfer.current) {
         currentlyPlayingWaveSurfer.pause();
+        currentlyPlayingWaveSurfer = null;
+        currentlyPlayingAudioId = null;
       }
 
-      // Play/pause this audio
-      wavesurfer.current.playPause();
-
-      // Update the global reference
-      if (!wavesurfer.current.isPlaying()) {
-        currentlyPlayingWaveSurfer = wavesurfer.current;
-      } else {
+      // Toggle play/pause for this audio
+      if (wavesurfer.current.isPlaying()) {
+        // Currently playing, so pause it
+        wavesurfer.current.pause();
+        setIsPlaying(false);
         currentlyPlayingWaveSurfer = null;
+        currentlyPlayingAudioId = null;
+      } else {
+        // Currently paused, so play it
+        wavesurfer.current.play();
+        setIsPlaying(true);
+        currentlyPlayingWaveSurfer = wavesurfer.current;
+        currentlyPlayingAudioId = pairId;
       }
     }
   };
@@ -572,17 +603,28 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                         {/* Display exact waveform from this specific audio file */}
                         <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
                           {(() => {
-                            // Always use the unique waveform for this specific audio file
-                            const uniquePeaks = waveformPeaks && waveformPeaks.length > 0 
-                              ? waveformPeaks 
-                              : generateRealisticWaveform(audio.name, audio.size);
+                            // Use the actual extracted waveform peaks if available, otherwise generate file-specific fallback
+                            let displayPeaks;
                             
-                            // Ensure we show the complete waveform by using more bars if needed
-                            const displayPeaks = uniquePeaks.length < 100 ? uniquePeaks : uniquePeaks.slice(0, 100);
+                            if (waveformPeaks && waveformPeaks.length > 0) {
+                              // Use the real extracted waveform data
+                              displayPeaks = waveformPeaks.length > 120 ? 
+                                waveformPeaks.slice(0, 120) : 
+                                waveformPeaks;
+                              console.log('Using real waveform data for drag preview:', audio.name, displayPeaks.length, 'peaks');
+                            } else {
+                              // Generate file-specific fallback pattern
+                              displayPeaks = generateRealisticWaveform(audio.name, audio.size);
+                              console.log('Using generated waveform for drag preview:', audio.name);
+                            }
                             
                             return displayPeaks.map((peak, i) => {
-                              const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
-                              const progress = currentTime / duration;
+                              // Normalize peak value to percentage
+                              const normalizedPeak = Math.abs(peak);
+                              const height = Math.max(Math.min(normalizedPeak * 100, 95), 5);
+                              
+                              // Calculate playback progress for visual feedback
+                              const progress = duration > 0 ? currentTime / duration : 0;
                               const barProgress = i / displayPeaks.length;
                               const isPlayed = barProgress <= progress;
 
@@ -592,10 +634,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                   style={{
                                     width: '2px',
                                     height: `${height}%`,
-                                    backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
+                                    backgroundColor: isPlayed ? '#FFFFFF' : 'rgba(255, 255, 255, 0.8)',
                                     borderRadius: '1px',
-                                    minHeight: '8%',
-                                    flexShrink: 0
+                                    minHeight: '5%',
+                                    maxHeight: '95%',
+                                    flexShrink: 0,
+                                    transition: 'background-color 0.1s ease'
                                   }}
                                 />
                               );
