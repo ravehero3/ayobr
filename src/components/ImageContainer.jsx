@@ -502,79 +502,82 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       )}
 
       {image ? (
-        <div className="relative h-full w-full overflow-hidden rounded-lg">
-
-
-          {/* Delete button - positioned at bottom right */}
-          <button
-            className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
-            style={{
-              backgroundColor: 'rgba(220, 38, 38, 0.15)',
-              border: '1px solid rgba(220, 38, 38, 0.3)',
-              color: '#DC2626'
-            }}
-            title="Delete image"
-            onClick={() => {
-              handleDelete();
-              if (onDelete) {
-                onDelete();
-              }
-            }}
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Full container image - 1.5x bigger with more space */}
-          <img
-            src={imageUrl}
-            alt={image.name}
-            className="w-full h-full object-contain"
-            style={{
-              transform: 'scale(1.8)', // Make image bigger to fill more empty space
-              maxWidth: 'none',
-              maxHeight: 'none'
-            }}
-            onError={(e) => {
-              // Fallback for HEIC files that might not display
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
-          />
-          <div className="hidden w-full h-full items-center justify-center bg-gray-800/50">
-            <div className="text-center">
-              <svg className="w-8 h-8 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="text-xs text-gray-400">Image Preview</p>
-              <p className="text-xs text-gray-500">{image.name.split('.').pop()?.toUpperCase()}</p>
+        <div className="relative h-full w-full rounded-lg overflow-hidden">
+          {/* Clean image display - full container with professional styling */}
+          <div className="absolute inset-4 flex items-center justify-center">
+            <img
+              src={imageUrl}
+              alt={image.name}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+              style={{
+                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))'
+              }}
+              onError={(e) => {
+                // Fallback for HEIC files that might not display
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="hidden w-full h-full items-center justify-center bg-gray-800/50 rounded-lg">
+              <div className="text-center">
+                <svg className="w-8 h-8 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-xs text-gray-400">Image Preview</p>
+                <p className="text-xs text-gray-500">{image.name.split('.').pop()?.toUpperCase()}</p>
+              </div>
             </div>
           </div>
 
-          {/* Move button - positioned at bottom left */}
-          <div
-            className="absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
-            style={{
-              backgroundColor: (isContainerDragMode && draggedContainerType === 'image') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
-              border: (isContainerDragMode && draggedContainerType === 'image') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
-              color: (isContainerDragMode && draggedContainerType === 'image') ? '#10B981' : '#3584E4'
-            }}
-            title="Drag to move image container"
-            onMouseDown={handleMoveButtonMouseDown}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </div>
-
-          {/* Hover overlay with filename */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="text-center">
-              <svg className="w-6 h-6 mx-auto text-neon-cyan mb-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+          {/* Control buttons overlay - only visible on hover */}
+          <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20 rounded-lg">
+            {/* Delete button - top right */}
+            <button
+              className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+              style={{
+                backgroundColor: 'rgba(220, 38, 38, 0.9)',
+                border: '1px solid rgba(220, 38, 38, 1)',
+                color: 'white',
+                backdropFilter: 'blur(4px)'
+              }}
+              title="Delete image"
+              onClick={() => {
+                handleDelete();
+                if (onDelete) {
+                  onDelete();
+                }
+              }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <p className="text-white text-sm font-medium truncate max-w-32">
+            </button>
+
+            {/* Move button - bottom left */}
+            <div
+              className="absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-move"
+              style={{
+                backgroundColor: (isContainerDragMode && draggedContainerType === 'image') ? 'rgba(16, 185, 129, 0.9)' : 'rgba(53, 132, 228, 0.9)',
+                border: (isContainerDragMode && draggedContainerType === 'image') ? '1px solid rgba(16, 185, 129, 1)' : '1px solid rgba(53, 132, 228, 1)',
+                color: 'white',
+                backdropFilter: 'blur(4px)'
+              }}
+              title="Drag to move image container"
+              onMouseDown={handleMoveButtonMouseDown}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+              </svg>
+            </div>
+
+            {/* Image info overlay - center bottom */}
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-lg"
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(8px)'
+              }}
+            >
+              <p className="text-white text-xs font-medium truncate max-w-32">
                 {image.name}
               </p>
             </div>
