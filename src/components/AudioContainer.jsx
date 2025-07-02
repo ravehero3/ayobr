@@ -262,13 +262,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     console.log('Move button mouse down for audio container:', { type: 'individual-container', containerType: 'audio', pairId, content: { audio } });
 
-    // Calculate offset to center the container on the cursor
-    const rect = containerRef.current.getBoundingClientRect();
-    const offset = {
-      x: rect.width / 2,  // Half container width to center horizontally
-      y: rect.height / 2  // Half container height to center vertically
-    };
-    setDragOffset(offset);
+    // Set fixed offset for green box centering (not based on current container)
+    setDragOffset({ x: 0, y: 0 }); // No offset needed since we center in the green box positioning
 
     // Set visual states
     setIsContainerDragging(true);
@@ -407,18 +402,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             Audio container being moved...
           </div>
           
-          {/* Green tilted container preview with full waveform */}
+          {/* Green box - tilted container preview with full waveform */}
           {audio && (
             <div
               style={{
                 position: 'fixed',
-                left: `${mousePosition.x - dragOffset.x}px`,
-                top: `${mousePosition.y - dragOffset.y}px`,
-                width: '100%',
-                maxWidth: '450px',
+                left: `${mousePosition.x - 225}px`, // Always center horizontally (450px / 2 = 225px)
+                top: `${mousePosition.y - 68}px`,   // Always center vertically (136px / 2 = 68px)
+                width: '450px',
                 height: '136px',
                 transform: 'rotate(10deg) scale(1.1)',
-                zIndex: 99999,
+                zIndex: 999999, // Highest possible z-index to be in front of everything
                 pointerEvents: 'none',
                 background: 'rgba(16, 185, 129, 0.95)',
                 borderRadius: '8px',
@@ -451,42 +445,42 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       overflow: 'hidden'
                     }}
                   >
-                    {/* Full waveform visualization using actual audio peaks */}
+                    {/* Full audio waveform from start to end */}
                     <div className="flex items-center justify-center h-full px-2">
                       {waveformPeaks && waveformPeaks.length > 0 ? (
-                        // Use actual extracted waveform peaks from the audio file
+                        // Use actual extracted waveform peaks from the complete audio file
                         waveformPeaks.map((peak, i) => (
                           <div
                             key={i}
                             style={{
-                              width: '2px',
-                              height: `${Math.max(Math.abs(peak) * 80, 5)}%`,
+                              width: '3px',
+                              height: `${Math.max(Math.abs(peak) * 85, 8)}%`,
                               background: 'rgba(255, 255, 255, 0.95)',
                               marginRight: '1px',
                               borderRadius: '1px',
-                              minHeight: '5%'
+                              minHeight: '8%'
                             }}
                           />
                         ))
                       ) : (
-                        // Fallback pattern while peaks are loading
-                        Array.from({ length: 80 }).map((_, i) => {
-                          // Create a more varied and realistic waveform pattern
-                          const base = Math.sin(i * 0.08) * Math.cos(i * 0.12);
-                          const variation = Math.sin(i * 0.25) * 0.5;
-                          const noise = (Math.random() - 0.5) * 0.3;
-                          const intensity = Math.abs(base + variation + noise);
-                          const height = intensity * 70 + 10;
+                        // Generate waveform pattern based on audio filename for consistency
+                        Array.from({ length: 100 }).map((_, i) => {
+                          // Create deterministic pattern based on audio filename
+                          const seed = audio.name.charCodeAt(i % audio.name.length) / 255;
+                          const base = Math.sin(i * 0.1 + seed * 10) * Math.cos(i * 0.08 + seed * 5);
+                          const variation = Math.sin(i * 0.3 + seed * 15) * 0.4;
+                          const intensity = Math.abs(base + variation + seed * 0.3);
+                          const height = intensity * 75 + 12;
                           return (
                             <div
                               key={i}
                               style={{
-                                width: '2px',
+                                width: '3px',
                                 height: `${height}%`,
-                                background: 'rgba(255, 255, 255, 0.9)',
+                                background: 'rgba(255, 255, 255, 0.95)',
                                 marginRight: '1px',
                                 borderRadius: '1px',
-                                minHeight: '8%'
+                                minHeight: '10%'
                               }}
                             />
                           );
