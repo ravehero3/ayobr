@@ -441,7 +441,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                   </div>
                 </div>
 
-                {/* Exact copy of actual audio container waveform */}
+                {/* Display the exact same waveform as the audio container */}
                 <div className="flex-1 flex items-center">
                   <div 
                     className="w-full"
@@ -453,7 +453,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       overflow: 'hidden'
                     }}
                   >
-                    {/* Create an exact visual copy of the main waveform */}
+                    {/* Mirror the exact waveform from wavesurfer */}
                     <div 
                       className="w-full h-full"
                       style={{
@@ -462,59 +462,77 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                         position: 'relative'
                       }}
                     >
-                      {/* Clone the actual waveform container styling */}
                       <div className="flex items-center justify-center h-full relative">
-                        {wavesurfer.current ? (
-                          // If wavesurfer is loaded, create a visual clone
+                        {wavesurfer.current && wavesurfer.current.backend && wavesurfer.current.backend.buffer ? (
+                          // Use actual audio buffer data to create identical waveform
                           <div className="w-full h-full flex items-end justify-center px-2">
-                            {Array.from({ length: 100 }).map((_, i) => {
-                              // Create bars that mimic the actual waveform appearance
+                            {(() => {
+                              const buffer = wavesurfer.current.backend.buffer;
+                              const channelData = buffer.getChannelData(0);
+                              const samples = 120; // Number of bars to display
+                              const sampleSize = Math.floor(channelData.length / samples);
                               const progress = currentTime / duration;
-                              const barProgress = i / 100;
-                              const isPlayed = barProgress <= progress;
                               
-                              // Generate consistent waveform pattern
-                              const baseHeight = 20 + Math.sin(i * 0.15) * 30;
-                              const variation = Math.sin(i * 0.3) * 20;
-                              const height = Math.max(Math.abs(baseHeight + variation), 5);
+                              return Array.from({ length: samples }).map((_, i) => {
+                                // Calculate actual peak for this section
+                                const start = i * sampleSize;
+                                const end = start + sampleSize;
+                                let peak = 0;
+                                
+                                for (let j = start; j < end && j < channelData.length; j++) {
+                                  const value = Math.abs(channelData[j]);
+                                  if (value > peak) peak = value;
+                                }
+                                
+                                // Convert peak to height percentage (0-90%)
+                                const height = Math.max(Math.min(peak * 100, 90), 5);
+                                const barProgress = i / samples;
+                                const isPlayed = barProgress <= progress;
+                                
+                                return (
+                                  <div
+                                    key={i}
+                                    style={{
+                                      width: '2px',
+                                      height: `${height}%`,
+                                      backgroundColor: isPlayed ? '#3584E4' : 'rgba(255, 255, 255, 0.7)', // Same colors as original
+                                      borderRadius: '1px',
+                                      margin: '0 0.5px',
+                                      minHeight: '5%'
+                                    }}
+                                  />
+                                );
+                              });
+                            })()}
+                          </div>
+                        ) : waveformPeaks ? (
+                          // Use extracted peaks if available
+                          <div className="w-full h-full flex items-end justify-center px-2">
+                            {waveformPeaks.map((peak, i) => {
+                              const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
+                              const progress = currentTime / duration;
+                              const barProgress = i / waveformPeaks.length;
+                              const isPlayed = barProgress <= progress;
                               
                               return (
                                 <div
                                   key={i}
                                   style={{
                                     width: '2px',
-                                    height: `${Math.min(height, 90)}%`,
-                                    backgroundColor: isPlayed ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                                    height: `${height}%`,
+                                    backgroundColor: isPlayed ? '#3584E4' : 'rgba(255, 255, 255, 0.7)',
                                     borderRadius: '1px',
                                     margin: '0 0.5px',
-                                    minHeight: '10%'
+                                    minHeight: '5%'
                                   }}
                                 />
                               );
                             })}
                           </div>
                         ) : (
-                          // Fallback pattern when wavesurfer isn't ready
-                          <div className="w-full h-full flex items-end justify-center px-2">
-                            {Array.from({ length: 100 }).map((_, i) => {
-                              const baseHeight = 20 + Math.sin(i * 0.15) * 30;
-                              const variation = Math.sin(i * 0.3) * 20;
-                              const height = Math.max(Math.abs(baseHeight + variation), 5);
-                              
-                              return (
-                                <div
-                                  key={i}
-                                  style={{
-                                    width: '2px',
-                                    height: `${Math.min(height, 90)}%`,
-                                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                                    borderRadius: '1px',
-                                    margin: '0 0.5px',
-                                    minHeight: '10%'
-                                  }}
-                                />
-                              );
-                            })}
+                          // Fallback: show loading state until waveform is ready
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-white/60 text-xs">Loading waveform...</span>
                           </div>
                         )}
                       </div>
