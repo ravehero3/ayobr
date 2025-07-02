@@ -280,6 +280,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
+      setMousePosition({ x: 0, y: 0 });
+      setDragOffset({ x: 0, y: 0 });
       sessionStorage.removeItem('currentDragData');
       
       // End container drag mode
@@ -362,7 +364,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             height: '136px',
             transform: 'rotate(10deg) scale(1.1)',
             opacity: 0.95,
-            zIndex: 999999
+            zIndex: 999999,
+            transition: 'none' // Ensure smooth cursor following without lag
           }}
         >
           <div
@@ -549,12 +552,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '136px',
         minHeight: '136px',
         maxHeight: '136px',
-        position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
-        left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
-        top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
-        transform: isDraggingWithMouse && isContainerDragging
-          ? 'rotate(10deg) scale(1.1)'
-          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+        position: 'relative', // Always relative - floating preview handles the cursor following
+        transform: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
           : isDragging 
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
@@ -563,7 +562,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : shouldHighlight
           ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
           : 'scale(1)',
-        opacity: isContainerDragging 
+        opacity: (isDraggingWithMouse && isContainerDragging)
+          ? 0.3 // Make original container very transparent when mouse dragging
+          : isContainerDragging 
           ? 0.95
           : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? 0.9
