@@ -19,9 +19,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   // Mouse tracking for drag visualization
   React.useEffect(() => {
+    const containerRef = { current: document.querySelector(`[data-pair-id="${pairId}"] .audio-container`) };
     const handleMouseMove = (e) => {
-      if (isDragging) {
-        setDragPosition({ x: e.clientX, y: e.clientY });
+      if (isDragging && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setDragPosition({ 
+          x: e.clientX - rect.width / 2, 
+          y: e.clientY - rect.height / 2 
+        });
       }
     };
 
@@ -31,7 +36,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         document.removeEventListener('mousemove', handleMouseMove);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, pairId]);
 
   React.useEffect(() => {
     if (audio && waveformRef.current) {
@@ -319,7 +324,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <motion.div
-      className="relative w-full h-full transition-all duration-300 group cursor-pointer"
+      className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
+      data-pair-id={pairId}
       draggable={!!audio}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
@@ -365,7 +371,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '136px',
         maxHeight: '136px',
         transform: isDragging 
-          ? `translate(${dragPosition.x}px, ${dragPosition.y}px)`
+          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.05) rotate(1deg)`
           : isDragOver 
           ? 'scale(1.02)' 
           : 'scale(1)',

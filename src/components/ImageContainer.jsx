@@ -142,8 +142,12 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   // Mouse tracking for drag visualization
   React.useEffect(() => {
     const handleMouseMove = (e) => {
-      if (isDragging) {
-        setDragPosition({ x: e.clientX, y: e.clientY });
+      if (isDragging && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setDragPosition({ 
+          x: e.clientX - rect.width / 2, 
+          y: e.clientY - rect.height / 2 
+        });
       }
     };
 
@@ -246,7 +250,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         minHeight: '180px',
         maxHeight: '180px',
         transform: isDragging 
-          ? `scale(1.05) translate(${dragPosition.x - (containerRef.current?.getBoundingClientRect().left || 0) - (containerRef.current?.offsetWidth || 0) / 2}px, ${dragPosition.y - (containerRef.current?.getBoundingClientRect().top || 0) - (containerRef.current?.offsetHeight || 0) / 2}px) rotate(2deg)` 
+          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.05) rotate(2deg)` 
           : isDragOver 
           ? 'scale(1.02)' 
           : 'scale(1)',
