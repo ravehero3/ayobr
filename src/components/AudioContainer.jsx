@@ -351,6 +351,80 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
+      {/* Floating drag preview - appears when mouse dragging */}
+      {isDraggingWithMouse && isContainerDragging && audio && (
+        <div
+          className="fixed pointer-events-none"
+          style={{
+            left: `${mousePosition.x - dragOffset.x}px`,
+            top: `${mousePosition.y - dragOffset.y}px`,
+            width: '450px',
+            height: '136px',
+            transform: 'rotate(10deg) scale(1.1)',
+            opacity: 0.95,
+            zIndex: 999999
+          }}
+        >
+          <div
+            className="w-full h-full rounded-2xl border-4 border-green-400 shadow-2xl backdrop-blur-sm"
+            style={{
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%)',
+              boxShadow: `
+                0 0 0 4px rgba(16, 185, 129, 1),
+                0 0 50px rgba(16, 185, 129, 0.8),
+                0 30px 80px rgba(0, 0, 0, 0.6)
+              `,
+              padding: '16px'
+            }}
+          >
+            <div className="w-full h-full flex flex-col justify-between">
+              {/* Header with filename and time */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-white text-sm font-medium truncate">
+                  {audio.name.replace(/\.[^/.]+$/, "")}
+                </span>
+                <div className="text-xs text-gray-400 flex-shrink-0">
+                  Audio File
+                </div>
+              </div>
+
+              {/* Waveform placeholder */}
+              <div className="flex-1 flex items-center">
+                <div className="w-full h-12 bg-gradient-to-r from-blue-500/20 to-blue-400/20 rounded flex items-end justify-center gap-1 px-2">
+                  {[...Array(20)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-blue-400 rounded-sm"
+                      style={{
+                        width: '3px',
+                        height: `${Math.random() * 100 + 20}%`,
+                        opacity: 0.7
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Play button */}
+              <div className="flex items-center justify-center mt-2">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: 'rgba(53, 132, 228, 0.15)',
+                    border: '2px solid rgba(53, 132, 228, 0.4)',
+                    color: '#3584E4'
+                  }}
+                >
+                  <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="m7 4 10 6L7 16V4z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Empty space placeholder when container is being dragged with mouse */}
       {isDraggingWithMouse && isContainerDragging ? (
         <div
