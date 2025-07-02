@@ -118,7 +118,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         barWidth: 1.5,
         barRadius: 0, // Sharp edges like Decibels
         barGap: 0.5,
-        height: 40, // More compact height like Decibels
+        height: 80, // 2x taller waveform height
         normalize: true,
         backend: 'WebAudio',
         interact: true,
@@ -554,7 +554,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 top: `${mousePosition.y - 60}px`,   // Always center vertically (120px / 2 = 60px)
                 width: '450px',
                 height: '120px',
-                transform: 'rotate(2deg) scale(1.1)',
+                transform: 'scale(1.1)', // Remove tilt rotation
                 zIndex: 999999999, // Extremely high z-index to ensure it's always on top
                 pointerEvents: 'none',
                 background: 'rgba(16, 185, 129, 0.95)',
@@ -675,21 +675,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                   </div>
                 </div>
 
-                {/* Bottom controls */}
-                <div className="flex items-center justify-center mt-2">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                      border: '2px solid rgba(255, 255, 255, 0.4)',
-                      color: 'white'
-                    }}
-                  >
-                    <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="m7 4 10 6L7 16V4z"/>
-                    </svg>
-                  </div>
-                </div>
+                {/* No play button in drag preview - just show the waveform */}
               </div>
             </div>,
             document.body // Render directly into document body to ensure highest z-index context

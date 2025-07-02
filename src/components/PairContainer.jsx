@@ -242,7 +242,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       ) : (
         <div 
           className="flex flex-col lg:flex-row items-center relative z-10"
-          style={{ gap: '20px' }} // Fixed 20px gap
+          style={{ gap: '0px' }} // Remove gap since we use fixed margins on plus button
           onDragOver={handleContainerDragOver}
           onDragLeave={handleContainerDragLeave}
           onDrop={handleContainerDrop}
@@ -300,7 +300,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           </div>
 
           {/* Connecting Bridge - Professional Plus Symbol */}
-          <div className="relative z-20 hidden lg:flex items-center justify-center" style={{ width: '60px', height: '300px', margin: '0 20px' }}>
+          <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0" style={{ width: '60px', height: '300px', marginLeft: '30px', marginRight: '30px' }}>
             <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
               {/* Plus symbol container with elegant background */}
               <div

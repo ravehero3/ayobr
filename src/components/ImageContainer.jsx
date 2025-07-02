@@ -526,13 +526,13 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             </svg>
           </button>
 
-          {/* Full container image - 1.5x bigger */}
+          {/* Full container image - 1.5x bigger with more space */}
           <img
             src={imageUrl}
             alt={image.name}
             className="w-full h-full object-contain"
             style={{
-              transform: 'scale(1.5)',
+              transform: 'scale(1.8)', // Make image bigger to fill more empty space
               maxWidth: 'none',
               maxHeight: 'none'
             }}
