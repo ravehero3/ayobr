@@ -32,20 +32,20 @@ function App() {
 
   const handleContainerDrag = (containerType, action, pairData) => {
     console.log('Container drag event:', containerType, action, pairData);
-    
+
     if (action === 'start') {
       // Start container drag mode
       setIsContainerDragMode(true);
       setIsDraggingContainer(true);
       setDraggedContainerType(containerType); // 'audio' or 'image'
       setDraggedContainer(pairData); // The actual pair data with id
-      
+
       console.log('Started dragging container:', {
         type: containerType,
         pairId: pairData.id,
         isDragging: true
       });
-      
+
       // Auto-reset after 15 seconds as safety
       setTimeout(() => {
         if (isDraggingContainer) {
@@ -165,11 +165,11 @@ function App() {
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
-    
+
     // Only show file drop overlay if dragging external files (not internal containers)
     const hasFiles = e.dataTransfer.types.includes('Files');
     const hasContainerData = e.dataTransfer.types.includes('text/plain');
-    
+
     // Only trigger file drop UI if we have files and no container drag data
     if (hasFiles && !hasContainerData) {
       setIsDragOver(true);
@@ -190,11 +190,23 @@ function App() {
     // Only process files if this is an external file drop (not internal container dragging)
     const files = Array.from(e.dataTransfer.files);
     const hasContainerData = e.dataTransfer.types.includes('text/plain');
-    
+
     if (files.length > 0 && !hasContainerData) {
       handleFileDrop(files);
     }
   }, [handleFileDrop]);
+
+  const handleGlobalDrop = useCallback((e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      // Clear the file cache before processing to ensure fresh processing
+      clearFileCache();
+      handleFileDrop(files);
+    }
+  }, [handleFileDrop, clearFileCache]);
 
   return (
     <div 
@@ -274,7 +286,7 @@ function App() {
                         Audio Container
                       </div>
                     </div>
-                    
+
                     {/* Full waveform visualization */}
                     <div className="flex-1 flex items-center">
                       <div className="w-full h-12 bg-gradient-to-r from-gray-700/30 to-gray-600/30 rounded flex items-end justify-center gap-0.5 px-2">
@@ -283,7 +295,7 @@ function App() {
                           const baseHeight = 20 + Math.sin(i * 0.3) * 15;
                           const randomVariation = Math.random() * 30;
                           const height = Math.max(10, Math.min(90, baseHeight + randomVariation));
-                          
+
                           return (
                             <div
                               key={i}
@@ -324,7 +336,7 @@ function App() {
                         </svg>
                       </div>
                     )}
-                    
+
                     <div className="absolute bottom-2 left-2 text-xs text-white bg-black/50 px-2 py-1 rounded">
                       Image Container
                     </div>

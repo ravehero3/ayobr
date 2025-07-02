@@ -66,26 +66,35 @@ export const usePairingLogic = () => {
           return;
         }
 
-        // Update the recently processed files set
+        // Update the recently processed files set with shorter retention
         currentFileIds.forEach(id => lastProcessedFiles.current.add(id));
         
-        // Clean up old entries (keep only last 50 files)
-        if (lastProcessedFiles.current.size > 50) {
+        // Clean up old entries more aggressively (keep only last 20 files)
+        if (lastProcessedFiles.current.size > 20) {
           const entries = Array.from(lastProcessedFiles.current);
-          const toDelete = entries.slice(0, entries.length - 50);
+          const toDelete = entries.slice(0, entries.length - 20);
           toDelete.forEach(id => lastProcessedFiles.current.delete(id));
         }
+        
+        // Clear cache after a short delay to allow immediate re-drops
+        setTimeout(() => {
+          currentFileIds.forEach(id => lastProcessedFiles.current.delete(id));
+        }, 2000);
 
         // Use current pairs from the hook
         const currentPairs = pairs;
         
-        // Get existing file names to avoid duplicates
-        const existingAudioNames = currentPairs.filter(pair => pair.audio).map(pair => pair.audio.name);
-        const existingImageNames = currentPairs.filter(pair => pair.image).map(pair => pair.image.name);
+        // Get existing files to avoid exact duplicates (same file object)
+        const existingAudioFiles = currentPairs.filter(pair => pair.audio).map(pair => pair.audio);
+        const existingImageFiles = currentPairs.filter(pair => pair.image).map(pair => pair.image);
 
-        // Filter out files that are already in pairs
-        const newAudioFiles = audioFiles.filter(file => !existingAudioNames.includes(file.name));
-        const newImageFiles = imageFiles.filter(file => !existingImageNames.includes(file.name));
+        // Filter out files that are exactly the same (same file object, not just name)
+        const newAudioFiles = audioFiles.filter(file => !existingAudioFiles.some(existing => 
+          existing.name === file.name && existing.size === file.size && existing.lastModified === file.lastModified
+        ));
+        const newImageFiles = imageFiles.filter(file => !existingImageFiles.some(existing => 
+          existing.name === file.name && existing.size === file.size && existing.lastModified === file.lastModified
+        ));
 
         console.log(`After filtering duplicates: ${newAudioFiles.length} new audio files, ${newImageFiles.length} new image files (Drop ID: ${dropId})`);
 
