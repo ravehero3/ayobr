@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import WaveSurfer from 'wavesurfer.js';
 
 // Global reference to track currently playing audio
@@ -402,8 +403,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             Audio container being moved...
           </div>
           
-          {/* Green box - tilted container preview with full waveform */}
-          {audio && (
+          {/* Green box - Portal-based rendering to ensure it's always on top */}
+          {audio && (isDraggingWithMouse && isContainerDragging) && createPortal(
             <div
               className="green-box-drag-preview"
               style={{
@@ -413,7 +414,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 width: '450px',
                 height: '136px',
                 transform: 'rotate(10deg) scale(1.1)',
-                zIndex: 2147483647, // Maximum possible z-index value to be in front of everything
+                zIndex: 999999999, // Extremely high z-index to ensure it's always on top
                 pointerEvents: 'none',
                 background: 'rgba(16, 185, 129, 0.95)',
                 borderRadius: '8px',
@@ -422,7 +423,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 padding: '16px',
                 opacity: 0.95,
                 isolation: 'isolate', // Creates new stacking context
-                willChange: 'transform' // Forces hardware acceleration
+                willChange: 'transform', // Forces hardware acceleration
+                // Additional CSS properties to ensure it stays on top
+                backdropFilter: 'blur(1px)',
+                WebkitBackdropFilter: 'blur(1px)',
+                contain: 'layout style paint'
               }}
             >
               <div className="w-full h-full flex flex-col justify-between">
@@ -448,8 +453,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       overflow: 'hidden'
                     }}
                   >
-                    {/* Full audio waveform from start to end */}
-                    <div className="flex items-center justify-center h-full px-2">
+                    {/* Full audio waveform from start to end - enhanced visualization */}
+                    <div className="flex items-end justify-center h-full px-2 gap-0.5">
                       {waveformPeaks && waveformPeaks.length > 0 ? (
                         // Use actual extracted waveform peaks from the complete audio file
                         waveformPeaks.map((peak, i) => (
@@ -459,31 +464,39 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                               width: '3px',
                               height: `${Math.max(Math.abs(peak) * 85, 8)}%`,
                               background: 'rgba(255, 255, 255, 0.95)',
-                              marginRight: '1px',
                               borderRadius: '1px',
-                              minHeight: '8%'
+                              minHeight: '8%',
+                              flexShrink: 0
                             }}
                           />
                         ))
                       ) : (
-                        // Generate waveform pattern based on audio filename for consistency
-                        Array.from({ length: 100 }).map((_, i) => {
-                          // Create deterministic pattern based on audio filename
+                        // Generate realistic waveform pattern representing the full audio file
+                        Array.from({ length: 120 }).map((_, i) => {
+                          // Create deterministic pattern based on audio filename for consistency
                           const seed = audio.name.charCodeAt(i % audio.name.length) / 255;
-                          const base = Math.sin(i * 0.1 + seed * 10) * Math.cos(i * 0.08 + seed * 5);
-                          const variation = Math.sin(i * 0.3 + seed * 15) * 0.4;
-                          const intensity = Math.abs(base + variation + seed * 0.3);
-                          const height = intensity * 75 + 12;
+                          const progressRatio = i / 120; // Position in the song (0 to 1)
+                          
+                          // Create realistic audio waveform patterns
+                          const bassFreq = Math.sin(progressRatio * Math.PI * 8 + seed * 10) * 0.4;
+                          const midFreq = Math.sin(progressRatio * Math.PI * 16 + seed * 20) * 0.3;
+                          const highFreq = Math.sin(progressRatio * Math.PI * 32 + seed * 30) * 0.2;
+                          const dynamicVariation = Math.sin(progressRatio * Math.PI * 4 + seed * 5) * 0.5;
+                          
+                          // Combine frequencies to create realistic waveform shape
+                          const amplitude = Math.abs(bassFreq + midFreq + highFreq + dynamicVariation + seed * 0.3);
+                          const height = Math.max(amplitude * 85 + 10, 8); // Ensure minimum height
+                          
                           return (
                             <div
                               key={i}
                               style={{
                                 width: '3px',
-                                height: `${height}%`,
+                                height: `${Math.min(height, 95)}%`, // Cap at 95% to prevent overflow
                                 background: 'rgba(255, 255, 255, 0.95)',
-                                marginRight: '1px',
                                 borderRadius: '1px',
-                                minHeight: '10%'
+                                minHeight: '8%',
+                                flexShrink: 0
                               }}
                             />
                           );
@@ -509,7 +522,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                   </div>
                 </div>
               </div>
-            </div>
+            </div>,
+            document.body // Render directly into document body to ensure highest z-index context
           )}
         </>
       ) : (
