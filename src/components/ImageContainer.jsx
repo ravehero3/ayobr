@@ -138,14 +138,49 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     setIsDraggingWithMouse(true);
     setMousePosition({ x: e.clientX, y: e.clientY });
 
+    // Store drag data in sessionStorage for reliable access
+    const dragData = {
+      type: 'individual-container',
+      containerType: 'image',
+      pairId: pairId,
+      content: { image }
+    };
+    sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+
+    // Trigger container drag mode
+    if (onContainerDragStart) {
+      onContainerDragStart(pairId, 'start', { id: pairId, type: 'image', image });
+    }
+
     // Add global mouse move and up listeners
     const handleMouseMove = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e) => {
+      // Check if we're dropping on another image container
+      const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+      const imageContainer = elementBelow?.closest('[data-image-container]');
+      
+      if (imageContainer) {
+        const targetPairId = imageContainer.getAttribute('data-pair-id');
+        if (targetPairId && targetPairId !== pairId) {
+          console.log('Dropping on image container:', targetPairId);
+          if (onSwap) {
+            onSwap(pairId, targetPairId, 'image');
+          }
+        }
+      }
+
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
+      sessionStorage.removeItem('currentDragData');
+      
+      // End container drag mode
+      if (onContainerDragEnd) {
+        onContainerDragEnd(pairId, 'end');
+      }
+      
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -323,7 +358,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             height: '180px',
             transform: 'rotate(10deg) scale(1.1)',
             opacity: 0.95,
-            zIndex: 9999
+            zIndex: 999999
           }}
         >
           <div
@@ -379,6 +414,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           ref={containerRef}
           className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
           draggable={!!image}
+          data-image-container="true"
+          data-pair-id={pairId}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragOver={(e) => {
@@ -443,12 +480,12 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           ? 'none' 
           : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
         zIndex: isDraggingWithMouse && isContainerDragging
-          ? 9999 // Highest z-index when dragging with mouse to appear above everything
+          ? 99999 // Maximum z-index when dragging with mouse to appear above everything globally
           : isContainerDragging
-          ? 2000 // Higher z-index when lifted
+          ? 50000 // Very high z-index when lifted
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
-          ? 1500 
-          : isDragging ? 1000 : shouldHighlight ? 100 : 1,
+          ? 10000 
+          : isDragging ? 5000 : shouldHighlight ? 100 : 1,
         pointerEvents: 'auto',
         userSelect: 'none'
       } : {
@@ -584,7 +621,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           <p className="text-gray-600 text-xs">Drop an image here</p>
         </div>
       )}
-          </motion.div>
+        </motion.div>
         </div>
       )}
     </>
