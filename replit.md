@@ -190,6 +190,12 @@ Changelog:
 - July 1, 2025. Enhanced audio and image container drag behavior - containers now properly follow cursor when dragged by move handles
 - July 1, 2025. Improved visual feedback for container dragging - proper integration with App.jsx cursor following system
 - July 1, 2025. All container swapping functionality now working correctly with enhanced user experience
+- July 2, 2025. Successfully completed migration from Replit Agent to standard Replit environment
+- July 2, 2025. Removed unnecessary grey move button from audio container header area
+- July 2, 2025. Implemented enhanced visual drag effects: containers "pop out" and follow cursor during drag
+- July 2, 2025. Added green glow effects for same-type containers during drag operations
+- July 2, 2025. Created 10-degree tilt effect for image containers when move button is clicked
+- July 2, 2025. Added empty space below lifted containers to show visual displacement
 ```
 
 ## User Preferences

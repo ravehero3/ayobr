@@ -120,6 +120,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     e.stopPropagation();
     console.log('Move button clicked for image container:', pairId);
 
+    // Toggle the container dragging state for visual effect
+    setIsContainerDragging(!isContainerDragging);
+
     // Trigger container drag start for individual image container
     if (onContainerDragStart) {
       onContainerDragStart('image', 'start', { 
@@ -272,6 +275,20 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   };
 
+  // Reset container dragging state when clicking elsewhere
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (isContainerDragging && containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsContainerDragging(false);
+      }
+    };
+
+    if (isContainerDragging) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [isContainerDragging]);
+
   return (
     <>
       {/* Floating drag preview */}
@@ -351,7 +368,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '180px',
         minHeight: '180px',
         maxHeight: '180px',
-        transform: (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+        transform: isContainerDragging
+          ? 'translateY(-20px) rotate(10deg) scale(1.05)' // Lift up, tilt 10 degrees when move button clicked
+          : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
           ? `translate(${containerDragPosition.x}px, ${containerDragPosition.y}px) scale(1.2) rotate(5deg)`
           : isDragging 
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
@@ -360,15 +379,20 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           : shouldHighlight
           ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
           : 'scale(1)',
-        opacity: (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId) 
+        opacity: isContainerDragging 
+          ? 0.95
+          : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId) 
           ? 0.9 
           : isDragging ? 0.9 : 1,
-        transition: (isDragging || (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId)) 
+        transition: (isDragging || (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)) 
           ? 'none' 
-          : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: (isContainerDragging && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+          : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
+        zIndex: isContainerDragging
+          ? 2000 // Higher z-index when lifted
+          : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
           ? 1500 
           : isDragging ? 1000 : shouldHighlight ? 100 : 1,
+        marginBottom: isContainerDragging ? '40px' : '0px', // Add space below when lifted
         pointerEvents: 'auto',
         userSelect: 'none'
       } : {
