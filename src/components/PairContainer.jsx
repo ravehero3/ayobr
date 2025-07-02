@@ -322,59 +322,64 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             </div>
           </div>
 
-          {/* Connecting Bridge - Plus Symbol */}
+          {/* Connecting Bridge - Professional Plus Symbol */}
           <div className="relative z-20 hidden lg:block flex items-center justify-center" style={{ width: '100px', height: '80px', margin: '0 -12px' }}>
-            <div className="relative flex items-center justify-center" style={{ width: '60px', height: '60px' }}>
-              {/* Horizontal bar of plus */}
+            <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
+              {/* Plus symbol container with elegant background */}
               <div
-                className="absolute backdrop-blur-xl border"
+                className="relative flex items-center justify-center"
                 style={{
-                  width: '50px',
-                  height: '12px',
-                  background: '#050A13',
-                  backgroundColor: '#0A0F1C',
-                  borderColor: '#1E90FF',
-                  borderWidth: '1.5px',
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, rgba(10, 15, 28, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
+                  backdropFilter: 'blur(16px)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(30, 144, 255, 0.3)',
                   boxShadow: `
-                    0 0 0 1px rgba(30, 144, 255, 0.3),
-                    0 0 8px rgba(30, 144, 255, 0.4),
-                    0 0 15px rgba(0, 207, 255, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.05)
+                    0 0 0 1px rgba(30, 144, 255, 0.2),
+                    0 0 16px rgba(30, 144, 255, 0.15),
+                    0 0 32px rgba(0, 207, 255, 0.08),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1)
                   `,
-                  borderRadius: '6px',
-                  animation: 'border-pulse 3s ease-in-out infinite alternate'
+                  animation: 'border-pulse 4s ease-in-out infinite alternate'
                 }}
-              />
-              
-              {/* Vertical bar of plus */}
-              <div
-                className="absolute backdrop-blur-xl border"
-                style={{
-                  width: '12px',
-                  height: '50px',
-                  background: '#050A13',
-                  backgroundColor: '#0A0F1C',
-                  borderColor: '#1E90FF',
-                  borderWidth: '1.5px',
-                  boxShadow: `
-                    0 0 0 1px rgba(30, 144, 255, 0.3),
-                    0 0 8px rgba(30, 144, 255, 0.4),
-                    0 0 15px rgba(0, 207, 255, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.05)
-                  `,
-                  borderRadius: '6px',
-                  animation: 'border-pulse 3s ease-in-out infinite alternate'
-                }}
-              />
-              
-              {/* Center flare effect */}
-              <div 
-                className="absolute w-3 h-3 rounded-full"
-                style={{
-                  background: 'radial-gradient(circle, rgba(30, 144, 255, 0.8) 0%, rgba(0, 207, 255, 0.4) 50%, transparent 70%)',
-                  boxShadow: '0 0 15px rgba(30, 144, 255, 0.6)'
-                }}
-              />
+              >
+                {/* Plus icon using SVG for crisp rendering */}
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  style={{
+                    filter: 'drop-shadow(0 0 8px rgba(30, 144, 255, 0.4))'
+                  }}
+                >
+                  <path 
+                    d="M12 5V19M5 12H19" 
+                    stroke="url(#plusGradient)" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                  <defs>
+                    <linearGradient id="plusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#1E90FF" />
+                      <stop offset="50%" stopColor="#00CFFF" />
+                      <stop offset="100%" stopColor="#1E90FF" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                
+                {/* Subtle inner glow effect */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: 'radial-gradient(circle at center, rgba(30, 144, 255, 0.1) 0%, transparent 70%)',
+                    borderRadius: '12px',
+                    animation: 'pulse-glow 3s ease-in-out infinite alternate'
+                  }}
+                />
+              </div>
             </div>
           </div>
 
