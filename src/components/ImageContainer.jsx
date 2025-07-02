@@ -460,8 +460,6 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
         transform: isDraggingWithMouse && isContainerDragging
           ? 'rotate(10deg) scale(1.1)'
-          : isContainerDragging
-          ? 'translateY(-80px) translateX(50px) rotate(10deg) scale(1.1)' // Move up and right, tilt 10 degrees when move button clicked
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
           ? `translate(${containerDragPosition.x}px, ${containerDragPosition.y}px) scale(1.2) rotate(5deg)`
           : isDragging 
