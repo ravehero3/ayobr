@@ -463,52 +463,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       }}
                     >
                       <div className="flex items-center justify-center h-full relative">
-                        {(wavesurfer.current && wavesurfer.current.backend && wavesurfer.current.backend.buffer) ? (
-                          // Use actual audio buffer data to create identical waveform
-                          <div className="w-full h-full flex items-end justify-center px-2">
-                            {(() => {
-                              const buffer = wavesurfer.current.backend.buffer;
-                              const channelData = buffer.getChannelData(0);
-                              const samples = 120; // Number of bars to display
-                              const sampleSize = Math.floor(channelData.length / samples);
-                              const progress = currentTime / duration;
-                              
-                              // Debug log to check waveform data
-                              console.log(`Green box waveform: samples=${samples}, channelData.length=${channelData.length}, progress=${progress}`);
-                              
-                              return Array.from({ length: samples }).map((_, i) => {
-                                // Calculate actual peak for this section
-                                const start = i * sampleSize;
-                                const end = start + sampleSize;
-                                let peak = 0;
-                                
-                                for (let j = start; j < end && j < channelData.length; j++) {
-                                  const value = Math.abs(channelData[j]);
-                                  if (value > peak) peak = value;
-                                }
-                                
-                                // Convert peak to height percentage (0-90%)
-                                const height = Math.max(Math.min(peak * 100, 90), 5);
-                                const barProgress = i / samples;
-                                const isPlayed = barProgress <= progress;
-                                
-                                return (
-                                  <div
-                                    key={i}
-                                    style={{
-                                      width: '2px',
-                                      height: `${height}%`,
-                                      backgroundColor: isPlayed ? '#3584E4' : 'rgba(255, 255, 255, 0.7)', // Same colors as original
-                                      borderRadius: '1px',
-                                      margin: '0 0.5px',
-                                      minHeight: '5%'
-                                    }}
-                                  />
-                                );
-                              });
-                            })()}
-                          </div>
-                        ) : waveformPeaks ? (
+                        {waveformPeaks && waveformPeaks.length > 0 ? (
                           // Use extracted peaks if available
                           <div className="w-full h-full flex items-end justify-center px-2">
                             {waveformPeaks.map((peak, i) => {
