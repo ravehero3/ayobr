@@ -16,10 +16,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [isContainerDragging, setIsContainerDragging] = useState(false);
+  const [isDraggingWithMouse, setIsDraggingWithMouse] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const containerRef = useRef(null);
 
   // Mouse tracking for drag visualization
   React.useEffect(() => {
-    const containerRef = { current: document.querySelector(`[data-pair-id="${pairId}"] .audio-container`) };
     const handleMouseMove = (e) => {
       if (isDragging && containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
@@ -222,18 +226,73 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleMoveButtonClick = (e) => {
+  const handleMoveButtonMouseDown = (e) => {
     e.stopPropagation();
-    console.log('Move button clicked for audio container:', pairId);
-    
-    // Trigger container drag start for individual audio container
+    e.preventDefault();
+    console.log('Move button mouse down for audio container:', { type: 'individual-container', containerType: 'audio', pairId, content: { audio } });
+
+    // Calculate offset to center the container on the cursor
+    const rect = containerRef.current.getBoundingClientRect();
+    const offset = {
+      x: rect.width / 2,  // Half container width to center horizontally
+      y: rect.height / 2  // Half container height to center vertically
+    };
+    setDragOffset(offset);
+
+    // Set visual states
+    setIsContainerDragging(true);
+    setIsDraggingWithMouse(true);
+    setMousePosition({ x: e.clientX, y: e.clientY });
+
+    // Store drag data in sessionStorage for reliable access
+    const dragData = {
+      type: 'individual-container',
+      containerType: 'audio',
+      pairId: pairId,
+      content: { audio }
+    };
+    sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+
+    // Trigger container drag mode
     if (onContainerDragStart) {
-      onContainerDragStart('audio', 'start', { 
-        id: pairId, 
-        audio: audio,
-        image: null // Audio container doesn't have image
-      });
+      onContainerDragStart(pairId, 'start', { id: pairId, type: 'audio', audio });
     }
+
+    // Add global mouse move and up listeners
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleMouseUp = (e) => {
+      // Check if we're dropping on another audio container
+      const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+      const audioContainer = elementBelow?.closest('[data-audio-container]');
+      
+      if (audioContainer) {
+        const targetPairId = audioContainer.getAttribute('data-pair-id');
+        if (targetPairId && targetPairId !== pairId) {
+          console.log('Dropping on audio container:', targetPairId);
+          if (onSwap) {
+            onSwap(pairId, targetPairId, 'audio');
+          }
+        }
+      }
+
+      setIsContainerDragging(false);
+      setIsDraggingWithMouse(false);
+      sessionStorage.removeItem('currentDragData');
+      
+      // End container drag mode
+      if (onContainerDragEnd) {
+        onContainerDragEnd(pairId, 'end');
+      }
+      
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   // Enhanced highlighting logic - show GREEN glow when:
@@ -291,24 +350,55 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
 
   return (
-    <motion.div
-      className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
-      data-pair-id={pairId}
-      draggable={!!audio}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragOver={(e) => {
-        handleDragOver(e);
-        handleContainerDragOver(e);
-      }}
-      onDragLeave={handleDragLeave}
-      onDrop={(e) => {
-        handleDrop(e);
-        handleContainerDrop(e);
-      }}
-      whileHover={{ scale: audio ? 1.005 : 1 }}
-      title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
-      style={{
+    <>
+      {/* Empty space placeholder when container is being dragged with mouse */}
+      {isDraggingWithMouse && isContainerDragging ? (
+        <div
+          style={{
+            width: '100%',
+            height: '136px',
+            minHeight: '136px',
+            border: '2px dashed rgba(53, 132, 228, 0.3)',
+            borderRadius: '8px',
+            background: 'rgba(10, 15, 28, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'rgba(53, 132, 228, 0.5)',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          Container being moved...
+        </div>
+      ) : (
+        <div 
+          className="relative"
+          style={{
+            minHeight: isContainerDragging ? '180px' : '136px', // Reserve space when container is lifted
+            transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
+          }}
+        >
+          <motion.div
+            ref={containerRef}
+            className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
+            data-pair-id={pairId}
+            data-audio-container="true"
+            draggable={!!audio}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => {
+              handleDragOver(e);
+              handleContainerDragOver(e);
+            }}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => {
+              handleDrop(e);
+              handleContainerDrop(e);
+            }}
+            whileHover={{ scale: audio ? 1.005 : 1 }}
+            title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
+            style={{
         pointerEvents: 'auto',
         userSelect: 'none',
         background: shouldHighlight && audio
@@ -342,7 +432,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '136px',
         minHeight: '136px',
         maxHeight: '136px',
-        transform: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+        position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
+        left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
+        top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
+        transform: isDraggingWithMouse && isContainerDragging
+          ? 'rotate(10deg) scale(1.1)'
+          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
           : isDragging 
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
@@ -351,15 +446,23 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : shouldHighlight
           ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
           : 'scale(1)',
-        opacity: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+        opacity: isContainerDragging 
+          ? 0.95
+          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? 0.9
           : isDragging ? 0.9 : 1,
         transition: (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
           ? 'none' 
-          : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+          : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
+        zIndex: isDraggingWithMouse && isContainerDragging
+          ? 99999 // Maximum z-index when dragging with mouse to appear above everything globally
+          : isContainerDragging
+          ? 50000 // Very high z-index when lifted
+          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? 1500
-          : isDragging ? 1000 : shouldHighlight ? 100 : 1
+          : isDragging ? 1000 : shouldHighlight ? 100 : 1,
+        pointerEvents: 'auto',
+        userSelect: 'none'
       }}
     >
       {/* Drag and Drop Overlay */}
@@ -473,7 +576,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                   onContainerDragEnd('audio', 'end');
                 }
               }}
-              onClick={handleMoveButtonClick}
+              onMouseDown={handleMoveButtonMouseDown}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
@@ -521,7 +624,10 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           <p className="text-xs text-gray-500 font-light text-center">MP3, WAV</p>
         </div>
       )}
-    </motion.div>
+          </motion.div>
+        </div>
+      )}
+    </>
   );
 };
 
