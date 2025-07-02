@@ -353,26 +353,132 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      {/* Empty space placeholder when container is being dragged with mouse */}
-      {isDraggingWithMouse && isContainerDragging ? (
-        <div
-          style={{
-            width: '100%',
-            height: '136px',
-            minHeight: '136px',
-            border: '2px dashed rgba(53, 132, 228, 0.3)',
-            borderRadius: '8px',
-            background: 'rgba(10, 15, 28, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(53, 132, 228, 0.5)',
-            fontSize: '14px',
-            fontWeight: '500'
-          }}
-        >
-          Container being moved...
-        </div>
+      {/* Dragged Container Preview - Shows full waveform in green tilted container */}
+      {(isDraggingWithMouse && isContainerDragging) || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId) ? (
+        <>
+          {/* Empty space placeholder */}
+          <div
+            style={{
+              width: '100%',
+              height: '136px',
+              minHeight: '136px',
+              border: '2px dashed rgba(16, 185, 129, 0.4)',
+              borderRadius: '8px',
+              background: 'rgba(10, 15, 28, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(16, 185, 129, 0.6)',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            Audio container being moved...
+          </div>
+          
+          {/* Green tilted container preview with full waveform */}
+          {audio && (
+            <div
+              style={{
+                position: 'fixed',
+                left: `${mousePosition.x - dragOffset.x}px`,
+                top: `${mousePosition.y - dragOffset.y}px`,
+                width: '100%',
+                maxWidth: '450px',
+                height: '136px',
+                transform: 'rotate(10deg) scale(1.1)',
+                zIndex: 99999,
+                pointerEvents: 'none',
+                background: 'rgba(16, 185, 129, 0.95)',
+                borderRadius: '8px',
+                border: '2px solid rgba(16, 185, 129, 1)',
+                boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
+                padding: '16px',
+                opacity: 0.95
+              }}
+            >
+              <div className="w-full h-full flex flex-col justify-between">
+                {/* Header with filename */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white text-sm font-medium truncate">
+                    {audio.name.replace(/\.[^/.]+$/, "")}
+                  </span>
+                  <div className="text-xs text-white/80 flex-shrink-0">
+                    {formatTime(duration)}
+                  </div>
+                </div>
+
+                {/* Full waveform preview - shows complete audio waveform */}
+                <div className="flex-1 flex items-center">
+                  <div 
+                    className="w-full"
+                    style={{ 
+                      height: '60px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '4px',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Full waveform visualization */}
+                    <div className="flex items-center justify-center h-full px-2">
+                      {wavesurfer.current && wavesurfer.current.backend && wavesurfer.current.backend.getPeaks ? (
+                        // Use actual waveform data from WaveSurfer if available
+                        wavesurfer.current.backend.getPeaks(100, 0, wavesurfer.current.getDuration()).map((peak, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              width: '2px',
+                              height: `${Math.abs(peak) * 80 + 20}%`,
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              marginRight: '1px',
+                              borderRadius: '1px'
+                            }}
+                          />
+                        ))
+                      ) : (
+                        // Fallback waveform pattern for consistent preview
+                        Array.from({ length: 60 }).map((_, i) => {
+                          // Create a realistic waveform pattern
+                          const intensity = Math.sin(i * 0.1) * Math.cos(i * 0.05) * Math.random();
+                          const height = Math.abs(intensity) * 60 + 15;
+                          return (
+                            <div
+                              key={i}
+                              style={{
+                                width: '2px',
+                                height: `${height}%`,
+                                background: 'rgba(255, 255, 255, 0.9)',
+                                marginRight: '1px',
+                                borderRadius: '1px'
+                              }}
+                            />
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom controls */}
+                <div className="flex items-center justify-center mt-2">
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center"
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      border: '2px solid rgba(255, 255, 255, 0.4)',
+                      color: 'white'
+                    }}
+                  >
+                    <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="m7 4 10 6L7 16V4z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <div 
           className="relative"
