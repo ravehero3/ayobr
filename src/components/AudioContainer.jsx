@@ -21,7 +21,7 @@ const generateRealisticWaveform = (fileName, fileSize) => {
   };
   
   const peaks = [];
-  const numBars = 80;
+  const numBars = 120;
   
   // Extract BPM from filename if present (common in music files)
   const bpmMatch = fileName.match(/(\d+)\s*bpm/i);
@@ -140,9 +140,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               const buffer = wavesurfer.current.backend.buffer;
               const peaks = [];
               const channelData = buffer.getChannelData(0);
-              const sampleSize = Math.floor(channelData.length / 80);
+              const sampleSize = Math.floor(channelData.length / 120);
 
-              for (let i = 0; i < 80; i++) {
+              for (let i = 0; i < 120; i++) {
                 const start = i * sampleSize;
                 const end = Math.min(start + sampleSize, channelData.length);
                 let max = 0;
@@ -163,7 +163,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
             // Method 2: Try to get peaks from the backend
             if (wavesurfer.current.backend && wavesurfer.current.backend.getPeaks) {
-              const peaks = wavesurfer.current.backend.getPeaks(80, 0, wavesurfer.current.getDuration());
+              const peaks = wavesurfer.current.backend.getPeaks(120, 0, wavesurfer.current.getDuration());
               if (peaks && peaks.length > 0) {
                 setWaveformPeaks(peaks);
                 console.log('Extracted peaks using getPeaks method for', audio.name, ':', peaks.length, 'peaks');
@@ -173,7 +173,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
             // Method 3: Try to get peaks from the drawable peaks if available
             if (wavesurfer.current.drawer && wavesurfer.current.drawer.peaks) {
-              const peaks = Array.from(wavesurfer.current.drawer.peaks).slice(0, 80);
+              const peaks = Array.from(wavesurfer.current.drawer.peaks).slice(0, 120);
               if (peaks.length > 0) {
                 setWaveformPeaks(peaks);
                 console.log('Extracted peaks from drawer for', audio.name, ':', peaks.length, 'peaks');
@@ -577,10 +577,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                               ? waveformPeaks 
                               : generateRealisticWaveform(audio.name, audio.size);
                             
-                            return uniquePeaks.map((peak, i) => {
+                            // Ensure we show the complete waveform by using more bars if needed
+                            const displayPeaks = uniquePeaks.length < 100 ? uniquePeaks : uniquePeaks.slice(0, 100);
+                            
+                            return displayPeaks.map((peak, i) => {
                               const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
                               const progress = currentTime / duration;
-                              const barProgress = i / uniquePeaks.length;
+                              const barProgress = i / displayPeaks.length;
                               const isPlayed = barProgress <= progress;
 
                               return (
@@ -738,8 +741,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         <div className="w-full h-full flex flex-col justify-between relative">
           {/* Header with filename and time */}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-white text-sm font-medium truncate">```python
-              {audio.name.replace(/\.[^/.]+$/, "")} {/* Remove file extension like Decibels */}
+            <span className="text-white text-sm font-medium overflow-hidden whitespace-nowrap">
+              {audio.name.replace(/\.[^/.]+$/, "")}
             </span>
             <div className="text-xs text-gray-400 flex-shrink-0">
               {formatTime(currentTime)} / {formatTime(duration)}
