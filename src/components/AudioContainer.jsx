@@ -463,13 +463,40 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       }}
                     >
                       <div className="flex items-center justify-center h-full relative">
-                        {waveformPeaks && waveformPeaks.length > 0 ? (
-                          // Use extracted peaks if available
-                          <div className="w-full h-full flex items-end justify-center px-2">
-                            {waveformPeaks.map((peak, i) => {
-                              const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
+                        {/* Always show waveform - use real data if available, fallback pattern otherwise */}
+                        <div className="w-full h-full flex items-end justify-center px-2">
+                          {(() => {
+                            // Use real peaks if available
+                            if (waveformPeaks && waveformPeaks.length > 0) {
+                              return waveformPeaks.map((peak, i) => {
+                                const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
+                                const progress = currentTime / duration;
+                                const barProgress = i / waveformPeaks.length;
+                                const isPlayed = barProgress <= progress;
+                                
+                                return (
+                                  <div
+                                    key={i}
+                                    style={{
+                                      width: '2px',
+                                      height: `${height}%`,
+                                      backgroundColor: isPlayed ? '#3584E4' : 'rgba(255, 255, 255, 0.7)',
+                                      borderRadius: '1px',
+                                      margin: '0 0.5px',
+                                      minHeight: '5%'
+                                    }}
+                                  />
+                                );
+                              });
+                            }
+                            
+                            // Fallback: Generate waveform pattern based on filename
+                            const seed = audio.name ? audio.name.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 42;
+                            return Array.from({ length: 120 }, (_, i) => {
+                              // Create realistic waveform pattern
+                              const height = Math.abs(Math.sin((i + seed) * 0.5) * Math.cos(i * 0.3)) * 80 + 10;
                               const progress = currentTime / duration;
-                              const barProgress = i / waveformPeaks.length;
+                              const barProgress = i / 120;
                               const isPlayed = barProgress <= progress;
                               
                               return (
@@ -485,14 +512,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                   }}
                                 />
                               );
-                            })}
-                          </div>
-                        ) : (
-                          // Fallback: show loading state until waveform is ready
-                          <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-white/60 text-xs">Loading waveform...</span>
-                          </div>
-                        )}
+                            });
+                          })()}
+                        </div>
                       </div>
                     </div>
                   </div>
