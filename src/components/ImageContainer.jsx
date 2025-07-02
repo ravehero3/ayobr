@@ -116,21 +116,42 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     updatePair(pairId, { image: null });
   };
 
-  const handleMoveButtonClick = (e) => {
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+  const [isDraggingWithMouse, setIsDraggingWithMouse] = React.useState(false);
+  const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
+
+  const handleMoveButtonMouseDown = (e) => {
     e.stopPropagation();
-    console.log('Move button clicked for image container:', pairId);
+    e.preventDefault();
+    console.log('Move button mouse down:', { type: 'individual-container', containerType: 'image', pairId, content: { image } });
 
-    // Toggle the container dragging state for visual effect
-    setIsContainerDragging(!isContainerDragging);
+    // Calculate offset from container center
+    const rect = containerRef.current.getBoundingClientRect();
+    const offset = {
+      x: e.clientX - (rect.left + rect.width / 2),
+      y: e.clientY - (rect.top + rect.height / 2)
+    };
+    setDragOffset(offset);
 
-    // Trigger container drag start for individual image container
-    if (onContainerDragStart) {
-      onContainerDragStart('image', 'start', { 
-        id: pairId, 
-        audio: null, // Image container doesn't have audio
-        image: image
-      });
-    }
+    // Set visual states
+    setIsContainerDragging(true);
+    setIsDraggingWithMouse(true);
+    setMousePosition({ x: e.clientX, y: e.clientY });
+
+    // Add global mouse move and up listeners
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleMouseUp = () => {
+      setIsContainerDragging(false);
+      setIsDraggingWithMouse(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   // Enhanced highlighting logic - show GREEN glow when:
@@ -375,8 +396,10 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         height: '180px',
         minHeight: '180px',
         maxHeight: '180px',
-        transform: isContainerDragging
-          ? 'translateY(-80px) translateX(50px) rotate(10deg) scale(1.1)' // Move up and right, tilt 10 degrees
+        transform: isDraggingWithMouse && isContainerDragging
+          ? `translate(${mousePosition.x - window.innerWidth/2}px, ${mousePosition.y - window.innerHeight/2}px) rotate(10deg) scale(1.1)`
+          : isContainerDragging
+          ? 'translateY(-80px) translateX(50px) rotate(10deg) scale(1.1)' // Move up and right, tilt 10 degrees when move button clicked
           : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
           ? `translate(${containerDragPosition.x}px, ${containerDragPosition.y}px) scale(1.2) rotate(5deg)`
           : isDragging 
@@ -504,53 +527,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
               color: (isContainerDragMode && draggedContainerType === 'image') ? '#10B981' : '#3584E4'
             }}
             title="Drag to move image container"
-            draggable="true"
-            onDragStart={(e) => {
-              e.stopPropagation();
-              e.dataTransfer.effectAllowed = 'move';
-              
-              // Create a transparent drag image to hide the default browser drag preview
-              const dragImage = new Image();
-              dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-              e.dataTransfer.setDragImage(dragImage, 0, 0);
-              
-              const dragData = {
-                type: 'individual-container',
-                containerType: 'image',
-                pairId: pairId,
-                content: image
-              };
-              e.dataTransfer.setData('application/json', JSON.stringify(dragData));
-              e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-
-              // Store in sessionStorage for reliable access
-              sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
-
-              // Set local dragging state for visual feedback
-              setIsDragging(true);
-              setIsContainerDragging(true);
-
-              if (onContainerDragStart) {
-                onContainerDragStart('image', 'start', { 
-                  id: pairId, 
-                  type: 'image',
-                  content: image,
-                  image: image // Include the image file for proper container type detection
-                });
-              }
-            }}
-            onDragEnd={(e) => {
-              // Reset local dragging state
-              setIsDragging(false);
-              setIsContainerDragging(false);
-
-              if (onContainerDragEnd) {
-                onContainerDragEnd('image', 'end');
-              }
-
-              // Clear the stored drag data
-              sessionStorage.removeItem('currentDragData');
-            }}
+            onMouseDown={handleMoveButtonMouseDown}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
