@@ -22,6 +22,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [waveformPeaks, setWaveformPeaks] = useState(null);
+  const [realTimeWaveformData, setRealTimeWaveformData] = useState(null);
   const containerRef = useRef(null);
 
   // Mouse tracking for drag visualization
@@ -463,77 +464,15 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                       }}
                     >
                       <div className="flex items-center justify-center h-full relative">
-                        {/* Copy the exact waveform from WaveSurfer */}
+                        {/* Display exact waveform from this specific audio file */}
                         <div className="w-full h-full flex items-end justify-center px-2">
-                          {(() => {
-                            // Try to get waveform data directly from WaveSurfer instance
-                            if (wavesurfer.current && wavesurfer.current.isReady) {
-                              try {
-                                // Get the canvas element from WaveSurfer
-                                const waveCanvas = wavesurfer.current.drawer.canvases[0];
-                                if (waveCanvas) {
-                                  // Extract the peak data from WaveSurfer's backend
-                                  const peaks = wavesurfer.current.backend.getPeaks ? 
-                                    wavesurfer.current.backend.getPeaks(120) : 
-                                    waveformPeaks;
-                                  
-                                  if (peaks && peaks.length > 0) {
-                                    const progress = currentTime / duration;
-                                    
-                                    return peaks.map((peak, i) => {
-                                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
-                                      const barProgress = i / peaks.length;
-                                      const isPlayed = barProgress <= progress;
-                                      
-                                      return (
-                                        <div
-                                          key={i}
-                                          style={{
-                                            width: '2px',
-                                            height: `${height}%`,
-                                            backgroundColor: isPlayed ? '#3584E4' : '#6C737F',
-                                            borderRadius: '1px',
-                                            margin: '0 0.5px',
-                                            minHeight: '5%'
-                                          }}
-                                        />
-                                      );
-                                    });
-                                  }
-                                }
-                              } catch (error) {
-                                console.log('Could not extract from WaveSurfer:', error);
-                              }
-                            }
-                            
-                            // Use stored peaks as fallback
-                            if (waveformPeaks && waveformPeaks.length > 0) {
+                          {waveformPeaks && waveformPeaks.length > 0 ? (
+                            // Use the actual peaks from this audio file
+                            waveformPeaks.map((peak, i) => {
+                              const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
                               const progress = currentTime / duration;
-                              return waveformPeaks.map((peak, i) => {
-                                const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 5);
-                                const barProgress = i / waveformPeaks.length;
-                                const isPlayed = barProgress <= progress;
-                                
-                                return (
-                                  <div
-                                    key={i}
-                                    style={{
-                                      width: '2px',
-                                      height: `${height}%`,
-                                      backgroundColor: isPlayed ? '#3584E4' : '#6C737F',
-                                      borderRadius: '1px',
-                                      margin: '0 0.5px',
-                                      minHeight: '5%'
-                                    }}
-                                  />
-                                );
-                              });
-                            }
-                            
-                            // Show realistic pattern while loading
-                            const seed = audio.name ? audio.name.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 42;
-                            return Array.from({ length: 120 }, (_, i) => {
-                              const height = Math.abs(Math.sin((i + seed) * 0.5) * Math.cos(i * 0.3)) * 80 + 10;
+                              const barProgress = i / waveformPeaks.length;
+                              const isPlayed = barProgress <= progress;
                               
                               return (
                                 <div
@@ -541,15 +480,20 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                                   style={{
                                     width: '2px',
                                     height: `${height}%`,
-                                    backgroundColor: '#6C737F',
+                                    backgroundColor: isPlayed ? '#3584E4' : '#6C737F',
                                     borderRadius: '1px',
                                     margin: '0 0.5px',
                                     minHeight: '5%'
                                   }}
                                 />
                               );
-                            });
-                          })()}
+                            })
+                          ) : (
+                            // Show loading message if waveform isn't ready yet
+                            <div className="text-white/60 text-xs">
+                              {audio.name.replace(/\.[^/.]+$/, "")}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
