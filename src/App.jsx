@@ -244,118 +244,6 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Drag Preview - Container that follows cursor */}
-      <AnimatePresence>
-        {isDraggingContainer && draggedContainer && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 0.9, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed pointer-events-none z-50"
-            style={{
-              left: dragPosition.x - 450, // Start at container position, not centered
-              top: dragPosition.y - 96, // Start at container position
-              transform: 'rotate(-3deg)' // Slight rotation for visual effect
-            }}
-          >
-            {/* Show full-size version of the actual container being dragged */}
-            <div
-              className="backdrop-blur-sm border-2 rounded-xl overflow-hidden"
-              style={{
-                width: '450px', // Full size to match original container
-                height: draggedContainerType === 'audio' ? '136px' : '200px',
-                background: draggedContainerType === 'audio' 
-                  ? 'rgba(15, 23, 42, 0.6)' // Dark blue background for audio
-                  : 'linear-gradient(135deg, #0A0F1C 0%, #050A13 100%)',
-                borderColor: draggedContainerType === 'audio' ? '#3584E4' : '#10B981', // Blue for audio, green for image
-                boxShadow: `
-                  0 0 30px rgba(${draggedContainerType === 'audio' ? '53, 132, 228' : '16, 185, 129'}, 0.6),
-                  0 0 60px rgba(${draggedContainerType === 'audio' ? '53, 132, 228' : '16, 185, 129'}, 0.4),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
-                `
-              }}
-            >
-                <div className="absolute inset-0 flex items-center justify-center p-4">
-                {draggedContainerType === 'audio' ? (
-                  // Audio container preview - mimics the actual audio container layout
-                  <div className="w-full h-full flex flex-col justify-between relative">
-                    {/* Header with title and controls */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{
-                        backgroundColor: 'rgba(53, 132, 228, 0.15)',
-                        border: '1px solid rgba(53, 132, 228, 0.3)',
-                        color: '#3584E4'
-                      }}>
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                        </svg>
-                      </div>
-                      <span className="text-white text-sm font-medium truncate text-center flex-1 mx-3">
-                        {draggedContainer.audio?.name?.replace(/\.[^/.]+$/, "") || "Audio File"}
-                      </span>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{
-                        backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                        border: '1px solid rgba(220, 38, 38, 0.3)',
-                        color: '#DC2626'
-                      }}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Simplified waveform representation */}
-                    <div className="flex-1 flex items-center justify-center mb-6">
-                      <div className="w-full h-12 bg-gray-700 rounded flex items-end justify-center space-x-1 px-4">
-                        {Array.from({ length: 20 }, (_, i) => (
-                          <div
-                            key={i}
-                            className="bg-blue-400 rounded-sm"
-                            style={{
-                              width: '3px',
-                              height: `${Math.random() * 80 + 20}%`,
-                              opacity: 0.7
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Play controls */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">0:00</span>
-                      <div className="w-12 h-8 bg-blue-500 rounded flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m7 4 10 6L7 16V4z"/>
-                        </svg>
-                      </div>
-                      <span className="text-xs text-gray-400">0:00</span>
-                    </div>
-                  </div>
-                ) : (
-                  // Image container preview - full size
-                  <div className="w-full h-full flex flex-col items-center justify-center relative">
-                    {draggedContainer.image ? (
-                      <img
-                        src={URL.createObjectURL(draggedContainer.image)}
-                        alt="Dragged"
-                        className="w-full h-full object-cover rounded-lg opacity-80"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-500/20 to-emerald-400/20 rounded-lg flex items-center justify-center">
-                        <svg className="w-12 h-12 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="fixed inset-0 flex flex-col">
         {/* Header */}
         <header className="p-6 border-b border-neon-blue/20 flex-shrink-0">
@@ -437,7 +325,7 @@ function App() {
               whileTap={{ scale: 0.95 }}
             >
               {isGenerating ? (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3:
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                   <span>Generating Videos...</span>
                 </div>

@@ -806,8 +806,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             position: 'fixed',
             left: `${mousePosition.x - dragOffset.x}px`,
             top: `${mousePosition.y - dragOffset.y}px`,
-            width: '450px',
-            height: '136px',
+            width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '450px',
+            height: containerRef.current ? `${containerRef.current.offsetHeight}px` : '136px',
             transform: 'none',
             zIndex: 999999999,
             pointerEvents: 'none',
@@ -846,19 +846,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 {audio.name.replace(/\.[^/.]+$/, "")}
               </span>
 
-              {/* Delete button - green version */}
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{
-                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                  border: '1px solid rgba(16, 185, 129, 0.5)',
-                  color: '#10B981'
-                }}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
+              {/* Empty space to maintain layout balance */}
+              <div className="w-8 h-8"></div>
             </div>
 
             {/* Waveform preview - green version */}
