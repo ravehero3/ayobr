@@ -209,6 +209,8 @@ Changelog:
 - July 3, 2025. Development server running on port 5000 with hot module replacement
 - July 3, 2025. Verified all core functionality working: file drop, pairing, drag operations, waveform generation
 - July 3, 2025. MIGRATION COMPLETE: Project fully operational in standard Replit environment
+- July 3, 2025. Fixed drag handle issue: Audio containers now show subtle blur effect on background while keeping audio containers crisp and unblurred during drag operations
+- July 3, 2025. Enhanced user experience: When clicking move handle, everything except audio containers gets slightly blurred with smooth transition effects
 ```
 
 ## User Preferences

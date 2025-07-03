@@ -638,7 +638,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         >
           <motion.div
             ref={containerRef}
-            className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
+            className={`relative w-full h-full transition-all duration-300 group cursor-pointer audio-container ${isContainerDragMode ? 'filter-none blur-none' : ''}`}
             data-pair-id={pairId}
             data-audio-container="true"
             draggable={!!audio}
