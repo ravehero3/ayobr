@@ -348,8 +348,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           }}
         >
           <div className="w-full h-full flex flex-col relative">
-            {/* Image preview - centered vertically with better spacing - exact copy */}
-            <div className="flex-1 flex items-center justify-center">
+            {/* Top spacing - exactly 10px */}
+            <div style={{ height: '10px', flexShrink: 0 }}></div>
+            
+            {/* Image preview - takes remaining space minus button area */}
+            <div className="flex-1 flex items-center justify-center" style={{ minHeight: '0' }}>
               <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>
                 <img
                   src={imageUrl}
@@ -364,8 +367,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
               </div>
             </div>
 
-            {/* Move button - positioned below image preview - exact copy with green tint */}
-            <div className="flex items-center justify-center">
+            {/* Bottom spacing before move button - exactly 10px */}
+            <div style={{ height: '10px', flexShrink: 0 }}></div>
+
+            {/* Move button - positioned at bottom - exact copy with green tint */}
+            <div className="flex items-center justify-center" style={{ height: '32px', flexShrink: 0 }}>
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
@@ -528,8 +534,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
             {image ? (
               <div className="w-full h-full flex flex-col relative">
-                {/* Image preview - perfectly centered with equal spacing */}
-                <div className="flex-1 flex items-center justify-center py-4">
+                {/* Top spacing - exactly 10px */}
+                <div style={{ height: '10px', flexShrink: 0 }}></div>
+                
+                {/* Image preview - takes remaining space minus button area */}
+                <div className="flex-1 flex items-center justify-center" style={{ minHeight: '0' }}>
                   <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>
                     <img
                       src={imageUrl}
@@ -543,8 +552,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
                   </div>
                 </div>
 
-                {/* Move button - positioned with proper spacing from bottom */}
-                <div className="flex items-center justify-center pb-2">
+                {/* Bottom spacing before move button - exactly 10px */}
+                <div style={{ height: '10px', flexShrink: 0 }}></div>
+
+                {/* Move button - positioned at bottom */}
+                <div className="flex items-center justify-center" style={{ height: '32px', flexShrink: 0 }}>
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
                     style={{
