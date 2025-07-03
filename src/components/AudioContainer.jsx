@@ -493,138 +493,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      {/* Enhanced Floating Drag Preview with Portal - exact copy of original container */}
-      {isDraggingWithMouse && isContainerDragging && audio && createPortal(
-        <div
-          className="green-box-drag-preview"
-          style={{
-            position: 'fixed',
-            // Position so cursor stays exactly on the move handle
-            left: `${mousePosition.x - dragOffset.x}px`,
-            top: `${mousePosition.y - dragOffset.y}px`,
-            // Use actual container dimensions
-            width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '450px',
-            height: '136px',
-            transform: 'none', // No tilt, clean rectangle
-            zIndex: 999999999,
-            pointerEvents: 'none',
-            background: 'rgba(15, 23, 42, 0.6)', // Same background as original
-            borderRadius: '8px',
-            border: '1px solid rgba(75, 85, 99, 0.4)', // Same border as original
-            boxShadow: 'none', // No special effects - exact copy
-            padding: '16px',
-            opacity: 0.9, // Same opacity as original when dragging
-            isolation: 'isolate',
-            willChange: 'transform',
-            backdropFilter: 'blur(1px)',
-            WebkitBackdropFilter: 'blur(1px)',
-            contain: 'layout style paint'
-          }}
-        >
-          {/* Recreate the exact layout from the original container */}
-          <div className="w-full h-full flex flex-col">
-            {/* Header with move button and filename (no delete button) */}
-            <div className="flex items-center justify-between mb-4">
-              {/* Move button - top left */}
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center opacity-60"
-                style={{
-                  backgroundColor: 'rgba(53, 132, 228, 0.15)',
-                  border: '1px solid rgba(53, 132, 228, 0.3)',
-                  color: '#3584E4'
-                }}
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                </svg>
-              </div>
-
-              {/* File title - centered */}
-              <span className="text-white text-sm font-medium truncate text-center flex-1 mx-3">
-                {audio.name.replace(/\.[^/.]+$/, "")}
-              </span>
-
-              {/* Empty space instead of delete button to maintain layout */}
-              <div className="w-8 h-8"></div>
-            </div>
-
-            {/* Waveform visualization - same as original */}
-            <div className="flex-1 flex items-center mb-4">
-              <div className="w-full" style={{ height: '60px' }}>
-                {/* Recreate the waveform visualization */}
-                <div className="w-full h-full bg-gradient-to-r from-gray-700/30 to-gray-600/30 rounded flex items-end justify-center gap-0.5 px-2">
-                  {waveformPeaks ? (
-                    waveformPeaks.map((peak, i) => (
-                      <div
-                        key={i}
-                        className="rounded-sm transition-all duration-200"
-                        style={{
-                          width: '2px',
-                          height: `${Math.max(10, peak * 80)}%`,
-                          opacity: 0.8,
-                          backgroundColor: i < (waveformPeaks.length * (currentTime / duration)) ? '#3584E4' : '#6C737F'
-                        }}
-                      />
-                    ))
-                  ) : (
-                    // Fallback waveform if peaks not available
-                    [...Array(50)].map((_, i) => {
-                      const baseHeight = 20 + Math.sin(i * 0.3) * 15;
-                      const randomVariation = Math.random() * 30;
-                      const height = Math.max(10, Math.min(90, baseHeight + randomVariation));
-                      return (
-                        <div
-                          key={i}
-                          className="rounded-sm transition-all duration-200"
-                          style={{
-                            width: '2px',
-                            height: `${height}%`,
-                            opacity: 0.8,
-                            backgroundColor: i < 15 ? '#3584E4' : '#6C737F'
-                          }}
-                        />
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Play button and time information on the same line */}
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-gray-400">
-                {formatTime(currentTime)}
-              </div>
-              
-              {/* Play/pause button - centered */}
-              <div
-                className="w-16 h-12 flex items-center justify-center"
-                style={{
-                  backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
-                  border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
-                  borderRadius: '10px',
-                  color: isPlaying ? 'white' : '#3584E4'
-                }}
-              >
-                {isPlaying ? (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="m7 4 10 6L7 16V4z"/>
-                  </svg>
-                )}
-              </div>
-              
-              <div className="text-xs text-gray-400">
-                {formatTime(duration)}
-              </div>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+      
 
       {/* Fixed position tooltip popup when this container is a valid drop target */}
       {isContainerDragMode && draggedContainerType === 'audio' && audio && draggedContainer?.id !== pairId && createPortal(
@@ -866,8 +735,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             </button>
           </div>
 
-          {/* Waveform */}
-          <div className="flex-1 flex items-center mb-4">
+          {/* Waveform - moved up */}
+          <div className="flex-1 flex items-start">
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer"
@@ -875,8 +744,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             />
           </div>
 
-          {/* Play button and time information on the same line */}
-          <div className="flex items-center justify-between">
+          {/* Play button and time information - moved down with margin */}
+          <div className="flex items-center justify-between" style={{ marginTop: '30px' }}>
             <div className="text-xs text-gray-400">
               {formatTime(currentTime)}
             </div>
