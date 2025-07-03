@@ -249,21 +249,21 @@ function App() {
         {isDraggingContainer && draggedContainer && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 0.9, scale: 0.7 }}
+            animate={{ opacity: 0.9, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             className="fixed pointer-events-none z-50"
             style={{
-              left: dragPosition.x - 200, // Offset to center the preview
+              left: dragPosition.x - 225, // Offset to center the preview (adjusted for full size)
               top: dragPosition.y - 100,
               transform: 'rotate(-3deg)' // Slight rotation for visual effect
             }}
           >
-            {/* Show a mini version of the actual container being dragged */}
+            {/* Show full-size version of the actual container being dragged */}
             <div
               className="backdrop-blur-sm border-2 rounded-xl overflow-hidden"
               style={{
-                width: '400px',
-                height: draggedContainerType === 'audio' ? '150px' : '200px',
+                width: '450px', // Full size to match original container
+                height: draggedContainerType === 'audio' ? '192px' : '200px',
                 background: 'linear-gradient(135deg, #0A0F1C 0%, #050A13 100%)',
                 borderColor: draggedContainerType === 'audio' ? '#1E90FF' : '#10B981',
                 boxShadow: `
@@ -273,9 +273,54 @@ function App() {
                 `
               }}
             >
-              {/* Only show drag preview for image containers, not audio containers */}
-              {draggedContainerType === 'image' && (
-                <div className="absolute inset-0 p-4">
+              <div className="absolute inset-0 p-4">
+                {draggedContainerType === 'audio' ? (
+                  // Audio container preview - full size
+                  <div className="w-full h-full flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white text-sm font-medium truncate">
+                        {draggedContainer.audio?.name?.replace(/\.[^/.]+$/, "") || "Audio File"}
+                      </span>
+                      <div className="text-xs text-gray-400">
+                        Audio Container
+                      </div>
+                    </div>
+
+                    {/* Full waveform visualization */}
+                    <div className="flex-1 flex items-center">
+                      <div className="w-full h-20 bg-gradient-to-r from-gray-700/30 to-gray-600/30 rounded flex items-end justify-center gap-0.5 px-2">
+                        {[...Array(70)].map((_, i) => {
+                          // Create more realistic waveform pattern
+                          const baseHeight = 20 + Math.sin(i * 0.3) * 15;
+                          const randomVariation = Math.random() * 30;
+                          const height = Math.max(10, Math.min(90, baseHeight + randomVariation));
+
+                          return (
+                            <div
+                              key={i}
+                              className="bg-blue-400 rounded-sm transition-all duration-200"
+                              style={{
+                                width: '2px',
+                                height: `${height}%`,
+                                opacity: 0.8,
+                                backgroundColor: i < 20 ? '#3584E4' : '#6C737F' // Progress effect
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center mt-2">
+                      <div className="w-12 h-12 rounded-full bg-blue-500/40 border-2 border-blue-400 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-blue-400 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="m7 4 10 6L7 16V4z"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Image container preview - full size
                   <div className="w-full h-full flex flex-col items-center justify-center relative">
                     {draggedContainer.image ? (
                       <img
@@ -291,8 +336,8 @@ function App() {
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </motion.div>
         )}
