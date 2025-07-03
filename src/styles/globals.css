@@ -97,12 +97,14 @@ body {
 }
 
 .container-drag-mode > * {
-  filter: blur(4px);
-  transition: filter 0.3s ease;
+  filter: blur(2px);
+  opacity: 0.8;
+  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
 .container-drag-mode .audio-container {
   filter: none !important;
+  opacity: 1 !important;
   transition: all 0.3s ease;
 }
 
