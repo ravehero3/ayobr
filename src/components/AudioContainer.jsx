@@ -508,62 +508,46 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               </div>
             </div>
 
-            {/* Large Waveform - exact copy of the real waveform but green tinted */}
+            {/* Large Waveform - Create a visual replica of the actual WaveSurfer component */}
             <div className="flex-1 flex items-center">
               <div 
                 className="w-full"
-                style={{ height: '60px' }}
+                style={{ height: '80px' }} // Match the real container height
               >
-                {/* Copy the exact waveform from the real container */}
-                <div className="w-full h-full flex items-end justify-center gap-0.5" style={{ padding: '0 2px' }}>
-                  {waveformPeaks && waveformPeaks.length > 0 ? (
-                    waveformPeaks.map((peak, i) => {
-                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 4);
-                      const progress = currentTime / duration;
-                      const barProgress = i / waveformPeaks.length;
-                      const isPlayed = barProgress <= progress;
+                {/* Create visual bars that mimic the WaveSurfer appearance exactly */}
+                <div className="w-full h-full flex items-end justify-start" style={{ gap: '1px', padding: '0 0' }}>
+                  {Array.from({ length: 200 }, (_, i) => {
+                    // Create a realistic waveform pattern that matches WaveSurfer's style
+                    const normalizedPos = i / 200;
+                    const baseWave = Math.sin(normalizedPos * Math.PI * 12) * 0.6;
+                    const envelope = Math.sin(normalizedPos * Math.PI) * 0.8;
+                    const noise = (Math.random() - 0.5) * 0.3;
+                    const combined = (baseWave + noise) * envelope;
+                    const height = Math.max(Math.min(Math.abs(combined) * 100, 90), 2);
+                    
+                    // Calculate if this bar should be "played" (green) based on current time
+                    const progress = currentTime / duration;
+                    const barProgress = i / 200;
+                    const isPlayed = barProgress <= progress;
 
-                      return (
-                        <div
-                          key={i}
-                          style={{
-                            width: '2px',
-                            height: `${height}%`,
-                            backgroundColor: isPlayed ? '#10B981' : '#6C737F', // Match the original colors but with green for played portions
-                            borderRadius: '1px',
-                            opacity: 1
-                          }}
-                        />
-                      );
-                    })
-                  ) : (
-                    [...Array(80)].map((_, i) => {
-                      const baseHeight = 20 + Math.sin(i * 0.3) * 15;
-                      const randomVariation = Math.random() * 30;
-                      const height = Math.max(4, Math.min(90, baseHeight + randomVariation));
-                      const progress = currentTime / duration;
-                      const barProgress = i / 80;
-                      const isPlayed = barProgress <= progress;
-
-                      return (
-                        <div
-                          key={i}
-                          style={{
-                            width: '2px',
-                            height: `${height}%`,
-                            backgroundColor: isPlayed ? '#10B981' : '#6C737F', // Match original waveform colors
-                            borderRadius: '1px',
-                            opacity: 1
-                          }}
-                        />
-                      );
-                    })
-                  )}
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          width: '2px',
+                          height: `${height}%`,
+                          backgroundColor: isPlayed ? '#10B981' : '#6C737F', // Exact same colors as the real waveform
+                          borderRadius: '1px',
+                          opacity: 1
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            {/* Bottom controls - Move and Delete buttons with green tint */}
+            {/* Bottom controls - Only Move and Delete buttons, NO play button */}
             <div className="flex items-center justify-center gap-3 mt-2">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -577,7 +561,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                   <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                 </svg>
               </div>
-              <button
+              <div
                 className="w-6 h-6 rounded-full flex items-center justify-center"
                 style={{
                   backgroundColor: 'rgba(220, 38, 38, 0.15)',
@@ -588,7 +572,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </div>
             </div>
           </div>
         </div>,
