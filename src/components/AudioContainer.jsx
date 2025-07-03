@@ -626,6 +626,35 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         document.body
       )}
 
+      {/* Fixed position tooltip popup when this container is a valid drop target */}
+      {isContainerDragMode && draggedContainerType === 'audio' && audio && draggedContainer?.id !== pairId && createPortal(
+        <div
+          className="drop-here-popup"
+          style={{
+            position: 'fixed',
+            left: containerRef.current ? `${containerRef.current.getBoundingClientRect().right + 15}px` : '100px',
+            top: containerRef.current ? `${containerRef.current.getBoundingClientRect().top + 20}px` : '100px',
+            zIndex: 999999998,
+            pointerEvents: 'none',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.98) 0%, rgba(5, 150, 105, 0.98) 100%)',
+            color: 'white',
+            padding: '10px 16px',
+            borderRadius: '12px',
+            fontSize: '13px',
+            fontWeight: '700',
+            border: '2px solid rgba(16, 185, 129, 0.9)',
+            boxShadow: '0 6px 20px rgba(16, 185, 129, 0.5), 0 0 30px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+            whiteSpace: 'nowrap',
+            textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }}
+        >
+          🎵 Drop Here
+        </div>,
+        document.body
+      )}
+
       {/* No placeholder when dragging - just empty space */}
       {isDraggingWithMouse && isContainerDragging ? (
         <div style={{ height: '136px' }} />
