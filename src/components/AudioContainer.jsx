@@ -744,13 +744,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             />
           </div>
 
-          {/* Play button and time information - moved down with more margin */}
-          <div className="flex items-center justify-between" style={{ marginTop: '40px' }}>
+          {/* Play button and time information - moved up */}
+          <div className="flex items-center justify-between" style={{ marginTop: '20px' }}>
             <div className="text-xs text-gray-400">
               {formatTime(currentTime)}
             </div>
             
-            {/* Play/pause button - centered and moved down */}
+            {/* Play/pause button - centered and moved up */}
             <button
               onClick={handlePlayPause}
               className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
@@ -759,7 +759,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
                 borderRadius: '10px',
                 color: isPlaying ? 'white' : '#3584E4',
-                transform: 'translateY(30px)' // Move play button down by 30px
+                transform: 'translateY(10px)' // Move play button down by only 10px (20px higher than before)
               }}
             >
               {isPlaying ? (
