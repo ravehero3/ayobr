@@ -253,8 +253,8 @@ function App() {
             exit={{ opacity: 0, scale: 0.8 }}
             className="fixed pointer-events-none z-50"
             style={{
-              left: dragPosition.x - 225, // Offset to center the preview (adjusted for full size)
-              top: dragPosition.y - 100,
+              left: dragPosition.x - 450, // Start at container position, not centered
+              top: dragPosition.y - 96, // Start at container position
               transform: 'rotate(-3deg)' // Slight rotation for visual effect
             }}
           >
@@ -273,51 +273,13 @@ function App() {
                 `
               }}
             >
-              <div className="absolute inset-0 p-4">
+              <div className="absolute inset-0 flex items-center justify-center p-4">
                 {draggedContainerType === 'audio' ? (
-                  // Audio container preview - full size
-                  <div className="w-full h-full flex flex-col justify-between">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white text-sm font-medium truncate">
-                        {draggedContainer.audio?.name?.replace(/\.[^/.]+$/, "") || "Audio File"}
-                      </span>
-                      <div className="text-xs text-gray-400">
-                        Audio Container
-                      </div>
-                    </div>
-
-                    {/* Full waveform visualization - simplified placeholder */}
-                    <div className="flex-1 flex items-center">
-                      <div className="w-full bg-gray-200 rounded"
-                        style={{ 
-                          height: '60px',
-                          backgroundImage: 'linear-gradient(to right, #3584E4 20%, #6C737F 20%)',
-                          backgroundSize: '100% 100%',
-                          position: 'relative',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        {/* Simple waveform representation */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-full h-full bg-gradient-to-r from-blue-500/20 to-gray-500/20 rounded"></div>
-                        </div>
-                        
-                        {/* Audio waveform text indicator */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-xs text-gray-400 font-medium">
-                            Audio Waveform
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-center mt-2">
-                      <div className="w-12 h-12 rounded-full bg-blue-500/40 border-2 border-blue-400 flex items-center justify-center shadow-lg">
-                        <svg className="w-6 h-6 text-blue-400 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m7 4 10 6L7 16V4z"/>
-                        </svg>
-                      </div>
-                    </div>
+                  // Simplified audio preview - just the title centered
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-white text-lg font-medium text-center px-4">
+                      {draggedContainer.audio?.name?.replace(/\.[^/.]+$/, "") || "Audio File"}
+                    </span>
                   </div>
                 ) : (
                   // Image container preview - full size

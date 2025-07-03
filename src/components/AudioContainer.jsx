@@ -414,13 +414,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  // Enhanced highlighting logic - show GREEN glow when:
+  // Enhanced highlighting logic - show GREEN glow ONLY when actively dragging (not constant)
   // 1. Another audio container is being dragged (container drag mode)
   // 2. This container has audio content (valid drop target)
   // 3. This is not the container being dragged
   const shouldHighlight = (isDraggingContainer && draggedContainerType === 'audio' && !!audio && draggedContainer?.id !== pairId) ||
-    (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && !!audio) ||
-    shouldShowGlow;
+    (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && !!audio);
 
   const handleContainerDragOver = (e) => {
     // Allow container dropping when in container drag mode or when dragging audio
