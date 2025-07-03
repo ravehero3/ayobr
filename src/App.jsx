@@ -286,28 +286,28 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Full waveform visualization */}
+                    {/* Full waveform visualization - simplified placeholder */}
                     <div className="flex-1 flex items-center">
-                      <div className="w-full h-20 bg-gradient-to-r from-gray-700/30 to-gray-600/30 rounded flex items-end justify-center gap-0.5 px-2">
-                        {[...Array(70)].map((_, i) => {
-                          // Create more realistic waveform pattern
-                          const baseHeight = 20 + Math.sin(i * 0.3) * 15;
-                          const randomVariation = Math.random() * 30;
-                          const height = Math.max(10, Math.min(90, baseHeight + randomVariation));
-
-                          return (
-                            <div
-                              key={i}
-                              className="bg-blue-400 rounded-sm transition-all duration-200"
-                              style={{
-                                width: '2px',
-                                height: `${height}%`,
-                                opacity: 0.8,
-                                backgroundColor: i < 20 ? '#3584E4' : '#6C737F' // Progress effect
-                              }}
-                            />
-                          );
-                        })}
+                      <div className="w-full bg-gray-200 rounded"
+                        style={{ 
+                          height: '60px',
+                          backgroundImage: 'linear-gradient(to right, #3584E4 20%, #6C737F 20%)',
+                          backgroundSize: '100% 100%',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {/* Simple waveform representation */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-r from-blue-500/20 to-gray-500/20 rounded"></div>
+                        </div>
+                        
+                        {/* Audio waveform text indicator */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xs text-gray-400 font-medium">
+                            Audio Waveform
+                          </span>
+                        </div>
                       </div>
                     </div>
 
