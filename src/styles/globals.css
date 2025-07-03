@@ -232,6 +232,20 @@ body {
   100% { background-position: -200% 0; }
 }
 
+/* Smooth blur-to-no-blur transition for content swapping */
+@keyframes blurFadeOut {
+  0% {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 1;
+  }
+  100% {
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    opacity: 0;
+  }
+}
+
 /* Futuristic container animations */
 @keyframes border-pulse {
   0%, 100% {

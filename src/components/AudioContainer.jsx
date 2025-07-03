@@ -670,23 +670,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         userSelect: 'none'
       }}
     >
-      {/* Content Change Transition Overlay with Pulsing Animation */}
+      {/* Smooth Blur-to-No-Blur Transition Overlay */}
       {isContentChanging && (
-        <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-20">
-          <div className="text-center">
-            {/* Pulsing circle animation */}
-            <div className="relative w-12 h-12 mx-auto mb-3">
-              <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-75"></div>
-              <div className="absolute inset-0 bg-blue-400 rounded-full animate-pulse"></div>
-              <div className="relative w-full h-full bg-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-blue-400 font-medium text-sm animate-pulse">Loading audio...</p>
-          </div>
-        </div>
+        <div 
+          className="absolute inset-0 rounded-lg z-20"
+          style={{
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            background: 'rgba(15, 23, 42, 0.4)',
+            animation: 'blurFadeOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+          }}
+        />
       )}
 
       {/* Drag and Drop Overlay */}
