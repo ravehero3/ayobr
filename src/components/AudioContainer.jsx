@@ -541,36 +541,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               <div className="w-8 h-8"></div>
             </div>
 
-            {/* Real waveform from WaveSurfer */}
-            <div className="flex-1 flex items-center mb-4">
-              <div className="w-full cursor-pointer" style={{ height: '60px' }}>
-                {/* Create a clone of the waveform for the drag preview */}
-                <div 
-                  className="w-full h-full bg-gray-800 rounded-md flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(to right, #374151 0%, #4B5563 50%, #374151 100%)',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                >
-                  {/* Waveform-like pattern to match the original */}
-                  <div className="absolute inset-0 flex items-end justify-around px-1">
-                    {[...Array(50)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="bg-gray-300"
-                        style={{
-                          width: '2px',
-                          height: `${10 + (Math.sin(i * 0.3) * 20) + (Math.random() * 15)}px`,
-                          opacity: 0.8,
-                          borderRadius: '1px'
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* No waveform in drag preview - just empty space */}
+            <div className="flex-1"></div>
 
             {/* Play button and time information on the same line */}
             <div className="flex items-center justify-between">
@@ -608,26 +580,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         document.body
       )}
 
-      {/* Empty space placeholder when container is being dragged with mouse */}
+      {/* No placeholder when dragging - just empty space */}
       {isDraggingWithMouse && isContainerDragging ? (
-        <div
-          style={{
-            width: '100%',
-            height: '136px',
-            minHeight: '136px',
-            border: '2px dashed rgba(53, 132, 228, 0.3)',
-            borderRadius: '8px',
-            background: 'rgba(10, 15, 28, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(53, 132, 228, 0.5)',
-            fontSize: '14px',
-            fontWeight: '500'
-          }}
-        >
-          Container being moved...
-        </div>
+        <div style={{ height: '136px' }} />
       ) : (
         <div 
           className="relative"
