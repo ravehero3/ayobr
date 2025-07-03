@@ -23,6 +23,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [waveformPeaks, setWaveformPeaks] = useState(null);
   const [realTimeWaveformData, setRealTimeWaveformData] = useState(null);
+  const [isSwapping, setIsSwapping] = useState(false);
   const containerRef = useRef(null);
 
   // Mouse tracking for drag visualization
@@ -249,9 +250,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       if (types.includes('application/json')) {
         const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
         if (dragData.type === 'audio' && dragData.pairId !== pairId && audio) {
+          // Trigger swap visual effect
+          setIsSwapping(true);
+          
           if (onSwap) {
             onSwap(dragData.pairId, pairId, 'audio');
           }
+          
+          // Reset visual effects after swap
+          setTimeout(() => {
+            setIsSwapping(false);
+          }, 600);
           return;
         }
       }
@@ -261,9 +270,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
     // Fallback to state-based swapping
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && audio) {
+      // Trigger swap visual effect
+      setIsSwapping(true);
+      
       if (onSwap) {
         onSwap(draggedItem.pairId, pairId, 'audio');
       }
+      
+      // Reset visual effects after swap
+      setTimeout(() => {
+        setIsSwapping(false);
+      }, 600);
       return;
     }
 
@@ -336,9 +353,30 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         const targetPairId = audioContainer.getAttribute('data-pair-id');
         if (targetPairId && targetPairId !== pairId) {
           console.log('Dropping on audio container:', targetPairId);
+          
+          // Trigger swap visual effect
+          setIsSwapping(true);
+          
+          // Create a brief green glow effect on both containers
+          const targetContainer = audioContainer.querySelector('.audio-container');
+          if (targetContainer) {
+            targetContainer.style.transition = 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)';
+            targetContainer.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.9), 0 0 60px rgba(16, 185, 129, 0.8), 0 0 120px rgba(16, 185, 129, 0.6)';
+            targetContainer.style.transform = 'scale(1.08)';
+          }
+          
           if (onSwap) {
             onSwap(pairId, targetPairId, 'audio');
           }
+          
+          // Reset visual effects after swap
+          setTimeout(() => {
+            setIsSwapping(false);
+            if (targetContainer) {
+              targetContainer.style.boxShadow = '';
+              targetContainer.style.transform = '';
+            }
+          }, 600);
         }
       }
 
@@ -392,6 +430,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     if (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pairId && audio) {
       console.log('Executing audio container swap:', draggedContainer.id, '->', pairId);
       
+      // Trigger swap visual effect
+      setIsSwapping(true);
+      
       if (onSwap) {
         onSwap(draggedContainer.id, pairId, 'audio');
       }
@@ -400,15 +441,29 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       if (onContainerDragEnd) {
         onContainerDragEnd('audio', 'end');
       }
+      
+      // Reset visual effects after swap
+      setTimeout(() => {
+        setIsSwapping(false);
+      }, 600);
       return;
     }
 
     // Handle regular audio file dropping from main container drag
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
       console.log('Regular audio drag detected, triggering swap');
+      
+      // Trigger swap visual effect
+      setIsSwapping(true);
+      
       if (onSwap) {
         onSwap(draggedItem.pairId, pairId, 'audio');
       }
+      
+      // Reset visual effects after swap
+      setTimeout(() => {
+        setIsSwapping(false);
+      }, 600);
     }
   };
 
@@ -425,7 +480,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             top: `${mousePosition.y - 68}px`,   // Always center vertically (136px / 2 = 68px)
             width: '450px',
             height: '136px',
-            transform: 'rotate(2deg) scale(1.1)',
+            transform: 'scale(1.05)', // Removed tilt, only slight scale
             zIndex: 999999999, // Extremely high z-index to ensure it's always on top
             pointerEvents: 'none',
             background: 'rgba(16, 185, 129, 0.95)',
@@ -584,7 +639,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : (isContainerDragMode && draggedContainerType === 'audio')
           ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for audio
           : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
-        boxShadow: isDragging
+        boxShadow: isSwapping
+          ? '0 0 0 4px rgba(16, 185, 129, 0.9), 0 0 60px rgba(16, 185, 129, 0.8), 0 0 120px rgba(16, 185, 129, 0.6), inset 0 0 30px rgba(16, 185, 129, 0.2)'
+          : isDragging
           ? '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8), 0 30px 80px rgba(0, 0, 0, 0.6)'
           : isDragOver
           ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
@@ -607,7 +664,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
         left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
         top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
-        transform: isDraggingWithMouse && isContainerDragging
+        transform: isSwapping
+          ? 'scale(1.08) translateY(-4px)' // Enhanced swap effect
+          : isDraggingWithMouse && isContainerDragging
           ? 'rotate(10deg) scale(1.1)'
           : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
@@ -623,7 +682,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? 0.9
           : isDragging ? 0.9 : 1,
-        transition: (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
+        transition: isSwapping
+          ? 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)' // Smooth swap animation
+          : (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
           ? 'none' 
           : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
         zIndex: isDraggingWithMouse && isContainerDragging
