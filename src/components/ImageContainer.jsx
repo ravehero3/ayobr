@@ -14,6 +14,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
+  const [isSwapping, setIsSwapping] = useState(false); // Add isSwapping state
+  const [isContentChanging, setIsContentChanging] = useState(false);
 
   React.useEffect(() => {
     if (image) {
@@ -89,6 +91,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
         if (dragData.type === 'image' && dragData.pairId !== pairId && image) {
           if (onSwap) {
+            setIsSwapping(true); // Start swap animation
+            setTimeout(() => setIsSwapping(false), 600); // End after the animation duration
             onSwap(dragData.pairId, pairId, 'image');
           }
           return;
@@ -101,6 +105,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     // Fallback to state-based swapping
     if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId && image) {
       if (onSwap) {
+        setIsSwapping(true); // Start swap animation
+        setTimeout(() => setIsSwapping(false), 600); // End after the animation duration
         onSwap(draggedItem.pairId, pairId, 'image');
       }
       return;
@@ -111,7 +117,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     const imageFile = files.find(file => file.type.startsWith('image/'));
 
     if (imageFile) {
+      setIsContentChanging(true);
       updatePair(pairId, { image: imageFile });
+      setTimeout(() => setIsContentChanging(false), 300);
     }
   };
 
@@ -156,12 +164,14 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       // Check if we're dropping on another image container
       const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
       const imageContainer = elementBelow?.closest('[data-image-container]');
-      
+
       if (imageContainer) {
         const targetPairId = imageContainer.getAttribute('data-pair-id');
         if (targetPairId && targetPairId !== pairId) {
           console.log('Dropping on image container:', targetPairId);
           if (onSwap) {
+            setIsSwapping(true); // Start swap animation
+            setTimeout(() => setIsSwapping(false), 600); // End after the animation duration
             onSwap(pairId, targetPairId, 'image');
           }
         }
@@ -170,12 +180,12 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
       sessionStorage.removeItem('currentDragData');
-      
+
       // End container drag mode
       if (onContainerDragEnd) {
         onContainerDragEnd(pairId, 'end');
       }
-      
+
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -266,7 +276,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     try {
       const dragDataString = e.dataTransfer.getData('application/json');
       let dragData = null;
-      
+
       if (dragDataString) {
         dragData = JSON.parse(dragDataString);
       } else {
@@ -281,6 +291,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
         console.log('Executing image container swap via drag data:', dragData.pairId, '->', pairId);
 
         if (onSwap) {
+          setIsSwapping(true); // Start swap animation
+          setTimeout(() => setIsSwapping(false), 600); // End after the animation duration
           onSwap(dragData.pairId, pairId, 'image');
         }
 
@@ -299,6 +311,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       console.log('Executing image container swap:', draggedContainer.id, '->', pairId);
 
       if (onSwap) {
+        setIsSwapping(true); // Start swap animation
+        setTimeout(() => setIsSwapping(false), 600); // End after the animation duration
         onSwap(draggedContainer.id, pairId, 'image');
       }
 
@@ -313,6 +327,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     if (draggedItem?.type === 'image' && draggedItem.pairId !== pairId) {
       console.log('Regular image drag detected, triggering swap');
       if (onSwap) {
+        setIsSwapping(true); // Start swap animation
+        setTimeout(() => setIsSwapping(false), 600); // End after the animation duration
         onSwap(draggedItem.pairId, pairId, 'image');
       }
     }
@@ -350,7 +366,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           <div className="w-full h-full flex flex-col relative">
             {/* Top spacing - exactly 10px */}
             <div style={{ height: '10px', flexShrink: 0 }}></div>
-            
+
             {/* Image preview - takes remaining space minus button area */}
             <div className="flex-1 flex items-center justify-center" style={{ minHeight: '0' }}>
               <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>
@@ -433,8 +449,15 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           }}
         >
           <motion.div
-            ref={containerRef}
-            className="relative w-full h-full transition-all duration-300 group cursor-pointer image-container"
+            className={`container-card relative w-full h-full ${
+        isDragging || (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+          ? 'dragging-container'
+          : shouldHighlight
+          ? 'drag-target-highlight'
+          : isSwapping
+          ? 'swapping-container'
+          : ''
+      }`}
             data-pair-id={pairId}
             data-image-container="true"
             draggable={!!image}
@@ -452,44 +475,51 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             whileHover={{ scale: image ? 1.005 : 1 }}
             title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
             style={{
-              pointerEvents: 'auto',
-              userSelect: 'none',
               background: shouldHighlight && image
                 ? 'rgba(16, 185, 129, 0.15)' // Green background when highlighted
-                : image ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
-              borderRadius: '8px',
+                : image ? 'rgba(26, 26, 26, 0.8)' : 'rgba(26, 26, 26, 0.6)', // Dark theme adapted
+              borderRadius: '1rem',
               border: isDragOver 
                 ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border when dragging over
                 : shouldHighlight
                 ? '2px solid rgba(16, 185, 129, 0.6)' // Simple green border when drop target
-                : image ? '1px solid rgba(75, 85, 99, 0.4)' : '1px solid rgba(75, 85, 99, 0.3)', // Dark gray borders only
-              boxShadow: 'none', // Remove all glows and shadows for clean dark mode
+                : isSwapping
+                ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border for swap
+                : image ? '1px solid #1A1A1A' : '1px solid #1A1A1A', // Dark gray borders only
               padding: image ? '16px' : '20px',
-              height: '180px',
-              minHeight: '180px',
-              maxHeight: '180px',
+              height: '300px',
+              minHeight: '300px',
+              maxHeight: '300px',
               position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
               left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
               top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
-              transform: isDraggingWithMouse && isContainerDragging
-                ? 'rotate(10deg) scale(1.1)'
+              transform: isSwapping
+                ? 'scale(1.08) translateY(-4px)' // Enhanced swap effect
+                : isDraggingWithMouse && isContainerDragging
+                ? 'rotate(-2deg) scale(1.05)'
                 : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
-                ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
+                ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.05) rotate(-2deg)`
                 : isDragging 
-                ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
+                ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.05) rotate(-2deg)`
                 : isDragOver 
                 ? 'scale(1.02)' 
                 : shouldHighlight
                 ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
                 : 'scale(1)',
-              opacity: isContainerDragging 
+              opacity: isContentChanging
+                ? 0.7
+                : isContainerDragging 
                 ? 0.95
                 : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
                 ? 0.9
                 : isDragging ? 0.9 : 1,
-              transition: (isDragging || (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId))
-                ? 'none' 
-                : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
+              transition: isContentChanging
+                ? 'all 0.3s ease-in-out' // Smooth content change transition
+                : isSwapping
+                ? 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)' // Smooth swap animation
+                : (isDragging || (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId))
+                ? 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)' 
+                : 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
               zIndex: isDraggingWithMouse && isContainerDragging
                 ? 99999 // Maximum z-index when dragging with mouse to appear above everything globally
                 : isContainerDragging
@@ -519,7 +549,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
               <div className="w-full h-full flex flex-col relative">
                 {/* Top spacing - exactly 10px */}
                 <div style={{ height: '10px', flexShrink: 0 }}></div>
-                
+
                 {/* Image preview - takes remaining space minus button area */}
                 <div className="flex-1 flex items-center justify-center" style={{ minHeight: '0' }}>
                   <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>

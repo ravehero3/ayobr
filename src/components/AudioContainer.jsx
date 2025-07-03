@@ -27,6 +27,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [isContentChanging, setIsContentChanging] = useState(false);
   const [previousAudio, setPreviousAudio] = useState(null);
   const containerRef = useRef(null);
+  const [showFocusOverlay, setShowFocusOverlay] = useState(false);
+  const [dragTooltip, setDragTooltip] = useState({ show: false, x: 0, y: 0 });
 
   // Mouse tracking for drag visualization
   React.useEffect(() => {
@@ -199,6 +201,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     if (!audio) return;
 
     setIsDragging(true);
+    setShowFocusOverlay(true);
     const dragData = {
       type: 'audio',
       pairId: pairId,
@@ -211,6 +214,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     // Also store in sessionStorage for move button operations
     sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
 
+    // Show tooltip
+    setDragTooltip({ show: true, x: e.clientX + 10, y: e.clientY - 10 });
+
     if (onDragStart) {
       onDragStart(dragData);
     }
@@ -218,6 +224,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   const handleDragEnd = (e) => {
     setIsDragging(false);
+    setShowFocusOverlay(false);
+    setDragTooltip({ show: false, x: 0, y: 0 });
     onDragEnd();
   };
 
@@ -340,7 +348,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     // Set visual states
     setIsContainerDragging(true);
     setIsDraggingWithMouse(true);
+    setShowFocusOverlay(true);
     setMousePosition({ x: e.clientX, y: e.clientY });
+
+    // Show tooltip
+    setDragTooltip({ show: true, x: e.clientX + 10, y: e.clientY - 10 });
 
     // Store drag data in sessionStorage for reliable access
     const dragData = {
@@ -399,6 +411,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
+      setShowFocusOverlay(false);
+      setDragTooltip({ show: false, x: 0, y: 0 });
       sessionStorage.removeItem('currentDragData');
 
       // End container drag mode
@@ -486,6 +500,26 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
+      {/* Focus Overlay */}
+      {showFocusOverlay && createPortal(
+        <div className="drag-focus-overlay" />,
+        document.body
+      )}
+
+      {/* Drag Tooltip */}
+      {dragTooltip.show && createPortal(
+        <div 
+          className="drop-tooltip"
+          style={{
+            left: `${dragTooltip.x}px`,
+            top: `${dragTooltip.y}px`
+          }}
+        >
+          Drop to Swap
+        </div>,
+        document.body
+      )}
+
       {/* Enhanced Floating Drag Preview with Portal - exact copy of original container */}
       {isDraggingWithMouse && isContainerDragging && audio && createPortal(
         <div
@@ -649,65 +683,73 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             }}
             whileHover={{ scale: audio ? 1.005 : 1 }}
             title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
-            style={{
-        pointerEvents: 'auto',
-        userSelect: 'none',
-        background: shouldHighlight && audio
-          ? 'rgba(16, 185, 129, 0.15)' // Green background when highlighted
-          : audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
-        borderRadius: '8px',
-        border: isDragOver 
-          ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border when dragging over
-          : shouldHighlight
-          ? '2px solid rgba(16, 185, 129, 0.6)' // Simple green border when drop target
-          : isSwapping
-          ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border for swap
-          : audio ? '1px solid rgba(75, 85, 99, 0.4)' : '1px solid rgba(75, 85, 99, 0.3)', // Dark gray borders only
-        boxShadow: 'none', // Remove all glows and shadows for clean dark mode
-        padding: audio ? '16px' : '20px',
-        height: '136px',
-        minHeight: '136px',
-        maxHeight: '136px',
-        position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
-        left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
-        top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
-        transform: isSwapping
-          ? 'scale(1.08) translateY(-4px)' // Enhanced swap effect
-          : isDraggingWithMouse && isContainerDragging
-          ? 'rotate(10deg) scale(1.1)'
-          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
-          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
-          : isDragging 
-          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
-          : isDragOver 
-          ? 'scale(1.02)' 
-          : shouldHighlight
-          ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
-          : 'scale(1)',
-        opacity: isContentChanging
-          ? 0.7
-          : isContainerDragging 
-          ? 0.95
-          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
-          ? 0.9
-          : isDragging ? 0.9 : 1,
-        transition: isContentChanging
-          ? 'all 0.3s ease-in-out' // Smooth content change transition
-          : isSwapping
-          ? 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)' // Smooth swap animation
-          : (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
-          ? 'none' 
-          : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
-        zIndex: isDraggingWithMouse && isContainerDragging
-          ? 99999 // Maximum z-index when dragging with mouse to appear above everything globally
-          : isContainerDragging
-          ? 50000 // Very high z-index when lifted
-          : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
-          ? 1500
-          : isDragging ? 1000 : shouldHighlight ? 100 : 1,
-        pointerEvents: 'auto',
-        userSelect: 'none'
-      }}
+            className={`container-card ${
+          isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+            ? 'dragging-container'
+            : shouldHighlight
+            ? 'drag-target-highlight'
+            : isSwapping
+            ? 'swapping-container'
+            : ''
+        }`}
+        style={{
+          pointerEvents: 'auto',
+          userSelect: 'none',
+          background: shouldHighlight && audio
+            ? 'rgba(16, 185, 129, 0.15)' // Green background when highlighted
+            : audio ? 'rgba(26, 26, 26, 0.8)' : 'rgba(26, 26, 26, 0.6)', // Dark theme adapted
+          borderRadius: '1rem',
+          border: isDragOver 
+            ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border when dragging over
+            : shouldHighlight
+            ? '2px solid rgba(16, 185, 129, 0.6)' // Simple green border when drop target
+            : isSwapping
+            ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border for swap
+            : audio ? '1px solid #1A1A1A' : '1px solid #1A1A1A', // Dark gray borders only
+          padding: audio ? '16px' : '20px',
+          height: '136px',
+          minHeight: '136px',
+          maxHeight: '136px',
+          position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
+          left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
+          top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
+          transform: isSwapping
+            ? 'scale(1.08) translateY(-4px)' // Enhanced swap effect
+            : isDraggingWithMouse && isContainerDragging
+            ? 'rotate(-2deg) scale(1.05)'
+            : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+            ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.05) rotate(-2deg)`
+            : isDragging 
+            ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.05) rotate(-2deg)`
+            : isDragOver 
+            ? 'scale(1.02)' 
+            : shouldHighlight
+            ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
+            : 'scale(1)',
+          opacity: isContentChanging
+            ? 0.7
+            : isContainerDragging 
+            ? 0.95
+            : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+            ? 0.9
+            : isDragging ? 0.9 : 1,
+          transition: isContentChanging
+            ? 'all 0.3s ease-in-out' // Smooth content change transition
+            : isSwapping
+            ? 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)' // Smooth swap animation
+            : (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
+            ? 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)' 
+            : 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
+          zIndex: isDraggingWithMouse && isContainerDragging
+            ? 99999 // Maximum z-index when dragging with mouse to appear above everything globally
+            : isContainerDragging
+            ? 50000 // Very high z-index when lifted
+            : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
+            ? 1500
+            : isDragging ? 1000 : shouldHighlight ? 100 : 1,
+          pointerEvents: 'auto',
+          userSelect: 'none'
+        }}
     >
       {/* Smooth Blur-to-No-Blur Transition Overlay */}
       {isContentChanging && (
