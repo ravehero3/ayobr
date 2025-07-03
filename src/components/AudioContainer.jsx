@@ -351,6 +351,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     };
     sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
 
+    // Add blur effect to the entire app
+    document.body.classList.add('container-drag-mode');
+
     // Trigger container drag mode
     if (onContainerDragStart) {
       onContainerDragStart(pairId, 'start', { id: pairId, type: 'audio', audio });
@@ -400,6 +403,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
       sessionStorage.removeItem('currentDragData');
+
+      // Remove blur effect from the entire app
+      document.body.classList.remove('container-drag-mode');
 
       // End container drag mode
       if (onContainerDragEnd) {
