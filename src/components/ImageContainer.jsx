@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAppStore } from '../store/appStore';
 import { motion } from 'framer-motion';
 
@@ -9,7 +10,9 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
   const [isDragging, setIsDragging] = useState(false);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [isContainerDragging, setIsContainerDragging] = useState(false);
-  const [containerDragPosition, setContainerDragPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingWithMouse, setIsDraggingWithMouse] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
 
   React.useEffect(() => {
@@ -112,18 +115,10 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   };
 
-  const handleDelete = () => {
-    updatePair(pairId, { image: null });
-  };
-
-  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-  const [isDraggingWithMouse, setIsDraggingWithMouse] = React.useState(false);
-  const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
-
   const handleMoveButtonMouseDown = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('Move button mouse down:', { type: 'individual-container', containerType: 'image', pairId, content: { image } });
+    console.log('Move button mouse down for image container:', { type: 'individual-container', containerType: 'image', pairId, content: { image } });
 
     // Calculate offset to center the container on the cursor
     const rect = containerRef.current.getBoundingClientRect();
@@ -161,7 +156,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       // Check if we're dropping on another image container
       const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
       const imageContainer = elementBelow?.closest('[data-image-container]');
-
+      
       if (imageContainer) {
         const targetPairId = imageContainer.getAttribute('data-pair-id');
         if (targetPairId && targetPairId !== pairId) {
@@ -175,12 +170,12 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
       sessionStorage.removeItem('currentDragData');
-
+      
       // End container drag mode
       if (onContainerDragEnd) {
         onContainerDragEnd(pairId, 'end');
       }
-
+      
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -236,23 +231,15 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
           y: e.clientY - rect.height / 2 
         });
       }
-      if (isContainerDragging) {
-        setContainerDragPosition({ 
-          x: e.clientX - 250, // Half the container width
-          y: e.clientY - 90   // Half the container height
-        });
-      }
     };
 
-    if (isDragging || isContainerDragging) {
+    if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
       };
     }
   }, [isDragging, isContainerDragging]);
-
-
 
   const handleContainerDragOver = (e) => {
     // Allow container dropping when in container drag mode or when dragging images
@@ -279,7 +266,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     try {
       const dragDataString = e.dataTransfer.getData('application/json');
       let dragData = null;
-
+      
       if (dragDataString) {
         dragData = JSON.parse(dragDataString);
       } else {
@@ -331,270 +318,312 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   };
 
-  // Reset container dragging state when clicking elsewhere
-  React.useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (isContainerDragging && containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsContainerDragging(false);
-      }
-    };
-
-    if (isContainerDragging) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
-  }, [isContainerDragging]);
-
   return (
     <>
+      {/* Enhanced Floating Drag Preview with Portal - appears when mouse dragging */}
+      {isDraggingWithMouse && isContainerDragging && image && createPortal(
+        <div
+          className="green-box-drag-preview"
+          style={{
+            position: 'fixed',
+            left: `${mousePosition.x - 250}px`, // Center horizontally (500px / 2 = 250px)
+            top: `${mousePosition.y - 90}px`,   // Center vertically (180px / 2 = 90px)
+            width: '500px',
+            height: '180px',
+            transform: 'rotate(10deg) scale(1.1)',
+            zIndex: 999999999, // Extremely high z-index to ensure it's always on top
+            pointerEvents: 'none',
+            background: 'rgba(16, 185, 129, 0.95)',
+            borderRadius: '8px',
+            border: '2px solid rgba(16, 185, 129, 1)',
+            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
+            padding: '16px',
+            opacity: 0.95,
+            isolation: 'isolate', // Creates new stacking context
+            willChange: 'transform', // Forces hardware acceleration
+            // Additional CSS properties to ensure it stays on top
+            backdropFilter: 'blur(1px)',
+            WebkitBackdropFilter: 'blur(1px)',
+            contain: 'layout style paint'
+          }}
+        >
+          <div className="w-full h-full flex flex-col justify-between">
+            {/* Header with filename */}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white text-sm font-medium truncate">
+                {image.name.replace(/\.[^/.]+$/, "")}
+              </span>
+              <div className="text-xs text-white/80 flex-shrink-0">
+                {imageDimensions}
+              </div>
+            </div>
 
+            {/* Display the exact same image as the container */}
+            <div className="flex-1 flex items-center justify-center">
+              <div 
+                className="relative overflow-hidden rounded"
+                style={{
+                  width: '100%',
+                  height: '100px',
+                  background: 'rgba(255, 255, 255, 0.1)'
+                }}
+              >
+                <img
+                  src={imageUrl}
+                  alt={image.name}
+                  className="w-full h-full object-contain"
+                  style={{
+                    filter: 'brightness(1.2) contrast(1.1)',
+                    opacity: 0.9
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Empty space placeholder when container is being dragged with mouse */}
       {isDraggingWithMouse && isContainerDragging ? (
         <div
           style={{
-            width: '450px',
+            width: '100%',
             height: '180px',
-            minWidth: '450px',
-            border: '2px dashed rgba(53, 132, 228, 0.3)',
-            borderRadius: '24px',
+            minHeight: '180px',
+            border: '2px dashed rgba(16, 185, 129, 0.4)',
+            borderRadius: '8px',
             background: 'rgba(10, 15, 28, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'rgba(53, 132, 228, 0.5)',
+            color: 'rgba(16, 185, 129, 0.6)',
             fontSize: '14px',
             fontWeight: '500'
           }}
         >
-          Container being moved...
+          Image container being moved...
         </div>
       ) : (
         <div 
           className="relative"
           style={{
-            minHeight: isContainerDragging ? '120px' : '100px', // Reserve space when container is lifted
+            minHeight: isContainerDragging ? '220px' : '180px', // Reserve space when container is lifted
             transition: 'min-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'
           }}
         >
           <motion.div
-          ref={containerRef}
-          className="relative rounded-2xl transition-all duration-300 group cursor-pointer"
-          draggable={!!image}
-          data-image-container="true"
-          data-pair-id={pairId}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragOver={(e) => {
-            handleDragOver(e);
-            handleContainerDragOver(e);
-          }}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => {
-            handleDrop(e);
-            handleContainerDrop(e);
-          }}
-          whileHover={{ scale: image ? 1.01 : 1 }}
-          title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
-      style={image ? {
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
-        backdropFilter: 'blur(8px)',
-        background: shouldHighlight 
-          ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%)'
-          : 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
-        border: isDragOver 
-          ? '3px solid rgba(34, 197, 94, 0.8)' 
-          : shouldHighlight
-          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another image container is being dragged
-          : (isContainerDragMode && draggedContainerType === 'image')
-          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for images
-          : '1px solid rgba(59, 130, 246, 0.2)',
-        boxShadow: isDragging
-          ? '0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.6), 0 20px 60px rgba(0, 0, 0, 0.4)'
-          : isDragOver
-          ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
-          : shouldHighlight
-          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-          : (isContainerDragMode && draggedContainerType === 'image')
-          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-          : '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-        padding: '20px',
-        height: '140px',
-        minHeight: '140px',
-        maxHeight: '140px',
-        position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
-        left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
-        top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
-        transform: isDraggingWithMouse && isContainerDragging
-          ? 'rotate(10deg) scale(1.1)'
-          : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
-          ? `translate(${containerDragPosition.x}px, ${containerDragPosition.y}px) scale(1.2) rotate(5deg)`
-          : isDragging 
-          ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
-          : isDragOver 
-          ? 'scale(1.02)' 
-          : shouldHighlight
-          ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
-          : 'scale(1)',
-        opacity: isContainerDragging 
-          ? 0.95
-          : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId) 
-          ? 0.9 
-          : isDragging ? 0.9 : 1,
-        transition: (isDragging || (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)) 
-          ? 'none' 
-          : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
-        zIndex: isDraggingWithMouse && isContainerDragging
-          ? 99999 // Maximum z-index when dragging with mouse to appear above everything globally
-          : isContainerDragging
-          ? 50000 // Very high z-index when lifted
-          : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
-          ? 10000 
-          : isDragging ? 5000 : shouldHighlight ? 100 : 1,
-        pointerEvents: 'auto',
-        userSelect: 'none'
-      } : {
-        background: '#040608', // Darker matte black container fill
-        backgroundColor: '#080C14', // Darker navy background
-        backdropFilter: 'blur(4px)',
-        border: isDragOver
-          ? '2px solid rgba(34, 197, 94, 0.6)'
-          : shouldHighlight
-          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another image container is being dragged
-          : (isContainerDragMode && draggedContainerType === 'image')
-          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow for empty image containers too
-          : '1.5px solid rgba(30, 144, 255, 0.3)',
-        boxShadow: isDragOver
-          ? '0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3)'
-          : shouldHighlight
-          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-          : (isContainerDragMode && draggedContainerType === 'image')
-          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-          : `
-          0 0 0 1px rgba(30, 144, 255, 0.15),
-          0 0 8px rgba(30, 144, 255, 0.2),
-          0 0 15px rgba(0, 207, 255, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.02)
-        `,
-        borderRadius: '14px',
-        padding: '20px',
-        height: '140px',
-        minHeight: '140px',
-        maxHeight: '140px',
-        transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
-        transition: 'all 0.2s ease-in-out',
-        pointerEvents: 'auto',
-        userSelect: 'none'
-      }}
-    >
-      {/* Drag and Drop Overlay */}
-      {isDragOver && (
-        <div className="absolute inset-0 bg-green-500/20 rounded-lg flex items-center justify-center z-10">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-2 bg-green-500 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
-            </div>
-            <p className="text-green-400 font-semibold text-sm">Drop to Swap Image</p>
-          </div>
-        </div>
-      )}
-
-      {image ? (
-        <div className="relative h-full w-full rounded-lg overflow-hidden">
-          {/* Clean image display - full container with professional styling */}
-          <div className="absolute inset-4 flex items-center justify-center">
-            <img
-              src={imageUrl}
-              alt={image.name}
-              className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-              style={{
-                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))'
-              }}
-              onError={(e) => {
-                // Fallback for HEIC files that might not display
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-            <div className="hidden w-full h-full items-center justify-center bg-gray-800/50 rounded-lg">
-              <div className="text-center">
-                <svg className="w-8 h-8 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
-                </svg>
-                <p className="text-xs text-gray-400">Image Preview</p>
-                <p className="text-xs text-gray-500">{image.name.split('.').pop()?.toUpperCase()}</p>
+            ref={containerRef}
+            className="relative w-full h-full transition-all duration-300 group cursor-pointer image-container"
+            data-pair-id={pairId}
+            data-image-container="true"
+            draggable={!!image}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => {
+              handleDragOver(e);
+              handleContainerDragOver(e);
+            }}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => {
+              handleDrop(e);
+              handleContainerDrop(e);
+            }}
+            whileHover={{ scale: image ? 1.005 : 1 }}
+            title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
+            style={{
+              pointerEvents: 'auto',
+              userSelect: 'none',
+              background: shouldHighlight && image
+                ? 'rgba(16, 185, 129, 0.15)' // Green background when highlighted
+                : image ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
+              borderRadius: '8px',
+              border: isDragOver 
+                ? '3px solid rgba(34, 197, 94, 0.8)' // Stronger green border when valid drop target
+                : shouldHighlight
+                ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another image container is being dragged
+                : (isContainerDragMode && draggedContainerType === 'image')
+                ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for images
+                : image ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
+              boxShadow: isDragging
+                ? '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8), 0 30px 80px rgba(0, 0, 0, 0.6)'
+                : isDragOver
+                ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
+                : shouldHighlight
+                ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
+                : (isContainerDragMode && draggedContainerType === 'image')
+                ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
+                : image 
+                  ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
+                  : `
+                  0 0 0 1px rgba(30, 144, 255, 0.15),
+                  0 0 8px rgba(30, 144, 255, 0.2),
+                  0 0 15px rgba(0, 207, 255, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.02)
+                `,
+              padding: image ? '16px' : '20px',
+              height: '180px',
+              minHeight: '180px',
+              maxHeight: '180px',
+              position: isDraggingWithMouse && isContainerDragging ? 'fixed' : 'relative',
+              left: isDraggingWithMouse && isContainerDragging ? `${mousePosition.x - dragOffset.x}px` : 'auto',
+              top: isDraggingWithMouse && isContainerDragging ? `${mousePosition.y - dragOffset.y}px` : 'auto',
+              transform: isDraggingWithMouse && isContainerDragging
+                ? 'rotate(10deg) scale(1.1)'
+                : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+                ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.2) rotate(5deg)`
+                : isDragging 
+                ? `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(1.15) rotate(3deg)`
+                : isDragOver 
+                ? 'scale(1.02)' 
+                : shouldHighlight
+                ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
+                : 'scale(1)',
+              opacity: isContainerDragging 
+                ? 0.95
+                : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+                ? 0.9
+                : isDragging ? 0.9 : 1,
+              transition: (isDragging || (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId))
+                ? 'none' 
+                : 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smoother transition for the lift effect
+              zIndex: isDraggingWithMouse && isContainerDragging
+                ? 99999 // Maximum z-index when dragging with mouse to appear above everything globally
+                : isContainerDragging
+                ? 50000 // Very high z-index when lifted
+                : (isDraggingContainer && draggedContainerType === 'image' && draggedContainer?.id === pairId)
+                ? 1500
+                : isDragging ? 1000 : shouldHighlight ? 100 : 1,
+              pointerEvents: 'auto',
+              userSelect: 'none'
+            }}
+          >
+            {/* Drag and Drop Overlay */}
+            {isDragOver && (
+              <div className="absolute inset-0 bg-green-500/20 rounded-lg flex items-center justify-center z-10">
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                  </div>
+                  <p className="text-green-400 font-semibold text-sm">Drop to Swap Image</p>
+                </div>
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* Control buttons overlay - only visible on hover */}
-          <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20 rounded-lg">
-            {/* Delete button - top right */}
-            <button
-              className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-              style={{
-                backgroundColor: 'rgba(220, 38, 38, 0.9)',
-                border: '1px solid rgba(220, 38, 38, 1)',
-                color: 'white',
-                backdropFilter: 'blur(4px)'
-              }}
-              title="Delete image"
-              onClick={() => {
-                handleDelete();
-                if (onDelete) {
-                  onDelete();
-                }
-              }}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            {image ? (
+              <div className="w-full h-full flex flex-col relative">
+                {/* Image preview with 10px padding top/bottom */}
+                <div className="flex-1 flex items-center justify-center py-3">
+                  <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>
+                    <img
+                      src={imageUrl}
+                      alt={image.name}
+                      className="w-20 h-20 object-cover"
+                      style={{
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                      }}
+                    />
+                  </div>
+                </div>
 
-            {/* Move button - bottom left */}
-            <div
-              className="absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-move"
-              style={{
-                backgroundColor: (isContainerDragMode && draggedContainerType === 'image') ? 'rgba(16, 185, 129, 0.9)' : 'rgba(53, 132, 228, 0.9)',
-                border: (isContainerDragMode && draggedContainerType === 'image') ? '1px solid rgba(16, 185, 129, 1)' : '1px solid rgba(53, 132, 228, 1)',
-                color: 'white',
-                backdropFilter: 'blur(4px)'
-              }}
-              title="Drag to move image container"
-              onMouseDown={handleMoveButtonMouseDown}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-              </svg>
-            </div>
+                {/* Move button - positioned below image preview */}
+                <div className="flex items-center justify-center">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
+                    style={{
+                      backgroundColor: (isContainerDragMode && draggedContainerType === 'image') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
+                      border: (isContainerDragMode && draggedContainerType === 'image') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
+                      color: (isContainerDragMode && draggedContainerType === 'image') ? '#10B981' : '#3584E4'
+                    }}
+                    title="Drag to move image container"
+                    draggable="true"
+                    onDragStart={(e) => {
+                      e.stopPropagation();
+                      e.dataTransfer.effectAllowed = 'move';
+                      const dragData = {
+                        type: 'individual-container',
+                        containerType: 'image',
+                        pairId: pairId,
+                        content: image
+                      };
+                      e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+                      e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
 
-            {/* Image info overlay - center bottom */}
-            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-lg"
-              style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(8px)'
-              }}
-            >
-              <p className="text-white text-xs font-medium truncate max-w-32">
-                {image.name}
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
-          <div className="w-16 h-16 mb-4 bg-gray-500/10 rounded-full flex items-center justify-center border-2 border-dashed border-gray-500/30">
-            <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <p className="text-gray-500 text-sm font-medium mb-1">Empty Image Container</p>
-          <p className="text-gray-600 text-xs">Drop an image here</p>
-        </div>
-      )}
-        </motion.div>
+                      // Also store in sessionStorage for reliable access
+                      sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
+
+                      console.log('Move button drag started:', dragData);
+
+                      // Set local dragging state for visual feedback
+                      setIsDragging(true);
+
+                      // Trigger the container drag system for cursor following
+                      if (onContainerDragStart) {
+                        onContainerDragStart('image', 'start', { 
+                          id: pairId, 
+                          type: 'image',
+                          content: image,
+                          image: image // Include the image file for proper container type detection
+                        });
+                      }
+                    }}
+                    onDragEnd={(e) => {
+                      // Reset local dragging state
+                      setIsDragging(false);
+
+                      if (onContainerDragEnd) {
+                        onContainerDragEnd('image', 'end');
+                      }
+                    }}
+                    onMouseDown={handleMoveButtonMouseDown}
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Delete button - positioned at top right */}
+                <button
+                  className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
+                  style={{
+                    backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                    border: '1px solid rgba(220, 38, 38, 0.3)',
+                    color: '#DC2626'
+                  }}
+                  title="Delete image"
+                  onClick={() => {
+                    if (onDelete) {
+                      onDelete();
+                    }
+                  }}
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-300">
+                <div 
+                  className="p-4 rounded-full mb-4"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%)',
+                    border: '1px solid rgba(59, 130, 246, 0.2)'
+                  }}
+                >
+                  <svg className="w-8 h-8 text-blue-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-gray-300 mb-1 text-center">Drop image file here</p>
+                <p className="text-xs text-gray-500 font-light text-center">PNG, JPG, HEIC</p>
+              </div>
+            )}
+          </motion.div>
         </div>
       )}
     </>

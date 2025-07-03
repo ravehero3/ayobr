@@ -83,6 +83,14 @@ body {
   pointer-events: none;
 }
 
+/* Green box drag preview - absolute highest priority */
+.green-box-drag-preview {
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  pointer-events: none !important;
+  isolation: isolate !important;
+}
+
 /* Global container for absolute positioned elements */
 body {
   position: relative;
