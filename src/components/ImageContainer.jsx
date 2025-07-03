@@ -354,7 +354,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
                 <img
                   src={imageUrl}
                   alt={image.name}
-                  className="w-20 h-20 object-cover"
+                  className="w-20 h-20 object-contain"
                   style={{
                     borderRadius: '4px',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
@@ -534,7 +534,7 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
                     <img
                       src={imageUrl}
                       alt={image.name}
-                      className="w-20 h-20 object-cover"
+                      className="w-20 h-20 object-contain"
                       style={{
                         borderRadius: '4px',
                         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
