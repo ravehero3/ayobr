@@ -330,55 +330,70 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             top: `${mousePosition.y - 90}px`,   // Center vertically (180px / 2 = 90px)
             width: '500px',
             height: '180px',
-            transform: 'rotate(10deg) scale(1.1)',
-            zIndex: 999999999, // Extremely high z-index to ensure it's always on top
+            transform: 'none', // No tilt, no scale - exact copy
+            zIndex: 999999999,
             pointerEvents: 'none',
-            background: 'rgba(16, 185, 129, 0.95)',
+            // Make it look exactly like the original container but with green glow
+            background: 'rgba(15, 23, 42, 0.9)', // Same dark background as original
             borderRadius: '8px',
-            border: '2px solid rgba(16, 185, 129, 1)',
-            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
+            border: '3px solid rgba(16, 185, 129, 0.8)', // Green border
+            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)',
             padding: '16px',
             opacity: 0.95,
-            isolation: 'isolate', // Creates new stacking context
-            willChange: 'transform', // Forces hardware acceleration
-            // Additional CSS properties to ensure it stays on top
+            isolation: 'isolate',
+            willChange: 'transform',
             backdropFilter: 'blur(1px)',
             WebkitBackdropFilter: 'blur(1px)',
             contain: 'layout style paint'
           }}
         >
-          <div className="w-full h-full flex flex-col justify-between">
-            {/* Header with filename */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white text-sm font-medium truncate">
-                {image.name.replace(/\.[^/.]+$/, "")}
-              </span>
-              <div className="text-xs text-white/80 flex-shrink-0">
-                {imageDimensions}
-              </div>
-            </div>
-
-            {/* Display the exact same image as the container */}
+          <div className="w-full h-full flex flex-col relative">
+            {/* Image preview - centered vertically with better spacing - exact copy */}
             <div className="flex-1 flex items-center justify-center">
-              <div 
-                className="relative overflow-hidden rounded"
-                style={{
-                  width: '100%',
-                  height: '100px',
-                  background: 'rgba(255, 255, 255, 0.1)'
-                }}
-              >
+              <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>
                 <img
                   src={imageUrl}
                   alt={image.name}
-                  className="w-full h-full object-contain"
+                  className="w-20 h-20 object-cover"
                   style={{
-                    filter: 'brightness(1.2) contrast(1.1)',
-                    opacity: 0.9
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                    // Add green tint overlay
+                    filter: 'brightness(1.1) contrast(1.1) hue-rotate(120deg) saturate(1.2)'
                   }}
                 />
               </div>
             </div>
+
+            {/* Move button - positioned below image preview - exact copy with green tint */}
+            <div className="flex items-center justify-center">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                  border: '1px solid rgba(16, 185, 129, 0.5)',
+                  color: '#10B981'
+                }}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Delete button - positioned at top right - exact copy */}
+            <button
+              className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center z-10"
+              style={{
+                backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                border: '1px solid rgba(220, 38, 38, 0.3)',
+                color: '#DC2626'
+              }}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>,
         document.body

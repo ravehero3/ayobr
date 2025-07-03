@@ -252,11 +252,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         if (dragData.type === 'audio' && dragData.pairId !== pairId && audio) {
           // Trigger swap visual effect
           setIsSwapping(true);
-          
+
           if (onSwap) {
             onSwap(dragData.pairId, pairId, 'audio');
           }
-          
+
           // Reset visual effects after swap
           setTimeout(() => {
             setIsSwapping(false);
@@ -272,11 +272,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId && audio) {
       // Trigger swap visual effect
       setIsSwapping(true);
-      
+
       if (onSwap) {
         onSwap(draggedItem.pairId, pairId, 'audio');
       }
-      
+
       // Reset visual effects after swap
       setTimeout(() => {
         setIsSwapping(false);
@@ -348,15 +348,15 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       // Check if we're dropping on another audio container
       const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
       const audioContainer = elementBelow?.closest('[data-audio-container]');
-      
+
       if (audioContainer) {
         const targetPairId = audioContainer.getAttribute('data-pair-id');
         if (targetPairId && targetPairId !== pairId) {
           console.log('Dropping on audio container:', targetPairId);
-          
+
           // Trigger swap visual effect
           setIsSwapping(true);
-          
+
           // Create a brief green glow effect on both containers
           const targetContainer = audioContainer.querySelector('.audio-container');
           if (targetContainer) {
@@ -364,11 +364,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             targetContainer.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.9), 0 0 60px rgba(16, 185, 129, 0.8), 0 0 120px rgba(16, 185, 129, 0.6)';
             targetContainer.style.transform = 'scale(1.08)';
           }
-          
+
           if (onSwap) {
             onSwap(pairId, targetPairId, 'audio');
           }
-          
+
           // Reset visual effects after swap
           setTimeout(() => {
             setIsSwapping(false);
@@ -383,12 +383,12 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       setIsContainerDragging(false);
       setIsDraggingWithMouse(false);
       sessionStorage.removeItem('currentDragData');
-      
+
       // End container drag mode
       if (onContainerDragEnd) {
         onContainerDragEnd(pairId, 'end');
       }
-      
+
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -429,19 +429,19 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     // Handle container swapping when dropping on this audio container
     if (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pairId && audio) {
       console.log('Executing audio container swap:', draggedContainer.id, '->', pairId);
-      
+
       // Trigger swap visual effect
       setIsSwapping(true);
-      
+
       if (onSwap) {
         onSwap(draggedContainer.id, pairId, 'audio');
       }
-      
+
       // End the container drag mode
       if (onContainerDragEnd) {
         onContainerDragEnd('audio', 'end');
       }
-      
+
       // Reset visual effects after swap
       setTimeout(() => {
         setIsSwapping(false);
@@ -452,14 +452,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     // Handle regular audio file dropping from main container drag
     if (draggedItem?.type === 'audio' && draggedItem.pairId !== pairId) {
       console.log('Regular audio drag detected, triggering swap');
-      
+
       // Trigger swap visual effect
       setIsSwapping(true);
-      
+
       if (onSwap) {
         onSwap(draggedItem.pairId, pairId, 'audio');
       }
-      
+
       // Reset visual effects after swap
       setTimeout(() => {
         setIsSwapping(false);
@@ -476,102 +476,135 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           className="green-box-drag-preview"
           style={{
             position: 'fixed',
-            left: `${mousePosition.x - 225}px`, // Always center horizontally (450px / 2 = 225px)
-            top: `${mousePosition.y - 68}px`,   // Always center vertically (136px / 2 = 68px)
+            left: `${mousePosition.x - 225}px`, // Center horizontally (450px / 2 = 225px)
+            top: `${mousePosition.y - 68}px`,   // Center vertically (136px / 2 = 68px)
             width: '450px',
             height: '136px',
-            transform: 'scale(1.05)', // Removed tilt, only slight scale
-            zIndex: 999999999, // Extremely high z-index to ensure it's always on top
+            transform: 'none', // No tilt, no scale - exact copy
+            zIndex: 999999999,
             pointerEvents: 'none',
-            background: 'rgba(16, 185, 129, 0.95)',
+            // Make it look exactly like the original container but with green glow
+            background: 'rgba(15, 23, 42, 0.9)', // Same dark background as original
             borderRadius: '8px',
-            border: '2px solid rgba(16, 185, 129, 1)',
-            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
+            border: '3px solid rgba(16, 185, 129, 0.8)', // Green border
+            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)',
             padding: '16px',
             opacity: 0.95,
-            isolation: 'isolate', // Creates new stacking context
-            willChange: 'transform', // Forces hardware acceleration
-            // Additional CSS properties to ensure it stays on top
+            isolation: 'isolate',
+            willChange: 'transform',
             backdropFilter: 'blur(1px)',
             WebkitBackdropFilter: 'blur(1px)',
             contain: 'layout style paint'
           }}
         >
-          <div className="w-full h-full flex flex-col justify-between">
-            {/* Header with filename */}
+          <div className="w-full h-full flex flex-col justify-between relative">
+            {/* Header with filename and time - exact copy */}
             <div className="flex items-center justify-between mb-2">
               <span className="text-white text-sm font-medium truncate">
                 {audio.name.replace(/\.[^/.]+$/, "")}
               </span>
-              <div className="text-xs text-white/80 flex-shrink-0">
-                {formatTime(duration)}
+              <div className="text-xs text-gray-400 flex-shrink-0">
+                {formatTime(currentTime)} / {formatTime(duration)}
               </div>
             </div>
 
-            {/* Display the exact same waveform as the audio container */}
+            {/* Large Waveform - exact copy but green tinted */}
             <div className="flex-1 flex items-center">
               <div 
-                className="w-full"
-                style={{ 
-                  height: '60px',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  borderRadius: '4px',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
+                className="w-full cursor-pointer"
+                style={{ height: '60px' }}
               >
-                {/* Mirror the exact waveform from wavesurfer */}
-                <div 
-                  className="w-full h-full"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '4px',
-                    position: 'relative'
-                  }}
-                >
-                  <div className="flex items-center justify-center h-full relative">
-                    {/* Display exact waveform from this specific audio file */}
-                    <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
-                      {waveformPeaks && waveformPeaks.length > 0 ? (
-                        // Use the stored waveform peaks from this specific audio file
-                        waveformPeaks.map((peak, i) => {
-                          const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
-                          const progress = currentTime / duration;
-                          const barProgress = i / waveformPeaks.length;
-                          const isPlayed = barProgress <= progress;
-                          
-                          return (
-                            <div
-                              key={i}
-                              style={{
-                                width: '2px',
-                                height: `${height}%`,
-                                backgroundColor: isPlayed ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-                                borderRadius: '1px',
-                                opacity: 0.9
-                              }}
-                            />
-                          );
-                        })
-                      ) : (
-                        // Fallback to generated bars if peaks not available
-                        [...Array(80)].map((_, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              width: '2px',
-                              height: `${Math.random() * 60 + 20}%`,
-                              backgroundColor: i < 30 ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-                              borderRadius: '1px',
-                              opacity: 0.8
-                            }}
-                          />
-                        ))
-                      )}
-                    </div>
-                  </div>
+                {/* Create a visual representation of the waveform with green tint */}
+                <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
+                  {waveformPeaks && waveformPeaks.length > 0 ? (
+                    waveformPeaks.map((peak, i) => {
+                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
+                      const progress = currentTime / duration;
+                      const barProgress = i / waveformPeaks.length;
+                      const isPlayed = barProgress <= progress;
+
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            width: '2px',
+                            height: `${height}%`,
+                            backgroundColor: isPlayed ? '#10B981' : 'rgba(16, 185, 129, 0.6)', // Green tinted
+                            borderRadius: '1px',
+                            opacity: 0.9
+                          }}
+                        />
+                      );
+                    })
+                  ) : (
+                    [...Array(80)].map((_, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          width: '2px',
+                          height: `${Math.random() * 60 + 20}%`,
+                          backgroundColor: i < 30 ? '#10B981' : 'rgba(16, 185, 129, 0.6)', // Green tinted
+                          borderRadius: '1px',
+                          opacity: 0.8
+                        }}
+                      />
+                    ))
+                  )}
                 </div>
               </div>
+            </div>
+
+            {/* Bottom controls - exact copy with green tint */}
+            <div className="flex items-center justify-center mt-2">
+              <button
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: isPlaying ? '#10B981' : 'rgba(16, 185, 129, 0.25)', // Green tinted
+                  border: `2px solid ${isPlaying ? '#10B981' : 'rgba(16, 185, 129, 0.6)'}`,
+                  boxShadow: isPlaying 
+                    ? '0 0 20px rgba(16, 185, 129, 0.4)'
+                    : '0 0 10px rgba(16, 185, 129, 0.3)',
+                  color: isPlaying ? 'white' : '#10B981'
+                }}
+              >
+                {isPlaying ? (
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="m7 4 10 6L7 16V4z"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {/* Bottom controls - Move and Delete buttons with green tint */}
+            <div className="flex items-center justify-center gap-3 mt-2">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                  border: '1px solid rgba(16, 185, 129, 0.5)',
+                  color: '#10B981'
+                }}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </div>
+              <button
+                className="w-6 h-6 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                  border: '1px solid rgba(220, 38, 38, 0.3)',
+                  color: '#DC2626'
+                }}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>,
