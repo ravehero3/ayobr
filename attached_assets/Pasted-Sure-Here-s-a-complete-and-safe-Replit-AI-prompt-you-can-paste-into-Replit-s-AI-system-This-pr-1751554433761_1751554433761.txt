@@ -1,0 +1,66 @@
+Sure! Here's a complete and **safe Replit AI prompt** you can paste into Replit’s AI system. This prompt assumes your app is already working and written in JavaScript (React or plain) as a desktop Electron-style app. It instructs Replit to **add the improvements carefully**, without removing or breaking existing functionality.
+
+---
+
+**🔧 REPLIT AI PROMPT:**
+
+> ⚠️ Important: My app is already working, so do **not remove or break** any existing JavaScript, React, or Electron logic. Instead, **gently add** or **enhance** the features listed below.
+>
+> 🧠 **Goal:** Improve the drag-and-drop UX/UI of my desktop app where users drag audio containers (with MP3 files and waveform previews) to swap their positions with other audio containers.
+>
+> 🖤 **Design Goals (Dark Mode):**
+>
+> 1. Apply a clean, modern **dark mode UI** across the whole app. Use these base colors:
+>
+>    * Background: `#0D0D0D`
+>    * Text: `#E0E0E0`
+>    * Border/Lines: `#1A1A1A`
+> 2. Use **rounded corners** (1rem radius) and spacing that matches desktop UI best practices.
+> 3. Apply readable, clean font sizes.
+>
+> 🔵 **Generate Button:**
+>
+> * Add a **large glowing blue button** labeled **“Generate Videos”**
+> * Place it centered at the bottom of the window
+> * Add **smooth glowing animation** using `box-shadow` and CSS `@keyframes`
+> * Style example: blue color `#00BFFF`, pulse effect on hover
+>
+> 🧲 **Drag-and-Drop Enhancements:**
+>
+> 1. When a user **clicks and drags** an audio container:
+>
+>    * Slightly scale it up (`scale(1.05)`)
+>    * Elevate it with `z-index` and `box-shadow`
+>    * Add a **rotation tilt** (`rotate(-2deg)`) for lifted feel
+>    * Follow the cursor smoothly with spring-like animation
+> 2. While dragging, show a **"popped-up" version** of the audio container
+>
+>    * Keep same style as original
+>    * Follow cursor position
+>    * Optionally semi-transparent or shadowed
+> 3. Add **green glowing highlight** to all valid drop targets
+>
+>    * Use CSS glow or animated stroke (neon pulse effect)
+>    * Make it pulse softly instead of static
+> 4. Animate **swap** action smoothly when user drops onto another container
+>
+>    * Use CSS transitions or Framer Motion to animate the position swap
+>    * Optional: add **bounce** or **pulse** feedback after successful drop
+>
+> 🌫 **Focus Effect While Dragging:**
+>
+> * When dragging starts, apply a **semi-transparent black overlay** on the entire background (e.g., `rgba(0,0,0,0.2)`)
+> * Add a slight **backdrop blur** (`backdrop-filter: blur(3px)`) to all **non-audio-container** UI elements
+> * Do NOT blur or affect the audio containers
+>
+> 💡 **Optional Extras (if safe to implement):**
+>
+> * Hovering over an audio container could trigger a short waveform animation or 1-2 second audio preview
+> * Add a small tooltip or label like “Drop to Swap” near the dragged element
+> * When dragging, grey out sidebars or nav areas (visually only, not functionally)
+>
+> ⚠️ Again: **Do not remove or break existing working logic.** Instead, **enhance the design and drag interactions** according to the above. You may use TailwindCSS, Framer Motion, or plain CSS/JS as needed — whichever fits better into the existing codebase.
+
+---
+
+This prompt keeps your current logic intact while asking for specific, layered improvements. If you'd like, I can also break this into separate steps or help you test parts safely before applying them all at once.
