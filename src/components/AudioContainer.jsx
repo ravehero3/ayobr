@@ -577,25 +577,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : audio ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
         borderRadius: '8px',
         border: isDragOver 
-          ? '3px solid rgba(34, 197, 94, 0.8)' // Stronger green border when valid drop target
+          ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border when dragging over
           : shouldHighlight
-          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another audio container is being dragged
-          : (isContainerDragMode && draggedContainerType === 'audio')
-          ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for audio
-          : audio ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
-        boxShadow: isSwapping
-          ? '0 0 0 4px rgba(16, 185, 129, 0.9), 0 0 60px rgba(16, 185, 129, 0.8), 0 0 120px rgba(16, 185, 129, 0.6), inset 0 0 30px rgba(16, 185, 129, 0.2)'
-          : isDragging
-          ? '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8), 0 30px 80px rgba(0, 0, 0, 0.6)'
-          : isDragOver
-          ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
-          : shouldHighlight
-          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-          : (isContainerDragMode && draggedContainerType === 'audio')
-          ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-          : audio 
-            ? 'none' // Remove constant glow - only show basic border
-            : 'none', // Remove constant glow from empty containers too
+          ? '2px solid rgba(16, 185, 129, 0.6)' // Simple green border when drop target
+          : isSwapping
+          ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border for swap
+          : audio ? '1px solid rgba(75, 85, 99, 0.4)' : '1px solid rgba(75, 85, 99, 0.3)', // Dark gray borders only
+        boxShadow: 'none', // Remove all glows and shadows for clean dark mode
         padding: audio ? '16px' : '20px',
         height: '136px',
         minHeight: '136px',
@@ -769,7 +757,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
 
           {/* Waveform */}
-          <div className="flex-1 flex items-center mb-2">
+          <div className="flex-1 flex items-center mb-4">
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer"
@@ -777,18 +765,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             />
           </div>
 
-          {/* Time information below waveform for better readability */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-xs text-gray-400">
-              {formatTime(currentTime)}
-            </div>
-            <div className="text-xs text-gray-400">
-              {formatTime(duration)}
-            </div>
-          </div>
-
           {/* Play/pause button - centered in rectangular box */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center mb-3">
             <button
               onClick={handlePlayPause}
               className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
@@ -796,9 +774,6 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
                 border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
                 borderRadius: '10px',
-                boxShadow: isPlaying 
-                  ? '0 0 20px rgba(53, 132, 228, 0.4)'
-                  : '0 0 10px rgba(53, 132, 228, 0.2)',
                 color: isPlaying ? 'white' : '#3584E4'
               }}
             >
@@ -812,6 +787,16 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 </svg>
               )}
             </button>
+          </div>
+
+          {/* Time information at the bottom - completely separate from waveform */}
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-gray-400">
+              {formatTime(currentTime)}
+            </div>
+            <div className="text-xs text-gray-400">
+              {formatTime(duration)}
+            </div>
           </div>
         </div>
       ) : (

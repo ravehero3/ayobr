@@ -459,28 +459,11 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
                 : image ? 'rgba(15, 23, 42, 0.6)' : '#040608', // Dark theme adapted
               borderRadius: '8px',
               border: isDragOver 
-                ? '3px solid rgba(34, 197, 94, 0.8)' // Stronger green border when valid drop target
+                ? '2px solid rgba(34, 197, 94, 0.6)' // Simple green border when dragging over
                 : shouldHighlight
-                ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when another image container is being dragged
-                : (isContainerDragMode && draggedContainerType === 'image')
-                ? '3px solid rgba(16, 185, 129, 0.8)' // Green glow when container drag mode is active for images
-                : image ? '1px solid rgba(53, 132, 228, 0.3)' : '1.5px solid rgba(30, 144, 255, 0.3)',
-              boxShadow: isDragging
-                ? '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8), 0 30px 80px rgba(0, 0, 0, 0.6)'
-                : isDragOver
-                ? '0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)'
-                : shouldHighlight
-                ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-                : (isContainerDragMode && draggedContainerType === 'image')
-                ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
-                : image 
-                  ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
-                  : `
-                  0 0 0 1px rgba(30, 144, 255, 0.15),
-                  0 0 8px rgba(30, 144, 255, 0.2),
-                  0 0 15px rgba(0, 207, 255, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `,
+                ? '2px solid rgba(16, 185, 129, 0.6)' // Simple green border when drop target
+                : image ? '1px solid rgba(75, 85, 99, 0.4)' : '1px solid rgba(75, 85, 99, 0.3)', // Dark gray borders only
+              boxShadow: 'none', // Remove all glows and shadows for clean dark mode
               padding: image ? '16px' : '20px',
               height: '180px',
               minHeight: '180px',
