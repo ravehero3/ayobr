@@ -329,11 +329,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     e.preventDefault();
     console.log('Move button mouse down for audio container:', { type: 'individual-container', containerType: 'audio', pairId, content: { audio } });
 
-    // Calculate offset to center the container on the cursor
+    // Calculate offset so cursor stays exactly on the move handle
     const rect = containerRef.current.getBoundingClientRect();
     const offset = {
-      x: rect.width / 2,  // Half container width to center horizontally
-      y: rect.height / 2  // Half container height to center vertically
+      x: e.clientX - rect.left,  // Mouse position relative to container left
+      y: e.clientY - rect.top    // Mouse position relative to container top
     };
     setDragOffset(offset);
 
@@ -351,7 +351,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     };
     sessionStorage.setItem('currentDragData', JSON.stringify(dragData));
 
-
+    // Add blur effect to everything except audio containers
+    document.body.classList.add('container-drag-mode');
 
     // Trigger container drag mode
     if (onContainerDragStart) {
@@ -403,7 +404,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       setIsDraggingWithMouse(false);
       sessionStorage.removeItem('currentDragData');
 
-
+      // Remove blur effect from everything except audio containers
+      document.body.classList.remove('container-drag-mode');
 
       // End container drag mode
       if (onContainerDragEnd) {
@@ -497,13 +499,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           className="green-box-drag-preview"
           style={{
             position: 'fixed',
-            // Position so cursor is at the move handle location (top-left with padding)
-            left: `${mousePosition.x - 32}px`, // 16px padding + 8px (half of move button width)
-            top: `${mousePosition.y - 24}px`,  // 16px padding + 8px (half of move button height)
+            // Position so cursor stays exactly on the move handle
+            left: `${mousePosition.x - dragOffset.x}px`,
+            top: `${mousePosition.y - dragOffset.y}px`,
             // Use actual container dimensions
             width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '450px',
             height: '136px',
-            transform: 'rotate(10deg) scale(1.1)', // Same transform as original when dragging
+            transform: 'none', // No tilt, clean rectangle
             zIndex: 999999999,
             pointerEvents: 'none',
             background: 'rgba(15, 23, 42, 0.6)', // Same background as original
