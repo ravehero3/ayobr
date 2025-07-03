@@ -492,17 +492,19 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           className="green-box-drag-preview"
           style={{
             position: 'fixed',
-            left: `${containerRef.current ? containerRef.current.getBoundingClientRect().left : mousePosition.x - 225}px`,
-            top: `${containerRef.current ? containerRef.current.getBoundingClientRect().top : mousePosition.y - 68}px`,
-            width: '450px',
+            // Position so cursor is at the move handle location (top-left with padding)
+            left: `${mousePosition.x - 32}px`, // 16px padding + 8px (half of move button width)
+            top: `${mousePosition.y - 24}px`,  // 16px padding + 8px (half of move button height)
+            // Use actual container dimensions
+            width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '450px',
             height: '136px',
             transform: 'none', // No rotation or scaling - exact copy
             zIndex: 999999999,
             pointerEvents: 'none',
             background: 'rgba(15, 23, 42, 0.6)', // Same background as original
             borderRadius: '8px',
-            border: '1px solid rgba(53, 132, 228, 0.3)', // Same border as original
-            boxShadow: '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8)', // Blue glow for drag preview
+            border: '1px solid rgba(75, 85, 99, 0.4)', // Same border as original (no blue glow)
+            boxShadow: 'none', // No glow for clean dark mode
             padding: '16px',
             opacity: 0.95,
             isolation: 'isolate',
@@ -514,7 +516,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         >
           {/* Recreate the exact layout from the original container */}
           <div className="w-full h-full flex flex-col">
-            {/* Header with move button, filename, and delete button */}
+            {/* Header with move button and filename (no delete button) */}
             <div className="flex items-center justify-between mb-4">
               {/* Move button - top left */}
               <div
@@ -535,36 +537,38 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 {audio.name.replace(/\.[^/.]+$/, "")}
               </span>
 
-              {/* Delete button - top right */}
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center opacity-70"
-                style={{
-                  backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                  border: '1px solid rgba(220, 38, 38, 0.3)',
-                  color: '#DC2626'
-                }}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
+              {/* Empty space instead of delete button to maintain layout */}
+              <div className="w-8 h-8"></div>
             </div>
 
-            {/* Simplified waveform representation */}
+            {/* Real waveform from WaveSurfer */}
             <div className="flex-1 flex items-center mb-4">
-              <div className="w-full h-16 bg-gray-700 rounded-md flex items-end justify-center px-2">
-                {/* Simple waveform bars */}
-                {[...Array(20)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-gray-400 mx-px rounded-sm"
-                    style={{
-                      width: '8px',
-                      height: `${20 + Math.random() * 35}px`,
-                      opacity: 0.7
-                    }}
-                  />
-                ))}
+              <div className="w-full cursor-pointer" style={{ height: '60px' }}>
+                {/* Create a clone of the waveform for the drag preview */}
+                <div 
+                  className="w-full h-full bg-gray-800 rounded-md flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(to right, #374151 0%, #4B5563 50%, #374151 100%)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {/* Waveform-like pattern to match the original */}
+                  <div className="absolute inset-0 flex items-end justify-around px-1">
+                    {[...Array(50)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-gray-300"
+                        style={{
+                          width: '2px',
+                          height: `${10 + (Math.sin(i * 0.3) * 20) + (Math.random() * 15)}px`,
+                          opacity: 0.8,
+                          borderRadius: '1px'
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
