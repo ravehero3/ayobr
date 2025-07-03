@@ -97,12 +97,15 @@ body {
 }
 
 .container-drag-mode > * {
-  filter: blur(2px);
-  opacity: 0.9;
+  filter: blur(0.8px);
+  opacity: 0.8;
   transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
-.container-drag-mode .audio-container {
+/* Keep audio containers completely unblurred and visible */
+.container-drag-mode .audio-container,
+.container-drag-mode [data-audio-container],
+.container-drag-mode .green-box-drag-preview {
   filter: none !important;
   opacity: 1 !important;
   transition: all 0.3s ease;
