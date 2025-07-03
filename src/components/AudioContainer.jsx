@@ -53,7 +53,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     if (previousAudio && audio && previousAudio !== audio) {
       // Content is changing - trigger transition
       setIsContentChanging(true);
-      
+
       // After a brief moment, allow the new content to load
       setTimeout(() => {
         setIsContentChanging(false);
@@ -493,7 +493,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      
+
 
       {/* Fixed position tooltip popup when this container is a valid drop target */}
       {isContainerDragMode && draggedContainerType === 'audio' && audio && draggedContainer?.id !== pairId && createPortal(
@@ -749,7 +749,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             <div className="text-xs text-gray-400">
               {formatTime(currentTime)}
             </div>
-            
+
             {/* Play/pause button - centered and moved up */}
             <button
               onClick={handlePlayPause}
@@ -772,7 +772,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 </svg>
               )}
             </button>
-            
+
             <div className="text-xs text-gray-400">
               {formatTime(duration)}
             </div>
@@ -797,6 +797,127 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       )}
           </motion.div>
         </div>
+      )}
+{/* Enhanced Floating Drag Preview with Portal - appears when mouse dragging */}
+      {isDraggingWithMouse && isContainerDragging && audio && createPortal(
+        <div
+          className="green-box-drag-preview"
+          style={{
+            position: 'fixed',
+            left: `${mousePosition.x - dragOffset.x}px`,
+            top: `${mousePosition.y - dragOffset.y}px`,
+            width: '450px',
+            height: '136px',
+            transform: 'none',
+            zIndex: 999999999,
+            pointerEvents: 'none',
+            background: 'rgba(16, 185, 129, 0.15)',
+            borderRadius: '8px',
+            border: '2px solid rgba(16, 185, 129, 0.8)',
+            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
+            padding: '16px',
+            opacity: 0.95,
+            isolation: 'isolate',
+            willChange: 'transform',
+            backdropFilter: 'blur(1px)',
+            WebkitBackdropFilter: 'blur(1px)',
+            contain: 'layout style paint'
+          }}
+        >
+          <div className="w-full h-full flex flex-col justify-between relative">
+            {/* Header with move button, title, and delete button - all in green */}
+            <div className="flex items-center justify-between mb-3">
+              {/* Move button - green version with cursor positioned here */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                  border: '1px solid rgba(16, 185, 129, 0.7)',
+                  color: '#10B981'
+                }}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </div>
+
+              {/* File title - green tinted */}
+              <span className="text-green-200 text-sm font-medium truncate text-center flex-1 mx-3">
+                {audio.name.replace(/\.[^/.]+$/, "")}
+              </span>
+
+              {/* Delete button - green version */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  border: '1px solid rgba(16, 185, 129, 0.5)',
+                  color: '#10B981'
+                }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Waveform preview - green version */}
+            <div className="flex-1 flex items-start">
+              <div 
+                className="w-full"
+                style={{ height: '60px', display: 'flex', alignItems: 'end', gap: '2px' }}
+              >
+                {/* Generate a simple waveform using the stored peaks or create a generic one */}
+                {(waveformPeaks || Array.from({ length: 80 }, (_, i) => Math.sin(i * 0.1) * 0.5 + 0.5)).map((peak, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      width: '2px',
+                      height: `${Math.max(peak * 60, 2)}px`,
+                      backgroundColor: '#10B981',
+                      borderRadius: '1px',
+                      opacity: 0.8
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Play button and time information - green version */}
+            <div className="flex items-center justify-between" style={{ marginTop: '20px' }}>
+              <div className="text-xs text-green-300">
+                {formatTime(currentTime)}
+              </div>
+
+              {/* Play/pause button - green version */}
+              <div
+                className="w-16 h-12 flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                  border: '2px solid rgba(16, 185, 129, 0.6)',
+                  borderRadius: '10px',
+                  color: '#10B981',
+                  transform: 'translateY(10px)'
+                }}
+              >
+                {isPlaying ? (
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="m7 4 10 6L7 16V4z"/>
+                  </svg>
+                )}
+              </div>
+
+              <div className="text-xs text-green-300">
+                {formatTime(duration)}
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </>
   );
