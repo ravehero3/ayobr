@@ -273,55 +273,9 @@ function App() {
                 `
               }}
             >
-              <div className="absolute inset-0 p-4">
-                {draggedContainerType === 'audio' ? (
-                  // Audio container preview
-                  <div className="w-full h-full flex flex-col justify-between">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white text-sm font-medium truncate">
-                        {draggedContainer.audio?.name?.replace(/\.[^/.]+$/, "") || "Audio File"}
-                      </span>
-                      <div className="text-xs text-gray-400">
-                        {/* Show duration if available */}
-                        Audio Container
-                      </div>
-                    </div>
-
-                    {/* Full waveform visualization */}
-                    <div className="flex-1 flex items-center">
-                      <div className="w-full h-12 bg-gradient-to-r from-gray-700/30 to-gray-600/30 rounded flex items-end justify-center gap-0.5 px-2">
-                        {[...Array(50)].map((_, i) => {
-                          // Create more realistic waveform pattern
-                          const baseHeight = 20 + Math.sin(i * 0.3) * 15;
-                          const randomVariation = Math.random() * 30;
-                          const height = Math.max(10, Math.min(90, baseHeight + randomVariation));
-
-                          return (
-                            <div
-                              key={i}
-                              className="bg-blue-400 rounded-sm transition-all duration-200"
-                              style={{
-                                width: '2px',
-                                height: `${height}%`,
-                                opacity: 0.8,
-                                backgroundColor: i < 15 ? '#3584E4' : '#6C737F' // Progress effect
-                              }}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-center mt-2">
-                      <div className="w-10 h-10 rounded-full bg-blue-500/40 border-2 border-blue-400 flex items-center justify-center shadow-lg">
-                        <svg className="w-5 h-5 text-blue-400 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="m7 4 10 6L7 16V4z"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  // Image container preview
+              {/* Only show drag preview for image containers, not audio containers */}
+              {draggedContainerType === 'image' && (
+                <div className="absolute inset-0 p-4">
                   <div className="w-full h-full flex flex-col items-center justify-center relative">
                     {draggedContainer.image ? (
                       <img
@@ -336,13 +290,9 @@ function App() {
                         </svg>
                       </div>
                     )}
-
-                    <div className="absolute bottom-2 left-2 text-xs text-white bg-black/50 px-2 py-1 rounded">
-                      Image Container
-                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
