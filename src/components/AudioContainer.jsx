@@ -24,6 +24,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
   const [waveformPeaks, setWaveformPeaks] = useState(null);
   const [realTimeWaveformData, setRealTimeWaveformData] = useState(null);
   const [isSwapping, setIsSwapping] = useState(false);
+  const [isContentChanging, setIsContentChanging] = useState(false);
+  const [previousAudio, setPreviousAudio] = useState(null);
   const containerRef = useRef(null);
 
   // Mouse tracking for drag visualization
@@ -46,8 +48,23 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
     }
   }, [isDragging, pairId]);
 
+  // Detect when audio content changes to trigger smooth transition
   React.useEffect(() => {
-    if (audio && waveformRef.current) {
+    if (previousAudio && audio && previousAudio !== audio) {
+      // Content is changing - trigger transition
+      setIsContentChanging(true);
+      
+      // After a brief moment, allow the new content to load
+      setTimeout(() => {
+        setIsContentChanging(false);
+      }, 300);
+    }
+    setPreviousAudio(audio);
+  }, [audio, previousAudio]);
+
+  React.useEffect(() => {
+    // Only initialize WaveSurfer if we're not in the middle of a content change
+    if (audio && waveformRef.current && !isContentChanging) {
       // Initialize WaveSurfer with Decibels-style waveform
       wavesurfer.current = WaveSurfer.create({
         container: waveformRef.current,
@@ -696,12 +713,16 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : shouldHighlight
           ? 'scale(1.05) translateY(-2px)' // Lift effect when highlighted
           : 'scale(1)',
-        opacity: isContainerDragging 
+        opacity: isContentChanging
+          ? 0.7
+          : isContainerDragging 
           ? 0.95
           : (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId)
           ? 0.9
           : isDragging ? 0.9 : 1,
-        transition: isSwapping
+        transition: isContentChanging
+          ? 'all 0.3s ease-in-out' // Smooth content change transition
+          : isSwapping
           ? 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)' // Smooth swap animation
           : (isDragging || (isDraggingContainer && draggedContainerType === 'audio' && draggedContainer?.id === pairId))
           ? 'none' 
@@ -717,6 +738,16 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
         userSelect: 'none'
       }}
     >
+      {/* Content Change Transition Overlay */}
+      {isContentChanging && (
+        <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-20">
+          <div className="text-center">
+            <div className="w-8 h-8 mx-auto mb-2 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-blue-400 font-medium text-sm">Loading audio...</p>
+          </div>
+        </div>
+      )}
+
       {/* Drag and Drop Overlay */}
       {isDragOver && (
         <div className="absolute inset-0 bg-green-500/20 rounded-lg flex items-center justify-center z-10">
@@ -732,7 +763,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
       )}
 
       {audio ? (
-        <div className="w-full h-full flex flex-col justify-between relative">
+        <div 
+          className="w-full h-full flex flex-col justify-between relative"
+          style={{
+            opacity: isContentChanging ? 0.3 : 1,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
+        >
           {/* Header with filename and time */}
           <div className="flex items-center justify-between mb-2">
             <span className="text-white text-sm font-medium truncate">
