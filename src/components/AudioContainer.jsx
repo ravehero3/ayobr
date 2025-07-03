@@ -498,15 +498,15 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             // Use actual container dimensions
             width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '450px',
             height: '136px',
-            transform: 'none', // No rotation or scaling - exact copy
+            transform: 'rotate(10deg) scale(1.1)', // Same transform as original when dragging
             zIndex: 999999999,
             pointerEvents: 'none',
             background: 'rgba(15, 23, 42, 0.6)', // Same background as original
             borderRadius: '8px',
-            border: '1px solid rgba(75, 85, 99, 0.4)', // Same border as original (no blue glow)
-            boxShadow: 'none', // No glow for clean dark mode
+            border: '1px solid rgba(75, 85, 99, 0.4)', // Same border as original
+            boxShadow: 'none', // No special effects - exact copy
             padding: '16px',
-            opacity: 0.95,
+            opacity: 0.9, // Same opacity as original when dragging
             isolation: 'isolate',
             willChange: 'transform',
             backdropFilter: 'blur(1px)',
@@ -541,8 +541,47 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               <div className="w-8 h-8"></div>
             </div>
 
-            {/* No waveform in drag preview - just empty space */}
-            <div className="flex-1"></div>
+            {/* Waveform visualization - same as original */}
+            <div className="flex-1 flex items-center mb-4">
+              <div className="w-full" style={{ height: '60px' }}>
+                {/* Recreate the waveform visualization */}
+                <div className="w-full h-full bg-gradient-to-r from-gray-700/30 to-gray-600/30 rounded flex items-end justify-center gap-0.5 px-2">
+                  {waveformPeaks ? (
+                    waveformPeaks.map((peak, i) => (
+                      <div
+                        key={i}
+                        className="rounded-sm transition-all duration-200"
+                        style={{
+                          width: '2px',
+                          height: `${Math.max(10, peak * 80)}%`,
+                          opacity: 0.8,
+                          backgroundColor: i < (waveformPeaks.length * (currentTime / duration)) ? '#3584E4' : '#6C737F'
+                        }}
+                      />
+                    ))
+                  ) : (
+                    // Fallback waveform if peaks not available
+                    [...Array(50)].map((_, i) => {
+                      const baseHeight = 20 + Math.sin(i * 0.3) * 15;
+                      const randomVariation = Math.random() * 30;
+                      const height = Math.max(10, Math.min(90, baseHeight + randomVariation));
+                      return (
+                        <div
+                          key={i}
+                          className="rounded-sm transition-all duration-200"
+                          style={{
+                            width: '2px',
+                            height: `${height}%`,
+                            opacity: 0.8,
+                            backgroundColor: i < 15 ? '#3584E4' : '#6C737F'
+                          }}
+                        />
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
 
             {/* Play button and time information on the same line */}
             <div className="flex items-center justify-between">
