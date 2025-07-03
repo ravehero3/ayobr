@@ -97,8 +97,8 @@ body {
 }
 
 .container-drag-mode > * {
-  filter: blur(2px);
-  opacity: 0.8;
+  filter: blur(1px);
+  opacity: 0.95;
   transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
