@@ -1,0 +1,299 @@
+@import 'tailwindcss';
+
+/* Premium container styles */
+.premium-container {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 32px;
+  box-shadow: 
+    0 0 0 1px rgba(59, 130, 246, 0.3),
+    0 0 40px rgba(59, 130, 246, 0.15),
+    0 0 80px rgba(59, 130, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.premium-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4) 0%, rgba(147, 51, 234, 0.2) 50%, rgba(59, 130, 246, 0.4) 100%);
+  filter: blur(1px);
+  opacity: 0.6;
+  z-index: -1;
+}
+
+.premium-highlight {
+  position: absolute;
+  top: 24px;
+  right: 48px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(59, 130, 246, 0.8) 40%, transparent 70%);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(59, 130, 246, 0.4);
+}
+
+/* Custom fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #050A13;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+body {
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+/* Ensure dragged containers appear above everything */
+.dragging-container {
+  position: fixed !important;
+  z-index: 999999 !important;
+  pointer-events: none;
+}
+
+/* Global container for absolute positioned elements */
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Custom animations */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(30, 144, 255, 0.6);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(30, 144, 255, 0.2),
+    transparent
+  );
+  background-size: 1000px 100%;
+}
+
+/* Drag and drop styles */
+.drag-over {
+  background: rgba(30, 144, 255, 0.1);
+  border-color: #1E90FF;
+  box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+}
+
+.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+  z-index: 1000;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 2px solid rgba(30, 144, 255, 0.3);
+  border-radius: 50%;
+  border-top: 2px solid #1E90FF;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Waveform container */
+.waveform-container {
+  background: rgba(30, 144, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+/* Video controls overlay */
+.video-controls {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 0, 0, 0.7)
+  );
+}
+
+/* Custom button styles */
+.btn-primary {
+  background: linear-gradient(to right, #1E90FF, #00CFFF);
+  @apply text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 active:scale-95;
+  box-shadow: 0 10px 15px -3px rgba(30, 144, 255, 0.3);
+}
+
+.btn-secondary {
+  background: #0F1419;
+  @apply text-white font-medium py-2 px-4 rounded-lg border border-blue-500/30 hover:border-blue-500/50 transition-all duration-300;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(10, 15, 28, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 144, 255, 0.2);
+}
+
+/* Neon text effect */
+.neon-text {
+  text-shadow: 
+    0 0 5px rgba(30, 144, 255, 0.5),
+    0 0 10px rgba(30, 144, 255, 0.3),
+    0 0 15px rgba(30, 144, 255, 0.2);
+}
+
+/* Progress bar */
+.progress-bar {
+  background: linear-gradient(
+    90deg,
+    #1E90FF,
+    #00CFFF,
+    #1E90FF
+  );
+  background-size: 200% 100%;
+  animation: gradient-shift 2s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Futuristic container animations */
+@keyframes border-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 1px rgba(30, 144, 255, 0.3),
+      0 0 15px rgba(30, 144, 255, 0.4),
+      0 0 30px rgba(0, 207, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 1px rgba(30, 144, 255, 0.5),
+      0 0 20px rgba(30, 144, 255, 0.6),
+      0 0 40px rgba(0, 207, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+}
+
+@keyframes flare-flicker {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 0 50px rgba(30, 144, 255, 0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 35px rgba(255, 255, 255, 1), 0 0 70px rgba(30, 144, 255, 0.7);
+  }
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none opacity-0 transition-opacity duration-300;
+}
+
+.tooltip.show {
+  @apply opacity-100;
+}
+
+/* File input styling */
+input[type="file"] {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Custom focus styles */
+*:focus {
+  outline: 2px solid rgba(30, 144, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Responsive typography */
+@screen sm {
+  html {
+    font-size: 14px;
+  }
+}
+
+@screen md {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Print styles */
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}

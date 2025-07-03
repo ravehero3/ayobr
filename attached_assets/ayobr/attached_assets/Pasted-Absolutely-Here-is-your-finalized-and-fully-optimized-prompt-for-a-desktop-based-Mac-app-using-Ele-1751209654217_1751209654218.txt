@@ -1,0 +1,167 @@
+Absolutely! Here is your finalized and fully optimized prompt for a desktop-based Mac app, using Electron + React + TailwindCSS — tailored specifically for use in VS Code AI tools like Cursor, GitHub Copilot, or GPT plugins to help you scaffold and build the app efficiently.
+
+✅ Prompt for VS Code AI / Cursor
+
+App Name: Type Beat Video Generator
+
+🧠 Goal
+
+Build a futuristic, dark mode desktop app for macOS using Electron + React + TailwindCSS.
+The app allows music producers to quickly create type beat videos by uploading audio (MP3/WAV) and images (PNG/JPG). It automatically pairs audio with images, allows previewing and arranging of pairs, and then renders high-quality 1920x1080 videos from those pairs using FFmpeg.
+
+🔧 Tech Stack
+
+App Framework: Electron.js (desktop app wrapper)
+
+Frontend: React + TailwindCSS (UI and animations)
+
+Media Processing: FFmpeg (via ffmpeg.wasm or Node bindings)
+
+Waveform Preview: Web Audio API or wavesurfer.js
+
+Drag-and-Drop: Native HTML5 or react-dnd
+
+State Management: Zustand, Redux, or React Context
+
+File Handling: Node.js FS APIs (Electron built-in)
+
+⚙️ Core Features
+
+1. Drag & Drop File Upload
+
+User drags MP3/WAV + PNG/JPG files into the app window
+
+App automatically creates pairs of 1 audio + 1 image per set
+
+If number is uneven, remaining container shows a dotted-line placeholder with “Drop file here”
+
+2. Modular Pair Container Layout
+
+Each pair container has two child containers:
+
+🎵 Audio Container
+
+Shows waveform (40 vertical bars)
+
+Play, pause, and seek controls
+
+Glowing animated border when playing
+
+🖼 Image Container
+
+Image centered with 10px padding above/below
+
+Shows image preview
+
+If missing, displays a dotted stroke box with a drag-to-fill prompt
+
+3. Dark Mode Container Design
+
+border-radius: 24px–32px
+
+background: Deep navy (#0A0F1C)
+
+fill: Matte black (#050A13)
+
+outline: Neon blue glow (#1E90FF–#00CFFF) at 1.5px width
+
+Highlight flare: Subtle glow in top-right corner (flickers slowly)
+
+Optional animation: Pulse or glow effect on idle
+
+4. Drag & Drop Swapping
+
+Users can reorder containers:
+
+Audio containers only swap with other audio containers
+
+Image containers only swap with image containers
+
+Use smooth animation (Framer Motion or CSS transition) as containers follow the cursor
+
+5. Generate Videos Button
+
+When clicked:
+
+Pairs are rendered one-by-one into 1920x1080 white-background videos
+
+Image is centered vertically with 30px space above and below
+
+Output format: .mp4 using FFmpeg
+
+6. Animated Pair Merge
+
+When video is being generated:
+
+Pair visually merges into a single video preview container
+
+Show progress bar while rendering
+
+Final container displays a video thumbnail with a play button in the center
+
+User can preview generated video inline
+
+📦 Output Expectations
+
+Support multiple pairs (batch rendering)
+
+Export rendered videos into a designated local folder (ask user or default to “output” folder)
+
+Optional: Zip final videos for easy sharing
+
+🎨 Bonus UI Touches
+
+Tooltips on hover (file name, length, resolution)
+
+Delete or clear buttons on each pair
+
+Optional: Undo last swap
+
+Responsive layout with fluid grid for smaller MacBook screens
+
+Clean Framer-like styling with Tailwind custom themes
+
+📁 File/Folder Structure to Scaffold
+
+/type-beat-generator
+│
+├── /public
+├── /src
+│   ├── App.jsx
+│   ├── main.js (Electron entry)
+│   ├── /components
+│   │   ├── PairContainer.jsx
+│   │   ├── AudioContainer.jsx
+│   │   ├── ImageContainer.jsx
+│   │   └── VideoPreviewCard.jsx
+│   ├── /hooks
+│   │   └── usePairingLogic.js
+│   ├── /utils
+│   │   └── ffmpegProcessor.js
+│   └── tailwind.config.js
+├── package.json
+├── electron-builder.json
+└── README.md
+🧠 Implementation Plan
+
+Start by building:
+
+Base layout using Tailwind + dark theme containers
+
+Drag-and-drop upload logic
+
+Pair container structure and automatic matching
+
+Audio preview and waveform
+
+Swapping containers logic
+
+Video generation placeholder function (hook up FFmpeg last)
+
+Animated preview cards after generation
+
+✅ Summary
+
+This is a desktop-based macOS app using Electron, React, and Tailwind.
+It features automatic pairing of beat files and visuals, futuristic dark UI, drag-and-drop rearrangement, and automated rendering of beat videos.
+
