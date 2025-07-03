@@ -699,8 +699,9 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             </button>
           </div>
 
-          {/* Move button - positioned below audio preview */}
-          <div className="flex items-center justify-center mt-2">
+          {/* Bottom controls - Move and Delete buttons positioned below audio preview */}
+          <div className="flex items-center justify-center gap-3 mt-2">
+            {/* Move button */}
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
               style={{
@@ -754,30 +755,30 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
               </svg>
             </div>
-          </div>
 
-          {/* Delete button - positioned at bottom right */}
-          <button
-            className="absolute bottom-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
-            style={{
-              backgroundColor: 'rgba(220, 38, 38, 0.15)',
-              border: '1px solid rgba(220, 38, 38, 0.3)',
-              color: '#DC2626'
-            }}
-            title="Delete audio"
-            onClick={() => {
-              if (wavesurfer.current) {
-                wavesurfer.current.pause();
-              }
-              if (onDelete) {
-                onDelete();
-              }
-            }}
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            {/* Delete button - positioned below waveform next to move button */}
+            <button
+              className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
+              style={{
+                backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                border: '1px solid rgba(220, 38, 38, 0.3)',
+                color: '#DC2626'
+              }}
+              title="Delete audio"
+              onClick={() => {
+                if (wavesurfer.current) {
+                  wavesurfer.current.pause();
+                }
+                if (onDelete) {
+                  onDelete();
+                }
+              }}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-gray-300">

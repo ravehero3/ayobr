@@ -514,8 +514,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
 
             {image ? (
               <div className="w-full h-full flex flex-col relative">
-                {/* Image preview with 10px padding top/bottom */}
-                <div className="flex-1 flex items-center justify-center py-3">
+                {/* Image preview - centered vertically with better spacing */}
+                <div className="flex-1 flex items-center justify-center">
                   <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>
                     <img
                       src={imageUrl}
