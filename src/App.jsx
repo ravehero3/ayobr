@@ -325,7 +325,7 @@ function App() {
               whileTap={{ scale: 0.95 }}
             >
               {isGenerating ? (
-                <div className="flex items-center space-x-3:
+                <div className="flex items-center space-x-3">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                   <span>Generating Videos...</span>
                 </div>
