@@ -805,57 +805,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             transition: 'opacity 0.3s ease-in-out'
           }}
         >
-          {/* Header with filename and time */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-white text-sm font-medium truncate">
-              {audio.name.replace(/\.[^/.]+$/, "")} {/* Remove file extension like Decibels */}
-            </span>
-            <div className="text-xs text-gray-400 flex-shrink-0">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </div>
-          </div>
-
-          {/* Large Waveform - The centerpiece like in Decibels */}
-          <div className="flex-1 flex items-center">
-            <div 
-              ref={waveformRef}
-              className="w-full cursor-pointer"
-              style={{ height: '60px' }}
-            />
-          </div>
-
-          {/* Bottom controls - Large play button like Decibels */}
-          <div className="flex items-center justify-center mt-2">
-            {/* Play button - centered */}
-            <button
-              onClick={handlePlayPause}
-              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
-              style={{
-                backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
-                border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
-                boxShadow: isPlaying 
-                  ? '0 0 20px rgba(53, 132, 228, 0.4)'
-                  : '0 0 10px rgba(53, 132, 228, 0.2)',
-                color: isPlaying ? 'white' : '#3584E4'
-              }}
-            >
-              {isPlaying ? (
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                </svg>
-              ) : (
-                <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="m7 4 10 6L7 16V4z"/>
-                </svg>
-              )}
-            </button>
-          </div>
-
-          {/* Bottom controls - Move and Delete buttons positioned below audio preview */}
-          <div className="flex items-center justify-center gap-3 mt-2">
-            {/* Move button */}
+          {/* Top header bar with move button (left), title (center), delete button (right) */}
+          <div className="flex items-center justify-between mb-3">
+            {/* Move button - top left */}
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-60 hover:opacity-100 z-10 cursor-move"
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 opacity-70 hover:opacity-100 z-10 cursor-move"
               style={{
                 backgroundColor: (isContainerDragMode && draggedContainerType === 'audio') ? 'rgba(16, 185, 129, 0.25)' : 'rgba(53, 132, 228, 0.15)',
                 border: (isContainerDragMode && draggedContainerType === 'audio') ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(53, 132, 228, 0.3)',
@@ -908,9 +862,14 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               </svg>
             </div>
 
-            {/* Delete button - positioned below waveform next to move button */}
+            {/* File title - centered */}
+            <span className="text-white text-sm font-medium truncate text-center flex-1 mx-3">
+              {audio.name.replace(/\.[^/.]+$/, "")}
+            </span>
+
+            {/* Delete button - top right */}
             <button
-              className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-70 hover:opacity-100 z-10"
               style={{
                 backgroundColor: 'rgba(220, 38, 38, 0.15)',
                 border: '1px solid rgba(220, 38, 38, 0.3)',
@@ -926,9 +885,55 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 }
               }}
             >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
+            </button>
+          </div>
+
+          {/* Waveform */}
+          <div className="flex-1 flex items-center mb-3">
+            <div 
+              ref={waveformRef}
+              className="w-full cursor-pointer"
+              style={{ height: '60px' }}
+            />
+          </div>
+
+          {/* Bottom bar with current time (left) and total duration (right) */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-xs text-gray-400">
+              {formatTime(currentTime)}
+            </div>
+            <div className="text-xs text-gray-400">
+              {formatTime(duration)}
+            </div>
+          </div>
+
+          {/* Play/pause button - centered in rectangular box */}
+          <div className="flex items-center justify-center">
+            <button
+              onClick={handlePlayPause}
+              className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{
+                backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
+                border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
+                borderRadius: '10px',
+                boxShadow: isPlaying 
+                  ? '0 0 20px rgba(53, 132, 228, 0.4)'
+                  : '0 0 10px rgba(53, 132, 228, 0.2)',
+                color: isPlaying ? 'white' : '#3584E4'
+              }}
+            >
+              {isPlaying ? (
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="m7 4 10 6L7 16V4z"/>
+                </svg>
+              )}
             </button>
           </div>
         </div>
