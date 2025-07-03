@@ -333,8 +333,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
             transform: 'none', // No tilt, no scale - exact copy
             zIndex: 999999999,
             pointerEvents: 'none',
-            // Make it look exactly like the original container but with green glow
-            background: 'rgba(15, 23, 42, 0.9)', // Same dark background as original
+            // Make it look exactly like the original container but with green glow and green background
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%)', // Green background
             borderRadius: '8px',
             border: '3px solid rgba(16, 185, 129, 0.8)', // Green border
             boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)',
@@ -357,9 +357,8 @@ const ImageContainer = ({ image, pairId, onSwap, draggedItem, onDragStart, onDra
                   className="w-20 h-20 object-cover"
                   style={{
                     borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-                    // Add green tint overlay
-                    filter: 'brightness(1.1) contrast(1.1) hue-rotate(120deg) saturate(1.2)'
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                    // Keep original image appearance without green tint
                   }}
                 />
               </div>

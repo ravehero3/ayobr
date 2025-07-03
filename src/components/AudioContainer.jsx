@@ -483,8 +483,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             transform: 'none', // No tilt, no scale - exact copy
             zIndex: 999999999,
             pointerEvents: 'none',
-            // Make it look exactly like the original container but with green glow
-            background: 'rgba(15, 23, 42, 0.9)', // Same dark background as original
+            // Make it look exactly like the original container but with green glow and green background
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%)', // Green background
             borderRadius: '8px',
             border: '3px solid rgba(16, 185, 129, 0.8)', // Green border
             boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)',
@@ -508,41 +508,59 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               </div>
             </div>
 
-            {/* Large Waveform - Create a visual replica of the actual WaveSurfer component */}
+            {/* Static Waveform - Fixed pattern that doesn't change during drag */}
             <div className="flex-1 flex items-center">
               <div 
                 className="w-full"
-                style={{ height: '80px' }} // Match the real container height
+                style={{ height: '60px' }} // Match the real container height
               >
-                {/* Create visual bars that mimic the WaveSurfer appearance exactly */}
+                {/* Create a static waveform pattern using the stored peaks */}
                 <div className="w-full h-full flex items-end justify-start" style={{ gap: '1px', padding: '0 0' }}>
-                  {Array.from({ length: 200 }, (_, i) => {
-                    // Create a realistic waveform pattern that matches WaveSurfer's style
-                    const normalizedPos = i / 200;
-                    const baseWave = Math.sin(normalizedPos * Math.PI * 12) * 0.6;
-                    const envelope = Math.sin(normalizedPos * Math.PI) * 0.8;
-                    const noise = (Math.random() - 0.5) * 0.3;
-                    const combined = (baseWave + noise) * envelope;
-                    const height = Math.max(Math.min(Math.abs(combined) * 100, 90), 2);
-                    
-                    // Calculate if this bar should be "played" (green) based on current time
-                    const progress = currentTime / duration;
-                    const barProgress = i / 200;
-                    const isPlayed = barProgress <= progress;
+                  {waveformPeaks && waveformPeaks.length > 0 ? (
+                    waveformPeaks.map((peak, i) => {
+                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 4);
+                      // For drag preview, show some progress in green
+                      const progress = 0.3; // Fixed progress for preview
+                      const barProgress = i / waveformPeaks.length;
+                      const isPlayed = barProgress <= progress;
 
-                    return (
-                      <div
-                        key={i}
-                        style={{
-                          width: '2px',
-                          height: `${height}%`,
-                          backgroundColor: isPlayed ? '#10B981' : '#6C737F', // Exact same colors as the real waveform
-                          borderRadius: '1px',
-                          opacity: 1
-                        }}
-                      />
-                    );
-                  })}
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            width: '2px',
+                            height: `${height}%`,
+                            backgroundColor: isPlayed ? '#10B981' : '#6C737F',
+                            borderRadius: '1px',
+                            opacity: 1
+                          }}
+                        />
+                      );
+                    })
+                  ) : (
+                    // Static fallback pattern - doesn't change
+                    Array.from({ length: 80 }, (_, i) => {
+                      const baseHeight = 20 + Math.sin(i * 0.3) * 15;
+                      const randomVariation = (i % 7) * 5; // Use modulo for consistent pattern
+                      const height = Math.max(4, Math.min(90, baseHeight + randomVariation));
+                      const progress = 0.3; // Fixed progress for preview
+                      const barProgress = i / 80;
+                      const isPlayed = barProgress <= progress;
+
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            width: '2px',
+                            height: `${height}%`,
+                            backgroundColor: isPlayed ? '#10B981' : '#6C737F',
+                            borderRadius: '1px',
+                            opacity: 1
+                          }}
+                        />
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
