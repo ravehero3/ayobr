@@ -493,18 +493,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           className="green-box-drag-preview"
           style={{
             position: 'fixed',
-            left: `${mousePosition.x - 225}px`, // Center horizontally (450px / 2 = 225px)
-            top: `${mousePosition.y - 68}px`,   // Center vertically (136px / 2 = 68px)
+            left: `${containerRef.current ? containerRef.current.getBoundingClientRect().left : mousePosition.x - 225}px`,
+            top: `${containerRef.current ? containerRef.current.getBoundingClientRect().top : mousePosition.y - 68}px`,
             width: '450px',
             height: '136px',
-            transform: 'none', // No tilt, no scale - exact copy
+            transform: 'rotate(10deg) scale(1.1)',
             zIndex: 999999999,
             pointerEvents: 'none',
-            // Make it look EXACTLY like the original container
-            background: 'rgba(15, 23, 42, 0.6)', // Same as real container
+            background: 'rgba(15, 23, 42, 0.6)',
             borderRadius: '8px',
-            border: '1px solid rgba(53, 132, 228, 0.3)', // Same as real container
-            boxShadow: '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)', // Same as real container
+            border: '1px solid rgba(53, 132, 228, 0.3)',
+            boxShadow: '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8)',
             padding: '16px',
             opacity: 0.95,
             isolation: 'isolate',
@@ -514,127 +513,11 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             contain: 'layout style paint'
           }}
         >
-          <div className="w-full h-full flex flex-col justify-between relative">
-            {/* Header with filename and time - exact copy */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white text-sm font-medium truncate">
-                {audio.name.replace(/\.[^/.]+$/, "")}
-              </span>
-              <div className="text-xs text-gray-400 flex-shrink-0">
-                {formatTime(currentTime)} / {formatTime(duration)}
-              </div>
-            </div>
-
-            {/* Static Waveform - Exact copy of real waveform */}
-            <div className="flex-1 flex items-center">
-              <div 
-                className="w-full"
-                style={{ height: '60px' }} // Match the real container height
-              >
-                {/* Create exact copy of waveform with same colors as real container */}
-                <div className="w-full h-full flex items-end justify-start" style={{ gap: '1px', padding: '0 0' }}>
-                  {waveformPeaks && waveformPeaks.length > 0 ? (
-                    waveformPeaks.map((peak, i) => {
-                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 4);
-                      // Use same progress calculation as real container
-                      const progress = currentTime / duration || 0;
-                      const barProgress = i / waveformPeaks.length;
-                      const isPlayed = barProgress <= progress;
-
-                      return (
-                        <div
-                          key={i}
-                          style={{
-                            width: '2px',
-                            height: `${height}%`,
-                            backgroundColor: isPlayed ? '#3584E4' : '#6C737F', // Same colors as real waveform
-                            borderRadius: '1px',
-                            opacity: 1
-                          }}
-                        />
-                      );
-                    })
-                  ) : (
-                    // Static fallback pattern with same colors
-                    Array.from({ length: 80 }, (_, i) => {
-                      const baseHeight = 20 + Math.sin(i * 0.3) * 15;
-                      const randomVariation = (i % 7) * 5;
-                      const height = Math.max(4, Math.min(90, baseHeight + randomVariation));
-                      const progress = currentTime / duration || 0;
-                      const barProgress = i / 80;
-                      const isPlayed = barProgress <= progress;
-
-                      return (
-                        <div
-                          key={i}
-                          style={{
-                            width: '2px',
-                            height: `${height}%`,
-                            backgroundColor: isPlayed ? '#3584E4' : '#6C737F', // Same colors as real waveform
-                            borderRadius: '1px',
-                            opacity: 1
-                          }}
-                        />
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom controls - EXACT copy with play button like real container */}
-            <div className="flex items-center justify-center mt-2">
-              {/* Play button - centered - exact copy */}
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
-                style={{
-                  backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
-                  border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
-                  boxShadow: isPlaying 
-                    ? '0 0 20px rgba(53, 132, 228, 0.4)'
-                    : '0 0 10px rgba(53, 132, 228, 0.2)',
-                  color: isPlaying ? 'white' : '#3584E4'
-                }}
-              >
-                {isPlaying ? (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="m7 4 10 6L7 16V4z"/>
-                  </svg>
-                )}
-              </div>
-            </div>
-
-            {/* Bottom controls - Move and Delete buttons positioned below like real container */}
-            <div className="flex items-center justify-center gap-3 mt-2">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 opacity-60"
-                style={{
-                  backgroundColor: 'rgba(53, 132, 228, 0.15)',
-                  border: '1px solid rgba(53, 132, 228, 0.3)',
-                  color: '#3584E4'
-                }}
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                </svg>
-              </div>
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 opacity-60"
-                style={{
-                  backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                  border: '1px solid rgba(220, 38, 38, 0.3)',
-                  color: '#DC2626'
-                }}
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
-            </div>
+          <div className="w-full h-full flex items-center justify-center">
+            {/* Only show the filename centered - no waveform */}
+            <span className="text-white text-lg font-medium text-center">
+              {audio.name.replace(/\.[^/.]+$/, "")}
+            </span>
           </div>
         </div>,
         document.body
@@ -712,13 +595,8 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           : (isContainerDragMode && draggedContainerType === 'audio')
           ? '0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 25px rgba(16, 185, 129, 0.15)'
           : audio 
-            ? '0 0 0 1px rgba(53, 132, 228, 0.2), 0 0 20px rgba(53, 132, 228, 0.1)'
-            : `
-            0 0 0 1px rgba(30, 144, 255, 0.15),
-            0 0 8px rgba(30, 144, 255, 0.2),
-            0 0 15px rgba(0, 207, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.02)
-          `,
+            ? 'none' // Remove constant glow - only show basic border
+            : 'none', // Remove constant glow from empty containers too
         padding: audio ? '16px' : '20px',
         height: '136px',
         minHeight: '136px',
@@ -892,7 +770,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
           </div>
 
           {/* Waveform */}
-          <div className="flex-1 flex items-center mb-3">
+          <div className="flex-1 flex items-center mb-2">
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer"
@@ -900,7 +778,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             />
           </div>
 
-          {/* Bottom bar with current time (left) and total duration (right) */}
+          {/* Time information below waveform for better readability */}
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs text-gray-400">
               {formatTime(currentTime)}
