@@ -91,24 +91,26 @@ body {
   isolation: isolate !important;
 }
 
-/* Container drag mode styles */
-.container-drag-mode {
-  overflow: hidden;
+/* Container drag mode styles - subtle background blur */
+.container-drag-mode::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
+  z-index: 1;
+  pointer-events: none;
 }
 
-.container-drag-mode > * {
-  filter: blur(0.8px);
-  opacity: 0.8;
-  transition: filter 0.3s ease, opacity 0.3s ease;
-}
-
-/* Keep audio containers completely unblurred and visible */
+/* Keep audio containers above the blur overlay */
 .container-drag-mode .audio-container,
 .container-drag-mode [data-audio-container],
 .container-drag-mode .green-box-drag-preview {
-  filter: none !important;
-  opacity: 1 !important;
-  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
 .container-drag-mode .audio-container[data-audio-container]:not(.dragging-container) {
