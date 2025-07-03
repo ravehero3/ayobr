@@ -486,7 +486,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
 
   return (
     <>
-      {/* Enhanced Floating Drag Preview with Portal - appears when mouse dragging */}
+      {/* Enhanced Floating Drag Preview with Portal - exact copy of original container */}
       {isDraggingWithMouse && isContainerDragging && audio && createPortal(
         <div
           className="green-box-drag-preview"
@@ -496,13 +496,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             top: `${containerRef.current ? containerRef.current.getBoundingClientRect().top : mousePosition.y - 68}px`,
             width: '450px',
             height: '136px',
-            transform: 'rotate(10deg) scale(1.1)',
+            transform: 'none', // No rotation or scaling - exact copy
             zIndex: 999999999,
             pointerEvents: 'none',
-            background: 'rgba(15, 23, 42, 0.6)',
+            background: 'rgba(15, 23, 42, 0.6)', // Same background as original
             borderRadius: '8px',
-            border: '1px solid rgba(53, 132, 228, 0.3)',
-            boxShadow: '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8)',
+            border: '1px solid rgba(53, 132, 228, 0.3)', // Same border as original
+            boxShadow: '0 0 0 4px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.8)', // Blue glow for drag preview
             padding: '16px',
             opacity: 0.95,
             isolation: 'isolate',
@@ -512,11 +512,93 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             contain: 'layout style paint'
           }}
         >
-          <div className="w-full h-full flex items-center justify-center">
-            {/* Only show the filename centered - no waveform */}
-            <span className="text-white text-lg font-medium text-center">
-              {audio.name.replace(/\.[^/.]+$/, "")}
-            </span>
+          {/* Recreate the exact layout from the original container */}
+          <div className="w-full h-full flex flex-col">
+            {/* Header with move button, filename, and delete button */}
+            <div className="flex items-center justify-between mb-4">
+              {/* Move button - top left */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center opacity-60"
+                style={{
+                  backgroundColor: 'rgba(53, 132, 228, 0.15)',
+                  border: '1px solid rgba(53, 132, 228, 0.3)',
+                  color: '#3584E4'
+                }}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </div>
+
+              {/* File title - centered */}
+              <span className="text-white text-sm font-medium truncate text-center flex-1 mx-3">
+                {audio.name.replace(/\.[^/.]+$/, "")}
+              </span>
+
+              {/* Delete button - top right */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center opacity-70"
+                style={{
+                  backgroundColor: 'rgba(220, 38, 38, 0.15)',
+                  border: '1px solid rgba(220, 38, 38, 0.3)',
+                  color: '#DC2626'
+                }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Simplified waveform representation */}
+            <div className="flex-1 flex items-center mb-4">
+              <div className="w-full h-16 bg-gray-700 rounded-md flex items-end justify-center px-2">
+                {/* Simple waveform bars */}
+                {[...Array(20)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-gray-400 mx-px rounded-sm"
+                    style={{
+                      width: '8px',
+                      height: `${20 + Math.random() * 35}px`,
+                      opacity: 0.7
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Play button and time information on the same line */}
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-400">
+                {formatTime(currentTime)}
+              </div>
+              
+              {/* Play/pause button - centered */}
+              <div
+                className="w-16 h-12 flex items-center justify-center"
+                style={{
+                  backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
+                  border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
+                  borderRadius: '10px',
+                  color: isPlaying ? 'white' : '#3584E4'
+                }}
+              >
+                {isPlaying ? (
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="m7 4 10 6L7 16V4z"/>
+                  </svg>
+                )}
+              </div>
+              
+              <div className="text-xs text-gray-400">
+                {formatTime(duration)}
+              </div>
+            </div>
           </div>
         </div>,
         document.body
@@ -765,8 +847,13 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
             />
           </div>
 
-          {/* Play/pause button - centered in rectangular box */}
-          <div className="flex items-center justify-center mb-3">
+          {/* Play button and time information on the same line */}
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-gray-400">
+              {formatTime(currentTime)}
+            </div>
+            
+            {/* Play/pause button - centered */}
             <button
               onClick={handlePlayPause}
               className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
@@ -787,13 +874,7 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                 </svg>
               )}
             </button>
-          </div>
-
-          {/* Time information at the bottom - completely separate from waveform */}
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-gray-400">
-              {formatTime(currentTime)}
-            </div>
+            
             <div className="text-xs text-gray-400">
               {formatTime(duration)}
             </div>
