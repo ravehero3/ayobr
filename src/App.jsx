@@ -307,7 +307,7 @@ function App() {
 
       <div className="fixed inset-0 flex flex-col">
         {/* Header */}
-        <header className={`p-6 border-b border-neon-blue/20 flex-shrink-0 transition-all duration-300 ${isContainerDragMode ? 'blur-sm' : ''}`}>
+        <header className="p-6 border-b border-neon-blue/20 flex-shrink-0">
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-3xl font-bold text-white mb-2">
               Type Beat Video Generator
@@ -319,7 +319,7 @@ function App() {
         </header>
 
         {/* Main Content */}
-        <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-300 ${isContainerDragMode ? 'blur-sm' : ''}`}>
+        <main className="flex-1 flex flex-col p-6 overflow-y-auto">
           <div className="max-w-6xl mx-auto w-full space-y-6">
         {/* Empty State */}
         {pairs.every(pair => !pair.audio && !pair.image) && (
