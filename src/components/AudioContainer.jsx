@@ -508,17 +508,17 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
               </div>
             </div>
 
-            {/* Large Waveform - exact copy but green tinted */}
+            {/* Large Waveform - exact copy of the real waveform but green tinted */}
             <div className="flex-1 flex items-center">
               <div 
-                className="w-full cursor-pointer"
+                className="w-full"
                 style={{ height: '60px' }}
               >
-                {/* Create a visual representation of the waveform with green tint */}
-                <div className="w-full h-full flex items-end justify-center px-1 gap-0.5">
+                {/* Copy the exact waveform from the real container */}
+                <div className="w-full h-full flex items-end justify-center gap-0.5" style={{ padding: '0 2px' }}>
                   {waveformPeaks && waveformPeaks.length > 0 ? (
                     waveformPeaks.map((peak, i) => {
-                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 8);
+                      const height = Math.max(Math.min(Math.abs(peak) * 100, 90), 4);
                       const progress = currentTime / duration;
                       const barProgress = i / waveformPeaks.length;
                       const isPlayed = barProgress <= progress;
@@ -529,54 +529,38 @@ const AudioContainer = ({ audio, pairId, onSwap, draggedItem, onDragStart, onDra
                           style={{
                             width: '2px',
                             height: `${height}%`,
-                            backgroundColor: isPlayed ? '#10B981' : 'rgba(16, 185, 129, 0.6)', // Green tinted
+                            backgroundColor: isPlayed ? '#10B981' : '#6C737F', // Match the original colors but with green for played portions
                             borderRadius: '1px',
-                            opacity: 0.9
+                            opacity: 1
                           }}
                         />
                       );
                     })
                   ) : (
-                    [...Array(80)].map((_, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          width: '2px',
-                          height: `${Math.random() * 60 + 20}%`,
-                          backgroundColor: i < 30 ? '#10B981' : 'rgba(16, 185, 129, 0.6)', // Green tinted
-                          borderRadius: '1px',
-                          opacity: 0.8
-                        }}
-                      />
-                    ))
+                    [...Array(80)].map((_, i) => {
+                      const baseHeight = 20 + Math.sin(i * 0.3) * 15;
+                      const randomVariation = Math.random() * 30;
+                      const height = Math.max(4, Math.min(90, baseHeight + randomVariation));
+                      const progress = currentTime / duration;
+                      const barProgress = i / 80;
+                      const isPlayed = barProgress <= progress;
+
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            width: '2px',
+                            height: `${height}%`,
+                            backgroundColor: isPlayed ? '#10B981' : '#6C737F', // Match original waveform colors
+                            borderRadius: '1px',
+                            opacity: 1
+                          }}
+                        />
+                      );
+                    })
                   )}
                 </div>
               </div>
-            </div>
-
-            {/* Bottom controls - exact copy with green tint */}
-            <div className="flex items-center justify-center mt-2">
-              <button
-                className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: isPlaying ? '#10B981' : 'rgba(16, 185, 129, 0.25)', // Green tinted
-                  border: `2px solid ${isPlaying ? '#10B981' : 'rgba(16, 185, 129, 0.6)'}`,
-                  boxShadow: isPlaying 
-                    ? '0 0 20px rgba(16, 185, 129, 0.4)'
-                    : '0 0 10px rgba(16, 185, 129, 0.3)',
-                  color: isPlaying ? 'white' : '#10B981'
-                }}
-              >
-                {isPlaying ? (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="m7 4 10 6L7 16V4z"/>
-                  </svg>
-                )}
-              </button>
             </div>
 
             {/* Bottom controls - Move and Delete buttons with green tint */}
