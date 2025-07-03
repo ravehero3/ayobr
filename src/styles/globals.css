@@ -91,7 +91,7 @@ body {
   isolation: isolate !important;
 }
 
-/* Container drag mode styles - subtle background blur */
+/* Container drag mode styles - stronger background blur */
 .container-drag-mode::before {
   content: '';
   position: fixed;
@@ -99,18 +99,27 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
   z-index: 1;
   pointer-events: none;
 }
 
-/* Keep audio containers above the blur overlay */
+/* Keep audio containers above blur and highlight ALL of them */
 .container-drag-mode .audio-container,
 .container-drag-mode [data-audio-container],
 .container-drag-mode .green-box-drag-preview {
   position: relative;
   z-index: 2;
+}
+
+/* Highlight ALL audio containers when dragging any audio container */
+.container-drag-mode .audio-container[data-audio-container] {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.4) !important;
+  border: 2px solid rgba(16, 185, 129, 0.9) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  transform: scale(1.02) !important;
+  transition: all 0.3s ease !important;
 }
 
 .container-drag-mode .audio-container[data-audio-container]:not(.dragging-container) {
