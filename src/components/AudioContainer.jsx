@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import WaveSurfer from 'wavesurfer.js';
+import DotLoader from './DotLoader';
 
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
@@ -187,35 +188,10 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               className="w-full cursor-pointer relative"
               style={{ height: '60px' }}
             >
-              {/* Loading dots animation */}
+              {/* Loading animation */}
               {isWaveformLoading && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex space-x-1">
-                    <div 
-                      className="w-2 h-2 rounded-full animate-pulse"
-                      style={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                        animationDelay: '0ms',
-                        animationDuration: '1.4s'
-                      }}
-                    ></div>
-                    <div 
-                      className="w-2 h-2 rounded-full animate-pulse"
-                      style={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                        animationDelay: '200ms',
-                        animationDuration: '1.4s'
-                      }}
-                    ></div>
-                    <div 
-                      className="w-2 h-2 rounded-full animate-pulse"
-                      style={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                        animationDelay: '400ms',
-                        animationDuration: '1.4s'
-                      }}
-                    ></div>
-                  </div>
+                  <DotLoader size="md" color="white" />
                 </div>
               )}
             </div>
