@@ -80,6 +80,29 @@ function App() {
     }
   }, []);
 
+  // Swap function to handle audio/image swapping between containers
+  const handleSwap = useCallback((sourcePairId, targetPairId, type) => {
+    const currentPairs = [...pairs];
+    const sourceIndex = currentPairs.findIndex(p => p.id === sourcePairId);
+    const targetIndex = currentPairs.findIndex(p => p.id === targetPairId);
+    
+    if (sourceIndex === -1 || targetIndex === -1) return;
+    
+    if (type === 'audio') {
+      // Swap audio files between containers
+      const tempAudio = currentPairs[sourceIndex].audio;
+      currentPairs[sourceIndex].audio = currentPairs[targetIndex].audio;
+      currentPairs[targetIndex].audio = tempAudio;
+    } else if (type === 'image') {
+      // Swap image files between containers
+      const tempImage = currentPairs[sourceIndex].image;
+      currentPairs[sourceIndex].image = currentPairs[targetIndex].image;
+      currentPairs[targetIndex].image = tempImage;
+    }
+    
+    setPairs(currentPairs);
+  }, [pairs, setPairs]);
+
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
 
@@ -276,6 +299,7 @@ function App() {
                       onStartImageDrag={handleStartImageDrag}
                       onUpdateDragPosition={handleUpdateDragPosition}
                       onEndDrag={handleEndDrag}
+                      onSwap={handleSwap}
                     />
                   </motion.div>
                 ))}
