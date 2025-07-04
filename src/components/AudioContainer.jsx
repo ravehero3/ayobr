@@ -216,9 +216,9 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete }) => {
             </div>
           </div>
 
-          {/* Up/Down Arrow Controls - Bottom Right, visible only on hover */}
+          {/* Up/Down Arrow Controls - Top Left, visible only on hover */}
           {isHovered && (
-            <div className="absolute bottom-3 right-3 flex flex-col space-y-1">
+            <div className="absolute top-3 left-3 flex flex-col space-y-1 z-20">
               {/* Up Arrow */}
               <button
                 onClick={() => onMoveUp && onMoveUp(pairId)}

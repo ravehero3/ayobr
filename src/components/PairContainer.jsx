@@ -6,7 +6,7 @@ import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
 const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType }) => {
-  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos } = useAppStore();
+  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
 
@@ -262,6 +262,25 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 <AudioContainer
                   audio={pair.audio}
                   pairId={pair.id}
+                  onMoveUp={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex > 0) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onMoveDown={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onDelete={() => {
+                    updatePair(pair.id, { audio: null });
+                  }}
                   onSwap={onSwap}
                   draggedItem={draggedItem}
                   onDragStart={onDragStart}
@@ -359,6 +378,25 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 <ImageContainer
                   image={pair.image}
                   pairId={pair.id}
+                  onMoveUp={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex > 0) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onMoveDown={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onDelete={() => {
+                    updatePair(pair.id, { image: null });
+                  }}
                   onSwap={onSwap}
                   draggedItem={draggedItem}
                   onDragStart={onDragStart}
