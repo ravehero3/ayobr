@@ -1,7 +1,3 @@
-Removing drag-and-drop functionality and replacing it with up/down arrow buttons for reordering containers.
-```
-
-```replit_final_file
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/appStore';
