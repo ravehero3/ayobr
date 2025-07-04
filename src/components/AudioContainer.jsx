@@ -57,10 +57,12 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
       wavesurfer.current.on('play', () => {
         setIsPlaying(true);
+        // Always update the global reference when this audio starts playing
         currentlyPlayingWaveSurfer = wavesurfer.current;
       });
       wavesurfer.current.on('pause', () => {
         setIsPlaying(false);
+        // Only clear the global reference if this was the currently playing audio
         if (currentlyPlayingWaveSurfer === wavesurfer.current) {
           currentlyPlayingWaveSurfer = null;
         }
@@ -77,7 +79,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
   const handlePlayPause = () => {
     if (wavesurfer.current) {
-      // Stop any currently playing audio
+      // Stop any currently playing audio BEFORE starting this one
       if (currentlyPlayingWaveSurfer && currentlyPlayingWaveSurfer !== wavesurfer.current) {
         currentlyPlayingWaveSurfer.pause();
       }
@@ -85,8 +87,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       // Play/pause this audio
       wavesurfer.current.playPause();
 
-      // Update the global reference
-      if (!wavesurfer.current.isPlaying()) {
+      // Update the global reference based on the new state
+      if (wavesurfer.current.isPlaying()) {
         currentlyPlayingWaveSurfer = wavesurfer.current;
       } else {
         currentlyPlayingWaveSurfer = null;
