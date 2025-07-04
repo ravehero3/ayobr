@@ -5,7 +5,7 @@ import WaveSurfer from 'wavesurfer.js';
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
-const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap }) => {
+const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap, onStartAudioDrag, onUpdateDragPosition, onEndDrag }) => {
   // Import updatePair from store
   const { updatePair } = require('../store/appStore').useAppStore();
   const waveformRef = useRef(null);
@@ -217,7 +217,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap 
           </div>
 
           {/* Move Handle - Top Left, visible only on hover */}
-          {isHovered && (
+          {isHovered && audio && onStartAudioDrag && (
             <div className="absolute top-3 left-3 z-20">
               <button
                 className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle"
@@ -231,82 +231,18 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap 
                   e.preventDefault();
                   e.stopPropagation();
                   
-                  // Create audio container copy
-                  const containerRect = containerRef.current.getBoundingClientRect();
-                  const handleRect = e.target.getBoundingClientRect();
-                  
-                  // Calculate offset from handle to container
-                  const offsetX = handleRect.left - containerRect.left + 16; // 16 is half of handle width
-                  const offsetY = handleRect.top - containerRect.top + 16; // 16 is half of handle height
-                  
-                  const audioContainerCopy = document.createElement('div');
-                  audioContainerCopy.className = 'audiocontainercopy';
-                  audioContainerCopy.innerHTML = containerRef.current.innerHTML;
-                  
-                  // Style the copy
-                  Object.assign(audioContainerCopy.style, {
-                    position: 'fixed',
-                    width: '500px',
-                    height: '136px',
-                    background: 'rgba(15, 23, 42, 0.9)',
-                    border: '2px solid rgba(53, 132, 228, 0.8)',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    zIndex: '999999',
-                    pointerEvents: 'none',
-                    transform: 'scale(1.05) rotate(3deg)',
-                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(53, 132, 228, 0.3)',
-                    transition: 'transform 0.2s ease-out',
-                    left: (containerRect.left - offsetX) + 'px',
-                    top: (containerRect.top - offsetY) + 'px'
-                  });
-                  
-                  document.body.appendChild(audioContainerCopy);
-                  
-                  // Add animation class for popup effect
-                  requestAnimationFrame(() => {
-                    audioContainerCopy.style.transform = 'scale(1.05) rotate(3deg)';
-                  });
-                  
-                  // Add drag mode class to highlight other audio containers
-                  document.body.classList.add('audio-drag-mode');
+                  // Start the new drag system
+                  const initialMousePosition = { x: e.clientX, y: e.clientY };
+                  onStartAudioDrag(audio, initialMousePosition);
                   
                   const handleMouseMove = (moveEvent) => {
-                    const newX = moveEvent.clientX - offsetX;
-                    const newY = moveEvent.clientY - offsetY;
-                    audioContainerCopy.style.left = newX + 'px';
-                    audioContainerCopy.style.top = newY + 'px';
+                    onUpdateDragPosition({ x: moveEvent.clientX, y: moveEvent.clientY });
                   };
                   
-                  const handleMouseUp = (upEvent) => {
+                  const handleMouseUp = () => {
                     document.removeEventListener('mousemove', handleMouseMove);
                     document.removeEventListener('mouseup', handleMouseUp);
-                    document.body.classList.remove('audio-drag-mode');
-                    
-                    // Check if dropped on another audio container
-                    const elementsUnder = document.elementsFromPoint(upEvent.clientX, upEvent.clientY);
-                    const targetAudioContainer = elementsUnder.find(el => 
-                      el.closest('[data-audio-container="true"]') && 
-                      el.closest('[data-audio-container="true"]') !== containerRef.current
-                    );
-                    
-                    if (targetAudioContainer) {
-                      const targetPairId = targetAudioContainer.closest('[data-pair-id]')?.getAttribute('data-pair-id');
-                      if (targetPairId && onSwap) {
-                        onSwap(pairId, targetPairId, 'audio');
-                      }
-                    }
-                    
-                    // Animate back and remove
-                    audioContainerCopy.style.transition = 'all 0.3s ease-out';
-                    audioContainerCopy.style.transform = 'scale(0.8) rotate(0deg)';
-                    audioContainerCopy.style.opacity = '0';
-                    
-                    setTimeout(() => {
-                      if (audioContainerCopy.parentNode) {
-                        audioContainerCopy.parentNode.removeChild(audioContainerCopy);
-                      }
-                    }, 300);
+                    onEndDrag();
                   };
                   
                   document.addEventListener('mousemove', handleMouseMove);

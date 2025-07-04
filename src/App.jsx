@@ -8,6 +8,8 @@ import VideoPreviewCard from './components/VideoPreviewCard';
 import BatchStatusIndicator from './components/BatchStatusIndicator';
 import ScreenSizeWarning from './components/ScreenSizeWarning';
 import DropZone from './components/DropZone';
+import AudioContainerCopy from './components/AudioContainerCopy';
+import ImageContainerCopy from './components/ImageContainerCopy';
 
 
 function App() {
@@ -15,6 +17,53 @@ function App() {
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
+  
+  // Drag overlay state
+  const [dragState, setDragState] = useState({
+    isAudioDragging: false,
+    isImageDragging: false,
+    draggedAudio: null,
+    draggedImage: null,
+    mousePosition: { x: 0, y: 0 }
+  });
+
+  // Drag handlers for containers
+  const handleStartAudioDrag = useCallback((audio, mousePosition) => {
+    setDragState({
+      isAudioDragging: true,
+      isImageDragging: false,
+      draggedAudio: audio,
+      draggedImage: null,
+      mousePosition
+    });
+  }, []);
+
+  const handleStartImageDrag = useCallback((image, mousePosition) => {
+    setDragState({
+      isAudioDragging: false,
+      isImageDragging: true,
+      draggedAudio: null,
+      draggedImage: image,
+      mousePosition
+    });
+  }, []);
+
+  const handleUpdateDragPosition = useCallback((mousePosition) => {
+    setDragState(prev => ({
+      ...prev,
+      mousePosition
+    }));
+  }, []);
+
+  const handleEndDrag = useCallback(() => {
+    setDragState({
+      isAudioDragging: false,
+      isImageDragging: false,
+      draggedAudio: null,
+      draggedImage: null,
+      mousePosition: { x: 0, y: 0 }
+    });
+  }, []);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -204,6 +253,10 @@ function App() {
                       index={index}
                       onMoveUp={moveContainerUp}
                       onMoveDown={moveContainerDown}
+                      onStartAudioDrag={handleStartAudioDrag}
+                      onStartImageDrag={handleStartImageDrag}
+                      onUpdateDragPosition={handleUpdateDragPosition}
+                      onEndDrag={handleEndDrag}
                     />
                   </motion.div>
                 ))}
@@ -303,6 +356,19 @@ function App() {
           </div>
         </main>
       </div>
+
+      {/* Drag Overlay for Container Copies */}
+      <AudioContainerCopy 
+        audio={dragState.draggedAudio}
+        isVisible={dragState.isAudioDragging}
+        mousePosition={dragState.mousePosition}
+      />
+      
+      <ImageContainerCopy 
+        image={dragState.draggedImage}
+        isVisible={dragState.isImageDragging}
+        mousePosition={dragState.mousePosition}
+      />
 
     </div>
   );

@@ -5,7 +5,7 @@ import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import { useAppStore } from '../store/appStore';
 
-const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType }) => {
+const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
@@ -293,6 +293,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
                   shouldShowGlow={(isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio) || (draggedItem?.type === 'audio' && draggedItem.pairId !== pair.id && !!pair.audio)}
+                  // New drag overlay handlers
+                  onStartAudioDrag={onStartAudioDrag}
+                  onUpdateDragPosition={onUpdateDragPosition}
+                  onEndDrag={onEndDrag}
                 />
               </div>
             </div>
@@ -408,6 +412,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
                   shouldShowGlow={(isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image) || (draggedItem?.type === 'image' && draggedItem.pairId !== pair.id && !!pair.image)}
+                  // New drag overlay handlers
+                  onStartImageDrag={onStartImageDrag}
+                  onUpdateDragPosition={onUpdateDragPosition}
+                  onEndDrag={onEndDrag}
                 />
               </div>
             </div>
