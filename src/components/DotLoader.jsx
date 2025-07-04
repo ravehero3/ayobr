@@ -23,7 +23,7 @@ const DotLoader = ({ size = 'md', color = 'white' }) => {
         className={`${dotSize} rounded-full`}
         style={{
           backgroundColor: dotColor,
-          animation: 'dotFloat 1.4s infinite ease-in-out',
+          animation: 'dotElastic 0.6s infinite linear',
           animationDelay: '0s'
         }}
       />
@@ -31,16 +31,16 @@ const DotLoader = ({ size = 'md', color = 'white' }) => {
         className={`${dotSize} rounded-full`}
         style={{
           backgroundColor: dotColor,
-          animation: 'dotFloat 1.4s infinite ease-in-out',
-          animationDelay: '0.16s'
+          animation: 'dotElastic 0.6s infinite linear',
+          animationDelay: '0.1s'
         }}
       />
       <div 
         className={`${dotSize} rounded-full`}
         style={{
           backgroundColor: dotColor,
-          animation: 'dotFloat 1.4s infinite ease-in-out',
-          animationDelay: '0.32s'
+          animation: 'dotElastic 0.6s infinite linear',
+          animationDelay: '0.2s'
         }}
       />
     </div>

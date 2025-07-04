@@ -431,14 +431,12 @@ input[type="file"] {
   background: rgba(59, 130, 246, 0.7);
 }
 
-/* Floating dot loader animation */
-@keyframes dotFloat {
+/* Dot elastic loader animation */
+@keyframes dotElastic {
   0%, 80%, 100% {
     transform: scale(0);
-    opacity: 0.5;
   }
   40% {
     transform: scale(1);
-    opacity: 1;
   }
 }
