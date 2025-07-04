@@ -1,35 +1,67 @@
+
 import React from 'react';
 
 const DotLoader = ({ size = 'md', color = 'white' }) => {
   const sizeClasses = {
-    sm: { width: '8px', height: '8px' },
-    md: { width: '10px', height: '10px' }, 
-    lg: { width: '12px', height: '12px' }
+    sm: { containerSize: '60px', circleSize: '25px' },
+    md: { containerSize: '80px', circleSize: '30px' }, 
+    lg: { containerSize: '100px', circleSize: '40px' }
   };
 
   const colorStyles = {
-    white: 'white',
-    blue: 'rgba(59, 130, 246, 0.8)',
-    cyan: 'rgba(34, 211, 238, 0.8)'
+    white: { dark: '#222', light: '#fff' },
+    blue: { dark: '#1E40AF', light: '#60A5FA' },
+    cyan: { dark: '#0E7490', light: '#22D3EE' }
   };
 
-  const dotSize = sizeClasses[size] || sizeClasses.md;
-  const dotColor = colorStyles[color] || colorStyles.white;
+  const { containerSize, circleSize } = sizeClasses[size] || sizeClasses.md;
+  const colors = colorStyles[color] || colorStyles.white;
 
   return (
     <div className="flex items-center justify-center">
       <div 
-        className="dot-overtaking"
+        className="box-container"
         style={{
-          width: dotSize.width,
-          height: dotSize.height,
-          background: dotColor,
-          borderRadius: '50%',
-          display: 'inline-block',
-          position: 'relative',
-          animation: 'overtaking 1s infinite ease-in-out'
+          width: containerSize,
+          height: containerSize,
+          display: 'grid',
+          gridTemplateRows: '1fr 1fr',
+          animation: 'spinLoader 1s ease infinite'
         }}
-      />
+      >
+        <div className="relative">
+          <div 
+            className="circle circle-1"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              height: circleSize,
+              width: circleSize,
+              background: colors.dark,
+              borderRadius: '50%',
+              animation: 'circle1 ease 1200ms infinite'
+            }}
+          />
+        </div>
+        <div className="relative">
+          <div 
+            className="circle circle-2"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              height: circleSize,
+              width: circleSize,
+              background: colors.light,
+              borderRadius: '50%',
+              animation: 'circle2 ease 1200ms infinite'
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

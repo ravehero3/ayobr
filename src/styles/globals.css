@@ -431,40 +431,33 @@ input[type="file"] {
   background: rgba(59, 130, 246, 0.7);
 }
 
-/* Dot overtaking loader animation */
-.dot-overtaking,
-.dot-overtaking::before,
-.dot-overtaking::after {
-  width: 10px;
-  height: 10px;
-  background: white;
-  border-radius: 50%;
-  display: inline-block;
-  animation: overtaking 1s infinite ease-in-out;
-}
-.dot-overtaking {
-  position: relative;
-}
-.dot-overtaking::before {
-  content: "";
-  position: absolute;
-  left: -20px;
-  animation-delay: 0.2s;
-}
-.dot-overtaking::after {
-  content: "";
-  position: absolute;
-  left: 20px;
-  animation-delay: 0.4s;
-}
-
-@keyframes overtaking {
-  0%, 100% {
-    transform: translateX(0) scale(1);
-    opacity: 0.5;
+/* Rotating circle loader animation */
+@keyframes circle1 {
+  0% {
+    top: 50%;
   }
   50% {
-    transform: translateX(10px) scale(1.3);
-    opacity: 1;
+    top: 120%;
+  }
+  100% {
+    top: 50%;
+  }
+}
+
+@keyframes circle2 {
+  0% {
+    top: 50%;
+  }
+  50% {
+    top: -50%;
+  }
+  100% {
+    top: 50%;
+  }
+}
+
+@keyframes spinLoader {
+  to {
+    transform: rotate(360deg);
   }
 }
