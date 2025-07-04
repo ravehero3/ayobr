@@ -152,6 +152,40 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
+/* Audio drag mode - highlight all audio containers */
+.audio-drag-mode [data-audio-container="true"] {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6) !important;
+  border: 2px solid rgba(16, 185, 129, 0.9) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  transform: scale(1.02) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Image drag mode - highlight all image containers */
+.image-drag-mode [data-image-container="true"] {
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.8), 0 0 30px rgba(147, 51, 234, 0.6) !important;
+  border: 2px solid rgba(147, 51, 234, 0.9) !important;
+  background: rgba(147, 51, 234, 0.1) !important;
+  transform: scale(1.02) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Container copy animations */
+.audiocontainercopy, .imagecontainercopy {
+  animation: popOut 0.2s ease-out forwards;
+}
+
+@keyframes popOut {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.05) rotate(3deg);
+    opacity: 1;
+  }
+}
+
 /* Global container for absolute positioned elements */
 body {
   position: relative;

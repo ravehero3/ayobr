@@ -5,7 +5,7 @@ import WaveSurfer from 'wavesurfer.js';
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
-const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete }) => {
+const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap }) => {
   // Import updatePair from store
   const { updatePair } = require('../store/appStore').useAppStore();
   const waveformRef = useRef(null);
@@ -216,38 +216,106 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete }) => {
             </div>
           </div>
 
-          {/* Up/Down Arrow Controls - Top Left, visible only on hover */}
+          {/* Move Handle - Top Left, visible only on hover */}
           {isHovered && (
-            <div className="absolute top-3 left-3 flex flex-col space-y-1 z-20">
-              {/* Up Arrow */}
+            <div className="absolute top-3 left-3 z-20">
               <button
-                onClick={() => onMoveUp && onMoveUp(pairId)}
-                className="w-6 h-6 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+                className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle"
                 style={{
                   backgroundColor: 'rgba(53, 132, 228, 0.15)',
                   border: '1px solid rgba(53, 132, 228, 0.3)',
                   color: '#3584E4'
                 }}
-                title="Move up"
-              >
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M7 14l5-5 5 5z"/>
-                </svg>
-              </button>
-              
-              {/* Down Arrow */}
-              <button
-                onClick={() => onMoveDown && onMoveDown(pairId)}
-                className="w-6 h-6 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-                style={{
-                  backgroundColor: 'rgba(53, 132, 228, 0.15)',
-                  border: '1px solid rgba(53, 132, 228, 0.3)',
-                  color: '#3584E4'
+                title="Drag to swap with other audio containers"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
+                  // Create audio container copy
+                  const containerRect = containerRef.current.getBoundingClientRect();
+                  const handleRect = e.target.getBoundingClientRect();
+                  
+                  // Calculate offset from handle to container
+                  const offsetX = handleRect.left - containerRect.left + 16; // 16 is half of handle width
+                  const offsetY = handleRect.top - containerRect.top + 16; // 16 is half of handle height
+                  
+                  const audioContainerCopy = document.createElement('div');
+                  audioContainerCopy.className = 'audiocontainercopy';
+                  audioContainerCopy.innerHTML = containerRef.current.innerHTML;
+                  
+                  // Style the copy
+                  Object.assign(audioContainerCopy.style, {
+                    position: 'fixed',
+                    width: '500px',
+                    height: '136px',
+                    background: 'rgba(15, 23, 42, 0.9)',
+                    border: '2px solid rgba(53, 132, 228, 0.8)',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    zIndex: '999999',
+                    pointerEvents: 'none',
+                    transform: 'scale(1.05) rotate(3deg)',
+                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(53, 132, 228, 0.3)',
+                    transition: 'transform 0.2s ease-out',
+                    left: (containerRect.left - offsetX) + 'px',
+                    top: (containerRect.top - offsetY) + 'px'
+                  });
+                  
+                  document.body.appendChild(audioContainerCopy);
+                  
+                  // Add animation class for popup effect
+                  requestAnimationFrame(() => {
+                    audioContainerCopy.style.transform = 'scale(1.05) rotate(3deg)';
+                  });
+                  
+                  // Add drag mode class to highlight other audio containers
+                  document.body.classList.add('audio-drag-mode');
+                  
+                  const handleMouseMove = (moveEvent) => {
+                    const newX = moveEvent.clientX - offsetX;
+                    const newY = moveEvent.clientY - offsetY;
+                    audioContainerCopy.style.left = newX + 'px';
+                    audioContainerCopy.style.top = newY + 'px';
+                  };
+                  
+                  const handleMouseUp = (upEvent) => {
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                    document.body.classList.remove('audio-drag-mode');
+                    
+                    // Check if dropped on another audio container
+                    const elementsUnder = document.elementsFromPoint(upEvent.clientX, upEvent.clientY);
+                    const targetAudioContainer = elementsUnder.find(el => 
+                      el.closest('[data-audio-container="true"]') && 
+                      el.closest('[data-audio-container="true"]') !== containerRef.current
+                    );
+                    
+                    if (targetAudioContainer) {
+                      const targetPairId = targetAudioContainer.closest('[data-pair-id]')?.getAttribute('data-pair-id');
+                      if (targetPairId && onSwap) {
+                        onSwap(pairId, targetPairId, 'audio');
+                      }
+                    }
+                    
+                    // Animate back and remove
+                    audioContainerCopy.style.transition = 'all 0.3s ease-out';
+                    audioContainerCopy.style.transform = 'scale(0.8) rotate(0deg)';
+                    audioContainerCopy.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                      if (audioContainerCopy.parentNode) {
+                        audioContainerCopy.parentNode.removeChild(audioContainerCopy);
+                      }
+                    }, 300);
+                  };
+                  
+                  document.addEventListener('mousemove', handleMouseMove);
+                  document.addEventListener('mouseup', handleMouseUp);
                 }}
-                title="Move down"
               >
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M7 10l5 5 5-5z"/>
+                {/* 4-way arrow/plus drag icon */}
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13,11H18L16.5,9.5L17.92,8.08L21.84,12L17.92,15.92L16.5,14.5L18,13H13V18L14.5,16.5L15.92,17.92L12,21.84L8.08,17.92L9.5,16.5L11,18V13H6L7.5,14.5L6.08,15.92L2.16,12L6.08,8.08L7.5,9.5L6,11H11V6L9.5,7.5L8.08,6.08L12,2.16L15.92,6.08L14.5,7.5L13,6V11Z"/>
                 </svg>
               </button>
             </div>
