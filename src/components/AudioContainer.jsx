@@ -16,6 +16,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   const [isHovered, setIsHovered] = useState(false);
   const [isContentChanging, setIsContentChanging] = useState(false);
   const [previousAudio, setPreviousAudio] = useState(null);
+  const [isWaveformLoading, setIsWaveformLoading] = useState(false);
   const containerRef = useRef(null);
 
   
@@ -25,6 +26,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   React.useEffect(() => {
     // Only initialize WaveSurfer if we're not in the middle of a content change
     if (audio && waveformRef.current && !isContentChanging) {
+      setIsWaveformLoading(true);
+      
       // Initialize WaveSurfer with Decibels-style waveform
       wavesurfer.current = WaveSurfer.create({
         container: waveformRef.current,
@@ -49,6 +52,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       // Event listeners
       wavesurfer.current.on('ready', () => {
         setDuration(wavesurfer.current.getDuration());
+        setIsWaveformLoading(false);
       });
 
       wavesurfer.current.on('audioprocess', () => {
@@ -180,9 +184,41 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           <div className="flex-1 flex items-start">
             <div 
               ref={waveformRef}
-              className="w-full cursor-pointer"
+              className="w-full cursor-pointer relative"
               style={{ height: '60px' }}
-            />
+            >
+              {/* Loading dots animation */}
+              {isWaveformLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex space-x-1">
+                    <div 
+                      className="w-2 h-2 rounded-full animate-pulse"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                        animationDelay: '0ms',
+                        animationDuration: '1.4s'
+                      }}
+                    ></div>
+                    <div 
+                      className="w-2 h-2 rounded-full animate-pulse"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                        animationDelay: '200ms',
+                        animationDuration: '1.4s'
+                      }}
+                    ></div>
+                    <div 
+                      className="w-2 h-2 rounded-full animate-pulse"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                        animationDelay: '400ms',
+                        animationDuration: '1.4s'
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Play button and time information */}
