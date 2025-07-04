@@ -302,59 +302,24 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             </div>
           </div>
 
-          {/* Connecting Bridge - Professional Plus Symbol */}
+          {/* Connecting Bridge - Simple Plus Symbol */}
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0" style={{ width: '60px', height: '300px', marginLeft: '30px', marginRight: '30px' }}>
             <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
-              {/* Plus symbol container with elegant background */}
-              <div
-                className="relative flex items-center justify-center"
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  background: 'linear-gradient(135deg, rgba(10, 15, 28, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
-                  backdropFilter: 'blur(16px)',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(30, 144, 255, 0.3)',
-                  boxShadow: 'none',
-                  animation: 'none'
-                }}
+              {/* Plus icon using SVG for crisp rendering */}
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none"
               >
-                {/* Plus icon using SVG for crisp rendering */}
-                <svg 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  style={{
-                    filter: 'drop-shadow(0 0 8px rgba(30, 144, 255, 0.4))'
-                  }}
-                >
-                  <path 
-                    d="M12 5V19M5 12H19" 
-                    stroke="url(#plusGradient)" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                  <defs>
-                    <linearGradient id="plusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#1E90FF" />
-                      <stop offset="50%" stopColor="#00CFFF" />
-                      <stop offset="100%" stopColor="#1E90FF" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-
-                {/* Subtle inner glow effect */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: 'radial-gradient(circle at center, rgba(30, 144, 255, 0.1) 0%, transparent 70%)',
-                    borderRadius: '12px',
-                    animation: 'pulse-glow 3s ease-in-out infinite alternate'
-                  }}
+                <path 
+                  d="M12 5V19M5 12H19" 
+                  stroke="rgba(255, 255, 255, 0.2)" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
                 />
-              </div>
+              </svg>
             </div>
           </div>
 

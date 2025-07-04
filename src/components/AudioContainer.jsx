@@ -154,9 +154,9 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             <button
               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 z-10"
               style={{
-                backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                border: '1px solid rgba(220, 38, 38, 0.3)',
-                color: '#DC2626'
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: 'rgba(255, 255, 255, 0.6)'
               }}
               title="Delete audio"
               onClick={() => {
@@ -194,10 +194,10 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               onClick={handlePlayPause}
               className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
               style={{
-                backgroundColor: isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.15)',
-                border: `2px solid ${isPlaying ? '#3584E4' : 'rgba(53, 132, 228, 0.4)'}`,
+                backgroundColor: isPlaying ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                border: `2px solid ${isPlaying ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)'}`,
                 borderRadius: '10px',
-                color: isPlaying ? 'white' : '#3584E4',
+                color: isPlaying ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transform: 'translateY(10px)'
               }}
             >
@@ -221,11 +221,11 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           {isHovered && audio && onStartAudioDrag && (
             <div className="absolute top-3 left-3 z-20">
               <button
-                className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-glow movehandle"
+                className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle"
                 style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'white'
+                  color: 'rgba(255, 255, 255, 0.6)'
                 }}
                 title="Drag to swap with other audio containers"
                 onMouseDown={(e) => {

@@ -81,7 +81,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         <div className="w-full h-full flex flex-col relative">
           {/* Top spacing - exactly 10px */}
           <div style={{ height: '10px', flexShrink: 0 }}></div>
-          
+
           {/* Image preview - takes remaining space minus button area */}
           <div className="flex-1 flex items-center justify-center" style={{ minHeight: '0' }}>
             <div className="relative overflow-hidden rounded flex-shrink-0" style={{ transform: 'scale(1.8)' }}>
@@ -100,15 +100,15 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           {/* Bottom spacing - exactly 10px */}
           <div style={{ height: '10px', flexShrink: 0 }}></div>
 
-          {/* Delete button - positioned at top right */}
-          <button
-            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 z-10"
-            style={{
-              backgroundColor: 'rgba(220, 38, 38, 0.15)',
-              border: '1px solid rgba(220, 38, 38, 0.3)',
-              color: '#DC2626'
-            }}
-            title="Delete image"
+          {/* Delete button - top right */}
+            <button
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 z-10"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: 'rgba(255, 255, 255, 0.6)'
+              }}
+              title="Delete image"
             onClick={() => {
               if (onDelete) {
                 onDelete();
@@ -134,26 +134,26 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  
+
                   // Start the new drag system
                   const initialMousePosition = { x: e.clientX, y: e.clientY };
                   onStartImageDrag(image, initialMousePosition);
-                  
+
                   const handleMouseMove = (moveEvent) => {
                     onUpdateDragPosition({ x: moveEvent.clientX, y: moveEvent.clientY });
                   };
-                  
+
                   const handleMouseUp = (upEvent) => {
                     document.removeEventListener('mousemove', handleMouseMove);
                     document.removeEventListener('mouseup', handleMouseUp);
-                    
+
                     // Check for valid drop target
                     const elementsUnder = document.elementsFromPoint(upEvent.clientX, upEvent.clientY);
                     const targetImageContainer = elementsUnder.find(el => 
                       el.closest('[data-image-container="true"]') && 
                       el.closest('[data-image-container="true"]') !== containerRef.current
                     );
-                    
+
                     let targetFound = false;
                     if (targetImageContainer) {
                       const targetPairId = targetImageContainer.closest('[data-pair-id]')?.getAttribute('data-pair-id');
@@ -162,10 +162,10 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                         targetFound = true;
                       }
                     }
-                    
+
                     onEndDrag(targetFound);
                   };
-                  
+
                   document.addEventListener('mousemove', handleMouseMove);
                   document.addEventListener('mouseup', handleMouseUp);
                 }}
