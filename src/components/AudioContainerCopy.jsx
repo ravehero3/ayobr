@@ -13,31 +13,31 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const container = waveformRef.current;
-      
+
       canvas.width = container.clientWidth;
       canvas.height = 80;
       canvas.style.width = '100%';
       canvas.style.height = '80px';
-      
+
       // Clear container and add canvas
       container.innerHTML = '';
       container.appendChild(canvas);
-      
+
       // Draw a simple waveform representation
       ctx.fillStyle = 'white';
       const barWidth = 2;
       const barGap = 1;
       const totalWidth = canvas.width;
       const numBars = Math.floor(totalWidth / (barWidth + barGap));
-      
+
       for (let i = 0; i < numBars; i++) {
         const x = i * (barWidth + barGap);
         const height = Math.random() * 60 + 20; // Random height between 20-80
         const y = (80 - height) / 2;
-        
+
         ctx.fillRect(x, y, barWidth, height);
       }
-      
+
       // Get audio duration
       const audioElement = new Audio();
       audioElement.src = URL.createObjectURL(audio);
@@ -78,8 +78,8 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
       }}
       style={{
         position: 'fixed',
-        left: mousePosition.x - 250, // Center the 500px wide container
-        top: mousePosition.y - 68, // Center the 136px tall container
+        left: `${mousePosition.x - 16}px`, // Position so cursor is on movehandle (16px from left edge)
+        top: `${mousePosition.y - 16}px`,  // Position so cursor is on movehandle (16px from top edge)
         width: '500px',
         height: '136px',
         background: '#1A1A1A',
@@ -92,6 +92,23 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
       }}
     >
       <div className="w-full h-full flex flex-col justify-between relative">
+        {/* Move Handle - Top Left */}
+        <div className="absolute top-3 left-3 z-20">
+          <div
+            className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: 'rgba(255, 255, 255, 0.6)'
+            }}
+          >
+            {/* 4-way arrow/plus drag icon */}
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13,11H18L16.5,9.5L17.92,8.08L21.84,12L17.92,15.92L16.5,14.5L18,13H13V18L14.5,16.5L15.92,17.92L12,21.84L8.08,17.92L9.5,16.5L11,18V13H6L7.5,14.5L6.08,15.92L2.16,12L6.08,8.08L7.5,9.5L6,11H11V6L9.5,7.5L8.08,6.08L12,2.16L15.92,6.08L14.5,7.5L13,6V11Z"/>
+            </svg>
+          </div>
+        </div>
+
         {/* Top header bar with title */}
         <div className="flex items-center justify-center mb-3">
           <span className="text-white text-sm font-medium truncate text-center">
