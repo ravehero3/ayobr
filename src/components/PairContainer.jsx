@@ -243,9 +243,6 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         <div 
           className="flex flex-col lg:flex-row items-center relative z-10"
           style={{ gap: '0px' }} // Remove gap since we use fixed margins on plus button
-          onDragOver={handleContainerDragOver}
-          onDragLeave={handleContainerDragLeave}
-          onDrop={handleContainerDrop}
         >
           {/* Audio Container - Made wider for better content display */}  
           <div className="relative w-full lg:w-1/2 min-w-[450px]">

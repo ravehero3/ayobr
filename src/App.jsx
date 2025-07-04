@@ -1,3 +1,7 @@
+Removing drag-and-drop functionality and replacing it with up/down arrow buttons for reordering containers.
+```
+
+```replit_final_file
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/appStore';
@@ -12,98 +16,48 @@ import DropZone from './components/DropZone';
 
 function App() {
   const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs } = useAppStore();
-  const { handleFileDrop, swapContainers, clearFileCache } = usePairingLogic();
+  const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
-  const [draggedItem, setDraggedItem] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [draggedContainer, setDraggedContainer] = useState(null);
-  const [isContainerDragMode, setIsContainerDragMode] = useState(false);
-  const [draggedContainerType, setDraggedContainerType] = useState(null);
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
-  const [isDraggingContainer, setIsDraggingContainer] = useState(false);
 
-  const handleDragStart = useCallback((item) => {
-    setDraggedItem(item);
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+
+    // Show file drop overlay when dragging files
+    const hasFiles = e.dataTransfer.types.includes('Files');
+    if (hasFiles) {
+      setIsDragOver(true);
+    }
   }, []);
 
-  const handleDragEnd = useCallback(() => {
-    setDraggedItem(null);
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOver(false);
+    }
   }, []);
 
-  const handleContainerDrag = (containerType, action, pairData) => {
-    console.log('Container drag event:', containerType, action, pairData);
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setIsDragOver(false);
 
-    if (action === 'start') {
-      // Start container drag mode
-      setIsContainerDragMode(true);
-      setIsDraggingContainer(true);
-      setDraggedContainerType(containerType); // 'audio' or 'image'
-      setDraggedContainer(pairData); // The actual pair data with id
-
-      console.log('Started dragging container:', {
-        type: containerType,
-        pairId: pairData.id,
-        isDragging: true
-      });
-
-      // Auto-reset after 15 seconds as safety
-      setTimeout(() => {
-        if (isDraggingContainer) {
-          console.log('Auto-resetting drag state');
-          setIsContainerDragMode(false);
-          setIsDraggingContainer(false);
-          setDraggedContainerType(null);
-          setDraggedContainer(null);
-        }
-      }, 15000);
-    } else if (action === 'end') {
-      console.log('Ending container drag');
-      setDraggedContainer(null);
-      setIsDraggingContainer(false); 
-      setDraggedContainerType(null);
-      setIsContainerDragMode(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileDrop(files);
     }
-  };
+  }, [handleFileDrop]);
 
-  // Mouse tracking for drag visualization
-  const handleMouseMove = useCallback((e) => {
-    if (isDraggingContainer) {
-      setDragPosition({ x: e.clientX, y: e.clientY });
+  const handleGlobalDrop = useCallback((e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      // Clear the file cache before processing to ensure fresh processing
+      clearFileCache();
+      handleFileDrop(files);
     }
-  }, [isDraggingContainer]);
-
-  // Add mouse move listener when dragging
-  React.useEffect(() => {
-    if (isDraggingContainer) {
-      document.addEventListener('mousemove', handleMouseMove);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-      };
-    }
-  }, [isDraggingContainer, handleMouseMove]);
-
-  const isValidContainerDragTarget = (targetPair) => {
-    if (!draggedContainer || targetPair.id === draggedContainer.id) return false;
-
-    // Determine what type the dragged container is
-    const draggedHasAudio = !!draggedContainer.audio;
-    const draggedHasImage = !!draggedContainer.image;
-    const targetHasAudio = !!targetPair.audio;
-    const targetHasImage = !!targetPair.image;
-
-    // Enforce same-type swapping only:
-    // - Audio containers can only swap with other audio containers
-    // - Image containers can only swap with other image containers
-    // - Empty containers can accept any type
-    if (draggedHasAudio) {
-      return targetHasAudio; // Audio can only swap with audio
-    } else if (draggedHasImage) {
-      return targetHasImage; // Image can only swap with image
-    } else {
-      // Dragged container is empty - can swap with any container
-      return true;
-    }
-  };
+  }, [handleFileDrop, clearFileCache]);
 
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');
@@ -162,51 +116,6 @@ function App() {
       }
     }
   };
-
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-
-    // Only show file drop overlay if dragging external files (not internal containers)
-    const hasFiles = e.dataTransfer.types.includes('Files');
-    const hasContainerData = e.dataTransfer.types.includes('text/plain');
-
-    // Only trigger file drop UI if we have files and no container drag data
-    if (hasFiles && !hasContainerData) {
-      setIsDragOver(true);
-    }
-  }, []);
-
-  const handleDragLeave = useCallback((e) => {
-    e.preventDefault();
-    if (!e.currentTarget.contains(e.relatedTarget)) {
-      setIsDragOver(false);
-    }
-  }, []);
-
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-
-    // Only process files if this is an external file drop (not internal container dragging)
-    const files = Array.from(e.dataTransfer.files);
-    const hasContainerData = e.dataTransfer.types.includes('text/plain');
-
-    if (files.length > 0 && !hasContainerData) {
-      handleFileDrop(files);
-    }
-  }, [handleFileDrop]);
-
-  const handleGlobalDrop = useCallback((e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      // Clear the file cache before processing to ensure fresh processing
-      clearFileCache();
-      handleFileDrop(files);
-    }
-  }, [handleFileDrop, clearFileCache]);
 
   return (
     <div 
@@ -285,7 +194,7 @@ function App() {
           <div className="w-full flex flex-col items-center mb-8">
             <div className="flex flex-col gap-4 max-w-[1200px] w-full px-6">
               <AnimatePresence>
-                {pairs.map((pair) => (
+                {pairs.map((pair, index) => (
                   <motion.div
                     key={pair.id}
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -296,16 +205,9 @@ function App() {
                   >
                     <Pairs
                       pair={pair}
-                      onSwap={swapContainers}
-                      draggedItem={draggedItem}
-                      onDragStart={handleDragStart}
-                      onDragEnd={handleDragEnd}
-                      clearFileCache={clearFileCache}
-                      onContainerDrag={handleContainerDrag}
-                      isValidContainerDragTarget={isValidContainerDragTarget}
-                      draggedContainer={draggedContainer}
-                      isDraggingContainer={isDraggingContainer}
-                      draggedContainerType={draggedContainerType}
+                      index={index}
+                      onMoveUp={moveContainerUp}
+                      onMoveDown={moveContainerDown}
                     />
                   </motion.div>
                 ))}

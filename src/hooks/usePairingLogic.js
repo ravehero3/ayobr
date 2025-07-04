@@ -155,36 +155,22 @@ export const usePairingLogic = () => {
     }, 50); // 50ms debounce delay
   }, [pairs, setPairs]);
 
-  const swapContainers = useCallback((fromPairId, toPairId, type) => {
-    const newPairs = [...pairs];
-    const fromPair = newPairs.find(pair => pair.id === fromPairId);
-    const toPair = newPairs.find(pair => pair.id === toPairId);
+  const moveContainerUp = useCallback((pairId) => {
+    const currentIndex = pairs.findIndex(pair => pair.id === pairId);
+    if (currentIndex > 0) {
+      const newPairs = [...pairs];
+      // Swap with the previous pair
+      [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
+      setPairs(newPairs);
+    }
+  }, [pairs, setPairs]);
 
-    if (fromPair && toPair) {
-      // Enforce same-type swapping rule: 
-      // - Audio content can only be swapped with other audio content
-      // - Image content can only be swapped with other image content
-      // - Empty slots can accept any content type
-      const fromHasType = !!fromPair[type];
-      const toHasType = !!toPair[type];
-      
-      // Allow swapping only if:
-      // 1. Both containers have content of the same type
-      // 2. At least one container is empty (allows moving content to empty slots)
-      if (fromHasType && toHasType) {
-        // Both have content - this is valid same-type swapping
-      } else if (!fromHasType || !toHasType) {
-        // One is empty - this is valid (moving content to/from empty slot)
-      } else {
-        // This case shouldn't happen, but just in case
-        return;
-      }
-
-      // Swap the specified type (audio or image)
-      const temp = fromPair[type];
-      fromPair[type] = toPair[type];
-      toPair[type] = temp;
-
+  const moveContainerDown = useCallback((pairId) => {
+    const currentIndex = pairs.findIndex(pair => pair.id === pairId);
+    if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
+      const newPairs = [...pairs];
+      // Swap with the next pair
+      [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
       setPairs(newPairs);
     }
   }, [pairs, setPairs]);
@@ -196,7 +182,8 @@ export const usePairingLogic = () => {
 
   return {
     handleFileDrop,
-    swapContainers,
+    moveContainerUp,
+    moveContainerDown,
     clearFileCache
   };
 };
