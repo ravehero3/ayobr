@@ -202,7 +202,7 @@ function App() {
 
   return (
     <div 
-      className={`fixed inset-0 w-screen h-screen bg-gradient-to-br from-space-dark via-space-navy to-space-black transition-all duration-300 overflow-auto ${
+      className={`fixed inset-0 w-screen h-screen bg-[#0D0D0D] transition-all duration-300 overflow-auto ${
         isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
       } ${
         dragState.isAudioDragging ? 'audio-drag-active' : ''
@@ -242,12 +242,12 @@ function App() {
 
       <div className="fixed inset-0 flex flex-col">
         {/* Header */}
-        <header className="p-6 border-b border-neon-blue/20 flex-shrink-0">
+        <header className="p-6 border-b border-white/10 flex-shrink-0">
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-3xl font-bold text-white mb-2">
               Type Beat Video Generator
             </h1>
-            <p className="text-gray-400">
+            <p className="text-sm text-[#AAA]">
               Drop audio files and images anywhere to create stunning type beat videos
             </p>
           </div>
@@ -279,7 +279,7 @@ function App() {
         {/* Pairs Grid - Updated for wider containers */}
         {pairs.some(pair => pair.audio || pair.image) && (
           <div className="w-full flex flex-col items-center mb-8">
-            <div className="flex flex-col gap-4 max-w-[1200px] w-full px-6">
+            <div className="flex flex-col gap-6 max-w-[1200px] w-full px-6">
               <AnimatePresence>
                 {pairs.map((pair, index) => (
                   <motion.div

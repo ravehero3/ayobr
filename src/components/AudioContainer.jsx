@@ -131,13 +131,14 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
       style={{
-        background: audio ? 'rgba(15, 23, 42, 0.6)' : '#040608',
-        borderRadius: '8px',
-        border: audio ? '1px solid rgba(75, 85, 99, 0.4)' : '1px solid rgba(75, 85, 99, 0.3)',
+        background: audio ? '#1A1A1A' : '#1A1A1A',
+        borderRadius: '12px',
+        border: audio ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)',
         padding: audio ? '16px' : '20px',
         height: '136px',
         minHeight: '136px',
-        maxHeight: '136px'
+        maxHeight: '136px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
       }}
     >
       {audio ? (
@@ -145,7 +146,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           {/* Top header bar with title (center) and delete button (right) */}
           <div className="flex items-center justify-between mb-3">
             {/* File title - centered */}
-            <span className="text-white text-sm font-medium truncate text-center flex-1">
+            <span className="text-[#AAA] text-sm font-medium truncate text-center flex-1">
               {audio.name.replace(/\.[^/.]+$/, "")}
             </span>
 
@@ -220,11 +221,11 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           {isHovered && audio && onStartAudioDrag && (
             <div className="absolute top-3 left-3 z-20">
               <button
-                className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle"
+                className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-glow movehandle"
                 style={{
-                  backgroundColor: 'rgba(53, 132, 228, 0.15)',
-                  border: '1px solid rgba(53, 132, 228, 0.3)',
-                  color: '#3584E4'
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white'
                 }}
                 title="Drag to swap with other audio containers"
                 onMouseDown={(e) => {

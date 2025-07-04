@@ -35,36 +35,41 @@
 
 /* Drag target visual feedback */
 .audio-drag-active .audio-container {
-  transition: all 0.3s ease-out;
-  transform: translateY(-2px);
-  border-color: rgba(53, 132, 228, 0.6) !important;
-  box-shadow: 0 4px 15px rgba(53, 132, 228, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-3px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .audio-drag-active .audio-container:not(.dragging-source) {
-  animation: border-pulse 2s ease-in-out infinite;
+  animation: container-pulse 2s ease-in-out infinite;
 }
 
 .image-drag-active .image-container {
-  transition: all 0.3s ease-out;
-  transform: translateY(-2px);
-  border-color: rgba(53, 132, 228, 0.6) !important;
-  box-shadow: 0 4px 15px rgba(53, 132, 228, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-3px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .image-drag-active .image-container:not(.dragging-source) {
-  animation: border-pulse 2s ease-in-out infinite;
+  animation: container-pulse 2s ease-in-out infinite;
 }
 
-@keyframes border-pulse {
+@keyframes container-pulse {
   0%, 100% {
-    border-color: rgba(53, 132, 228, 0.6);
-    box-shadow: 0 4px 15px rgba(53, 132, 228, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.1);
   }
   50% {
-    border-color: rgba(53, 132, 228, 0.9);
-    box-shadow: 0 6px 20px rgba(53, 132, 228, 0.4);
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
   }
+}
+
+/* Hover glow effect for buttons */
+.hover\:shadow-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
 /* Base styles */
@@ -76,8 +81,8 @@
 
 html, body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background-color: #050A13;
-  color: #ffffff;
+  background-color: #0D0D0D;
+  color: #AAAAAA;
   overflow-x: hidden;
 }
 

@@ -30,13 +30,13 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
       className="imagecontainercopy pointer-events-none"
       initial={{ scale: 1, rotate: 0 }}
       animate={{ 
-        scale: shouldReturnToOrigin ? 0.8 : 1.02, 
-        rotate: shouldReturnToOrigin ? 0 : 2,
-        opacity: shouldReturnToOrigin ? 0 : 1
+        scale: shouldReturnToOrigin ? 0.8 : 1.05, 
+        rotate: shouldReturnToOrigin ? 0 : 0,
+        opacity: shouldReturnToOrigin ? 0 : 0.95
       }}
       transition={{ 
         duration: shouldReturnToOrigin ? 0.3 : 0.2,
-        ease: shouldReturnToOrigin ? "easeOut" : "easeInOut"
+        ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
       }}
       style={{
         position: 'fixed',
@@ -44,12 +44,12 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
         top: mousePosition.y - 90, // Center the 180px tall container
         width: '500px',
         height: '180px',
-        background: 'rgba(15, 23, 42, 0.95)',
-        borderRadius: '8px',
-        border: '2px solid rgba(53, 132, 228, 0.8)',
+        background: '#1A1A1A',
+        borderRadius: '12px',
+        border: '2px solid rgba(255, 255, 255, 0.8)',
         padding: '16px',
         zIndex: 999999,
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(53, 132, 228, 0.4)',
+        boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.2)',
         backdropFilter: 'blur(8px)'
       }}
     >

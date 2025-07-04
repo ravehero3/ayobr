@@ -67,13 +67,14 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
       style={{
-        background: image ? 'rgba(15, 23, 42, 0.6)' : '#040608',
-        borderRadius: '8px',
-        border: image ? '1px solid rgba(75, 85, 99, 0.4)' : '1px solid rgba(75, 85, 99, 0.3)',
+        background: image ? '#1A1A1A' : '#1A1A1A',
+        borderRadius: '12px',
+        border: image ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)',
         padding: image ? '16px' : '20px',
         height: '180px',
         minHeight: '180px',
-        maxHeight: '180px'
+        maxHeight: '180px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
       }}
     >
       {image ? (
@@ -123,11 +124,11 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           {isHovered && image && onStartImageDrag && (
             <div className="absolute top-3 left-3 z-20">
               <button
-                className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle"
+                className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-glow movehandle"
                 style={{
-                  backgroundColor: 'rgba(53, 132, 228, 0.15)',
-                  border: '1px solid rgba(53, 132, 228, 0.3)',
-                  color: '#3584E4'
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white'
                 }}
                 title="Drag to swap with other image containers"
                 onMouseDown={(e) => {
