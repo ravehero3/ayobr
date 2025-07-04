@@ -159,7 +159,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       {!generatedVideo && (
         <button
           onClick={handleDelete}
-          className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-red-500/20 backdrop-blur-sm border border-red-400/40 text-red-400 hover:text-red-300 hover:border-red-300/50 hover:bg-red-500/30 transition-all duration-300"
+          className="absolute top-4 right-4 z-30 p-2 rounded-xl bg-red-500/20 backdrop-blur-sm border border-red-400/40 text-red-400 hover:text-red-300 hover:border-red-300/50 hover:bg-red-500/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
           style={{
             boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
@@ -235,7 +235,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </div>
       ) : (
         <div 
-          className="flex flex-col lg:flex-row items-center relative z-10"
+          className="flex flex-col lg:flex-row items-center relative z-10 group/pair"
           style={{ gap: '0px' }} // Remove gap since we use fixed margins on plus button
         >
           {/* Audio Container - Made wider for better content display */}  
@@ -249,8 +249,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
-                background: pair.audio ? '#050A13' : '#040608', // Darker for empty containers
-                backgroundColor: pair.audio ? '#0A0F1C' : '#080C14', // Darker navy background for empty
+                background: '#1A1A1A', // Match audio container background
+                backgroundColor: '#1A1A1A', // Match audio container background
                 borderColor: pair.audio ? 'rgba(75, 85, 99, 0.6)' : 'rgba(75, 85, 99, 0.3)',
                 borderWidth: '1.5px',
                 boxShadow: 'none',
@@ -369,8 +369,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
-                background: pair.image ? '#050A13' : '#040608', // Darker for empty containers
-                backgroundColor: pair.image ? '#0A0F1C' : '#080C14', // Darker navy background for empty
+                background: '#1A1A1A', // Match audio container background
+                backgroundColor: '#1A1A1A', // Match audio container background
                 borderColor: pair.image ? 'rgba(75, 85, 99, 0.6)' : 'rgba(75, 85, 99, 0.3)',
                 borderWidth: '1.5px',
                 boxShadow: 'none',

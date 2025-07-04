@@ -17,7 +17,7 @@ function App() {
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
-  
+
   // Drag overlay state
   const [dragState, setDragState] = useState({
     isAudioDragging: false,
@@ -85,9 +85,9 @@ function App() {
     const currentPairs = [...pairs];
     const sourceIndex = currentPairs.findIndex(p => p.id === sourcePairId);
     const targetIndex = currentPairs.findIndex(p => p.id === targetPairId);
-    
+
     if (sourceIndex === -1 || targetIndex === -1) return;
-    
+
     if (type === 'audio') {
       // Swap audio files between containers
       const tempAudio = currentPairs[sourceIndex].audio;
@@ -99,7 +99,7 @@ function App() {
       currentPairs[sourceIndex].image = currentPairs[targetIndex].image;
       currentPairs[targetIndex].image = tempImage;
     }
-    
+
     setPairs(currentPairs);
   }, [pairs, setPairs]);
 
@@ -406,7 +406,7 @@ function App() {
         isVisible={dragState.isAudioDragging}
         mousePosition={dragState.mousePosition}
       />
-      
+
       <ImageContainerCopy 
         image={dragState.draggedImage}
         isVisible={dragState.isImageDragging}

@@ -152,7 +152,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
             {/* Delete button - top right */}
             <button
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-70 hover:opacity-100 z-10"
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 z-10"
               style={{
                 backgroundColor: 'rgba(220, 38, 38, 0.15)',
                 border: '1px solid rgba(220, 38, 38, 0.3)',

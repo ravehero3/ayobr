@@ -102,7 +102,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
           {/* Delete button - positioned at top right */}
           <button
-            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-60 hover:opacity-100 z-10"
+            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 z-10"
             style={{
               backgroundColor: 'rgba(220, 38, 38, 0.15)',
               border: '1px solid rgba(220, 38, 38, 0.3)',
