@@ -196,14 +196,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
               backgroundColor: '#0A0F1C',
               borderColor: '#10B981', // Green border for completed video
               borderWidth: '2px',
-              boxShadow: `
-                0 0 0 1px rgba(16, 185, 129, 0.4),
-                0 0 20px rgba(16, 185, 129, 0.3),
-                0 0 40px rgba(16, 185, 129, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05)
-              `,
-              borderRadius: '16px',
-              animation: 'border-pulse 3s ease-in-out infinite alternate'
+              boxShadow: 'none',
+              borderRadius: '16px'
             }}
           >
             {/* Clean video display - just the video */}
@@ -257,21 +251,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 maxWidth: '500px',
                 background: pair.audio ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.audio ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: pair.audio ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)',
+                borderColor: pair.audio ? 'rgba(75, 85, 99, 0.6)' : 'rgba(75, 85, 99, 0.3)',
                 borderWidth: '1.5px',
-                boxShadow: pair.audio ? `
-                  0 0 0 1px rgba(30, 144, 255, 0.3),
-                  0 0 15px rgba(30, 144, 255, 0.4),
-                  0 0 30px rgba(0, 207, 255, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.05)
-                ` : `
-                  0 0 0 1px rgba(30, 144, 255, 0.15),
-                  0 0 8px rgba(30, 144, 255, 0.2),
-                  0 0 15px rgba(0, 207, 255, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `,
-                borderRadius: '14px',
-                animation: pair.audio ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
+                boxShadow: 'none',
+                borderRadius: '14px'
               }}
             >
 
@@ -309,13 +292,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   backdropFilter: 'blur(16px)',
                   borderRadius: '12px',
                   border: '1px solid rgba(30, 144, 255, 0.3)',
-                  boxShadow: `
-                    0 0 0 1px rgba(30, 144, 255, 0.2),
-                    0 0 16px rgba(30, 144, 255, 0.15),
-                    0 0 32px rgba(0, 207, 255, 0.08),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1)
-                  `,
-                  animation: 'border-pulse 4s ease-in-out infinite alternate'
+                  boxShadow: 'none',
+                  animation: 'none'
                 }}
               >
                 {/* Plus icon using SVG for crisp rendering */}
@@ -370,21 +348,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 maxWidth: '500px',
                 background: pair.image ? '#050A13' : '#040608', // Darker for empty containers
                 backgroundColor: pair.image ? '#0A0F1C' : '#080C14', // Darker navy background for empty
-                borderColor: pair.image ? '#1E90FF' : 'rgba(30, 144, 255, 0.3)',
+                borderColor: pair.image ? 'rgba(75, 85, 99, 0.6)' : 'rgba(75, 85, 99, 0.3)',
                 borderWidth: '1.5px',
-                boxShadow: pair.image ? `
-                  0 0 0 1px rgba(30, 144, 255, 0.3),
-                  0 0 15px rgba(30, 144, 255, 0.4),
-                  0 0 30px rgba(0, 207, 255, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.05)
-                ` : `
-                  0 0 0 1px rgba(30, 144, 255, 0.15),
-                  0 0 8px rgba(30, 144, 255, 0.2),
-                  0 0 15px rgba(0, 207, 255, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.02)
-                `,
-                borderRadius: '14px',
-                animation: pair.image ? 'border-pulse 3s ease-in-out infinite alternate' : 'none'
+                boxShadow: 'none',
+                borderRadius: '14px'
               }}
             >
 
