@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-const ImageContainerCopy = ({ image, isVisible, mousePosition }) => {
+const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOrigin = false }) => {
   const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
@@ -29,7 +29,15 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition }) => {
     <motion.div
       className="imagecontainercopy pointer-events-none"
       initial={{ scale: 1, rotate: 0 }}
-      animate={{ scale: 1.02, rotate: 2 }}
+      animate={{ 
+        scale: shouldReturnToOrigin ? 0.8 : 1.02, 
+        rotate: shouldReturnToOrigin ? 0 : 2,
+        opacity: shouldReturnToOrigin ? 0 : 1
+      }}
+      transition={{ 
+        duration: shouldReturnToOrigin ? 0.3 : 0.2,
+        ease: shouldReturnToOrigin ? "easeOut" : "easeInOut"
+      }}
       style={{
         position: 'fixed',
         left: mousePosition.x - 250, // Center the 500px wide container

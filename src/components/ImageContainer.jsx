@@ -142,10 +142,27 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                     onUpdateDragPosition({ x: moveEvent.clientX, y: moveEvent.clientY });
                   };
                   
-                  const handleMouseUp = () => {
+                  const handleMouseUp = (upEvent) => {
                     document.removeEventListener('mousemove', handleMouseMove);
                     document.removeEventListener('mouseup', handleMouseUp);
-                    onEndDrag();
+                    
+                    // Check for valid drop target
+                    const elementsUnder = document.elementsFromPoint(upEvent.clientX, upEvent.clientY);
+                    const targetImageContainer = elementsUnder.find(el => 
+                      el.closest('[data-image-container="true"]') && 
+                      el.closest('[data-image-container="true"]') !== containerRef.current
+                    );
+                    
+                    let targetFound = false;
+                    if (targetImageContainer) {
+                      const targetPairId = targetImageContainer.closest('[data-pair-id]')?.getAttribute('data-pair-id');
+                      if (targetPairId && onSwap) {
+                        onSwap(pairId, targetPairId, 'image');
+                        targetFound = true;
+                      }
+                    }
+                    
+                    onEndDrag(targetFound);
                   };
                   
                   document.addEventListener('mousemove', handleMouseMove);

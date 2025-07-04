@@ -55,14 +55,29 @@ function App() {
     }));
   }, []);
 
-  const handleEndDrag = useCallback(() => {
-    setDragState({
-      isAudioDragging: false,
-      isImageDragging: false,
-      draggedAudio: null,
-      draggedImage: null,
-      mousePosition: { x: 0, y: 0 }
-    });
+  const handleEndDrag = useCallback((targetFound = false) => {
+    if (!targetFound) {
+      // If no valid target found, animate back to origin
+      // The container copy components will handle this animation
+      setTimeout(() => {
+        setDragState({
+          isAudioDragging: false,
+          isImageDragging: false,
+          draggedAudio: null,
+          draggedImage: null,
+          mousePosition: { x: 0, y: 0 }
+        });
+      }, 300); // Wait for return animation to complete
+    } else {
+      // Immediate cleanup if dropped on valid target
+      setDragState({
+        isAudioDragging: false,
+        isImageDragging: false,
+        draggedAudio: null,
+        draggedImage: null,
+        mousePosition: { x: 0, y: 0 }
+      });
+    }
   }, []);
 
   const handleDragOver = useCallback((e) => {
@@ -166,6 +181,10 @@ function App() {
     <div 
       className={`fixed inset-0 w-screen h-screen bg-gradient-to-br from-space-dark via-space-navy to-space-black transition-all duration-300 overflow-auto ${
         isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
+      } ${
+        dragState.isAudioDragging ? 'audio-drag-active' : ''
+      } ${
+        dragState.isImageDragging ? 'image-drag-active' : ''
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-const AudioContainerCopy = ({ audio, isVisible, mousePosition }) => {
+const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOrigin = false }) => {
   const waveformRef = useRef(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -67,7 +67,15 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition }) => {
     <motion.div
       className="audiocontainercopy pointer-events-none"
       initial={{ scale: 1, rotate: 0 }}
-      animate={{ scale: 1.02, rotate: 2 }}
+      animate={{ 
+        scale: shouldReturnToOrigin ? 0.8 : 1.02, 
+        rotate: shouldReturnToOrigin ? 0 : 2,
+        opacity: shouldReturnToOrigin ? 0 : 1
+      }}
+      transition={{ 
+        duration: shouldReturnToOrigin ? 0.3 : 0.2,
+        ease: shouldReturnToOrigin ? "easeOut" : "easeInOut"
+      }}
       style={{
         position: 'fixed',
         left: mousePosition.x - 250, // Center the 500px wide container
