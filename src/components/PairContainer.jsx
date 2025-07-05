@@ -237,7 +237,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           {/* Audio Container - Made wider for better content display */}  
           <div className="relative w-full lg:w-1/2 min-w-[450px]">
             <div
-              className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
+              className="relative w-full overflow-hidden group/container"
               style={{
                 height: '200px',
                 minHeight: '200px',
@@ -245,12 +245,6 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
-                background: '#1A1A1A', // Match audio container background
-                backgroundColor: '#1A1A1A', // Match audio container background
-                borderColor: pair.audio ? 'rgba(75, 85, 99, 0.6)' : 'rgba(75, 85, 99, 0.3)',
-                borderWidth: '1.5px',
-                boxShadow: 'none',
-                borderRadius: '14px'
               }}
             >
 
@@ -322,7 +316,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           {/* Image Container - Made wider for better content display */}
           <div className="relative w-full lg:w-1/2 min-w-[450px]">
             <div
-              className="relative w-full backdrop-blur-xl border overflow-hidden group/container"
+              className="relative w-full overflow-hidden group/container"
               style={{
                 height: '200px',
                 minHeight: '200px',
@@ -330,12 +324,6 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
-                background: '#1A1A1A', // Match audio container background
-                backgroundColor: '#1A1A1A', // Match audio container background
-                borderColor: pair.image ? 'rgba(75, 85, 99, 0.6)' : 'rgba(75, 85, 99, 0.3)',
-                borderWidth: '1.5px',
-                boxShadow: 'none',
-                borderRadius: '14px'
               }}
             >
 
