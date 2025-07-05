@@ -202,19 +202,13 @@ function App() {
 
   return (
     <div 
-      className={`fixed inset-0 w-screen h-screen bg-[#0D0D0D] transition-all duration-300 overflow-auto ${
+      className={`fixed inset-0 w-screen h-screen custom-background transition-all duration-300 overflow-auto ${
         isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
       } ${
         dragState.isAudioDragging ? 'audio-drag-active' : ''
       } ${
         dragState.isImageDragging ? 'image-drag-active' : ''
       }`}
-      style={{
-        backgroundImage: `url('/attached_assets/background_1751734336497.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
