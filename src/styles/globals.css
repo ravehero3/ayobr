@@ -1,19 +1,31 @@
 @import 'tailwindcss';
 
-/* Global glass morphism effect for all containers */
+/* Modern glassmorphism effect for all containers */
 .glass-container {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* Semi-transparent dark background */
+  background: rgba(0, 0, 0, 0.3);
   
-  /* Add noise texture for enhanced glass effect */
+  /* Strong backdrop blur for glass effect */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  
+  /* Subtle border and shadows */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  
+  /* Rounded corners */
+  border-radius: 16px;
+  
+  /* Noise texture overlay */
   background-image: url('/noise.png');
-  background-blend-mode: overlay;
-  background-size: 200px 200px;
+  background-blend-mode: soft-light;
+  background-size: 150px 150px;
   background-repeat: repeat;
+  
+  /* Ensure content stays above background */
+  position: relative;
 }
 
 /* Premium container styles */

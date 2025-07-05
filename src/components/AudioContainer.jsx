@@ -145,11 +145,11 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       }}
     >
       {audio ? (
-        <div className="w-full h-full flex flex-col justify-between relative">
+        <div className="w-full h-full flex flex-col justify-between relative z-10">
           {/* Top header bar with title (center) and delete button (right) */}
           <div className="flex items-center justify-between mb-3">
             {/* File title - centered */}
-            <span className="text-[#AAA] text-sm font-medium truncate text-center flex-1">
+            <span className="text-white text-sm font-medium truncate text-center flex-1 drop-shadow-lg">
               {audio.name.replace(/\.[^/.]+$/, "")}
             </span>
 
@@ -181,12 +181,12 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           <div className="flex-1 flex items-start">
             <div 
               ref={waveformRef}
-              className="w-full cursor-pointer relative"
+              className="w-full cursor-pointer relative z-10 bg-black/20 rounded-lg p-2 backdrop-blur-sm"
               style={{ height: '60px' }}
             >
               {/* Loading animation */}
               {isWaveformLoading && (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center z-20">
                   <DotLoader size="md" color="white" />
                 </div>
               )}
@@ -194,21 +194,22 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           </div>
 
           {/* Play button and time information */}
-          <div className="flex items-center justify-between" style={{ marginTop: '20px' }}>
-            <div className="text-xs text-gray-400">
+          <div className="flex items-center justify-between relative z-10" style={{ marginTop: '20px' }}>
+            <div className="text-xs text-white bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
               {formatTime(currentTime)}
             </div>
 
             {/* Play/pause button - centered */}
             <button
               onClick={handlePlayPause}
-              className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+              className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
               style={{
-                backgroundColor: isPlaying ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                border: `2px solid ${isPlaying ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)'}`,
+                backgroundColor: isPlaying ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
+                border: `2px solid ${isPlaying ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)'}`,
                 borderRadius: '10px',
-                color: isPlaying ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                transform: 'translateY(10px)'
+                color: 'white',
+                transform: 'translateY(10px)',
+                backdropFilter: 'blur(8px)'
               }}
             >
               {isPlaying ? (
@@ -222,7 +223,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               )}
             </button>
 
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-white bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
               {formatTime(duration)}
             </div>
           </div>
@@ -286,20 +287,16 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           )}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center h-full text-gray-300">
+        <div className="flex flex-col items-center justify-center h-full relative z-10">
           <div 
-            className="p-4 rounded-full mb-4"
-            style={{
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%)',
-              border: '1px solid rgba(59, 130, 246, 0.2)'
-            }}
+            className="p-4 rounded-full mb-4 bg-white/10 backdrop-blur-sm border border-white/20"
           >
-            <svg className="w-8 h-8 text-blue-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-gray-300 mb-1 text-center">Drop audio file here</p>
-          <p className="text-xs text-gray-500 font-light text-center">MP3, WAV</p>
+          <p className="text-sm font-medium text-white mb-1 text-center drop-shadow-lg">Drop audio file here</p>
+          <p className="text-xs text-white/70 font-light text-center drop-shadow-sm">MP3, WAV</p>
         </div>
       )}
     </motion.div>
