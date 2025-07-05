@@ -74,49 +74,17 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       }}
     >
       {image ? (
-        <div className="w-full h-full flex items-center justify-center relative z-10">
-          {/* Centered image preview */}
-          <div className="relative overflow-hidden rounded flex-shrink-0 bg-black/20 p-3 backdrop-blur-sm border border-white/20">
-            <img
-              src={imageUrl}
-              alt={image.name}
-              className="w-24 h-24 object-contain"
-              style={{
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
-              }}
-            />
-          </div>
-
-          {/* Delete button - absolute top-right */}
-          <button
-            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 z-20"
-            style={{
-              backgroundColor: 'rgba(239, 68, 68, 0.8)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'white'
-            }}
-            title="Delete image"
-            onClick={() => {
-              if (onDelete) {
-                onDelete();
-              }
-            }}
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Move Handle - Top Left, visible only on hover */}
-          {isHovered && image && onStartImageDrag && (
-            <div className="absolute top-3 left-3 z-20">
+        <div className="w-full h-full flex flex-col relative z-10">
+          {/* Top header bar with title and controls */}
+          <div className="flex items-center justify-between mb-3 relative">
+            {/* Move Handle - Left side, aligned with title */}
+            {isHovered && image && onStartImageDrag && (
               <button
-                className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle"
+                className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle flex-shrink-0"
                 style={{
-                  backgroundColor: 'rgba(147, 51, 234, 0.8)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'white'
+                  color: 'rgba(255, 255, 255, 0.7)'
                 }}
                 title="Drag to swap with other image containers"
                 onMouseDown={(e) => {
@@ -163,8 +131,48 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                   <path d="M13,11H18L16.5,9.5L17.92,8.08L21.84,12L17.92,15.92L16.5,14.5L18,13H13V18L14.5,16.5L15.92,17.92L12,21.84L8.08,17.92L9.5,16.5L11,18V13H6L7.5,14.5L6.08,15.92L2.16,12L6.08,8.08L7.5,9.5L6,11H11V6L9.5,7.5L8.08,6.08L12,2.16L15.92,6.08L14.5,7.5L13,6V11Z"/>
                 </svg>
               </button>
+            )}
+            
+            {/* File title - centered */}
+            <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg flex-1">
+              {image.name.replace(/\.[^/.]+$/, "")}
+            </span>
+            
+            {/* Delete button - Right side, aligned with title */}
+            <button
+              className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 flex-shrink-0"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: 'rgba(255, 255, 255, 0.7)'
+              }}
+              title="Delete image"
+              onClick={() => {
+                if (onDelete) {
+                  onDelete();
+                }
+              }}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Centered image preview */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="relative overflow-hidden rounded flex-shrink-0 bg-black/20 p-3 backdrop-blur-sm border border-white/20">
+              <img
+                src={imageUrl}
+                alt={image.name}
+                className="w-24 h-24 object-contain"
+                style={{
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
+                }}
+              />
             </div>
-          )}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full relative z-10">
