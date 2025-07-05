@@ -86,6 +86,23 @@ html, body {
   overflow-x: hidden;
 }
 
+/* Background overlay for better content readability */
+.bg-overlay {
+  position: relative;
+}
+
+.bg-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 1;
+}
+
 body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

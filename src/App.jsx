@@ -209,6 +209,12 @@ function App() {
       } ${
         dragState.isImageDragging ? 'image-drag-active' : ''
       }`}
+      style={{
+        backgroundImage: `url('/attached_assets/background_1751734336497.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -240,7 +246,7 @@ function App() {
         )}
       </AnimatePresence>
 
-      <div className="fixed inset-0 flex flex-col">
+      <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Header */}
         <header className="p-6 border-b border-white/10 flex-shrink-0">
           <div className="max-w-6xl mx-auto text-center">
