@@ -311,22 +311,18 @@ function App() {
         {/* Action Buttons */}
         {pairs.some(pair => pair.audio || pair.image) && (
           <div className="flex justify-center gap-4 mb-8">
-            <motion.button
+            <button
               onClick={handleGenerateVideos}
               disabled={isGenerating}
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="generate-videos-btn"
             >
-              {isGenerating ? (
-                <div className="flex items-center space-x-3">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Generating Videos...</span>
-                </div>
-              ) : (
-                'Generate Videos'
-              )}
-            </motion.button>
+              <span className="btn-text">
+                {isGenerating ? 'Generating...' : 'Generate Videos'}
+              </span>
+              <span className="btn-icon">
+                {isGenerating ? '⟳' : '→'}
+              </span>
+            </button>
 
             {/* Stop Generation Button */}
             {isGenerating && !isCancelling && (
