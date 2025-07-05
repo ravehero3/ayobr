@@ -93,7 +93,7 @@ html, body {
 
 /* Custom background image */
 .custom-background {
-  background-image: url('../attached_assets/background_1751734336497.jpg');
+  background-image: url('../../attached_assets/background_1751734336497.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
