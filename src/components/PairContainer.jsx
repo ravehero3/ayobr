@@ -232,12 +232,19 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       ) : (
         <div 
           className="flex flex-col lg:flex-row items-center relative z-10 group/pair"
-          style={{ gap: '0px' }} // Remove gap since we use fixed margins on plus button
+          style={{ 
+            gap: '0px',
+            position: 'fixed',
+            left: '30px',
+            right: '30px',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
         >
-          {/* Audio Container - Made wider for better content display */}  
-          <div className="relative w-full lg:w-1/2 min-w-[450px]">
+          {/* Audio Container - Fixed to left with 30px margin */}  
+          <div className="relative" style={{ position: 'absolute', left: '0' }}>
             <div
-              className="relative w-full overflow-hidden group/container"
+              className="relative overflow-hidden group/container"
               style={{
                 height: '200px',
                 minHeight: '200px',
@@ -293,7 +300,13 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           </div>
 
           {/* Connecting Bridge - Simple Plus Symbol */}
-          <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0" style={{ width: '80px', height: '300px', marginLeft: '40px', marginRight: '40px' }}>
+          <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0" style={{ 
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '80px', 
+            height: '300px'
+          }}>
             <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
               {/* Plus icon using SVG for crisp rendering */}
               <svg 
@@ -313,10 +326,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             </div>
           </div>
 
-          {/* Image Container - Made wider for better content display */}
-          <div className="relative w-full lg:w-1/2 min-w-[450px]">
+          {/* Image Container - Fixed to right with 30px margin */}
+          <div className="relative" style={{ position: 'absolute', right: '0' }}>
             <div
-              className="relative w-full overflow-hidden group/container"
+              className="relative overflow-hidden group/container"
               style={{
                 height: '200px',
                 minHeight: '200px',
