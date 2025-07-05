@@ -187,17 +187,13 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       {generatedVideo ? (
         <div className="flex justify-center relative z-10">
           <div
-            className="relative w-full max-w-[800px] backdrop-blur-xl border overflow-hidden group/container"
+            className="relative w-full max-w-[800px] border overflow-hidden group/container glass-container"
             style={{
               height: '450px',
               minHeight: '450px',
               maxHeight: '450px',
-              background: '#050A13',
-              backgroundColor: '#0A0F1C',
               borderColor: '#10B981', // Green border for completed video
               borderWidth: '2px',
-              boxShadow: 'none',
-              borderRadius: '16px'
             }}
           >
             {/* Clean video display - just the video */}

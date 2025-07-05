@@ -57,7 +57,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   return (
     <motion.div
       ref={containerRef}
-      className="relative w-full h-full transition-all duration-300 group cursor-pointer image-container"
+      className="relative w-full h-full transition-all duration-300 group cursor-pointer image-container glass-container"
       data-pair-id={pairId}
       data-image-container="true"
       whileHover={{ scale: image ? 1.005 : 1 }}
@@ -67,14 +67,10 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
       style={{
-        background: image ? '#1A1A1A' : '#1A1A1A',
-        borderRadius: '12px',
-        border: image ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)',
         padding: image ? '16px' : '20px',
         height: '180px',
         minHeight: '180px',
         maxHeight: '180px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
       }}
     >
       {image ? (

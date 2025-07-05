@@ -128,7 +128,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   return (
     <motion.div
       ref={containerRef}
-      className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
+      className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container glass-container"
       data-pair-id={pairId}
       data-audio-container="true"
       whileHover={{ scale: audio ? 1.005 : 1 }}
@@ -138,14 +138,10 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
       style={{
-        background: audio ? '#1A1A1A' : '#1A1A1A',
-        borderRadius: '12px',
-        border: audio ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)',
         padding: audio ? '16px' : '20px',
         height: '136px',
         minHeight: '136px',
         maxHeight: '136px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
       }}
     >
       {audio ? (
