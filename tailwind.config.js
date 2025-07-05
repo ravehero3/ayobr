@@ -134,6 +134,13 @@ module.exports = {
           border: '1.5px solid #00CFFF',
           boxShadow: '0 0 10px rgba(0, 207, 255, 0.3)',
         },
+        '.glass-card': {
+          backdropFilter: 'blur(16px)',
+          background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.3) 0%, rgba(30, 144, 255, 0.3) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+        },
       }
       addUtilities(newUtilities)
     }

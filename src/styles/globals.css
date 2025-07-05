@@ -328,6 +328,16 @@ body {
   border: 1px solid rgba(30, 144, 255, 0.2);
 }
 
+/* Blurry glass card with gradient */
+.glass-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.3) 0%, rgba(30, 144, 255, 0.3) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
 /* Neon text effect */
 .neon-text {
   text-shadow: 
