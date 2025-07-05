@@ -147,7 +147,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
           {/* Top header bar with title (center) and controls */}
-          <div className="flex items-center justify-between mb-3 relative">
+          <div className="flex items-center justify-between mb-2 relative" style={{ marginTop: '-4px' }}>
             {/* Move Handle - Left side, aligned with title */}
             {isHovered && audio && onStartAudioDrag && (
               <button
@@ -258,22 +258,21 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             {/* Play/pause button - centered */}
             <button
               onClick={handlePlayPause}
-              className="w-16 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+              className="w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
               style={{
-                backgroundColor: isPlaying ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
-                border: `2px solid ${isPlaying ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)'}`,
-                borderRadius: '10px',
-                color: 'white',
-                transform: 'translateY(10px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '8px',
+                color: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(8px)'
               }}
             >
               {isPlaying ? (
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
               ) : (
-                <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="m7 4 10 6L7 16V4z"/>
                 </svg>
               )}

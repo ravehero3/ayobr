@@ -76,7 +76,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       {image ? (
         <div className="w-full h-full flex flex-col relative z-10">
           {/* Top header bar with title and controls */}
-          <div className="flex items-center justify-between mb-3 relative">
+        <div className="flex items-center justify-between mb-2 relative z-20" style={{ marginTop: '-4px' }}>
             {/* Move Handle - Left side, aligned with title */}
             {isHovered && image && onStartImageDrag && (
               <button
@@ -132,12 +132,12 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                 </svg>
               </button>
             )}
-            
+
             {/* File title - centered */}
             <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg flex-1">
               {image.name.replace(/\.[^/.]+$/, "")}
             </span>
-            
+
             {/* Delete button - Right side, aligned with title */}
             <button
               className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 flex-shrink-0"

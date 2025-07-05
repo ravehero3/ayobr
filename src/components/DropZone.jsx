@@ -41,7 +41,7 @@ const DropZone = ({ onFileDrop }) => {
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="text-center">
+      <div className="text-center flex flex-col items-center justify-center min-h-[300px]">
         <div className="mb-4">
           <svg
             className={`mx-auto h-16 w-16 transition-colors duration-300 ${
