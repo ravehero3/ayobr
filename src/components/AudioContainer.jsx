@@ -204,10 +204,12 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               </button>
             )}
             
-            {/* File title - centered */}
-            <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg flex-1">
-              {audio.name.replace(/\.[^/.]+$/, "")}
-            </span>
+            {/* File title - Always centered, independent of move button */}
+            <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+              <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg">
+                {audio.name.replace(/\.[^/.]+$/, "")}
+              </span>
+            </div>
             
             {/* Delete button - Right side, aligned with title */}
             <button
@@ -255,14 +257,13 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               {formatTime(currentTime)}
             </div>
 
-            {/* Play/pause button - centered */}
+            {/* Play/pause button - centered, circular */}
             <button
               onClick={handlePlayPause}
-              className="w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+              className="w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 rounded-full"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '8px',
                 color: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(8px)'
               }}

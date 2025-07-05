@@ -235,6 +235,10 @@ Changelog:
 - July 5, 2025. Applied modern glassmorphism styling: semi-transparent dark background, 16px backdrop blur, noise texture overlay
 - July 5, 2025. Enhanced content readability with white text, drop shadows, and proper z-index layering
 - July 5, 2025. Updated both audio and image containers with consistent glass effect for filled and empty states
+- July 5, 2025. Fixed title movement issue by making audio container titles absolutely positioned and centered
+- July 5, 2025. Removed title display from image containers for cleaner interface
+- July 5, 2025. Changed play button from rounded rectangle to circular shape for better visual appeal
+- July 5, 2025. Reduced spacing between container pairs from gap-6 to gap-3 to fit more pairs on screen
 ```
 
 ## User Preferences

@@ -133,10 +133,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               </button>
             )}
 
-            {/* File title - centered */}
-            <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg flex-1">
-              {image.name.replace(/\.[^/.]+$/, "")}
-            </span>
+
 
             {/* Delete button - Right side, aligned with title */}
             <button
