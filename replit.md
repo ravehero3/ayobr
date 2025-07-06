@@ -242,6 +242,8 @@ Changelog:
 - July 5, 2025. Removed background box around images in image containers for cleaner appearance
 - July 5, 2025. Updated image display to fill the container better with object-cover sizing
 - July 5, 2025. Changed audio note icon to white music note symbol matching user's provided design
+- July 5, 2025. Added 10px spacing above and below images in image containers for proper positioning
+- July 5, 2025. Updated audio icon to speaker/volume symbol for better audio representation
 ```
 
 ## User Preferences
