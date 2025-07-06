@@ -231,18 +231,17 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </div>
       ) : (
         <div 
-          className="flex flex-col lg:flex-row items-center relative z-10 group/pair"
+          className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8"
           style={{ 
-            gap: '0px',
-            position: 'fixed',
-            left: '30px',
-            right: '30px',
-            justifyContent: 'space-between',
+            gap: '40px',
+            paddingLeft: '30px',
+            paddingRight: '30px',
+            justifyContent: 'center',
             alignItems: 'center'
           }}
         >
-          {/* Audio Container - Fixed to left with 30px margin */}  
-          <div className="relative" style={{ position: 'absolute', left: '0' }}>
+          {/* Audio Container */}  
+          <div className="relative">
             <div
               className="relative overflow-hidden group/container"
               style={{
@@ -301,11 +300,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0" style={{ 
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
             width: '80px', 
-            height: '300px'
+            height: '200px'
           }}>
             <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
               {/* Plus icon using SVG for crisp rendering */}
@@ -326,8 +322,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             </div>
           </div>
 
-          {/* Image Container - Fixed to right with 30px margin */}
-          <div className="relative" style={{ position: 'absolute', right: '0' }}>
+          {/* Image Container */}
+          <div className="relative">
             <div
               className="relative overflow-hidden group/container"
               style={{

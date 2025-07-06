@@ -20,67 +20,65 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   const [isWaveformLoading, setIsWaveformLoading] = useState(false);
   const containerRef = useRef(null);
 
-  
 
-  
 
-  React.useEffect(() => {
-    // Only initialize WaveSurfer if we're not in the middle of a content change
-    if (audio && waveformRef.current && !isContentChanging) {
-      setIsWaveformLoading(true);
-      
-      // Initialize WaveSurfer with Decibels-style waveform
-      wavesurfer.current = WaveSurfer.create({
-        container: waveformRef.current,
-        waveColor: '#6C737F', // Muted gray for unplayed portions (like Decibels)
-        progressColor: '#3584E4', // GNOME blue for played portions
-        cursorColor: 'rgba(53, 132, 228, 0.6)',
-        barWidth: 2,
-        barRadius: 1,
-        barGap: 1,
-        height: 80, // Taller for prominence like Decibels
-        normalize: true,
-        backend: 'WebAudio',
-        interact: true,
-        barMinHeight: 1,
-        responsive: true
-      });
 
-      // Load audio file
-      const url = URL.createObjectURL(audio);
-      wavesurfer.current.load(url);
 
-      // Event listeners
-      wavesurfer.current.on('ready', () => {
-        setDuration(wavesurfer.current.getDuration());
-        setIsWaveformLoading(false);
-      });
+  useEffect(() => {
+    if (audio && containerRef.current && !isContentChanging) {
+      const loadAudio = async () => {
+        try {
+          if (wavesurfer.current) {
+            wavesurfer.current.destroy();
+          }
 
-      wavesurfer.current.on('audioprocess', () => {
-        setCurrentTime(wavesurfer.current.getCurrentTime());
-      });
+          // Create blob URL for audio file to prevent fetch errors
+          const audioBlob = new Blob([audio], { type: audio.type });
+          const audioUrl = URL.createObjectURL(audioBlob);
 
-      wavesurfer.current.on('play', () => {
-        setIsPlaying(true);
-        // Always update the global reference when this audio starts playing
-        currentlyPlayingWaveSurfer = wavesurfer.current;
-      });
-      wavesurfer.current.on('pause', () => {
-        setIsPlaying(false);
-        // Only clear the global reference if this was the currently playing audio
-        if (currentlyPlayingWaveSurfer === wavesurfer.current) {
-          currentlyPlayingWaveSurfer = null;
+          const ws = WaveSurfer.create({
+            container: waveformRef.current,
+            waveColor: '#6C737F', // Muted gray for unplayed portions (like Decibels)
+            progressColor: '#3584E4', // GNOME blue for played portions
+            cursorColor: 'rgba(53, 132, 228, 0.6)',
+            barWidth: 2,
+            barRadius: 1,
+            barGap: 1,
+            height: 80, // Taller for prominence like Decibels
+            normalize: true,
+            backend: 'WebAudio',
+            interact: true,
+            barMinHeight: 1,
+            responsive: true
+          });
+
+          await ws.load(audioUrl);
+          setDuration(ws.getDuration());
+          wavesurfer.current = ws;
+
+          // Clean up blob URL when component unmounts
+          return () => {
+            if (audioUrl) {
+              URL.revokeObjectURL(audioUrl);
+            }
+          };
+        } catch (error) {
+          console.error("Error loading audio:", error);
+          setIsWaveformLoading(false);
+        } finally {
+          setIsWaveformLoading(false);
         }
-      });
-
-      return () => {
-        if (wavesurfer.current) {
-          wavesurfer.current.destroy();
-        }
-        URL.revokeObjectURL(url);
       };
+
+      loadAudio();
     }
-  }, [audio]);
+
+    return () => {
+      if (wavesurfer.current) {
+        wavesurfer.current.destroy();
+      }
+    };
+  }, [audio, isContentChanging]);
 
   const handlePlayPause = () => {
     if (wavesurfer.current) {
@@ -161,26 +159,26 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  
+
                   // Start the new drag system
                   const initialMousePosition = { x: e.clientX, y: e.clientY };
                   onStartAudioDrag(audio, initialMousePosition);
-                  
+
                   const handleMouseMove = (moveEvent) => {
                     onUpdateDragPosition({ x: moveEvent.clientX, y: moveEvent.clientY });
                   };
-                  
+
                   const handleMouseUp = (upEvent) => {
                     document.removeEventListener('mousemove', handleMouseMove);
                     document.removeEventListener('mouseup', handleMouseUp);
-                    
+
                     // Check for valid drop target
                     const elementsUnder = document.elementsFromPoint(upEvent.clientX, upEvent.clientY);
                     const targetAudioContainer = elementsUnder.find(el => 
                       el.closest('[data-audio-container="true"]') && 
                       el.closest('[data-audio-container="true"]') !== containerRef.current
                     );
-                    
+
                     let targetFound = false;
                     if (targetAudioContainer) {
                       const targetPairId = targetAudioContainer.closest('[data-pair-id]')?.getAttribute('data-pair-id');
@@ -189,10 +187,10 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                         targetFound = true;
                       }
                     }
-                    
+
                     onEndDrag(targetFound);
                   };
-                  
+
                   document.addEventListener('mousemove', handleMouseMove);
                   document.addEventListener('mouseup', handleMouseUp);
                 }}
@@ -203,14 +201,14 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
                 </svg>
               </button>
             )}
-            
+
             {/* File title - Always centered, independent of move button */}
             <div className="absolute inset-x-0 flex justify-center pointer-events-none">
               <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg">
                 {audio.name.replace(/\.[^/.]+$/, "")}
               </span>
             </div>
-            
+
             {/* Delete button - Right side, aligned with title */}
             <button
               className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 flex-shrink-0"
@@ -284,7 +282,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </div>
           </div>
 
-          
+
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full relative z-10">
