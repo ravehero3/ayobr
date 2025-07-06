@@ -239,6 +239,9 @@ Changelog:
 - July 5, 2025. Removed title display from image containers for cleaner interface
 - July 5, 2025. Changed play button from rounded rectangle to circular shape for better visual appeal
 - July 5, 2025. Reduced spacing between container pairs from gap-6 to gap-3 to fit more pairs on screen
+- July 5, 2025. Removed background box around images in image containers for cleaner appearance
+- July 5, 2025. Updated image display to fill the container better with object-cover sizing
+- July 5, 2025. Changed audio note icon to white music note symbol matching user's provided design
 ```
 
 ## User Preferences
