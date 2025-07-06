@@ -134,11 +134,11 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
       
-      // Ensure generation state is properly reset after completion
+      // Reset generation state after showing completion
       setTimeout(() => {
         setIsGenerating(false);
         setProgress(0);
-      }, 1500);
+      }, 2000);
       
     } catch (error) {
       console.error('Error in generateVideos:', error);
@@ -161,10 +161,8 @@ export const useFFmpeg = () => {
       
       throw error;
     } finally {
-      // Always ensure generation state is properly reset
-      if (!isCancelling) {
-        setIsGenerating(false);
-      }
+      // Cleanup is handled in the main flow above
+      // No additional state reset needed here to prevent double reset
     }
   }, [isCancelling, setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState, resetCancellation]);
 
