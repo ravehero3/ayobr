@@ -156,15 +156,17 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </button>
           </div>
 
-          {/* Centered image preview - smaller with 10px spacing */}
-          <div className="flex-1 flex items-center justify-center" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+          {/* Centered image preview - contained within bounds */}
+          <div className="flex-1 flex items-center justify-center overflow-hidden" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
             <img
               src={imageUrl}
               alt={image.name}
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="object-contain rounded-lg"
               style={{
-                maxWidth: 'calc(100% - 20px)',
-                maxHeight: 'calc(100% - 20px)'
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto'
               }}
             />
           </div>
