@@ -76,30 +76,28 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         duration: shouldReturnToOrigin ? 0.3 : 0.2,
         ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
       }}
+      className="glass-container"
       style={{
         position: 'fixed',
         left: `${mousePosition.x - 16}px`, // Position so cursor is on movehandle (16px from left edge)
         top: `${mousePosition.y - 16}px`,  // Position so cursor is on movehandle (16px from top edge)
         width: '500px',
-        height: '136px',
-        background: '#1A1A1A',
-        borderRadius: '12px',
-        border: '2px solid rgba(255, 255, 255, 0.8)',
+        height: '160px',
         padding: '16px',
         zIndex: 999999,
-        boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(8px)'
+        minHeight: '160px',
+        maxHeight: '160px',
       }}
     >
       <div className="w-full h-full flex flex-col justify-between relative">
-        {/* Move Handle - Top Left */}
-        <div className="absolute top-3 left-3 z-20">
+        {/* Move Handle - Bottom Left matching original */}
+        <div className="absolute bottom-2 left-2 z-20">
           <div
-            className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200"
+            className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200"
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'rgba(255, 255, 255, 0.6)'
+              color: 'rgba(255, 255, 255, 0.7)'
             }}
           >
             {/* 4-way arrow/plus drag icon */}
@@ -111,7 +109,7 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
 
         {/* Top header bar with title */}
         <div className="flex items-center justify-center mb-3">
-          <span className="text-white text-sm font-medium truncate text-center">
+          <span className="text-white text-sm font-medium truncate text-center" style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 32px)' }}>
             {audio.name.replace(/\.[^/.]+$/, "")}
           </span>
         </div>
@@ -131,18 +129,16 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
             {formatTime(currentTime)}
           </div>
 
-          {/* Static play button */}
+          {/* Static play button - circular like original */}
           <div
-            className="w-16 h-12 flex items-center justify-center"
+            className="w-8 h-8 flex items-center justify-center rounded-full"
             style={{
               backgroundColor: 'rgba(53, 132, 228, 0.15)',
               border: '2px solid rgba(53, 132, 228, 0.4)',
-              borderRadius: '10px',
               color: '#3584E4',
-              transform: 'translateY(10px)'
             }}
           >
-            <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="m7 4 10 6L7 16V4z"/>
             </svg>
           </div>

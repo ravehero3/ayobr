@@ -38,33 +38,31 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
         duration: shouldReturnToOrigin ? 0.3 : 0.2,
         ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
       }}
+      className="glass-container"
       style={{
         position: 'fixed',
         left: `${mousePosition.x - 16}px`, // Position so cursor is on movehandle (16px from left edge)
         top: `${mousePosition.y - 16}px`,  // Position so cursor is on movehandle (16px from top edge)
         width: '500px',
-        height: '180px',
-        background: '#1A1A1A',
-        borderRadius: '12px',
-        border: '2px solid rgba(255, 255, 255, 0.8)',
+        height: '160px',
         padding: '16px',
         zIndex: 999999,
-        boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(8px)'
+        minHeight: '160px',
+        maxHeight: '160px',
       }}
     >
       <div className="w-full h-full flex flex-col relative">
         {/* Top spacing - exactly 10px */}
         <div style={{ height: '10px', flexShrink: 0 }}></div>
 
-        {/* Move Handle - Top Left */}
-        <div className="absolute top-3 left-3 z-20">
+        {/* Move Handle - Bottom Left matching original */}
+        <div className="absolute bottom-2 left-2 z-20">
           <div
-            className="w-8 h-8 rounded flex items-center justify-center transition-all duration-200"
+            className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200"
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'white'
+              color: 'rgba(255, 255, 255, 0.7)'
             }}
           >
             {/* 4-way arrow/plus drag icon */}
@@ -83,7 +81,6 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
               className="w-20 h-20 object-contain"
               style={{
                 borderRadius: '4px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
               }}
             />
           </div>
