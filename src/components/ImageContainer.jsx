@@ -156,8 +156,8 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </button>
           </div>
 
-          {/* Centered image preview - contained within bounds */}
-          <div className="flex-1 flex items-center justify-center overflow-hidden" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+          {/* Centered image preview - maximized with 5px spacing */}
+          <div className="flex-1 flex items-center justify-center overflow-hidden" style={{ paddingTop: '5px', paddingBottom: '5px' }}>
             <img
               src={imageUrl}
               alt={image.name}
