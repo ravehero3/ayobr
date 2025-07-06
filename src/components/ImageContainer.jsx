@@ -158,13 +158,13 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
           {/* Centered image preview */}
           <div className="flex-1 flex items-center justify-center">
-            <div className="relative overflow-hidden rounded flex-shrink-0 bg-black/20 p-3 backdrop-blur-sm border border-white/20">
+            <div className="relative overflow-hidden rounded flex-shrink-0 bg-black/20 p-2 backdrop-blur-sm border border-white/20 w-full h-full max-w-[140px] max-h-[100px]">
               <img
                 src={imageUrl}
                 alt={image.name}
-                className="w-24 h-24 object-contain"
+                className="w-full h-full object-contain"
                 style={{
-                  borderRadius: '8px',
+                  borderRadius: '6px',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
                 }}
               />
