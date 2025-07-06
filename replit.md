@@ -248,6 +248,8 @@ Changelog:
 - July 6, 2025. Fixed image display to show whole image using object-contain instead of object-cover for complete visibility
 - July 6, 2025. Made UI improvements: smaller play button circle (32px), centered plus sign between pairs, balanced waveform spacing with equal margins above/below audio title
 - July 6, 2025. Fixed video generation scenarios: Scenario 1 (successful generation) shows video previews in place of loading animations, Scenario 2 (stopped generation) clears all loading states and returns to container pairs view for rearrangement
+- July 6, 2025. Enhanced video generation UI: updated "Merging Audio & Image" text to match audio container font style (text-sm font-medium), created modern multi-layer loading circle with gradient spin and inner glow, styled stop button with red gradient and "STOP!" text
+- July 6, 2025. Fixed plus sign positioning: centered vertically between container pairs by matching plus sign container height (200px) to audio/image container height for perfect center alignment
 ```
 
 ## User Preferences
