@@ -134,11 +134,12 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
       
-      // Reset generation state after showing completion
+      // Show completion briefly, then reset
       setTimeout(() => {
         setIsGenerating(false);
         setProgress(0);
-      }, 2000);
+        console.log('Generation completed and state reset');
+      }, 1500);
       
     } catch (error) {
       console.error('Error in generateVideos:', error);
@@ -147,19 +148,23 @@ export const useFFmpeg = () => {
       setIsGenerating(false);
       setProgress(0);
       
-      // Reset all pair states
-      const { pairs } = useAppStore.getState();
-      pairs.forEach(pair => {
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: error.message || 'Generation failed'
-        });
-      });
+      // Force stop any remaining processes
+      forceStopAllProcesses();
       
-      throw error;
+      // Reset all pair states
+      const { pairs, clearAllVideoGenerationStates } = useAppStore.getState();
+      clearAllVideoGenerationStates();
+      
+      // Show user-friendly error message
+      alert(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);
+      
+      // Don't re-throw to prevent unhandled promise rejection
+      console.log('Generation error handled, app is ready for retry');
+      
+      // Reset cancellation state
+      setTimeout(() => {
+        resetCancellation();
+      }, 1000);
     } finally {
       // Cleanup is handled in the main flow above
       // No additional state reset needed here to prevent double reset
@@ -215,17 +220,30 @@ export const useFFmpeg = () => {
       console.log('Creating video blob and URL...');
       const videoBlob = new Blob([videoData], { type: 'video/mp4' });
       const videoUrl = URL.createObjectURL(videoBlob);
+      
+      // Ensure clean filename
+      const audioName = pair.audio.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+      const imageName = pair.image.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+      
       const video = {
         id: crypto.randomUUID(),
         pairId: pair.id,
         url: videoUrl,
         blob: videoBlob,
-        filename: `video_${pair.audio.name.split('.')[0]}_${pair.image.name.split('.')[0]}.mp4`,
-        createdAt: new Date()
+        filename: `video_${audioName}_${imageName}.mp4`,
+        createdAt: new Date(),
+        size: videoData.length
       };
 
-      console.log('Adding generated video to store:', video.filename);
+      console.log('Adding generated video to store:', video.filename, 'Size:', video.size);
       addGeneratedVideo(video);
+      
+      // Verify video was added
+      setTimeout(() => {
+        const store = useAppStore.getState();
+        const addedVideo = store.generatedVideos.find(v => v.id === video.id);
+        console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
+      }, 100);
 
       setVideoGenerationState(pair.id, {
         isGenerating: false,

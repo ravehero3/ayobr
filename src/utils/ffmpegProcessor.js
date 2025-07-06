@@ -322,7 +322,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Read the output file
     const data = await ffmpeg.readFile(outputFileName);
-    console.log('Output file read successfully, size:', data.length);
+    console.log('Output file read successfully, size:', data.length, 'bytes');
+
+    // Verify the data is valid
+    if (!data || data.length === 0) {
+      throw new Error('Generated video file is empty or invalid');
+    }
 
     // Batch cleanup for faster I/O
     const cleanupPromises = [
@@ -338,7 +343,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       cleanupMemory();
     }
 
-    return data;
+    // Return a new Uint8Array to ensure data integrity
+    return new Uint8Array(data);
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);

@@ -169,7 +169,7 @@ function App() {
       console.log('Video generation completed successfully');
     } catch (error) {
       console.error('Error generating videos:', error);
-      
+
       // Check if it was cancelled
       if (error.message === 'Generation cancelled by user' || isCancelling) {
         console.log('Video generation was cancelled by user');
@@ -396,15 +396,31 @@ function App() {
 
         {/* Generated Videos Display */}
         {generatedVideos.length > 0 && (
-          <div className="w-full mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6 text-center">Generated Videos</h2>
-            <div className="flex flex-wrap gap-4 justify-center">
+          <div className="generated-videos-section mb-8">
+            <h2 className="text-2xl font-bold text-center mb-6 text-white">
+              Generated Videos ({generatedVideos.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {generatedVideos.map((video) => (
-                <VideoPreviewCard 
-                  key={video.id} 
-                  video={video} 
-                />
+                <VideoPreviewCard key={video.id} video={video} />
               ))}
+            </div>
+
+            {/* Bulk Download Button */}
+            <div className="text-center mt-6">
+              <button
+                onClick={() => {
+                  generatedVideos.forEach(video => {
+                    const link = document.createElement('a');
+                    link.href = video.url;
+                    link.download = video.filename;
+                    link.click();
+                  });
+                }}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Download All Videos
+              </button>
             </div>
           </div>
         )}
