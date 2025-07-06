@@ -116,6 +116,18 @@ export const useFFmpeg = () => {
         console.log('Video generation was cancelled');
         setIsGenerating(false);
         setProgress(0);
+        
+        // Clean up any partial state
+        pairs.forEach(pair => {
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 0,
+            isComplete: false,
+            video: null,
+            error: null
+          });
+        });
+        
         return;
       }
 
@@ -124,11 +136,26 @@ export const useFFmpeg = () => {
       
     } catch (error) {
       console.error('Error in generateVideos:', error);
+      
+      // Clean up all states on error
       setIsGenerating(false);
       setProgress(0);
+      
+      // Reset all pair states
+      const { pairs } = useAppStore.getState();
+      pairs.forEach(pair => {
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: error.message || 'Generation failed'
+        });
+      });
+      
       throw error;
     } finally {
-      // Only set to false if not cancelled - cancelled state is handled above
+      // Always ensure generation state is properly reset
       if (!isCancelling) {
         setIsGenerating(false);
       }
@@ -211,7 +238,8 @@ export const useFFmpeg = () => {
           isGenerating: false,
           progress: 0,
           isComplete: false,
-          video: null
+          video: null,
+          error: null
         });
         return null;
       }
@@ -224,6 +252,15 @@ export const useFFmpeg = () => {
         video: null,
         error: error && error.message ? error.message : 'Unknown error'
       });
+
+      // Clean up any partial video data
+      if (pair.video) {
+        try {
+          URL.revokeObjectURL(pair.video.url);
+        } catch (e) {
+          console.warn('Failed to revoke object URL:', e);
+        }
+      }
 
       return null; // Don't throw to prevent unhandled rejections
     }
@@ -245,19 +282,40 @@ export const useFFmpeg = () => {
         isGenerating: false,
         progress: 0,
         isComplete: false,
-        video: null
+        video: null,
+        error: null
       });
     });
     
-    // Reset cancellation state after a short delay
+    // Reset cancellation state after a short delay to allow cleanup
     setTimeout(() => {
       resetCancellation();
-    }, 1000);
+      console.log('App reset and ready for new generation');
+    }, 1500);
   }, [cancelGeneration, setIsGenerating, setProgress, setVideoGenerationState, resetCancellation]);
+
+  const resetAppForNewGeneration = useCallback(() => {
+    console.log('Resetting app for new generation');
+    
+    // Reset all states
+    setIsGenerating(false);
+    setProgress(0);
+    resetCancellation();
+    
+    // Clear all video generation states
+    const { pairs, clearAllVideoGenerationStates } = useAppStore.getState();
+    clearAllVideoGenerationStates();
+    
+    // Force cleanup of any lingering processes
+    forceStopAllProcesses();
+    
+    console.log('App reset complete - ready for new generation');
+  }, [setIsGenerating, setProgress, resetCancellation]);
 
   return {
     generateVideos,
     stopGeneration,
+    resetAppForNewGeneration,
     progress
   };
 };

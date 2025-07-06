@@ -155,6 +155,12 @@ function App() {
       return;
     }
 
+    // Check if already generating
+    if (isGenerating) {
+      console.log('Generation already in progress');
+      return;
+    }
+
     console.log('Starting video generation for pairs:', completePairs);
 
     try {
@@ -163,8 +169,14 @@ function App() {
       console.log('Video generation completed successfully');
     } catch (error) {
       console.error('Error generating videos:', error);
-      // Don't set isGenerating to false here - let the hook handle it
-      alert('Failed to generate videos. Please try again.');
+      
+      // Check if it was cancelled
+      if (error.message === 'Generation cancelled by user' || isCancelling) {
+        console.log('Video generation was cancelled by user');
+        // Don't show error alert for cancellation
+      } else {
+        alert('Failed to generate videos. Please try again.');
+      }
     }
   };
 

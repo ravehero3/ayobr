@@ -34,6 +34,9 @@ export const forceStopAllProcesses = () => {
 
   if (ffmpeg) {
     try {
+      // Clear any progress listeners first
+      ffmpeg.off('progress');
+      
       // Terminate the FFmpeg instance immediately
       ffmpeg.terminate();
       ffmpeg = null;
@@ -41,7 +44,17 @@ export const forceStopAllProcesses = () => {
       isInitializing = false;
       initPromise = null;
       activeProcesses.clear();
-      console.log('All FFmpeg processes terminated');
+      
+      // Clean up caches
+      fileCache.clear();
+      processedImageCache.clear();
+      audioBufferCache.clear();
+      memoryCache.clear();
+      
+      // Reset process count
+      processedCount = 0;
+      
+      console.log('All FFmpeg processes terminated and cleaned up');
     } catch (error) {
       console.error('Error terminating FFmpeg:', error);
     }
@@ -321,6 +334,18 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);
+    
+    // Clean up files on error
+    try {
+      const cleanupPromises = [
+        ffmpeg.deleteFile(audioFileName).catch(() => {}),
+        ffmpeg.deleteFile(imageFileName).catch(() => {}),
+        ffmpeg.deleteFile(outputFileName).catch(() => {})
+      ];
+      await Promise.allSettled(cleanupPromises);
+    } catch (cleanupError) {
+      console.warn('Error during cleanup:', cleanupError);
+    }
     
     // Check if this is a cancellation error
     if (shouldCancel && shouldCancel()) {

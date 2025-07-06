@@ -141,5 +141,18 @@ export const useAppStore = create((set, get) => ({
   // Settings actions
   setConcurrencySettings: (settings) => set(state => ({
     concurrencySettings: { ...state.concurrencySettings, ...settings }
-  }))
+  })),
+
+  // Cleanup function for resetting app state
+  resetAppState: () => set({
+    isGenerating: false,
+    isCancelling: false,
+    currentProgress: 0,
+    videoGenerationStates: {}
+  }),
+
+  // Clear all video generation states
+  clearAllVideoGenerationStates: () => set({
+    videoGenerationStates: {}
+  })
 }));
