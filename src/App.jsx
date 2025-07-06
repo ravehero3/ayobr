@@ -238,7 +238,7 @@ function App() {
     >
       {/* Animated Background */}
       <AnimatedBackground />
-      
+
       <div className="fixed inset-0 flex justify-center">
         <div className="w-full max-w-6xl custom-background transition-all duration-300 overflow-auto">
       {/* Drag Overlay */}
@@ -306,8 +306,13 @@ function App() {
 
         {/* Pairs Grid - Updated for wider containers */}
         {pairs.some(pair => pair.audio || pair.image) && (
-          <div className="w-full flex flex-col items-center mb-8">
-            <div className="flex flex-col gap-2 max-w-[1200px] w-full px-6">
+          <motion.div>
+          <motion.div
+            className="w-full flex flex-col items-center mb-8"
+          >
+            <motion.div
+              className="flex flex-col gap-2 max-w-[1200px] w-full px-6"
+            >
               <AnimatePresence>
                 {pairs.map((pair, index) => (
                   <motion.div
@@ -332,13 +337,18 @@ function App() {
                   </motion.div>
                 ))}
               </AnimatePresence>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
+          </motion.div>
         )}
 
         {/* Action Buttons */}
         {pairs.some(pair => pair.audio || pair.image) && (
-          <div className="flex justify-center gap-4 mb-8">
+            <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center gap-4 mb-8"
+          >
             <button
               onClick={handleGenerateVideos}
               disabled={isGenerating}
@@ -419,14 +429,18 @@ function App() {
                 </div>
               </motion.button>
             )}
-          </div>
+          </motion.div>
         )}
 
 
 
         {/* Generated Videos Display */}
         {generatedVideos.length > 0 && (
-          <div className="generated-videos-section mb-8">
+            <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="generated-videos-section mb-8"
+          >
             <h2 className="text-2xl font-bold text-center mb-6 text-white">
               Generated Videos ({generatedVideos.length})
             </h2>
@@ -452,7 +466,7 @@ function App() {
                 Download All Videos
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Batch Status Indicator */}
