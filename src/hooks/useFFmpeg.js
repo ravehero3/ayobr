@@ -134,7 +134,7 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
       
-      // Show completion briefly, then reset
+      // Show completion briefly, then reset states
       setTimeout(() => {
         setIsGenerating(false);
         setProgress(0);
@@ -144,26 +144,25 @@ export const useFFmpeg = () => {
     } catch (error) {
       console.error('Error in generateVideos:', error);
       
-      // Clean up all states on error
-      setIsGenerating(false);
-      setProgress(0);
-      
       // Force stop any remaining processes
       forceStopAllProcesses();
       
-      // Reset all pair states
-      const { pairs, clearAllVideoGenerationStates } = useAppStore.getState();
-      clearAllVideoGenerationStates();
+      // Use comprehensive reset from store
+      const { resetGenerationState } = useAppStore.getState();
+      resetGenerationState();
       
-      // Show user-friendly error message
-      alert(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);
+      // Reset progress in hook
+      setProgress(0);
       
-      // Don't re-throw to prevent unhandled promise rejection
-      console.log('Generation error handled, app is ready for retry');
+      // Show user-friendly error message only if not cancelled
+      if (!isCancelling) {
+        alert(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);
+      }
       
       // Reset cancellation state
       setTimeout(() => {
         resetCancellation();
+        console.log('Error handled, app is ready for retry');
       }, 1000);
     } finally {
       // Cleanup is handled in the main flow above
@@ -296,23 +295,26 @@ export const useFFmpeg = () => {
 
   const stopGeneration = useCallback(() => {
     console.log('Stop generation clicked - forcing immediate termination');
+    
+    // Set cancelling flag first
     cancelGeneration();
+    
+    // Force stop all FFmpeg processes
     forceStopAllProcesses();
     
-    // Reset all generation states immediately
-    setIsGenerating(false);
+    // Use comprehensive reset from store
+    const { resetGenerationState } = useAppStore.getState();
+    resetGenerationState();
+    
+    // Reset progress in hook
     setProgress(0);
     
-    // Clear any ongoing video generation states
-    const { pairs, clearAllVideoGenerationStates } = useAppStore.getState();
-    clearAllVideoGenerationStates();
-    
-    // Reset cancellation state after a short delay to allow cleanup
+    // Final cleanup after a short delay
     setTimeout(() => {
       resetCancellation();
-      console.log('App reset and ready for new generation');
-    }, 1000);
-  }, [cancelGeneration, setIsGenerating, setProgress, setVideoGenerationState, resetCancellation]);
+      console.log('App completely reset and ready for new generation');
+    }, 500);
+  }, [cancelGeneration, setProgress, resetCancellation]);
 
   const resetAppForNewGeneration = useCallback(() => {
     console.log('Resetting app for new generation');

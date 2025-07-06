@@ -152,5 +152,13 @@ export const useAppStore = create((set, get) => ({
   // Clear all video generation states
   clearAllVideoGenerationStates: () => set({
     videoGenerationStates: {}
+  }),
+
+  // Complete reset for clean state after stopping generation
+  resetGenerationState: () => set({
+    isGenerating: false,
+    isCancelling: false,
+    currentProgress: 0,
+    videoGenerationStates: {}
   })
 }));
