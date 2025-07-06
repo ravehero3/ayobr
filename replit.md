@@ -244,6 +244,8 @@ Changelog:
 - July 5, 2025. Changed audio note icon to white music note symbol matching user's provided design
 - July 5, 2025. Added 10px spacing above and below images in image containers for proper positioning
 - July 5, 2025. Updated audio icon to speaker/volume symbol for better audio representation
+- July 6, 2025. Changed audio icon to sound wave bars design for modern audio visualization
+- July 6, 2025. Fixed image display to show whole image using object-contain instead of object-cover for complete visibility
 ```
 
 ## User Preferences
