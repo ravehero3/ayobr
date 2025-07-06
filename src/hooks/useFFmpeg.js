@@ -134,6 +134,12 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
       
+      // Ensure generation state is properly reset after completion
+      setTimeout(() => {
+        setIsGenerating(false);
+        setProgress(0);
+      }, 1500);
+      
     } catch (error) {
       console.error('Error in generateVideos:', error);
       
@@ -205,9 +211,10 @@ export const useFFmpeg = () => {
 
       if (isCancelling) {
         console.log('Video generation cancelled during blob creation');
-        return;
+        return null;
       }
 
+      console.log('Creating video blob and URL...');
       const videoBlob = new Blob([videoData], { type: 'video/mp4' });
       const videoUrl = URL.createObjectURL(videoBlob);
       const video = {
@@ -219,18 +226,23 @@ export const useFFmpeg = () => {
         createdAt: new Date()
       };
 
+      console.log('Adding generated video to store:', video.filename);
       addGeneratedVideo(video);
 
       setVideoGenerationState(pair.id, {
         isGenerating: false,
         progress: 100,
         isComplete: true,
-        video: video
+        video: video,
+        error: null
       });
 
       console.log(`Video generation completed for pair ${pair.id}`);
+      return video;
 
     } catch (error) {
+      console.error(`Error generating video for pair ${pair.id}:`, error);
+      
       // Check if generation was cancelled
       if (isCancelling || (error && error.message === 'Generation cancelled by user')) {
         console.log(`Video generation cancelled for pair ${pair.id}`);
@@ -244,7 +256,7 @@ export const useFFmpeg = () => {
         return null;
       }
 
-      console.error(`Error generating video for pair ${pair.id}:`, error);
+      // Handle actual errors
       setVideoGenerationState(pair.id, {
         isGenerating: false,
         progress: 0,
@@ -276,22 +288,14 @@ export const useFFmpeg = () => {
     setProgress(0);
     
     // Clear any ongoing video generation states
-    const { pairs } = useAppStore.getState();
-    pairs.forEach(pair => {
-      setVideoGenerationState(pair.id, {
-        isGenerating: false,
-        progress: 0,
-        isComplete: false,
-        video: null,
-        error: null
-      });
-    });
+    const { pairs, clearAllVideoGenerationStates } = useAppStore.getState();
+    clearAllVideoGenerationStates();
     
     // Reset cancellation state after a short delay to allow cleanup
     setTimeout(() => {
       resetCancellation();
       console.log('App reset and ready for new generation');
-    }, 1500);
+    }, 1000);
   }, [cancelGeneration, setIsGenerating, setProgress, setVideoGenerationState, resetCancellation]);
 
   const resetAppForNewGeneration = useCallback(() => {

@@ -6,6 +6,7 @@ let isLoaded = false;
 let isInitializing = false;
 let initPromise = null;
 let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
+let isForceStopped = false; // Track if processes were force stopped
 
 // Scalable concurrency management for up to 100 files
 const getOptimalConcurrency = (totalFiles) => {
@@ -31,6 +32,7 @@ const audioBufferCache = new Map(); // Cache for audio file buffers
 // Force stop all active FFmpeg processes immediately
 export const forceStopAllProcesses = () => {
   console.log('Force stopping all FFmpeg processes...');
+  isForceStopped = true;
 
   if (ffmpeg) {
     try {
@@ -111,8 +113,14 @@ export const getBatchProgress = () => {
 export const initializeFFmpeg = async () => {
   console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing);
 
+  // Reset force stopped flag if we're initializing fresh
+  if (isForceStopped) {
+    console.log('Resetting force stopped flag for fresh initialization');
+    isForceStopped = false;
+  }
+
   // Return existing instance if already loaded
-  if (isLoaded && ffmpeg) {
+  if (isLoaded && ffmpeg && !isForceStopped) {
     console.log('Returning existing FFmpeg instance');
     return ffmpeg;
   }
@@ -128,11 +136,11 @@ export const initializeFFmpeg = async () => {
 
   initPromise = (async () => {
     try {
-      if (!ffmpeg) {
+      if (!ffmpeg || isForceStopped) {
         ffmpeg = new FFmpeg();
       }
 
-      if (!isLoaded) {
+      if (!isLoaded || isForceStopped) {
         // Direct initialization without blob URLs for Replit compatibility
         try {
           console.log('Initializing FFmpeg with CDN...');
