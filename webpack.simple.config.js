@@ -4,11 +4,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: './src/index.js',
+  
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
-    publicPath: '/',
+    clean: true
   },
+  
   module: {
     rules: [
       {
@@ -17,10 +19,9 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react'],
-            plugins: [
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-syntax-dynamic-import'
+            presets: [
+              '@babel/preset-env',
+              ['@babel/preset-react', { runtime: 'automatic' }]
             ]
           }
         }
@@ -30,44 +31,28 @@ module.exports = {
         use: ['style-loader', 'css-loader', 'postcss-loader']
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg)$/,
-        use: ['file-loader']
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        type: 'asset/resource'
       }
     ]
   },
+
+  resolve: {
+    extensions: ['.js', '.jsx'],
+  },
+
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html'
     })
   ],
-  resolve: {
-    extensions: ['.js', '.jsx']
-  },
+
   devServer: {
+    static: path.join(__dirname, 'dist'),
     host: '0.0.0.0',
     port: 5000,
     hot: true,
-    liveReload: true,
-    open: false,
     historyApiFallback: true,
-    headers: {
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-      'Cross-Origin-Opener-Policy': 'same-origin',
-    },
-    client: {
-      reconnect: 5,
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
-    },
-    devMiddleware: {
-      writeToDisk: false,
-    },
-  },
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-    },
-  },
+    allowedHosts: 'all'
+  }
 };

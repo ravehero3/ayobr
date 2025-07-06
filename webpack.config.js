@@ -12,7 +12,9 @@ module.exports = {
     clean: true
   },
   
-  cache: false,
+  cache: {
+    type: 'memory'
+  },
 
   module: {
     rules: [
@@ -27,7 +29,7 @@ module.exports = {
               ['@babel/preset-react', { runtime: 'automatic' }]
             ],
             plugins: [
-              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-transform-class-properties',
               '@babel/plugin-syntax-dynamic-import'
             ]
           }
