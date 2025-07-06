@@ -145,7 +145,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
           {/* Top header bar with title (center) and controls */}
-          <div className="flex items-center justify-between mb-2 relative" style={{ marginTop: '-4px' }}>
+          <div className="flex items-center justify-between mb-4 relative" style={{ marginTop: '8px' }}>
             {/* Move Handle - Left side, aligned with title */}
             {isHovered && audio && onStartAudioDrag && (
               <button
@@ -258,7 +258,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             {/* Play/pause button - centered, circular */}
             <button
               onClick={handlePlayPause}
-              className="w-10 h-10 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 rounded-full"
+              className="w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 rounded-full"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
