@@ -189,7 +189,8 @@ export const useFFmpeg = () => {
       console.log(`Video generation completed for pair ${pair.id}`);
 
     } catch (error) {
-      if (error.message === 'Generation cancelled by user') {
+      // Check if generation was cancelled
+      if (isCancelling || (error && error.message === 'Generation cancelled by user')) {
         console.log(`Video generation cancelled for pair ${pair.id}`);
         setVideoGenerationState(pair.id, {
           isGenerating: false,
@@ -197,7 +198,7 @@ export const useFFmpeg = () => {
           isComplete: false,
           video: null
         });
-        return;
+        return null;
       }
 
       console.error(`Error generating video for pair ${pair.id}:`, error);
@@ -206,10 +207,10 @@ export const useFFmpeg = () => {
         progress: 0,
         isComplete: false,
         video: null,
-        error: error.message
+        error: error && error.message ? error.message : 'Unknown error'
       });
-      // Don't re-throw to prevent unhandled promise rejections
-      return null;
+
+      return null; // Don't throw to prevent unhandled rejections
     }
   };
 

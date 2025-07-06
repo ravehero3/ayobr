@@ -25,12 +25,12 @@ const VideoGenerationAnimation = ({
     if (isComplete && generatedVideo && !showSuccess && !animationComplete) {
       // First hide the merging animation
       setShowMerging(false);
-      
+
       // Then show success animation after a brief delay
       setTimeout(() => {
         setShowSuccess(true);
       }, 300);
-      
+
       // Hide success animation and complete the process
       setTimeout(() => {
         setShowSuccess(false);
@@ -63,23 +63,41 @@ const VideoGenerationAnimation = ({
             exit={{ opacity: 0, scale: 0.8 }}
             className="text-center"
           >
-            <div className="mb-4">
-              <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <h3 className="text-white text-xl font-bold mb-2">Generating Video...</h3>
-              <p className="text-gray-300 text-sm mb-4">
-                Merging {pair.audio?.name} with {pair.image?.name}
-              </p>
-            </div>
-
-            <div className="w-64 bg-gray-700 rounded-full h-3 overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                initial={{ width: "0%" }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.3 }}
+            <div className="absolute inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+            <div className="text-center flex flex-col items-center justify-center h-full">
+              <motion.div 
+                className="w-20 h-20 mx-auto mb-6 border-4 border-blue-500 border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
+              <motion.h3 
+                className="text-white text-xl font-bold mb-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Merging Audio & Image
+              </motion.h3>
+
+              {/* Centered Progress Bar */}
+              <div className="w-80 bg-gray-700 rounded-full h-4 mx-auto overflow-hidden shadow-lg">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-inner"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                />
+              </div>
+              <motion.p 
+                className="text-gray-300 text-lg mt-3 font-medium"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                {progress}% Complete
+              </motion.p>
             </div>
-            <p className="text-white text-sm mt-2">{Math.round(progress)}%</p>
+          </div>
           </motion.div>
         )}
 
