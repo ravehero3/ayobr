@@ -302,19 +302,37 @@ export const useFFmpeg = () => {
     // Force stop all FFmpeg processes
     forceStopAllProcesses();
     
-    // Use comprehensive reset from store
-    const { resetGenerationState } = useAppStore.getState();
-    resetGenerationState();
+    // Immediately clear all generation states and return to containers view
+    const { resetGenerationState, clearAllVideoGenerationStates, pairs } = useAppStore.getState();
     
-    // Reset progress in hook
+    // Reset all states immediately
+    setIsGenerating(false);
     setProgress(0);
+    
+    // Clear all video generation states for all pairs
+    clearAllVideoGenerationStates();
+    
+    // Reset each pair's video generation state to ensure UI shows containers
+    pairs.forEach(pair => {
+      const { setVideoGenerationState } = useAppStore.getState();
+      setVideoGenerationState(pair.id, {
+        isGenerating: false,
+        progress: 0,
+        isComplete: false,
+        video: null,
+        error: null
+      });
+    });
+    
+    // Use comprehensive reset from store
+    resetGenerationState();
     
     // Final cleanup after a short delay
     setTimeout(() => {
       resetCancellation();
       console.log('App completely reset and ready for new generation');
-    }, 500);
-  }, [cancelGeneration, setProgress, resetCancellation]);
+    }, 100); // Reduced delay for immediate feedback
+  }, [cancelGeneration, setProgress, resetCancellation, setIsGenerating]);
 
   const resetAppForNewGeneration = useCallback(() => {
     console.log('Resetting app for new generation');
