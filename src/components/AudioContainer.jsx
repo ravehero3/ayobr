@@ -243,7 +243,22 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               {/* Loading animation */}
               {isWaveformLoading && (
                 <div className="absolute inset-0 flex items-center justify-center z-20">
-                  <DotLoader size="md" color="white" />
+                  <svg 
+                    className="w-8 h-8 text-white animate-pulse" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M2 10v3"/>
+                    <path d="M6 6v11"/>
+                    <path d="M10 3v18"/>
+                    <path d="M14 8v7"/>
+                    <path d="M18 5v13"/>
+                    <path d="M22 10v3"/>
+                  </svg>
                 </div>
               )}
             </div>
