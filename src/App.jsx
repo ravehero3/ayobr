@@ -291,7 +291,7 @@ function App() {
         {/* Pairs Grid - Updated for wider containers */}
         {pairs.some(pair => pair.audio || pair.image) && (
           <div className="w-full flex flex-col items-center mb-8">
-            <div className="flex flex-col gap-3 max-w-[1200px] w-full px-6">
+            <div className="flex flex-col gap-2 max-w-[1200px] w-full px-6">
               <AnimatePresence>
                 {pairs.map((pair, index) => (
                   <motion.div

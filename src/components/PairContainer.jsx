@@ -233,7 +233,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         <div 
           className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8"
           style={{ 
-            gap: '20px',
+            gap: '8px',
             paddingLeft: '30px',
             paddingRight: '30px',
             justifyContent: 'center',
@@ -300,7 +300,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0" style={{ 
-            width: '40px', 
+            width: '20px', 
             height: '200px', // Match container height
             paddingTop: '16px', // Match container padding to align with content area
             paddingBottom: '16px'
