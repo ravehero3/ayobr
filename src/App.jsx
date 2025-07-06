@@ -89,6 +89,18 @@ function App() {
 
     if (sourceIndex === -1 || targetIndex === -1) return;
 
+    // Trigger swap animation on source container too
+    const sourceElement = document.querySelector(`[data-pair-id="${sourcePairId}"]`);
+    if (sourceElement) {
+      const containerDiv = sourceElement.querySelector('.relative');
+      if (containerDiv) {
+        containerDiv.classList.add('animate-swap-container');
+        setTimeout(() => {
+          containerDiv.classList.remove('animate-swap-container');
+        }, 800);
+      }
+    }
+
     if (type === 'audio') {
       // Swap audio files between containers
       const tempAudio = currentPairs[sourceIndex].audio;

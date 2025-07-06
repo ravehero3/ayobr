@@ -9,6 +9,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
+  const [isValidDragTarget, setIsValidDragTarget] = useState(false);
+  const [isSwapping, setIsSwapping] = useState(false);
 
   // Check if this container is a valid drop target
   const isValidDropTarget = draggedContainer && isValidContainerDragTarget && isValidContainerDragTarget(pair);
@@ -52,6 +54,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
     // Only show drag over state if this is a valid drop target for container swapping
     if (draggedContainer && draggedContainer.id !== pair.id && isValidDropTarget) {
       setIsDragOverContainer(true);
+      setIsValidDragTarget(true);
     }
   };
 
@@ -59,14 +62,20 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
     e.preventDefault();
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setIsDragOverContainer(false);
+      setIsValidDragTarget(false);
     }
   };
 
   const handleContainerDrop = (e) => {
     e.preventDefault();
     setIsDragOverContainer(false);
+    setIsValidDragTarget(false);
 
     try {
+      // Trigger swap animation
+      setIsSwapping(true);
+      setTimeout(() => setIsSwapping(false), 800); // Reset after animation completes
+
       // Handle both main container drag and individual container drag
       const dragDataString = e.dataTransfer.getData('application/json');
       if (dragDataString) {
@@ -85,10 +94,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           // Only allow same-type swapping
           if (draggedHasAudio && targetHasAudio) {
             // Swap audio content
-            onSwap(dragData.pairId, pair.id, 'audio');
+            setTimeout(() => onSwap(dragData.pairId, pair.id, 'audio'), 200);
           } else if (draggedHasImage && targetHasImage) {
             // Swap image content
-            onSwap(dragData.pairId, pair.id, 'image');
+            setTimeout(() => onSwap(dragData.pairId, pair.id, 'image'), 200);
           }
         }
         // Handle individual container drag (from move buttons)
@@ -97,9 +106,9 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
           // Only allow same-type swapping
           if (draggedContainerType === 'audio' && pair.audio) {
-            onSwap(dragData.pairId, pair.id, 'audio');
+            setTimeout(() => onSwap(dragData.pairId, pair.id, 'audio'), 200);
           } else if (draggedContainerType === 'image' && pair.image) {
-            onSwap(dragData.pairId, pair.id, 'image');
+            setTimeout(() => onSwap(dragData.pairId, pair.id, 'image'), 200);
           }
         }
       }
@@ -113,9 +122,9 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       const draggedHasImage = !!draggedContainer.image;
 
       if (draggedHasAudio && pair.audio) {
-        onSwap(draggedContainer.id, pair.id, 'audio');
+        setTimeout(() => onSwap(draggedContainer.id, pair.id, 'audio'), 200);
       } else if (draggedHasImage && pair.image) {
-        onSwap(draggedContainer.id, pair.id, 'image');
+        setTimeout(() => onSwap(draggedContainer.id, pair.id, 'image'), 200);
       }
     }
   };
@@ -241,7 +250,14 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           }}
         >
           {/* Audio Container */}  
-          <div className="relative">
+          <div 
+            className={`relative transition-all duration-300 ${
+              isValidDragTarget && pair.audio ? 'animate-pulse-glow' : ''
+            } ${isSwapping ? 'animate-swap-container' : ''}`}
+            onDragOver={handleContainerDragOver}
+            onDragLeave={handleContainerDragLeave}
+            onDrop={handleContainerDrop}
+          >
             <div
               className="relative overflow-hidden group/container"
               style={{
@@ -325,7 +341,14 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           </div>
 
           {/* Image Container */}
-          <div className="relative">
+          <div 
+            className={`relative transition-all duration-300 ${
+              isValidDragTarget && pair.image ? 'animate-pulse-glow' : ''
+            } ${isSwapping ? 'animate-swap-container' : ''}`}
+            onDragOver={handleContainerDragOver}
+            onDragLeave={handleContainerDragLeave}
+            onDrop={handleContainerDrop}
+          >
             <div
               className="relative overflow-hidden group/container"
               style={{
