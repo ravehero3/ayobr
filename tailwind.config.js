@@ -85,19 +85,19 @@ module.exports = {
         },
         diagonalMove: {
           '0%': { 
-            transform: 'translate(-10%, -10%)',
+            transform: 'translate(-20%, -20%) scale(1.2)',
           },
           '25%': { 
-            transform: 'translate(-5%, -5%)',
+            transform: 'translate(-10%, -10%) scale(1.2)',
           },
           '50%': { 
-            transform: 'translate(0%, 0%)',
+            transform: 'translate(0%, 0%) scale(1.2)',
           },
           '75%': { 
-            transform: 'translate(-5%, -5%)',
+            transform: 'translate(-10%, -10%) scale(1.2)',
           },
           '100%': { 
-            transform: 'translate(-10%, -10%)',
+            transform: 'translate(-20%, -20%) scale(1.2)',
           },
         },
       },

@@ -5,7 +5,7 @@ const AnimatedBackground = () => {
     <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
       {/* Moving background image */}
       <div 
-        className="absolute inset-0 w-[120%] h-[120%] bg-cover bg-center animate-diagonal-move"
+        className="absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move"
         style={{
           backgroundImage: 'url(/attached_assets/background_1751734336497.jpg)',
           backgroundSize: 'cover',

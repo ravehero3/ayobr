@@ -330,14 +330,23 @@ function App() {
             <button
               onClick={handleGenerateVideos}
               disabled={isGenerating}
-              className="generate-videos-btn"
+              className="spotlight-button"
             >
-              <span className="btn-text">
-                {isGenerating ? 'Generating...' : 'Generate Videos'}
-              </span>
-              <span className="btn-icon">
-                {isGenerating ? '⟳' : '→'}
-              </span>
+              <div className="wrapper">
+                <span>{isGenerating ? 'GENERATING...' : 'GENERATE VIDEOS'}</span>
+                <div className="circle circle-1"></div>
+                <div className="circle circle-2"></div>
+                <div className="circle circle-3"></div>
+                <div className="circle circle-4"></div>
+                <div className="circle circle-5"></div>
+                <div className="circle circle-6"></div>
+                <div className="circle circle-7"></div>
+                <div className="circle circle-8"></div>
+                <div className="circle circle-9"></div>
+                <div className="circle circle-10"></div>
+                <div className="circle circle-11"></div>
+                <div className="circle circle-12"></div>
+              </div>
             </button>
 
             {/* Stop Generation Button */}
