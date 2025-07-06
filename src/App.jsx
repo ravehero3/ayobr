@@ -158,14 +158,12 @@ function App() {
     console.log('Starting video generation for pairs:', completePairs);
 
     try {
-      console.log('Setting isGenerating to true');
-      setIsGenerating(true);
       console.log('Calling generateVideos function');
       await generateVideos(completePairs);
       console.log('Video generation completed successfully');
     } catch (error) {
       console.error('Error generating videos:', error);
-      setIsGenerating(false);
+      // Don't set isGenerating to false here - let the hook handle it
       alert('Failed to generate videos. Please try again.');
     }
   };
@@ -383,6 +381,21 @@ function App() {
         )}
 
 
+
+        {/* Generated Videos Display */}
+        {generatedVideos.length > 0 && (
+          <div className="w-full mb-8">
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">Generated Videos</h2>
+            <div className="flex flex-wrap gap-4 justify-center">
+              {generatedVideos.map((video) => (
+                <VideoPreviewCard 
+                  key={video.id} 
+                  video={video} 
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Batch Status Indicator */}
         {pairs.some(pair => pair.audio || pair.image) && (

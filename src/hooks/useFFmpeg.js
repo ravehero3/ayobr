@@ -111,12 +111,27 @@ export const useFFmpeg = () => {
           await Promise.race(Array.from(activePromises));
         }
       }
+      // Check if generation was cancelled before finishing
+      if (isCancelling) {
+        console.log('Video generation was cancelled');
+        setIsGenerating(false);
+        setProgress(0);
+        return;
+      }
+
+      console.log('Video generation completed successfully');
+      setProgress(100);
+      
     } catch (error) {
       console.error('Error in generateVideos:', error);
+      setIsGenerating(false);
+      setProgress(0);
       throw error;
     } finally {
-      setIsGenerating(false);
-      setProgress(100);
+      // Only set to false if not cancelled - cancelled state is handled above
+      if (!isCancelling) {
+        setIsGenerating(false);
+      }
     }
   }, [isCancelling, setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState, resetCancellation]);
 
@@ -218,7 +233,27 @@ export const useFFmpeg = () => {
     console.log('Stop generation clicked - forcing immediate termination');
     cancelGeneration();
     forceStopAllProcesses();
-  }, [cancelGeneration]);
+    
+    // Reset all generation states immediately
+    setIsGenerating(false);
+    setProgress(0);
+    
+    // Clear any ongoing video generation states
+    const { pairs } = useAppStore.getState();
+    pairs.forEach(pair => {
+      setVideoGenerationState(pair.id, {
+        isGenerating: false,
+        progress: 0,
+        isComplete: false,
+        video: null
+      });
+    });
+    
+    // Reset cancellation state after a short delay
+    setTimeout(() => {
+      resetCancellation();
+    }, 1000);
+  }, [cancelGeneration, setIsGenerating, setProgress, setVideoGenerationState, resetCancellation]);
 
   return {
     generateVideos,

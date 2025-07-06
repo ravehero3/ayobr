@@ -321,6 +321,14 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);
+    
+    // Check if this is a cancellation error
+    if (shouldCancel && shouldCancel()) {
+      const cancellationError = new Error('Generation cancelled by user');
+      cancellationError.isCancellation = true;
+      throw cancellationError;
+    }
+    
     throw error;
   }
 };
