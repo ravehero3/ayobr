@@ -17,7 +17,7 @@ export const useFFmpeg = () => {
 
   const generateVideos = useCallback(async (pairs) => {
     console.log('generateVideos called with pairs:', pairs);
-    
+
     if (!pairs || pairs.length === 0) {
       console.error('No pairs provided for video generation');
       throw new Error('No pairs provided for video generation');
@@ -48,22 +48,22 @@ export const useFFmpeg = () => {
       } else {
         maxConcurrent = 12;      // Maximum 100 files: 12 concurrent
       }
-      
+
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);
       const processingQueue = [...pairs];
       const activePromises = new Set();
       let completedCount = 0;
-      
+
       // Enhanced progress tracking for large batches
       const updateBatchProgress = () => {
         const overallProgress = Math.floor((completedCount / pairs.length) * 100);
         setProgress(overallProgress);
-        
+
         // Log progress for large batches
         if (pairs.length > 20) {
           console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
         }
-        
+
         // Memory cleanup every 10 completed videos for large batches
         if (pairs.length > 20 && completedCount % 10 === 0 && completedCount > 0) {
           console.log(`Performing memory cleanup after ${completedCount} completed videos`);
@@ -83,7 +83,22 @@ export const useFFmpeg = () => {
 
         while (activePromises.size < maxConcurrent && processingQueue.length > 0) {
           const pair = processingQueue.shift();
-          const promise = processPairAsync(pair);
+
+          // Skip if this pair already has a completed video
+          const currentStore = useAppStore.getState();
+          const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
+          if (existingVideo) {
+            console.log(`Skipping pair ${pair.id} - video already exists`);
+            completedCount++;
+            updateBatchProgress();
+            continue;
+          }
+
+          const promise = processPairAsync(pair).catch(error => {
+            console.error(`Error in processPairAsync for pair ${pair.id}:`, error);
+            // Don't re-throw to prevent unhandled rejection
+            return null;
+          });
           activePromises.add(promise);
           promise.finally(() => {
             activePromises.delete(promise);
@@ -108,7 +123,7 @@ export const useFFmpeg = () => {
   const processPairAsync = async (pair) => {
     try {
       if (isCancelling) return;
-      
+
       // Check if this pair already has a generated video
       const store = useAppStore.getState();
       const existingVideo = store.generatedVideos.find(v => v.pairId === pair.id);
@@ -116,7 +131,7 @@ export const useFFmpeg = () => {
         console.log(`Video already exists for pair ${pair.id}, skipping`);
         return;
       }
-        
+
       setVideoGenerationState(pair.id, {
         isGenerating: true,
         progress: 0,
@@ -184,14 +199,17 @@ export const useFFmpeg = () => {
         });
         return;
       }
-      
+
       console.error(`Error generating video for pair ${pair.id}:`, error);
       setVideoGenerationState(pair.id, {
         isGenerating: false,
         progress: 0,
         isComplete: false,
-        video: null
+        video: null,
+        error: error.message
       });
+      // Don't re-throw to prevent unhandled promise rejections
+      return null;
     }
   };
 
