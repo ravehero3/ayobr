@@ -10,6 +10,7 @@ import ScreenSizeWarning from './components/ScreenSizeWarning';
 import DropZone from './components/DropZone';
 import AudioContainerCopy from './components/AudioContainerCopy';
 import ImageContainerCopy from './components/ImageContainerCopy';
+import AnimatedBackground from './components/AnimatedBackground';
 
 
 function App() {
@@ -223,6 +224,9 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Animated Background */}
+      <AnimatedBackground />
+      
       <div className="fixed inset-0 flex justify-center">
         <div className="w-full max-w-6xl custom-background transition-all duration-300 overflow-auto">
       {/* Drag Overlay */}
