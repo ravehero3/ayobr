@@ -53,6 +53,12 @@ module.exports = {
     port: 5000,
     hot: true,
     historyApiFallback: true,
-    allowedHosts: 'all'
+    allowedHosts: 'all',
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false
+      }
+    }
   }
 };

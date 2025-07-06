@@ -246,6 +246,8 @@ Changelog:
 - July 5, 2025. Updated audio icon to speaker/volume symbol for better audio representation
 - July 6, 2025. Changed audio icon to sound wave bars design for modern audio visualization
 - July 6, 2025. Fixed image display to show whole image using object-contain instead of object-cover for complete visibility
+- July 6, 2025. Made UI improvements: smaller play button circle (32px), centered plus sign between pairs, balanced waveform spacing with equal margins above/below audio title
+- July 6, 2025. Fixed video generation scenarios: Scenario 1 (successful generation) shows video previews in place of loading animations, Scenario 2 (stopped generation) clears all loading states and returns to container pairs view for rearrangement
 ```
 
 ## User Preferences

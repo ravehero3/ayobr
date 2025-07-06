@@ -48,8 +48,18 @@ const VideoGenerationAnimation = ({
     }
   }, [isGenerating, progress]);
 
-  // Don't show overlay if generation is complete and animation is done
-  if (!isGenerating && !showMerging && !showSuccess) {
+  // Reset animation when generation is cancelled/stopped
+  useEffect(() => {
+    if (!isGenerating && !isComplete) {
+      // Generation was stopped/cancelled
+      setShowMerging(false);
+      setShowSuccess(false);
+      setAnimationComplete(false);
+    }
+  }, [isGenerating, isComplete]);
+
+  // Don't show overlay if generation is complete and animation is done, or if generation is cancelled
+  if ((!isGenerating && !showMerging && !showSuccess) || (!isGenerating && !isComplete && !generatedVideo)) {
     return null;
   }
 
