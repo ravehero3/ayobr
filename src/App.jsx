@@ -223,6 +223,8 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      <div className="fixed inset-0 flex justify-center">
+        <div className="w-full max-w-6xl custom-background transition-all duration-300 overflow-auto">
       {/* Drag Overlay */}
       <AnimatePresence>
         {isDragOver && (
@@ -253,7 +255,7 @@ function App() {
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Header */}
         <header className="p-6 border-b border-white/10 flex-shrink-0">
-          <div className="max-w-6xl mx-auto text-center">
+          <div className="text-center">
             <h1 className="text-3xl font-bold text-white mb-2">
               Type Beat Video Generator
             </h1>
@@ -265,7 +267,7 @@ function App() {
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col p-6 overflow-y-auto">
-          <div className="max-w-6xl mx-auto w-full space-y-6">
+          <div className="w-full space-y-6">
         {/* Empty State */}
         {pairs.every(pair => !pair.audio && !pair.image) && (
           <motion.div
@@ -453,6 +455,8 @@ function App() {
         mousePosition={dragState.mousePosition}
       />
 
+        </div>
+      </div>
     </div>
   );
 }
