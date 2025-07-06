@@ -163,10 +163,10 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               alt={image.name}
               className="object-contain rounded-lg"
               style={{
-                width: '100%',
-                height: '100%',
-                maxWidth: '100%',
-                maxHeight: '100%'
+                width: '110%',
+                height: '110%',
+                maxWidth: '110%',
+                maxHeight: '110%'
               }}
             />
           </div>
