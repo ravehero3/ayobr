@@ -64,7 +64,7 @@ const VideoGenerationAnimation = ({
   }
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl z-20">
+    <div className="absolute inset-0 flex items-center justify-center glass-container rounded-2xl z-20">
       <AnimatePresence>
         {showMerging && (
           <motion.div
@@ -73,32 +73,8 @@ const VideoGenerationAnimation = ({
             exit={{ opacity: 0, scale: 0.8 }}
             className="text-center"
           >
-            <div className="absolute inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             <div className="text-center flex flex-col items-center justify-center h-full">
-              <motion.div className="relative w-20 h-20 mx-auto mb-6">
-                {/* Outer ring */}
-                <motion.div 
-                  className="absolute inset-0 border-4 border-gray-600 rounded-full"
-                />
-                {/* Spinning gradient ring */}
-                <motion.div 
-                  className="absolute inset-0 border-4 border-transparent rounded-full"
-                  style={{
-                    borderTopColor: '#3B82F6',
-                    borderRightColor: '#8B5CF6',
-                    borderBottomColor: 'transparent',
-                    borderLeftColor: 'transparent',
-                  }}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                />
-                {/* Inner glow */}
-                <motion.div 
-                  className="absolute inset-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                />
-              </motion.div>
               <motion.h3 
                 className="text-white text-sm font-medium mb-4"
                 initial={{ opacity: 0, y: 10 }}

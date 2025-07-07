@@ -393,6 +393,21 @@
   }
 }
 
+/* Stop button variant with red coloring */
+.spotlight-button.stop-button {
+  --c-color-1: rgba(220, 38, 38, 0.7); /* Red instead of blue */
+  --c-color-2: #000000; /* Black */
+  --c-color-3: #1a1a1a; /* Dark gray */
+  --c-color-4: rgba(220, 38, 38, 0.3); /* Light red */
+  --c-shadow: rgba(220, 38, 38, 0.5); /* Red shadow */
+  --c-shadow-inset-top: rgba(255, 255, 255, 0.2); /* White spotlight from top */
+  --c-shadow-inset-bottom: rgba(220, 38, 38, 0.3); /* Red spotlight from corner */
+}
+
+.spotlight-button.stop-button:hover {
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+}
+
 /* Base styles */
 * {
   box-sizing: border-box;

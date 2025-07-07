@@ -375,10 +375,7 @@ function App() {
             {isGenerating && !isCancelling && (
               <motion.button
                 onClick={stopGeneration}
-                className="generate-videos-btn"
-                style={{
-                  background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 50%, #991B1B 100%)',
-                }}
+                className="spotlight-button stop-button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, x: -20 }}
@@ -386,12 +383,21 @@ function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <span className="btn-text">
-                  STOP!
-                </span>
-                <span className="btn-icon">
-                  ■
-                </span>
+                <div className="wrapper">
+                  <span>STOP!</span>
+                  <div className="circle circle-1"></div>
+                  <div className="circle circle-2"></div>
+                  <div className="circle circle-3"></div>
+                  <div className="circle circle-4"></div>
+                  <div className="circle circle-5"></div>
+                  <div className="circle circle-6"></div>
+                  <div className="circle circle-7"></div>
+                  <div className="circle circle-8"></div>
+                  <div className="circle circle-9"></div>
+                  <div className="circle circle-10"></div>
+                  <div className="circle circle-11"></div>
+                  <div className="circle circle-12"></div>
+                </div>
               </motion.button>
             )}
 
