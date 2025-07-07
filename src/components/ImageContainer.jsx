@@ -79,8 +79,8 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           {isHovered && image && onStartImageDrag && (
             <button
               className="absolute left-2 w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle flex-shrink-0 z-20"
-              style={{ top: '-3px' }}
               style={{
+                top: '-8px',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 color: 'rgba(255, 255, 255, 0.7)'
@@ -135,8 +135,8 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           {/* Delete button positioned absolutely */}
           <button
             className="absolute right-2 w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 flex-shrink-0 z-20"
-            style={{ top: '-3px' }}
             style={{
+              top: '-8px',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               color: 'rgba(255, 255, 255, 0.7)'

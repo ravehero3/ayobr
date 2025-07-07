@@ -145,7 +145,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
           {/* Top header bar with title (center) and controls */}
-          <div className="flex items-center justify-between mb-4 relative" style={{ marginTop: '3px' }}>
+          <div className="flex items-center justify-between mb-4 relative" style={{ marginTop: '-2px' }}>
             {/* Move Handle - Left side, aligned with title */}
             {isHovered && audio && onStartAudioDrag && (
               <button
