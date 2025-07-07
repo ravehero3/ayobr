@@ -348,6 +348,7 @@ function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-center gap-4 mb-8"
+            style={{ marginTop: '10px' }}
           >
             <button
               onClick={handleGenerateVideos}
