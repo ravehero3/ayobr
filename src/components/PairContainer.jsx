@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import AudioContainer from './AudioContainer';
 import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
+import PairMergeAnimation from './PairMergeAnimation';
 import { useAppStore } from '../store/appStore';
 
 const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
@@ -180,14 +181,12 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </button>
       )}
 
-      {/* Video Generation Animation */}
-      <VideoGenerationAnimation
+      {/* Pair Merge Animation */}
+      <PairMergeAnimation
         pair={pair}
         isGenerating={videoState?.isGenerating || false}
         progress={videoState?.progress || 0}
-        isComplete={videoState?.isComplete || false}
-        generatedVideo={generatedVideo}
-        onComplete={handleVideoGenerationComplete}
+        onAnimationComplete={handleVideoGenerationComplete}
       />
 
 

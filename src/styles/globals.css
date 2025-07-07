@@ -801,6 +801,21 @@ input[type="file"] {
   }
 }
 
+/* Stop button variant with red coloring */
+.spotlight-button.stop-button {
+  --c-color-1: rgba(220, 38, 38, 0.7); /* Red instead of blue */
+  --c-color-2: #000000; /* Black */
+  --c-color-3: #1a1a1a; /* Dark gray */
+  --c-color-4: rgba(220, 38, 38, 0.3); /* Light red */
+  --c-shadow: rgba(220, 38, 38, 0.5); /* Red shadow */
+  --c-shadow-inset-top: rgba(255, 255, 255, 0.2); /* White spotlight from top */
+  --c-shadow-inset-bottom: rgba(220, 38, 38, 0.3); /* Red spotlight from corner */
+}
+
+.spotlight-button.stop-button:hover {
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+}
+
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
   width: 8px;
@@ -949,4 +964,28 @@ input[type="file"] {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Glassmorphism Hover Effect for Audio and Image Containers */
+.audio-container, .image-container {
+  /* Smooth transition for all hover effects */
+  transition: all 0.3s ease !important;
+  
+  /* Make sure it's positioned for transform */
+  position: relative;
+  
+  /* Cursor pointer to indicate it's interactive */
+  cursor: pointer;
+}
+
+/* Hover effects */
+.audio-container:hover, .image-container:hover {
+  /* Enhanced glassmorphism on hover */
+  background: rgba(255, 255, 255, 0.25) !important;
+  
+  /* Lift effect */
+  transform: translateY(-10px) !important;
+  
+  /* Stronger glow shadow */
+  box-shadow: 0 30px 60px rgba(255, 255, 255, 0.15) !important;
 }
