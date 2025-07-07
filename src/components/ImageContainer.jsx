@@ -74,18 +74,19 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       }}
     >
       {image ? (
-        <div className="w-full h-full flex flex-col relative z-10">
-          {/* Controls positioned absolutely to not take up space */}
-          {isHovered && image && onStartImageDrag && (
-            <button
-              className="absolute left-2 w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle flex-shrink-0 z-20"
-              style={{
-                top: '-8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: 'rgba(255, 255, 255, 0.7)'
-              }}
-              title="Drag to swap with other image containers"
+        <div className="w-full h-full flex flex-col justify-between relative z-10">
+          {/* Top header bar with controls - matching audio container layout */}
+          <div className="flex items-center justify-between mb-4 relative" style={{ marginTop: '-2px' }}>
+            {/* Move Handle - Left side, aligned with audio container */}
+            {isHovered && image && onStartImageDrag && (
+              <button
+                className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 movehandle flex-shrink-0"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }}
+                title="Drag to swap with other image containers"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -129,32 +130,32 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M13,11H18L16.5,9.5L17.92,8.08L21.84,12L17.92,15.92L16.5,14.5L18,13H13V18L14.5,16.5L15.92,17.92L12,21.84L8.08,17.92L9.5,16.5L11,18V13H6L7.5,14.5L6.08,15.92L2.16,12L6.08,8.08L7.5,9.5L6,11H11V6L9.5,7.5L8.08,6.08L12,2.16L15.92,6.08L14.5,7.5L13,6V11Z"/>
               </svg>
+              </button>
+            )}
+
+            {/* Delete button - Right side, aligned with audio container */}
+            <button
+              className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 flex-shrink-0"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: 'rgba(255, 255, 255, 0.7)'
+              }}
+              title="Delete image"
+              onClick={() => {
+                if (onDelete) {
+                  onDelete();
+                }
+              }}
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
-          )}
+          </div>
 
-          {/* Delete button positioned absolutely */}
-          <button
-            className="absolute right-2 w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 flex-shrink-0 z-20"
-            style={{
-              top: '-8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'rgba(255, 255, 255, 0.7)'
-            }}
-            title="Delete image"
-            onClick={() => {
-              if (onDelete) {
-                onDelete();
-              }
-            }}
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Perfectly centered image preview - full container height */}
-          <div className="w-full h-full flex items-center justify-center overflow-hidden">
+          {/* Perfectly centered image preview - takes remaining space */}
+          <div className="flex-1 flex items-center justify-center overflow-hidden">
             <img
               src={imageUrl}
               alt={image.name}
