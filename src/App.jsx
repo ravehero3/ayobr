@@ -269,27 +269,16 @@ function App() {
       </AnimatePresence>
 
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
-        {/* Header */}
-        <header className="p-6 border-b border-white/10 flex-shrink-0">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Type Beat Video Generator
-            </h1>
-            <p className="text-sm text-[#AAA]">
-              Drop audio files and images anywhere to create stunning type beat videos
-            </p>
-          </div>
-        </header>
-
         {/* Main Content */}
         <main className="flex-1 flex flex-col p-6 overflow-y-auto">
           <div className="w-full space-y-6">
-        {/* Empty State */}
+        {/* Empty State - Centered */}
         {pairs.every(pair => !pair.audio && !pair.image) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center flex-1 text-center w-full"
+            className="fixed inset-0 flex flex-col items-center justify-center text-center"
+            style={{ zIndex: 10 }}
           >
             <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-full bg-neon-blue/10 border-2 border-dashed border-neon-blue/30">
               <svg className="w-12 h-12 text-neon-blue/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
