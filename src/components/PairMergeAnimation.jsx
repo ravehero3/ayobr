@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '../store/appStore';
 
 const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete }) => {
-  const [animationStage, setAnimationStage] = useState('idle'); // idle, merging, merged
+  const [animationStage, setAnimationStage] = useState('idle'); // idle, merging, merged, completed
   const [showProgress, setShowProgress] = useState(false);
+  const { generatedVideos } = useAppStore();
+  
+  // Find the generated video for this pair
+  const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
 
   useEffect(() => {
     if (isGenerating && animationStage === 'idle') {
@@ -19,12 +24,24 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   }, [isGenerating, animationStage]);
 
   useEffect(() => {
-    if (!isGenerating && animationStage !== 'idle') {
-      // Reset animation when generation stops
+    // When video is generated and progress is complete, show video preview
+    if (generatedVideo && progress === 100 && animationStage === 'merged') {
+      // Short delay to show completion, then transition to video preview
+      setTimeout(() => {
+        setAnimationStage('completed');
+        setShowProgress(false);
+        if (onAnimationComplete) onAnimationComplete();
+      }, 1000);
+    }
+  }, [generatedVideo, progress, animationStage, onAnimationComplete]);
+
+  useEffect(() => {
+    if (!isGenerating && !generatedVideo && animationStage !== 'idle') {
+      // Reset animation when generation stops without completion
       setAnimationStage('idle');
       setShowProgress(false);
     }
-  }, [isGenerating, animationStage]);
+  }, [isGenerating, generatedVideo, animationStage]);
 
   if (animationStage === 'idle') {
     return null;
@@ -100,6 +117,37 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
               >
                 {progress}% Complete
               </motion.p>
+            </div>
+          </motion.div>
+        )}
+
+        {animationStage === 'completed' && generatedVideo && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Video Preview with glassmorphism background */}
+            <div className="w-full h-full glass-container rounded-2xl flex items-center justify-center p-6">
+              <motion.div
+                className="w-full max-w-[600px] aspect-video"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <video
+                  src={generatedVideo.url}
+                  controls
+                  className="w-full h-full rounded-lg shadow-2xl object-contain"
+                  style={{
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.1)'
+                  }}
+                  preload="metadata"
+                  autoPlay={false}
+                />
+              </motion.div>
             </div>
           </motion.div>
         )}

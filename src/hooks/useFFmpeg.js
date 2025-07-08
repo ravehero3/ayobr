@@ -244,13 +244,25 @@ export const useFFmpeg = () => {
         console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
       }, 100);
 
+      // Set final state with 100% progress for animation
       setVideoGenerationState(pair.id, {
-        isGenerating: false,
+        isGenerating: true, // Keep generating true for animation
         progress: 100,
         isComplete: true,
         video: video,
         error: null
       });
+
+      // After a delay, mark as fully complete
+      setTimeout(() => {
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 100,
+          isComplete: true,
+          video: video,
+          error: null
+        });
+      }, 2000); // Give time for animation to complete
 
       console.log(`Video generation completed for pair ${pair.id}`);
       return video;

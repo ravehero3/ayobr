@@ -191,8 +191,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
 
 
-      {/* Show generated video if available, otherwise show the original containers */}
-      {generatedVideo ? (
+      {/* Show generated video if available and not in generation state, otherwise show the original containers */}
+      {generatedVideo && !videoState?.isGenerating ? (
         <div className="flex justify-center relative z-10">
           <div
             className="relative w-full max-w-[800px] border overflow-hidden group/container glass-container"
