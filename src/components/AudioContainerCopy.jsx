@@ -114,12 +114,16 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
           </span>
         </div>
 
-        {/* Waveform */}
+        {/* Waveform - with blur effect */}
         <div className="flex-1 flex items-start">
           <div 
             ref={waveformRef}
             className="w-full"
-            style={{ height: '60px' }}
+            style={{ 
+              height: '60px',
+              filter: 'blur(2px)',
+              opacity: 0.7
+            }}
           />
         </div>
 
