@@ -973,4 +973,16 @@ input[type="file"] {
   
   /* Cursor pointer to indicate it's interactive */
   cursor: pointer;
+  
+  /* Smooth transition for hover effects */
+  transition: all 0.3s ease !important;
+}
+
+/* Hover effects */
+.audio-container:hover, .image-container:hover {
+  /* Scale up by 5% */
+  transform: scale(1.05) !important;
+  
+  /* Add 5% white overlay */
+  background: rgba(255, 255, 255, 0.05) !important;
 }
