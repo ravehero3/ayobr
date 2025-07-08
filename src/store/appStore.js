@@ -99,6 +99,9 @@ export const useAppStore = create((set, get) => ({
   setVideoGenerationState: (pairId, state) => set(store => {
     const currentState = store.videoGenerationStates[pairId];
     
+    console.log(`Setting video generation state for pair ${pairId}:`, state);
+    console.log(`Current state:`, currentState);
+    
     // Prevent unnecessary state updates that could trigger re-renders
     if (currentState && 
         currentState.isGenerating === state.isGenerating &&

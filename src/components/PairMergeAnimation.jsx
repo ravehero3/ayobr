@@ -9,6 +9,14 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   
   // Find the generated video for this pair
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+  
+  console.log(`PairMergeAnimation for pair ${pair.id}:`, {
+    isGenerating,
+    progress,
+    animationStage,
+    hasGeneratedVideo: !!generatedVideo,
+    generatedVideo: generatedVideo ? { id: generatedVideo.id, filename: generatedVideo.filename } : null
+  });
 
   useEffect(() => {
     if (isGenerating && animationStage === 'idle') {
