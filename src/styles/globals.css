@@ -974,15 +974,31 @@ input[type="file"] {
   /* Cursor pointer to indicate it's interactive */
   cursor: pointer;
   
-  /* Smooth transition for hover effects */
-  transition: all 0.3s ease !important;
+  /* Ensure overflow is hidden for inner scaling */
+  overflow: hidden;
 }
 
-/* Hover effects */
-.audio-container:hover, .image-container:hover {
-  /* Scale up by 5% */
-  transform: scale(1.05) !important;
-  
-  /* Add 5% white overlay */
-  background: rgba(255, 255, 255, 0.05) !important;
+/* Hover effects - scale inner content, not the container */
+.audio-container:hover::before, .image-container:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.audio-container:hover > *, .image-container:hover > * {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+/* Ensure content has proper z-index */
+.audio-container > *, .image-container > * {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
 }
