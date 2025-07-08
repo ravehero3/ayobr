@@ -70,9 +70,17 @@ export const useAppStore = create((set, get) => ({
   }),
 
   // Generated videos
-  addGeneratedVideo: (video) => set(state => ({
-    generatedVideos: [...state.generatedVideos, video]
-  })),
+  addGeneratedVideo: (video) => set(state => {
+    console.log('Store: Adding video to generatedVideos:', video.filename);
+    console.log('Store: Current video count:', state.generatedVideos.length);
+    
+    const newVideos = [...state.generatedVideos, video];
+    console.log('Store: New video count:', newVideos.length);
+    
+    return {
+      generatedVideos: newVideos
+    };
+  }),
 
   removeGeneratedVideo: (videoId) => set(state => ({
     generatedVideos: state.generatedVideos.filter(video => video.id !== videoId)

@@ -233,14 +233,15 @@ export const useFFmpeg = () => {
       };
 
       console.log('Adding generated video to store:', video.filename, 'Size:', video.size);
+      
+      // Add video to store immediately
       addGeneratedVideo(video);
       
-      // Verify video was added
-      setTimeout(() => {
-        const store = useAppStore.getState();
-        const addedVideo = store.generatedVideos.find(v => v.id === video.id);
-        console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
-      }, 100);
+      // Verify video was added immediately
+      const storeState = useAppStore.getState();
+      const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
+      console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
+      console.log('Total videos in store:', storeState.generatedVideos.length);
 
       // Set final state with 100% progress for animation
       setVideoGenerationState(pair.id, {
