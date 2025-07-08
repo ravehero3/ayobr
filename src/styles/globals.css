@@ -985,4 +985,10 @@ input[type="file"] {
   
   /* Add 5% white overlay */
   background: rgba(255, 255, 255, 0.05) !important;
+  
+  /* Bring hovered container above neighbors */
+  z-index: 10 !important;
+  
+  /* Ensure the container can overflow its bounds */
+  position: relative !important;
 }
