@@ -134,12 +134,10 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
       
-      // Show completion briefly, then reset states
-      setTimeout(() => {
-        setIsGenerating(false);
-        setProgress(0);
-        console.log('Generation completed and state reset');
-      }, 1500);
+      // Reset the global generation state immediately
+      setIsGenerating(false);
+      setProgress(0);
+      console.log('Generation completed and state reset');
       
     } catch (error) {
       console.error('Error in generateVideos:', error);
@@ -253,7 +251,7 @@ export const useFFmpeg = () => {
         error: null
       });
 
-      // After a delay, mark as fully complete
+      // After a shorter delay, mark as fully complete for animation
       setTimeout(() => {
         setVideoGenerationState(pair.id, {
           isGenerating: false,
@@ -262,7 +260,7 @@ export const useFFmpeg = () => {
           video: video,
           error: null
         });
-      }, 2000); // Give time for animation to complete
+      }, 1000); // Shorter delay for animation
 
       console.log(`Video generation completed for pair ${pair.id}`);
       return video;

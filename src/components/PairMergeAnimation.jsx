@@ -24,8 +24,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   }, [isGenerating, animationStage]);
 
   useEffect(() => {
-    // When video is generated and progress is complete, show video preview
-    if (generatedVideo && progress === 100 && animationStage === 'merged') {
+    // When video is generated and we're in merged state, show video preview
+    if (generatedVideo && animationStage === 'merged') {
       // Short delay to show completion, then transition to video preview
       setTimeout(() => {
         setAnimationStage('completed');
@@ -33,7 +33,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
         if (onAnimationComplete) onAnimationComplete();
       }, 1000);
     }
-  }, [generatedVideo, progress, animationStage, onAnimationComplete]);
+  }, [generatedVideo, animationStage, onAnimationComplete]);
 
   useEffect(() => {
     if (!isGenerating && !generatedVideo && animationStage !== 'idle') {
