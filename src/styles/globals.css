@@ -966,26 +966,11 @@ input[type="file"] {
   to { transform: rotate(360deg); }
 }
 
-/* Glassmorphism Hover Effect for Audio and Image Containers */
+/* Basic container styles */
 .audio-container, .image-container {
-  /* Smooth transition for all hover effects */
-  transition: all 0.3s ease !important;
-  
   /* Make sure it's positioned for transform */
   position: relative;
   
   /* Cursor pointer to indicate it's interactive */
   cursor: pointer;
-}
-
-/* Hover effects */
-.audio-container:hover, .image-container:hover {
-  /* Enhanced glassmorphism on hover */
-  background: rgba(255, 255, 255, 0.25) !important;
-  
-  /* Lift effect */
-  transform: translateY(-10px) !important;
-  
-  /* Stronger glow shadow */
-  box-shadow: 0 30px 60px rgba(255, 255, 255, 0.15) !important;
 }
