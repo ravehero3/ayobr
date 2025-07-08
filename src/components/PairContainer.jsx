@@ -181,13 +181,17 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </button>
       )}
 
-      {/* Pair Merge Animation */}
-      <PairMergeAnimation
-        pair={pair}
-        isGenerating={videoState?.isGenerating || false}
-        progress={videoState?.progress || 0}
-        onAnimationComplete={handleVideoGenerationComplete}
-      />
+      {/* Show animation overlay during generation only if no video exists yet */}
+      {videoState?.isGenerating && !generatedVideo && (
+        <PairMergeAnimation 
+          pair={pair}
+          isGenerating={videoState.isGenerating}
+          progress={videoState.progress}
+          onAnimationComplete={() => {
+            console.log(`Animation complete for pair ${pair.id}`);
+          }}
+        />
+      )}
 
 
 

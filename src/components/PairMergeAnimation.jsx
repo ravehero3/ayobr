@@ -19,7 +19,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   });
 
   useEffect(() => {
-    if (isGenerating && animationStage === 'idle') {
+    // Only start animation if we don't already have a generated video
+    if (isGenerating && animationStage === 'idle' && !generatedVideo) {
       // Start the merge animation
       setAnimationStage('merging');
       
@@ -29,7 +30,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
         setShowProgress(true);
       }, 800);
     }
-  }, [isGenerating, animationStage]);
+  }, [isGenerating, animationStage, generatedVideo]);
 
   useEffect(() => {
     // When video is generated and we're in merged state, show video preview
@@ -44,6 +45,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   }, [generatedVideo, animationStage, onAnimationComplete]);
 
   useEffect(() => {
+    // Only reset if generation stops without completion AND we don't have a video
     if (!isGenerating && !generatedVideo && animationStage !== 'idle') {
       // Reset animation when generation stops without completion
       setAnimationStage('idle');
