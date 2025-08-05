@@ -9,11 +9,11 @@ const AnimatedBackground = () => {
   const hasAnyFiles = pairs.some(pair => pair.audio || pair.image);
   
   // Determine which background to show:
-  // - First page (empty state): drag and drop background
-  // - Second page (has files): animated GIF background
+  // - First page (empty state): drag and drop background  
+  // - Second page (has files): animated type beatz GIF background
   const backgroundImage = isEmptyState 
     ? 'url(/attached_assets/DRAG AND DROP__1754389613176.png)'
-    : 'url(/attached_assets/type beatz_1754412396458.gif)';
+    : 'url(/attached_assets/type beatz_1754412865602.gif)';
     
   // Apply blur when generating videos
   const blurClass = isGenerating ? 'blur-md' : '';
