@@ -23,9 +23,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative w-full max-w-4xl mx-4 p-8 rounded-3xl overflow-hidden"
+          className="relative w-full max-w-4xl mx-4 p-2 rounded-2xl overflow-hidden"
           style={{
-            background: 'rgba(255, 255, 255, 0.05)',
+            background: 'rgba(0, 0, 0, 0.2)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             boxShadow: '0 25px 45px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
@@ -33,10 +33,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           }}
         >
           {/* Ambient glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl" />
           
-          {/* Header */}
-          <div className="relative z-10 text-center mb-8">
+          {/* Content Container with proper padding */}
+          <div className="p-6">
+            {/* Header */}
+            <div className="relative z-10 text-center mb-6">
             <motion.h2 
               className="text-3xl font-bold text-white mb-2"
               initial={{ opacity: 0, y: -10 }}
@@ -70,7 +72,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    className="relative p-4 rounded-2xl overflow-hidden"
+                    className="relative p-4 rounded-xl overflow-hidden"
                     style={{
                       background: 'rgba(255, 255, 255, 0.03)',
                       border: `1px solid ${isComplete ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
@@ -79,7 +81,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
                   >
                     {/* Success glow for completed videos */}
                     {isComplete && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl" />
                     )}
 
                     {/* Pair Content */}
@@ -203,26 +205,27 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           </div>
 
           {/* Overall Progress */}
-          <motion.div 
-            className="relative z-10 mt-8 text-center"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="text-sm text-gray-300 mb-2">
-              Overall Progress: {generatedVideos.length} of {pairs.length} completed
-            </div>
-            <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden backdrop-blur-sm border border-white/10 max-w-md mx-auto">
-              <motion.div
-                className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full relative"
-                initial={{ width: 0 }}
-                animate={{ width: `${(generatedVideos.length / pairs.length) * 100}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-              </motion.div>
-            </div>
-          </motion.div>
+            <motion.div 
+              className="relative z-10 mt-6 text-center"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="text-sm text-gray-300 mb-2">
+                Overall Progress: {generatedVideos.length} of {pairs.length} completed
+              </div>
+              <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden backdrop-blur-sm border border-white/10 max-w-md mx-auto">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full relative"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(generatedVideos.length / pairs.length) * 100}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
