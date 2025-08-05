@@ -36,7 +36,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg" />
           
           {/* Content Container with proper padding */}
-          <div className="p-1.5">
+          <div className="p-6">
             {/* Header */}
             <div className="relative z-10 text-center mb-6">
             <motion.h2 
@@ -90,13 +90,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
                       <div className="flex items-center justify-between mb-3">
                         {/* Audio Miniature */}
                         <div className="flex items-center gap-2 flex-1">
-                          <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="w-8 h-8 rounded-lg bg-gray-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                             </svg>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs text-green-400 font-medium truncate">
+                            <div className="text-xs text-gray-400 font-medium truncate">
                               {pair.audio?.name?.replace(/\.[^/.]+$/, '') || 'Audio'}
                             </div>
                           </div>
@@ -111,21 +111,21 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
 
                         {/* Image Miniature */}
                         <div className="flex items-center gap-2 flex-1">
-                          <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-gray-500/20 flex items-center justify-center overflow-hidden flex-shrink-0">
                             {pair.image ? (
                               <img 
                                 src={URL.createObjectURL(pair.image)} 
                                 alt="Preview" 
-                                className="w-full h-full object-cover rounded-lg"
+                                className="w-full h-full object-cover rounded-lg grayscale"
                               />
                             ) : (
-                              <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs text-blue-400 font-medium truncate">
+                            <div className="text-xs text-gray-400 font-medium truncate">
                               {pair.image?.name?.replace(/\.[^/.]+$/, '') || 'Image'}
                             </div>
                           </div>
@@ -147,7 +147,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
                             className={`h-full rounded-full relative ${
                               isComplete 
                                 ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
-                                : 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500'
+                                : 'bg-gradient-to-r from-blue-400 to-blue-500'
                             }`}
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
@@ -180,7 +180,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
                               {[1,2,3].map((i) => (
                                 <motion.div
                                   key={i}
-                                  className="w-1 h-1 bg-purple-400 rounded-full"
+                                  className="w-1 h-1 bg-gray-400 rounded-full"
                                   animate={{ 
                                     scale: [1, 1.5, 1],
                                     opacity: [0.3, 1, 0.3]
@@ -193,7 +193,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
                                 />
                               ))}
                             </div>
-                            <span className="text-xs text-purple-400 font-medium">Generating</span>
+                            <span className="text-xs text-gray-400 font-medium">Generating</span>
                           </div>
                         )}
                       </div>
@@ -216,7 +216,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
               </div>
               <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden backdrop-blur-sm border border-white/10 max-w-md mx-auto">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full relative"
+                  className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative"
                   initial={{ width: 0 }}
                   animate={{ width: `${(generatedVideos.length / pairs.length) * 100}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
