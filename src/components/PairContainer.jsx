@@ -164,7 +164,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   };
 
   return (
-    <motion.div className="relative">
+    <motion.div className="relative" data-pair-id={pair.id}>
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
         <button
@@ -262,7 +262,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             onDrop={handleContainerDrop}
           >
             <div
-              className="relative overflow-hidden group/container"
+              className="relative overflow-hidden group/container audio-container"
               style={{
                 height: '200px',
                 minHeight: '200px',
@@ -360,7 +360,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             onDrop={handleContainerDrop}
           >
             <div
-              className="relative overflow-hidden group/container"
+              className="relative overflow-hidden group/container image-container"
               style={{
                 height: '200px',
                 minHeight: '200px',

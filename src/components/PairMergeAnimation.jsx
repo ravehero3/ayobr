@@ -27,16 +27,38 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
       // Capture the positions of the actual audio and image containers
       const captureContainerPositions = () => {
         const pairElement = document.querySelector(`[data-pair-id="${pair.id}"]`);
+        console.log('Looking for pair element:', `[data-pair-id="${pair.id}"]`, pairElement);
+        
         if (pairElement) {
-          const audioElement = pairElement.querySelector('.audio-container');
-          const imageElement = pairElement.querySelector('.image-container');
-          const plusElement = pairElement.querySelector('.connecting-bridge'); // Find the plus sign
+          // Look for the actual container elements more broadly
+          const audioElement = pairElement.querySelector('[class*="audio"]') || pairElement.querySelector('.audio-container');
+          const imageElement = pairElement.querySelector('[class*="image"]') || pairElement.querySelector('.image-container');
+          const plusElement = pairElement.querySelector('.connecting-bridge');
           
-          if (audioElement && imageElement && plusElement) {
+          console.log('Found elements:', { audioElement, imageElement, plusElement });
+          
+          if (audioElement && imageElement) {
             const containerRect = pairElement.getBoundingClientRect();
             const audioRect = audioElement.getBoundingClientRect();
             const imageRect = imageElement.getBoundingClientRect();
-            const plusRect = plusElement.getBoundingClientRect();
+            
+            // If plus element is found, use it for center position, otherwise calculate center
+            let centerX, centerY;
+            if (plusElement) {
+              const plusRect = plusElement.getBoundingClientRect();
+              centerX = plusRect.left + (plusRect.width / 2) - containerRect.left;
+              centerY = plusRect.top + (plusRect.height / 2) - containerRect.top;
+            } else {
+              // Fallback: calculate center between audio and image
+              centerX = (audioRect.right + imageRect.left) / 2 - containerRect.left;
+              centerY = (audioRect.top + audioRect.bottom) / 2 - containerRect.top;
+            }
+            
+            console.log('Calculated positions:', {
+              audio: { x: audioRect.left - containerRect.left, y: audioRect.top - containerRect.top },
+              image: { x: imageRect.left - containerRect.left, y: imageRect.top - containerRect.top },
+              center: { x: centerX, y: centerY }
+            });
             
             // Calculate positions relative to the pair container
             setAudioPosition({
@@ -44,8 +66,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
               y: audioRect.top - containerRect.top,
               width: audioRect.width,
               height: audioRect.height,
-              centerX: plusRect.left + (plusRect.width / 2) - containerRect.left,
-              centerY: plusRect.top + (plusRect.height / 2) - containerRect.top
+              centerX,
+              centerY
             });
             
             setImagePosition({
@@ -53,25 +75,40 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
               y: imageRect.top - containerRect.top,
               width: imageRect.width,
               height: imageRect.height,
-              centerX: plusRect.left + (plusRect.width / 2) - containerRect.left,
-              centerY: plusRect.top + (plusRect.height / 2) - containerRect.top
+              centerX,
+              centerY
             });
+            
+            return true; // Successful capture
+          } else {
+            console.log('Could not find audio/image elements');
+            return false;
           }
         }
+        return false;
       };
       
-      captureContainerPositions();
+      const positionsCaptured = captureContainerPositions();
       
-      // Start the merge animation after a brief delay to ensure positions are captured
-      setTimeout(() => {
-        setAnimationStage('merging');
-      }, 100);
-      
-      // Show merged container after animation
-      setTimeout(() => {
+      if (positionsCaptured) {
+        // Start the merge animation after a brief delay to ensure positions are captured
+        setTimeout(() => {
+          console.log('Starting merge animation');
+          setAnimationStage('merging');
+        }, 100);
+        
+        // Show merged container after animation
+        setTimeout(() => {
+          console.log('Moving to merged state');
+          setAnimationStage('merged');
+          setShowProgress(true);
+        }, 1600); // Increased delay to allow merge animation to complete
+      } else {
+        // Skip directly to merged if we can't capture positions
+        console.log('Skipping merge animation, going directly to merged');
         setAnimationStage('merged');
         setShowProgress(true);
-      }, 1500);
+      }
     }
   }, [isGenerating, animationStage, generatedVideo, pair.id]);
 
