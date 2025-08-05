@@ -25,11 +25,17 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="relative w-full max-w-4xl mx-4 p-2 rounded-lg overflow-hidden"
           style={{
+            width: 'calc(100% + 20px)', // 10px wider on each side
+            maxWidth: 'calc(4rem * 16 + 20px)' // max-w-4xl + 20px
+          }}
+          style={{
             background: 'rgba(0, 0, 0, 0.2)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             boxShadow: '0 25px 45px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-            maxHeight: '80vh'
+            maxHeight: '80vh',
+            width: 'calc(100% + 20px)', // 10px wider on each side
+            maxWidth: 'calc(4rem * 16 + 20px)' // max-w-4xl + 20px
           }}
         >
           {/* Ambient glow effect */}
