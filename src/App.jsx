@@ -273,38 +273,19 @@ function App() {
         {/* Main Content */}
         <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
-        {/* Simple test text - always visible when no files */}
+        {/* Drop Zone - Show when no files are present */}
         {pairs.every(pair => !pair.audio && !pair.image) && (
-          <div
-            className="fixed inset-0 flex items-center justify-center"
-            style={{ 
-              zIndex: 999999,
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              pointerEvents: 'none'
-            }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-4xl mx-auto"
           >
-            <div className="text-center">
-              <h1 
-                className="text-6xl font-bold mb-4"
-                style={{ 
-                  color: '#00ff00',
-                  textShadow: '0 0 20px #00ff00, 0 0 40px #00ff00',
-                  fontFamily: 'Arial, sans-serif'
-                }}
-              >
-                DRAG AND DROP HERE
-              </h1>
-              <p 
-                className="text-2xl"
-                style={{ 
-                  color: '#ffffff',
-                  textShadow: '0 0 10px #ffffff'
-                }}
-              >
-                Test text - should be visible immediately
-              </p>
-            </div>
-          </div>
+            <DropZone
+              onFileDrop={handleGlobalDrop}
+              hasFiles={false}
+            />
+          </motion.div>
         )}
 
         {/* Pairs Grid - Updated for wider containers */}
