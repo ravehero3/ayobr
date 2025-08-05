@@ -222,7 +222,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
               </motion.div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

@@ -133,6 +133,13 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               </button>
             )}
 
+            {/* File title - Always centered, independent of move button */}
+            <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+              <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg">
+                {image.name.replace(/\.[^/.]+$/, "")}
+              </span>
+            </div>
+
             {/* Delete button - Right side, aligned with audio container */}
             <button
               className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 opacity-0 group-hover:opacity-100 flex-shrink-0"
