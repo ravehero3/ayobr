@@ -9,10 +9,10 @@ const AnimatedBackground = () => {
   const hasAnyFiles = pairs.some(pair => pair.audio || pair.image);
   
   // Determine which background to show:
-  // - First page (empty state): drag and drop background  
+  // - First page (empty state): solid dark background to show DropZone text clearly
   // - Second page (has files): animated type beatz GIF background
   const backgroundImage = isEmptyState 
-    ? 'url(/attached_assets/DRAG AND DROP__1754389613176.png)'
+    ? 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
     : 'url(/attached_assets/typebeatznew_1754424064040.gif)';
     
   // Apply blur when generating videos
@@ -22,11 +22,11 @@ const AnimatedBackground = () => {
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -1 }}>
       {/* Dynamic background image */}
       <div 
-        className={`absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move transition-all duration-1000 ${blurClass}`}
+        className={`absolute -inset-10 w-[140%] h-[140%] transition-all duration-1000 ${blurClass} ${isEmptyState ? '' : 'bg-cover bg-center animate-diagonal-move'}`}
         style={{
-          backgroundImage,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: backgroundImage,
+          backgroundSize: isEmptyState ? 'auto' : 'cover',
+          backgroundPosition: isEmptyState ? 'center' : 'center',
         }}
       />
       
