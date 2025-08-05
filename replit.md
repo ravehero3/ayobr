@@ -16,14 +16,14 @@ The application is built as a cross-platform desktop application using Electron,
 
 ### Feature Specifications
 Key features include:
-- **Drag & Drop File Management**: Full-window drop zone with automatic audio-image pairing, visual feedback for drag operations (e.g., green borders, scaling effects), and intelligent pairing logic.
+- **Drag & Drop File Management**: Full-window drop zone with automatic audio-image pairing, visual feedback for drag operations (e.g., green borders, scaling effects), and intelligent pairing logic. Drop zone is always visible - centered when empty, compact at top when files exist.
 - **Modular Pair Containers**: Individual containers for audio and images, allowing drag-and-drop swapping only between same-type containers (audio with audio, image with image). Containers are 384px x 192px with a consistent glassmorphism design.
 - **Media Previews**: Waveform visualization for audio files and image display with proper centering and padding.
 - **Enhanced Merge Animation**: During video generation, audio and image containers visually move to the center and merge into a "Video Loading Container" with smooth Framer Motion animations. Text disappears during the merge process for clean visual transitions.
 - **Video Generation**: Output videos are 1920x1080 resolution, 30px vertical spacing, white background, and high-quality audio (AAC codec at 320k bitrate). Real-time progress tracking with modern loading circles and a "STOP!" button for cancellation. Videos display in original container positions after generation.
 - **Smart Button Management**: "Generate Videos" button only appears when no videos exist. After generation, only "Download All Videos" button is shown, eliminating duplicate interfaces.
 - **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images, with MIME type and extension checking.
-- **Deployment**: Optimized for macOS but cross-platform ready. Development uses hot reloading via Webpack dev server.
+- **Deployment**: Web-based deployment ready for Replit with webpack dev server on port 5000. Client-side processing ensures privacy and performance.
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between the React-based renderer process and Electron's main process for system interactions.
