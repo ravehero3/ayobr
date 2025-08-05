@@ -181,8 +181,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </button>
       )}
 
-      {/* Show animation overlay during generation only if no video exists yet */}
-      {videoState?.isGenerating && !generatedVideo && (
+      {/* Show animation overlay during generation */}
+      {videoState?.isGenerating && (
         <PairMergeAnimation 
           pair={pair}
           isGenerating={videoState.isGenerating}
@@ -193,9 +193,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         />
       )}
 
-
-
-      {/* Show generated video if available and not in generation state, otherwise show the original containers */}
+      {/* Show generated video if available and not generating */}
       {generatedVideo && !videoState?.isGenerating ? (
         <div className="flex justify-center relative z-10">
           <div
@@ -241,9 +239,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             </button>
           </div>
         </div>
-      ) : (
-        // Only show containers when NOT generating and no video exists
-        !videoState?.isGenerating && !generatedVideo && (
+      ) : !videoState?.isGenerating && !generatedVideo ? (
           <div 
             className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8"
             style={{ 
@@ -424,7 +420,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             </div>
           </div>
         )
-      )}
+      ) : null}
     </motion.div>
   );
 };
