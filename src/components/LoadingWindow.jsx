@@ -23,7 +23,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative w-full max-w-4xl mx-4 p-2 rounded-2xl overflow-hidden"
+          className="relative w-full max-w-4xl mx-4 p-2 rounded-lg overflow-hidden"
           style={{
             background: 'rgba(0, 0, 0, 0.2)',
             backdropFilter: 'blur(20px)',
@@ -33,10 +33,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           }}
         >
           {/* Ambient glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg" />
           
           {/* Content Container with proper padding */}
-          <div className="p-6">
+          <div className="p-1.5">
             {/* Header */}
             <div className="relative z-10 text-center mb-6">
             <motion.h2 
