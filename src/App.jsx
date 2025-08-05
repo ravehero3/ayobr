@@ -488,6 +488,7 @@ function App() {
         onClose={() => {
           // Loading window will close automatically when generation completes
         }}
+        onStop={stopGeneration}
       />
 
         </div>

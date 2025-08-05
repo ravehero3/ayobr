@@ -7,7 +7,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     onFileDrop(files);
   }, [onFileDrop]);
@@ -30,95 +30,101 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
   return (
     <motion.div
-      className={`relative transition-all duration-500 ${
-        hasFiles 
-          ? 'mb-4 p-4 border border-dashed rounded-xl' 
-          : 'mb-8 p-12 border-2 border-dashed rounded-3xl'
-      } ${
-        isDragOver
-          ? 'border-blue-400 bg-blue-400/10 shadow-lg shadow-blue-400/20'
-          : 'border-gray-600 hover:border-blue-400/50'
-      }`}
-      onDrop={handleDrop}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className={`
+        relative w-full max-w-4xl mx-auto p-12 rounded-3xl
+        bg-gradient-to-br from-space-dark/50 to-space-gray/30
+        backdrop-blur-sm
+        hover:bg-gradient-to-br hover:from-space-dark/60 hover:to-space-gray/40
+        transition-all duration-300 ease-out
+        cursor-pointer group
+        min-h-[400px] flex items-center justify-center
+        ${isDragOver ? 'bg-gradient-to-br from-neon-green/10 to-neon-blue/10 scale-[1.02]' : ''}
+      `}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      whileHover={{ scale: hasFiles ? 1.01 : 1.02 }}
-      transition={{ duration: 0.2 }}
+      onDrop={handleDrop}
+      onClick={() => document.getElementById('file-input').click()}
     >
-      {/* Show centered content only when no files */}
-      <motion.div 
-        className="text-center flex flex-col items-center justify-center"
-        style={{ minHeight: hasFiles ? '60px' : '300px' }}
-        initial={{ opacity: hasFiles ? 0 : 1 }}
-        animate={{ opacity: hasFiles ? 0 : 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {!hasFiles && (
-          <>
-            <div className="mb-4">
-              <svg
-                className={`mx-auto h-16 w-16 transition-colors duration-300 ${
-                  isDragOver ? 'text-blue-400' : 'text-gray-400'
-                }`}
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Drop Your Files
-            </h3>
-            
-            <p className="text-gray-400 mb-4">
-              Drag and drop your audio files (MP3, WAV) and images (PNG, JPG) anywhere on this page. They will automatically pair together to create your type beat videos.
-            </p>
-            
-            <div className="space-y-2">
-              <input
-                type="file"
-                accept=".mp3,.wav,.png,.jpg,.jpeg,.heic,.heif"
-                multiple
-                onChange={handleFileInput}
-                className="hidden"
-                id="file-input"
-              />
-              <label
-                htmlFor="file-input"
-                className="inline-block px-6 py-3 bg-gradient-to-r from-neon-blue to-neon-cyan rounded-xl text-white font-medium cursor-pointer hover:shadow-lg hover:shadow-neon-blue/30 transition-all duration-300"
-              >
-                Browse Files
-              </label>
-            </div>
-          </>
-        )}
-        
-        {hasFiles && (
-          <p className="text-gray-400 text-sm">
-            Drop more files here to add them
-          </p>
-        )}
-      </motion.div>
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 rounded-3xl group-hover:from-neon-blue/10 group-hover:to-neon-purple/10 transition-all duration-300" />
 
-      {/* Animated background glow */}
-      {isDragOver && (
+      {/* Content - Centered */}
+      <div className="relative z-10 text-center space-y-6 w-full flex flex-col items-center justify-center">
+        {/* Upload Icon */}
         <motion.div
-          className="absolute inset-0 rounded-3xl"
-          style={{
-            background: 'linear-gradient(to right, rgba(30, 144, 255, 0.2), rgba(0, 207, 255, 0.2))'
+          className="inline-flex items-center justify-center w-24 h-24 mx-auto mb-6 rounded-full bg-neon-blue/10 border-2 border-neon-blue/20 group-hover:border-neon-blue/40 group-hover:bg-neon-blue/20 transition-all duration-300"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <svg className="w-12 h-12 text-neon-blue group-hover:text-neon-blue/80 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+        </motion.div>
+
+        {/* Title */}
+        <motion.h2 
+          className="text-4xl font-bold text-white mb-4 group-hover:text-neon-blue/90 transition-colors duration-300"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          Drop Your Files
+        </motion.h2>
+
+        {/* Description */}
+        <motion.p 
+          className="text-xl text-gray-300 mb-6 max-w-md mx-auto leading-relaxed group-hover:text-gray-200 transition-colors duration-300"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          Drag and drop your audio and image files here, or click to browse
+        </motion.p>
+
+        {/* Supported Formats */}
+        <motion.div 
+          className="flex flex-wrap justify-center gap-3 max-w-lg mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          {/* Audio formats */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-space-gray/30 rounded-full border border-neon-blue/20 group-hover:border-neon-blue/30 transition-all duration-300">
+            <svg className="w-4 h-4 text-neon-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+            <span className="text-sm font-medium text-gray-300">MP3, WAV</span>
+          </div>
+
+          {/* Image formats */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-space-gray/30 rounded-full border border-neon-purple/20 group-hover:border-neon-purple/30 transition-all duration-300">
+            <svg className="w-4 h-4 text-neon-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-sm font-medium text-gray-300">PNG, JPG</span>
+          </div>
+        </motion.div>
+
+        {/* Browse Button */}
+        <motion.button
+          onClick={(e) => {
+            e.stopPropagation();
+            document.getElementById('file-input').click();
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        />
-      )}
+          className="mt-8 px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          Browse Files
+        </motion.button>
+      </div>
     </motion.div>
   );
 };

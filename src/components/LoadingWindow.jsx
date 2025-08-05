@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 
-const LoadingWindow = ({ isVisible, pairs, onClose }) => {
-  const { getVideoGenerationState, generatedVideos, cancelVideoGeneration } = useAppStore();
+const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
+  const { getVideoGenerationState, generatedVideos } = useAppStore();
 
   if (!isVisible) return null;
 
@@ -36,10 +36,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
         >
           {/* Close/Cancel Button */}
           <button
-            onClick={() => {
-              cancelVideoGeneration();
-              onClose();
-            }}
+            onClick={onStop}
             className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 hover:border-red-500/50 transition-all duration-200 group"
             style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
           >
