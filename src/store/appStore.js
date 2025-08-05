@@ -171,5 +171,13 @@ export const useAppStore = create((set, get) => ({
     isCancelling: false,
     currentProgress: 0,
     videoGenerationStates: {}
+  }),
+
+  // Cancel video generation
+  cancelVideoGeneration: () => set({
+    isGenerating: false,
+    isCancelling: true,
+    currentProgress: 0,
+    videoGenerationStates: {}
   })
 }));

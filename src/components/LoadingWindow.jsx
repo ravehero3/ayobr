@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 
 const LoadingWindow = ({ isVisible, pairs, onClose }) => {
-  const { getVideoGenerationState, generatedVideos } = useAppStore();
+  const { getVideoGenerationState, generatedVideos, cancelVideoGeneration } = useAppStore();
 
   if (!isVisible) return null;
 
@@ -25,10 +25,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="relative w-full max-w-4xl mx-4 p-2 rounded-lg overflow-hidden"
           style={{
-            width: 'calc(100% + 20px)', // 10px wider on each side
-            maxWidth: 'calc(4rem * 16 + 20px)' // max-w-4xl + 20px
-          }}
-          style={{
             background: 'rgba(0, 0, 0, 0.2)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -38,6 +34,25 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
             maxWidth: 'calc(4rem * 16 + 20px)' // max-w-4xl + 20px
           }}
         >
+          {/* Close/Cancel Button */}
+          <button
+            onClick={() => {
+              cancelVideoGeneration();
+              onClose();
+            }}
+            className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 hover:border-red-500/50 transition-all duration-200 group"
+            style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+          >
+            <svg 
+              className="w-4 h-4 text-red-400 group-hover:text-red-300 transition-colors" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           {/* Ambient glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg" />
           
