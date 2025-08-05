@@ -36,7 +36,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose }) => {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg" />
           
           {/* Content Container with proper padding */}
-          <div className="p-6">
+          <div className="p-8">
             {/* Header */}
             <div className="relative z-10 text-center mb-6">
             <motion.h2 
