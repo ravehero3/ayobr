@@ -11,6 +11,7 @@ import DropZone from './components/DropZone';
 import AudioContainerCopy from './components/AudioContainerCopy';
 import ImageContainerCopy from './components/ImageContainerCopy';
 import AnimatedBackground from './components/AnimatedBackground';
+import LoadingWindow from './components/LoadingWindow';
 
 
 function App() {
@@ -270,7 +271,7 @@ function App() {
 
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Main Content */}
-        <main className="flex-1 flex flex-col p-6 overflow-y-auto">
+        <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
         {/* Empty State - Centered */}
         {pairs.every(pair => !pair.audio && !pair.image) && (
@@ -484,6 +485,15 @@ function App() {
         image={dragState.draggedImage}
         isVisible={dragState.isImageDragging}
         mousePosition={dragState.mousePosition}
+      />
+
+      {/* Loading Window */}
+      <LoadingWindow 
+        isVisible={isGenerating}
+        pairs={getCompletePairs()}
+        onClose={() => {
+          // Loading window will close automatically when generation completes
+        }}
       />
 
         </div>

@@ -181,19 +181,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </button>
       )}
 
-      {/* Show animation overlay during generation */}
-      {videoState?.isGenerating && (
-        <div className="w-full">
-          <PairMergeAnimation 
-            pair={pair}
-            isGenerating={videoState.isGenerating}
-            progress={videoState.progress}
-            onAnimationComplete={() => {
-              console.log(`Animation complete for pair ${pair.id}`);
-            }}
-          />
-        </div>
-      )}
+      {/* Individual pair animations are now handled by the central LoadingWindow */}
 
       {/* Show generated video if available and not generating */}
       {generatedVideo && !videoState?.isGenerating ? (
