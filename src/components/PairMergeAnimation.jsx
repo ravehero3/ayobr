@@ -30,25 +30,31 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
         if (pairElement) {
           const audioElement = pairElement.querySelector('.audio-container');
           const imageElement = pairElement.querySelector('.image-container');
+          const plusElement = pairElement.querySelector('.connecting-bridge'); // Find the plus sign
           
-          if (audioElement && imageElement) {
+          if (audioElement && imageElement && plusElement) {
             const containerRect = pairElement.getBoundingClientRect();
             const audioRect = audioElement.getBoundingClientRect();
             const imageRect = imageElement.getBoundingClientRect();
+            const plusRect = plusElement.getBoundingClientRect();
             
-            // Calculate relative positions within the pair container
+            // Calculate positions relative to the pair container
             setAudioPosition({
               x: audioRect.left - containerRect.left,
               y: audioRect.top - containerRect.top,
               width: audioRect.width,
-              height: audioRect.height
+              height: audioRect.height,
+              centerX: plusRect.left + (plusRect.width / 2) - containerRect.left,
+              centerY: plusRect.top + (plusRect.height / 2) - containerRect.top
             });
             
             setImagePosition({
               x: imageRect.left - containerRect.left,
               y: imageRect.top - containerRect.top,
               width: imageRect.width,
-              height: imageRect.height
+              height: imageRect.height,
+              centerX: plusRect.left + (plusRect.width / 2) - containerRect.left,
+              centerY: plusRect.top + (plusRect.height / 2) - containerRect.top
             });
           }
         }
@@ -65,7 +71,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
       setTimeout(() => {
         setAnimationStage('merged');
         setShowProgress(true);
-      }, 1200);
+      }, 1500);
     }
   }, [isGenerating, animationStage, generatedVideo, pair.id]);
 
@@ -105,10 +111,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* Overlay to hide original containers */}
-            <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm" />
-            
-            {/* Audio container clone moving towards center */}
+            {/* Audio container clone moving towards center (plus sign position) */}
             <motion.div
               className="absolute glass-container rounded-2xl flex items-center justify-center overflow-hidden"
               style={{
@@ -124,25 +127,30 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 opacity: 1
               }}
               animate={{ 
-                x: (window.innerWidth / 2) - audioPosition.x - (audioPosition.width / 2),
-                y: (window.innerHeight / 2) - audioPosition.y - (audioPosition.height / 2),
-                scale: 0.8,
-                opacity: 0.9
+                x: audioPosition.centerX - audioPosition.x - (audioPosition.width / 2),
+                y: audioPosition.centerY - audioPosition.y - (audioPosition.height / 2),
+                scale: 0.7,
+                opacity: 0
               }}
-              transition={{ duration: 1.0, ease: "easeInOut" }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
             >
-              {/* Audio content clone */}
+              {/* Audio icon and content */}
               <motion.div 
-                className="text-white text-sm font-medium"
+                className="flex items-center gap-2"
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 0 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
+                transition={{ delay: 0.6, duration: 0.3 }}
               >
-                {pair.audio?.name?.replace(/\.[^/.]+$/, '') || 'Audio'}
+                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+                <span className="text-white text-sm font-medium">
+                  {pair.audio?.name?.replace(/\.[^/.]+$/, '') || 'Audio'}
+                </span>
               </motion.div>
             </motion.div>
 
-            {/* Image container clone moving towards center */}
+            {/* Image container clone moving towards center (plus sign position) */}
             <motion.div
               className="absolute glass-container rounded-2xl flex items-center justify-center overflow-hidden"
               style={{
@@ -158,21 +166,26 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 opacity: 1
               }}
               animate={{ 
-                x: (window.innerWidth / 2) - imagePosition.x - (imagePosition.width / 2),
-                y: (window.innerHeight / 2) - imagePosition.y - (imagePosition.height / 2),
-                scale: 0.8,
-                opacity: 0.9
+                x: imagePosition.centerX - imagePosition.x - (imagePosition.width / 2),
+                y: imagePosition.centerY - imagePosition.y - (imagePosition.height / 2),
+                scale: 0.7,
+                opacity: 0
               }}
-              transition={{ duration: 1.0, ease: "easeInOut" }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
             >
-              {/* Image content clone */}
+              {/* Image icon and content */}
               <motion.div 
-                className="text-white text-sm font-medium"
+                className="flex items-center gap-2"
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 0 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
+                transition={{ delay: 0.6, duration: 0.3 }}
               >
-                {pair.image?.name?.replace(/\.[^/.]+$/, '') || 'Image'}
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-white text-sm font-medium">
+                  {pair.image?.name?.replace(/\.[^/.]+$/, '') || 'Image'}
+                </span>
               </motion.div>
             </motion.div>
           </motion.div>
@@ -180,19 +193,21 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
 
         {animationStage === 'merged' && imagePosition && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
+            className="absolute flex items-center justify-center"
+            style={{
+              left: imagePosition.centerX - (imagePosition.width / 2),
+              top: imagePosition.centerY - 100, // Center the loading container at plus sign position
+              width: imagePosition.width,
+              height: '200px'
+            }}
+            initial={{ opacity: 0, scale: 0.3 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.5 }}
+            exit={{ opacity: 0, scale: 0.3 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {/* Video Loading Container - matches image container width */}
+            {/* Video Loading Container positioned at center */}
             <div 
-              className="glass-container rounded-2xl flex flex-col items-center justify-center p-8 relative overflow-hidden"
-              style={{
-                width: imagePosition.width,
-                height: '200px', // Fixed height
-              }}
+              className="glass-container rounded-2xl flex flex-col items-center justify-center p-8 relative overflow-hidden w-full h-full"
             >
               {/* Ambient glow effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl" />
