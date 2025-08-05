@@ -65,7 +65,7 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
 
   return (
     <motion.div
-      className="audiocontainercopy pointer-events-none"
+      className="audiocontainercopy pointer-events-none glass-container"
       initial={{ scale: 1, rotate: 0 }}
       animate={{ 
         scale: shouldReturnToOrigin ? 0.8 : 1.05, 
@@ -76,7 +76,6 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         duration: shouldReturnToOrigin ? 0.3 : 0.2,
         ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
       }}
-      className="glass-container"
       style={{
         position: 'fixed',
         left: `${mousePosition.x - 16}px`, // Position so cursor is on movehandle (16px from left edge)
@@ -137,9 +136,9 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
           <div
             className="w-8 h-8 flex items-center justify-center rounded-full"
             style={{
-              backgroundColor: 'rgba(53, 132, 228, 0.15)',
-              border: '2px solid rgba(53, 132, 228, 0.4)',
-              color: '#3584E4',
+              backgroundColor: 'rgba(96, 165, 250, 0.15)',
+              border: '2px solid rgba(96, 165, 250, 0.4)',
+              color: '#60A5FA',
             }}
           >
             <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">

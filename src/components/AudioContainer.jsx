@@ -39,8 +39,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           const ws = WaveSurfer.create({
             container: waveformRef.current,
             waveColor: '#6C737F', // Muted gray for unplayed portions (like Decibels)
-            progressColor: '#3584E4', // GNOME blue for played portions
-            cursorColor: 'rgba(53, 132, 228, 0.6)',
+            progressColor: '#60A5FA', // Blue for played portions
+            cursorColor: 'rgba(96, 165, 250, 0.6)',
             barWidth: 2,
             barRadius: 1,
             barGap: 1,

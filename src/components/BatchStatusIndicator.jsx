@@ -19,8 +19,8 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-neon-cyan/20 flex items-center justify-center">
-                <svg className="w-5 h-5 text-neon-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -51,7 +51,7 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
         <div className="relative">
           <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-neon-cyan to-blue-400 rounded-full relative"
+              className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}

@@ -27,7 +27,7 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
 
   return (
     <motion.div
-      className="imagecontainercopy pointer-events-none"
+      className="imagecontainercopy pointer-events-none glass-container"
       initial={{ scale: 1, rotate: 0 }}
       animate={{ 
         scale: shouldReturnToOrigin ? 0.8 : 1.05, 
@@ -38,7 +38,6 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
         duration: shouldReturnToOrigin ? 0.3 : 0.2,
         ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
       }}
-      className="glass-container"
       style={{
         position: 'fixed',
         left: `${mousePosition.x - 16}px`, // Position so cursor is on movehandle (16px from left edge)

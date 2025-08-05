@@ -32,8 +32,8 @@ const DropZone = ({ onFileDrop }) => {
     <motion.div
       className={`relative mb-8 p-12 border-2 border-dashed rounded-3xl transition-all duration-300 ${
         isDragOver
-          ? 'border-neon-cyan bg-neon-cyan/10 shadow-lg shadow-neon-cyan/20'
-          : 'border-gray-600 hover:border-neon-blue/50'
+          ? 'border-blue-400 bg-blue-400/10 shadow-lg shadow-blue-400/20'
+          : 'border-gray-600 hover:border-blue-400/50'
       }`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -45,7 +45,7 @@ const DropZone = ({ onFileDrop }) => {
         <div className="mb-4">
           <svg
             className={`mx-auto h-16 w-16 transition-colors duration-300 ${
-              isDragOver ? 'text-neon-cyan' : 'text-gray-400'
+              isDragOver ? 'text-blue-400' : 'text-gray-400'
             }`}
             stroke="currentColor"
             fill="none"
