@@ -29,26 +29,37 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
   }, [onFileDrop]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`
-        relative w-full max-w-4xl mx-auto p-12 rounded-3xl
-        bg-gradient-to-br from-space-dark/50 to-space-gray/30
-        backdrop-blur-sm
-        hover:bg-gradient-to-br hover:from-space-dark/60 hover:to-space-gray/40
-        transition-all duration-300 ease-out
-        cursor-pointer group
-        min-h-[400px] flex items-center justify-center
-        ${isDragOver ? 'bg-gradient-to-br from-neon-green/10 to-neon-blue/10 scale-[1.02]' : ''}
-      `}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onClick={() => document.getElementById('file-input').click()}
-    >
+    <>
+      {/* Hidden file input */}
+      <input
+        id="file-input"
+        type="file"
+        multiple
+        accept="audio/*,image/*,.mp3,.wav,.png,.jpg,.jpeg,.heic"
+        onChange={handleFileInput}
+        style={{ display: 'none' }}
+      />
+      
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className={`
+          relative w-full max-w-4xl mx-auto p-12 rounded-3xl
+          bg-gradient-to-br from-space-dark/50 to-space-gray/30
+          backdrop-blur-sm
+          hover:bg-gradient-to-br hover:from-space-dark/60 hover:to-space-gray/40
+          transition-all duration-300 ease-out
+          cursor-pointer group
+          min-h-[400px] flex items-center justify-center
+          ${isDragOver ? 'bg-gradient-to-br from-neon-green/10 to-neon-blue/10 scale-[1.02]' : ''}
+        `}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => document.getElementById('file-input').click()}
+      >
       {/* Glow effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 rounded-3xl group-hover:from-neon-blue/10 group-hover:to-neon-purple/10 transition-all duration-300" />
 
@@ -126,6 +137,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
         </motion.button>
       </div>
     </motion.div>
+    </>
   );
 };
 
