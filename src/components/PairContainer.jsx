@@ -274,9 +274,15 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             >
 
               <div className="absolute inset-0 p-4">
-                <AudioContainer
-                  audio={pair.audio}
-                  pairId={pair.id}
+                <motion.div
+                  animate={{
+                    opacity: videoState?.isGenerating ? 0.3 : 1
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <AudioContainer
+                    audio={pair.audio}
+                    pairId={pair.id}
                   onMoveUp={() => {
                     const currentIndex = pairs.findIndex(p => p.id === pair.id);
                     if (currentIndex > 0) {
@@ -308,11 +314,12 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
                   shouldShowGlow={(isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio) || (draggedItem?.type === 'audio' && draggedItem.pairId !== pair.id && !!pair.audio)}
-                  // New drag overlay handlers
-                  onStartAudioDrag={onStartAudioDrag}
-                  onUpdateDragPosition={onUpdateDragPosition}
-                  onEndDrag={onEndDrag}
-                />
+                    // New drag overlay handlers
+                    onStartAudioDrag={onStartAudioDrag}
+                    onUpdateDragPosition={onUpdateDragPosition}
+                    onEndDrag={onEndDrag}
+                  />
+                </motion.div>
               </div>
             </div>
           </div>
@@ -365,7 +372,13 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             >
 
               <div className="absolute inset-0 p-4">
-                <ImageContainer
+                <motion.div
+                  animate={{
+                    opacity: videoState?.isGenerating ? 0.3 : 1
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ImageContainer
                   image={pair.image}
                   pairId={pair.id}
                   onMoveUp={() => {
@@ -398,11 +411,12 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                   // Pass the targeted highlighting props
                   isDraggingContainer={isDraggingContainer}
                   shouldShowGlow={(isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image) || (draggedItem?.type === 'image' && draggedItem.pairId !== pair.id && !!pair.image)}
-                  // New drag overlay handlers
-                  onStartImageDrag={onStartImageDrag}
-                  onUpdateDragPosition={onUpdateDragPosition}
-                  onEndDrag={onEndDrag}
-                />
+                    // New drag overlay handlers
+                    onStartImageDrag={onStartImageDrag}
+                    onUpdateDragPosition={onUpdateDragPosition}
+                    onEndDrag={onEndDrag}
+                  />
+                </motion.div>
               </div>
             </div>
           </div>

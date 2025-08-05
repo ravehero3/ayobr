@@ -309,8 +309,8 @@ function App() {
                     if (isGenerating) {
                       return (pair.audio && pair.image) || getVideoGenerationState(pair.id);
                     }
-                    // When not generating, show all pairs
-                    return true;
+                    // When not generating, show pairs that have at least one file
+                    return pair.audio || pair.image;
                   })
                   .map((pair, index) => (
                   <motion.div

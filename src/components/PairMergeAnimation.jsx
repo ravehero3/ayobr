@@ -178,7 +178,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
           </motion.div>
         )}
 
-        {animationStage === 'merged' && (
+        {animationStage === 'merged' && imagePosition && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -186,8 +186,14 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Video Loading Container */}
-            <div className="w-full h-full glass-container rounded-2xl flex flex-col items-center justify-center p-8 relative overflow-hidden">
+            {/* Video Loading Container - matches image container width */}
+            <div 
+              className="glass-container rounded-2xl flex flex-col items-center justify-center p-8 relative overflow-hidden"
+              style={{
+                width: imagePosition.width,
+                height: '200px', // Fixed height
+              }}
+            >
               {/* Ambient glow effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl" />
               
