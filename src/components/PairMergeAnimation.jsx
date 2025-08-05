@@ -4,7 +4,6 @@ import { useAppStore } from '../store/appStore';
 
 const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete }) => {
   const [animationStage, setAnimationStage] = useState('idle'); // idle, merging, merged, completed
-  const [animationStage, setAnimationStage] = useState('idle'); // idle, merging, merged, completed
   const [showProgress, setShowProgress] = useState(false);
   const [audioPosition, setAudioPosition] = useState(null);
   const [imagePosition, setImagePosition] = useState(null);
@@ -252,19 +251,19 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
 
               {/* Miniature representations */}
               <div className="flex items-center gap-4 mb-6">
-                {/* Audio miniature */}
+                {/* Audio miniature - representing the actual audio container */}
                 <motion.div 
-                  className="glass-container rounded-lg p-3 w-20 h-12 flex items-center justify-center"
+                  className="glass-container rounded-lg p-2 w-20 h-12 flex flex-col items-center justify-center"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 mb-1">
                     {[1,2,3,4,5].map((i) => (
                       <motion.div
                         key={i}
-                        className="w-0.5 bg-blue-400 rounded-full"
-                        style={{ height: `${8 + (i % 3) * 4}px` }}
+                        className="w-0.5 bg-green-400 rounded-full"
+                        style={{ height: `${4 + (i % 3) * 2}px` }}
                         animate={{ 
                           scaleY: [1, 1.5, 1],
                           opacity: [0.7, 1, 0.7]
@@ -276,6 +275,9 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                         }}
                       />
                     ))}
+                  </div>
+                  <div className="text-xs text-green-400 font-medium truncate w-full text-center">
+                    {pair.audio?.name?.replace(/\.[^/.]+$/, '').substring(0, 8) || 'Audio'}
                   </div>
                 </motion.div>
 
@@ -291,24 +293,30 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                   </svg>
                 </motion.div>
 
-                {/* Image miniature */}
+                {/* Image miniature - showing actual image */}
                 <motion.div 
-                  className="glass-container rounded-lg p-1 w-20 h-12 flex items-center justify-center overflow-hidden"
+                  className="glass-container rounded-lg p-1 w-20 h-12 flex flex-col items-center justify-center overflow-hidden"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                 >
                   {pair.image ? (
-                    <img 
-                      src={URL.createObjectURL(pair.image)} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover rounded"
-                    />
+                    <>
+                      <img 
+                        src={URL.createObjectURL(pair.image)} 
+                        alt="Preview" 
+                        className="w-full h-8 object-cover rounded"
+                      />
+                      <div className="text-xs text-blue-400 font-medium truncate w-full text-center mt-0.5">
+                        {pair.image.name.replace(/\.[^/.]+$/, '').substring(0, 8)}
+                      </div>
+                    </>
                   ) : (
-                    <div className="w-full h-full bg-gray-600 rounded flex items-center justify-center">
+                    <div className="w-full h-full bg-gray-600 rounded flex flex-col items-center justify-center">
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
+                      <div className="text-xs text-gray-400">Image</div>
                     </div>
                   )}
                 </motion.div>
@@ -325,18 +333,18 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                   </svg>
                 </motion.div>
 
-                {/* Video loading miniature */}
+                {/* Video loading miniature with three dots animation */}
                 <motion.div 
-                  className="glass-container rounded-lg p-3 w-20 h-12 flex items-center justify-center"
+                  className="glass-container rounded-lg p-2 w-20 h-12 flex flex-col items-center justify-center"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 mb-1">
                     {[1,2,3].map((i) => (
                       <motion.div
                         key={i}
-                        className="w-1 h-1 bg-green-400 rounded-full"
+                        className="w-1.5 h-1.5 bg-purple-400 rounded-full"
                         animate={{ 
                           scale: [1, 1.5, 1],
                           opacity: [0.3, 1, 0.3]
@@ -348,6 +356,9 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                         }}
                       />
                     ))}
+                  </div>
+                  <div className="text-xs text-purple-400 font-medium">
+                    Video
                   </div>
                 </motion.div>
               </div>
