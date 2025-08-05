@@ -22,8 +22,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   });
 
   useEffect(() => {
-    // Only start animation if we don't already have a generated video
-    if (isGenerating && animationStage === 'idle' && !generatedVideo) {
+    // Start animation immediately when generation starts (regardless of existing video)
+    if (isGenerating && animationStage === 'idle') {
       // Capture the positions of the actual audio and image containers
       const captureContainerPositions = () => {
         const pairElement = document.querySelector(`[data-pair-id="${pair.id}"]`);
@@ -104,10 +104,12 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
           setShowProgress(true);
         }, 1600); // Increased delay to allow merge animation to complete
       } else {
-        // Skip directly to merged if we can't capture positions
+        // Skip directly to merged if we can't capture positions - but still show the animation
         console.log('Skipping merge animation, going directly to merged');
-        setAnimationStage('merged');
-        setShowProgress(true);
+        setTimeout(() => {
+          setAnimationStage('merged');
+          setShowProgress(true);
+        }, 100);
       }
     }
   }, [isGenerating, animationStage, generatedVideo, pair.id]);
@@ -228,23 +230,22 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
           </motion.div>
         )}
 
-        {animationStage === 'merged' && imagePosition && (
+        {animationStage === 'merged' && (
           <motion.div
-            className="absolute flex items-center justify-center"
-            style={{
-              left: imagePosition.centerX - (imagePosition.width / 2),
-              top: imagePosition.centerY - 100, // Center the loading container at plus sign position
-              width: imagePosition.width,
-              height: '200px'
-            }}
+            className="absolute flex items-center justify-center inset-0"
             initial={{ opacity: 0, scale: 0.3 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {/* Video Loading Container positioned at center */}
+            {/* Video Loading Container - centered and always visible */}
             <div 
-              className="glass-container rounded-2xl flex flex-col items-center justify-center p-8 relative overflow-hidden w-full h-full"
+              className="glass-container rounded-2xl flex flex-col items-center justify-center p-8 relative overflow-hidden mx-auto"
+              style={{
+                width: '600px',
+                height: '300px',
+                maxWidth: '90vw'
+              }}
             >
               {/* Ambient glow effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl" />
