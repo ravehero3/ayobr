@@ -14,7 +14,7 @@ import AnimatedBackground from './components/AnimatedBackground';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -303,7 +303,16 @@ function App() {
               className="flex flex-col gap-2 max-w-[1200px] w-full px-6"
             >
               <AnimatePresence>
-                {pairs.map((pair, index) => (
+                {pairs
+                  .filter(pair => {
+                    // During generation, only show pairs that have files or are being processed
+                    if (isGenerating) {
+                      return (pair.audio && pair.image) || getVideoGenerationState(pair.id);
+                    }
+                    // When not generating, show all pairs
+                    return true;
+                  })
+                  .map((pair, index) => (
                   <motion.div
                     key={pair.id}
                     initial={{ opacity: 0, scale: 0.9 }}
