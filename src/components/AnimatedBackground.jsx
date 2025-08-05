@@ -4,13 +4,16 @@ import { useAppStore } from '../store/appStore';
 const AnimatedBackground = () => {
   const { pairs, isGenerating } = useAppStore();
   
-  // Check if any files have been dropped
-  const hasFiles = pairs.some(pair => pair.audio || pair.image);
+  // Check if we're in the empty state (first page) or file management state (second page)
+  const isEmptyState = pairs.every(pair => !pair.audio && !pair.image);
+  const hasAnyFiles = pairs.some(pair => pair.audio || pair.image);
   
-  // Determine which background to show
-  const backgroundImage = hasFiles 
-    ? 'url(/attached_assets/type beatz_1754412396458.gif)'
-    : 'url(/attached_assets/DRAG AND DROP__1754389613176.png)';
+  // Determine which background to show:
+  // - First page (empty state): drag and drop background
+  // - Second page (has files): animated GIF background
+  const backgroundImage = isEmptyState 
+    ? 'url(/attached_assets/DRAG AND DROP__1754389613176.png)'
+    : 'url(/attached_assets/type beatz_1754412396458.gif)';
     
   // Apply blur when generating videos
   const blurClass = isGenerating ? 'blur-md' : '';
