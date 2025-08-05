@@ -47,14 +47,15 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className={`
           relative w-full max-w-4xl mx-auto p-12 rounded-3xl
-          bg-gradient-to-br from-space-dark/50 to-space-gray/30
+          bg-gradient-to-br from-space-dark/80 to-space-gray/60
           backdrop-blur-sm
-          hover:bg-gradient-to-br hover:from-space-dark/60 hover:to-space-gray/40
+          hover:bg-gradient-to-br hover:from-space-dark/90 hover:to-space-gray/70
           transition-all duration-300 ease-out
           cursor-pointer group
           min-h-[400px] flex items-center justify-center
           ${isDragOver ? 'bg-gradient-to-br from-neon-green/10 to-neon-blue/10 scale-[1.02]' : ''}
         `}
+        style={{ zIndex: 50 }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -64,7 +65,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
       <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 rounded-3xl group-hover:from-neon-blue/10 group-hover:to-neon-purple/10 transition-all duration-300" />
 
       {/* Content - Centered */}
-      <div className="relative z-10 text-center space-y-6 w-full flex flex-col items-center justify-center">
+      <div className="relative text-center space-y-6 w-full flex flex-col items-center justify-center" style={{ zIndex: 60 }}>
         {/* Upload Icon */}
         <motion.div
           className="inline-flex items-center justify-center w-24 h-24 mx-auto mb-6 rounded-full bg-neon-blue/10 border-2 border-neon-blue/20 group-hover:border-neon-blue/40 group-hover:bg-neon-blue/20 transition-all duration-300"

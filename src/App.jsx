@@ -269,25 +269,26 @@ function App() {
         )}
       </AnimatePresence>
 
+      {/* Drop Zone - Show when no files are present - HIGHEST Z-INDEX */}
+      {pairs.every(pair => !pair.audio && !pair.image) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="fixed inset-0 flex items-center justify-center p-6"
+          style={{ zIndex: 100 }}
+        >
+          <DropZone
+            onFileDrop={handleGlobalDrop}
+            hasFiles={false}
+          />
+        </motion.div>
+      )}
+
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Main Content */}
         <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
-        {/* Drop Zone - Show when no files are present */}
-        {pairs.every(pair => !pair.audio && !pair.image) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="fixed inset-0 flex items-center justify-center p-6"
-            style={{ zIndex: 20 }}
-          >
-            <DropZone
-              onFileDrop={handleGlobalDrop}
-              hasFiles={false}
-            />
-          </motion.div>
-        )}
 
         {/* Pairs Grid - Updated for wider containers */}
         {pairs.some(pair => pair.audio || pair.image) && (

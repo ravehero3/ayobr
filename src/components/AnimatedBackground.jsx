@@ -19,7 +19,7 @@ const AnimatedBackground = () => {
   const blurClass = isGenerating ? 'blur-md' : '';
   
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -1 }}>
+    <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
       {/* Dynamic background image */}
       <div 
         className={`absolute -inset-10 w-[140%] h-[140%] transition-all duration-1000 ${blurClass} ${isEmptyState ? '' : 'bg-cover bg-center animate-diagonal-move'}`}
@@ -27,6 +27,7 @@ const AnimatedBackground = () => {
           background: backgroundImage,
           backgroundSize: isEmptyState ? 'auto' : 'cover',
           backgroundPosition: isEmptyState ? 'center' : 'center',
+          zIndex: -10
         }}
       />
       
@@ -37,6 +38,7 @@ const AnimatedBackground = () => {
           backgroundImage: 'url(/attached_assets/noise_1751735379404.png)',
           backgroundSize: '256px 256px',
           backgroundRepeat: 'repeat',
+          zIndex: -9
         }}
       />
     </div>
