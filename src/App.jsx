@@ -339,27 +339,30 @@ function App() {
             className="flex justify-center gap-4 mb-8"
             style={{ marginTop: '10px' }}
           >
-            <button
-              onClick={handleGenerateVideos}
-              disabled={isGenerating}
-              className="spotlight-button"
-            >
-              <div className="wrapper">
-                <span>{isGenerating ? 'GENERATING...' : 'GENERATE VIDEOS'}</span>
-                <div className="circle circle-1"></div>
-                <div className="circle circle-2"></div>
-                <div className="circle circle-3"></div>
-                <div className="circle circle-4"></div>
-                <div className="circle circle-5"></div>
-                <div className="circle circle-6"></div>
-                <div className="circle circle-7"></div>
-                <div className="circle circle-8"></div>
-                <div className="circle circle-9"></div>
-                <div className="circle circle-10"></div>
-                <div className="circle circle-11"></div>
-                <div className="circle circle-12"></div>
-              </div>
-            </button>
+            {/* Only show Generate Videos button if no videos have been generated yet */}
+            {generatedVideos.length === 0 && (
+              <button
+                onClick={handleGenerateVideos}
+                disabled={isGenerating}
+                className="spotlight-button"
+              >
+                <div className="wrapper">
+                  <span>{isGenerating ? 'GENERATING...' : 'GENERATE VIDEOS'}</span>
+                  <div className="circle circle-1"></div>
+                  <div className="circle circle-2"></div>
+                  <div className="circle circle-3"></div>
+                  <div className="circle circle-4"></div>
+                  <div className="circle circle-5"></div>
+                  <div className="circle circle-6"></div>
+                  <div className="circle circle-7"></div>
+                  <div className="circle circle-8"></div>
+                  <div className="circle circle-9"></div>
+                  <div className="circle circle-10"></div>
+                  <div className="circle circle-11"></div>
+                  <div className="circle circle-12"></div>
+                </div>
+              </button>
+            )}
 
             {/* Stop Generation Button */}
             {isGenerating && !isCancelling && (
@@ -407,48 +410,9 @@ function App() {
               </motion.div>
             )}
 
+            {/* Show Download All Videos button when videos are generated */}
             {generatedVideos.length > 0 && (
               <motion.button
-                onClick={handleDownloadVideos}
-                className="px-8 py-4 bg-green-600 hover:bg-green-500 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Download Videos</span>
-                </div>
-              </motion.button>
-            )}
-          </motion.div>
-        )}
-
-
-
-        {/* Generated Videos Display */}
-        {generatedVideos.length > 0 && (
-            <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="generated-videos-section mb-8"
-          >
-            <h2 className="text-2xl font-bold text-center mb-6 text-white">
-              Generated Videos ({generatedVideos.length})
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {generatedVideos.map((video) => (
-                <VideoPreviewCard key={video.id} video={video} />
-              ))}
-            </div>
-
-            {/* Bulk Download Button */}
-            <div className="text-center mt-6">
-              <button
                 onClick={() => {
                   generatedVideos.forEach(video => {
                     const link = document.createElement('a');
@@ -457,13 +421,36 @@ function App() {
                     link.click();
                   });
                 }}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                className="spotlight-button download-button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                Download All Videos
-              </button>
-            </div>
+                <div className="wrapper">
+                  <span>DOWNLOAD ALL VIDEOS</span>
+                  <div className="circle circle-1"></div>
+                  <div className="circle circle-2"></div>
+                  <div className="circle circle-3"></div>
+                  <div className="circle circle-4"></div>
+                  <div className="circle circle-5"></div>
+                  <div className="circle circle-6"></div>
+                  <div className="circle circle-7"></div>
+                  <div className="circle circle-8"></div>
+                  <div className="circle circle-9"></div>
+                  <div className="circle circle-10"></div>
+                  <div className="circle circle-11"></div>
+                  <div className="circle circle-12"></div>
+                </div>
+              </motion.button>
+            )}
           </motion.div>
         )}
+
+
+
+
 
         {/* Batch Status Indicator */}
         {pairs.some(pair => pair.audio || pair.image) && (

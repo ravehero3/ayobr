@@ -429,7 +429,7 @@ html, body {
 
 /* Custom background image */
 .custom-background {
-  background-image: url('../../attached_assets/DRAG AND DROP__1754389613176.png');
+  background-image: url('../../attached_assets/type beatz_1754412396458.gif');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -991,4 +991,19 @@ input[type="file"] {
   
   /* Ensure the container can overflow its bounds */
   position: relative !important;
+}
+
+/* Download button variant with green coloring */
+.spotlight-button.download-button {
+  --c-color-1: rgba(16, 185, 129, 0.7); /* Green instead of blue */
+  --c-color-2: #000000; /* Black */
+  --c-color-3: #1a1a1a; /* Dark gray */
+  --c-color-4: rgba(16, 185, 129, 0.3); /* Light green */
+  --c-shadow: rgba(16, 185, 129, 0.5); /* Green shadow */
+  --c-shadow-inset-top: rgba(255, 255, 255, 0.2); /* White spotlight from top */
+  --c-shadow-inset-bottom: rgba(16, 185, 129, 0.3); /* Green spotlight from corner */
+}
+
+.spotlight-button.download-button:hover {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
 }

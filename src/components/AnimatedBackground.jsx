@@ -7,7 +7,7 @@ const AnimatedBackground = () => {
       <div 
         className="absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move"
         style={{
-          backgroundImage: 'url(/attached_assets/DRAG AND DROP__1754389613176.png)',
+          backgroundImage: 'url(/attached_assets/type beatz_1754412396458.gif)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
