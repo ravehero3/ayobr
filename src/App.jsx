@@ -280,7 +280,7 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="fixed inset-0 flex items-center justify-center p-6"
-            style={{ zIndex: 10 }}
+            style={{ zIndex: 20 }}
           >
             <DropZone
               onFileDrop={handleGlobalDrop}

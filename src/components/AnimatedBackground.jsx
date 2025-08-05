@@ -19,7 +19,7 @@ const AnimatedBackground = () => {
   const blurClass = isGenerating ? 'blur-md' : '';
   
   return (
-    <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
+    <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -1 }}>
       {/* Dynamic background image */}
       <div 
         className={`absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move transition-all duration-1000 ${blurClass}`}
