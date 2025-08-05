@@ -16,7 +16,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   
   /* Rounded corners */
-  border-radius: 8px;
+  border-radius: 12px;
   
   /* Noise texture overlay */
   background-image: url('/noise.png');

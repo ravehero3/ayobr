@@ -273,40 +273,29 @@ function App() {
         {/* Main Content */}
         <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
-        {/* Always visible drop zone */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`flex flex-col items-center justify-center text-center mb-8 ${
-            pairs.every(pair => !pair.audio && !pair.image) 
-              ? 'fixed inset-0' 
-              : 'relative py-16'
-          }`}
-          style={{ 
-            zIndex: pairs.every(pair => !pair.audio && !pair.image) ? 10 : 1 
-          }}
-        >
-          <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-full bg-neon-blue/10 border-2 border-dashed border-neon-blue/30">
-            <svg className="w-12 h-12 text-neon-blue/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-          </div>
-          <h2 className={`font-bold text-white mb-3 ${
-            pairs.every(pair => !pair.audio && !pair.image) 
-              ? 'text-2xl' 
-              : 'text-xl'
-          }`}>
-            Drop Your Files
-          </h2>
-          <p className={`text-gray-400 max-w-md ${
-            pairs.every(pair => !pair.audio && !pair.image) 
-              ? 'text-lg' 
-              : 'text-base'
-          }`}>
-            Drag and drop your audio files (MP3, WAV) and images (PNG, JPG) anywhere on this page. 
-            They will automatically pair together to create your type beat videos.
-          </p>
-        </motion.div>
+        {/* Always visible drop zone - only show centered when no files */}
+        {pairs.every(pair => !pair.audio && !pair.image) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 flex flex-col items-center justify-center text-center"
+            style={{ zIndex: 10 }}
+          >
+            <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-full bg-blue-400/10 border-2 border-dashed border-blue-400/30">
+              <svg className="w-12 h-12 text-blue-400/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">
+              Drop Your Files
+            </h2>
+            <p className="text-lg text-gray-400 max-w-md">
+              Drag and drop your audio files (MP3, WAV) and images (PNG, JPG) anywhere on this page. 
+              They will automatically pair together to create your type beat videos.
+            </p>
+          </motion.div>
+        )}
 
         {/* Pairs Grid - Updated for wider containers */}
         {pairs.some(pair => pair.audio || pair.image) && (
