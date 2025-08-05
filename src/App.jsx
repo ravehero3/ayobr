@@ -273,36 +273,39 @@ function App() {
         {/* Main Content */}
         <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
-        {/* Drop zone - only show when no files exist, fade out when files are added */}
-        <AnimatePresence>
-          {(() => {
-            const shouldShowText = pairs.every(pair => !pair.audio && !pair.image);
-            console.log('Drop zone check:', { pairs, shouldShowText });
-            return shouldShowText;
-          })() && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="fixed inset-0 flex flex-col items-center justify-center text-center bg-black/40 backdrop-blur-sm"
-              style={{ zIndex: 100 }}
-            >
-              <div className="inline-flex items-center justify-center w-32 h-32 mb-8 rounded-full bg-blue-500/30 border-4 border-dashed border-blue-500 shadow-2xl shadow-blue-500/20">
-                <svg className="w-16 h-16 text-blue-300 fill-none stroke-currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-              </div>
-              <h2 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">
-                Drop Your Files
-              </h2>
-              <p className="text-xl text-gray-200 max-w-2xl leading-relaxed drop-shadow-md">
-                Drag and drop your audio files (MP3, WAV) and images (PNG, JPG) anywhere on this page. 
-                They will automatically pair together to create your type beat videos.
+        {/* Simple test text - always visible when no files */}
+        {pairs.every(pair => !pair.audio && !pair.image) && (
+          <div
+            className="fixed inset-0 flex items-center justify-center"
+            style={{ 
+              zIndex: 999999,
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              pointerEvents: 'none'
+            }}
+          >
+            <div className="text-center">
+              <h1 
+                className="text-6xl font-bold mb-4"
+                style={{ 
+                  color: '#00ff00',
+                  textShadow: '0 0 20px #00ff00, 0 0 40px #00ff00',
+                  fontFamily: 'Arial, sans-serif'
+                }}
+              >
+                DRAG AND DROP HERE
+              </h1>
+              <p 
+                className="text-2xl"
+                style={{ 
+                  color: '#ffffff',
+                  textShadow: '0 0 10px #ffffff'
+                }}
+              >
+                Test text - should be visible immediately
               </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        )}
 
         {/* Pairs Grid - Updated for wider containers */}
         {pairs.some(pair => pair.audio || pair.image) && (
