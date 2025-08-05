@@ -13,7 +13,7 @@ const AnimatedBackground = () => {
   // - Second page (has files): animated type beatz GIF background
   const backgroundImage = isEmptyState 
     ? 'url(/attached_assets/DRAG AND DROP__1754389613176.png)'
-    : 'url(/attached_assets/type beatz_1754412865602.gif)';
+    : 'url(/attached_assets/typebeatznew_1754424064040.gif)';
     
   // Apply blur when generating videos
   const blurClass = isGenerating ? 'blur-md' : '';
