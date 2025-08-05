@@ -240,186 +240,185 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           </div>
         </div>
       ) : !videoState?.isGenerating && !generatedVideo ? (
+        <div 
+          className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8"
+          style={{ 
+            gap: '8px',
+            paddingLeft: '30px',
+            paddingRight: '30px',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          {/* Audio Container */}  
           <div 
-            className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8"
-            style={{ 
-              gap: '8px',
-              paddingLeft: '30px',
-              paddingRight: '30px',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
+            className={`relative transition-all duration-300 ${
+              isValidDragTarget && pair.audio ? 'animate-pulse-glow' : ''
+            } ${isSwapping ? 'animate-swap-container' : ''}`}
+            onDragOver={handleContainerDragOver}
+            onDragLeave={handleContainerDragLeave}
+            onDrop={handleContainerDrop}
           >
-            {/* Audio Container */}  
-            <div 
-              className={`relative transition-all duration-300 ${
-                isValidDragTarget && pair.audio ? 'animate-pulse-glow' : ''
-              } ${isSwapping ? 'animate-swap-container' : ''}`}
-              onDragOver={handleContainerDragOver}
-              onDragLeave={handleContainerDragLeave}
-              onDrop={handleContainerDrop}
+            <div
+              className="relative overflow-hidden group/container audio-container"
+              style={{
+                height: '200px',
+                minHeight: '200px',
+                maxHeight: '200px',
+                width: '500px',
+                minWidth: '500px',
+                maxWidth: '500px',
+              }}
             >
-              <div
-                className="relative overflow-hidden group/container audio-container"
-                style={{
-                  height: '200px',
-                  minHeight: '200px',
-                  maxHeight: '200px',
-                  width: '500px',
-                  minWidth: '500px',
-                  maxWidth: '500px',
-                }}
-              >
 
-                <div className="absolute inset-0 p-4">
-                  <motion.div
-                    animate={{
-                      opacity: videoState?.isGenerating ? 0.3 : 1
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <AudioContainer
-                      audio={pair.audio}
-                      pairId={pair.id}
-                    onMoveUp={() => {
-                      const currentIndex = pairs.findIndex(p => p.id === pair.id);
-                      if (currentIndex > 0) {
-                        const newPairs = [...pairs];
-                        [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
-                        setPairs(newPairs);
-                      }
-                    }}
-                    onMoveDown={() => {
-                      const currentIndex = pairs.findIndex(p => p.id === pair.id);
-                      if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
-                        const newPairs = [...pairs];
-                        [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
-                        setPairs(newPairs);
-                      }
-                    }}
-                    onDelete={() => {
-                      updatePair(pair.id, { audio: null });
-                    }}
-                    onSwap={onSwap}
-                    draggedItem={draggedItem}
-                    onDragStart={onDragStart}
-                    onDragEnd={onDragEnd}
-                    isContainerDragMode={isContainerDragTarget}
-                    draggedContainerType={draggedContainer?.type}
-                    draggedContainer={draggedContainer}
-                    onContainerDragStart={onContainerDrag}
-                    onContainerDragEnd={onContainerDrag}
-                    // Pass the targeted highlighting props
-                    isDraggingContainer={isDraggingContainer}
-                    shouldShowGlow={(isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio) || (draggedItem?.type === 'audio' && draggedItem.pairId !== pair.id && !!pair.audio)}
-                      // New drag overlay handlers
-                      onStartAudioDrag={onStartAudioDrag}
-                      onUpdateDragPosition={onUpdateDragPosition}
-                      onEndDrag={onEndDrag}
-                    />
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-
-            {/* Connecting Bridge - Simple Plus Symbol */}
-            <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
-              width: '20px', 
-              height: '200px', // Match container height
-              paddingTop: '1px', // Move plus symbol 15px higher (16px - 15px = 1px)
-              paddingBottom: '31px' // Adjust bottom padding to maintain total height
-            }}>
-              <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
-                {/* Plus icon using SVG for crisp rendering */}
-                <svg 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none"
+              <div className="absolute inset-0 p-4">
+                <motion.div
+                  animate={{
+                    opacity: videoState?.isGenerating ? 0.3 : 1
+                  }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <path 
-                    d="M12 5V19M5 12H19" 
-                    stroke="rgba(255, 255, 255, 0.2)" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Image Container */}
-            <div 
-              className={`relative transition-all duration-300 ${
-                isValidDragTarget && pair.image ? 'animate-pulse-glow' : ''
-              } ${isSwapping ? 'animate-swap-container' : ''}`}
-              onDragOver={handleContainerDragOver}
-              onDragLeave={handleContainerDragLeave}
-              onDrop={handleContainerDrop}
-            >
-              <div
-                className="relative overflow-hidden group/container image-container"
-                style={{
-                  height: '200px',
-                  minHeight: '200px',
-                  maxHeight: '200px',
-                  width: '500px',
-                  minWidth: '500px',
-                  maxWidth: '500px',
-                }}
-              >
-
-                <div className="absolute inset-0 p-4">
-                  <motion.div
-                    animate={{
-                      opacity: videoState?.isGenerating ? 0.3 : 1
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ImageContainer
-                    image={pair.image}
+                  <AudioContainer
+                    audio={pair.audio}
                     pairId={pair.id}
-                    onMoveUp={() => {
-                      const currentIndex = pairs.findIndex(p => p.id === pair.id);
-                      if (currentIndex > 0) {
-                        const newPairs = [...pairs];
-                        [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
-                        setPairs(newPairs);
-                      }
-                    }}
-                    onMoveDown={() => {
-                      const currentIndex = pairs.findIndex(p => p.id === pair.id);
-                      if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
-                        const newPairs = [...pairs];
-                        [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
-                        setPairs(newPairs);
-                      }
-                    }}
-                    onDelete={() => {
-                      updatePair(pair.id, { image: null });
-                    }}
-                    onSwap={onSwap}
-                    draggedItem={draggedItem}
-                    onDragStart={onDragStart}
-                    onDragEnd={onDragEnd}
-                    isContainerDragMode={isContainerDragTarget}
-                    draggedContainerType={draggedContainer?.type}
-                    onContainerDragStart={onContainerDrag}
-                    onContainerDragEnd={onContainerDrag}
-                    // Pass the targeted highlighting props
-                    isDraggingContainer={isDraggingContainer}
-                    shouldShowGlow={(isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image) || (draggedItem?.type === 'image' && draggedItem.pairId !== pair.id && !!pair.image)}
-                      // New drag overlay handlers
-                      onStartImageDrag={onStartImageDrag}
-                      onUpdateDragPosition={onUpdateDragPosition}
-                      onEndDrag={onEndDrag}
-                    />
-                  </motion.div>
-                </div>
+                  onMoveUp={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex > 0) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onMoveDown={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onDelete={() => {
+                    updatePair(pair.id, { audio: null });
+                  }}
+                  onSwap={onSwap}
+                  draggedItem={draggedItem}
+                  onDragStart={onDragStart}
+                  onDragEnd={onDragEnd}
+                  isContainerDragMode={isContainerDragTarget}
+                  draggedContainerType={draggedContainer?.type}
+                  draggedContainer={draggedContainer}
+                  onContainerDragStart={onContainerDrag}
+                  onContainerDragEnd={onContainerDrag}
+                  // Pass the targeted highlighting props
+                  isDraggingContainer={isDraggingContainer}
+                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'audio' && draggedContainer && draggedContainer.id !== pair.id && !!pair.audio) || (draggedItem?.type === 'audio' && draggedItem.pairId !== pair.id && !!pair.audio)}
+                    // New drag overlay handlers
+                    onStartAudioDrag={onStartAudioDrag}
+                    onUpdateDragPosition={onUpdateDragPosition}
+                    onEndDrag={onEndDrag}
+                  />
+                </motion.div>
               </div>
             </div>
           </div>
-        )
+
+          {/* Connecting Bridge - Simple Plus Symbol */}
+          <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
+            width: '20px', 
+            height: '200px', // Match container height
+            paddingTop: '1px', // Move plus symbol 15px higher (16px - 15px = 1px)
+            paddingBottom: '31px' // Adjust bottom padding to maintain total height
+          }}>
+            <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
+              {/* Plus icon using SVG for crisp rendering */}
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none"
+              >
+                <path 
+                  d="M12 5V19M5 12H19" 
+                  stroke="rgba(255, 255, 255, 0.2)" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Image Container */}
+          <div 
+            className={`relative transition-all duration-300 ${
+              isValidDragTarget && pair.image ? 'animate-pulse-glow' : ''
+            } ${isSwapping ? 'animate-swap-container' : ''}`}
+            onDragOver={handleContainerDragOver}
+            onDragLeave={handleContainerDragLeave}
+            onDrop={handleContainerDrop}
+          >
+            <div
+              className="relative overflow-hidden group/container image-container"
+              style={{
+                height: '200px',
+                minHeight: '200px',
+                maxHeight: '200px',
+                width: '500px',
+                minWidth: '500px',
+                maxWidth: '500px',
+              }}
+            >
+
+              <div className="absolute inset-0 p-4">
+                <motion.div
+                  animate={{
+                    opacity: videoState?.isGenerating ? 0.3 : 1
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ImageContainer
+                  image={pair.image}
+                  pairId={pair.id}
+                  onMoveUp={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex > 0) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onMoveDown={() => {
+                    const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                    if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
+                      const newPairs = [...pairs];
+                      [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
+                      setPairs(newPairs);
+                    }
+                  }}
+                  onDelete={() => {
+                    updatePair(pair.id, { image: null });
+                  }}
+                  onSwap={onSwap}
+                  draggedItem={draggedItem}
+                  onDragStart={onDragStart}
+                  onDragEnd={onDragEnd}
+                  isContainerDragMode={isContainerDragTarget}
+                  draggedContainerType={draggedContainer?.type}
+                  onContainerDragStart={onContainerDrag}
+                  onContainerDragEnd={onContainerDrag}
+                  // Pass the targeted highlighting props
+                  isDraggingContainer={isDraggingContainer}
+                  shouldShowGlow={(isDraggingContainer && draggedContainerType === 'image' && draggedContainer && draggedContainer.id !== pair.id && !!pair.image) || (draggedItem?.type === 'image' && draggedItem.pairId !== pair.id && !!pair.image)}
+                    // New drag overlay handlers
+                    onStartImageDrag={onStartImageDrag}
+                    onUpdateDragPosition={onUpdateDragPosition}
+                    onEndDrag={onEndDrag}
+                  />
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </div>
       ) : null}
     </motion.div>
   );
