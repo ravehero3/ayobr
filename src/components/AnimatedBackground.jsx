@@ -44,7 +44,7 @@ const AnimatedBackground = () => {
           page1: true
         }));
       };
-      img1.src = '/attached_assets/page 1_1754503149465.png';
+      img1.src = '/attached_assets/page%201_1754503149465.png';
     }
     
     // Preload Page 2 background (GIF)
@@ -57,7 +57,7 @@ const AnimatedBackground = () => {
           page2: true
         }));
       };
-      img2.src = '/attached_assets/page 2_1754503149466.gif';
+      img2.src = '/attached_assets/page%202_1754503149466.gif';
     }
   }, [backgroundLoaded]);
   
