@@ -105,6 +105,7 @@ const AnimatedBackground = () => {
               backgroundColor: '#000000',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              filter: 'blur(3px)', // Apply gaussian blur to page 2 background
               zIndex: -12
             }}
           />
