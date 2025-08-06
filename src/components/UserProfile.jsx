@@ -69,6 +69,8 @@ const UserProfile = ({ isOpen, onClose }) => {
             background: 'rgba(0, 0, 0, 0.4)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
+            paddingTop: '80px', // Account for header height
+            paddingBottom: '80px', // Account for footer height
           }}
           onClick={handleBackdropClick}
         >
