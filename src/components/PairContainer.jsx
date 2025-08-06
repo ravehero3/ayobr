@@ -231,7 +231,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </div>
       ) : !videoState?.isGenerating && !generatedVideo ? (
         <div 
-          className="w-full flex flex-col items-center mb-8 mt-8"
+          className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8 mt-8"
           style={{ 
             gap: '8px',
             paddingLeft: '30px',
@@ -315,10 +315,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
-            width: '20px', 
-            height: '200px', // Match container height
-            paddingTop: '1px', // Move plus symbol 15px higher (16px - 15px = 1px)
-            paddingBottom: '31px' // Adjust bottom padding to maintain total height
+            width: '48px', 
+            height: '48px'
           }}>
             <div className="relative flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
               {/* Plus icon using SVG for crisp rendering */}
