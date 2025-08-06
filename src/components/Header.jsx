@@ -18,7 +18,7 @@ const Header = () => {
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.3, delay: 0 }}
       className="fixed top-0 left-0 right-0 z-50 h-16"
     >
       <div
