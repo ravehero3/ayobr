@@ -25,6 +25,7 @@ Key features include:
 - **Download Page**: Dedicated final page for video preview and download with grid layout, individual video controls, bulk download functionality, and "Create More Videos" option to return to file management.
 - **Smart Page Management**: Automatic page detection based on app state (files present, videos generated, generation in progress) with manual override capabilities.
 - **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images, with MIME type and extension checking.
+- **User Profile System**: Clickable profile icon in header opens glassmorphism user profile modal. Users can upload custom profile pictures (JPG/PNG, max 5MB) which are stored as base64 data in memory. Profile image automatically updates header icon and persists during session. Features drag-and-drop or click-to-upload functionality with loading states and validation.
 - **Deployment**: Successfully migrated from Replit Agent to standard Replit web environment (January 2025). Web-based deployment running with webpack dev server on port 5000. Client-side processing ensures privacy and performance. All Electron-specific features adapted for web compatibility while maintaining full functionality. Header loading timing optimized to appear before file containers for better UX.
 
 ### System Design Choices

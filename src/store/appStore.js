@@ -16,6 +16,9 @@ export const useAppStore = create((set, get) => ({
   // Page tracking
   currentPage: null, // null means auto-detect, otherwise explicit page
   isFilesBeingDropped: false, // Track when files are being processed
+  
+  // User profile
+  userProfileImage: null, // Store base64 image data
 
   // Concurrency settings optimized for up to 100 files
   concurrencySettings: {
@@ -214,5 +217,8 @@ export const useAppStore = create((set, get) => ({
     isCancelling: true,
     currentProgress: 0,
     videoGenerationStates: {}
-  })
+  }),
+
+  // User profile actions
+  setUserProfileImage: (imageData) => set({ userProfileImage: imageData })
 }));
