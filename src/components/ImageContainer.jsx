@@ -135,7 +135,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
             {/* File title - Always centered, independent of move button */}
             <div className="absolute inset-x-0 flex justify-center pointer-events-none">
-              <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg">
+              <span className="text-white text-body-text font-medium truncate text-center drop-shadow-lg">
                 {image.name.replace(/\.[^/.]+$/, "")}
               </span>
             </div>

@@ -60,7 +60,7 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
             </motion.div>
           </div>
-          
+
           {/* Progress markers for large batches */}
           {totalPairs >= 20 && (
             <div className="flex justify-between mt-2 text-xs text-gray-500">

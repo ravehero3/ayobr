@@ -78,7 +78,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
         </motion.div>
 
         {/* Title */}
-        <motion.h2 
+        <motion.h2
           className="text-4xl font-bold text-white mb-4 group-hover:text-neon-blue/90 transition-colors duration-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,7 +88,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
         </motion.h2>
 
         {/* Description */}
-        <motion.p 
+        <motion.p
           className="text-xl text-gray-300 mb-6 max-w-md mx-auto leading-relaxed group-hover:text-gray-200 transition-colors duration-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -98,7 +98,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
         </motion.p>
 
         {/* Supported Formats */}
-        <motion.div 
+        <motion.div
           className="flex flex-wrap justify-center gap-3 max-w-lg mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,7 +132,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             }
           }}
           type="button"
-          className="mt-8 px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95"
+          className="mt-8 px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}

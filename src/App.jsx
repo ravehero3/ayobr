@@ -168,7 +168,7 @@ function App() {
 
   // Page management
   const currentPage = getCurrentPage();
-  
+
   const handleBackToFileManagement = useCallback(() => {
     clearGeneratedVideos();
     // This will automatically set page to 'fileManagement' or 'upload' based on files
@@ -280,8 +280,8 @@ function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </motion.div>
-              <h2 className="text-3xl font-bold text-white mb-2">Drop Files Anywhere</h2>
-              <p className="text-xl text-gray-300">Audio and images will be automatically paired</p>
+              <h2 className="text-section-title text-white mb-2">Drop Files Anywhere</h2>
+              <p className="text-lg text-gray-300">Audio and images will be automatically paired</p>
             </div>
           </motion.div>
         )}

@@ -102,6 +102,17 @@ module.exports = {
         },
       },
       
+      fontSize: {
+        // Custom font sizes for app typography rules
+        'main-title': ['32px', { lineHeight: '1.2', fontWeight: '700' }],    // Main Title/Headline
+        'section-title': ['22px', { lineHeight: '1.3', fontWeight: '600' }], // Section Titles/Headers
+        'button-primary': ['18px', { lineHeight: '1.4', fontWeight: '500' }], // Primary Action Buttons
+        'button-secondary': ['16px', { lineHeight: '1.4', fontWeight: '500' }], // Secondary Buttons
+        'body-text': ['16px', { lineHeight: '1.5', fontWeight: '400' }],     // Body Text/Labels
+        'small-notes': ['13px', { lineHeight: '1.4', fontWeight: '400' }],   // Small Notes/Footnotes
+        'ui-tooltips': ['12px', { lineHeight: '1.3', fontWeight: '400' }],   // Icons/Tabs/UI Tooltips
+      },
+      
       spacing: {
         '18': '4.5rem',
         '88': '22rem',

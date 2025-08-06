@@ -77,13 +77,13 @@ const VideoPreviewCard = ({ video }) => {
         </h3>
 
         <div className="flex justify-between items-center text-xs text-gray-400">
-          <span>{formatFileSize(video.size)}</span>
-          <span>{new Date(video.createdAt).toLocaleTimeString()}</span>
+          <span className="text-small-notes">{formatFileSize(video.size)}</span>
+          <span className="text-small-notes">{new Date(video.createdAt).toLocaleTimeString()}</span>
         </div>
 
         <button
           onClick={handleDownload}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-button-primary"
         >
           Download
         </button>

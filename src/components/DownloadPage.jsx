@@ -27,10 +27,10 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
         transition={{ delay: 0.2, duration: 0.5 }}
         className="text-center mb-8"
       >
-        <h1 className="text-4xl font-bold text-white mb-4">
+        <h1 className="text-main-title text-white mb-4">
           🎬 Your Videos Are Ready!
         </h1>
-        <p className="text-xl text-gray-300">
+        <p className="text-base-body text-gray-300">
           Preview and download your generated type beat videos
         </p>
       </motion.div>
@@ -52,8 +52,8 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 + index * 0.1, duration: 0.4 }}
           >
-            <VideoPreviewCard 
-              video={video} 
+            <VideoPreviewCard
+              video={video}
               showDownloadButton={true}
               className="bg-gray-900/50 backdrop-blur-md border border-gray-700/30 rounded-2xl p-4"
             />
@@ -71,7 +71,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
         {/* Download All Button */}
         <button
           onClick={onDownloadAll}
-          className="spotlight-button bg-green-600 hover:bg-green-700"
+          className="spotlight-button download-button text-button-primary"
         >
           <div className="wrapper">
             <span>
@@ -95,7 +95,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
         {/* Start Over Button */}
         <button
           onClick={handleStartOver}
-          className="px-8 py-3 bg-gray-700/50 backdrop-blur-md border border-gray-600/30 rounded-xl text-white font-medium transition-all duration-300 hover:bg-gray-600/50 hover:border-gray-500/50"
+          className="px-8 py-3 bg-gray-700/50 backdrop-blur-md border border-gray-600/30 rounded-xl text-white font-medium transition-all duration-300 hover:bg-gray-600/50 hover:border-gray-500/50 text-button-secondary"
         >
           CREATE MORE VIDEOS
         </button>
@@ -108,8 +108,8 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
         transition={{ delay: 1, duration: 0.5 }}
         className="mt-8 text-center text-gray-400"
       >
-        <p>
-          {generatedVideos.length} video{generatedVideos.length !== 1 ? 's' : ''} generated • 
+        <p className="text-sm-notes">
+          {generatedVideos.length} video{generatedVideos.length !== 1 ? 's' : ''} generated •
           Total size: {Math.round(generatedVideos.reduce((sum, video) => sum + (video.size || 0), 0) / 1024 / 1024 * 100) / 100} MB
         </p>
       </motion.div>

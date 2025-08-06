@@ -204,7 +204,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
             {/* File title - Always centered, independent of move button */}
             <div className="absolute inset-x-0 flex justify-center pointer-events-none">
-              <span className="text-white text-sm font-medium truncate text-center drop-shadow-lg">
+              <span className="text-white text-body-text font-medium truncate text-center drop-shadow-lg">
                 {audio.name.replace(/\.[^/.]+$/, "")}
               </span>
             </div>
@@ -305,8 +305,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               <path d="M2 12h2v2H2zm4-2h2v6H6zm4-4h2v12h-2zm4 2h2v8h-2zm4-4h2v16h-2z"/>
             </svg>
           </div>
-          <p className="text-sm font-medium text-white mb-1 text-center drop-shadow-lg">Drop audio file here</p>
-          <p className="text-xs text-white/70 font-light text-center drop-shadow-sm">MP3, WAV</p>
+          <p className="text-body-text text-white mb-1 text-center drop-shadow-lg">Drop audio file here</p>
+          <p className="text-small-notes text-white/70 font-light text-center drop-shadow-sm">MP3, WAV</p>
         </div>
       )}
     </motion.div>
