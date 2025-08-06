@@ -48,12 +48,33 @@ const AnimatedBackground = () => {
   
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
-      {/* Clean slate - no backgrounds for now */}
-      <div 
-        className="absolute inset-0 w-full h-full"
+      {/* Page 1 Background: Static blue background - Shows when no files */}
+      <motion.div
+        className="absolute inset-0 w-full h-full bg-cover bg-center"
+        animate={{ 
+          opacity: hasFiles ? 0 : 1
+        }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
         style={{
-          background: '#000000',
-          zIndex: -10
+          backgroundImage: 'url(/attached_assets/page%201_1754503149465.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          zIndex: -12
+        }}
+      />
+
+      {/* Page 2 Background: Blue flame GIF - Shows when files are added */}
+      <motion.div
+        className="absolute inset-0 w-full h-full bg-cover bg-center"
+        animate={{ 
+          opacity: hasFiles ? 1 : 0
+        }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+        style={{
+          backgroundImage: 'url(/attached_assets/page%202_1754503149466.gif)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          zIndex: -11
         }}
       />
     </div>
