@@ -3,9 +3,33 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 
 const AnimatedBackground = () => {
-  const { getCurrentPage } = useAppStore();
+  // Get reactive state from Zustand store - these will trigger re-renders
+  const pairs = useAppStore(state => state.pairs);
+  const generatedVideos = useAppStore(state => state.generatedVideos);
+  const isGenerating = useAppStore(state => state.isGenerating);
+  
   const [backgroundLoaded, setBackgroundLoaded] = useState({});
-  const currentPage = getCurrentPage();
+  
+  // Calculate current page directly based on reactive state
+  const hasFiles = pairs.some(pair => pair.audio || pair.image);
+  const hasVideos = generatedVideos.length > 0;
+  
+  let currentPage;
+  if (hasVideos) {
+    currentPage = 'download';
+  } else if (isGenerating) {
+    currentPage = 'generation';
+  } else if (hasFiles) {
+    currentPage = 'fileManagement';
+  } else {
+    currentPage = 'upload';
+  }
+  
+  // Debug logging for page detection
+  console.log('AnimatedBackground: Current page:', currentPage);
+  console.log('AnimatedBackground: Has files:', pairs.some(pair => pair.audio || pair.image));
+  console.log('AnimatedBackground: Has videos:', generatedVideos.length > 0);
+  console.log('AnimatedBackground: Is generating:', isGenerating);
   
   // Background configurations for each page
   const pageConfigs = {
@@ -37,9 +61,11 @@ const AnimatedBackground = () => {
   // Preload backgrounds when needed
   useEffect(() => {
     const config = pageConfigs[currentPage];
+    console.log('AnimatedBackground: Loading background for page:', currentPage, config);
     if (config?.preloadUrl && !backgroundLoaded[currentPage]) {
       const img = new Image();
       img.onload = () => {
+        console.log('AnimatedBackground: Background loaded for page:', currentPage);
         setBackgroundLoaded(prev => ({
           ...prev,
           [currentPage]: true
@@ -50,6 +76,7 @@ const AnimatedBackground = () => {
   }, [currentPage, backgroundLoaded]);
   
   const config = pageConfigs[currentPage] || pageConfigs.upload;
+  console.log('AnimatedBackground: Using config for page:', currentPage, config);
   
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
