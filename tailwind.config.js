@@ -55,7 +55,7 @@ module.exports = {
         'glow': 'glow 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s infinite',
         'float': 'float 6s ease-in-out infinite',
-        'diagonal-move': 'diagonalMove 20s linear infinite',
+        'diagonal-move': 'diagonalMove 25s ease-in-out infinite',
       },
       
       keyframes: {
@@ -85,19 +85,19 @@ module.exports = {
         },
         diagonalMove: {
           '0%': { 
-            transform: 'translate(-20%, -20%) scale(1.2)',
+            transform: 'translate(-15%, -15%) scale(1.15)',
           },
           '25%': { 
-            transform: 'translate(-10%, -10%) scale(1.2)',
+            transform: 'translate(-5%, -8%) scale(1.18)',
           },
           '50%': { 
-            transform: 'translate(0%, 0%) scale(1.2)',
+            transform: 'translate(5%, 2%) scale(1.15)',
           },
           '75%': { 
-            transform: 'translate(-10%, -10%) scale(1.2)',
+            transform: 'translate(-8%, -5%) scale(1.18)',
           },
           '100%': { 
-            transform: 'translate(-20%, -20%) scale(1.2)',
+            transform: 'translate(-15%, -15%) scale(1.15)',
           },
         },
       },
