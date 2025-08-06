@@ -250,7 +250,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             onDrop={handleContainerDrop}
           >
             <div
-              className="relative overflow-hidden group/container audio-container"
+              className="relative group/container audio-container"
               style={{
                 height: '200px',
                 minHeight: '200px',
@@ -258,6 +258,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
+                overflow: 'visible',
               }}
             >
 

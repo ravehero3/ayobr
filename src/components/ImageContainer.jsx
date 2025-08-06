@@ -60,7 +60,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       className="relative w-full h-full transition-all duration-300 group cursor-pointer image-container glass-container"
       data-pair-id={pairId}
       data-image-container="true"
-      whileHover={{ scale: image ? 1.005 : 1 }}
+      whileHover={{ scale: image ? 1 : 1 }}
       title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -71,6 +71,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         height: '160px',
         minHeight: '160px',
         maxHeight: '160px',
+        overflow: 'visible',
       }}
     >
       {image ? (

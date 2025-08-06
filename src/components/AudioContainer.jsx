@@ -129,7 +129,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container glass-container"
       data-pair-id={pairId}
       data-audio-container="true"
-      whileHover={{ scale: audio ? 1.005 : 1 }}
+      whileHover={{ scale: audio ? 1 : 1 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -140,6 +140,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         height: '160px',
         minHeight: '160px',
         maxHeight: '160px',
+        overflow: 'visible',
       }}
     >
       {audio ? (
