@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import NightSkyBackground from './NightSkyBackground';
 
 const AnimatedBackground = () => {
   // Get reactive state from Zustand store - these will trigger re-renders
@@ -45,7 +44,7 @@ const AnimatedBackground = () => {
           page1: true
         }));
       };
-      img1.src = '/attached_assets/page%201_1754503149465.png';
+      img1.src = '/attached_assets/page%201_1754508034866.png';
     }
 
     // Preload Page 2 background (Earth from Space)
@@ -67,10 +66,7 @@ const AnimatedBackground = () => {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
-      {/* Night Sky Background - Always present as deepest layer */}
-      <div className="fixed inset-0">
-        <NightSkyBackground />
-      </div>
+
 
       {/* Layer 1: Base Dark Texture - Always visible */}
       <AnimatePresence mode="wait">
@@ -84,7 +80,7 @@ const AnimatedBackground = () => {
             transition={{ duration: 1.5, ease: "easeInOut" }}
             style={{
               backgroundImage: backgroundLoaded.page1
-                ? 'url(/attached_assets/page%201_1754503149465.png)'
+                ? 'url(/attached_assets/page%201_1754508034866.png)'
                 : 'none',
               backgroundColor: '#000000',
               backgroundSize: 'cover',
@@ -115,24 +111,7 @@ const AnimatedBackground = () => {
         )}
       </AnimatePresence>
 
-      {/* Debug info overlay - temporary */}
-      <div style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        background: 'rgba(0,0,0,0.8)',
-        color: 'white',
-        padding: '10px',
-        fontSize: '12px',
-        zIndex: 1000,
-        fontFamily: 'monospace'
-      }}>
-        hasFiles: {hasFiles.toString()}<br/>
-        pairs: {pairs.length}<br/>
-        current: {currentBackgroundKey}<br/>
-        page1: {backgroundLoaded.page1?.toString() || 'false'}<br/>
-        page2: {backgroundLoaded.page2?.toString() || 'false'}
-      </div>
+
     </div>
   );
 };
