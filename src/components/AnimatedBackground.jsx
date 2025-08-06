@@ -15,22 +15,7 @@ const AnimatedBackground = () => {
   const hasVideos = generatedVideos.length > 0;
   const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
   
-  // Get the explicit current page from store if available
-  const explicitPage = useAppStore(state => state.currentPage);
-  
-  let currentPage;
-  // Priority order: explicit page setting > state-based detection
-  if (explicitPage) {
-    currentPage = explicitPage;
-  } else if (hasVideos && !isGenerating) {
-    currentPage = 'download';
-  } else if (isGenerating) {
-    currentPage = 'generation';
-  } else if (hasFiles) {
-    currentPage = 'fileManagement';
-  } else {
-    currentPage = 'upload';
-  }
+  // We no longer need page detection for the progressive background system
 
   // Calculate progress level (0-4) based on user actions
   let progressLevel = 0;
@@ -39,58 +24,27 @@ const AnimatedBackground = () => {
   if (isGenerating || hasVideos) progressLevel = 3; // Video generation started/completed
   if (hasVideos && !isGenerating) progressLevel = 4; // Videos ready for download
   
-  // Debug logging for page detection
-  console.log('AnimatedBackground: Current page:', currentPage);
-  console.log('AnimatedBackground: Has files:', pairs.some(pair => pair.audio || pair.image));
-  console.log('AnimatedBackground: Has videos:', generatedVideos.length > 0);
+  // Debug logging for progress detection
+  console.log('AnimatedBackground: Progress level:', progressLevel);
+  console.log('AnimatedBackground: Has files:', hasFiles);
+  console.log('AnimatedBackground: Has complete pairs:', hasCompletePairs);
+  console.log('AnimatedBackground: Has videos:', hasVideos);
   console.log('AnimatedBackground: Is generating:', isGenerating);
-  
-  // Background configurations for each page
-  const pageConfigs = {
-    upload: {
-      type: 'gradient',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      animated: false
-    },
-    fileManagement: {
-      type: 'gif',
-      background: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
-      animated: true,
-      preloadUrl: '/attached_assets/typebeatznew_1754459272105.gif'
-    },
-    generation: {
-      type: 'blurred-gif', 
-      background: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
-      animated: true,
-      blur: true,
-      preloadUrl: '/attached_assets/typebeatznew_1754459272105.gif'
-    },
-    download: {
-      type: 'download-gradient',
-      background: 'linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #0d1b2a 100%)',
-      animated: false
-    }
-  };
 
-  // Preload backgrounds when needed
+  // Preload the GIF when needed
   useEffect(() => {
-    const config = pageConfigs[currentPage];
-    console.log('AnimatedBackground: Loading background for page:', currentPage, config);
-    if (config?.preloadUrl && !backgroundLoaded[currentPage]) {
+    if (!backgroundLoaded.gif) {
       const img = new Image();
       img.onload = () => {
-        console.log('AnimatedBackground: Background loaded for page:', currentPage);
+        console.log('AnimatedBackground: GIF loaded');
         setBackgroundLoaded(prev => ({
           ...prev,
-          [currentPage]: true
+          gif: true
         }));
       };
-      img.src = config.preloadUrl;
+      img.src = '/attached_assets/typebeatznew_1754459272105.gif';
     }
-  }, [currentPage, backgroundLoaded]);
-  
-  const config = pageConfigs[currentPage] || pageConfigs.upload;
-  console.log('AnimatedBackground: Using config for page:', currentPage, config);
+  }, [backgroundLoaded]);
   
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
@@ -103,14 +57,31 @@ const AnimatedBackground = () => {
         }}
       />
 
-      {/* Layer 2: Animated Particle System - Fades out when files added (progress >= 1) */}
+      {/* Current Background: Dynamic Flame GIF - This is what's currently shown, fades out when files are added */}
+      <motion.div
+        className="absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move"
+        animate={{ 
+          opacity: hasFiles ? 0 : 1, // Simple: fade out when any files are present
+          scale: hasFiles ? 0.9 : 1,
+          filter: isGenerating ? 'blur(8px)' : 'blur(0px)'
+        }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+        style={{
+          backgroundImage: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          zIndex: -11
+        }}
+      />
+
+      {/* Layer 2: Particle System - Shows after current background fades */}
       <motion.div
         className="absolute inset-0 w-full h-full"
         animate={{ 
-          opacity: progressLevel >= 1 ? 0 : 1,
-          scale: progressLevel >= 1 ? 1.1 : 1
+          opacity: hasFiles && !hasCompletePairs ? 0.3 : 0,
+          scale: hasFiles ? 1 : 0.95
         }}
-        transition={{ duration: 1.5, ease: "easeInOut" }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
         style={{
           background: `
             radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
@@ -118,23 +89,6 @@ const AnimatedBackground = () => {
             radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.1) 0%, transparent 50%)
           `,
           zIndex: -12
-        }}
-      />
-
-      {/* Layer 3: Dynamic Flame GIF - Fades out when complete pairs created (progress >= 2) */}
-      <motion.div
-        className="absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move"
-        animate={{ 
-          opacity: progressLevel >= 2 ? 0 : (hasFiles ? 1 : 0),
-          scale: progressLevel >= 2 ? 0.9 : 1,
-          filter: isGenerating ? 'blur(8px)' : 'blur(0px)'
-        }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
-        style={{
-          backgroundImage: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          zIndex: -11
         }}
       />
 
