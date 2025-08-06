@@ -42,7 +42,7 @@ const AnimatedBackground = () => {
           gif: true
         }));
       };
-      img.src = '/attached_assets/typebeatznew_1754459272105.gif';
+      img.src = '/attached_assets/typebeatznew_1754502880376.gif';
     }
   }, [backgroundLoaded]);
   
@@ -57,17 +57,17 @@ const AnimatedBackground = () => {
         }}
       />
 
-      {/* Current Background: Dynamic Flame GIF - This is what's currently shown, fades out when files are added */}
+      {/* FIRST BACKGROUND: Blue Flame GIF - This is the initial background, fades out when files are added */}
       <motion.div
         className="absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move"
         animate={{ 
-          opacity: hasFiles ? 0 : 1, // Simple: fade out when any files are present
+          opacity: hasFiles ? 0 : 1, // Fade to 0 opacity when files are present
           scale: hasFiles ? 0.9 : 1,
           filter: isGenerating ? 'blur(8px)' : 'blur(0px)'
         }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
         style={{
-          backgroundImage: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
+          backgroundImage: 'url(/attached_assets/typebeatznew_1754502880376.gif)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           zIndex: -11
