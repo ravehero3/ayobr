@@ -16,7 +16,7 @@ import DownloadPage from './components/DownloadPage';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -174,10 +174,10 @@ function App() {
   React.useEffect(() => {
     if (currentPage === 'download' && generatedVideos.length > 0) {
       setHasLeftDownloadPage(false); // Reset when on download page
-    } else if (currentPage !== 'download' && generatedVideos.length > 0 && !hasLeftDownloadPage) {
+    } else if (currentPage !== 'download' && generatedVideos.length > 0) {
       setHasLeftDownloadPage(true); // Mark as left when navigating away with videos
     }
-  }, [currentPage, generatedVideos.length, hasLeftDownloadPage]);
+  }, [currentPage, generatedVideos.length]);
 
   const handleBackToFileManagement = useCallback(() => {
     clearGeneratedVideos();
@@ -186,9 +186,10 @@ function App() {
   }, [clearGeneratedVideos]);
 
   const handleBackToDownloads = useCallback(() => {
-    // This will automatically switch to download page since generatedVideos.length > 0
-    // The getCurrentPage() function handles this logic
-  }, []);
+    // Force navigate back to download page
+    setHasLeftDownloadPage(false);
+    setCurrentPage('download');
+  }, [setHasLeftDownloadPage, setCurrentPage]);
 
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');

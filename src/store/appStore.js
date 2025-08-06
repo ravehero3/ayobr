@@ -94,6 +94,9 @@ export const useAppStore = create((set, get) => ({
   // Page management actions
   setCurrentPage: (page) => set({ currentPage: page }),
   
+  // Force page navigation
+  navigateToPage: (page) => set({ currentPage: page }),
+  
   getCurrentPage: () => {
     const state = get();
     const hasFiles = state.pairs.some(pair => pair.audio || pair.image);
