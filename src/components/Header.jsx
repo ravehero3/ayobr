@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import typebeatLogo from '../assets/typebeatz-logo-new.png';
+import typebeatLogo from '../assets/typebeatz logo 1_1754478881987.png';
 import userIcon from '../assets/user_1754478889614.png';
 
 const Header = () => {
