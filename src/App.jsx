@@ -263,7 +263,7 @@ function App() {
 
   return (
     <div 
-      className={`fixed inset-0 w-screen h-screen custom-background transition-all duration-300 overflow-auto ${
+      className={`fixed inset-0 w-screen h-screen transition-all duration-300 overflow-auto ${
         isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
       } ${
         dragState.isAudioDragging ? 'audio-drag-active' : ''
@@ -278,7 +278,7 @@ function App() {
       <AnimatedBackground />
 
       <div className="fixed inset-0 flex justify-center">
-        <div className="w-full max-w-6xl custom-background transition-all duration-300 overflow-auto">
+        <div className="w-full max-w-6xl transition-all duration-300 overflow-auto">
       {/* Drag Overlay */}
       <AnimatePresence>
         {isDragOver && (
