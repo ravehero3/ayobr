@@ -37,11 +37,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* Close/Cancel Button */}
           <button
             onClick={onStop}
-            className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 hover:border-red-500/50 transition-all duration-200 group"
-            style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+            className="absolute top-6 right-6 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-gray-500/20 hover:bg-gray-500/40 border border-gray-500/30 hover:border-gray-500/50 transition-all duration-200 group"
           >
             <svg 
-              className="w-4 h-4 text-red-400 group-hover:text-red-300 transition-colors" 
+              className="w-4 h-4 text-gray-400 group-hover:text-gray-300 transition-colors" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
