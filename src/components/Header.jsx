@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import typebeatLogo from '../assets/typebeatz logo 1_1754478881987.png';
+import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import userIcon from '../assets/user_1754478889614.png';
 import UserProfile from './UserProfile';
 
@@ -42,7 +42,7 @@ const Header = () => {
           <img 
             src={typebeatLogo}
             alt="TypeBeatz"
-            className="h-6 object-contain"
+            className="h-8 object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
             style={{ marginLeft: '10px' }}
           />
         </div>
