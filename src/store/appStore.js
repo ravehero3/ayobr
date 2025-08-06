@@ -12,6 +12,7 @@ export const useAppStore = create((set, get) => ({
   isCancelling: false,
   currentProgress: 0,
   videoGenerationStates: {}, // Track generation progress for each pair
+  currentPage: 'upload', // 'upload' | 'fileManagement' | 'generation' | 'download'
   
   // Concurrency settings optimized for up to 100 files
   concurrencySettings: {
@@ -89,6 +90,21 @@ export const useAppStore = create((set, get) => ({
   setGeneratedVideos: (videos) => set({ generatedVideos: videos }),
 
   clearGeneratedVideos: () => set({ generatedVideos: [] }),
+
+  // Page management actions
+  setCurrentPage: (page) => set({ currentPage: page }),
+  
+  getCurrentPage: () => {
+    const state = get();
+    const hasFiles = state.pairs.some(pair => pair.audio || pair.image);
+    const hasVideos = state.generatedVideos.length > 0;
+    
+    // Auto-determine page based on app state
+    if (hasVideos) return 'download';
+    if (state.isGenerating) return 'generation';
+    if (hasFiles) return 'fileManagement';
+    return 'upload';
+  },
 
   // Generation state
   setIsGenerating: (isGenerating) => set({ isGenerating }),

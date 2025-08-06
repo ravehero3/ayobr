@@ -3,50 +3,61 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 
 const AnimatedBackground = () => {
-  const { pairs, isGenerating } = useAppStore();
-  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const { getCurrentPage } = useAppStore();
+  const [backgroundLoaded, setBackgroundLoaded] = useState({});
+  const currentPage = getCurrentPage();
   
-  // Check if we're in the empty state (first page) or file management state (second page)
-  const isEmptyState = pairs.every(pair => !pair.audio && !pair.image);
-  const hasAnyFiles = pairs.some(pair => pair.audio || pair.image);
-  
-  // Preload the GIF background when transitioning
-  useEffect(() => {
-    if (hasAnyFiles && !backgroundLoaded) {
-      const img = new Image();
-      img.onload = () => setBackgroundLoaded(true);
-      img.src = '/attached_assets/typebeatznew_1754459272105.gif';
-    }
-  }, [hasAnyFiles, backgroundLoaded]);
-  
-  // Page states for different backgrounds
-  const getBackgroundConfig = () => {
-    if (isEmptyState) {
-      return {
-        type: 'gradient',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        animated: false,
-        opacity: 1
-      };
-    } else {
-      return {
-        type: 'gif',
-        background: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
-        animated: true,
-        opacity: backgroundLoaded ? 1 : 0.7
-      };
+  // Background configurations for each page
+  const pageConfigs = {
+    upload: {
+      type: 'gradient',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+      animated: false
+    },
+    fileManagement: {
+      type: 'gif',
+      background: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
+      animated: true,
+      preloadUrl: '/attached_assets/typebeatznew_1754459272105.gif'
+    },
+    generation: {
+      type: 'blurred-gif', 
+      background: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
+      animated: true,
+      blur: true,
+      preloadUrl: '/attached_assets/typebeatznew_1754459272105.gif'
+    },
+    download: {
+      type: 'download-gradient',
+      background: 'linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #0d1b2a 100%)',
+      animated: false
     }
   };
+
+  // Preload backgrounds when needed
+  useEffect(() => {
+    const config = pageConfigs[currentPage];
+    if (config?.preloadUrl && !backgroundLoaded[currentPage]) {
+      const img = new Image();
+      img.onload = () => {
+        setBackgroundLoaded(prev => ({
+          ...prev,
+          [currentPage]: true
+        }));
+      };
+      img.src = config.preloadUrl;
+    }
+  }, [currentPage, backgroundLoaded]);
   
-  const config = getBackgroundConfig();
+  const config = pageConfigs[currentPage] || pageConfigs.upload;
   
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
       <AnimatePresence mode="wait">
-        {/* Page 1: Empty State Background */}
-        {isEmptyState && (
+        {/* Page 1: Upload Page - Dark Gradient */}
+        {currentPage === 'upload' && (
           <motion.div
-            key="empty-background"
+            key="upload-background"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -59,27 +70,66 @@ const AnimatedBackground = () => {
           />
         )}
         
-        {/* Page 2: File Management Background */}
-        {hasAnyFiles && (
+        {/* Page 2: File Management - Blue Flame GIF */}
+        {currentPage === 'fileManagement' && (
           <motion.div
-            key="animated-background"
+            key="fileManagement-background"
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ 
-              opacity: config.opacity,
-              scale: 1,
-              filter: isGenerating ? 'blur(8px)' : 'blur(0px)'
+              opacity: backgroundLoaded[currentPage] ? 1 : 0.7,
+              scale: 1
             }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ 
               duration: 1.2, 
-              ease: "easeInOut",
-              filter: { duration: 0.5 }
+              ease: "easeInOut"
             }}
             className="absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move"
             style={{
               backgroundImage: config.background,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              zIndex: -10
+            }}
+          />
+        )}
+
+        {/* Page 3: Generation - Blurred Blue Flame GIF */}
+        {currentPage === 'generation' && (
+          <motion.div
+            key="generation-background"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ 
+              opacity: backgroundLoaded[currentPage] ? 1 : 0.7,
+              scale: 1,
+              filter: 'blur(8px)'
+            }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ 
+              duration: 1.2, 
+              ease: "easeInOut"
+            }}
+            className="absolute -inset-10 w-[140%] h-[140%] bg-cover bg-center animate-diagonal-move"
+            style={{
+              backgroundImage: config.background,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              zIndex: -10
+            }}
+          />
+        )}
+
+        {/* Page 4: Download - Special Dark Blue Gradient */}
+        {currentPage === 'download' && (
+          <motion.div
+            key="download-background"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.0, ease: "easeInOut" }}
+            className="absolute inset-0 w-full h-full"
+            style={{
+              background: config.background,
               zIndex: -10
             }}
           />
@@ -93,7 +143,7 @@ const AnimatedBackground = () => {
         animate={{ opacity: 0.1 }}
         transition={{ duration: 1 }}
         style={{
-          backgroundImage: 'url(/attached_assets/noise_1751735379404.png)',
+          backgroundImage: 'url(/noise.png)',
           backgroundSize: '256px 256px',
           backgroundRepeat: 'repeat',
           zIndex: -9,
@@ -102,7 +152,7 @@ const AnimatedBackground = () => {
       />
       
       {/* Subtle gradient overlay for better text readability */}
-      {hasAnyFiles && (
+      {(currentPage === 'fileManagement' || currentPage === 'generation') && (
         <motion.div 
           className="absolute inset-0 w-full h-full pointer-events-none"
           initial={{ opacity: 0 }}

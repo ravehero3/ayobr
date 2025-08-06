@@ -12,10 +12,11 @@ import AudioContainerCopy from './components/AudioContainerCopy';
 import ImageContainerCopy from './components/ImageContainerCopy';
 import AnimatedBackground from './components/AnimatedBackground';
 import LoadingWindow from './components/LoadingWindow';
+import DownloadPage from './components/DownloadPage';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -165,6 +166,14 @@ function App() {
     }
   }, [handleFileDrop, clearFileCache]);
 
+  // Page management
+  const currentPage = getCurrentPage();
+  
+  const handleBackToFileManagement = useCallback(() => {
+    clearGeneratedVideos();
+    // This will automatically set page to 'fileManagement' or 'upload' based on files
+  }, [clearGeneratedVideos]);
+
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');
     const completePairs = getCompletePairs();
@@ -278,8 +287,8 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Drop Zone - Show when no files are present - HIGHEST Z-INDEX */}
-      {pairs.every(pair => !pair.audio && !pair.image) && (
+      {/* Page 1: Upload Page - Drop Zone - Show when no files are present */}
+      {currentPage === 'upload' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -294,13 +303,21 @@ function App() {
         </motion.div>
       )}
 
+      {/* Page 4: Download Page - Show when videos are generated */}
+      {currentPage === 'download' && (
+        <DownloadPage
+          onDownloadAll={handleDownloadVideos}
+          onBackToFileManagement={handleBackToFileManagement}
+        />
+      )}
+
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Main Content */}
         <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
 
-        {/* Pairs Grid - Updated for wider containers */}
-        {pairs.some(pair => pair.audio || pair.image) && (
+        {/* Page 2: File Management - Pairs Grid */}
+        {currentPage === 'fileManagement' && (
           <motion.div>
           <motion.div
             className="w-full flex flex-col items-center mb-8"
@@ -346,8 +363,8 @@ function App() {
           </motion.div>
         )}
 
-        {/* Action Buttons */}
-        {pairs.some(pair => pair.audio || pair.image) && (
+        {/* Action Buttons for File Management Page */}
+        {currentPage === 'fileManagement' && (
             <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
