@@ -12,14 +12,13 @@ class NightSkyController {
 
   init() {
     this.createStars();
-    this.createConstellations();
     this.bindEvents();
     this.animate();
   }
 
   createStars() {
-    // Create bright stars with cross glow
-    for (let i = 0; i < 12; i++) {
+    // Create bright stars with cross glow - 3x more stars (36 instead of 12)
+    for (let i = 0; i < 36; i++) {
       const star = document.createElement('div');
       star.className = 'bright-star';
       star.style.left = Math.random() * 100 + '%';
@@ -36,39 +35,8 @@ class NightSkyController {
   }
 
   createConstellations() {
-    // Create constellation lines
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'constellation-lines');
-    svg.style.position = 'absolute';
-    svg.style.top = '0';
-    svg.style.left = '0';
-    svg.style.width = '100%';
-    svg.style.height = '100%';
-    svg.style.pointerEvents = 'none';
-    svg.style.opacity = '0.3';
-
-    // Create some constellation lines
-    const lines = [
-      { x1: '20%', y1: '30%', x2: '35%', y2: '25%' },
-      { x1: '35%', y1: '25%', x2: '45%', y2: '40%' },
-      { x1: '60%', y1: '20%', x2: '75%', y2: '35%' },
-      { x1: '75%', y1: '35%', x2: '80%', y2: '50%' },
-      { x1: '15%', y1: '70%', x2: '25%', y2: '85%' },
-      { x1: '70%', y1: '75%', x2: '85%', y2: '80%' }
-    ];
-
-    lines.forEach(line => {
-      const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      svgLine.setAttribute('x1', line.x1);
-      svgLine.setAttribute('y1', line.y1);
-      svgLine.setAttribute('x2', line.x2);
-      svgLine.setAttribute('y2', line.y2);
-      svgLine.setAttribute('stroke', 'rgba(255, 255, 255, 0.4)');
-      svgLine.setAttribute('stroke-width', '1');
-      svg.appendChild(svgLine);
-    });
-
-    this.container.appendChild(svg);
+    // No constellation lines - just pure darkness and stars
+    return;
   }
 
   bindEvents() {

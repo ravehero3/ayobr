@@ -231,13 +231,14 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </div>
       ) : !videoState?.isGenerating && !generatedVideo ? (
         <div 
-          className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8 mt-8"
+          className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8"
           style={{ 
             gap: '8px',
             paddingLeft: '30px',
             paddingRight: '30px',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            marginTop: '69px'
           }}
         >
           {/* Audio Container */}  
