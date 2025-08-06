@@ -109,6 +109,7 @@ const AnimatedBackground = () => {
       }}>
         hasFiles: {hasFiles.toString()}<br/>
         pairs: {pairs.length}<br/>
+        currentPage: {useAppStore(state => state.getCurrentPage())}<br/>
         page1: {backgroundLoaded.page1?.toString() || 'false'}<br/>
         page2: {backgroundLoaded.page2?.toString() || 'false'}
       </div>

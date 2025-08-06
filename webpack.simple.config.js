@@ -48,7 +48,15 @@ module.exports = {
   ],
 
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: [
+      {
+        directory: path.join(__dirname, 'dist'),
+      },
+      {
+        directory: path.join(__dirname, 'attached_assets'),
+        publicPath: '/attached_assets',
+      }
+    ],
     host: '0.0.0.0',
     port: 5000,
     hot: true,
