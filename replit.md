@@ -25,7 +25,7 @@ Key features include:
 - **Download Page**: Dedicated final page for video preview and download with grid layout, individual video controls, bulk download functionality, and "Create More Videos" option to return to file management.
 - **Smart Page Management**: Automatic page detection based on app state (files present, videos generated, generation in progress) with manual override capabilities.
 - **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images, with MIME type and extension checking.
-- **Deployment**: Web-based deployment ready for Replit with webpack dev server on port 5000. Client-side processing ensures privacy and performance.
+- **Deployment**: Successfully migrated from Replit Agent to standard Replit web environment (January 2025). Web-based deployment running with webpack dev server on port 5000. Client-side processing ensures privacy and performance. All Electron-specific features adapted for web compatibility while maintaining full functionality.
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between the React-based renderer process and Electron's main process for system interactions.
