@@ -13,7 +13,6 @@ import ImageContainerCopy from './components/ImageContainerCopy';
 import AnimatedBackground from './components/AnimatedBackground';
 import LoadingWindow from './components/LoadingWindow';
 import DownloadPage from './components/DownloadPage';
-import AudioContainer from './components/AudioContainer'; // Assuming AudioContainer is used in the 'files' page
 
 
 function App() {
@@ -21,20 +20,6 @@ function App() {
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
-
-  // Mock state for audioFiles and imageFiles if they are used in the 'files' page
-  // In a real app, these would likely come from a store or context
-  const [audioFiles, setAudioFiles] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
-
-  const removeAudioFile = useCallback((id) => {
-    setAudioFiles(prev => prev.filter(file => file.id !== id));
-  }, []);
-
-  const removeImageFile = useCallback((id) => {
-    setImageFiles(prev => prev.filter(file => file.id !== id));
-  }, []);
-
 
   // Drag overlay state
   const [dragState, setDragState] = useState({
@@ -181,36 +166,6 @@ function App() {
     }
   }, [handleFileDrop, clearFileCache]);
 
-  // Mock handlers for audio and image drops for the 'upload' page
-  const handleAudioDrop = useCallback((files) => {
-    console.log('Audio files dropped:', files);
-    // Logic to add files to audioFiles state and update pairs
-    const newAudioFiles = files.map((file, index) => ({
-      id: `${file.name}-${Date.now()}-${index}`, // Unique ID
-      name: file.name,
-      file: file
-    }));
-    setAudioFiles(prev => [...prev, ...newAudioFiles]);
-    // Here you would also update the 'pairs' state to associate these audio files
-    // For now, we'll just log and set state for demonstration
-    console.log("New audio files state:", [...audioFiles, ...newAudioFiles]);
-  }, [audioFiles]); // Include audioFiles in dependency if it's used to update pairs directly
-
-  const handleImageDrop = useCallback((files) => {
-    console.log('Image files dropped:', files);
-    // Logic to add files to imageFiles state and update pairs
-    const newImageFiles = files.map((file, index) => ({
-      id: `${file.name}-${Date.now()}-${index}`, // Unique ID
-      name: file.name,
-      file: file
-    }));
-    setImageFiles(prev => [...prev, ...newImageFiles]);
-    // Here you would also update the 'pairs' state to associate these image files
-    // For now, we'll just log and set state for demonstration
-    console.log("New image files state:", [...imageFiles, ...newImageFiles]);
-  }, [imageFiles]); // Include imageFiles in dependency if it's used to update pairs directly
-
-
   // Page management
   const currentPage = getCurrentPage();
 
@@ -288,7 +243,7 @@ function App() {
   };
 
   return (
-    <div
+    <div 
       className={`fixed inset-0 w-screen h-screen custom-background transition-all duration-300 overflow-auto ${
         isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
       } ${
@@ -525,138 +480,14 @@ function App() {
           </motion.div>
         )}
 
-        {/* Page 3: Upload Page - Contains DropZones for Audio and Images */}
-        {currentPage === 'upload' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-8"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div>
-                <h2 className="text-section-title font-semibold text-white mb-6">Upload Audio</h2>
-                <DropZone
-                  type="audio"
-                  onFileDrop={handleAudioDrop}
-                  accept="audio/*"
-                />
-              </div>
-
-              <div>
-                <h2 className="text-section-title font-semibold text-white mb-6">Upload Images</h2>
-                <DropZone
-                  type="image"
-                  onFileDrop={handleImageDrop}
-                  accept="image/*"
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
 
 
-        {/* Page 5: Files page - Displays uploaded Audio and Image Files */}
-        {currentPage === 'files' && (
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-section-title font-semibold text-white">Audio Files ({audioFiles.length})</h2>
-                    <button
-                      onClick={() => getCurrentPage('upload')}
-                      className="text-button-secondary text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      <span>Add More</span>
-                    </button>
-                  </div>
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {audioFiles.map((file) => (
-                      <AudioContainer
-                        key={file.id}
-                        file={file.file}
-                        fileName={file.name}
-                        fileSize={file.file.size}
-                        onRemove={() => removeAudioFile(file.id)}
-                      />
-                    ))}
-                    {audioFiles.length === 0 && (
-                      <div className="text-center py-12 text-gray-500">
-                        <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                        </svg>
-                        <p className="text-body-text">No audio files uploaded yet</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-section-title font-semibold text-white">Image Files ({imageFiles.length})</h2>
-                    <button
-                      onClick={() => getCurrentPage('upload')}
-                      className="text-button-secondary text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      <span>Add More</span>
-                    </button>
-                  </div>
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {imageFiles.map((file) => (
-                      <ImageContainerCopy // Using ImageContainerCopy as a placeholder for ImageContainer
-                        key={file.id}
-                        image={file.file} // Assuming image property holds the file object
-                        fileName={file.name}
-                        fileSize={file.file.size}
-                        onRemove={() => removeImageFile(file.id)}
-                      />
-                    ))}
-                    {imageFiles.length === 0 && (
-                      <div className="text-center py-12 text-gray-500">
-                        <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h2v5a2 2 0 002 2h6a2 2 0 002-2V7h2a2 2 0 012 2v11a2 2 0 01-2 2H7a2 2 0 01-2-2V9zM8 10a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1H8zM13 10a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2z" />
-                        </svg>
-                        <p className="text-body-text">No image files uploaded yet</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-center pt-8">
-                <button
-                  onClick={() => getCurrentPage('fileManagement')}
-                  className="spotlight-button"
-                >
-                  <div className="wrapper">
-                    <span>PAIR FILES</span>
-                    <div className="circle circle-1"></div>
-                    <div className="circle circle-2"></div>
-                    <div className="circle circle-3"></div>
-                    <div className="circle circle-4"></div>
-                    <div className="circle circle-5"></div>
-                    <div className="circle circle-6"></div>
-                    <div className="circle circle-7"></div>
-                    <div className="circle circle-8"></div>
-                    <div className="circle circle-9"></div>
-                    <div className="circle circle-10"></div>
-                    <div className="circle circle-11"></div>
-                    <div className="circle circle-12"></div>
-                  </div>
-                </button>
-              </div>
-            </div>
-        )}
 
         {/* Batch Status Indicator */}
         {pairs.some(pair => pair.audio || pair.image) && (
-          <BatchStatusIndicator
-            totalPairs={pairs.length}
+          <BatchStatusIndicator 
+            totalPairs={pairs.length} 
             completedPairs={generatedVideos.length}
             isProcessing={isGenerating}
           />
@@ -666,20 +497,20 @@ function App() {
       </div>
 
       {/* Drag Overlay for Container Copies */}
-      <AudioContainerCopy
+      <AudioContainerCopy 
         audio={dragState.draggedAudio}
         isVisible={dragState.isAudioDragging}
         mousePosition={dragState.mousePosition}
       />
 
-      <ImageContainerCopy
+      <ImageContainerCopy 
         image={dragState.draggedImage}
         isVisible={dragState.isImageDragging}
         mousePosition={dragState.mousePosition}
       />
 
       {/* Loading Window */}
-      <LoadingWindow
+      <LoadingWindow 
         isVisible={isGenerating}
         pairs={getCompletePairs()}
         onClose={() => {

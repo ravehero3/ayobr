@@ -123,60 +123,10 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const togglePlayback = () => {
-    handlePlayPause();
-    setIsPlaying(!isPlaying); // This state should be managed by wavesurfer's events for accuracy
-  };
-
-  // Update isPlaying state based on wavesurfer's play and pause events
-  useEffect(() => {
-    if (wavesurfer.current) {
-      const playHandler = () => {
-        setIsPlaying(true);
-        currentlyPlayingWaveSurfer = wavesurfer.current;
-      };
-      const pauseHandler = () => {
-        setIsPlaying(false);
-        if (currentlyPlayingWaveSurfer === wavesurfer.current) {
-          currentlyPlayingWaveSurfer = null;
-        }
-      };
-      const timeUpdateHandler = () => {
-        setCurrentTime(wavesurfer.current.getCurrentTime());
-      };
-
-      wavesurfer.current.on('play', playHandler);
-      wavesurfer.current.on('pause', pauseHandler);
-      wavesurfer.current.on('audioprocess', timeUpdateHandler);
-      wavesurfer.current.on('ready', () => {
-        setDuration(wavesurfer.current.getDuration());
-        setCurrentTime(0); // Reset current time when ready
-        setIsPlaying(false); // Ensure it's not playing on load
-      });
-      wavesurfer.current.on('finish', () => {
-        setIsPlaying(false);
-        setCurrentTime(0); // Reset current time on finish
-        if (currentlyPlayingWaveSurfer === wavesurfer.current) {
-          currentlyPlayingWaveSurfer = null;
-        }
-      });
-
-      // Clean up listeners
-      return () => {
-        wavesurfer.current.un('play', playHandler);
-        wavesurfer.current.un('pause', pauseHandler);
-        wavesurfer.current.un('audioprocess', timeUpdateHandler);
-        wavesurfer.current.un('ready', () => {});
-        wavesurfer.current.un('finish', () => {});
-      };
-    }
-  }, [wavesurfer.current, audio]); // Re-run effect if wavesurfer instance or audio changes
-
-
   return (
     <motion.div
       ref={containerRef}
-      className="relative w-full transition-all duration-300 group cursor-pointer audio-container glass-container"
+      className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container glass-container"
       data-pair-id={pairId}
       data-audio-container="true"
       whileHover={{ scale: audio ? 1.005 : 1 }}
@@ -195,7 +145,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
           {/* Top header bar with title (center) and controls */}
-          <div className="flex items-center justify-between mb-6 relative" style={{ marginTop: '-2px' }}>
+          <div className="flex items-center justify-between mb-4 relative" style={{ marginTop: '-2px' }}>
             {/* Move Handle - Left side, aligned with title */}
             {isHovered && audio && onStartAudioDrag && (
               <button
