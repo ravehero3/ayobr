@@ -17,8 +17,8 @@ class NightSkyController {
   }
 
   createStars() {
-    // Create bright stars with cross glow - 3x more stars (36 instead of 12)
-    for (let i = 0; i < 36; i++) {
+    // Create bright stars with cross glow - 6x more stars (72 instead of 12)
+    for (let i = 0; i < 72; i++) {
       const star = document.createElement('div');
       star.className = 'bright-star';
       star.style.left = Math.random() * 100 + '%';
