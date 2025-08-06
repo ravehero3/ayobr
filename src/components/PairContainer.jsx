@@ -77,7 +77,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       setIsSwapping(true);
       setTimeout(() => setIsSwapping(false), 800); // Reset after animation completes
 
-      // Handle both main container drag and individual container drag
+      // Handle both main container drag (from drag handle)
       const dragDataString = e.dataTransfer.getData('application/json');
       if (dragDataString) {
         const dragData = JSON.parse(dragDataString);
@@ -231,7 +231,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </div>
       ) : !videoState?.isGenerating && !generatedVideo ? (
         <div 
-          className="flex flex-col lg:flex-row items-center relative z-10 group/pair mb-8"
+          className="w-full flex flex-col items-center mb-8 mt-8"
           style={{ 
             gap: '8px',
             paddingLeft: '30px',
