@@ -8,14 +8,14 @@ const AnimatedBackground = () => {
   const pairs = useAppStore(state => state.pairs);
   const generatedVideos = useAppStore(state => state.generatedVideos);
   const isGenerating = useAppStore(state => state.isGenerating);
-  
+
   const [backgroundLoaded, setBackgroundLoaded] = useState({});
-  
+
   // Enhanced page detection with multiple state checks
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
   const hasVideos = generatedVideos.length > 0;
   const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
-  
+
   // We no longer need page detection for the progressive background system
 
   // Calculate progress level (0-4) based on user actions
@@ -24,7 +24,7 @@ const AnimatedBackground = () => {
   if (hasCompletePairs) progressLevel = 2; // Complete pairs created
   if (isGenerating || hasVideos) progressLevel = 3; // Video generation started/completed
   if (hasVideos && !isGenerating) progressLevel = 4; // Videos ready for download
-  
+
   // Debug logging for progress detection
   console.log('AnimatedBackground: Progress level:', progressLevel);
   console.log('AnimatedBackground: Has files:', hasFiles);
@@ -47,7 +47,7 @@ const AnimatedBackground = () => {
       };
       img1.src = '/attached_assets/page%201_1754503149465.png';
     }
-    
+
     // Preload Page 2 background (GIF)
     if (!backgroundLoaded.page2) {
       const img2 = new Image();
@@ -61,13 +61,18 @@ const AnimatedBackground = () => {
       img2.src = '/attached_assets/page%202_1754503149466.gif';
     }
   }, [backgroundLoaded]);
-  
+
   // Determine which background should be shown
   const currentBackgroundKey = hasFiles ? 'page2' : 'page1';
-  
+
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
-      {/* Single background with AnimatePresence for proper transitions */}
+      {/* Night Sky Background - Always present as deepest layer */}
+      <div className="fixed inset-0">
+        <NightSkyBackground />
+      </div>
+
+      {/* Layer 1: Base Dark Texture - Always visible */}
       <AnimatePresence mode="wait">
         {currentBackgroundKey === 'page1' && (
           <motion.div
@@ -78,7 +83,7 @@ const AnimatedBackground = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
             style={{
-              backgroundImage: backgroundLoaded.page1 
+              backgroundImage: backgroundLoaded.page1
                 ? 'url(/attached_assets/page%201_1754503149465.png)'
                 : 'none',
               backgroundColor: '#000000',
@@ -88,7 +93,7 @@ const AnimatedBackground = () => {
             }}
           />
         )}
-        
+
         {currentBackgroundKey === 'page2' && (
           <motion.div
             key="page2"
@@ -105,7 +110,7 @@ const AnimatedBackground = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Debug info overlay - temporary */}
       <div style={{
         position: 'fixed',
