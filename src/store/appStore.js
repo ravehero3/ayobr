@@ -12,8 +12,10 @@ export const useAppStore = create((set, get) => ({
   isCancelling: false,
   currentProgress: 0,
   videoGenerationStates: {}, // Track generation progress for each pair
-  currentPage: 'upload', // 'upload' | 'fileManagement' | 'generation' | 'download'
   
+  // Page tracking
+  currentPage: null, // null means auto-detect, otherwise explicit page
+
   // Concurrency settings optimized for up to 100 files
   concurrencySettings: {
     small: 4,     // 1-10 videos
@@ -43,20 +45,20 @@ export const useAppStore = create((set, get) => ({
 
   removePair: (pairId) => set(state => {
     const filteredPairs = state.pairs.filter(pair => pair.id !== pairId);
-    
+
     // Clean up video generation states for the removed pair
     const newVideoGenerationStates = { ...state.videoGenerationStates };
     delete newVideoGenerationStates[pairId];
-    
+
     // Remove associated generated videos
     const filteredVideos = state.generatedVideos.filter(video => video.pairId !== pairId);
-    
+
     // Always ensure we have at least one empty pair after deletion
     // This allows users to continue dropping files
     if (filteredPairs.length === 0) {
       filteredPairs.push({ id: uuidv4(), audio: null, image: null });
     }
-    
+
     return {
       pairs: filteredPairs,
       videoGenerationStates: newVideoGenerationStates,
@@ -70,14 +72,14 @@ export const useAppStore = create((set, get) => ({
     pairs: []
   }),
 
-  // Generated videos
+  // Generated videos storage
   addGeneratedVideo: (video) => set(state => {
     console.log('Store: Adding video to generatedVideos:', video.filename);
     console.log('Store: Current video count:', state.generatedVideos.length);
-    
+
     const newVideos = [...state.generatedVideos, video];
     console.log('Store: New video count:', newVideos.length);
-    
+
     return {
       generatedVideos: newVideos
     };
@@ -92,22 +94,33 @@ export const useAppStore = create((set, get) => ({
   clearGeneratedVideos: () => set({ generatedVideos: [] }),
 
   // Page management actions
-  setCurrentPage: (page) => set({ currentPage: page }),
-  
-  // Force page navigation
-  navigateToPage: (page) => set({ currentPage: page }),
-  
   getCurrentPage: () => {
     const state = get();
+
+    // Return explicit page if set
+    if (state.currentPage) {
+      return state.currentPage;
+    }
+
+    // Fallback to automatic detection
     const hasFiles = state.pairs.some(pair => pair.audio || pair.image);
     const hasVideos = state.generatedVideos.length > 0;
-    
-    // Auto-determine page based on app state
-    if (hasVideos) return 'download';
-    if (state.isGenerating) return 'generation';
-    if (hasFiles) return 'fileManagement';
-    return 'upload';
+
+    if (hasVideos) {
+      return 'download';
+    } else if (state.isGenerating) {
+      return 'generation';
+    } else if (hasFiles) {
+      return 'fileManagement';
+    } else {
+      return 'upload';
+    }
   },
+
+  setCurrentPage: (page) => set({ currentPage: page }),
+
+  // Force page navigation
+  navigateToPage: (page) => set({ currentPage: page }),
 
   // Generation state
   setIsGenerating: (isGenerating) => set({ isGenerating }),
@@ -125,10 +138,10 @@ export const useAppStore = create((set, get) => ({
   // Video generation state management for individual pairs
   setVideoGenerationState: (pairId, state) => set(store => {
     const currentState = store.videoGenerationStates[pairId];
-    
+
     console.log(`Setting video generation state for pair ${pairId}:`, state);
     console.log(`Current state:`, currentState);
-    
+
     // Prevent unnecessary state updates that could trigger re-renders
     if (currentState && 
         currentState.isGenerating === state.isGenerating &&
@@ -136,7 +149,7 @@ export const useAppStore = create((set, get) => ({
         currentState.isComplete === state.isComplete) {
       return store; // No change needed
     }
-    
+
     return {
       videoGenerationStates: {
         ...store.videoGenerationStates,

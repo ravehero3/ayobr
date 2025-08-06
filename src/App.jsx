@@ -309,6 +309,7 @@ function App() {
       {/* Page 1: Upload Page - Drop Zone - Show when no files are present */}
       {currentPage === 'upload' && (
         <motion.div
+          data-page-section="upload"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -324,10 +325,12 @@ function App() {
 
       {/* Page 4: Download Page - Show when videos are generated */}
       {currentPage === 'download' && (
-        <DownloadPage
-          onDownloadAll={handleDownloadVideos}
-          onBackToFileManagement={handleBackToFileManagement}
-        />
+        <div data-page-section="download">
+          <DownloadPage
+            onDownloadAll={handleDownloadVideos}
+            onBackToFileManagement={handleBackToFileManagement}
+          />
+        </div>
       )}
 
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
@@ -337,7 +340,7 @@ function App() {
 
         {/* Page 2: File Management - Pairs Grid */}
         {currentPage === 'fileManagement' && (
-          <motion.div>
+          <motion.div data-page-section="fileManagement">
           <motion.div
             className="w-full flex flex-col items-center mb-8"
           >

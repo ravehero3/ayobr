@@ -10,12 +10,19 @@ const AnimatedBackground = () => {
   
   const [backgroundLoaded, setBackgroundLoaded] = useState({});
   
-  // Calculate current page directly based on reactive state
+  // Enhanced page detection with multiple state checks
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
   const hasVideos = generatedVideos.length > 0;
+  const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
+  
+  // Get the explicit current page from store if available
+  const explicitPage = useAppStore(state => state.currentPage);
   
   let currentPage;
-  if (hasVideos) {
+  // Priority order: explicit page setting > state-based detection
+  if (explicitPage) {
+    currentPage = explicitPage;
+  } else if (hasVideos && !isGenerating) {
     currentPage = 'download';
   } else if (isGenerating) {
     currentPage = 'generation';
