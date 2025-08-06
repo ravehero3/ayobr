@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import typebeatLogo from '../assets/typebeatz logo 1_1754478881987.png';
+import typebeatLogo from '../assets/typebeatz-logo-new.png';
 import userIcon from '../assets/user_1754478889614.png';
 
 const Header = () => {
@@ -22,7 +22,7 @@ const Header = () => {
       className="fixed top-0 left-0 right-0 z-50 h-16"
     >
       <div
-        className="w-full h-full flex items-center justify-between px-6"
+        className="w-full h-full flex items-center justify-between"
         style={{
           background: 'rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(16px)',
@@ -31,6 +31,8 @@ const Header = () => {
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
+          paddingLeft: 'calc((100vw - 500px) / 2)', // Align with audio container left edge
+          paddingRight: 'calc((100vw - 500px) / 2)', // Maintain symmetry
         }}
       >
         {/* TypeBeatz Logo */}
