@@ -45,8 +45,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-3px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.3) !important;
-  border-radius: 12px !important; /* Ensure glow follows container radius */
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-radius: 12px !important;
+  position: relative;
 }
 
 .audio-drag-active .audio-container:not(.dragging-source) {
@@ -57,8 +57,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-3px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.3) !important;
-  border-radius: 12px !important; /* Ensure glow follows container radius */
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-radius: 12px !important;
+  position: relative;
 }
 
 .image-drag-active .image-container:not(.dragging-source) {
@@ -68,13 +68,35 @@
 @keyframes container-pulse {
   0%, 100% {
     border-color: rgba(255, 255, 255, 0.6);
-    border-radius: 12px; /* Ensure glow follows container radius */
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
   }
   50% {
     border-color: rgba(255, 255, 255, 0.9);
-    border-radius: 12px; /* Ensure glow follows container radius */
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+  }
+}
+
+/* Add pulsing glow effect for containers using pseudo-elements */
+.audio-drag-active .audio-container:not(.dragging-source)::before,
+.image-drag-active .image-container:not(.dragging-source)::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  z-index: -1;
+  filter: blur(6px);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
   }
 }
 
@@ -471,12 +493,32 @@ body {
 
 /* Highlight ALL audio containers when dragging any audio container - proper rounded glow */
 .container-drag-mode .audio-container[data-audio-container] {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.4) !important;
   border: 2px solid rgba(16, 185, 129, 0.9) !important;
-  border-radius: 12px !important; /* Ensure glow follows container radius */
+  border-radius: 12px !important;
   background: rgba(16, 185, 129, 0.1) !important;
   transform: scale(1.02) !important;
   transition: all 0.3s ease !important;
+  position: relative;
+}
+
+.container-drag-mode .audio-container[data-audio-container]::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px; /* Slightly larger radius for outer glow */
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.4), rgba(16, 185, 129, 0.6));
+  z-index: -1;
+  filter: blur(8px);
+}
+
+.container-drag-mode .audio-container[data-audio-container]::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 20px; /* Even larger radius for extended glow */
+  background: radial-gradient(ellipse, rgba(16, 185, 129, 0.3) 0%, transparent 70%);
+  z-index: -2;
+  filter: blur(15px);
 }
 
 /* Popup animation styles */
@@ -495,13 +537,7 @@ body {
   animation: fadeInPopup 0.2s ease-out forwards;
 }
 
-.container-drag-mode .audio-container[data-audio-container]:not(.dragging-container) {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.4) !important;
-  border: 2px solid rgba(16, 185, 129, 0.9) !important;
-  border-radius: 12px !important; /* Ensure glow follows container radius */
-  background: rgba(16, 185, 129, 0.1) !important;
-  transform: scale(1.02) !important;
-}
+/* This rule is now covered by the above pseudo-element approach */
 
 .container-drag-mode .green-box-drag-preview {
   filter: none !important;
@@ -515,22 +551,44 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Audio drag mode - highlight all audio containers */
+/* Audio drag mode - highlight all audio containers with proper rounded glow */
 .audio-drag-mode [data-audio-container="true"] {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6) !important;
   border: 2px solid rgba(16, 185, 129, 0.9) !important;
+  border-radius: 12px !important;
   background: rgba(16, 185, 129, 0.1) !important;
   transform: scale(1.02) !important;
   transition: all 0.3s ease !important;
+  position: relative;
 }
 
-/* Image drag mode - highlight all image containers */
+.audio-drag-mode [data-audio-container="true"]::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px;
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.4), rgba(16, 185, 129, 0.6));
+  z-index: -1;
+  filter: blur(8px);
+}
+
+/* Image drag mode - highlight all image containers with proper rounded glow */
 .image-drag-mode [data-image-container="true"] {
-  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.8), 0 0 30px rgba(147, 51, 234, 0.6) !important;
   border: 2px solid rgba(147, 51, 234, 0.9) !important;
+  border-radius: 12px !important;
   background: rgba(147, 51, 234, 0.1) !important;
   transform: scale(1.02) !important;
   transition: all 0.3s ease !important;
+  position: relative;
+}
+
+.image-drag-mode [data-image-container="true"]::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px;
+  background: linear-gradient(45deg, rgba(147, 51, 234, 0.4), rgba(147, 51, 234, 0.6));
+  z-index: -1;
+  filter: blur(8px);
 }
 
 /* Container copy animations */
