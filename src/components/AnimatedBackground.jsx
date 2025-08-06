@@ -62,7 +62,15 @@ const AnimatedBackground = () => {
   }, [backgroundLoaded]);
 
   // Determine which background should be shown
-  const currentBackgroundKey = hasFiles ? 'page2' : 'page1';
+  // Page 1: No files (deep space with Earth)
+  // Page 2: Has files but no videos (same as page 1 but blurred)
+  // Page 4: Videos generated (Earth from space background)
+  let currentBackgroundKey = 'page1';
+  if (hasVideos && !isGenerating) {
+    currentBackgroundKey = 'page4'; // Videos ready - use Earth background
+  } else if (hasFiles) {
+    currentBackgroundKey = 'page2'; // Files added - use blurred page 1 background
+  }
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
@@ -99,13 +107,33 @@ const AnimatedBackground = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
             style={{
+              backgroundImage: backgroundLoaded.page1
+                ? 'url(/attached_assets/page%201_1754508034866.png)'
+                : 'none',
+              backgroundColor: '#000000',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'blur(5px)', // Apply gaussian blur to page 1 background
+              zIndex: -12
+            }}
+          />
+        )}
+
+        {currentBackgroundKey === 'page4' && (
+          <motion.div
+            key="page4"
+            className="absolute inset-0 w-full h-full bg-cover bg-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            style={{
               backgroundImage: backgroundLoaded.page2
                 ? 'url(/attached_assets/background%20page%202_1754507959583.jpg)'
                 : 'none',
               backgroundColor: '#000000',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              filter: 'blur(3px)', // Apply gaussian blur to page 2 background
               zIndex: -12
             }}
           />

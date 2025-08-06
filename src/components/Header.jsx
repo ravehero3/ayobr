@@ -42,12 +42,15 @@ const Header = () => {
           <img 
             src={typebeatLogo}
             alt="TypeBeatz"
-            className="h-8 object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
-            style={{ marginLeft: '10px' }}
+            className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
+            style={{ 
+              height: '28.8px', // 10% smaller than 32px (h-8)
+              marginLeft: '0px' // Align with left edge of audio container
+            }}
           />
         </div>
 
-        {/* Status Indicator - Center */}
+        {/* Status Indicator - Center (only show videos ready, removed pair counter) */}
         <div className="flex items-center space-x-4">
           {generatedVideos.length > 0 && (
             <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
@@ -57,21 +60,14 @@ const Header = () => {
               </span>
             </div>
           )}
-          {hasFiles && generatedVideos.length === 0 && (
-            <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30">
-              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-              <span className="text-xs text-blue-300 font-medium">
-                {pairs.filter(pair => pair.audio && pair.image).length} Pair{pairs.filter(pair => pair.audio && pair.image).length !== 1 ? 's' : ''} Ready
-              </span>
-            </div>
-          )}
         </div>
 
-        {/* Profile Icon */}
+        {/* Profile Icon - Aligned with right edge of image container */}
         <div className="flex items-center">
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
+            style={{ marginRight: '0px' }} // Align with right edge of image container
           >
             <img 
               src={userProfileImage || userIcon}
