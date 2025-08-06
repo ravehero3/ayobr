@@ -27,22 +27,37 @@ const AnimatedBackground = () => {
   // Debug logging for progress detection
   console.log('AnimatedBackground: Progress level:', progressLevel);
   console.log('AnimatedBackground: Has files:', hasFiles);
+  console.log('AnimatedBackground: Pairs:', pairs);
   console.log('AnimatedBackground: Has complete pairs:', hasCompletePairs);
   console.log('AnimatedBackground: Has videos:', hasVideos);
   console.log('AnimatedBackground: Is generating:', isGenerating);
 
-  // Preload the GIF when needed
+  // Preload both background images when needed
   useEffect(() => {
-    if (!backgroundLoaded.gif) {
-      const img = new Image();
-      img.onload = () => {
-        console.log('AnimatedBackground: GIF loaded');
+    // Preload Page 1 background
+    if (!backgroundLoaded.page1) {
+      const img1 = new Image();
+      img1.onload = () => {
+        console.log('AnimatedBackground: Page 1 PNG loaded');
         setBackgroundLoaded(prev => ({
           ...prev,
-          gif: true
+          page1: true
         }));
       };
-      img.src = '/attached_assets/typebeatznew_1754502880376.gif';
+      img1.src = '/attached_assets/page 1_1754503149465.png';
+    }
+    
+    // Preload Page 2 background (GIF)
+    if (!backgroundLoaded.page2) {
+      const img2 = new Image();
+      img2.onload = () => {
+        console.log('AnimatedBackground: Page 2 GIF loaded');
+        setBackgroundLoaded(prev => ({
+          ...prev,
+          page2: true
+        }));
+      };
+      img2.src = '/attached_assets/page 2_1754503149466.gif';
     }
   }, [backgroundLoaded]);
   
@@ -56,7 +71,8 @@ const AnimatedBackground = () => {
         }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
         style={{
-          backgroundImage: 'url(/attached_assets/page%201_1754503149465.png)',
+          backgroundImage: backgroundLoaded.page1 ? 'url(/attached_assets/page%201_1754503149465.png)' : 'none',
+          backgroundColor: '#000000', // Fallback color
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           zIndex: -12
@@ -71,12 +87,31 @@ const AnimatedBackground = () => {
         }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
         style={{
-          backgroundImage: 'url(/attached_assets/page%202_1754503149466.gif)',
+          backgroundImage: backgroundLoaded.page2 ? 'url(/attached_assets/page%202_1754503149466.gif)' : 'none',
+          backgroundColor: '#000000', // Fallback color
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           zIndex: -11
         }}
       />
+      
+      {/* Debug info overlay - temporary */}
+      <div style={{
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        background: 'rgba(0,0,0,0.8)',
+        color: 'white',
+        padding: '10px',
+        fontSize: '12px',
+        zIndex: 1000,
+        fontFamily: 'monospace'
+      }}>
+        hasFiles: {hasFiles.toString()}<br/>
+        pairs: {pairs.length}<br/>
+        page1: {backgroundLoaded.page1?.toString() || 'false'}<br/>
+        page2: {backgroundLoaded.page2?.toString() || 'false'}
+      </div>
     </div>
   );
 };
