@@ -43,7 +43,7 @@ const Header = () => {
         {/* Status Indicator - Center */}
         <div className="flex items-center space-x-4">
           {generatedVideos.length > 0 && (
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
+            <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
               <div className="w-2 h-2 rounded-full bg-green-400"></div>
               <span className="text-xs text-green-300 font-medium">
                 {generatedVideos.length} Video{generatedVideos.length !== 1 ? 's' : ''} Ready
@@ -51,7 +51,7 @@ const Header = () => {
             </div>
           )}
           {hasFiles && generatedVideos.length === 0 && (
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30">
+            <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30">
               <div className="w-2 h-2 rounded-full bg-blue-400"></div>
               <span className="text-xs text-blue-300 font-medium">
                 {pairs.filter(pair => pair.audio && pair.image).length} Pair{pairs.filter(pair => pair.audio && pair.image).length !== 1 ? 's' : ''} Ready
