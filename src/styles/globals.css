@@ -4,26 +4,26 @@
 .glass-container {
   /* Semi-transparent dark background */
   background: rgba(0, 0, 0, 0.3);
-  
+
   /* Strong backdrop blur for glass effect */
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  
+
   /* Subtle border and shadows */
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  
+
   /* Rounded corners */
   border-radius: 12px;
-  
+
   /* Noise texture overlay */
   background-image: url('/noise.png');
   background-blend-mode: soft-light;
   background-size: 150px 150px;
   background-repeat: repeat;
-  
+
   /* Ensure content stays above background */
   position: relative;
 }
@@ -884,16 +884,16 @@ input[type="file"] {
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  
+
   /* Svarog black background */
   background: #000000;
   color: white;
-  
+
   /* Minimal shadow like Svarog */
   box-shadow: 
     0 1px 3px rgba(0, 0, 0, 0.1),
     0 1px 2px rgba(0, 0, 0, 0.06);
-  
+
   /* Prevent text selection */
   user-select: none;
   -webkit-user-select: none;
@@ -970,10 +970,10 @@ input[type="file"] {
 .audio-container, .image-container {
   /* Make sure it's positioned for transform */
   position: relative;
-  
+
   /* Cursor pointer to indicate it's interactive */
   cursor: pointer;
-  
+
   /* Smooth transition for hover effects */
   transition: all 0.3s ease !important;
 }
@@ -982,13 +982,13 @@ input[type="file"] {
 .audio-container:hover, .image-container:hover {
   /* Scale up the entire container by 5% */
   transform: scale(1.05) !important;
-  
+
   /* Add 5% white overlay */
   background: rgba(255, 255, 255, 0.05) !important;
-  
+
   /* Bring hovered container above neighbors */
   z-index: 10 !important;
-  
+
   /* Ensure the container can overflow its bounds */
   position: relative !important;
 }
@@ -1006,4 +1006,30 @@ input[type="file"] {
 
 .spotlight-button.download-button:hover {
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+/* Download button styling */
+.download-button .wrapper {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.download-button:hover .wrapper {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.download-button .circle {
+  background: rgba(16, 185, 129, 0.3);
+}
+
+/* Back to downloads button styling */
+.back-to-downloads-button .wrapper {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.back-to-downloads-button:hover .wrapper {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+}
+
+.back-to-downloads-button .circle {
+  background: rgba(59, 130, 246, 0.3);
 }
