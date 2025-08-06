@@ -260,6 +260,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 minWidth: '500px',
                 maxWidth: '500px',
                 overflow: 'visible',
+                boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
               }}
             >
 
@@ -356,6 +358,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
+                boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
               }}
             >
 
