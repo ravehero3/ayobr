@@ -67,8 +67,8 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
       style={{
-        padding: image ? '16px' : '20px',
-        height: '160px',
+        padding: image ? '16px' : '20px', // 16px is 4 * 4pt, 20px is 5 * 4pt
+        height: '160px', // 160px is 40 * 4pt
         minHeight: '160px',
         maxHeight: '160px',
       }}

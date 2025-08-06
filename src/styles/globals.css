@@ -61,6 +61,26 @@
 /* Custom fonts from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* 4-Point Grid Spacing System */
+:root {
+  /* Base spacing unit: 4px */
+  --space-1: 4px;    /* Tight connections, icon gaps */
+  --space-2: 8px;    /* Related elements, button padding */
+  --space-3: 12px;   /* Small component spacing */
+  --space-4: 16px;   /* Standard component spacing */
+  --space-5: 20px;   /* Medium spacing */
+  --space-6: 24px;   /* Section separation */
+  --space-7: 28px;   /* Large spacing */
+  --space-8: 32px;   /* Major section breaks */
+  --space-9: 36px;   /* Extra large spacing */
+  --space-10: 40px;  /* Container margins */
+  --space-12: 48px;  /* Page sections */
+  --space-16: 64px;  /* Major layout spacing */
+  --space-20: 80px;  /* Hero sections */
+  --space-24: 96px;  /* Large page spacing */
+  --space-32: 128px; /* Maximum spacing */
+}
+
 /* Drag target visual feedback */
 .audio-drag-active .audio-container {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

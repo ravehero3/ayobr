@@ -114,6 +114,24 @@ module.exports = {
       },
       
       spacing: {
+        // 4-point grid spacing system (multiples of 4px)
+        '1': '4px',    // 1 unit = 4px
+        '2': '8px',    // 2 units = 8px
+        '3': '12px',   // 3 units = 12px
+        '4': '16px',   // 4 units = 16px
+        '5': '20px',   // 5 units = 20px
+        '6': '24px',   // 6 units = 24px
+        '7': '28px',   // 7 units = 28px
+        '8': '32px',   // 8 units = 32px
+        '9': '36px',   // 9 units = 36px
+        '10': '40px',  // 10 units = 40px
+        '12': '48px',  // 12 units = 48px
+        '16': '64px',  // 16 units = 64px
+        '20': '80px',  // 20 units = 80px
+        '24': '96px',  // 24 units = 96px
+        '32': '128px', // 32 units = 128px
+        
+        // Legacy spacing (keeping for compatibility)
         '18': '4.5rem',
         '88': '22rem',
         '128': '32rem',
