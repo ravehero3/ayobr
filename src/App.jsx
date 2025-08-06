@@ -335,7 +335,7 @@ function App() {
 
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Main Content with conditional header/footer spacing */}
-        <main className={`flex-1 flex flex-col ${pairs.some(pair => pair.audio || pair.image) ? 'pt-20 px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
+        <main className={`flex-1 flex flex-col ${pairs.some(pair => pair.audio || pair.image) ? 'mt-16 pt-6 px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
 
             {/* Page 2: File Management - Pairs Grid */}
