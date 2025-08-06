@@ -625,6 +625,26 @@ body {
   }
 }
 
+/* Diagonal movement animation for background GIF */
+@keyframes diagonal-move {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1.1);
+  }
+  25% {
+    transform: translate(-10px, -5px) scale(1.12);
+  }
+  50% {
+    transform: translate(5px, -10px) scale(1.1);
+  }
+  75% {
+    transform: translate(-5px, 5px) scale(1.11);
+  }
+}
+
+.animate-diagonal-move {
+  animation: diagonal-move 20s ease-in-out infinite;
+}
+
 .animate-pulse-glow {
   animation: pulse-glow 1.5s ease-in-out infinite;
 }
