@@ -5,9 +5,9 @@
   /* Semi-transparent dark background */
   background: rgba(0, 0, 0, 0.3);
 
-  /* Strong backdrop blur for glass effect */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  /* Removed backdrop blur to eliminate shadow rectangles */
+  /* backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px); */
 
   /* Subtle border with no shadow to eliminate rectangles */
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -75,8 +75,8 @@
   }
 }
 
-/* Add pulsing glow effect for containers using pseudo-elements */
-.audio-drag-active .audio-container:not(.dragging-source)::before,
+/* Temporarily disabled glow effects to eliminate rectangles */
+/* .audio-drag-active .audio-container:not(.dragging-source)::before,
 .image-drag-active .image-container:not(.dragging-source)::before {
   content: '';
   position: absolute;
@@ -86,7 +86,7 @@
   z-index: -1;
   filter: blur(6px);
   animation: glow-pulse 2s ease-in-out infinite;
-}
+} */
 
 @keyframes glow-pulse {
   0%, 100% {
@@ -500,11 +500,12 @@ body {
   position: relative;
 }
 
-.container-drag-mode .audio-container[data-audio-container]::before {
+/* Temporarily disabled drag glow effects to eliminate rectangles */
+/* .container-drag-mode .audio-container[data-audio-container]::before {
   content: '';
   position: absolute;
   inset: -3px;
-  border-radius: 16px; /* Slightly larger radius for outer glow */
+  border-radius: 16px;
   background: linear-gradient(45deg, rgba(16, 185, 129, 0.4), rgba(16, 185, 129, 0.6));
   z-index: -1;
   filter: blur(8px);
@@ -514,11 +515,11 @@ body {
   content: '';
   position: absolute;
   inset: -8px;
-  border-radius: 20px; /* Even larger radius for extended glow */
+  border-radius: 20px;
   background: radial-gradient(ellipse, rgba(16, 185, 129, 0.3) 0%, transparent 70%);
   z-index: -2;
   filter: blur(15px);
-}
+} */
 
 /* Popup animation styles */
 @keyframes fadeInPopup {
@@ -560,7 +561,8 @@ body {
   position: relative;
 }
 
-.audio-drag-mode [data-audio-container="true"]::before {
+/* Temporarily disabled audio drag glow to eliminate rectangles */
+/* .audio-drag-mode [data-audio-container="true"]::before {
   content: '';
   position: absolute;
   inset: -3px;
@@ -568,7 +570,7 @@ body {
   background: linear-gradient(45deg, rgba(16, 185, 129, 0.4), rgba(16, 185, 129, 0.6));
   z-index: -1;
   filter: blur(8px);
-}
+} */
 
 /* Image drag mode - highlight all image containers with proper rounded glow */
 .image-drag-mode [data-image-container="true"] {
@@ -580,7 +582,8 @@ body {
   position: relative;
 }
 
-.image-drag-mode [data-image-container="true"]::before {
+/* Temporarily disabled image drag glow to eliminate rectangles */
+/* .image-drag-mode [data-image-container="true"]::before {
   content: '';
   position: absolute;
   inset: -3px;
@@ -588,7 +591,7 @@ body {
   background: linear-gradient(45deg, rgba(147, 51, 234, 0.4), rgba(147, 51, 234, 0.6));
   z-index: -1;
   filter: blur(8px);
-}
+} */
 
 /* Container copy animations */
 .audiocontainercopy, .imagecontainercopy {
