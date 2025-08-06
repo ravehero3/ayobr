@@ -38,7 +38,7 @@ class NightSkyController {
   createConstellations() {
     // Create constellation lines
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.className = 'constellation-lines';
+    svg.setAttribute('class', 'constellation-lines');
     svg.style.position = 'absolute';
     svg.style.top = '0';
     svg.style.left = '0';
