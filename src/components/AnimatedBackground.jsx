@@ -48,17 +48,17 @@ const AnimatedBackground = () => {
       img1.src = '/attached_assets/page%201_1754503149465.png';
     }
 
-    // Preload Page 2 background (GIF)
+    // Preload Page 2 background (Earth from Space)
     if (!backgroundLoaded.page2) {
       const img2 = new Image();
       img2.onload = () => {
-        console.log('AnimatedBackground: Page 2 GIF loaded');
+        console.log('AnimatedBackground: Page 2 Earth background loaded');
         setBackgroundLoaded(prev => ({
           ...prev,
           page2: true
         }));
       };
-      img2.src = '/attached_assets/page%202_1754503149466.gif';
+      img2.src = '/attached_assets/background%20page%202_1754507959583.jpg';
     }
   }, [backgroundLoaded]);
 
@@ -97,17 +97,21 @@ const AnimatedBackground = () => {
         {currentBackgroundKey === 'page2' && (
           <motion.div
             key="page2"
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-full h-full bg-cover bg-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
             style={{
+              backgroundImage: backgroundLoaded.page2
+                ? 'url(/attached_assets/background%20page%202_1754507959583.jpg)'
+                : 'none',
+              backgroundColor: '#000000',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
               zIndex: -12
             }}
-          >
-            <NightSkyBackground />
-          </motion.div>
+          />
         )}
       </AnimatePresence>
 
