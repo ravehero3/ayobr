@@ -4,7 +4,7 @@ import { useAppStore } from '../store/appStore';
 import { v4 as uuidv4 } from 'uuid';
 
 export const usePairingLogic = () => {
-  const { pairs, addPair, updatePair, setPairs } = useAppStore();
+  const { pairs, addPair, updatePair, setPairs, setIsFilesBeingDropped } = useAppStore();
   const processingRef = useRef(false);
   const lastProcessedFiles = useRef(new Set());
   const debounceTimeoutRef = useRef(null);
@@ -28,6 +28,9 @@ export const usePairingLogic = () => {
   };
 
   const handleFileDrop = useCallback((files) => {
+    // Immediately signal that files are being dropped for instant background change
+    setIsFilesBeingDropped(true);
+    
     // Clear any existing debounce timeout
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
@@ -147,9 +150,10 @@ export const usePairingLogic = () => {
         setPairs(newPairs);
         
       } finally {
-        // Reset processing lock after a delay
+        // Reset processing lock and file dropping state after a delay
         setTimeout(() => {
           processingRef.current = false;
+          setIsFilesBeingDropped(false);
         }, 200);
       }
     }, 50); // 50ms debounce delay

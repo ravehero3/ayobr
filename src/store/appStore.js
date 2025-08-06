@@ -15,6 +15,7 @@ export const useAppStore = create((set, get) => ({
   
   // Page tracking
   currentPage: null, // null means auto-detect, otherwise explicit page
+  isFilesBeingDropped: false, // Track when files are being processed
 
   // Concurrency settings optimized for up to 100 files
   concurrencySettings: {
@@ -110,12 +111,14 @@ export const useAppStore = create((set, get) => ({
       return 'download';
     } else if (state.isGenerating) {
       return 'generation';
-    } else if (hasFiles) {
+    } else if (hasFiles || state.isFilesBeingDropped) {
       return 'fileManagement';
     } else {
       return 'upload';
     }
   },
+
+  setIsFilesBeingDropped: (isDropping) => set({ isFilesBeingDropped: isDropping }),
 
   setCurrentPage: (page) => set({ currentPage: page }),
 
