@@ -15,7 +15,7 @@ const AnimatedBackground = () => {
     if (hasAnyFiles && !backgroundLoaded) {
       const img = new Image();
       img.onload = () => setBackgroundLoaded(true);
-      img.src = '/attached_assets/typebeatznew_1754424064040.gif';
+      img.src = '/attached_assets/typebeatznew_1754459272105.gif';
     }
   }, [hasAnyFiles, backgroundLoaded]);
   
@@ -31,7 +31,7 @@ const AnimatedBackground = () => {
     } else {
       return {
         type: 'gif',
-        background: 'url(/attached_assets/typebeatznew_1754424064040.gif)',
+        background: 'url(/attached_assets/typebeatznew_1754459272105.gif)',
         animated: true,
         opacity: backgroundLoaded ? 1 : 0.7
       };
