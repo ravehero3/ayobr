@@ -335,214 +335,210 @@ function App() {
 
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Main Content with conditional header/footer spacing */}
-        <main className={`flex-1 flex flex-col ${pairs.some(pair => pair.audio || pair.image) ? 'pt-[280px] px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}></main>
+        <main className={`flex-1 flex flex-col ${pairs.some(pair => pair.audio || pair.image) ? 'pt-[280px] px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
 
-        {/* Page 2: File Management - Pairs Grid */}
-        {currentPage === 'fileManagement' && (
-          <motion.div data-page-section="fileManagement">
-          <motion.div
-            className="w-full flex flex-col items-center mb-8"
-          >
-            <motion.div
-              className="flex flex-col gap-2 max-w-[1200px] w-full px-6 mt-12"
-            >
-              <AnimatePresence>
-                {pairs
-                  .filter(pair => {
-                    // During generation, only show pairs that have files or are being processed
-                    if (isGenerating) {
-                      return (pair.audio && pair.image) || getVideoGenerationState(pair.id);
-                    }
-                    // When not generating, show pairs that have at least one file
-                    return pair.audio || pair.image;
-                  })
-                  .map((pair, index) => (
+            {/* Page 2: File Management - Pairs Grid */}
+            {currentPage === 'fileManagement' && (
+              <motion.div data-page-section="fileManagement">
+                <motion.div
+                  className="w-full flex flex-col items-center mb-8"
+                >
                   <motion.div
-                    key={pair.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full"
+                    className="flex flex-col gap-2 max-w-[1200px] w-full px-6 mt-12"
                   >
-                    <Pairs
-                      pair={pair}
-                      index={index}
-                      onMoveUp={moveContainerUp}
-                      onMoveDown={moveContainerDown}
-                      onStartAudioDrag={handleStartAudioDrag}
-                      onStartImageDrag={handleStartImageDrag}
-                      onUpdateDragPosition={handleUpdateDragPosition}
-                      onEndDrag={handleEndDrag}
-                      onSwap={handleSwap}
-                    />
+                    <AnimatePresence>
+                      {pairs
+                        .filter(pair => {
+                          // During generation, only show pairs that have files or are being processed
+                          if (isGenerating) {
+                            return (pair.audio && pair.image) || getVideoGenerationState(pair.id);
+                          }
+                          // When not generating, show pairs that have at least one file
+                          return pair.audio || pair.image;
+                        })
+                        .map((pair, index) => (
+                        <motion.div
+                          key={pair.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.3 }}
+                          className="w-full"
+                        >
+                          <Pairs
+                            pair={pair}
+                            index={index}
+                            onMoveUp={moveContainerUp}
+                            onMoveDown={moveContainerDown}
+                            onStartAudioDrag={handleStartAudioDrag}
+                            onStartImageDrag={handleStartImageDrag}
+                            onUpdateDragPosition={handleUpdateDragPosition}
+                            onEndDrag={handleEndDrag}
+                            onSwap={handleSwap}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          </motion.div>
-          </motion.div>
-        )}
-
-        {/* Action Buttons for File Management Page */}
-        {currentPage === 'fileManagement' && (
-            <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center gap-4 mb-8"
-            style={{ marginTop: '10px' }}
-          >
-            {/* Back to Downloads button - only show if user has generated videos and left download page */}
-            {hasLeftDownloadPage && generatedVideos.length > 0 && (
-              <motion.button
-                onClick={handleBackToDownloads}
-                className="spotlight-button back-to-downloads-button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="wrapper">
-                  <span>← BACK TO DOWNLOADS</span>
-                  <div className="circle circle-1"></div>
-                  <div className="circle circle-2"></div>
-                  <div className="circle circle-3"></div>
-                  <div className="circle circle-4"></div>
-                  <div className="circle circle-5"></div>
-                  <div className="circle circle-6"></div>
-                  <div className="circle circle-7"></div>
-                  <div className="circle circle-8"></div>
-                  <div className="circle circle-9"></div>
-                  <div className="circle circle-10"></div>
-                  <div className="circle circle-11"></div>
-                  <div className="circle circle-12"></div>
-                </div>
-              </motion.button>
-            )}
-
-            {/* Only show Generate Videos button if no videos have been generated yet */}
-            {generatedVideos.length === 0 && (
-              <button
-                onClick={handleGenerateVideos}
-                disabled={isGenerating}
-                className="spotlight-button"
-              >
-                <div className="wrapper">
-                  <span>{isGenerating ? 'GENERATING...' : 'GENERATE VIDEOS'}</span>
-                  <div className="circle circle-1"></div>
-                  <div className="circle circle-2"></div>
-                  <div className="circle circle-3"></div>
-                  <div className="circle circle-4"></div>
-                  <div className="circle circle-5"></div>
-                  <div className="circle circle-6"></div>
-                  <div className="circle circle-7"></div>
-                  <div className="circle circle-8"></div>
-                  <div className="circle circle-9"></div>
-                  <div className="circle circle-10"></div>
-                  <div className="circle circle-11"></div>
-                  <div className="circle circle-12"></div>
-                </div>
-              </button>
-            )}
-
-            {/* Stop Generation Button */}
-            {isGenerating && !isCancelling && (
-              <motion.button
-                onClick={stopGeneration}
-                className="spotlight-button stop-button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="wrapper">
-                  <span>STOP!</span>
-                  <div className="circle circle-1"></div>
-                  <div className="circle circle-2"></div>
-                  <div className="circle circle-3"></div>
-                  <div className="circle circle-4"></div>
-                  <div className="circle circle-5"></div>
-                  <div className="circle circle-6"></div>
-                  <div className="circle circle-7"></div>
-                  <div className="circle circle-8"></div>
-                  <div className="circle circle-9"></div>
-                  <div className="circle circle-10"></div>
-                  <div className="circle circle-11"></div>
-                  <div className="circle circle-12"></div>
-                </div>
-              </motion.button>
-            )}
-
-            {/* Cancelling Status */}
-            {isCancelling && (
-              <motion.div
-                className="px-8 py-4 bg-yellow-600 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-yellow-500/25"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Stopping Generation...</span>
-                </div>
+                </motion.div>
               </motion.div>
             )}
 
-            {/* Show Download All Videos button when videos are generated */}
-            {generatedVideos.length > 0 && (
-              <motion.button
-                onClick={() => {
-                  generatedVideos.forEach(video => {
-                    const link = document.createElement('a');
-                    link.href = video.url;
-                    link.download = video.filename;
-                    link.click();
-                  });
-                }}
-                className="spotlight-button download-button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
+            {/* Action Buttons for File Management Page */}
+            {currentPage === 'fileManagement' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex justify-center gap-4 mb-8"
+                style={{ marginTop: '10px' }}
               >
-                <div className="wrapper">
-                  <span>DOWNLOAD ALL VIDEOS</span>
-                  <div className="circle circle-1"></div>
-                  <div className="circle circle-2"></div>
-                  <div className="circle circle-3"></div>
-                  <div className="circle circle-4"></div>
-                  <div className="circle circle-5"></div>
-                  <div className="circle circle-6"></div>
-                  <div className="circle circle-7"></div>
-                  <div className="circle circle-8"></div>
-                  <div className="circle circle-9"></div>
-                  <div className="circle circle-10"></div>
-                  <div className="circle circle-11"></div>
-                  <div className="circle circle-12"></div>
-                </div>
-              </motion.button>
+                {/* Back to Downloads button - only show if user has generated videos and left download page */}
+                {hasLeftDownloadPage && generatedVideos.length > 0 && (
+                  <motion.button
+                    onClick={handleBackToDownloads}
+                    className="spotlight-button back-to-downloads-button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="wrapper">
+                      <span>← BACK TO DOWNLOADS</span>
+                      <div className="circle circle-1"></div>
+                      <div className="circle circle-2"></div>
+                      <div className="circle circle-3"></div>
+                      <div className="circle circle-4"></div>
+                      <div className="circle circle-5"></div>
+                      <div className="circle circle-6"></div>
+                      <div className="circle circle-7"></div>
+                      <div className="circle circle-8"></div>
+                      <div className="circle circle-9"></div>
+                      <div className="circle circle-10"></div>
+                      <div className="circle circle-11"></div>
+                      <div className="circle circle-12"></div>
+                    </div>
+                  </motion.button>
+                )}
+
+                {/* Only show Generate Videos button if no videos have been generated yet */}
+                {generatedVideos.length === 0 && (
+                  <button
+                    onClick={handleGenerateVideos}
+                    disabled={isGenerating}
+                    className="spotlight-button"
+                  >
+                    <div className="wrapper">
+                      <span>{isGenerating ? 'GENERATING...' : 'GENERATE VIDEOS'}</span>
+                      <div className="circle circle-1"></div>
+                      <div className="circle circle-2"></div>
+                      <div className="circle circle-3"></div>
+                      <div className="circle circle-4"></div>
+                      <div className="circle circle-5"></div>
+                      <div className="circle circle-6"></div>
+                      <div className="circle circle-7"></div>
+                      <div className="circle circle-8"></div>
+                      <div className="circle circle-9"></div>
+                      <div className="circle circle-10"></div>
+                      <div className="circle circle-11"></div>
+                      <div className="circle circle-12"></div>
+                    </div>
+                  </button>
+                )}
+
+                {/* Stop Generation Button */}
+                {isGenerating && !isCancelling && (
+                  <motion.button
+                    onClick={stopGeneration}
+                    className="spotlight-button stop-button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="wrapper">
+                      <span>STOP!</span>
+                      <div className="circle circle-1"></div>
+                      <div className="circle circle-2"></div>
+                      <div className="circle circle-3"></div>
+                      <div className="circle circle-4"></div>
+                      <div className="circle circle-5"></div>
+                      <div className="circle circle-6"></div>
+                      <div className="circle circle-7"></div>
+                      <div className="circle circle-8"></div>
+                      <div className="circle circle-9"></div>
+                      <div className="circle circle-10"></div>
+                      <div className="circle circle-11"></div>
+                      <div className="circle circle-12"></div>
+                    </div>
+                  </motion.button>
+                )}
+
+                {/* Cancelling Status */}
+                {isCancelling && (
+                  <motion.div
+                    className="px-8 py-4 bg-yellow-600 rounded-2xl text-white font-semibold text-lg shadow-lg shadow-yellow-500/25"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Stopping Generation...</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Show Download All Videos button when videos are generated */}
+                {generatedVideos.length > 0 && (
+                  <motion.button
+                    onClick={() => {
+                      generatedVideos.forEach(video => {
+                        const link = document.createElement('a');
+                        link.href = video.url;
+                        link.download = video.filename;
+                        link.click();
+                      });
+                    }}
+                    className="spotlight-button download-button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="wrapper">
+                      <span>DOWNLOAD ALL VIDEOS</span>
+                      <div className="circle circle-1"></div>
+                      <div className="circle circle-2"></div>
+                      <div className="circle circle-3"></div>
+                      <div className="circle circle-4"></div>
+                      <div className="circle circle-5"></div>
+                      <div className="circle circle-6"></div>
+                      <div className="circle circle-7"></div>
+                      <div className="circle circle-8"></div>
+                      <div className="circle circle-9"></div>
+                      <div className="circle circle-10"></div>
+                      <div className="circle circle-11"></div>
+                      <div className="circle circle-12"></div>
+                    </div>
+                  </motion.button>
+                )}
+              </motion.div>
             )}
-          </motion.div>
-        )}
 
-
-
-
-
-        {/* Batch Status Indicator */}
-        {pairs.some(pair => pair.audio || pair.image) && (
-          <BatchStatusIndicator 
-            totalPairs={pairs.length} 
-            completedPairs={generatedVideos.length}
-            isProcessing={isGenerating}
-          />
-        )}
+            {/* Batch Status Indicator */}
+            {pairs.some(pair => pair.audio || pair.image) && (
+              <BatchStatusIndicator 
+                totalPairs={pairs.length} 
+                completedPairs={generatedVideos.length}
+                isProcessing={isGenerating}
+              />
+            )}
           </div>
         </main>
       </div>
