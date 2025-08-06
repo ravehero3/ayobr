@@ -2,6 +2,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import typebeatLogo from '../assets/typebeatz logo 1_1754478881987.png';
+import userIcon from '../assets/user_1754478889614.png';
 
 const Header = () => {
   const { generatedVideos, pairs } = useAppStore();
@@ -34,7 +36,7 @@ const Header = () => {
         {/* TypeBeatz Logo */}
         <div className="flex items-center">
           <img 
-            src="/attached_assets/typebeatz logo 1_1754478881987.png" 
+            src={typebeatLogo}
             alt="TypeBeatz"
             className="h-8 object-contain"
           />
@@ -64,7 +66,7 @@ const Header = () => {
         <div className="flex items-center">
           <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
             <img 
-              src="/attached_assets/user_1754478889614.png" 
+              src={userIcon}
               alt="Profile"
               className="w-full h-full object-cover"
             />
