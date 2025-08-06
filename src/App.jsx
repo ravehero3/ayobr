@@ -13,6 +13,8 @@ import ImageContainerCopy from './components/ImageContainerCopy';
 import AnimatedBackground from './components/AnimatedBackground';
 import LoadingWindow from './components/LoadingWindow';
 import DownloadPage from './components/DownloadPage';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 
 function App() {
@@ -310,7 +312,7 @@ function App() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed inset-0 flex items-center justify-center p-6"
+          className="fixed inset-0 flex items-center justify-center p-6 pt-28 pb-24"
           style={{ zIndex: 100 }}
         >
           <DropZone
@@ -328,9 +330,15 @@ function App() {
         />
       )}
 
+      {/* Header */}
+      <Header />
+
+      {/* Footer */}
+      <Footer />
+
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
-        {/* Main Content */}
-        <main className={`flex-1 flex flex-col p-6 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
+        {/* Main Content with header/footer spacing */}
+        <main className={`flex-1 flex flex-col p-6 pt-28 pb-24 overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
 
         {/* Page 2: File Management - Pairs Grid */}

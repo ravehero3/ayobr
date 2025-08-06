@@ -1,0 +1,83 @@
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useAppStore } from '../store/appStore';
+
+const Footer = () => {
+  const { pairs, generatedVideos, isGenerating } = useAppStore();
+  const completePairs = pairs.filter(pair => pair.audio && pair.image);
+
+  return (
+    <motion.footer
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="fixed bottom-0 left-0 right-0 z-50 h-16"
+    >
+      <div
+        className="w-full h-full flex items-center justify-between px-8"
+        style={{
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderBottom: 'none',
+          borderLeft: 'none',
+          borderRight: 'none',
+        }}
+      >
+        {/* Left side - File count */}
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+            <span className="text-sm text-gray-300">
+              {pairs.filter(pair => pair.audio).length} Audio
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-sm text-gray-300">
+              {pairs.filter(pair => pair.image).length} Images
+            </span>
+          </div>
+        </div>
+
+        {/* Center - Processing status */}
+        {isGenerating && (
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
+            <span className="text-sm text-blue-300 font-medium">Processing...</span>
+          </div>
+        )}
+
+        {/* Right side - Stats */}
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span className="text-sm text-gray-300">
+              {completePairs.length} Ready
+            </span>
+          </div>
+          {generatedVideos.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm text-green-300 font-medium">
+                {generatedVideos.length} Generated
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.footer>
+  );
+};
+
+export default Footer;
