@@ -66,6 +66,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-3px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important; /* Ensure glow follows container radius */
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
@@ -77,6 +78,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-3px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important; /* Ensure glow follows container radius */
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
@@ -87,10 +89,12 @@
 @keyframes container-pulse {
   0%, 100% {
     border-color: rgba(255, 255, 255, 0.6);
+    border-radius: 12px; /* Ensure glow follows container radius */
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.1);
   }
   50% {
     border-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px; /* Ensure glow follows container radius */
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
   }
 }
@@ -476,18 +480,7 @@ body {
   isolation: isolate !important;
 }
 
-/* Container drag mode styles - no blur */
-.container-drag-mode::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  pointer-events: none;
-}
+/* Container drag mode styles - no overlay rectangle */
 
 /* Keep audio containers above blur and highlight ALL of them */
 .container-drag-mode .audio-container,
@@ -497,10 +490,11 @@ body {
   z-index: 2;
 }
 
-/* Highlight ALL audio containers when dragging any audio container */
+/* Highlight ALL audio containers when dragging any audio container - proper rounded glow */
 .container-drag-mode .audio-container[data-audio-container] {
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.4) !important;
   border: 2px solid rgba(16, 185, 129, 0.9) !important;
+  border-radius: 12px !important; /* Ensure glow follows container radius */
   background: rgba(16, 185, 129, 0.1) !important;
   transform: scale(1.02) !important;
   transition: all 0.3s ease !important;
@@ -525,6 +519,7 @@ body {
 .container-drag-mode .audio-container[data-audio-container]:not(.dragging-container) {
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.4) !important;
   border: 2px solid rgba(16, 185, 129, 0.9) !important;
+  border-radius: 12px !important; /* Ensure glow follows container radius */
   background: rgba(16, 185, 129, 0.1) !important;
   transform: scale(1.02) !important;
 }
