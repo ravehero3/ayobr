@@ -6,6 +6,12 @@ import { useAppStore } from '../store/appStore';
 const Footer = () => {
   const { pairs, generatedVideos, isGenerating } = useAppStore();
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
+  const hasFiles = pairs.some(pair => pair.audio || pair.image);
+
+  // Don't render footer if no files are present
+  if (!hasFiles) {
+    return null;
+  }
 
   return (
     <motion.footer
