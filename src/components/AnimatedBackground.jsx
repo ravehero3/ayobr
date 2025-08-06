@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import NightSkyBackground from './NightSkyBackground';
 
 const AnimatedBackground = () => {
   // Get reactive state from Zustand store - these will trigger re-renders
@@ -68,25 +69,41 @@ const AnimatedBackground = () => {
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
       {/* Single background with AnimatePresence for proper transitions */}
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentBackgroundKey}
-          className="absolute inset-0 w-full h-full bg-cover bg-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          style={{
-            backgroundImage: currentBackgroundKey === 'page1' && backgroundLoaded.page1 
-              ? 'url(/attached_assets/page%201_1754503149465.png)'
-              : currentBackgroundKey === 'page2' && backgroundLoaded.page2
-              ? 'url(/attached_assets/page%202_1754503149466.gif)'
-              : 'none',
-            backgroundColor: '#000000',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            zIndex: -12
-          }}
-        />
+        {currentBackgroundKey === 'page1' && (
+          <motion.div
+            key="page1"
+            className="absolute inset-0 w-full h-full bg-cover bg-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            style={{
+              backgroundImage: backgroundLoaded.page1 
+                ? 'url(/attached_assets/page%201_1754503149465.png)'
+                : 'none',
+              backgroundColor: '#000000',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              zIndex: -12
+            }}
+          />
+        )}
+        
+        {currentBackgroundKey === 'page2' && (
+          <motion.div
+            key="page2"
+            className="absolute inset-0 w-full h-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            style={{
+              zIndex: -12
+            }}
+          >
+            <NightSkyBackground />
+          </motion.div>
+        )}
       </AnimatePresence>
       
       {/* Debug info overlay - temporary */}
