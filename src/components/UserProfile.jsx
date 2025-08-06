@@ -66,11 +66,9 @@ const UserProfile = ({ isOpen, onClose }) => {
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-[100] flex items-center justify-center p-6"
           style={{
-            background: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            paddingTop: '80px', // Account for header height
-            paddingBottom: '80px', // Account for footer height
+            background: 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(25px)',
+            WebkitBackdropFilter: 'blur(25px)',
           }}
           onClick={handleBackdropClick}
         >
@@ -80,13 +78,17 @@ const UserProfile = ({ isOpen, onClose }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative w-full max-w-md p-8 rounded-lg overflow-hidden"
+            className="relative w-full max-w-md p-8 rounded-2xl overflow-hidden"
             style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              background: 'rgba(0, 0, 0, 0.15)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              backgroundImage: 'url(/noise.png)',
+              backgroundBlendMode: 'soft-light',
+              backgroundSize: '150px 150px',
+              backgroundRepeat: 'repeat',
             }}
             onClick={(e) => e.stopPropagation()}
           >
