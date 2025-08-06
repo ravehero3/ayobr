@@ -156,6 +156,15 @@ function App() {
     }
   }, [handleFileDrop, clearFileCache]);
 
+  // Wrapper for DropZone component - handles files array directly
+  const handleDropZoneFiles = useCallback((files) => {
+    if (files.length > 0) {
+      // Clear the file cache before processing to ensure fresh processing
+      clearFileCache();
+      handleFileDrop(files);
+    }
+  }, [handleFileDrop, clearFileCache]);
+
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');
     const completePairs = getCompletePairs();
@@ -279,7 +288,7 @@ function App() {
           style={{ zIndex: 100 }}
         >
           <DropZone
-            onFileDrop={handleGlobalDrop}
+            onFileDrop={handleDropZoneFiles}
             hasFiles={false}
           />
         </motion.div>
