@@ -5,6 +5,7 @@ The Type Beat Video Generator is a desktop application designed for music produc
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
+Container styling preferences: 4px thick glassmorphism stroke around all containers with semitransparent shadows below and beneath.
 
 ## System Architecture
 

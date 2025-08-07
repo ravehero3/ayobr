@@ -9,14 +9,17 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 
-  /* Double border effect: inner glassmorphism border + outer grey stroke */
-  border: 2px solid transparent;
+  /* 4px thick glassmorphism stroke with enhanced shadows */
+  border: 4px solid transparent;
   background-clip: padding-box;
   
-  /* Create the glassmorphism inner border and grey outer stroke */
+  /* Create the thick glassmorphism border and semitransparent shadows */
   box-shadow: 
-    0 0 0 1px rgba(128, 128, 128, 0.4), /* 1px grey outer stroke */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.15); /* Inner glassmorphism border */
+    0 0 0 4px rgba(128, 128, 128, 0.6), /* 4px thick grey outer stroke */
+    inset 0 0 0 4px rgba(255, 255, 255, 0.2), /* 4px thick inner glassmorphism border */
+    0 8px 32px rgba(0, 0, 0, 0.4), /* Deep semitransparent shadow below */
+    0 4px 16px rgba(0, 0, 0, 0.3), /* Medium semitransparent shadow beneath */
+    0 2px 8px rgba(0, 0, 0, 0.2); /* Subtle close shadow */
 
   /* Rounded corners */
   border-radius: 24px;
@@ -27,9 +30,9 @@
   background-size: 150px 150px;
   background-repeat: repeat;
 
-  /* Ensure content stays above background and no bottom artifacts */
+  /* Ensure content stays above background with proper spacing for shadows */
   position: relative;
-  margin-bottom: 0;
+  margin-bottom: 16px; /* Add margin to accommodate shadow */
 
   /* Smooth transitions */
   transition: all 0.3s ease;
@@ -40,15 +43,19 @@
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
   backdrop-filter: blur(16px);
   
-  /* Double border effect: inner glassmorphism border + outer grey stroke */
-  border: 2px solid transparent;
+  /* 4px thick glassmorphism border with enhanced shadows */
+  border: 4px solid transparent;
   background-clip: padding-box;
   
   box-shadow: 
-    0 0 0 1px rgba(128, 128, 128, 0.4), /* 1px grey outer stroke */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.15); /* Inner glassmorphism border */
+    0 0 0 4px rgba(128, 128, 128, 0.6), /* 4px thick grey outer stroke */
+    inset 0 0 0 4px rgba(255, 255, 255, 0.2), /* 4px thick inner glassmorphism border */
+    0 8px 32px rgba(0, 0, 0, 0.4), /* Deep semitransparent shadow below */
+    0 4px 16px rgba(0, 0, 0, 0.3), /* Medium semitransparent shadow beneath */
+    0 2px 8px rgba(0, 0, 0, 0.2); /* Subtle close shadow */
     
   border-radius: 8px;
+  margin-bottom: 16px; /* Add margin to accommodate shadow */
 }
 
 /* Removed premium-glow and premium-highlight to eliminate extra rectangles */
@@ -56,18 +63,20 @@
 /* Custom fonts from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* Drag target visual feedback - enhanced glassmorphism */
+/* Drag target visual feedback - enhanced glassmorphism with 4px borders */
 .audio-drag-active .audio-container {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-3px) scale(1.02);
   border-radius: 24px !important;
   position: relative;
   
-  /* Enhanced borders during drag */
+  /* Enhanced 4px thick borders during drag with stronger shadows */
   box-shadow: 
-    0 0 0 1px rgba(128, 128, 128, 0.6), /* Stronger grey outer stroke during drag */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3), /* Brighter inner border during drag */
-    0 4px 20px rgba(0, 0, 0, 0.3); /* Subtle elevation shadow */
+    0 0 0 4px rgba(128, 128, 128, 0.8), /* 4px thick stronger grey outer stroke during drag */
+    inset 0 0 0 4px rgba(255, 255, 255, 0.4), /* 4px thick brighter inner border during drag */
+    0 12px 40px rgba(0, 0, 0, 0.5), /* Enhanced elevation shadow */
+    0 6px 20px rgba(0, 0, 0, 0.4), /* Medium shadow */
+    0 3px 10px rgba(0, 0, 0, 0.3); /* Close shadow */
 }
 
 .image-drag-active .image-container {
@@ -76,11 +85,13 @@
   border-radius: 24px !important;
   position: relative;
   
-  /* Enhanced borders during drag */
+  /* Enhanced 4px thick borders during drag with stronger shadows */
   box-shadow: 
-    0 0 0 1px rgba(128, 128, 128, 0.6), /* Stronger grey outer stroke during drag */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3), /* Brighter inner border during drag */
-    0 4px 20px rgba(0, 0, 0, 0.3); /* Subtle elevation shadow */
+    0 0 0 4px rgba(128, 128, 128, 0.8), /* 4px thick stronger grey outer stroke during drag */
+    inset 0 0 0 4px rgba(255, 255, 255, 0.4), /* 4px thick brighter inner border during drag */
+    0 12px 40px rgba(0, 0, 0, 0.5), /* Enhanced elevation shadow */
+    0 6px 20px rgba(0, 0, 0, 0.4), /* Medium shadow */
+    0 3px 10px rgba(0, 0, 0, 0.3); /* Close shadow */
 }
 
 /* Removed all glow effects from containers */
