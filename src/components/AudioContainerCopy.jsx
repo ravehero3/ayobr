@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -68,22 +69,22 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
       className="audiocontainercopy pointer-events-none"
       style={{
         position: 'fixed',
-        left: `${mousePosition.x - 16}px`, // Position so cursor is on movehandle (16px from left edge)
-        top: `${mousePosition.y - 16}px`,  // Position so cursor is on movehandle (16px from top edge)
+        left: `${mousePosition.x - 16}px`,
+        top: `${mousePosition.y - 16}px`,
         width: '500px',
         height: '160px',
         padding: '16px',
         zIndex: 999999,
         minHeight: '160px',
         maxHeight: '160px',
-        background: 'rgba(0, 0, 0, 0.3)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        // Simplified background - just solid color with rounded corners
+        background: 'rgba(0, 0, 0, 0.8)',
         borderRadius: '24px',
-        backgroundImage: 'url("/noise.png")',
-        backgroundBlendMode: 'soft-light',
-        backgroundSize: '150px 150px',
-        backgroundRepeat: 'repeat',
+        // Remove all extra visual effects
+        border: 'none',
+        boxShadow: 'none',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
       }}
       initial={{ scale: 1, rotate: 0 }}
       animate={{ 
@@ -95,7 +96,6 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         duration: shouldReturnToOrigin ? 0.3 : 0.2,
         ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
       }}
-
     >
       <div className="w-full h-full flex flex-col justify-between relative">
         {/* Move Handle - Bottom Left matching original */}
@@ -103,9 +103,8 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
           <div
             className="w-5 h-5 rounded flex items-center justify-center transition-all duration-200"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'rgba(255, 255, 255, 0.7)'
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'rgba(255, 255, 255, 0.8)'
             }}
           >
             {/* 4-way arrow/plus drag icon */}
@@ -122,14 +121,15 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
           </span>
         </div>
 
-        {/* Waveform - with blur effect */}
+        {/* Waveform - simplified */}
         <div className="flex-1 flex items-start">
           <div 
             ref={waveformRef}
             className="w-full"
             style={{ 
               height: '60px',
-              filter: 'blur(2px)',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
               opacity: 0.7
             }}
           />
@@ -141,13 +141,12 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
             {formatTime(currentTime)}
           </div>
 
-          {/* Static play button - circular like original */}
+          {/* Static play button */}
           <div
             className="w-8 h-8 flex items-center justify-center rounded-full"
             style={{
-              backgroundColor: 'rgba(96, 165, 250, 0.15)',
-              border: '2px solid rgba(96, 165, 250, 0.4)',
-              color: '#60A5FA',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
             }}
           >
             <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
