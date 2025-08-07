@@ -27,17 +27,7 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
 
   return (
     <motion.div
-      className="imagecontainercopy pointer-events-none glass-container"
-      initial={{ scale: 1, rotate: 0 }}
-      animate={{ 
-        scale: shouldReturnToOrigin ? 0.8 : 1.05, 
-        rotate: shouldReturnToOrigin ? 0 : 0,
-        opacity: shouldReturnToOrigin ? 0 : 0.95
-      }}
-      transition={{ 
-        duration: shouldReturnToOrigin ? 0.3 : 0.2,
-        ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
-      }}
+      className="imagecontainercopy pointer-events-none"
       style={{
         position: 'fixed',
         left: `${mousePosition.x - 16}px`, // Position so cursor is on movehandle (16px from left edge)
@@ -48,7 +38,26 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
         zIndex: 999999,
         minHeight: '160px',
         maxHeight: '160px',
+        background: 'rgba(0, 0, 0, 0.3)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '24px',
+        backgroundImage: 'url("/noise.png")',
+        backgroundBlendMode: 'soft-light',
+        backgroundSize: '150px 150px',
+        backgroundRepeat: 'repeat',
       }}
+      initial={{ scale: 1, rotate: 0 }}
+      animate={{ 
+        scale: shouldReturnToOrigin ? 0.8 : 1.05, 
+        rotate: shouldReturnToOrigin ? 0 : 0,
+        opacity: shouldReturnToOrigin ? 0 : 0.95
+      }}
+      transition={{ 
+        duration: shouldReturnToOrigin ? 0.3 : 0.2,
+        ease: shouldReturnToOrigin ? [0.4, 0, 0.2, 1] : [0.25, 0.46, 0.45, 0.94]
+      }}
+
     >
       <div className="w-full h-full flex flex-col relative">
         {/* Top spacing - exactly 10px */}
