@@ -15,6 +15,7 @@ import LoadingWindow from './components/LoadingWindow';
 import DownloadPage from './components/DownloadPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import SettingsPanel from './components/SettingsPanel';
 
 
 function App() {
@@ -549,6 +550,9 @@ function App() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Settings Panel */}
+      <SettingsPanel />
 
       {/* Drag Overlay for Container Copies */}
       <AudioContainerCopy 

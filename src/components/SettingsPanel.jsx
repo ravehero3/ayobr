@@ -4,7 +4,30 @@ import { useAppStore } from '../store/appStore';
 
 const SettingsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { concurrencySettings, setConcurrencySettings } = useAppStore();
+  const { 
+    concurrencySettings, 
+    setConcurrencySettings,
+    videoSettings,
+    setVideoBackground,
+    setCustomBackground,
+    setVideoQuality
+  } = useAppStore();
+
+  const handleBackgroundChange = (background) => {
+    setVideoBackground(background);
+  };
+
+  const handleCustomBackgroundUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setCustomBackground(file);
+      setVideoBackground('custom');
+    }
+  };
+
+  const handleQualityChange = (quality) => {
+    setVideoQuality(quality);
+  };
 
   const presetOptions = [
     {
@@ -107,8 +130,8 @@ const SettingsPanel = () => {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">Performance Settings</h2>
-                    <p className="text-gray-400 text-sm">Optimize video generation for your system</p>
+                    <h2 className="text-2xl font-bold text-white">Settings</h2>
+                    <p className="text-gray-400 text-sm">Customize video generation and performance</p>
                   </div>
                 </div>
                 <button
@@ -119,6 +142,135 @@ const SettingsPanel = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
+              </div>
+
+              {/* Video Generation Settings */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-white mb-4">Video Settings</h3>
+                
+                {/* Background Options */}
+                <div className="mb-6">
+                  <h4 className="text-md font-medium text-white mb-3">Background</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* White Background */}
+                    <motion.button
+                      onClick={() => handleBackgroundChange('white')}
+                      className={`aspect-video rounded-xl border-2 transition-all duration-200 overflow-hidden ${
+                        videoSettings.background === 'white'
+                          ? 'border-neon-cyan bg-neon-cyan/10'
+                          : 'border-gray-600 hover:border-gray-500'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="w-full h-full bg-white flex items-center justify-center">
+                        <span className="text-black font-medium text-sm">White</span>
+                      </div>
+                    </motion.button>
+
+                    {/* Black Background */}
+                    <motion.button
+                      onClick={() => handleBackgroundChange('black')}
+                      className={`aspect-video rounded-xl border-2 transition-all duration-200 overflow-hidden ${
+                        videoSettings.background === 'black'
+                          ? 'border-neon-cyan bg-neon-cyan/10'
+                          : 'border-gray-600 hover:border-gray-500'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="w-full h-full bg-black flex items-center justify-center">
+                        <span className="text-white font-medium text-sm">Black</span>
+                      </div>
+                    </motion.button>
+
+                    {/* Custom Background */}
+                    <motion.div
+                      className={`aspect-video rounded-xl border-2 transition-all duration-200 overflow-hidden cursor-pointer ${
+                        videoSettings.background === 'custom'
+                          ? 'border-neon-cyan bg-neon-cyan/10'
+                          : 'border-gray-600 hover:border-gray-500'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <label className="w-full h-full cursor-pointer block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCustomBackgroundUpload}
+                          className="hidden"
+                        />
+                        <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex flex-col items-center justify-center">
+                          {videoSettings.customBackground ? (
+                            <img
+                              src={URL.createObjectURL(videoSettings.customBackground)}
+                              alt="Custom background"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <>
+                              <svg className="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              <span className="text-gray-400 font-medium text-sm">Custom</span>
+                            </>
+                          )}
+                        </div>
+                      </label>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Quality Options */}
+                <div className="mb-6">
+                  <h4 className="text-md font-medium text-white mb-3">Quality</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Full HD */}
+                    <motion.button
+                      onClick={() => handleQualityChange('fullhd')}
+                      className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                        videoSettings.quality === 'fullhd'
+                          ? 'border-neon-cyan bg-neon-cyan/10'
+                          : 'border-gray-600 hover:border-gray-500 bg-gray-800/30'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex items-center justify-center space-x-3">
+                        <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">HD</span>
+                        </div>
+                        <div className="text-left">
+                          <div className="text-white font-medium">Full HD</div>
+                          <div className="text-gray-400 text-sm">1920×1080</div>
+                        </div>
+                      </div>
+                    </motion.button>
+
+                    {/* 4K */}
+                    <motion.button
+                      onClick={() => handleQualityChange('4k')}
+                      className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                        videoSettings.quality === '4k'
+                          ? 'border-neon-cyan bg-neon-cyan/10'
+                          : 'border-gray-600 hover:border-gray-500 bg-gray-800/30'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex items-center justify-center space-x-3">
+                        <div className="w-12 h-8 bg-red-600 rounded flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">4K</span>
+                        </div>
+                        <div className="text-left">
+                          <div className="text-white font-medium">4K Ultra</div>
+                          <div className="text-gray-400 text-sm">3840×2160</div>
+                        </div>
+                      </div>
+                    </motion.button>
+                  </div>
+                </div>
               </div>
 
               {/* Performance Presets */}
@@ -210,12 +362,23 @@ const SettingsPanel = () => {
               </div>
 
               {/* Current Settings Display */}
-              <div className="mt-6 p-4 bg-neon-cyan/5 rounded-xl border border-neon-cyan/20">
-                <div className="flex items-center justify-between">
-                  <span className="text-white font-medium">Current Settings:</span>
-                  <span className="text-neon-cyan text-sm">
-                    {selectedPreset} - Small: {customSettings.small} | Medium: {customSettings.medium} | Large: {customSettings.large} | XL: {customSettings.xlarge}
-                  </span>
+              <div className="mt-6 space-y-3">
+                <div className="p-4 bg-neon-cyan/5 rounded-xl border border-neon-cyan/20">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium">Video Settings:</span>
+                    <span className="text-neon-cyan text-sm">
+                      Background: {videoSettings.background === 'custom' ? 'Custom' : videoSettings.background.charAt(0).toUpperCase() + videoSettings.background.slice(1)} | 
+                      Quality: {videoSettings.quality === 'fullhd' ? 'Full HD (1920×1080)' : '4K Ultra (3840×2160)'}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-800/30 rounded-xl border border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium">Performance:</span>
+                    <span className="text-gray-300 text-sm">
+                      {selectedPreset} - Small: {customSettings.small} | Medium: {customSettings.medium} | Large: {customSettings.large} | XL: {customSettings.xlarge}
+                    </span>
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -20,6 +20,13 @@ export const useAppStore = create((set, get) => ({
   // User profile
   userProfileImage: null, // Store base64 image data
 
+  // Video generation settings
+  videoSettings: {
+    background: 'black', // 'white', 'black', or 'custom'
+    customBackground: null, // File object for custom background
+    quality: 'fullhd' // 'fullhd' or '4k'
+  },
+
   // Concurrency settings optimized for up to 100 files
   concurrencySettings: {
     small: 4,     // 1-10 videos
@@ -220,5 +227,18 @@ export const useAppStore = create((set, get) => ({
   }),
 
   // User profile actions
-  setUserProfileImage: (imageData) => set({ userProfileImage: imageData })
+  setUserProfileImage: (imageData) => set({ userProfileImage: imageData }),
+
+  // Video settings actions
+  setVideoBackground: (background) => set(state => ({
+    videoSettings: { ...state.videoSettings, background }
+  })),
+
+  setCustomBackground: (file) => set(state => ({
+    videoSettings: { ...state.videoSettings, customBackground: file }
+  })),
+
+  setVideoQuality: (quality) => set(state => ({
+    videoSettings: { ...state.videoSettings, quality }
+  }))
 }));
