@@ -244,8 +244,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           {/* Audio Container */}  
           <div 
             className={`relative transition-all duration-300 ${
-              isValidDragTarget && pair.audio ? 'animate-pulse-glow' : ''
-            } ${isSwapping ? 'animate-swap-container' : ''}`}
+              isSwapping ? 'animate-swap-container' : ''
+            }`}
             onDragOver={handleContainerDragOver}
             onDragLeave={handleContainerDragLeave}
             onDrop={handleContainerDrop}
@@ -260,8 +260,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 minWidth: '500px',
                 maxWidth: '500px',
                 overflow: 'visible',
-                boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
+                boxShadow: '0 0 0 1px rgba(128, 128, 128, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.15)',
+                border: 'none',
               }}
             >
 
@@ -343,8 +343,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           {/* Image Container */}
           <div 
             className={`relative transition-all duration-300 ${
-              isValidDragTarget && pair.image ? 'animate-pulse-glow' : ''
-            } ${isSwapping ? 'animate-swap-container' : ''}`}
+              isSwapping ? 'animate-swap-container' : ''
+            }`}
             onDragOver={handleContainerDragOver}
             onDragLeave={handleContainerDragLeave}
             onDrop={handleContainerDrop}
@@ -358,8 +358,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
-                boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
+                boxShadow: '0 0 0 1px rgba(128, 128, 128, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.15)',
+                border: 'none',
               }}
             >
 

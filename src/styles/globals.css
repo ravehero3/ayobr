@@ -93,13 +93,13 @@
 .spotlight-button {
   --duration: 7s;
   --easing: linear;
-  --c-color-1: rgba(30, 144, 255, 0.7); /* Neon blue */
+  --c-color-1: rgba(156, 163, 175, 0.7); /* Gray */
   --c-color-2: #000000; /* Black */
   --c-color-3: #1a1a1a; /* Dark gray */
-  --c-color-4: rgba(30, 144, 255, 0.3); /* Light blue */
-  --c-shadow: rgba(30, 144, 255, 0.5);
+  --c-color-4: rgba(156, 163, 175, 0.3); /* Light gray */
+  --c-shadow: rgba(156, 163, 175, 0.5);
   --c-shadow-inset-top: rgba(255, 255, 255, 0.2); /* White spotlight from top */
-  --c-shadow-inset-bottom: rgba(30, 144, 255, 0.3); /* Blue spotlight from corner */
+  --c-shadow-inset-bottom: rgba(156, 163, 175, 0.3); /* Gray spotlight from corner */
   --c-radial-inner: #1a1a1a; /* Dark center */
   --c-radial-outer: #000000; /* Black outer */
   --c-color: #fff;
@@ -579,17 +579,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom animations */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
-    transform: scale(1.02);
-  }
-}
+/* Removed pulse-glow animation */
 
 @keyframes swap-container {
   0% {
