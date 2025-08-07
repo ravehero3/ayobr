@@ -127,6 +127,21 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
     <motion.div
       ref={containerRef}
       className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
+      style={{
+        background: 'rgba(0, 0, 0, 0.3)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: '24px',
+        backgroundImage: 'url("/noise.png")',
+        backgroundBlendMode: 'soft-light',
+        backgroundSize: '150px 150px',
+        backgroundRepeat: 'repeat',
+        padding: audio ? '16px' : '20px',
+        height: '160px',
+        minHeight: '160px',
+        maxHeight: '160px',
+        overflow: 'visible',
+      }}
       data-pair-id={pairId}
       data-audio-container="true"
       whileHover={{ scale: audio ? 1 : 1 }}
@@ -135,13 +150,6 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onMouseLeave={() => setIsHovered(false)}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
-      style={{
-        padding: audio ? '16px' : '20px',
-        height: '160px',
-        minHeight: '160px',
-        maxHeight: '160px',
-        overflow: 'visible',
-      }}
     >
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
