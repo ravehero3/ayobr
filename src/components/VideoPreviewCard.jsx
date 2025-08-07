@@ -44,7 +44,7 @@ const VideoPreviewCard = ({ video }) => {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-700">
+    <div className="glass-container p-4">
       <div className="relative mb-4">
         <video
           src={video.url}

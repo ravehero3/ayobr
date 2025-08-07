@@ -5,12 +5,18 @@
   /* Semi-transparent dark background */
   background: rgba(0, 0, 0, 0.3);
 
-  /* Restored light backdrop blur */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Enhanced backdrop blur for glassmorphism */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 
-  /* Subtle border */
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Double border effect: inner glassmorphism border + outer grey stroke */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  
+  /* Create the glassmorphism inner border and grey outer stroke */
+  box-shadow: 
+    0 0 0 1px rgba(128, 128, 128, 0.4), /* 1px grey outer stroke */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15); /* Inner glassmorphism border */
 
   /* Rounded corners */
   border-radius: 24px;
@@ -24,7 +30,6 @@
   /* Ensure content stays above background and no bottom artifacts */
   position: relative;
   margin-bottom: 0;
-  box-shadow: none !important;
 
   /* Smooth transitions */
   transition: all 0.3s ease;
@@ -34,9 +39,16 @@
 .premium-container {
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(75, 85, 99, 0.4);
+  
+  /* Double border effect: inner glassmorphism border + outer grey stroke */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  
+  box-shadow: 
+    0 0 0 1px rgba(128, 128, 128, 0.4), /* 1px grey outer stroke */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15); /* Inner glassmorphism border */
+    
   border-radius: 8px;
-  box-shadow: none !important;
 }
 
 /* Removed premium-glow and premium-highlight to eliminate extra rectangles */
@@ -44,21 +56,31 @@
 /* Custom fonts from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* Drag target visual feedback - clean without glow */
+/* Drag target visual feedback - enhanced glassmorphism */
 .audio-drag-active .audio-container {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-3px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.3) !important;
   border-radius: 24px !important;
   position: relative;
+  
+  /* Enhanced borders during drag */
+  box-shadow: 
+    0 0 0 1px rgba(128, 128, 128, 0.6), /* Stronger grey outer stroke during drag */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3), /* Brighter inner border during drag */
+    0 4px 20px rgba(0, 0, 0, 0.3); /* Subtle elevation shadow */
 }
 
 .image-drag-active .image-container {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-3px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.3) !important;
   border-radius: 24px !important;
   position: relative;
+  
+  /* Enhanced borders during drag */
+  box-shadow: 
+    0 0 0 1px rgba(128, 128, 128, 0.6), /* Stronger grey outer stroke during drag */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3), /* Brighter inner border during drag */
+    0 4px 20px rgba(0, 0, 0, 0.3); /* Subtle elevation shadow */
 }
 
 /* Removed all glow effects from containers */

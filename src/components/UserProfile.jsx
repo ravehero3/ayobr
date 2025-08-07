@@ -80,11 +80,12 @@ const UserProfile = ({ isOpen, onClose }) => {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="relative w-full max-w-md p-8 rounded-2xl overflow-hidden"
             style={{
-              background: 'rgba(0, 0, 0, 0.15)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              background: 'rgba(0, 0, 0, 0.3)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '2px solid transparent',
+              backgroundClip: 'padding-box',
+              boxShadow: '0 0 0 1px rgba(128, 128, 128, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 8px 32px rgba(0, 0, 0, 0.2)',
               backgroundImage: 'url(/noise.png)',
               backgroundBlendMode: 'soft-light',
               backgroundSize: '150px 150px',
