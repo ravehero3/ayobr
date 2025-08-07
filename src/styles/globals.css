@@ -25,7 +25,7 @@
   position: relative;
   margin-bottom: 0;
   box-shadow: none !important;
-  
+
   /* Smooth transitions */
   transition: all 0.3s ease;
 }
@@ -384,7 +384,7 @@
 }
 
 .spotlight-button.stop-button:hover {
-  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+  box-shadow: 0 0 7px rgba(220, 38, 38, 0.5);
 }
 
 /* Base styles */
@@ -820,7 +820,7 @@ input[type="file"] {
 }
 
 .spotlight-button.stop-button:hover {
-  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+  box-shadow: 0 0 7px rgba(220, 38, 38, 0.5);
 }
 
 /* Custom scrollbar for webkit browsers */
@@ -998,7 +998,7 @@ input[type="file"] {
 
   /* Ensure the container can overflow its bounds */
   position: relative !important;
-  
+
   /* Prevent clipping by ensuring overflow is visible */
   overflow: visible !important;
 }
