@@ -77,14 +77,15 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         zIndex: 999999,
         minHeight: '160px',
         maxHeight: '160px',
-        // Simplified background - just solid color with rounded corners
-        background: 'rgba(0, 0, 0, 0.8)',
+        // Match original container styling exactly
+        background: 'rgba(0, 0, 0, 0.3)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         borderRadius: '24px',
-        // Remove all extra visual effects
-        border: 'none',
-        boxShadow: 'none',
-        backdropFilter: 'none',
-        WebkitBackdropFilter: 'none',
+        backgroundImage: 'url("/noise.png")',
+        backgroundBlendMode: 'soft-light',
+        backgroundSize: '150px 150px',
+        backgroundRepeat: 'repeat',
       }}
       initial={{ scale: 1, rotate: 0 }}
       animate={{ 
