@@ -346,7 +346,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             onDragOver={handleContainerDragOver}
             onDragLeave={handleContainerDragLeave}
             onDrop={handleContainerDrop}
-            style={{ marginLeft: '5px' }}
+            style={{ marginLeft: '7px' }}
           >
             <div
               className="relative overflow-hidden group/container image-container"
