@@ -12,9 +12,7 @@ module.exports = {
     clean: true
   },
   
-  cache: {
-    type: 'memory'
-  },
+  cache: false,
 
   module: {
     rules: [
@@ -25,7 +23,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: [
-              ['@babel/preset-env', { targets: { electron: '22.0' } }],
+              ['@babel/preset-env', { targets: { browsers: ['last 2 versions'] } }],
               ['@babel/preset-react', { runtime: 'automatic' }]
             ],
             plugins: [
@@ -128,11 +126,7 @@ module.exports = {
     }
   },
 
-  target: 'electron-renderer',
-  
-  externals: {
-    'electron': 'commonjs electron'
-  },
+  target: 'web',
 
   optimization: {
     splitChunks: {
