@@ -83,7 +83,7 @@ const AnimatedBackground = () => {
           zIndex: -12
         }}
         animate={{
-          filter: hasFiles && !hasVideos ? 'blur(8px)' : 'blur(0px)', // 8px blur when files added, no blur initially
+          filter: hasFiles && !hasVideos ? 'blur(20px)' : 'blur(0px)', // 20px blur when files added, no blur initially
         }}
         transition={{ duration: 1.0, ease: "easeInOut" }}
       />
