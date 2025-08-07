@@ -33,7 +33,7 @@ const Header = () => {
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
-          paddingLeft: 'calc((100vw - 500px) / 2 - 16px)', // Align with audio container left edge accounting for container padding
+          paddingLeft: 'calc((100vw - 500px) / 2 - 716px)', // Move logo 700px further left
           paddingRight: 'calc((100vw - 500px) / 2)', // Maintain symmetry
         }}
       >

@@ -24,7 +24,7 @@
   /* Ensure content stays above background and no bottom artifacts */
   position: relative;
   margin-bottom: 0;
-  box-shadow: none;
+  box-shadow: none !important;
   
   /* Smooth transitions */
   transition: all 0.3s ease;
@@ -36,7 +36,7 @@
   backdrop-filter: blur(16px);
   border: 1px solid rgba(75, 85, 99, 0.4);
   border-radius: 8px;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 /* Removed premium-glow and premium-highlight to eliminate extra rectangles */
@@ -76,7 +76,7 @@
 
 /* Hover glow effect for buttons */
 .hover\:shadow-glow:hover {
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  box-shadow: none;
 }
 
 /* Dark mode Uiverse-style button with spotlight effects */
@@ -655,7 +655,7 @@ body {
 .drag-over {
   background: rgba(30, 144, 255, 0.1);
   border-color: #1E90FF;
-  box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+  box-shadow: none;
 }
 
 .dragging {
