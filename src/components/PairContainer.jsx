@@ -260,16 +260,6 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 minWidth: '500px',
                 maxWidth: '500px',
                 overflow: 'visible',
-                background: 'rgba(0, 0, 0, 0.3)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                borderRadius: '24px',
-                backgroundImage: 'url("/noise.png")',
-                backgroundBlendMode: 'soft-light',
-                backgroundSize: '150px 150px',
-                backgroundRepeat: 'repeat',
-                boxShadow: 'none',
-                border: 'none',
               }}
             >
 
@@ -366,16 +356,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 width: '500px',
                 minWidth: '500px',
                 maxWidth: '500px',
-                background: 'rgba(0, 0, 0, 0.3)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                borderRadius: '24px',
-                backgroundImage: 'url("/noise.png")',
-                backgroundBlendMode: 'soft-light',
-                backgroundSize: '150px 150px',
-                backgroundRepeat: 'repeat',
-                boxShadow: 'none',
-                border: 'none',
+                overflow: 'visible',
               }}
             >
 
