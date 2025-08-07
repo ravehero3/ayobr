@@ -233,7 +233,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         <div 
           className="flex flex-col lg:flex-row items-center relative z-10 group/pair"
           style={{ 
-            gap: '4px',
+            gap: '0px',
             paddingLeft: '30px',
             paddingRight: '30px',
             justifyContent: 'center',
