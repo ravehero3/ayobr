@@ -252,7 +252,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           <div className="flex-1 flex items-start">
             <div 
               ref={waveformRef}
-              className="w-full cursor-pointer relative z-10 bg-black/20 rounded-lg p-2 backdrop-blur-sm"
+              className="w-full cursor-pointer relative z-10"
               style={{ height: '60px' }}
             >
               {/* Loading animation */}
