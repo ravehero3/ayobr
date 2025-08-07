@@ -7,6 +7,8 @@ const UserProfile = ({ isOpen, onClose }) => {
   const { userProfileImage, setUserProfileImage } = useAppStore();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [username, setUsername] = useState('Producer');
+  const [email, setEmail] = useState('');
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -72,58 +74,64 @@ const UserProfile = ({ isOpen, onClose }) => {
           }}
           onClick={handleBackdropClick}
         >
-          {/* User Profile Modal */}
+          {/* User Profile Modal - Version 2 Glassmorphism */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative w-full max-w-md p-8 rounded-2xl overflow-hidden"
+            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative w-[420px] rounded-3xl overflow-hidden"
             style={{
-              background: 'rgba(0, 0, 0, 0.3)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              border: '2px solid transparent',
-              backgroundClip: 'padding-box',
-              boxShadow: '0 0 0 1px rgba(128, 128, 128, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 8px 32px rgba(0, 0, 0, 0.2)',
-              backgroundImage: 'url(/noise.png)',
-              backgroundBlendMode: 'soft-light',
-              backgroundSize: '150px 150px',
-              backgroundRepeat: 'repeat',
+              background: 'rgba(0, 0, 0, 0.98)',
+              backdropFilter: 'blur(25px)',
+              WebkitBackdropFilter: 'blur(25px)',
+              border: '1px solid rgba(59, 130, 246, 0.4)',
+              boxShadow: `
+                0 25px 50px rgba(0, 0, 0, 0.9),
+                inset 0 1px 0 rgba(59, 130, 246, 0.08),
+                0 0 20px rgba(59, 130, 246, 0.1)
+              `,
+              padding: '40px',
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 text-white/60 hover:text-white/80"
+              className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center text-white text-2xl rounded-lg transition-all duration-300 hover:bg-blue-500/10 hover:rotate-90"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              ×
             </button>
 
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">User Profile</h2>
-              <p className="text-gray-300">Customize your profile picture</p>
-            </div>
-
             {/* Profile Picture Section */}
-            <div className="flex flex-col items-center">
-              {/* Profile Picture Circle */}
+            <div className="text-center mb-8">
               <motion.button
                 onClick={handleFileSelect}
                 disabled={isUploading}
-                className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-white/20 hover:border-blue-400/50 transition-all duration-300 mb-6 group"
+                className="relative w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 group cursor-pointer transition-all duration-400"
                 style={{
+                  border: '3px solid rgba(59, 130, 246, 0.5)',
                   background: userProfileImage 
                     ? 'transparent' 
-                    : 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%)',
+                    : 'linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(0, 0, 0, 0.9) 100%)',
                 }}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ 
+                  scale: 1.05,
+                  borderColor: 'rgba(59, 130, 246, 0.7)',
+                  boxShadow: '0 0 30px rgba(59, 130, 246, 0.2)'
+                }}
                 whileTap={{ scale: 0.95 }}
               >
+                {/* Shine Effect */}
+                <div 
+                  className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-600 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent)',
+                    transform: 'rotate(45deg) translateX(-100%) translateY(-100%)',
+                    animation: 'shine 0.6s ease',
+                  }}
+                />
+
                 {isUploading ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                     <motion.div
@@ -139,11 +147,8 @@ const UserProfile = ({ isOpen, onClose }) => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60 group-hover:text-white/80 transition-colors duration-300">
-                    <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span className="text-sm font-medium text-center">Update Profile Picture</span>
+                  <div className="absolute inset-0 flex items-center justify-center text-white text-5xl">
+                    👤
                   </div>
                 )}
 
@@ -159,35 +164,118 @@ const UserProfile = ({ isOpen, onClose }) => {
                   </div>
                 )}
               </motion.button>
+            </div>
 
-              {/* Instructions */}
-              <div className="text-center text-gray-400 text-sm mb-6">
-                <p>Click the circle above to {userProfileImage ? 'change' : 'upload'} your profile picture</p>
-                <p className="text-xs mt-1 text-gray-500">Supported formats: JPG, PNG • Max size: 5MB</p>
+            {/* User Information Form */}
+            <div className="space-y-6">
+              {/* Username Input */}
+              <div className="space-y-2">
+                <label className="block text-white text-sm font-medium uppercase tracking-wider">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  className="w-full px-4 py-4 rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-blue-400/60 focus:shadow-lg focus:shadow-blue-500/10"
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    border: '1px solid rgba(59, 130, 246, 0.35)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                />
               </div>
 
-              {/* Hidden File Input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="block text-white text-sm font-medium uppercase tracking-wider">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-4 rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-blue-400/60 focus:shadow-lg focus:shadow-blue-500/10"
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    border: '1px solid rgba(59, 130, 246, 0.35)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 justify-center mt-8">
+              <motion.button
+                onClick={() => {
+                  // Save functionality would go here
+                  onClose();
+                }}
+                className="relative px-6 py-3 rounded-xl text-white text-sm font-semibold overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
+                style={{
+                  background: 'linear-gradient(145deg, #0a0a0a 0%, #000000 100%)',
+                  boxShadow: `
+                    inset 0 1px 0 rgba(59, 130, 246, 0.1),
+                    0 4px 15px rgba(0, 0, 0, 0.5)
+                  `,
+                }}
+                whileHover={{
+                  boxShadow: `
+                    inset 0 1px 0 rgba(59, 130, 246, 0.2),
+                    0 8px 25px rgba(0, 0, 0, 0.6)
+                  `
+                }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div 
+                  className="absolute inset-0 rounded-xl opacity-50"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.4) 0%, transparent 30%, transparent 70%, rgba(135, 206, 250, 0.4) 100%)',
+                    padding: '1px',
+                  }}
+                />
+                <div 
+                  className="absolute top-0 left-0 right-0 h-1/2 rounded-t-xl opacity-20"
+                  style={{
+                    background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%)',
+                  }}
+                />
+                <span className="relative z-10">Save Profile</span>
+              </motion.button>
 
               {/* Remove Picture Button */}
               {userProfileImage && (
                 <motion.button
                   onClick={() => setUserProfileImage(null)}
-                  className="px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-300 border border-red-500/30 hover:border-red-400/50"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-3 rounded-xl text-red-400 text-sm font-semibold border border-red-500/30 hover:border-red-400/50 hover:bg-red-500/10 transition-all duration-300"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Remove Picture
                 </motion.button>
               )}
             </div>
+
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </motion.div>
+
+          {/* Add CSS for shine animation */}
+          <style jsx>{`
+            @keyframes shine {
+              0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+              100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            }
+          `}</style>
         </motion.div>
       )}
     </AnimatePresence>

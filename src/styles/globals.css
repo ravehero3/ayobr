@@ -1045,3 +1045,13 @@ input[type="file"] {
 .back-to-downloads-button .circle {
   background: rgba(59, 130, 246, 0.3);
 }
+
+/* User Profile Shine Animation */
+@keyframes shine {
+  0% { 
+    transform: translateX(-100%) translateY(-100%) rotate(45deg); 
+  }
+  100% { 
+    transform: translateX(100%) translateY(100%) rotate(45deg); 
+  }
+}
