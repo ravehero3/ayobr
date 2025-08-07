@@ -33,7 +33,7 @@ const Header = () => {
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
-          paddingLeft: 'calc((100vw - 500px) / 2)', // Align with audio container left edge
+          paddingLeft: 'calc((100vw - 500px) / 2 - 16px)', // Align with audio container left edge accounting for container padding
           paddingRight: 'calc((100vw - 500px) / 2)', // Maintain symmetry
         }}
       >
@@ -44,8 +44,7 @@ const Header = () => {
             alt="TypeBeatz"
             className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
             style={{ 
-              height: '20px', // Much smaller logo
-              marginLeft: '0px' // Align with left edge of audio container
+              height: '20px' // Much smaller logo
             }}
           />
         </div>
