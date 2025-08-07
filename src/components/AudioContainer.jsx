@@ -141,11 +141,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         minHeight: '160px',
         maxHeight: '160px',
         overflow: 'visible',
-        border: '4px solid transparent',
-        backgroundClip: 'padding-box',
+        border: '1px solid rgba(128, 128, 128, 0.5)',
         boxShadow: `
-          0 0 0 4px rgba(128, 128, 128, 0.6),
-          inset 0 0 0 4px rgba(255, 255, 255, 0.2),
           0 8px 32px rgba(0, 0, 0, 0.4),
           0 4px 16px rgba(0, 0, 0, 0.3),
           0 2px 8px rgba(0, 0, 0, 0.2)
