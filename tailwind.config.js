@@ -35,11 +35,6 @@ module.exports = {
       },
       
       boxShadow: {
-        'neon': '0 0 20px rgba(96, 165, 250, 0.3)',
-        'neon-lg': '0 0 30px rgba(96, 165, 250, 0.4)',
-        'neon-xl': '0 0 40px rgba(96, 165, 250, 0.5)',
-        'cyan': '0 0 20px rgba(96, 165, 250, 0.3)',
-        'cyan-lg': '0 0 30px rgba(96, 165, 250, 0.4)',
         'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
         'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
       },
@@ -52,21 +47,12 @@ module.exports = {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
         'spin-slow': 'spin 3s linear infinite',
-        'glow': 'glow 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s infinite',
         'float': 'float 6s ease-in-out infinite',
         'diagonal-move': 'diagonalMove 25s ease-in-out infinite',
       },
       
       keyframes: {
-        glow: {
-          '0%, 100%': { 
-            boxShadow: '0 0 20px rgba(30, 144, 255, 0.3)' 
-          },
-          '50%': { 
-            boxShadow: '0 0 30px rgba(30, 144, 255, 0.6)' 
-          },
-        },
         shimmer: {
           '0%': { 
             backgroundPosition: '-1000px 0' 

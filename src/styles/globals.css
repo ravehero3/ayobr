@@ -85,21 +85,9 @@
 
 /* Removed all glow effects from containers */
 
-@keyframes glow-pulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.02);
-  }
-}
+/* Removed glow-pulse animation */
 
-/* Hover glow effect for buttons */
-.hover\:shadow-glow:hover {
-  box-shadow: none;
-}
+/* Removed hover glow effects */
 
 /* Dark mode Uiverse-style button with spotlight effects */
 .spotlight-button {
@@ -734,26 +722,20 @@ body {
 .glass {
   background: rgba(10, 15, 28, 0.8);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(30, 144, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Blurry glass card with gradient */
 .glass-card {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  background: linear-gradient(135deg, rgba(138, 43, 226, 0.3) 0%, rgba(30, 144, 255, 0.3) 100%);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 1.5rem;
 }
 
-/* Neon text effect */
-.neon-text {
-  text-shadow: 
-    0 0 5px rgba(30, 144, 255, 0.5),
-    0 0 10px rgba(30, 144, 255, 0.3),
-    0 0 15px rgba(30, 144, 255, 0.2);
-}
+/* Removed neon text effect */
 
 /* Progress bar */
 .progress-bar {
@@ -806,7 +788,7 @@ input[type="file"] {
 
 /* Custom focus styles */
 *:focus {
-  outline: 2px solid rgba(30, 144, 255, 0.5);
+  outline: 2px solid rgba(255, 255, 255, 0.3);
   outline-offset: 2px;
 }
 
