@@ -201,7 +201,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </svg>
           </div>
           <p className="text-sm font-medium text-white mb-1 text-center drop-shadow-lg">Drop image file here</p>
-          <p className="text-xs text-white/70 font-light text-center drop-shadow-sm pl-6 pr-7 py-1 rounded-full bg-white/5 backdrop-blur-sm" style={{ marginLeft: '-2px' }}>PNG,<span style={{ marginLeft: '-2px' }}>JPG</span>, HEIC</p>
+          <p className="text-xs text-white/70 font-light text-center drop-shadow-sm px-8 py-1 rounded-full bg-white/5 backdrop-blur-sm">PNG, JPG, HEIC</p>
         </div>
       )}
     </motion.div>
