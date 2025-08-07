@@ -126,7 +126,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   return (
     <motion.div
       ref={containerRef}
-      className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container glass-container"
+      className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
       data-pair-id={pairId}
       data-audio-container="true"
       whileHover={{ scale: audio ? 1 : 1 }}
