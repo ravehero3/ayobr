@@ -44,7 +44,7 @@ const Header = () => {
             alt="TypeBeatz"
             className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
             style={{ 
-              height: '28.8px', // 10% smaller than 32px (h-8)
+              height: '20px', // Much smaller logo
               marginLeft: '0px' // Align with left edge of audio container
             }}
           />
