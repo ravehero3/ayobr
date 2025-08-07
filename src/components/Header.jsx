@@ -33,8 +33,8 @@ const Header = () => {
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
-          paddingLeft: 'calc((100vw - 500px) / 2 - 566px)', // Move logo 150px to the right (from -716px to -566px)
-          paddingRight: 'calc((100vw - 500px) / 2 - 350px)', // Move profile icon 350px to the right
+          paddingLeft: 'calc((100vw - 500px) / 2 - 366px)', // Move logo 200px to the right (from -566px to -366px)
+          paddingRight: 'calc((100vw - 500px) / 2 - 340px)', // Move profile icon 10px to the left (from -350px to -340px)
         }}
       >
         {/* TypeBeatz Logo */}
