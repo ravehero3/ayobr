@@ -85,9 +85,9 @@ const VideoGenerationAnimation = ({
               </motion.h3>
 
               {/* Centered Progress Bar */}
-              <div className="w-80 bg-gray-700 rounded-full h-4 mx-auto overflow-hidden shadow-lg">
+              <div className="w-80 bg-gray-900 rounded-full h-4 mx-auto overflow-hidden shadow-lg">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-inner"
+                  className="h-full bg-gradient-to-r from-gray-600 to-gray-500 rounded-full shadow-inner"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
