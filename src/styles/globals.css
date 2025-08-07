@@ -476,14 +476,12 @@ body {
   z-index: 2;
 }
 
-/* Highlight ALL audio containers when dragging any audio container - clean border only */
+/* Highlight ALL audio containers when dragging any audio container - shadow effect only */
 .container-drag-mode .audio-container[data-audio-container] {
-  border: 2px solid rgba(16, 185, 129, 0.9) !important;
-  border-radius: 24px !important;
-  background: rgba(16, 185, 129, 0.1) !important;
   transform: scale(1.02) !important;
   transition: all 0.3s ease !important;
   position: relative;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4), 0 4px 16px rgba(16, 185, 129, 0.3) !important;
 }
 
 /* Temporarily disabled drag glow effects to eliminate rectangles */
@@ -537,24 +535,20 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Audio drag mode - clean highlighting without glow */
+/* Audio drag mode - shadow highlighting only */
 .audio-drag-mode [data-audio-container="true"] {
-  border: 2px solid rgba(16, 185, 129, 0.9) !important;
-  border-radius: 24px !important;
-  background: rgba(16, 185, 129, 0.1) !important;
   transform: scale(1.02) !important;
   transition: all 0.3s ease !important;
   position: relative;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4), 0 4px 16px rgba(16, 185, 129, 0.3) !important;
 }
 
-/* Image drag mode - clean highlighting without glow */
+/* Image drag mode - shadow highlighting only */
 .image-drag-mode [data-image-container="true"] {
-  border: 2px solid rgba(147, 51, 234, 0.9) !important;
-  border-radius: 24px !important;
-  background: rgba(147, 51, 234, 0.1) !important;
   transform: scale(1.02) !important;
   transition: all 0.3s ease !important;
   position: relative;
+  box-shadow: 0 8px 32px rgba(147, 51, 234, 0.4), 0 4px 16px rgba(147, 51, 234, 0.3) !important;
 }
 
 /* Container copy animations */

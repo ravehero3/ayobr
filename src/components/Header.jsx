@@ -33,7 +33,7 @@ const Header = () => {
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
-          paddingLeft: 'calc((100vw - 500px) / 2 - 246px)', // Move logo 25px to the right (from -271px to -246px)
+          paddingLeft: 'calc((100vw - 500px) / 2 - 258px)', // Move logo 12px to the left (from -246px to -258px)
           paddingRight: 'calc((100vw - 500px) / 2 - 260px)', // Move profile icon 20px to the right (from -280px to -260px)
         }}
       >
