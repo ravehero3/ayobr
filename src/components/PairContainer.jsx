@@ -164,7 +164,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   };
 
   return (
-    <motion.div className="relative" data-pair-id={pair.id}>
+    <motion.div className="relative mb-4" data-pair-id={pair.id}>
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
         <button
@@ -346,6 +346,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             onDragOver={handleContainerDragOver}
             onDragLeave={handleContainerDragLeave}
             onDrop={handleContainerDrop}
+            style={{ marginLeft: '5px' }}
           >
             <div
               className="relative overflow-hidden group/container image-container"
