@@ -72,6 +72,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         minHeight: '160px',
         maxHeight: '160px',
         overflow: 'visible',
+        border: '1px solid rgba(128, 128, 128, 0.5)',
       }}
       data-pair-id={pairId}
       data-image-container="true"
