@@ -66,8 +66,9 @@ const UserProfile = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+          className="fixed inset-0 z-[100] flex justify-center p-6"
           style={{
+            paddingTop: '200px',
             background: 'rgba(0, 0, 0, 0.3)',
             backdropFilter: 'blur(25px)',
             WebkitBackdropFilter: 'blur(25px)',
