@@ -12,11 +12,11 @@ module.exports = {
         'space-dark': '#0A0F1C',
         'space-navy': '#0F1419',
         
-        // Blue accent colors
-        'neon-blue': '#60A5FA',
-        'neon-cyan': '#60A5FA',
-        'neon-purple': '#60A5FA',
-        'neon-pink': '#60A5FA',
+        // Gray accent colors (removed blue)
+        'neon-blue': '#9CA3AF',
+        'neon-cyan': '#9CA3AF',
+        'neon-purple': '#9CA3AF',
+        'neon-pink': '#9CA3AF',
         
         // Grayscale with blue tints
         'gray-850': '#1a1f2e',

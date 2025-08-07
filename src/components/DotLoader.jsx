@@ -10,7 +10,7 @@ const DotLoader = ({ size = 'md', color = 'white' }) => {
 
   const colorStyles = {
     white: { dark: '#222', light: '#fff' },
-    blue: { dark: '#1E40AF', light: '#60A5FA' },
+    blue: { dark: '#374151', light: '#9CA3AF' },
     cyan: { dark: '#374151', light: '#9CA3AF' }
   };
 

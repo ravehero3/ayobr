@@ -692,7 +692,7 @@ body {
 
 /* Waveform container */
 .waveform-container {
-  background: rgba(30, 144, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   padding: 8px;
 }
@@ -708,14 +708,14 @@ body {
 
 /* Custom button styles */
 .btn-primary {
-  background: linear-gradient(to right, #1E90FF, #00CFFF);
+  background: linear-gradient(to right, #6B7280, #9CA3AF);
   @apply text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 active:scale-95;
-  box-shadow: 0 10px 15px -3px rgba(30, 144, 255, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(156, 163, 175, 0.3);
 }
 
 .btn-secondary {
   background: #0F1419;
-  @apply text-white font-medium py-2 px-4 rounded-lg border border-blue-500/30 hover:border-blue-500/50 transition-all duration-300;
+  @apply text-white font-medium py-2 px-4 rounded-lg border border-gray-500/30 hover:border-gray-500/50 transition-all duration-300;
 }
 
 /* Glass morphism effect */
@@ -741,9 +741,9 @@ body {
 .progress-bar {
   background: linear-gradient(
     90deg,
-    #1E90FF,
-    #00CFFF,
-    #1E90FF
+    #6B7280,
+    #9CA3AF,
+    #6B7280
   );
   background-size: 200% 100%;
   animation: gradient-shift 2s ease infinite;
