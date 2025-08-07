@@ -317,7 +317,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </svg>
           </div>
           <p className="text-body-text text-white mb-1 text-center drop-shadow-lg">Drop audio file here</p>
-          <p className="text-small-notes text-white/70 font-light text-center drop-shadow-sm pl-6 pr-7 py-1 rounded-full bg-white/5 backdrop-blur-sm" style={{ marginLeft: '-4px' }}>MP3, WAV</p>
+          <p className="text-small-notes text-white/70 font-light text-center drop-shadow-sm pl-6 pr-7 py-1 rounded-full bg-white/5 backdrop-blur-sm" style={{ marginLeft: '-4px' }}>MP3,<span style={{ marginLeft: '-2px' }}>WAV</span></p>
         </div>
       )}
     </motion.div>
