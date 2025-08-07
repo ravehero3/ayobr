@@ -61,65 +61,36 @@ const AnimatedBackground = () => {
     }
   }, [backgroundLoaded]);
 
-  // Determine which background should be shown
-  // Page 1: No files (deep space with Earth)
-  // Page 2: Has files but no videos (same as page 1 but blurred)
-  // Page 4: Videos generated (Earth from space background)
-  let currentBackgroundKey = 'page1';
-  if (hasVideos && !isGenerating) {
-    currentBackgroundKey = 'page4'; // Videos ready - use Earth background
-  } else if (hasFiles) {
-    currentBackgroundKey = 'page2'; // Files added - use blurred page 1 background
-  }
+  // Background logic:
+  // - Always show page 1 background as base
+  // - Apply blur when files are added
+  // - Show Earth background (page 4) when videos are generated
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
 
 
-      {/* Layer 1: Base Dark Texture - Always visible */}
-      <AnimatePresence mode="wait">
-        {currentBackgroundKey === 'page1' && (
-          <motion.div
-            key="page1"
-            className="absolute inset-0 w-full h-full bg-cover bg-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            style={{
-              backgroundImage: backgroundLoaded.page1
-                ? 'url(/attached_assets/page%201_1754508034866.png)'
-                : 'none',
-              backgroundColor: '#000000',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              zIndex: -12
-            }}
-          />
-        )}
+      {/* Single background layer that transitions blur smoothly */}
+      <motion.div
+        className="absolute inset-0 w-full h-full bg-cover bg-center"
+        style={{
+          backgroundImage: backgroundLoaded.page1
+            ? 'url(/attached_assets/page%201_1754508034866.png)'
+            : 'none',
+          backgroundColor: '#000000',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          zIndex: -12
+        }}
+        animate={{
+          filter: hasFiles && !hasVideos ? 'blur(8px)' : 'blur(0px)', // 8px blur when files added, no blur initially
+        }}
+        transition={{ duration: 1.0, ease: "easeInOut" }}
+      />
 
-        {currentBackgroundKey === 'page2' && (
-          <motion.div
-            key="page2"
-            className="absolute inset-0 w-full h-full bg-cover bg-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            style={{
-              backgroundImage: backgroundLoaded.page1
-                ? 'url(/attached_assets/page%201_1754508034866.png)'
-                : 'none',
-              backgroundColor: '#000000',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: 'blur(5px)', // Apply gaussian blur to page 1 background
-              zIndex: -12
-            }}
-          />
-        )}
-
-        {currentBackgroundKey === 'page4' && (
+      {/* Page 4 background (Earth) - shown when videos are generated */}
+      <AnimatePresence>
+        {hasVideos && !isGenerating && (
           <motion.div
             key="page4"
             className="absolute inset-0 w-full h-full bg-cover bg-center"
@@ -134,7 +105,7 @@ const AnimatedBackground = () => {
               backgroundColor: '#000000',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              zIndex: -12
+              zIndex: -11 // Above the main background
             }}
           />
         )}
