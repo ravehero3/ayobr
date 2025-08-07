@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import GlassmorphismVideoLoader from './GlassmorphismVideoLoader';
 
 const VideoGenerationAnimation = ({
   pair,
@@ -9,24 +10,12 @@ const VideoGenerationAnimation = ({
   onComplete,
   generatedVideo
 }) => {
-  const [showMerging, setShowMerging] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
 
   useEffect(() => {
-    if (isGenerating && progress > 0) {
-      setShowMerging(true);
-      setShowSuccess(false);
-      setAnimationComplete(false);
-    }
-  }, [isGenerating, progress]);
-
-  useEffect(() => {
     if (isComplete && generatedVideo && !showSuccess && !animationComplete) {
-      // First hide the merging animation
-      setShowMerging(false);
-
-      // Then show success animation after a brief delay
+      // Show success animation after a brief delay
       setTimeout(() => {
         setShowSuccess(true);
       }, 300);
@@ -51,61 +40,33 @@ const VideoGenerationAnimation = ({
   // Reset animation when generation is cancelled/stopped
   useEffect(() => {
     if (!isGenerating && !isComplete) {
-      // Generation was stopped/cancelled
-      setShowMerging(false);
       setShowSuccess(false);
       setAnimationComplete(false);
     }
   }, [isGenerating, isComplete]);
 
+  // Show glassmorphism loader during generation
+  if (isGenerating && !isComplete) {
+    return (
+      <GlassmorphismVideoLoader
+        isVisible={true}
+        progress={progress}
+        filename={generatedVideo?.filename}
+        onClose={() => {
+          // Handle close if needed
+        }}
+      />
+    );
+  }
+
   // Don't show overlay if generation is complete and animation is done, or if generation is cancelled
-  if ((!isGenerating && !showMerging && !showSuccess) || (!isGenerating && !isComplete && !generatedVideo)) {
+  if ((!isGenerating && !showSuccess) || (!isGenerating && !isComplete && !generatedVideo)) {
     return null;
   }
 
   return (
     <div className="absolute inset-0 flex items-center justify-center glass-container rounded-2xl z-20">
       <AnimatePresence>
-        {showMerging && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="text-center"
-          >
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-            <div className="text-center flex flex-col items-center justify-center h-full">
-              <motion.h3
-                className="text-white text-sm font-medium mb-4"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                Merging Audio & Image
-              </motion.h3>
-
-              {/* Centered Progress Bar */}
-              <div className="w-80 bg-gray-900 rounded-full h-4 mx-auto overflow-hidden shadow-lg">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-gray-600 to-gray-500 rounded-full shadow-inner"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                />
-              </div>
-              <motion.p
-                className="text-gray-300 text-lg mt-3 font-medium"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                {progress}% Complete
-              </motion.p>
-            </div>
-          </div>
-          </motion.div>
-        )}
-
         {showSuccess && generatedVideo && (
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
