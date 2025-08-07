@@ -150,7 +150,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       }}
       data-pair-id={pairId}
       data-audio-container="true"
-      whileHover={{ scale: audio ? 1 : 1 }}
+      whileHover={{ scale: 1.02 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

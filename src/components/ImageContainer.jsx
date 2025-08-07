@@ -81,7 +81,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       }}
       data-pair-id={pairId}
       data-image-container="true"
-      whileHover={{ scale: image ? 1 : 1 }}
+      whileHover={{ scale: 1.02 }}
       title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
