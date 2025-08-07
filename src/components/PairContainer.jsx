@@ -164,7 +164,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   };
 
   return (
-    <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ marginLeft: '7px' }}>
+    <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ marginLeft: '8px' }}>
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
         <button
@@ -315,13 +315,13 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
-            width: '24px', 
+            width: '32px', 
             height: '48px',
             marginTop: '-42px',
-            marginLeft: '-6px',
-            marginRight: '-6px'
+            marginLeft: '-10px',
+            marginRight: '-10px'
           }}>
-            <div className="relative flex items-center justify-center" style={{ width: '24px', height: '48px' }}>
+            <div className="relative flex items-center justify-center" style={{ width: '32px', height: '48px' }}>
               {/* Plus icon using SVG for crisp rendering */}
               <svg 
                 width="20" 
