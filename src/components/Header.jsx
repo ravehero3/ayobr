@@ -33,8 +33,8 @@ const Header = () => {
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
-          paddingLeft: 'calc((100vw - 500px) / 2 - 716px)', // Move logo 700px further left
-          paddingRight: 'calc((100vw - 500px) / 2)', // Maintain symmetry
+          paddingLeft: 'calc((100vw - 500px) / 2 - 566px)', // Move logo 150px to the right (from -716px to -566px)
+          paddingRight: 'calc((100vw - 500px) / 2 - 350px)', // Move profile icon 350px to the right
         }}
       >
         {/* TypeBeatz Logo */}
@@ -61,12 +61,12 @@ const Header = () => {
           )}
         </div>
 
-        {/* Profile Icon - Aligned with right edge of image container */}
+        {/* Profile Icon - Moved 350px to the right */}
         <div className="flex items-center">
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
-            style={{ marginRight: '0px' }} // Align with right edge of image container
+            style={{ marginRight: '0px' }} // Profile icon positioned via paddingRight
           >
             <img 
               src={userProfileImage || userIcon}
