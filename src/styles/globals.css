@@ -2103,12 +2103,6 @@ input[type="file"] {
   /* Scale up the entire container by 4% */
   transform: scale(1.04) !important;
 
-  /* Add 5% white overlay while maintaining rounded corners */
-  background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)), 
-              rgba(0, 0, 0, 0.3) !important;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)), 
-                    url("/noise.png") !important;
-
   /* Maintain rounded corners during hover */
   border-radius: 24px !important;
 
