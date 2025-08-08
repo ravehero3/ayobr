@@ -16,10 +16,11 @@ import DownloadPage from './components/DownloadPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SettingsPanel from './components/SettingsPanel';
+import SpacingSlider from './components/SpacingSlider';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -347,7 +348,7 @@ function App() {
                 >
                   <motion.div
                     className="flex flex-col max-w-[1200px] w-full px-6"
-                    style={{ gap: '4px', marginTop: '80px' }}
+                    style={{ gap: `${containerSpacing}px`, marginTop: '80px' }}
                   >
                     <AnimatePresence>
                       {pairs
@@ -527,6 +528,9 @@ function App() {
 
       {/* Footer */}
       <Footer onGenerateVideos={handleGenerateVideos} />
+
+      {/* Spacing Slider */}
+      <SpacingSlider />
 
 
       {/* Drag Overlay for Container Copies */}

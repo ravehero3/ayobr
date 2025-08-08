@@ -20,6 +20,9 @@ export const useAppStore = create((set, get) => ({
   // User profile
   userProfileImage: null, // Store base64 image data
 
+  // Container spacing
+  containerSpacing: 4, // Default spacing in pixels between container pairs
+
   // Video generation settings
   videoSettings: {
     background: 'black', // 'white', 'black', or 'custom'
@@ -240,5 +243,8 @@ export const useAppStore = create((set, get) => ({
 
   setVideoQuality: (quality) => set(state => ({
     videoSettings: { ...state.videoSettings, quality }
-  }))
+  })),
+
+  // Container spacing actions
+  setContainerSpacing: (spacing) => set({ containerSpacing: spacing })
 }));
