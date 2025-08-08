@@ -1716,14 +1716,6 @@ input[type="file"] {
   animation: gradientShift 3s ease infinite;
 }
 
-/* Play icon */
-.generate-videos-btn::before {
-  content: "▶";
-  margin-right: 10px;
-  font-size: 14px;
-  color: #87CEEB;
-}
-
 /* Top lighting effect */
 .generate-videos-btn::after {
   content: '';
@@ -1731,11 +1723,12 @@ input[type="file"] {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  width: 80%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
   border-radius: 50%;
   z-index: 2;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 /* Particle System */
