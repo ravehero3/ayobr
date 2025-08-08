@@ -2100,8 +2100,8 @@ input[type="file"] {
 
 /* Hover effects - scale the whole container */
 .audio-container:hover, .image-container:hover {
-  /* Scale up the entire container by 2% */
-  transform: scale(1.02) !important;
+  /* Scale up the entire container by 4% */
+  transform: scale(1.04) !important;
 
   /* Add 5% white overlay while maintaining rounded corners */
   background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)), 

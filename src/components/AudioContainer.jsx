@@ -56,6 +56,11 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           setDuration(ws.getDuration());
           wavesurfer.current = ws;
 
+          // Track play/pause state
+          ws.on('play', () => setIsPlaying(true));
+          ws.on('pause', () => setIsPlaying(false));
+          ws.on('finish', () => setIsPlaying(false));
+
           // Clean up blob URL when component unmounts
           return () => {
             if (audioUrl) {
@@ -314,10 +319,13 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             {/* Play/pause button - centered */}
             <button
               onClick={handlePlayPause}
-              className="w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-none"
+              className="w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
               style={{
-                color: 'rgba(255, 255, 255, 0.9)'
+                color: 'rgba(255, 255, 255, 0.9)',
+                outline: 'none',
+                border: 'none'
               }}
+              onFocus={(e) => e.target.blur()}
             >
               {isPlaying ? (
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
