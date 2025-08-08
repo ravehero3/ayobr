@@ -82,7 +82,6 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         borderRadius: '24px',
         border: '1px solid rgba(128, 128, 128, 0.5)',
         boxShadow: `
-          0 0 0 2px rgba(255, 255, 255, 0.1),
           0 0 20px rgba(0, 0, 0, 0.15)
         `,
         backdropFilter: 'blur(16px)',
