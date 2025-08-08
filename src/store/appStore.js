@@ -116,16 +116,20 @@ export const useAppStore = create((set, get) => ({
       return state.currentPage;
     }
 
-    // Fallback to automatic detection
+    // Fallback to automatic detection with improved logic
     const hasFiles = state.pairs.some(pair => pair.audio || pair.image);
     const hasVideos = state.generatedVideos.length > 0;
 
-    if (hasVideos) {
+    // Priority order: videos > generation > files > upload
+    if (hasVideos && !state.isGenerating) {
       return 'download';
     } else if (state.isGenerating) {
       return 'generation';
-    } else if (hasFiles || state.isFilesBeingDropped) {
+    } else if (hasFiles) {
       return 'fileManagement';
+    } else if (state.isFilesBeingDropped) {
+      // Still processing files, stay on current page to avoid flickering
+      return hasFiles ? 'fileManagement' : 'upload';
     } else {
       return 'upload';
     }
@@ -137,6 +141,9 @@ export const useAppStore = create((set, get) => ({
 
   // Force page navigation
   navigateToPage: (page) => set({ currentPage: page }),
+
+  // Reset page state to auto-detect (useful for recovery)
+  resetPageState: () => set({ currentPage: null, isFilesBeingDropped: false }),
 
   // Generation state
   setIsGenerating: (isGenerating) => set({ isGenerating }),

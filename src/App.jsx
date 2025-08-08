@@ -20,7 +20,7 @@ import SpacingSlider from './components/SpacingSlider';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -182,6 +182,33 @@ function App() {
       setHasLeftDownloadPage(true); // Mark as left when navigating away with videos
     }
   }, [currentPage, generatedVideos.length]);
+
+  // Recovery mechanism for stuck states
+  React.useEffect(() => {
+    const checkForStuckState = () => {
+      const hasFiles = pairs.some(pair => pair.audio || pair.image);
+      const hasVideos = generatedVideos.length > 0;
+      
+      // If we're on upload page but have files, and not generating or dropping files
+      if (currentPage === 'upload' && hasFiles && !isGenerating && !useAppStore.getState().isFilesBeingDropped) {
+        console.log('Detected stuck state: on upload page with files, recovering...');
+        resetPageState();
+      }
+      
+      // If we're stuck in file dropping state for too long
+      if (useAppStore.getState().isFilesBeingDropped) {
+        setTimeout(() => {
+          if (useAppStore.getState().isFilesBeingDropped) {
+            console.log('File dropping state stuck, forcing reset...');
+            setIsFilesBeingDropped(false);
+          }
+        }, 3000); // 3 second timeout
+      }
+    };
+
+    const timeoutId = setTimeout(checkForStuckState, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, pairs, generatedVideos, isGenerating, resetPageState, setIsFilesBeingDropped]);
 
   const handleBackToFileManagement = useCallback(() => {
     clearGeneratedVideos();

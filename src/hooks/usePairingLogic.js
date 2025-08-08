@@ -41,6 +41,7 @@ export const usePairingLogic = () => {
       // Prevent concurrent processing
       if (processingRef.current) {
         console.log('Already processing files, ignoring duplicate call');
+        setIsFilesBeingDropped(false);
         return;
       }
       
@@ -55,17 +56,47 @@ export const usePairingLogic = () => {
 
         console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files (Drop ID: ${dropId})`);
 
-        // If no valid files, don't change anything
+        // If no valid files, reset state and return
         if (audioFiles.length === 0 && imageFiles.length === 0) {
+          console.log('No valid files found, resetting state');
+          setIsFilesBeingDropped(false);
           return;
         }
 
-        // Check if these exact files were just processed
-        const currentFileIds = [...audioFiles, ...imageFiles].map(getFileId);
+        // Get current state for better duplicate detection
+        const currentPairs = pairs;
+        const existingAudioFiles = currentPairs.map(pair => pair.audio).filter(Boolean);
+        const existingImageFiles = currentPairs.map(pair => pair.image).filter(Boolean);
+
+        // Improved duplicate detection - check exact file properties
+        const isDuplicateFile = (newFile, existingFiles) => {
+          return existingFiles.some(existing => 
+            existing.name === newFile.name && 
+            existing.size === newFile.size && 
+            existing.lastModified === newFile.lastModified &&
+            existing.type === newFile.type
+          );
+        };
+
+        const newAudioFiles = audioFiles.filter(file => !isDuplicateFile(file, existingAudioFiles));
+        const newImageFiles = imageFiles.filter(file => !isDuplicateFile(file, existingImageFiles));
+
+        console.log(`After duplicate filtering: ${newAudioFiles.length} new audio, ${newImageFiles.length} new images`);
+
+        // If all files are duplicates, reset state and return
+        if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
+          console.log('All files are duplicates, skipping processing');
+          setIsFilesBeingDropped(false);
+          return;
+        }
+
+        // Check if these exact files were just processed (additional safety)
+        const currentFileIds = [...newAudioFiles, ...newImageFiles].map(getFileId);
         const hasRecentDuplicates = currentFileIds.some(id => lastProcessedFiles.current.has(id));
         
         if (hasRecentDuplicates) {
           console.log('Detected recently processed files, skipping to prevent duplicates');
+          setIsFilesBeingDropped(false);
           return;
         }
 
@@ -91,20 +122,14 @@ export const usePairingLogic = () => {
         const existingAudioFiles = currentPairs.filter(pair => pair.audio).map(pair => pair.audio);
         const existingImageFiles = currentPairs.filter(pair => pair.image).map(pair => pair.image);
 
-        // Filter out files that are exactly the same (same file object, not just name)
-        const newAudioFiles = audioFiles.filter(file => !existingAudioFiles.some(existing => 
-          existing.name === file.name && existing.size === file.size && existing.lastModified === file.lastModified
-        ));
-        const newImageFiles = imageFiles.filter(file => !existingImageFiles.some(existing => 
-          existing.name === file.name && existing.size === file.size && existing.lastModified === file.lastModified
-        ));
+        // Mark these files as processed to prevent immediate re-processing
+        currentFileIds.forEach(id => lastProcessedFiles.current.add(id));
 
-        console.log(`After filtering duplicates: ${newAudioFiles.length} new audio files, ${newImageFiles.length} new image files (Drop ID: ${dropId})`);
-
-        // If no new files after filtering, don't change anything
-        if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
-          console.log(`No new files to add - all files already exist in pairs (Drop ID: ${dropId})`);
-          return;
+        // Clean up old processed file IDs (keep only last 50)
+        if (lastProcessedFiles.current.size > 50) {
+          const ids = Array.from(lastProcessedFiles.current);
+          lastProcessedFiles.current.clear();
+          ids.slice(-25).forEach(id => lastProcessedFiles.current.add(id));
         }
 
         // Start with current pairs
@@ -149,15 +174,18 @@ export const usePairingLogic = () => {
         console.log(`Updated pairs count: ${newPairs.length} (Drop ID: ${dropId})`);
         setPairs(newPairs);
         
+      } catch (error) {
+        console.error('Error processing files:', error);
+        setIsFilesBeingDropped(false);
       } finally {
         // Reset processing lock and file dropping state after a delay
         setTimeout(() => {
           processingRef.current = false;
           setIsFilesBeingDropped(false);
-        }, 200);
+        }, 300);
       }
-    }, 50); // 50ms debounce delay
-  }, [pairs, setPairs]);
+    }, 100); // Increased debounce delay for better stability
+  }, [pairs, setPairs, setIsFilesBeingDropped]);
 
   const moveContainerUp = useCallback((pairId) => {
     const currentIndex = pairs.findIndex(pair => pair.id === pairId);
