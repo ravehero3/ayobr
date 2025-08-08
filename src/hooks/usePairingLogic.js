@@ -44,12 +44,24 @@ export const usePairingLogic = () => {
       console.log('Processing unprocessed files:', unprocessedFiles);
 
       // Separate audio and image files
-      const audioFiles = unprocessedFiles.filter(file => 
-        file.type.startsWith('audio/') && (file.type.includes('mp3') || file.type.includes('wav'))
-      );
-      const imageFiles = unprocessedFiles.filter(file => 
-        file.type.startsWith('image/') && (file.type.includes('jpeg') || file.type.includes('jpg') || file.type.includes('png'))
-      );
+      const audioFiles = unprocessedFiles.filter(file => {
+        const isAudioType = file.type.startsWith('audio/') || 
+                           file.type === 'audio/mpeg' || 
+                           file.type === 'audio/wav' || 
+                           file.type === 'audio/mp3';
+        const hasAudioExtension = file.name.toLowerCase().endsWith('.mp3') || 
+                                 file.name.toLowerCase().endsWith('.wav');
+        return isAudioType || hasAudioExtension;
+      });
+      const imageFiles = unprocessedFiles.filter(file => {
+        const isImageType = file.type.startsWith('image/');
+        const hasImageExtension = file.name.toLowerCase().endsWith('.jpg') || 
+                                 file.name.toLowerCase().endsWith('.jpeg') || 
+                                 file.name.toLowerCase().endsWith('.png') || 
+                                 file.name.toLowerCase().endsWith('.heic') || 
+                                 file.name.toLowerCase().endsWith('.heif');
+        return isImageType || hasImageExtension;
+      });
 
       console.log('Separated files - Audio:', audioFiles.length, 'Images:', imageFiles.length);
 
