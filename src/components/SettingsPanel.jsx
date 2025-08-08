@@ -55,17 +55,14 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Animated blurry background */}
+          {/* Invisible backdrop for closing */}
           <motion.div
             className="fixed inset-0 z-40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-              background: 'linear-gradient(45deg, #0f0f23, #1a1a2e, #16213e, #0f0f23)',
-              backgroundSize: '400% 400%',
-              animation: 'gradientShift 8s ease infinite',
-              filter: 'blur(2px)'
+              background: 'transparent'
             }}
             onClick={onClose}
           />
