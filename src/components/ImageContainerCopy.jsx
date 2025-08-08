@@ -42,7 +42,7 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
         // Match the original container styling exactly
         background: 'rgba(0, 0, 0, 0.3)',
         backgroundImage: 'none',
-        borderRadius: '24px',
+        borderRadius: '12px',
         border: '1px solid rgba(128, 128, 128, 0.5)',
         boxShadow: `
           0 0 20px rgba(0, 0, 0, 0.15)

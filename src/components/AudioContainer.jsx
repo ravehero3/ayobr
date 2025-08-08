@@ -157,7 +157,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         background: 'rgba(0, 0, 0, 0.3)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '24px',
+        borderRadius: '12px',
         backgroundImage: 'none', // Clean container without texture
         padding: audio ? '16px' : '20px',
         height: '160px',
