@@ -79,7 +79,7 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         // Match the original container styling exactly
         background: 'rgba(0, 0, 0, 0.3)',
         backgroundImage: 'none',
-        borderRadius: '12px',
+        borderRadius: '24px',
         border: '1px solid rgba(128, 128, 128, 0.5)',
         boxShadow: `
           0 0 20px rgba(0, 0, 0, 0.15)

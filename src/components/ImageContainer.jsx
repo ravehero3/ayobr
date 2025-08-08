@@ -83,7 +83,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         background: 'rgba(0, 0, 0, 0.3)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '12px',
+        borderRadius: '24px',
         backgroundImage: 'none', // Clean container without texture
         padding: image ? '16px' : '20px',
         height: '160px',
