@@ -315,13 +315,12 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
-            width: '32px', 
-            height: '48px',
-            marginTop: '-42px',
-            marginLeft: '-7px',
-            marginRight: '-10px'
+            width: '40px', 
+            height: '200px',
+            marginLeft: '-20px',
+            marginRight: '-20px'
           }}>
-            <div className="relative flex items-center justify-center" style={{ width: '32px', height: '48px' }}>
+            <div className="relative flex items-center justify-center" style={{ width: '40px', height: '40px' }}>
               {/* Plus icon using SVG for crisp rendering */}
               <svg 
                 width="20" 
