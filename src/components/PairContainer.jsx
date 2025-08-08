@@ -165,8 +165,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
   return (
     <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ 
-      marginLeft: containerSpacing >= 0 ? `${8 + containerSpacing}px` : '8px',
-      transform: containerSpacing < 0 ? `translateX(${containerSpacing}px)` : 'none'
+      marginLeft: '8px',
+      marginBottom: `${4 + Math.abs(containerSpacing)}px`
     }}>
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
