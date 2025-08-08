@@ -210,7 +210,7 @@ const SettingsPanel = () => {
                             />
                           ) : (
                             <>
-                              <svg className="w-6 h-6 text-gray-400 mb-1" style={{ marginLeft: '3px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-6 h-6 text-gray-400 mb-1" style={{ marginLeft: '6px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                               </svg>
                               <span className="text-gray-400 font-medium text-sm">Custom</span>
