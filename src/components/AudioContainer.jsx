@@ -312,12 +312,9 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full relative z-10">
-          <div 
-            className="p-4 rounded-full mb-4 bg-white/10 backdrop-blur-sm border border-white/20"
-            style={{ marginLeft: '2px' }}
-          >
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M2 12h2v2H2zm4-2h2v6H6zm4-4h2v12h-2zm4 2h2v8h-2zm4-4h2v16h-2z"/>
+          <div className="mb-4">
+            <svg className="w-12 h-12 text-white/80" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z"/>
             </svg>
           </div>
           <p className="text-body-text text-white mb-1 text-center drop-shadow-lg">Drop audio file here</p>
