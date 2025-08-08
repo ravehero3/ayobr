@@ -68,19 +68,24 @@ const UserProfile = ({ isOpen, onClose }) => {
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-[100] flex items-center justify-center p-6"
           style={{
-            background: 'rgba(0, 0, 0, 0.3)',
-            backdropFilter: 'blur(25px)',
-            WebkitBackdropFilter: 'blur(25px)',
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(35px)',
+            WebkitBackdropFilter: 'blur(35px)',
+            minHeight: '100vh',
+            minWidth: '100vw',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           onClick={handleBackdropClick}
         >
           {/* User Profile Modal - Version 2 Glassmorphism */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+            initial={{ opacity: 0, scale: 0.95, y: 0 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+            exit={{ opacity: 0, scale: 0.95, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="relative w-[420px] max-h-[90vh] rounded-3xl overflow-y-auto"
+            className="relative w-[420px] max-h-[80vh] rounded-3xl overflow-y-auto"
             style={{
               background: 'rgba(0, 0, 0, 0.98)',
               backdropFilter: 'blur(25px)',

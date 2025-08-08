@@ -20,7 +20,7 @@ import SpacingSlider from './components/SpacingSlider';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped, isModalOpen } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -298,6 +298,8 @@ function App() {
         dragState.isAudioDragging ? 'audio-drag-active' : ''
       } ${
         dragState.isImageDragging ? 'image-drag-active' : ''
+      } ${
+        isModalOpen ? 'modal-open' : 'modal-open no-blur'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}

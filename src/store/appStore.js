@@ -19,6 +19,7 @@ export const useAppStore = create((set, get) => ({
   
   // User profile
   userProfileImage: null, // Store base64 image data
+  isModalOpen: false, // Track when modal is open for background blur
 
   // Container spacing
   containerSpacing: 4, // Default spacing in pixels between container pairs
@@ -238,6 +239,7 @@ export const useAppStore = create((set, get) => ({
 
   // User profile actions
   setUserProfileImage: (imageData) => set({ userProfileImage: imageData }),
+  setIsModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
 
   // Video settings actions
   setVideoBackground: (background) => set(state => ({
