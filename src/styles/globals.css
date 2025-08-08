@@ -422,7 +422,7 @@
 /* Subtle Gradient + Particles Button Styles */
 .generate-btn-subtle-particles {
   position: relative;
-  padding: 12px 24px;
+  padding: 7px 24px 17px 24px;
   background: #0a0a0a;
   color: white;
   border: 2px solid transparent;

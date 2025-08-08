@@ -71,7 +71,7 @@ const Footer = ({ onGenerateVideos }) => {
         {/* Center - Ready Status */}
         <div className="flex items-center space-x-6">
           {/* Ready counter */}
-          <div className="flex items-center space-x-2" style={{ marginLeft: '-95px' }}>
+          <div className="flex items-center space-x-2" style={{ marginLeft: '-93px' }}>
             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -90,7 +90,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Generate Videos Button - centered with footer */}
-        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 20px)', top: 'calc(50% + 2px)', transform: 'translateY(-50%)' }}>
+        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 18px)', top: 'calc(50% + 2px)', transform: 'translateY(-50%)' }}>
           {generatedVideos.length === 0 && !isGenerating && (
             <button
               onClick={onGenerateVideos}
@@ -112,7 +112,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Right side - Settings Button */}
-        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 270px)' }}>
+        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 275px)' }}>
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
             className="w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-300"
