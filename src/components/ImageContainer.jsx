@@ -77,7 +77,6 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           0 0 0 2px rgba(255, 255, 255, 0.1),
           0 0 20px rgba(0, 0, 0, 0.15)
         `,
-        marginBottom: '16px',
       }}
       data-pair-id={pairId}
       data-image-container="true"
