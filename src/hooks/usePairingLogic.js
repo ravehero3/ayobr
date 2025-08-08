@@ -1,215 +1,164 @@
 
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { useAppStore } from '../store/appStore';
-import { v4 as uuidv4 } from 'uuid';
 
 export const usePairingLogic = () => {
-  const { pairs, addPair, updatePair, setPairs, setIsFilesBeingDropped } = useAppStore();
-  const processingRef = useRef(false);
-  const lastProcessedFiles = useRef(new Set());
-  const debounceTimeoutRef = useRef(null);
+  const { pairs, setPairs, setCurrentPage, setIsFilesBeingDropped } = useAppStore();
 
-  const isAudioFile = (file) => {
-    return file.type.startsWith('audio/') || 
-           file.name.toLowerCase().endsWith('.mp3') || 
-           file.name.toLowerCase().endsWith('.wav');
-  };
+  // Cache to track processed files and prevent immediate re-processing
+  const processedFilesCache = new Set();
 
-  const isImageFile = (file) => {
-    return file.type.startsWith('image/') ||
-           file.name.toLowerCase().endsWith('.png') ||
-           file.name.toLowerCase().endsWith('.jpg') ||
-           file.name.toLowerCase().endsWith('.jpeg');
-  };
-
-  // Create a unique identifier for a file
-  const getFileId = (file) => {
-    return `${file.name}_${file.size}_${file.lastModified}`;
-  };
+  const clearFileCache = useCallback(() => {
+    processedFilesCache.clear();
+  }, []);
 
   const handleFileDrop = useCallback((files) => {
-    // Immediately signal that files are being dropped for instant background change
-    setIsFilesBeingDropped(true);
+    console.log('usePairingLogic: handleFileDrop called with files:', files);
     
-    // Clear any existing debounce timeout
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
+    if (!files || files.length === 0) {
+      console.log('usePairingLogic: No files provided');
+      return;
     }
 
-    // Debounce the file processing to prevent rapid consecutive calls
-    debounceTimeoutRef.current = setTimeout(() => {
-      // Prevent concurrent processing
-      if (processingRef.current) {
-        console.log('Already processing files, ignoring duplicate call');
+    // Mark that files are being dropped/processed
+    setIsFilesBeingDropped(true);
+
+    try {
+      // Filter out files that have been recently processed (same file object)
+      const unprocessedFiles = files.filter(file => {
+        const fileKey = `${file.name}_${file.size}_${file.lastModified}`;
+        if (processedFilesCache.has(fileKey)) {
+          console.log('Skipping already processed file:', file.name);
+          return false;
+        }
+        processedFilesCache.add(fileKey);
+        return true;
+      });
+
+      if (unprocessedFiles.length === 0) {
+        console.log('All files were already processed, skipping');
         setIsFilesBeingDropped(false);
         return;
       }
-      
-      processingRef.current = true;
-      
-      try {
-        const dropId = Date.now();
-        console.log(`Processing ${files.length} files for pairing (Drop ID: ${dropId})`);
-        
-        const audioFiles = files.filter(isAudioFile);
-        const imageFiles = files.filter(isImageFile);
 
-        console.log(`Found ${audioFiles.length} audio files and ${imageFiles.length} image files (Drop ID: ${dropId})`);
+      console.log('Processing unprocessed files:', unprocessedFiles);
 
-        // If no valid files, reset state and return
-        if (audioFiles.length === 0 && imageFiles.length === 0) {
-          console.log('No valid files found, resetting state');
-          setIsFilesBeingDropped(false);
-          return;
-        }
+      // Separate audio and image files
+      const audioFiles = unprocessedFiles.filter(file => 
+        file.type.startsWith('audio/') && (file.type.includes('mp3') || file.type.includes('wav'))
+      );
+      const imageFiles = unprocessedFiles.filter(file => 
+        file.type.startsWith('image/') && (file.type.includes('jpeg') || file.type.includes('jpg') || file.type.includes('png'))
+      );
 
-        // Get current state for better duplicate detection
-        const currentPairs = pairs;
-        const existingAudioFiles = currentPairs.map(pair => pair.audio).filter(Boolean);
-        const existingImageFiles = currentPairs.map(pair => pair.image).filter(Boolean);
+      console.log('Separated files - Audio:', audioFiles.length, 'Images:', imageFiles.length);
 
-        // Improved duplicate detection - check exact file properties
-        const isDuplicateFile = (newFile, existingFiles) => {
-          return existingFiles.some(existing => 
-            existing.name === newFile.name && 
-            existing.size === newFile.size && 
-            existing.lastModified === newFile.lastModified &&
-            existing.type === newFile.type
-          );
-        };
-
-        const newAudioFiles = audioFiles.filter(file => !isDuplicateFile(file, existingAudioFiles));
-        const newImageFiles = imageFiles.filter(file => !isDuplicateFile(file, existingImageFiles));
-
-        console.log(`After duplicate filtering: ${newAudioFiles.length} new audio, ${newImageFiles.length} new images`);
-
-        // If all files are duplicates, reset state and return
-        if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
-          console.log('All files are duplicates, skipping processing');
-          setIsFilesBeingDropped(false);
-          return;
-        }
-
-        // Check if these exact files were just processed (additional safety)
-        const currentFileIds = [...newAudioFiles, ...newImageFiles].map(getFileId);
-        const hasRecentDuplicates = currentFileIds.some(id => lastProcessedFiles.current.has(id));
-        
-        if (hasRecentDuplicates) {
-          console.log('Detected recently processed files, skipping to prevent duplicates');
-          setIsFilesBeingDropped(false);
-          return;
-        }
-
-        // Update the recently processed files set with shorter retention
-        currentFileIds.forEach(id => lastProcessedFiles.current.add(id));
-        
-        // Clean up old entries more aggressively (keep only last 20 files)
-        if (lastProcessedFiles.current.size > 20) {
-          const entries = Array.from(lastProcessedFiles.current);
-          const toDelete = entries.slice(0, entries.length - 20);
-          toDelete.forEach(id => lastProcessedFiles.current.delete(id));
-        }
-        
-        // Clear cache after a short delay to allow immediate re-drops
-        setTimeout(() => {
-          currentFileIds.forEach(id => lastProcessedFiles.current.delete(id));
-        }, 2000);
-
-        // Use current pairs from the hook
-        
-        // Get existing files to avoid exact duplicates (same file object)
-        const existingAudioFiles = currentPairs.filter(pair => pair.audio).map(pair => pair.audio);
-        const existingImageFiles = currentPairs.filter(pair => pair.image).map(pair => pair.image);
-
-        // Mark these files as processed to prevent immediate re-processing
-        currentFileIds.forEach(id => lastProcessedFiles.current.add(id));
-
-        // Clean up old processed file IDs (keep only last 50)
-        if (lastProcessedFiles.current.size > 50) {
-          const ids = Array.from(lastProcessedFiles.current);
-          lastProcessedFiles.current.clear();
-          ids.slice(-25).forEach(id => lastProcessedFiles.current.add(id));
-        }
-
-        // Start with current pairs
-        const newPairs = [...currentPairs];
-        
-        // First, try to fill existing empty containers
-        let audioIndex = 0;
-        let imageIndex = 0;
-        
-        // Fill existing empty audio slots
-        for (const pair of newPairs) {
-          if (!pair.audio && audioIndex < newAudioFiles.length) {
-            pair.audio = newAudioFiles[audioIndex];
-            audioIndex++;
-          }
-        }
-        
-        // Fill existing empty image slots
-        for (const pair of newPairs) {
-          if (!pair.image && imageIndex < newImageFiles.length) {
-            pair.image = newImageFiles[imageIndex];
-            imageIndex++;
-          }
-        }
-        
-        // If we still have files left, create new pairs for them
-        const remainingAudioFiles = newAudioFiles.slice(audioIndex);
-        const remainingImageFiles = newImageFiles.slice(imageIndex);
-        const maxRemaining = Math.max(remainingAudioFiles.length, remainingImageFiles.length);
-        
-        for (let i = 0; i < maxRemaining; i++) {
-          const audioFile = remainingAudioFiles[i] || null;
-          const imageFile = remainingImageFiles[i] || null;
-          
-          newPairs.push({
-            id: uuidv4(),
-            audio: audioFile,
-            image: imageFile
-          });
-        }
-
-        console.log(`Updated pairs count: ${newPairs.length} (Drop ID: ${dropId})`);
-        setPairs(newPairs);
-        
-      } catch (error) {
-        console.error('Error processing files:', error);
+      if (audioFiles.length === 0 && imageFiles.length === 0) {
+        console.log('No valid audio or image files found');
+        alert('Please upload valid audio files (MP3, WAV) or image files (PNG, JPG, JPEG).');
         setIsFilesBeingDropped(false);
-      } finally {
-        // Reset processing lock and file dropping state after a delay
-        setTimeout(() => {
-          processingRef.current = false;
-          setIsFilesBeingDropped(false);
-        }, 300);
+        return;
       }
-    }, 100); // Increased debounce delay for better stability
-  }, [pairs, setPairs, setIsFilesBeingDropped]);
+
+      // Get current pairs from the hook
+      const currentPairs = pairs;
+      
+      // Get existing files to avoid exact duplicates (same file object)
+      const existingAudioFiles = currentPairs.filter(pair => pair.audio).map(pair => pair.audio);
+      const existingImageFiles = currentPairs.filter(pair => pair.image).map(pair => pair.image);
+
+      // Mark these files as processed to prevent immediate re-processing
+      [...audioFiles, ...imageFiles].forEach(file => {
+        const fileKey = `${file.name}_${file.size}_${file.lastModified}`;
+        processedFilesCache.add(fileKey);
+      });
+
+      // Filter out files that are already in pairs (exact same file object)
+      const newAudioFiles = audioFiles.filter(file => !existingAudioFiles.includes(file));
+      const newImageFiles = imageFiles.filter(file => !existingImageFiles.includes(file));
+
+      console.log('New files after filtering - Audio:', newAudioFiles.length, 'Images:', newImageFiles.length);
+
+      if (newAudioFiles.length === 0 && newImageFiles.length === 0) {
+        console.log('All files are already in pairs');
+        setIsFilesBeingDropped(false);
+        return;
+      }
+
+      // Create new pairs for new files
+      const newPairs = [...currentPairs];
+
+      // First, try to fill existing empty slots
+      newAudioFiles.forEach(audioFile => {
+        const emptyPair = newPairs.find(pair => !pair.audio);
+        if (emptyPair) {
+          emptyPair.audio = audioFile;
+          console.log('Added audio to existing pair:', emptyPair.id);
+        } else {
+          // Create new pair for this audio
+          const newPair = {
+            id: `pair-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            audio: audioFile,
+            image: null
+          };
+          newPairs.push(newPair);
+          console.log('Created new pair for audio:', newPair.id);
+        }
+      });
+
+      newImageFiles.forEach(imageFile => {
+        const emptyPair = newPairs.find(pair => !pair.image);
+        if (emptyPair) {
+          emptyPair.image = imageFile;
+          console.log('Added image to existing pair:', emptyPair.id);
+        } else {
+          // Create new pair for this image
+          const newPair = {
+            id: `pair-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            audio: null,
+            image: imageFile
+          };
+          newPairs.push(newPair);
+          console.log('Created new pair for image:', newPair.id);
+        }
+      });
+
+      console.log('Final pairs after processing:', newPairs.length);
+      setPairs(newPairs);
+
+      // Navigate to file management page
+      setCurrentPage('fileManagement');
+      
+      // Small delay to allow UI to update, then clear the dropping state
+      setTimeout(() => {
+        setIsFilesBeingDropped(false);
+      }, 100);
+
+    } catch (error) {
+      console.error('Error in handleFileDrop:', error);
+      setIsFilesBeingDropped(false);
+    }
+  }, [pairs, setPairs, setCurrentPage, setIsFilesBeingDropped]);
 
   const moveContainerUp = useCallback((pairId) => {
-    const currentIndex = pairs.findIndex(pair => pair.id === pairId);
-    if (currentIndex > 0) {
-      const newPairs = [...pairs];
-      // Swap with the previous pair
-      [newPairs[currentIndex - 1], newPairs[currentIndex]] = [newPairs[currentIndex], newPairs[currentIndex - 1]];
-      setPairs(newPairs);
+    const currentPairs = [...pairs];
+    const index = currentPairs.findIndex(pair => pair.id === pairId);
+    
+    if (index > 0) {
+      [currentPairs[index], currentPairs[index - 1]] = [currentPairs[index - 1], currentPairs[index]];
+      setPairs(currentPairs);
     }
   }, [pairs, setPairs]);
 
   const moveContainerDown = useCallback((pairId) => {
-    const currentIndex = pairs.findIndex(pair => pair.id === pairId);
-    if (currentIndex >= 0 && currentIndex < pairs.length - 1) {
-      const newPairs = [...pairs];
-      // Swap with the next pair
-      [newPairs[currentIndex], newPairs[currentIndex + 1]] = [newPairs[currentIndex + 1], newPairs[currentIndex]];
-      setPairs(newPairs);
+    const currentPairs = [...pairs];
+    const index = currentPairs.findIndex(pair => pair.id === pairId);
+    
+    if (index < currentPairs.length - 1) {
+      [currentPairs[index], currentPairs[index + 1]] = [currentPairs[index + 1], currentPairs[index]];
+      setPairs(currentPairs);
     }
   }, [pairs, setPairs]);
-
-  const clearFileCache = useCallback(() => {
-    lastProcessedFiles.current.clear();
-    console.log('Cleared recent file cache');
-  }, []);
 
   return {
     handleFileDrop,
