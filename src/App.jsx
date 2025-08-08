@@ -551,8 +551,6 @@ function App() {
       {/* Footer */}
       <Footer />
 
-      {/* Settings Panel */}
-      <SettingsPanel />
 
       {/* Drag Overlay for Container Copies */}
       <AudioContainerCopy 
