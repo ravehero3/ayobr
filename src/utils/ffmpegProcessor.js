@@ -286,14 +286,14 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-map', '1:a',                 // Map audio from second input (audio file)
       '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
       '-c:v', 'libx264',
-      '-preset', 'ultrafast',        // Fastest encoding preset
+      '-preset', 'superfast',        // Even faster encoding preset
       '-tune', 'zerolatency',        // Ultra-low latency encoding
-      '-crf', '28',                  // Optimized CRF for speed/quality balance
-      '-g', '250',                   // Larger GOP for better compression efficiency
+      '-crf', '30',                  // Higher CRF for faster encoding (slightly lower quality but much faster)
+      '-g', '1000',                  // Maximum GOP size for static images
       '-bf', '0',                    // Disable B-frames for faster encoding
       '-refs', '1',                  // Single reference frame
       '-me_method', 'dia',           // Fastest motion estimation
-      '-subq', '1',                  // Minimal subpixel refinement
+      '-subq', '0',                  // Disable subpixel refinement completely
       '-trellis', '0',               // Disable trellis quantization
       '-aq-mode', '0',               // Disable adaptive quantization
       '-fast-pskip', '1',            // Enable fast P-frame skip
@@ -302,7 +302,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-sc_threshold', '0',          // Disable scene change detection
       '-partitions', 'none',         // Disable all partitions
       '-me_range', '4',              // Minimal motion estimation range
-      '-r', '1',                     // 1 FPS since image is static
+      '-r', '0.5',                   // Even lower FPS for static content
       '-c:a', 'aac',                 // Use AAC codec for audio (guaranteed compatibility)
       '-b:a', '320k',                // High bitrate for uncompressed quality
       '-ar', '48000',                // High sample rate
