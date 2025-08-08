@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full HD Video Generation Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #87CEEB, #1e3a8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #87CEEB;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .resolution-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .resolution-badge::before {
+            content: "FULL HD";
+            margin-right: 8px;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .download-btn-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .download-btn {
+            position: relative;
+            padding: 18px 36px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 30%, #0a0a0a 100%) padding-box, 
+                       conic-gradient(from 270deg, 
+                           #1e3a8a 0deg, 
+                           #4a6bb8 30deg, 
+                           #87CEEB 90deg, 
+                           #6bb5d0 120deg, 
+                           #333333 180deg, 
+                           #1a1a1a 210deg, 
+                           #000000 270deg, 
+                           #0d1e44 330deg) border-box;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: visible;
+            min-width: 220px;
+            text-align: center;
+            box-shadow: 0 -15px 40px rgba(30, 58, 138, 0.35), 
+                       inset 0 2px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .download-btn::before {
+            content: "⬇";
+            margin-right: 10px;
+            font-size: 14px;
+            color: #87CEEB;
+        }
+
+        .download-btn::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 25%;
+            right: 25%;
+            height: 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+            border-radius: 50px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 -18px 50px rgba(135, 206, 235, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        /* Video Grid */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 40px;
+            justify-items: center;
+            position: relative;
+        }
+
+        /* Video Container - Full HD aspect ratio (16:9) */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            aspect-ratio: 16/9;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 0 30px rgba(59, 130, 246, 0.4),
+                0 0 60px rgba(59, 130, 246, 0.2),
+                0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .video-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                rgba(59, 130, 246, 0.8) 0%,
+                rgba(139, 92, 246, 0.6) 25%,
+                rgba(59, 130, 246, 0.8) 50%,
+                rgba(139, 92, 246, 0.6) 75%,
+                rgba(59, 130, 246, 0.8) 100%);
+            background-size: 200% 200%;
+            border-radius: 22px;
+            z-index: -1;
+            animation: glowRotate 3s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes glowRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .video-container:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 
+                0 0 40px rgba(59, 130, 246, 0.6),
+                0 0 80px rgba(59, 130, 246, 0.3),
+                0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .video-container:hover::before {
+            opacity: 1;
+            animation-duration: 1.5s;
+        }
+
+        /* Full HD Thumbnail */
+        .video-thumbnail {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e40af);
+            overflow: hidden;
+        }
+
+        .video-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .carti-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1e40af, #1e3a8a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Full HD Badge */
+        .hd-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 2;
+        }
+
+        /* Play Button */
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        .play-button::before {
+            content: "▶";
+            color: #1e3a8a;
+            font-size: 24px;
+            margin-left: 4px;
+        }
+
+        .video-container:hover .play-button {
+            background: rgba(59, 130, 246, 0.95);
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        .video-container:hover .play-button::before {
+            color: white;
+        }
+
+        /* Video Info */
+        .video-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 25px 20px 18px;
+            text-align: left;
+            z-index: 1;
+        }
+
+        .video-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #87CEEB;
+        }
+
+        .video-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .video-duration {
+            background: rgba(59, 130, 246, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .video-resolution {
+            color: #87CEEB;
+            font-weight: 600;
+        }
+
+        /* Mouse-Reactive Particle System */
+        .video-particle-system {
+            position: absolute;
+            top: -60px;
+            left: -60px;
+            right: -60px;
+            bottom: -60px;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .video-particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .video-particle-1 { 
+            width: 6px; height: 6px;
+            background: radial-gradient(circle, #3b82f6, transparent);
+            top: 20%; left: 15%; 
+        }
+        .video-particle-2 { 
+            width: 4px; height: 4px;
+            background: radial-gradient(circle, #1e40af, transparent);
+            top: 30%; right: 20%; 
+        }
+        .video-particle-3 { 
+            width: 8px; height: 8px;
+            background: radial-gradient(circle, #87CEEB, transparent);
+            bottom: 35%; left: 25%; 
+        }
+        .video-particle-4 { 
+            width: 5px; height: 5px;
+            background: radial-gradient(circle, #3b82f6, transparent);
+            bottom: 25%; right: 15%; 
+        }
+        .video-particle-5 { 
+            width: 7px; height: 7px;
+            background: radial-gradient(circle, #1e3a8a, transparent);
+            top: 60%; left: 10%; 
+        }
+        .video-particle-6 { 
+            width: 4px; height: 4px;
+            background: radial-gradient(circle, #3b82f6, transparent);
+            top: 70%; right: 25%; 
+        }
+        .video-particle-7 { 
+            width: 6px; height: 6px;
+            background: radial-gradient(circle, #87CEEB, transparent);
+            top: 15%; left: 60%; 
+        }
+        .video-particle-8 { 
+            width: 5px; height: 5px;
+            background: radial-gradient(circle, #1e40af, transparent);
+            bottom: 45%; right: 35%; 
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .videos-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 25px;
+            }
+            
+            .video-container {
+                max-width: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-container {
+                max-width: 260px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Video Generation Complete</h1>
+            <p class="subtitle">9 Full HD videos successfully generated</p>
+            <div class="resolution-badge">1920×1080</div>
+            
+            <div class="download-btn-container">
+                <button class="download-btn">Download All Videos</button>
+            </div>
+        </div>
+        
+        <div class="videos-grid">
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 1</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:30</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 2</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:28</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 3</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:32</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 4</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:29</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 5</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:31</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 6</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:27</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 7</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:33</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 8</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:30</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="video-thumbnail">
+                    <div class="carti-image">PC</div>
+                    <div class="hd-badge">FULL HD</div>
+                </div>
+                <div class="play-button"></div>
+                <div class="video-info">
+                    <div class="video-title">Video 9</div>
+                    <div class="video-details">
+                        <span class="video-resolution">1920×1080</span>
+                        <span class="video-duration">0:29</span>
+                    </div>
+                </div>
+                <div class="video-particle-system">
+                    <div class="video-particle video-particle-1"></div>
+                    <div class="video-particle video-particle-2"></div>
+                    <div class="video-particle video-particle-3"></div>
+                    <div class="video-particle video-particle-4"></div>
+                    <div class="video-particle video-particle-5"></div>
+                    <div class="video-particle video-particle-6"></div>
+                    <div class="video-particle video-particle-7"></div>
+                    <div class="video-particle video-particle-8"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mouse-reactive particle system
+        document.addEventListener('mousemove', function(e) {
+            const containers = document.querySelectorAll('.video-container');
+            
+            containers.forEach(container => {
+                const rect = container.getBoundingClientRect();
+                const particles = container.querySelectorAll('.video-particle');
+                
+                // Calculate mouse position relative to container
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Check if mouse is over the container
+                const isHovering = mouseX >= 0 && mouseX <= rect.width && 
+                                 mouseY >= 0 && mouseY <= rect.height;
+                
+                particles.forEach((particle, index) => {
+                    if (isHovering) {
+                        // Calculate distance from mouse to particle
+                        const particleRect = particle.getBoundingClientRect();
+                        const containerParticleX = particleRect.left - rect.left + particleRect.width/2;
+                        const containerParticleY = particleRect.top - rect.top + particleRect.height/2;
+                        
+                        const deltaX = mouseX - containerParticleX;
+                        const deltaY = mouseY - containerParticleY;
+                        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                        
+                        // Maximum influence distance
+                        const maxDistance = 150;
+                        
+                        if (distance < maxDistance) {
+                            const influence = 1 - (distance / maxDistance);
+                            const moveX = -deltaX * influence * 0.3;
+                            const moveY = -deltaY * influence * 0.3;
+                            const scale = 1 + influence * 0.5;
+                            
+                            particle.style.opacity = Math.min(1, influence * 2);
+                            particle.style.transform = `translate(${moveX}px, ${moveY}px) scale(${scale})`;
+                            particle.style.boxShadow = `0 0 ${influence * 15}px rgba(59, 130, 246, ${influence * 0.8})`;
+                        } else {
+                            particle.style.opacity = 0.3;
+                            particle.style.transform = 'translate(0, 0) scale(1)';
+                            particle.style.boxShadow = 'none';
+                        }
+                    } else {
+                        // Reset particles when not hovering
+                        particle.style.opacity = 0;
+                        particle.style.transform = 'translate(0, 0) scale(1)';
+                        particle.style.boxShadow = 'none';
+                    }
+                });
+            });
+        });
+
+        // Enhanced hover effects for video containers
+        const videoContainers = document.querySelectorAll('.video-container');
+        
+        videoContainers.forEach(container => {
+            container.addEventListener('mouseenter', function() {
+                const particles = this.querySelectorAll('.video-particle');
+                particles.forEach(particle => {
+                    particle.style.opacity = '0.6';
+                });
+            });
+            
+            container.addEventListener('mouseleave', function() {
+                const particles = this.querySelectorAll('.video-particle');
+                particles.forEach(particle => {
+                    particle.style.opacity = '0';
+                    particle.style.transform = 'translate(0, 0) scale(1)';
+                    particle.style.boxShadow = 'none';
+                });
+            });
+        });
+
+        // Download button functionality
+        document.querySelector('.download-btn').addEventListener('click', function() {
+            console.log('Downloading all Full HD videos...');
+            // Add your download logic here
+        });
+    </script>
+</body>
+</html>
