@@ -29,6 +29,27 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
     }
   };
 
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+
+    if (imageFile) {
+      updatePair(pairId, { image: imageFile });
+    }
+    
+    // Clear the input so the same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleContainerClick = () => {
+    if (!image) {
+      const fileInput = document.getElementById(`image-file-input-${pairId}`);
+      if (fileInput) {
+        fileInput.click();
+      }
+    }
+  };
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -86,7 +107,16 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onMouseLeave={() => setIsHovered(false)}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
+      onClick={handleContainerClick}
     >
+      {/* Hidden file input */}
+      <input
+        id={`image-file-input-${pairId}`}
+        type="file"
+        accept="image/*,.png,.jpg,.jpeg,.heic"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+      />
       {image ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
           {/* Top header bar with controls - matching audio container layout */}

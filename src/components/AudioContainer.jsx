@@ -109,6 +109,27 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
     }
   };
 
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const audioFile = files.find(file => file.type.startsWith('audio/'));
+
+    if (audioFile) {
+      updatePair(pairId, { audio: audioFile });
+    }
+    
+    // Clear the input so the same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleContainerClick = () => {
+    if (!audio) {
+      const fileInput = document.getElementById(`audio-file-input-${pairId}`);
+      if (fileInput) {
+        fileInput.click();
+      }
+    }
+  };
+
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -155,7 +176,16 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       onMouseLeave={() => setIsHovered(false)}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleFileDrop}
+      onClick={handleContainerClick}
     >
+      {/* Hidden file input */}
+      <input
+        id={`audio-file-input-${pairId}`}
+        type="file"
+        accept="audio/*,.mp3,.wav"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+      />
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
           {/* Top header bar with title (center) and controls */}
