@@ -313,9 +313,52 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       ) : (
         <div className="flex flex-col items-center justify-center h-full relative z-10">
           <div className="mb-4">
-            <svg className="w-12 h-12 text-white/80" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z"/>
-            </svg>
+            <div 
+              className="flex items-center gap-1" 
+              style={{ 
+                width: '48px', 
+                height: '48px', 
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+            >
+              <div
+                style={{
+                  width: '4px',
+                  height: '20px',
+                  background: '#ffffff',
+                  borderRadius: '2px',
+                  animation: 'wave 1.5s ease-in-out infinite alternate',
+                  animationDelay: '0s'
+                }}
+              />
+              <div
+                style={{
+                  width: '4px',
+                  height: '32px',
+                  background: '#ffffff',
+                  borderRadius: '2px',
+                  animation: 'wave 1.5s ease-in-out infinite alternate',
+                  animationDelay: '0.3s'
+                }}
+              />
+              <div
+                style={{
+                  width: '4px',
+                  height: '16px',
+                  background: '#ffffff',
+                  borderRadius: '2px',
+                  animation: 'wave 1.5s ease-in-out infinite alternate',
+                  animationDelay: '0.6s'
+                }}
+              />
+              <style jsx>{`
+                @keyframes wave {
+                  0% { transform: scaleY(0.3); opacity: 0.6; }
+                  100% { transform: scaleY(1); opacity: 1; }
+                }
+              `}</style>
+            </div>
           </div>
           <p className="text-body-text text-white mb-1 text-center drop-shadow-lg">Drop audio file here</p>
           <p className="text-small-notes text-white/70 font-light text-center drop-shadow-sm px-8 py-1 rounded-full bg-white/5 backdrop-blur-sm">MP3, WAV</p>
