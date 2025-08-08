@@ -7,19 +7,9 @@ import userIcon from '../assets/user_1754478889614.png';
 import UserProfile from './UserProfile';
 
 const Header = () => {
-  const { generatedVideos, pairs, userProfileImage, setIsModalOpen } = useAppStore();
+  const { generatedVideos, pairs, userProfileImage } = useAppStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
-
-  const handleProfileOpen = () => {
-    setIsProfileOpen(true);
-    setIsModalOpen?.(true); // Apply blur to background
-  };
-
-  const handleProfileClose = () => {
-    setIsProfileOpen(false);
-    setIsModalOpen?.(false); // Remove blur from background
-  };
 
   // Don't render header if no files are present
   if (!hasFiles) {
@@ -74,7 +64,7 @@ const Header = () => {
         {/* Profile Icon - Moved 350px to the right */}
         <div className="flex items-center">
           <button
-            onClick={handleProfileOpen}
+            onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
             style={{ marginRight: '0px' }} // Profile icon positioned via paddingRight
           >
@@ -89,7 +79,7 @@ const Header = () => {
         {/* User Profile Modal */}
         <UserProfile 
           isOpen={isProfileOpen}
-          onClose={handleProfileClose}
+          onClose={() => setIsProfileOpen(false)}
         />
       </div>
     </motion.header>

@@ -96,21 +96,7 @@
 
 /* Removed all glow effects from containers */
 
-/* Enhanced backdrop blur for user profile modal */
-.user-profile-backdrop {
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-}
-
-/* Ensure everything behind modal is blurred */
-.modal-open {
-  filter: blur(2px);
-  transition: filter 0.3s ease;
-}
-
-.modal-open.no-blur {
-  filter: none;
-}
+/* Removed modal blur styles */
 
 /* Subtle Gradient + Particles Button Styles */
 .generate-btn-subtle-particles {

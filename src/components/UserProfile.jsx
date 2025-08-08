@@ -69,8 +69,6 @@ const UserProfile = ({ isOpen, onClose }) => {
           className="fixed inset-0 z-[100] flex items-center justify-center p-6"
           style={{
             background: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(35px)',
-            WebkitBackdropFilter: 'blur(35px)',
             minHeight: '100vh',
             minWidth: '100vw',
             display: 'flex',
