@@ -424,30 +424,7 @@ function App() {
                   </motion.button>
                 )}
 
-                {/* Only show Generate Videos button if no videos have been generated yet */}
-                {generatedVideos.length === 0 && (
-                  <button
-                    onClick={handleGenerateVideos}
-                    disabled={isGenerating}
-                    className="spotlight-button"
-                  >
-                    <div className="wrapper">
-                      <span>{isGenerating ? 'GENERATING...' : 'GENERATE VIDEOS'}</span>
-                      <div className="circle circle-1"></div>
-                      <div className="circle circle-2"></div>
-                      <div className="circle circle-3"></div>
-                      <div className="circle circle-4"></div>
-                      <div className="circle circle-5"></div>
-                      <div className="circle circle-6"></div>
-                      <div className="circle circle-7"></div>
-                      <div className="circle circle-8"></div>
-                      <div className="circle circle-9"></div>
-                      <div className="circle circle-10"></div>
-                      <div className="circle circle-11"></div>
-                      <div className="circle circle-12"></div>
-                    </div>
-                  </button>
-                )}
+                {/* Generate Videos button moved to Footer */}
 
                 {/* Stop Generation Button */}
                 {isGenerating && !isCancelling && (
@@ -549,7 +526,7 @@ function App() {
       <Header />
 
       {/* Footer */}
-      <Footer />
+      <Footer onGenerateVideos={handleGenerateVideos} />
 
 
       {/* Drag Overlay for Container Copies */}

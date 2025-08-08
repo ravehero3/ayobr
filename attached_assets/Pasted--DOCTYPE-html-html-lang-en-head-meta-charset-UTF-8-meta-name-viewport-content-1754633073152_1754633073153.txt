@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Videos Button Collection - Final Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #87CEEB, #1e3a8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .directions {
+            background: rgba(30, 58, 138, 0.1);
+            border: 1px solid rgba(135, 206, 235, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .directions h3 {
+            color: #87CEEB;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .directions ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .directions li {
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .directions strong {
+            color: #87CEEB;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            justify-items: center;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .button-label {
+            font-size: 1rem;
+            color: #87CEEB;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Base button styles */
+        .generate-btn {
+            position: relative;
+            padding: 18px 36px;
+            background: #0a0a0a;
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: visible;
+            min-width: 220px;
+            text-align: center;
+        }
+
+        /* Play icon */
+        .generate-btn::before {
+            content: "▶";
+            margin-right: 10px;
+            font-size: 14px;
+            color: #87CEEB;
+        }
+
+        /* Base top lighting effect */
+        .generate-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        /* Animated Border Button */
+        .btn-animated {
+            border: 2px solid transparent;
+            border-radius: 14px;
+            background: linear-gradient(#0a0a0a, #0a0a0a) padding-box, 
+                       conic-gradient(from 270deg, #1e3a8a 0deg, #87CEEB 90deg, #333333 180deg, #000000 270deg) border-box;
+            box-shadow: 0 -10px 30px rgba(135, 206, 235, 0.3), 
+                       inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: gradientShift 3s ease infinite;
+        }
+
+        /* Animated Border + Particles */
+        .btn-animated-particles {
+            border: 2px solid transparent;
+            border-radius: 14px;
+            background: linear-gradient(#0a0a0a, #0a0a0a) padding-box, 
+                       conic-gradient(from 270deg, #1e3a8a 0deg, #87CEEB 90deg, #333333 180deg, #000000 270deg) border-box;
+            box-shadow: 0 -10px 30px rgba(135, 206, 235, 0.3), 
+                       inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: gradientShift 3s ease infinite;
+        }
+
+        /* Subtle Gradient Button */
+        .btn-subtle {
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: linear-gradient(#0a0a0a, #0a0a0a) padding-box, 
+                       conic-gradient(from 270deg, #1e3a8a 0deg, #87CEEB 90deg, #333333 180deg, #000000 270deg) border-box;
+            box-shadow: 0 -15px 40px rgba(30, 58, 138, 0.35), 
+                       inset 0 2px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Subtle Gradient + Particles */
+        .btn-subtle-particles {
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: linear-gradient(#0a0a0a, #0a0a0a) padding-box, 
+                       conic-gradient(from 270deg, #1e3a8a 0deg, #87CEEB 90deg, #333333 180deg, #000000 270deg) border-box;
+            box-shadow: 0 -15px 40px rgba(30, 58, 138, 0.35), 
+                       inset 0 2px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Top Light Variants - Enhanced lighting */
+        .btn-animated-light,
+        .btn-animated-particles-light,
+        .btn-subtle-light,
+        .btn-subtle-particles-light {
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 30%, #0a0a0a 100%) padding-box, 
+                       conic-gradient(from 270deg, #1e3a8a 0deg, #87CEEB 90deg, #333333 180deg, #000000 270deg) border-box !important;
+        }
+
+        /* Enhanced top light highlight */
+        .btn-animated-light::after,
+        .btn-animated-particles-light::after,
+        .btn-subtle-light::after,
+        .btn-subtle-particles-light::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 25%;
+            right: 25%;
+            height: 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+            border-radius: 50px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Copy styles for light versions */
+        .btn-animated-light {
+            border: 2px solid transparent;
+            border-radius: 14px;
+            box-shadow: 0 -10px 30px rgba(135, 206, 235, 0.3), 
+                       inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: gradientShift 3s ease infinite;
+        }
+
+        .btn-animated-particles-light {
+            border: 2px solid transparent;
+            border-radius: 14px;
+            box-shadow: 0 -10px 30px rgba(135, 206, 235, 0.3), 
+                       inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: gradientShift 3s ease infinite;
+        }
+
+        .btn-subtle-light {
+            border: 2px solid transparent;
+            border-radius: 12px;
+            box-shadow: 0 -15px 40px rgba(30, 58, 138, 0.35), 
+                       inset 0 2px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-subtle-particles-light {
+            border: 2px solid transparent;
+            border-radius: 12px;
+            box-shadow: 0 -15px 40px rgba(30, 58, 138, 0.35), 
+                       inset 0 2px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        /* 7 Particle System */
+        .particle-system {
+            position: absolute;
+            top: -30px;
+            left: -30px;
+            right: -30px;
+            bottom: -30px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .particle-1 { 
+            background: rgba(135, 206, 235, 0.8); 
+            top: 15%; 
+            left: 20%; 
+            animation: float1 4s ease-in-out infinite;
+        }
+        .particle-2 { 
+            background: rgba(30, 58, 138, 0.7); 
+            top: 25%; 
+            right: 15%; 
+            animation: float2 3.5s ease-in-out infinite 0.5s;
+        }
+        .particle-3 { 
+            background: rgba(135, 206, 235, 0.6); 
+            bottom: 20%; 
+            left: 15%; 
+            animation: float3 4.5s ease-in-out infinite 1s;
+        }
+        .particle-4 { 
+            background: rgba(30, 58, 138, 0.8); 
+            bottom: 30%; 
+            right: 20%; 
+            animation: float4 3.8s ease-in-out infinite 1.5s;
+        }
+        .particle-5 { 
+            background: rgba(135, 206, 235, 0.5); 
+            top: 50%; 
+            left: 10%; 
+            animation: float5 4.2s ease-in-out infinite 2s;
+        }
+        .particle-6 { 
+            background: rgba(30, 58, 138, 0.6); 
+            top: 60%; 
+            right: 8%; 
+            animation: float6 3.7s ease-in-out infinite 2.5s;
+        }
+        .particle-7 { 
+            background: rgba(135, 206, 235, 0.9); 
+            top: 10%; 
+            left: 50%; 
+            animation: float7 4.1s ease-in-out infinite 3s;
+        }
+
+        /* Particle hover activation */
+        .btn-animated:hover .particle-system,
+        .btn-animated-particles:hover .particle-system,
+        .btn-subtle:hover .particle-system,
+        .btn-subtle-particles:hover .particle-system,
+        .btn-animated-light:hover .particle-system,
+        .btn-animated-particles-light:hover .particle-system,
+        .btn-subtle-light:hover .particle-system,
+        .btn-subtle-particles-light:hover .particle-system {
+            opacity: 1;
+        }
+
+        .btn-animated:hover .particle,
+        .btn-animated-particles:hover .particle,
+        .btn-subtle:hover .particle,
+        .btn-subtle-particles:hover .particle,
+        .btn-animated-light:hover .particle,
+        .btn-animated-particles-light:hover .particle,
+        .btn-subtle-light:hover .particle,
+        .btn-subtle-particles-light:hover .particle {
+            opacity: 1;
+            animation-play-state: running;
+        }
+
+        /* Particle animations */
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(10px, -8px) rotate(90deg); }
+            50% { transform: translate(-5px, -15px) rotate(180deg); }
+            75% { transform: translate(-12px, -5px) rotate(270deg); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-8px, 12px) rotate(120deg); }
+            66% { transform: translate(15px, 8px) rotate(240deg); }
+        }
+
+        @keyframes float3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            20% { transform: translate(8px, -10px) scale(1.2); }
+            40% { transform: translate(-6px, -18px) scale(0.8); }
+            60% { transform: translate(12px, -8px) scale(1.1); }
+            80% { transform: translate(-4px, 5px) scale(0.9); }
+        }
+
+        @keyframes float4 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            50% { transform: translate(-15px, 10px) rotate(180deg) scale(1.3); }
+        }
+
+        @keyframes float5 {
+            0%, 100% { transform: translate(0, 0); opacity: 0.5; }
+            25% { transform: translate(6px, -12px); opacity: 1; }
+            50% { transform: translate(-8px, -8px); opacity: 0.7; }
+            75% { transform: translate(10px, 6px); opacity: 0.9; }
+        }
+
+        @keyframes float6 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            30% { transform: translate(-12px, -6px) rotate(108deg); }
+            60% { transform: translate(8px, -14px) rotate(216deg); }
+            90% { transform: translate(4px, 8px) rotate(324deg); }
+        }
+
+        @keyframes float7 {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            16% { transform: translate(-6px, 10px) scale(1.1) rotate(60deg); }
+            33% { transform: translate(12px, 4px) scale(0.9) rotate(120deg); }
+            50% { transform: translate(-8px, -12px) scale(1.2) rotate(180deg); }
+            66% { transform: translate(10px, -6px) scale(0.8) rotate(240deg); }
+            83% { transform: translate(-4px, 8px) scale(1.1) rotate(300deg); }
+        }
+
+        /* Gradient animation */
+        @keyframes gradientShift {
+            0% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(10deg); }
+            100% { filter: hue-rotate(0deg); }
+        }
+
+        /* Hover effects */
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 -18px 50px rgba(135, 206, 235, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Videos Button Collection</h1>
+        
+        <div class="directions">
+            <h3>📋 Comprehensive Button Construction Directions</h3>
+            
+            <h4><strong>Core Requirements:</strong></h4>
+            <ul>
+                <li><strong>Purpose:</strong> Generate Videos button (most important button in the app)</li>
+                <li><strong>Base Color:</strong> Black background (#0a0a0a) with subtle lighting</li>
+                <li><strong>Border:</strong> 2px glassmorphism stroke with corner radius matching button</li>
+                <li><strong>Top Lighting:</strong> White highlight on top like a lamp shining from above</li>
+                <li><strong>Play Icon:</strong> ▶ symbol before text in baby blue color</li>
+            </ul>
+
+            <h4><strong>Corner Color Mapping (Clockwise from Left):</strong></h4>
+            <ul>
+                <li><strong>Left Corner (270°):</strong> Dark blue (#1e3a8a)</li>
+                <li><strong>Top Right Corner (0°):</strong> Baby blue (#87CEEB)</li>
+                <li><strong>Bottom Right Corner (90°):</strong> Black (#000000)</li>
+                <li><strong>Bottom Left Corner (180°):</strong> Very dark grey (#333333)</li>
+            </ul>
+
+            <h4><strong>Particle System Specifications:</strong></h4>
+            <ul>
+                <li><strong>Count:</strong> Exactly 7 particles per button</li>
+                <li><strong>Behavior:</strong> Hidden by default, appear only on mouse hover</li>
+                <li><strong>Colors:</strong> Alternating baby blue (#87CEEB) and dark blue (#1e3a8a) with varying opacity</li>
+                <li><strong>Animation:</strong> Each particle has unique floating pattern with rotation, scaling, and translation</li>
+                <li><strong>Positioning:</strong> Strategically placed around button perimeter at different percentages</li>
+                <li><strong>Timing:</strong> Staggered animation delays (0s, 0.5s, 1s, 1.5s, 2s, 2.5s, 3s)</li>
+            </ul>
+
+            <h4><strong>Button Variants Created:</strong></h4>
+            <ul>
+                <li><strong>Animated Border:</strong> Gradient shifting animation with hover particles</li>
+                <li><strong>Animated Border + Particles:</strong> Enhanced version with permanent particle visibility on hover</li>
+                <li><strong>Subtle Gradient:</strong> Clean gradient border with hover particles</li>
+                <li><strong>Subtle Gradient + Particles:</strong> Enhanced version with permanent particle visibility on hover</li>
+                <li><strong>Top Light Variants (x4):</strong> All above versions with enhanced top lighting effect</li>
+            </ul>
+
+            <h4><strong>Technical Implementation:</strong></h4>
+            <ul>
+                <li><strong>Border Technique:</strong> CSS conic-gradient with transparent border and background layering</li>
+                <li><strong>Particle System:</strong> Absolute positioned elements with CSS keyframe animations</li>
+                <li><strong>Hover Detection:</strong> CSS :hover pseudo-class triggers particle opacity and animation</li>
+                <li><strong>Performance:</strong> GPU-accelerated transforms for smooth 60fps animations</li>
+                <li><strong>Responsive:</strong> Scales properly on different screen sizes</li>
+            </ul>
+        </div>
+        
+        <div class="buttons-grid">
+            <div class="button-container">
+                <div class="button-label">Animated Border</div>
+                <button class="generate-btn btn-animated">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-label">Animated Border + Particles</div>
+                <button class="generate-btn btn-animated-particles">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-label">Subtle Gradient</div>
+                <button class="generate-btn btn-subtle">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-label">Subtle Gradient + Particles</div>
+                <button class="generate-btn btn-subtle-particles">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-label">Animated Border + Top Light</div>
+                <button class="generate-btn btn-animated-light">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-label">Animated Border + Particles + Light</div>
+                <button class="generate-btn btn-animated-particles-light">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-label">Subtle Gradient + Top Light</div>
+                <button class="generate-btn btn-subtle-light">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="button-container">
+                <div class="button-label">Subtle Gradient + Particles + Light</div>
+                <button class="generate-btn btn-subtle-particles-light">
+                    Generate Videos
+                    <div class="particle-system">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                        <div class="particle particle-7"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

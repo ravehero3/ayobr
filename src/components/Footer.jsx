@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import SettingsPanel from './SettingsPanel';
 
-const Footer = () => {
+const Footer = ({ onGenerateVideos }) => {
   const { pairs, generatedVideos, isGenerating } = useAppStore();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
@@ -69,9 +69,9 @@ const Footer = () => {
           </button>
         </div>
 
-        {/* Center - Ready status and Processing status */}
-        <div className="flex items-center space-x-4">
-          {/* Ready counter moved from right */}
+        {/* Center - Generate Videos Button and Status */}
+        <div className="flex items-center space-x-6">
+          {/* Ready counter */}
           <div className="flex items-center space-x-2">
             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -80,6 +80,26 @@ const Footer = () => {
               {completePairs.length} Ready
             </span>
           </div>
+
+          {/* Generate Videos Button - only show if no videos generated and not generating */}
+          {generatedVideos.length === 0 && !isGenerating && (
+            <button
+              onClick={onGenerateVideos}
+              disabled={isGenerating || completePairs.length === 0}
+              className="generate-videos-btn"
+            >
+              GENERATE VIDEOS
+              <div className="particle-system">
+                <div className="particle particle-1"></div>
+                <div className="particle particle-2"></div>
+                <div className="particle particle-3"></div>
+                <div className="particle particle-4"></div>
+                <div className="particle particle-5"></div>
+                <div className="particle particle-6"></div>
+                <div className="particle particle-7"></div>
+              </div>
+            </button>
+          )}
           
           {/* Processing status */}
           {isGenerating && (

@@ -841,6 +841,189 @@ input[type="file"] {
   }
 }
 
+/* Animated Border + Particles Button Styles */
+.generate-videos-btn {
+  position: relative;
+  padding: 18px 36px;
+  background: #0a0a0a;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: visible;
+  min-width: 220px;
+  text-align: center;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background: linear-gradient(#0a0a0a, #0a0a0a) padding-box, 
+             conic-gradient(from 270deg, #1e3a8a 0deg, #87CEEB 90deg, #333333 180deg, #000000 270deg) border-box;
+  box-shadow: 0 -10px 30px rgba(135, 206, 235, 0.3), 
+             inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: gradientShift 3s ease infinite;
+}
+
+/* Play icon */
+.generate-videos-btn::before {
+  content: "▶";
+  margin-right: 10px;
+  font-size: 14px;
+  color: #87CEEB;
+}
+
+/* Top lighting effect */
+.generate-videos-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* Particle System */
+.particle-system {
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  right: -30px;
+  bottom: -30px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.particle-1 { 
+  background: rgba(135, 206, 235, 0.8); 
+  top: 15%; 
+  left: 20%; 
+  animation: float1 4s ease-in-out infinite;
+}
+.particle-2 { 
+  background: rgba(30, 58, 138, 0.7); 
+  top: 25%; 
+  right: 15%; 
+  animation: float2 3.5s ease-in-out infinite 0.5s;
+}
+.particle-3 { 
+  background: rgba(135, 206, 235, 0.6); 
+  bottom: 20%; 
+  left: 15%; 
+  animation: float3 4.5s ease-in-out infinite 1s;
+}
+.particle-4 { 
+  background: rgba(30, 58, 138, 0.8); 
+  bottom: 30%; 
+  right: 20%; 
+  animation: float4 3.8s ease-in-out infinite 1.5s;
+}
+.particle-5 { 
+  background: rgba(135, 206, 235, 0.5); 
+  top: 50%; 
+  left: 10%; 
+  animation: float5 4.2s ease-in-out infinite 2s;
+}
+.particle-6 { 
+  background: rgba(30, 58, 138, 0.6); 
+  top: 60%; 
+  right: 8%; 
+  animation: float6 3.7s ease-in-out infinite 2.5s;
+}
+.particle-7 { 
+  background: rgba(135, 206, 235, 0.9); 
+  top: 10%; 
+  left: 50%; 
+  animation: float7 4.1s ease-in-out infinite 3s;
+}
+
+/* Particle hover activation */
+.generate-videos-btn:hover .particle-system {
+  opacity: 1;
+}
+
+.generate-videos-btn:hover .particle {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+/* Particle animations */
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(10px, -8px) rotate(90deg); }
+  50% { transform: translate(-5px, -15px) rotate(180deg); }
+  75% { transform: translate(-12px, -5px) rotate(270deg); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-8px, 12px) rotate(120deg); }
+  66% { transform: translate(15px, 8px) rotate(240deg); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  20% { transform: translate(8px, -10px) scale(1.2); }
+  40% { transform: translate(-6px, -18px) scale(0.8); }
+  60% { transform: translate(12px, -8px) scale(1.1); }
+  80% { transform: translate(-4px, 5px) scale(0.9); }
+}
+
+@keyframes float4 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate(-15px, 10px) rotate(180deg) scale(1.3); }
+}
+
+@keyframes float5 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.5; }
+  25% { transform: translate(6px, -12px); opacity: 1; }
+  50% { transform: translate(-8px, -8px); opacity: 0.7; }
+  75% { transform: translate(10px, 6px); opacity: 0.9; }
+}
+
+@keyframes float6 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  30% { transform: translate(-12px, -6px) rotate(108deg); }
+  60% { transform: translate(8px, -14px) rotate(216deg); }
+  90% { transform: translate(4px, 8px) rotate(324deg); }
+}
+
+@keyframes float7 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  16% { transform: translate(-6px, 10px) scale(1.1) rotate(60deg); }
+  33% { transform: translate(12px, 4px) scale(0.9) rotate(120deg); }
+  50% { transform: translate(-8px, -12px) scale(1.2) rotate(180deg); }
+  66% { transform: translate(10px, -6px) scale(0.8) rotate(240deg); }
+  83% { transform: translate(-4px, 8px) scale(1.1) rotate(300deg); }
+}
+
+/* Gradient animation */
+@keyframes gradientShift {
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(10deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
+/* Hover effects */
+.generate-videos-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 -18px 50px rgba(135, 206, 235, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.2);
+}
+
 /* Stop button variant with red coloring */
 .spotlight-button.stop-button {
   --c-color-1: rgba(220, 38, 38, 0.7); /* Red instead of blue */
