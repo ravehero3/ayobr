@@ -86,10 +86,10 @@ const Footer = ({ onGenerateVideos }) => {
             <button
               onClick={onGenerateVideos}
               disabled={isGenerating || completePairs.length === 0}
-              className="generate-videos-btn"
+              className="generate-btn-subtle-particles"
             >
-              <div className="wrapper">
-                <span>GENERATE VIDEOS</span>
+              Generate Videos
+              <div className="particle-system">
                 <div className="particle particle-1"></div>
                 <div className="particle particle-2"></div>
                 <div className="particle particle-3"></div>
