@@ -280,7 +280,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
           {/* Play button and time information */}
           <div className="flex items-center justify-between relative z-10" style={{ marginTop: '20px' }}>
-            <div className="text-xs text-white bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
+            <div className="text-xs text-white">
               {formatTime(currentTime)}
             </div>
 
@@ -303,7 +303,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
               )}
             </button>
 
-            <div className="text-xs text-white bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
+            <div className="text-xs text-white">
               {formatTime(duration)}
             </div>
           </div>
