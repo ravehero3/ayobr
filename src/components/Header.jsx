@@ -29,10 +29,7 @@ const Header = () => {
           background: 'rgba(0, 0, 0, 0.3)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          boxShadow: '0 0 0 1px rgba(128, 128, 128, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.15)',
-          borderTop: 'none',
-          borderLeft: 'none',
-          borderRight: 'none',
+          borderBottom: '1px solid rgba(64, 64, 64, 0.8)',
           paddingLeft: 'calc((100vw - 500px) / 2 - 258px)', // Move logo 12px to the left (from -246px to -258px)
           paddingRight: 'calc((100vw - 500px) / 2 - 264px)', // Move profile icon 6px to the right (from -258px to -264px)
         }}
