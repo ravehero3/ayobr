@@ -192,11 +192,23 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full relative z-10">
-          <div className="mb-4">
+          <motion.div 
+            className="mb-4"
+            animate={{
+              y: [-2, 2, -2],
+              x: [-1, 1, -1],
+              rotate: [-1, 1, -1]
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
             <svg className="w-12 h-12 text-white/80" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Z"/>
             </svg>
-          </div>
+          </motion.div>
           <p className="text-sm font-medium text-white mb-1 text-center drop-shadow-lg">Drop image file here</p>
           <p className="text-xs text-white/70 font-light text-center drop-shadow-sm px-8 py-1 rounded-full bg-white/5 backdrop-blur-sm">PNG, JPG, HEIC</p>
         </div>
