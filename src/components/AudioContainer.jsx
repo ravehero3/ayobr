@@ -314,7 +314,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             {/* Play/pause button - centered */}
             <button
               onClick={handlePlayPause}
-              className="w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+              className="w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-none"
               style={{
                 color: 'rgba(255, 255, 255, 0.9)'
               }}
