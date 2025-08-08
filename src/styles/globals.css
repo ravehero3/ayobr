@@ -449,13 +449,7 @@
              inset 0 2px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Play icon */
-.generate-btn-subtle-particles::before {
-  content: "▶";
-  margin-right: 10px;
-  font-size: 14px;
-  color: #87CEEB;
-}
+/* Play icon removed per user request */
 
 /* Base top lighting effect */
 .generate-btn-subtle-particles::after {
