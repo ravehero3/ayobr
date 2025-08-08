@@ -347,7 +347,7 @@ function App() {
                 >
                   <motion.div
                     className="flex flex-col max-w-[1200px] w-full px-6"
-                    style={{ gap: '8px', marginTop: '80px' }}
+                    style={{ gap: '4px', marginTop: '80px' }}
                   >
                     <AnimatePresence>
                       {pairs
