@@ -72,7 +72,7 @@ const Footer = ({ onGenerateVideos }) => {
         {/* Center - Ready Status */}
         <div className="flex items-center space-x-6">
           {/* Ready counter */}
-          <div className="flex items-center space-x-2" style={{ marginLeft: '-20px' }}>
+          <div className="flex items-center space-x-2" style={{ marginLeft: '-70px' }}>
             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -91,7 +91,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Generate Videos Button - positioned to align with image containers */}
-        <div className="absolute" style={{ left: 'calc(50% + 192px + 8px)' }}>
+        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px)' }}>
           {generatedVideos.length === 0 && !isGenerating && (
             <button
               onClick={onGenerateVideos}
