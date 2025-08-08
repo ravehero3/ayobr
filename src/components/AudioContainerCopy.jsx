@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -77,16 +76,21 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         zIndex: 999999,
         minHeight: '160px',
         maxHeight: '160px',
-        // Remove all background styling - no rectangle
-        background: 'transparent',
-        backgroundImage: 'none', // Explicitly remove noise texture
-        backdropFilter: 'none',
-        WebkitBackdropFilter: 'none',
+        // Match the original container styling exactly
+        background: 'rgba(0, 0, 0, 0.3)',
+        backgroundImage: 'none',
         borderRadius: '24px',
+        border: '1px solid rgba(128, 128, 128, 0.5)',
+        boxShadow: `
+          0 0 0 2px rgba(255, 255, 255, 0.1),
+          0 0 20px rgba(0, 0, 0, 0.15)
+        `,
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
       }}
       initial={{ scale: 1, rotate: 0 }}
       animate={{ 
-        scale: shouldReturnToOrigin ? 0.8 : 1.05, 
+        scale: shouldReturnToOrigin ? 0.8 : 1.02, 
         rotate: shouldReturnToOrigin ? 0 : 0,
         opacity: shouldReturnToOrigin ? 0 : 0.95
       }}
