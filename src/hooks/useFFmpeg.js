@@ -29,6 +29,10 @@ export const useFFmpeg = () => {
       throw new Error('All pairs must have both audio and image files');
     }
 
+    // Clear any stuck generation states before starting
+    const { clearStuckGenerationStates } = useAppStore.getState();
+    clearStuckGenerationStates();
+
     try {
       setIsGenerating(true);
       resetCancellation();

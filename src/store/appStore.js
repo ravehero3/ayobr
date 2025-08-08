@@ -145,6 +145,29 @@ export const useAppStore = create((set, get) => ({
   // Reset page state to auto-detect (useful for recovery)
   resetPageState: () => set({ currentPage: null, isFilesBeingDropped: false }),
 
+  // Clear stuck generation states
+  clearStuckGenerationStates: () => set(store => {
+    const clearedStates = {};
+    Object.keys(store.videoGenerationStates).forEach(pairId => {
+      const state = store.videoGenerationStates[pairId];
+      if (state.isGenerating && !state.isComplete && state.progress > 0) {
+        clearedStates[pairId] = {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: state.video || null,
+          error: null
+        };
+      } else {
+        clearedStates[pairId] = state;
+      }
+    });
+    return {
+      videoGenerationStates: clearedStates,
+      isGenerating: false
+    };
+  }),
+
   // Generation state
   setIsGenerating: (isGenerating) => set({ isGenerating }),
 
@@ -165,18 +188,24 @@ export const useAppStore = create((set, get) => ({
     console.log(`Setting video generation state for pair ${pairId}:`, state);
     console.log(`Current state:`, currentState);
 
-    // Prevent unnecessary state updates that could trigger re-renders
+    // More careful state comparison to prevent loops
     if (currentState && 
         currentState.isGenerating === state.isGenerating &&
         currentState.progress === state.progress &&
-        currentState.isComplete === state.isComplete) {
+        currentState.isComplete === state.isComplete &&
+        ((currentState.video === null && state.video === null) || 
+         (currentState.video && state.video && currentState.video.id === state.video.id))) {
       return store; // No change needed
     }
 
     return {
       videoGenerationStates: {
         ...store.videoGenerationStates,
-        [pairId]: state
+        [pairId]: {
+          ...state,
+          // Ensure we don't lose the video reference
+          video: state.video || currentState?.video || null
+        }
       }
     };
   }),

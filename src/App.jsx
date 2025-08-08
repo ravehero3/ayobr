@@ -204,9 +204,22 @@ function App() {
           }
         }, 3000); // 3 second timeout
       }
+
+      // Check for stuck video generation states
+      if (isGenerating) {
+        const { videoGenerationStates, clearStuckGenerationStates } = useAppStore.getState();
+        const stuckStates = Object.values(videoGenerationStates).filter(state => 
+          state.isGenerating && state.progress > 0 && state.progress < 100 && !state.isComplete
+        );
+        
+        if (stuckStates.length > 0) {
+          console.log('Detected stuck video generation states, clearing...');
+          clearStuckGenerationStates();
+        }
+      }
     };
 
-    const timeoutId = setTimeout(checkForStuckState, 1000);
+    const timeoutId = setTimeout(checkForStuckState, 2000);
     return () => clearTimeout(timeoutId);
   }, [currentPage, pairs, generatedVideos, isGenerating, resetPageState, setIsFilesBeingDropped]);
 
