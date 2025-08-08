@@ -13,10 +13,10 @@
   border: 4px solid transparent;
   background-clip: padding-box;
   
-  /* Create the thick glassmorphism border and semitransparent shadows */
+  /* Create the thick glassmorphism border with smooth color transitions */
   box-shadow: 
-    0 0 0 4px rgba(128, 128, 128, 0.6), /* 4px thick grey outer stroke */
-    inset 0 0 0 4px rgba(255, 255, 255, 0.2), /* 4px thick inner glassmorphism border */
+    0 0 0 4px linear-gradient(135deg, rgba(128, 128, 128, 0.6), rgba(160, 160, 160, 0.4)), /* 4px thick gradient outer stroke */
+    inset 0 0 0 4px linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1)), /* 4px thick gradient inner border */
     0 8px 32px rgba(0, 0, 0, 0.4), /* Deep semitransparent shadow below */
     0 4px 16px rgba(0, 0, 0, 0.3), /* Medium semitransparent shadow beneath */
     0 2px 8px rgba(0, 0, 0, 0.2); /* Subtle close shadow */
@@ -1987,6 +1987,14 @@ input[type="file"] {
     0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
+.generate-videos-btn:hover .btn-text {
+  transform: translateY(-1px);
+}
+
+.generate-videos-btn:hover .btn-icon {
+  transform: translateX(2px) translateY(-1px);
+}
+
 .generate-videos-btn:active {
   transform: translateY(0);
   background: #000000;
@@ -2009,6 +2017,7 @@ input[type="file"] {
   position: relative;
   z-index: 1;
   letter-spacing: -0.01em;
+  transition: transform 0.2s ease;
 }
 
 .btn-icon {
@@ -2053,7 +2062,7 @@ input[type="file"] {
 }
 
 .settings-icon:hover {
-  animation: slowSpin 2s linear infinite;
+  animation: slowSpin 0.8s linear infinite;
 }
 
 .settings-icon:active,
