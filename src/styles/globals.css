@@ -101,18 +101,19 @@
 /* Subtle Gradient + Particles Button Styles */
 .generate-btn-subtle-particles {
   position: relative;
-  padding: 18px 36px;
+  padding: 12px 24px;
   background: #0a0a0a;
   color: white;
   border: 2px solid transparent;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   overflow: visible;
-  min-width: 220px;
+  min-width: 180px;
   text-align: center;
+  height: 44px;
   background: linear-gradient(#0a0a0a, #0a0a0a) padding-box, 
              conic-gradient(from 270deg, 
                  #1e3a8a 0deg, 
