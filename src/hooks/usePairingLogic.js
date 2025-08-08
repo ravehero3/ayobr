@@ -116,7 +116,6 @@ export const usePairingLogic = () => {
         }, 2000);
 
         // Use current pairs from the hook
-        const currentPairs = pairs;
         
         // Get existing files to avoid exact duplicates (same file object)
         const existingAudioFiles = currentPairs.filter(pair => pair.audio).map(pair => pair.audio);
