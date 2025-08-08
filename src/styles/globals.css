@@ -1965,8 +1965,9 @@ input[type="file"] {
   background: #000000;
   color: white;
 
-  /* Minimal shadow like Svarog */
+  /* Blue glow shadow */
   box-shadow: 
+    0 0 20px rgba(59, 130, 246, 0.3),
     0 1px 3px rgba(0, 0, 0, 0.1),
     0 1px 2px rgba(0, 0, 0, 0.06);
 
@@ -1978,7 +1979,10 @@ input[type="file"] {
 .generate-videos-btn:hover {
   transform: translateY(-1px);
   background: #1a1a1a;
+  /* Enhanced blue glow and light from below effect */
   box-shadow: 
+    0 0 30px rgba(59, 130, 246, 0.5),
+    0 -8px 16px rgba(255, 255, 255, 0.1),
     0 4px 12px rgba(0, 0, 0, 0.15),
     0 2px 4px rgba(0, 0, 0, 0.08);
 }
@@ -2031,6 +2035,7 @@ input[type="file"] {
 .generate-videos-btn:focus {
   outline: none;
   box-shadow: 
+    0 0 20px rgba(59, 130, 246, 0.3),
     0 1px 3px rgba(0, 0, 0, 0.1),
     0 1px 2px rgba(0, 0, 0, 0.06),
     0 0 0 3px rgba(255, 255, 255, 0.1);
@@ -2040,6 +2045,33 @@ input[type="file"] {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Settings icon hover and click animations */
+.settings-icon {
+  transition: transform 0.3s ease;
+}
+
+.settings-icon:hover {
+  animation: slowSpin 2s linear infinite;
+}
+
+.settings-icon:active,
+.settings-icon:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  animation: fastSpin 0.5s ease-out;
+}
+
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fastSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(180deg); }
 }
 
 /* Basic container styles */
