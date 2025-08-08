@@ -39,8 +39,9 @@ const ImageContainerCopy = ({ image, isVisible, mousePosition, shouldReturnToOri
         zIndex: 999999,
         minHeight: '160px',
         maxHeight: '160px',
-        // Simplified background - just solid color with rounded corners
+        // Clean background without texture
         background: 'rgba(0, 0, 0, 0.8)',
+        backgroundImage: 'none', // Explicitly remove noise texture
         borderRadius: '24px',
         // Remove all extra visual effects
         border: 'none',

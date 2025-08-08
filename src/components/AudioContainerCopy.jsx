@@ -79,6 +79,7 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         maxHeight: '160px',
         // Remove all background styling - no rectangle
         background: 'transparent',
+        backgroundImage: 'none', // Explicitly remove noise texture
         backdropFilter: 'none',
         WebkitBackdropFilter: 'none',
         borderRadius: '24px',
