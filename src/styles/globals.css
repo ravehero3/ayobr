@@ -449,6 +449,19 @@
              inset 0 2px 0 rgba(255, 255, 255, 0.15);
 }
 
+/* Enhanced hover effect with blue glow and top lighting */
+.generate-btn-subtle-particles:hover {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 
+             0 -15px 40px rgba(30, 58, 138, 0.5), 
+             inset 0 2px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Enhanced top lighting on hover */
+.generate-btn-subtle-particles:hover::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  height: 2px;
+}
+
 /* Play icon removed per user request */
 
 /* Base top lighting effect */
