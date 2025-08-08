@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -80,7 +79,7 @@ const Footer = ({ onGenerateVideos }) => {
               {completePairs.length} Ready
             </span>
           </div>
-          
+
           {/* Processing status */}
           {isGenerating && (
             <div className="flex items-center space-x-2">
@@ -130,7 +129,7 @@ const Footer = ({ onGenerateVideos }) => {
           </motion.button>
         </div>
       </div>
-      
+
       {/* Settings Panel */}
       <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </motion.footer>
