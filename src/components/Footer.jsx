@@ -90,7 +90,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Generate Videos Button - positioned to align with image containers */}
-        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 300px)' }}>
+        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px)' }}>
           {generatedVideos.length === 0 && !isGenerating && (
             <button
               onClick={onGenerateVideos}
