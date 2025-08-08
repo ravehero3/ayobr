@@ -7,7 +7,7 @@ import PairMergeAnimation from './PairMergeAnimation';
 import { useAppStore } from '../store/appStore';
 
 const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
-  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair } = useAppStore();
+  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair, containerSpacing } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
   const [isValidDragTarget, setIsValidDragTarget] = useState(false);
@@ -164,7 +164,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   };
 
   return (
-    <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ marginLeft: '8px' }}>
+    <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ 
+      marginLeft: containerSpacing >= 0 ? `${8 + containerSpacing}px` : '8px',
+      transform: containerSpacing < 0 ? `translateX(${containerSpacing}px)` : 'none'
+    }}>
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
         <button
