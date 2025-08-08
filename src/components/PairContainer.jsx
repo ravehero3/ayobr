@@ -318,7 +318,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             width: '32px', 
             height: '48px',
             marginTop: '-42px',
-            marginLeft: '-7px',
+            marginLeft: '-3px',
             marginRight: '-10px'
           }}>
             <div className="relative flex items-center justify-center" style={{ width: '32px', height: '48px' }}>
