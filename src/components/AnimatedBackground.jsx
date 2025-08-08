@@ -111,6 +111,14 @@ const AnimatedBackground = () => {
         )}
       </AnimatePresence>
 
+      {/* Background Overlay */}
+      <div 
+        className="absolute inset-0 bg-black/40"
+        style={{ 
+          zIndex: 1,
+          pointerEvents: 'none'
+        }}
+      />
 
     </div>
   );

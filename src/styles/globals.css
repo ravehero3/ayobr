@@ -13,9 +13,9 @@
   border: 4px solid transparent;
   background-clip: padding-box;
   
-  /* Create the thick glassmorphism border with smooth color transitions */
+  /* Create the thick glassmorphism border with dark grey on left transitioning to lighter grey */
   box-shadow: 
-    0 0 0 4px linear-gradient(135deg, rgba(128, 128, 128, 0.6), rgba(160, 160, 160, 0.4)), /* 4px thick gradient outer stroke */
+    0 0 0 4px linear-gradient(135deg, rgba(64, 64, 64, 0.8), rgba(160, 160, 160, 0.4)), /* 4px thick gradient outer stroke with dark grey on left */
     inset 0 0 0 4px linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1)), /* 4px thick gradient inner border */
     0 8px 32px rgba(0, 0, 0, 0.4), /* Deep semitransparent shadow below */
     0 4px 16px rgba(0, 0, 0, 0.3), /* Medium semitransparent shadow beneath */
@@ -1965,9 +1965,9 @@ input[type="file"] {
   background: #000000;
   color: white;
 
-  /* Blue glow shadow */
+  /* Baby blue glow shadow */
   box-shadow: 
-    0 0 20px rgba(59, 130, 246, 0.3),
+    0 0 20px rgba(173, 216, 230, 0.3),
     0 1px 3px rgba(0, 0, 0, 0.1),
     0 1px 2px rgba(0, 0, 0, 0.06);
 
@@ -1979,9 +1979,9 @@ input[type="file"] {
 .generate-videos-btn:hover {
   transform: translateY(-1px);
   background: #1a1a1a;
-  /* Enhanced blue glow and light from below effect */
+  /* Enhanced baby blue glow and light from below effect */
   box-shadow: 
-    0 0 30px rgba(59, 130, 246, 0.5),
+    0 0 30px rgba(173, 216, 230, 0.5),
     0 -8px 16px rgba(255, 255, 255, 0.1),
     0 4px 12px rgba(0, 0, 0, 0.15),
     0 2px 4px rgba(0, 0, 0, 0.08);
@@ -2044,7 +2044,7 @@ input[type="file"] {
 .generate-videos-btn:focus {
   outline: none;
   box-shadow: 
-    0 0 20px rgba(59, 130, 246, 0.3),
+    0 0 20px rgba(173, 216, 230, 0.3),
     0 1px 3px rgba(0, 0, 0, 0.1),
     0 1px 2px rgba(0, 0, 0, 0.06),
     0 0 0 3px rgba(255, 255, 255, 0.1);
@@ -2062,7 +2062,7 @@ input[type="file"] {
 }
 
 .settings-icon:hover {
-  animation: slowSpin 0.8s linear infinite;
+  animation: slowSpin 3.2s linear infinite;
 }
 
 .settings-icon:active,

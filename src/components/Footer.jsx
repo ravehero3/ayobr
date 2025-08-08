@@ -115,7 +115,7 @@ const Footer = ({ onGenerateVideos }) => {
         <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 280px)' }}>
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
-            className="w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-300"
+            className="settings-icon w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-300 focus:outline-none"
             whileHover={{
               rotate: 360,
               transition: { duration: 2, repeat: Infinity, ease: "linear" }
