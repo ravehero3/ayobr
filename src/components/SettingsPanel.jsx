@@ -10,12 +10,17 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     videoSettings,
     setVideoBackground,
     setCustomBackground,
-    setVideoQuality
+    setVideoQuality,
+    logoSettings,
+    setLogoFile,
+    setUseLogoInVideos
   } = useAppStore();
 
   const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
   const [selectedResolution, setSelectedResolution] = useState(videoSettings.quality || 'fullhd');
-  const [logoFile, setLogoFile] = useState(null);
+  const [localLogoFile, setLocalLogoFile] = useState(logoSettings.logoFile);
+  const [localLogoFileName, setLocalLogoFileName] = useState(logoSettings.logoFileName);
+  const [localUseLogoInVideos, setLocalUseLogoInVideos] = useState(logoSettings.useLogoInVideos);
 
   const handleBackgroundChange = (background) => {
     setSelectedBackground(background);
@@ -28,18 +33,24 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   const handleLogoUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
-      setLogoFile(file);
-      // You can add logo handling logic here
+      // Convert file to base64 for storage
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64Data = e.target.result;
+        setLocalLogoFile(base64Data);
+        setLocalLogoFileName(file.name);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const handleSave = () => {
     setVideoBackground(selectedBackground);
     setVideoQuality(selectedResolution);
-    if (logoFile) {
-      // Handle logo file if needed
-      console.log('Logo file:', logoFile);
+    if (localLogoFile && localLogoFileName) {
+      setLogoFile(localLogoFile, localLogoFileName);
     }
+    setUseLogoInVideos(localUseLogoInVideos);
     onClose();
   };
 
@@ -47,7 +58,9 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     // Reset selections to current values
     setSelectedBackground(videoSettings.background || 'black');
     setSelectedResolution(videoSettings.quality || 'fullhd');
-    setLogoFile(null);
+    setLocalLogoFile(logoSettings.logoFile);
+    setLocalLogoFileName(logoSettings.logoFileName);
+    setLocalUseLogoInVideos(logoSettings.useLogoInVideos);
     onClose();
   };
 
@@ -105,39 +118,132 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             </h2>
 
             {/* Logo Upload Area */}
-            <motion.div
-              className="cursor-pointer relative overflow-hidden"
-              style={{
-                height: '120px',
-                background: 'rgba(15, 15, 25, 0.6)',
-                border: '2px dashed rgba(255, 255, 255, 0.15)',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.3s ease'
-              }}
-              whileHover={{
-                borderColor: 'rgba(59, 130, 246, 0.4)',
-                background: 'rgba(59, 130, 246, 0.05)'
-              }}
-              onClick={() => document.getElementById('logoUpload').click()}
-            >
+            <div>
               <div style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: '16px',
-                fontWeight: '500'
+                color: '#e0e0e0',
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '12px',
+                opacity: '0.9'
               }}>
-                {logoFile ? logoFile.name : 'Your Logo'}
+                Logo
               </div>
-              <input
-                type="file"
-                id="logoUpload"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                style={{ display: 'none' }}
-              />
-            </motion.div>
+              <motion.div
+                className="cursor-pointer relative overflow-hidden"
+                style={{
+                  height: '120px',
+                  background: localLogoFile 
+                    ? 'rgba(34, 197, 94, 0.1)' 
+                    : 'rgba(15, 15, 25, 0.6)',
+                  border: localLogoFile 
+                    ? '2px solid rgba(34, 197, 94, 0.4)' 
+                    : '2px dashed rgba(255, 255, 255, 0.15)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
+                  backgroundImage: localLogoFile ? `url(${localLogoFile})` : 'none',
+                  backgroundSize: 'contain',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center'
+                }}
+                whileHover={{
+                  borderColor: localLogoFile 
+                    ? 'rgba(34, 197, 94, 0.6)' 
+                    : 'rgba(59, 130, 246, 0.4)',
+                  background: localLogoFile 
+                    ? 'rgba(34, 197, 94, 0.15)' 
+                    : 'rgba(59, 130, 246, 0.05)'
+                }}
+                onClick={() => document.getElementById('logoUpload').click()}
+              >
+                {!localLogoFile && (
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    textAlign: 'center'
+                  }}>
+                    Your Logo
+                    <div style={{
+                      fontSize: '12px',
+                      color: 'rgba(255, 255, 255, 0.4)',
+                      marginTop: '4px'
+                    }}>
+                      PNG, JPG, HEIC supported
+                    </div>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  id="logoUpload"
+                  accept="image/png,image/jpeg,image/jpg,image/heic,image/svg+xml"
+                  onChange={handleLogoUpload}
+                  style={{ display: 'none' }}
+                />
+              </motion.div>
+
+              {/* Show checkbox when logo is uploaded */}
+              {localLogoFile && localLogoFileName && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    marginTop: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <motion.div
+                    className="cursor-pointer"
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '4px',
+                      border: '2px solid rgba(34, 197, 94, 0.6)',
+                      background: localUseLogoInVideos 
+                        ? 'rgba(34, 197, 94, 0.8)' 
+                        : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
+                  >
+                    {localUseLogoInVideos && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        style={{
+                          width: '12px',
+                          height: '12px',
+                          background: 'white',
+                          borderRadius: '2px'
+                        }}
+                      />
+                    )}
+                  </motion.div>
+                  <div 
+                    className="cursor-pointer" 
+                    onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
+                    style={{
+                      color: '#e0e0e0',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      userSelect: 'none'
+                    }}
+                  >
+                    Use logo in videos
+                  </div>
+                </motion.div>
+              )}
+            </div>
 
             {/* Background Selection */}
             <div>

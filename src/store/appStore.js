@@ -23,6 +23,13 @@ export const useAppStore = create((set, get) => ({
   // Container spacing
   containerSpacing: 4, // Default spacing in pixels between container pairs
 
+  // Logo settings
+  logoSettings: {
+    logoFile: null, // Store the uploaded logo file as base64
+    logoFileName: null, // Store the original filename
+    useLogoInVideos: false // Checkbox to enable/disable logo in video generation
+  },
+
   // Video generation settings
   videoSettings: {
     background: 'black', // 'white', 'black', or 'custom'
@@ -282,5 +289,30 @@ export const useAppStore = create((set, get) => ({
   })),
 
   // Container spacing actions
-  setContainerSpacing: (spacing) => set({ containerSpacing: spacing })
+  setContainerSpacing: (spacing) => set({ containerSpacing: spacing }),
+
+  // Logo settings actions
+  setLogoFile: (file, fileName) => set(state => ({
+    logoSettings: { 
+      ...state.logoSettings, 
+      logoFile: file, 
+      logoFileName: fileName 
+    }
+  })),
+
+  setUseLogoInVideos: (useLogoInVideos) => set(state => ({
+    logoSettings: { 
+      ...state.logoSettings, 
+      useLogoInVideos 
+    }
+  })),
+
+  clearLogo: () => set(state => ({
+    logoSettings: { 
+      ...state.logoSettings, 
+      logoFile: null, 
+      logoFileName: null,
+      useLogoInVideos: false
+    }
+  }))
 }));
