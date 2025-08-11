@@ -133,7 +133,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 style={{
                   height: '120px',
                   background: localLogoFile 
-                    ? 'rgba(34, 197, 94, 0.1)' 
+                    ? 'rgba(15, 15, 25, 0.3)' 
                     : 'rgba(15, 15, 25, 0.6)',
                   border: localLogoFile 
                     ? '2px solid rgba(34, 197, 94, 0.4)' 
@@ -142,23 +142,39 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transition: 'all 0.3s ease',
-                  backgroundImage: localLogoFile ? `url(${localLogoFile})` : 'none',
-                  backgroundSize: 'contain',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'center'
+                  transition: 'all 0.3s ease'
                 }}
                 whileHover={{
                   borderColor: localLogoFile 
                     ? 'rgba(34, 197, 94, 0.6)' 
                     : 'rgba(59, 130, 246, 0.4)',
                   background: localLogoFile 
-                    ? 'rgba(34, 197, 94, 0.15)' 
+                    ? 'rgba(15, 15, 25, 0.4)' 
                     : 'rgba(59, 130, 246, 0.05)'
                 }}
                 onClick={() => document.getElementById('logoUpload').click()}
               >
-                {!localLogoFile && (
+                {localLogoFile ? (
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px'
+                  }}>
+                    <img 
+                      src={localLogoFile} 
+                      alt="Logo preview"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'contain',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  </div>
+                ) : (
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.6)',
                     fontSize: '16px',
@@ -171,7 +187,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       color: 'rgba(255, 255, 255, 0.4)',
                       marginTop: '4px'
                     }}>
-                      PNG, JPG, HEIC supported
+                      PNG, JPG, HEIC, SVG supported
                     </div>
                   </div>
                 )}
