@@ -195,8 +195,9 @@ export const initializeFFmpeg = async () => {
   return initPromise;
 };
 
-export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel) => {
+export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel, logoSettings = null) => {
   console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
+  console.log('Logo settings:', logoSettings);
 
   try {
     const ffmpeg = await initializeFFmpeg();
@@ -267,10 +268,22 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     const audioFileName = `audio_${Date.now()}.mp3`;
     const imageFileName = `image_${Date.now()}.jpg`;
     const outputFileName = `output_${Date.now()}.mp4`;
+    let logoFileName = null;
 
     // Write files to FFmpeg filesystem
     await ffmpeg.writeFile(audioFileName, audioData);
     await ffmpeg.writeFile(imageFileName, imageData);
+
+    // Handle logo file if provided and enabled
+    if (logoSettings && logoSettings.useLogoInVideos && logoSettings.logoFile) {
+      logoFileName = `logo_${Date.now()}.png`;
+      
+      // Convert base64 logo to binary data
+      const logoBase64 = logoSettings.logoFile.split(',')[1]; // Remove data:image/... prefix
+      const logoData = Uint8Array.from(atob(logoBase64), c => c.charCodeAt(0));
+      await ffmpeg.writeFile(logoFileName, logoData);
+      console.log('Logo file written to FFmpeg filesystem:', logoFileName);
+    }
 
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
@@ -278,13 +291,37 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Ultra-fast FFmpeg command - with guaranteed high-quality audio
     // Create 1920x1080 video with image centered and 20px white space above/below
     console.log('Executing FFmpeg command...');
-    await ffmpeg.exec([
+    
+    // Build FFmpeg command array
+    let ffmpegArgs = [
       '-loop', '1',
       '-i', imageFileName,
-      '-i', audioFileName,
-      '-map', '0:v',                 // Map video from first input (image)
-      '-map', '1:a',                 // Map audio from second input (audio file)
-      '-vf', `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white`,
+      '-i', audioFileName
+    ];
+
+    // Add logo input if provided
+    if (logoFileName) {
+      ffmpegArgs.push('-i', logoFileName);
+    }
+
+    // Map inputs
+    ffmpegArgs.push('-map', '0:v');  // Map video from first input (image)
+    ffmpegArgs.push('-map', '1:a');  // Map audio from second input (audio file)
+
+    // Build video filter chain
+    let videoFilter = 'scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white';
+    
+    // Add logo overlay if enabled (positioned at 27% horizontally from left edge)
+    if (logoFileName) {
+      const logoX = Math.round(1920 * 0.27); // 27% of video width (518px from left edge)
+      const logoY = 'H/2-overlay_h/2'; // Vertically centered
+      videoFilter += `[v];[2:v]scale=-1:80[logo];[v][logo]overlay=${logoX}:${logoY}`;
+    }
+
+    ffmpegArgs.push('-vf', videoFilter);
+
+    // Add encoding parameters
+    ffmpegArgs.push(
       '-c:v', 'libx264',
       '-preset', 'superfast',        // Even faster encoding preset
       '-tune', 'zerolatency',        // Ultra-low latency encoding
@@ -316,7 +353,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-max_muxing_queue_size', '1024', // Increase muxing queue
       '-y',
       outputFileName
-    ]);
+    );
+
+    console.log('FFmpeg command args:', ffmpegArgs);
+    await ffmpeg.exec(ffmpegArgs);
 
     console.log('FFmpeg execution completed successfully');
 
@@ -335,6 +375,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       ffmpeg.deleteFile(imageFileName).catch(() => {}),
       ffmpeg.deleteFile(outputFileName).catch(() => {})
     ];
+    
+    // Clean up logo file if it was used
+    if (logoFileName) {
+      cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
+    }
+    
     await Promise.allSettled(cleanupPromises);
 
     // Increment processed count and cleanup memory for large batches
@@ -356,6 +402,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         ffmpeg.deleteFile(imageFileName).catch(() => {}),
         ffmpeg.deleteFile(outputFileName).catch(() => {})
       ];
+      
+      // Clean up logo file if it was used
+      if (logoFileName) {
+        cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
+      }
+      
       await Promise.allSettled(cleanupPromises);
     } catch (cleanupError) {
       console.warn('Error during cleanup:', cleanupError);
