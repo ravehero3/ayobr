@@ -68,11 +68,11 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
       <div className="relative text-center space-y-6 w-full flex flex-col items-center justify-center" style={{ zIndex: 60 }}>
         {/* Upload Icon */}
         <motion.div
-          className="inline-flex items-center justify-center w-24 h-24 mx-auto mb-6 rounded-full bg-neon-blue/10 border-2 border-neon-blue/20 group-hover:border-neon-blue/40 group-hover:bg-neon-blue/20 transition-all duration-300"
+          className="inline-flex items-center justify-center w-24 h-24 mx-auto mb-6 rounded-full bg-white/10 border-2 border-white/20 group-hover:border-white/40 group-hover:bg-white/20 transition-all duration-300"
           whileHover={{ scale: 1.1, rotate: 5 }}
           whileTap={{ scale: 0.95 }}
         >
-          <svg className="w-12 h-12 text-neon-blue group-hover:text-neon-blue/80 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-12 h-12 text-white group-hover:text-white/80 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
         </motion.div>
@@ -105,19 +105,19 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           transition={{ delay: 0.4, duration: 0.5 }}
         >
           {/* Audio formats */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-space-gray/30 rounded-full border border-neon-blue/20 group-hover:border-neon-blue/30 transition-all duration-300">
-            <svg className="w-4 h-4 text-neon-blue flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center gap-2 px-4 py-3 bg-space-gray/30 rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300">
+            <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <span className="text-xs font-medium text-gray-300 whitespace-nowrap">MP3, WAV</span>
+            <span className="text-xs font-medium text-white whitespace-nowrap">MP3, WAV</span>
           </div>
 
           {/* Image formats */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-space-gray/30 rounded-full border border-neon-purple/20 group-hover:border-neon-purple/30 transition-all duration-300">
-            <svg className="w-4 h-4 text-neon-purple flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center gap-2 px-4 py-3 bg-space-gray/30 rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300">
+            <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span className="text-xs font-medium text-gray-300 whitespace-nowrap">PNG, JPG</span>
+            <span className="text-xs font-medium text-white whitespace-nowrap">PNG, JPG</span>
           </div>
         </motion.div>
 
