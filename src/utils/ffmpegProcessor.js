@@ -309,13 +309,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     ffmpegArgs.push('-map', '1:a');  // Map audio from second input (audio file)
 
     // Build video filter chain
-    let videoFilter = 'scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white';
+    let videoFilter;
     
-    // Add logo overlay if enabled (positioned at 27% horizontally from left edge)
     if (logoFileName) {
+      // Complex filter with logo overlay - positioned at 27% horizontally from left edge
       const logoX = Math.round(1920 * 0.27); // 27% of video width (518px from left edge)
-      const logoY = 'H/2-overlay_h/2'; // Vertically centered
-      videoFilter += `[v];[2:v]scale=-1:80[logo];[v][logo]overlay=${logoX}:${logoY}`;
+      const logoY = '(main_h-overlay_h)/2'; // Vertically centered
+      videoFilter = `[0:v]scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white[background];[2:v]scale=-1:80[logo];[background][logo]overlay=${logoX}:${logoY}`;
+    } else {
+      // Simple filter without logo
+      videoFilter = 'scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white';
     }
 
     ffmpegArgs.push('-vf', videoFilter);
@@ -356,7 +359,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     );
 
     console.log('FFmpeg command args:', ffmpegArgs);
-    await ffmpeg.exec(ffmpegArgs);
+    
+    try {
+      await ffmpeg.exec(ffmpegArgs);
+      console.log('FFmpeg command executed successfully');
+    } catch (ffmpegError) {
+      console.error('FFmpeg execution failed:', ffmpegError);
+      console.error('FFmpeg command that failed:', ffmpegArgs);
+      throw new Error(`FFmpeg processing failed: ${ffmpegError.message}`);
+    }
 
     console.log('FFmpeg execution completed successfully');
 

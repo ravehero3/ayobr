@@ -281,6 +281,12 @@ export const useFFmpeg = () => {
 
     } catch (error) {
       console.error(`Error generating video for pair ${pair.id}:`, error);
+      console.error('Error stack:', error.stack);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        cause: error.cause
+      });
       
       // Check if generation was cancelled
       if (isCancelling || (error && error.message === 'Generation cancelled by user')) {
