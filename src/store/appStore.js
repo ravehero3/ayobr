@@ -113,6 +113,9 @@ export const useAppStore = create((set, get) => ({
   setGeneratedVideos: (videos) => set({ generatedVideos: videos }),
 
   clearGeneratedVideos: () => set({ generatedVideos: [] }),
+    removeVideo: (videoId) => set((state) => ({
+      generatedVideos: state.generatedVideos.filter(video => video.id !== videoId)
+    })),
 
   // Page management actions
   getCurrentPage: () => {
