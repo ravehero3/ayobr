@@ -611,6 +611,37 @@
 
 /* Removed glow-pulse animation */
 
+/* Glassmorphism Video Loader Hover Effects */
+.glassmorphism-video-loader:hover .close-btn {
+  opacity: 1 !important;
+}
+
+.glassmorphism-video-loader:hover .static-particles {
+  opacity: 1 !important;
+}
+
+/* Enhanced close button styling */
+.close-btn {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.close-btn::before,
+.close-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 2px;
+  background: #000;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.close-btn::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
 /* Removed hover glow effects */
 
 /* Subtle Gradient + Particles Generate Videos Button */
