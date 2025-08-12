@@ -238,145 +238,40 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
             exit={{ opacity: 0, scale: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {/* Video Loading Container - centered and always visible */}
+            {/* Image Container with Video Preview Background */}
             <div 
-              className="glass-container rounded-2xl flex flex-col items-center justify-center p-8 relative overflow-hidden mx-auto"
+              className="glass-container rounded-2xl relative overflow-hidden mx-auto"
               style={{
-                width: '600px',
+                width: '500px',
                 height: '300px',
                 maxWidth: '90vw'
               }}
             >
-              {/* Ambient glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl" />
+              {/* Background image preview - shows what the video will look like */}
+              {pair.image && (
+                <img 
+                  src={URL.createObjectURL(pair.image)}
+                  alt="Video Preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+              
+              {/* Dark overlay for better text readability */}
+              <div className="absolute inset-0 bg-black/40" />
 
-              {/* Miniature representations */}
-              <div className="flex items-center gap-4 mb-6">
-                {/* Audio miniature - representing the actual audio container */}
-                <motion.div 
-                  className="glass-container rounded-lg p-2 w-20 h-12 flex flex-col items-center justify-center"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <div className="flex items-center gap-0.5 mb-1">
-                    {[1,2,3,4,5].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-0.5 bg-green-400 rounded-full"
-                        style={{ height: `${4 + (i % 3) * 2}px` }}
-                        animate={{ 
-                          scaleY: [1, 1.5, 1],
-                          opacity: [0.7, 1, 0.7]
-                        }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          delay: i * 0.1
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="text-xs text-green-400 font-medium truncate w-full text-center">
-                    {pair.audio?.name?.replace(/\.[^/.]+$/, '').substring(0, 8) || 'Audio'}
-                  </div>
-                </motion.div>
-
-                {/* Plus symbol */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-white/60"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </motion.div>
-
-                {/* Image miniature - showing actual image */}
-                <motion.div 
-                  className="glass-container rounded-lg p-1 w-20 h-12 flex flex-col items-center justify-center overflow-hidden"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  {pair.image ? (
-                    <>
-                      <img 
-                        src={URL.createObjectURL(pair.image)} 
-                        alt="Preview" 
-                        className="w-full h-8 object-cover rounded"
-                      />
-                      <div className="text-xs text-blue-400 font-medium truncate w-full text-center mt-0.5">
-                        {pair.image.name.replace(/\.[^/.]+$/, '').substring(0, 8)}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full bg-gray-600 rounded flex flex-col items-center justify-center">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <div className="text-xs text-gray-400">Image</div>
-                    </div>
-                  )}
-                </motion.div>
-
-                {/* Arrow pointing to video */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-white/60"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </motion.div>
-
-                {/* Video loading miniature with three dots animation */}
-                <motion.div 
-                  className="glass-container rounded-lg p-2 w-20 h-12 flex flex-col items-center justify-center"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <div className="flex items-center gap-1 mb-1">
-                    {[1,2,3].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-1.5 h-1.5 bg-purple-400 rounded-full"
-                        animate={{ 
-                          scale: [1, 1.5, 1],
-                          opacity: [0.3, 1, 0.3]
-                        }}
-                        transition={{
-                          duration: 0.8,
-                          repeat: Infinity,
-                          delay: i * 0.2
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="text-xs text-purple-400 font-medium">
-                    Video
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Loading Title with file names */}
+              {/* Title overlay - positioned at top */}
               <motion.div
-                className="text-center mb-6 relative z-10"
-                initial={{ opacity: 0, y: 20 }}
+                className="absolute top-6 left-6 right-6 z-20 text-center"
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
                 <h3 
-                  className="text-white font-semibold mb-2"
+                  className="text-white font-semibold"
                   style={{
                     fontSize: '18px',
                     fontWeight: '600',
-                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
                     lineHeight: '1.3'
                   }}
                 >
@@ -385,111 +280,63 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                     'Generating Video'
                   }
                 </h3>
-                <p 
-                  className="text-white/80 mb-4"
-                  style={{
-                    fontSize: '14px',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-                  }}
-                >
-                  Processing... {Math.round(progress)}%
-                </p>
-
-                {/* Video Preview Area */}
-                <motion.div 
-                  className="w-full max-w-[300px] mx-auto mb-4"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <div 
-                    className="aspect-video bg-black/30 rounded-lg border border-white/20 flex items-center justify-center relative overflow-hidden"
-                    style={{ minHeight: '150px' }}
-                  >
-                    {/* Background image preview */}
-                    {pair.image && (
-                      <img 
-                        src={URL.createObjectURL(pair.image)}
-                        alt="Preview"
-                        className="absolute inset-0 w-full h-full object-cover opacity-60"
-                      />
-                    )}
-                    
-                    {/* Audio waveform indicator */}
-                    <div className="absolute bottom-3 left-3 right-3 flex items-center gap-1">
-                      {[...Array(12)].map((_, i) => (
-                        <div 
-                          key={i}
-                          className="bg-green-400/80 rounded-full"
-                          style={{
-                            width: '4px',
-                            height: `${10 + Math.random() * 16}px`,
-                            animation: `pulse ${0.5 + i * 0.1}s infinite alternate`
-                          }}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Progress overlay */}
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <div className="text-white text-sm font-medium bg-black/50 px-3 py-1 rounded">
-                        {Math.round(progress)}%
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
               </motion.div>
 
-              {/* Progress Bar */}
-              <div className="w-full max-w-md mx-auto mb-6 relative z-10">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm text-white/80">Progress</span>
-                  <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
+              {/* Progress Bar - centered in the middle */}
+              <motion.div 
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                style={{ width: '80%', maxWidth: '300px' }}
+              >
+                <div className="text-center mb-3">
+                  <p 
+                    className="text-white font-medium"
+                    style={{
+                      fontSize: '14px',
+                      textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)'
+                    }}
+                  >
+                    Processing... {Math.round(progress)}%
+                  </p>
                 </div>
+                
                 <div 
-                  className="relative w-full bg-white/10 rounded overflow-visible"
+                  className="relative w-full bg-black/30 rounded-full overflow-hidden border border-white/20"
                   style={{ height: '8px' }}
                 >
                   <motion.div
-                    className="h-full rounded relative transition-all duration-300"
+                    className="h-full rounded-full relative"
                     style={{
                       background: 'linear-gradient(90deg, #1300ff 0%, #4facfe 100%)',
-                      boxShadow: '0 0 20px rgba(19, 0, 255, 0.25), 0 0 40px rgba(19, 0, 255, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.2)'
+                      boxShadow: '0 0 20px rgba(19, 0, 255, 0.4), 0 0 40px rgba(19, 0, 255, 0.2)'
                     }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
                   </motion.div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <motion.div 
-                className="w-full max-w-[300px] mx-auto mb-4"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-              >
-                <div className="w-full bg-white/10 rounded-full h-3">
-                  <motion.div 
-                    className="bg-gradient-to-r from-blue-400 to-purple-500 h-3 rounded-full"
-                    initial={{ width: '0%' }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5 }}
-                  />
                 </div>
               </motion.div>
 
-              <motion.p 
-                className="text-blue-200 text-sm font-medium tracking-wider"
-                initial={{ opacity: 0, y: 5 }}
+              {/* Processing indicator at bottom */}
+              <motion.div
+                className="absolute bottom-6 left-6 right-6 z-20 text-center"
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
+                transition={{ delay: 0.7 }}
               >
-                {progress}% Complete
-              </motion.p>
+                <p 
+                  className="text-white/90 text-sm font-medium"
+                  style={{
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)'
+                  }}
+                >
+                  Creating your video...
+                </p>
+              </motion.div>
             </div>
           </motion.div>
         )}
