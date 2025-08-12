@@ -58,7 +58,15 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
   );
 
   return (
-    <div className="fixed inset-0 bg-black text-white overflow-auto" style={{ zIndex: 20 }}>
+    <div className="fixed inset-0 text-white overflow-auto" style={{ 
+      zIndex: 20,
+      backgroundImage: 'url(/attached_assets/background%20page%202_1754507959583.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      {/* Background overlay for better text readability */}
+      <div className="absolute inset-0 bg-black/40" style={{ zIndex: -1 }} />
       <div className="min-h-screen py-12 px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -78,12 +86,12 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
             
           </motion.div>
           
-          {/* Video Grid */}
+          {/* Video Grid - 4 per row matching audio container width (384px) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            className="grid grid-cols-4 gap-4 max-w-6xl mx-auto"
           >
             <AnimatePresence>
               {generatedVideos.map((video, index) => (
@@ -93,11 +101,16 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className={`relative bg-gray-900 rounded-2xl p-6 cursor-pointer transition-all duration-300 ${
+                  className={`relative glass-container cursor-pointer transition-all duration-300 ${
                     hoveredVideo === video.id 
-                      ? 'bg-gray-800 shadow-2xl shadow-blue-500/20' 
-                      : 'hover:bg-gray-850'
+                      ? 'shadow-2xl shadow-blue-500/20' 
+                      : ''
                   }`}
+                  style={{
+                    width: '384px',
+                    height: '192px',
+                    padding: '16px'
+                  }}
                   onMouseEnter={() => setHoveredVideo(video.id)}
                   onMouseLeave={() => setHoveredVideo(null)}
                   onClick={() => handleVideoDownload(video)}
@@ -126,36 +139,39 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                     </div>
                   )}
 
-                  {/* Video Icon */}
-                  <div className="flex items-center justify-center mb-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center">
-                      <div className="text-2xl font-bold">▶</div>
+                  {/* Compact Video Preview */}
+                  <div className="flex flex-col h-full">
+                    {/* Video Icon - smaller */}
+                    <div className="flex items-center justify-center mb-2">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                        <div className="text-lg font-bold">▶</div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full shadow-lg shadow-blue-500/30"
-                        initial={{ width: 0 }}
-                        animate={{ width: '100%' }}
-                        transition={{ duration: 0.8, delay: index * 0.1 }}
-                      />
+                    {/* Progress Bar - thinner */}
+                    <div className="mb-3">
+                      <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                        <motion.div 
+                          className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full shadow-lg shadow-blue-500/30"
+                          initial={{ width: 0 }}
+                          animate={{ width: '100%' }}
+                          transition={{ duration: 0.8, delay: index * 0.1 }}
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Video Info */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium text-sm mb-2 truncate">
-                      {video.filename || `Video ${index + 1}`}
-                    </h3>
-                    <div className="flex justify-between text-xs text-gray-400">
-                      <span>1920×1080</span>
-                      <span>{formatDuration(video.duration)}</span>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {(video.size / (1024 * 1024)).toFixed(1)} MB
+                    {/* Compact Video Info */}
+                    <div className="text-center flex-1 flex flex-col justify-center">
+                      <h3 className="text-white font-medium text-xs mb-1 truncate">
+                        {video.filename || `Video ${index + 1}`}
+                      </h3>
+                      <div className="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>1920×1080</span>
+                        <span>{formatDuration(video.duration)}</span>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {(video.size / (1024 * 1024)).toFixed(1)} MB
+                      </div>
                     </div>
                   </div>
                 </motion.div>
