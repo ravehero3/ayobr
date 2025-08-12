@@ -301,8 +301,6 @@ export const useFFmpeg = () => {
         });
         console.log(`Video generation completed successfully for pair ${pair.id}`);
         
-        // Small delay to ensure state is properly set before returning
-        await new Promise(resolve => setTimeout(resolve, 100));
         return video;
       } catch (stateError) {
         console.error(`Error setting final state for pair ${pair.id}:`, stateError);

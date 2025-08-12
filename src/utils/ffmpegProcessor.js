@@ -208,13 +208,19 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Set up progress callback with throttling for better performance
     let lastProgressTime = 0;
+    let hasCompleted = false;
     ffmpeg.on('progress', ({ progress }) => {
       const now = Date.now();
       // Throttle progress updates to every 100ms for better performance
-      if (onProgress && (now - lastProgressTime > 100)) {
+      if (onProgress && (now - lastProgressTime > 100) && !hasCompleted) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         onProgress(normalizedProgress);
         lastProgressTime = now;
+        
+        // Mark as completed when we reach 100% to prevent restart
+        if (normalizedProgress >= 100) {
+          hasCompleted = true;
+        }
       }
     });
 
