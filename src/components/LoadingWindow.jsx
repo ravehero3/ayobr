@@ -133,27 +133,91 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     </div>
 
                     <div className="relative z-10">
-                      {/* Title */}
+                      {/* Title - Audio + Image names */}
                       <div
-                        className="text-white font-semibold mb-2"
+                        className="text-white font-semibold mb-2 text-center"
                         style={{
-                          fontSize: '16px',
+                          fontSize: '14px',
                           fontWeight: '600',
-                          textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                          textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                          lineHeight: '1.3'
                         }}
                       >
-                        {generatedVideo?.filename || `Video ${index + 1}`}
+                        {pair.audio?.name && pair.image?.name ? 
+                          `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}` :
+                          generatedVideo?.filename || `Video ${index + 1}`
+                        }
                       </div>
 
-                      {/* Subtitle */}
+                      {/* Processing status */}
                       <div
-                        className="text-white/80 mb-6"
+                        className="text-white/80 mb-4"
                         style={{
                           fontSize: '12px',
                           textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
                         }}
                       >
                         {isComplete ? 'Generation Complete' : `Processing... ${Math.round(progress)}%`}
+                      </div>
+
+                      {/* Video Preview Area */}
+                      <div className="mb-4 w-full max-w-[200px] mx-auto">
+                        <div 
+                          className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
+                          style={{ minHeight: '100px' }}
+                        >
+                          {/* Background image preview */}
+                          {pair.image && (
+                            <img 
+                              src={URL.createObjectURL(pair.image)}
+                              alt="Preview"
+                              className="absolute inset-0 w-full h-full object-cover opacity-50"
+                            />
+                          )}
+                          
+                          {/* Audio waveform indicator */}
+                          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1">
+                            {[...Array(8)].map((_, i) => (
+                              <div 
+                                key={i}
+                                className="bg-green-400/70 rounded-full"
+                                style={{
+                                  width: '3px',
+                                  height: `${8 + Math.random() * 12}px`,
+                                  animation: isComplete ? 'none' : `pulse ${0.5 + i * 0.1}s infinite alternate`
+                                }}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Progress overlay */}
+                          {!isComplete && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <div className="text-white text-xs font-medium">
+                                {Math.round(progress)}%
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Completion checkmark */}
+                          {isComplete && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full bg-white/10 rounded-full h-2 mb-4">
+                        <div 
+                          className="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        />
                       </div>
 
                       {/* Miniature containers row */}

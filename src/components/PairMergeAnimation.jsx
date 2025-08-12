@@ -364,9 +364,9 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 </motion.div>
               </div>
 
-              {/* Loading Title with Typewriter Effect */}
+              {/* Loading Title with file names */}
               <motion.div
-                className="text-center mb-8 relative z-10"
+                className="text-center mb-6 relative z-10"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -374,22 +374,70 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 <h3 
                   className="text-white font-semibold mb-2"
                   style={{
-                    fontSize: '20px',
+                    fontSize: '18px',
                     fontWeight: '600',
-                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                    lineHeight: '1.3'
                   }}
                 >
-                  Generating Video
+                  {pair.audio?.name && pair.image?.name ? 
+                    `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}` :
+                    'Generating Video'
+                  }
                 </h3>
                 <p 
-                  className="text-white/80"
+                  className="text-white/80 mb-4"
                   style={{
                     fontSize: '14px',
                     textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
                   }}
                 >
-                  Processing audio and image files...
+                  Processing... {Math.round(progress)}%
                 </p>
+
+                {/* Video Preview Area */}
+                <motion.div 
+                  className="w-full max-w-[300px] mx-auto mb-4"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <div 
+                    className="aspect-video bg-black/30 rounded-lg border border-white/20 flex items-center justify-center relative overflow-hidden"
+                    style={{ minHeight: '150px' }}
+                  >
+                    {/* Background image preview */}
+                    {pair.image && (
+                      <img 
+                        src={URL.createObjectURL(pair.image)}
+                        alt="Preview"
+                        className="absolute inset-0 w-full h-full object-cover opacity-60"
+                      />
+                    )}
+                    
+                    {/* Audio waveform indicator */}
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center gap-1">
+                      {[...Array(12)].map((_, i) => (
+                        <div 
+                          key={i}
+                          className="bg-green-400/80 rounded-full"
+                          style={{
+                            width: '4px',
+                            height: `${10 + Math.random() * 16}px`,
+                            animation: `pulse ${0.5 + i * 0.1}s infinite alternate`
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Progress overlay */}
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <div className="text-white text-sm font-medium bg-black/50 px-3 py-1 rounded">
+                        {Math.round(progress)}%
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               </motion.div>
 
               {/* Progress Bar */}
@@ -416,6 +464,23 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                   </motion.div>
                 </div>
               </div>
+
+              {/* Progress Bar */}
+              <motion.div 
+                className="w-full max-w-[300px] mx-auto mb-4"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <div className="w-full bg-white/10 rounded-full h-3">
+                  <motion.div 
+                    className="bg-gradient-to-r from-blue-400 to-purple-500 h-3 rounded-full"
+                    initial={{ width: '0%' }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </motion.div>
 
               <motion.p 
                 className="text-blue-200 text-sm font-medium tracking-wider"
