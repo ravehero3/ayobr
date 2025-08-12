@@ -1,4 +1,46 @@
 
+<style>
+  .btn-3d-download:hover .btn-3d-particles {
+    opacity: 1 !important;
+  }
+
+  @keyframes float3d {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px) scale(1);
+      opacity: 0.3;
+    }
+    25% {
+      transform: translateY(-12px) translateX(8px) scale(1.2);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-6px) translateX(-6px) scale(0.8);
+      opacity: 0.7;
+    }
+    75% {
+      transform: translateY(-18px) translateX(12px) scale(1.1);
+      opacity: 0.9;
+    }
+  }
+
+  .btn-3d-download::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn-3d-download:hover::before {
+    left: 100%;
+  }
+</style>
+
+
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -75,14 +117,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
               {generatedVideos.length} video{generatedVideos.length !== 1 ? 's' : ''} ready for download
             </p>
             
-            <motion.button
-              onClick={onDownloadAll}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Download All Videos
-            </motion.button>
+            
           </motion.div>
           
           {/* Video Grid */}
@@ -170,13 +205,73 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
             </AnimatePresence>
           </motion.div>
 
-          {/* Action Buttons */}
+          {/* Footer with Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="flex justify-center mt-12"
+            className="flex flex-col items-center gap-6 mt-12"
           >
+            {/* 3D CSS Artist Download All Button */}
+            <button
+              onClick={onDownloadAll}
+              className="btn-3d-download"
+              style={{
+                background: 'linear-gradient(145deg, #007AFF, #0051D5)',
+                border: 'none',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                padding: '16px 32px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                transform: 'perspective(1000px) rotateX(10deg)',
+                boxShadow: '0 10px 20px rgba(0, 122, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'perspective(1000px) rotateX(0deg) translateY(-5px)';
+                e.target.style.boxShadow = '0 20px 40px rgba(0, 122, 255, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'perspective(1000px) rotateX(10deg)';
+                e.target.style.boxShadow = '0 10px 20px rgba(0, 122, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)';
+              }}
+            >
+              Download All Videos
+              <div 
+                className="btn-3d-particles absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                  opacity: 0,
+                  transition: 'opacity 0.3s ease'
+                }}
+              >
+                {[...Array(7)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="btn-3d-particle absolute rounded-full bg-white"
+                    style={{
+                      width: i % 2 === 0 ? '3px' : '2px',
+                      height: i % 2 === 0 ? '3px' : '2px',
+                      top: `${15 + (i * 10)}%`,
+                      left: `${15 + (i * 12)}%`,
+                      opacity: 0.3 + (i * 0.1),
+                      animation: `float3d ${2.5 + (i * 0.3)}s infinite ease-in-out`,
+                      animationDelay: `${i * 0.4}s`
+                    }}
+                  />
+                ))}
+              </div>
+            </button>
+
             <button
               onClick={handleStartOver}
               className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200"
