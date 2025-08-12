@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -39,10 +38,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             onClick={onStop}
             className="absolute top-6 right-6 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-gray-500/20 hover:bg-gray-500/40 border border-gray-500/30 hover:border-gray-500/50 transition-all duration-200 group"
           >
-            <svg 
-              className="w-4 h-4 text-gray-400 group-hover:text-gray-300 transition-colors" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-4 h-4 text-gray-400 group-hover:text-gray-300 transition-colors"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -51,12 +50,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
           {/* Ambient glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg" />
-          
+
           {/* Content Container with proper padding */}
           <div className="p-10">
             {/* Header */}
             <div className="relative z-10 text-center mb-8">
-            <motion.h2 
+            <motion.h2
               className="text-3xl font-bold text-white mb-2"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -64,7 +63,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             >
               Generating Videos
             </motion.h2>
-            <motion.p 
+            <motion.p
               className="text-gray-300 text-lg"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -86,122 +85,115 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 return (
                   <motion.div
                     key={pair.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="relative p-6 rounded-xl overflow-hidden"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="video-loading-container"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: `1px solid ${isComplete ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                      backdropFilter: 'blur(10px)',
-                      margin: '4px' // Add margin to prevent edge overlapping
+                      position: 'relative',
+                      width: '100%',
+                      height: '180px',
+                      background: isComplete ? 'rgba(0, 0, 0, 0.44)' : 'transparent',
+                      borderRadius: '16px',
+                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                      backdropFilter: 'blur(11.4px)',
+                      WebkitBackdropFilter: 'blur(11.4px)',
+                      border: isComplete ? '1px solid rgba(0, 0, 0, 0.09)' : '1px solid rgba(255, 255, 255, 0.1)',
+                      padding: '20px',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      overflow: 'visible'
+                    }}
+                    whileHover={{
+                      scale: 1.02,
+                      boxShadow: isComplete
+                        ? '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)'
+                        : '0 4px 30px rgba(0, 0, 0, 0.1)'
                     }}
                   >
-                    {/* Success glow for completed videos */}
-                    {isComplete && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl" />
-                    )}
+                    {/* Particle system */}
+                    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1000 }}>
+                      {[...Array(7)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-1 h-1 bg-white rounded-full"
+                          style={{
+                            top: `${-10 + Math.random() * 60}px`,
+                            left: `${12 + i * 12}%`,
+                            boxShadow: '0 0 6px rgba(255, 255, 255, 0.6)',
+                            opacity: 0
+                          }}
+                          animate={isComplete ? {
+                            x: [0, Math.random() * 60 - 30, Math.random() * 60 - 30, 0],
+                            y: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
+                            scale: [0, 1, 0.8, 0],
+                            opacity: [0, 0.8, 0.6, 0]
+                          } : { opacity: 0 }}
+                          transition={{
+                            duration: 15 + Math.random() * 10,
+                            repeat: Infinity,
+                            delay: i * 3,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      ))}
+                    </div>
 
-                    {/* Pair Content */}
                     <div className="relative z-10">
-                      {/* Audio and Image Row */}
-                      <div className="flex items-center justify-between mb-4 gap-4">
-                        {/* Audio Miniature */}
-                        <div className="flex items-center gap-3 flex-1 px-2">
-                          <div className="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center flex-shrink-0 border border-gray-600/30">
-                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                            </svg>
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs text-gray-300 font-medium truncate">
-                              {pair.audio?.name?.replace(/\.[^/.]+$/, '') || 'Audio'}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Plus Symbol */}
-                        <div className="mx-4 text-white/50 flex-shrink-0">
-                          <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
-                          </div>
-                        </div>
-
-                        {/* Image Miniature */}
-                        <div className="flex items-center gap-3 flex-1 px-2">
-                          <div className="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-600/30">
-                            {pair.image ? (
-                              <img 
-                                src={URL.createObjectURL(pair.image)} 
-                                alt="Preview" 
-                                className="w-full h-full object-cover rounded-lg grayscale"
-                              />
-                            ) : (
-                              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z" />
-                              </svg>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs text-gray-300 font-medium truncate">
-                              {pair.image?.name?.replace(/\.[^/.]+$/, '') || 'Image'}
-                            </div>
-                          </div>
-                        </div>
+                      {/* Title */}
+                      <div
+                        className="text-white font-semibold mb-2"
+                        style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                        }}
+                      >
+                        {generatedVideo?.filename || `Video ${index + 1}`}
                       </div>
 
-                      {/* Progress Bar */}
-                      <div className="mb-4 px-2">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs text-gray-300 font-medium">
-                            {isComplete ? 'Complete' : 'Processing...'}
-                          </span>
-                          <span className="text-xs text-white font-semibold bg-white/10 px-2 py-1 rounded-full">
-                            {progress}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-800/60 rounded-full h-3 overflow-hidden backdrop-blur-sm border border-white/10 shadow-inner">
-                          <motion.div
-                            className={`h-full rounded-full relative ${
-                              isComplete 
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
-                                : 'bg-gradient-to-r from-blue-400 to-blue-500'
-                            }`}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
-                          >
-                            {!isComplete && (
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-                            )}
-                          </motion.div>
-                        </div>
+                      {/* Subtitle */}
+                      <div
+                        className="text-white/80 mb-6"
+                        style={{
+                          fontSize: '12px',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                        }}
+                      >
+                        {isComplete ? 'Generation Complete' : `Processing... ${Math.round(progress)}%`}
                       </div>
 
-                      {/* Status Indicator */}
-                      <div className="flex items-center justify-center px-2 py-1">
-                        {isComplete ? (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 200 }}
-                            className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-2 rounded-full border border-green-500/30"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span className="text-xs font-medium">Video Ready</span>
-                          </motion.div>
-                        ) : (
-                          <div className="flex items-center gap-3 bg-blue-500/10 px-3 py-2 rounded-full border border-blue-500/30">
-                            <div className="flex items-center gap-1">
+                      {/* Miniature containers row */}
+                      <div className="flex items-center justify-center gap-2 mb-6">
+                        {/* Audio mini container */}
+                        {pair.audio && (
+                          <div className="w-10 h-6 bg-black/20 rounded border border-white/10 flex items-center justify-center">
+                            <div className="w-4 h-1 bg-green-400 rounded-full"></div>
+                          </div>
+                        )}
+
+                        <div className="text-gray-400 text-sm">+</div>
+
+                        {/* Image mini container */}
+                        {pair.image && (
+                          <div className="w-10 h-6 bg-black/20 rounded border border-white/10 flex items-center justify-center">
+                            <div className="w-4 h-4 bg-purple-400 rounded"></div>
+                          </div>
+                        )}
+
+                        <div className="text-gray-400 text-sm">→</div>
+
+                        {/* Video result */}
+                        <div className="w-12 h-8 bg-black/20 rounded border border-white/10 flex items-center justify-center">
+                          {isComplete ? (
+                            <div className="text-green-400 font-bold">✓</div>
+                          ) : (
+                            <div className="flex gap-0.5">
                               {[1,2,3].map((i) => (
                                 <motion.div
                                   key={i}
-                                  className="w-1.5 h-1.5 bg-blue-400 rounded-full"
-                                  animate={{ 
+                                  className="w-1 h-1 bg-blue-400 rounded-full"
+                                  animate={{
                                     scale: [1, 1.5, 1],
                                     opacity: [0.3, 1, 0.3]
                                   }}
@@ -213,9 +205,30 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                 />
                               ))}
                             </div>
-                            <span className="text-xs text-blue-300 font-medium">Generating</span>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Progress Container */}
+                      <div
+                        className="relative w-full bg-white/10 rounded overflow-visible"
+                        style={{ height: '8px' }}
+                      >
+                        <motion.div
+                          className="h-full rounded relative transition-all duration-300"
+                          style={{
+                            width: `${progress}%`,
+                            background: isComplete
+                              ? 'linear-gradient(90deg, #1300ff 0%, #4facfe 100%)'
+                              : '#333',
+                            boxShadow: isComplete
+                              ? '0 0 20px rgba(19, 0, 255, 0.25), 0 0 40px rgba(19, 0, 255, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.2)'
+                              : 'none'
+                          }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ duration: 0.5 }}
+                        />
                       </div>
                     </div>
                   </motion.div>
@@ -225,7 +238,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           </div>
 
           {/* Overall Progress */}
-            <motion.div 
+            <motion.div
               className="relative z-10 mt-8 text-center bg-white/5 rounded-xl p-6 border border-white/10"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

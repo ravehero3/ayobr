@@ -364,16 +364,50 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 </motion.div>
               </div>
 
-              {/* Progress Bar */}
-              <motion.div 
-                className="w-4/5 max-w-md mb-6"
-                initial={{ opacity: 0, y: 10 }}
+              {/* Loading Title with Typewriter Effect */}
+              <motion.div
+                className="text-center mb-8 relative z-10"
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.3 }}
               >
-                <div className="bg-gray-800/50 rounded-full h-3 overflow-hidden backdrop-blur-sm border border-white/10">
+                <h3 
+                  className="text-white font-semibold mb-2"
+                  style={{
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  Generating Video
+                </h3>
+                <p 
+                  className="text-white/80"
+                  style={{
+                    fontSize: '14px',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  Processing audio and image files...
+                </p>
+              </motion.div>
+
+              {/* Progress Bar */}
+              <div className="w-full max-w-md mx-auto mb-6 relative z-10">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm text-white/80">Progress</span>
+                  <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
+                </div>
+                <div 
+                  className="relative w-full bg-white/10 rounded overflow-visible"
+                  style={{ height: '8px' }}
+                >
                   <motion.div
-                    className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full relative"
+                    className="h-full rounded relative transition-all duration-300"
+                    style={{
+                      background: 'linear-gradient(90deg, #1300ff 0%, #4facfe 100%)',
+                      boxShadow: '0 0 20px rgba(19, 0, 255, 0.25), 0 0 40px rgba(19, 0, 255, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.2)'
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
@@ -381,7 +415,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
                   </motion.div>
                 </div>
-              </motion.div>
+              </div>
 
               <motion.p 
                 className="text-blue-200 text-sm font-medium tracking-wider"
