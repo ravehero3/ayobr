@@ -1,0 +1,685 @@
+please use the button called 3D CSS Artist from this code: 
+
+use this button as the download all videos button on the generated videos page and place this button in the footer
+
+code:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MountainView Button Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #fff;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 300;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, #007AFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 18px;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .button-section {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .designer-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #007AFF;
+        }
+
+        .designer-desc {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* 1. Apple iOS Designer */
+        .btn-ios {
+            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 16px 32px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-ios:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.4);
+        }
+
+        .btn-ios:active {
+            transform: translateY(0);
+        }
+
+        /* 2. Material Design Expert */
+        .btn-material {
+            background: #1976D2;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 12px 24px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.25px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-material::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+            border-radius: 50%;
+        }
+
+        .btn-material:hover::before {
+            transform: scale(2);
+        }
+
+        .btn-material:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 3. Neumorphism Designer */
+        .btn-neumorphism {
+            background: #1a1a1a;
+            border: none;
+            border-radius: 20px;
+            color: #007AFF;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 18px 36px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                8px 8px 16px rgba(0, 0, 0, 0.4),
+                -8px -8px 16px rgba(40, 40, 40, 0.1);
+        }
+
+        .btn-neumorphism:hover {
+            box-shadow: 
+                4px 4px 8px rgba(0, 0, 0, 0.4),
+                -4px -4px 8px rgba(40, 40, 40, 0.1),
+                inset 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-neumorphism:active {
+            box-shadow: 
+                inset 6px 6px 12px rgba(0, 0, 0, 0.4),
+                inset -6px -6px 12px rgba(40, 40, 40, 0.1);
+        }
+
+        /* 4. Glassmorphism Expert */
+        .btn-glass {
+            background: rgba(0, 122, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 16px 32px;
+            cursor: pointer;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-glass:hover::before {
+            left: 100%;
+        }
+
+        .btn-glass:hover {
+            background: rgba(0, 122, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 122, 255, 0.2);
+        }
+
+        /* 5. Brutalist Designer */
+        .btn-brutalist {
+            background: #007AFF;
+            border: 4px solid #fff;
+            border-radius: 0;
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            padding: 16px 32px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.1s ease;
+            box-shadow: 8px 8px 0px #fff;
+        }
+
+        .btn-brutalist:hover {
+            transform: translate(4px, 4px);
+            box-shadow: 4px 4px 0px #fff;
+        }
+
+        .btn-brutalist:active {
+            transform: translate(8px, 8px);
+            box-shadow: 0px 0px 0px #fff;
+        }
+
+        /* 6. Cyberpunk UI Designer */
+        .btn-cyberpunk {
+            background: transparent;
+            border: 2px solid #00ff41;
+            border-radius: 0;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 14px 28px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 65, 0.3),
+                inset 0 0 10px rgba(0, 255, 65, 0.1);
+        }
+
+        .btn-cyberpunk::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-cyberpunk:hover::before {
+            left: 100%;
+        }
+
+        .btn-cyberpunk:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 65, 0.6),
+                inset 0 0 20px rgba(0, 255, 65, 0.2);
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+        }
+
+        /* 7. Minimalist Designer */
+        .btn-minimal {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: lowercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-minimal:hover {
+            border-color: #007AFF;
+            color: #007AFF;
+        }
+
+        /* 8. 3D CSS Artist */
+        .btn-3d {
+            background: linear-gradient(145deg, #007AFF, #0051D5);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 16px 32px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            transform: perspective(1000px) rotateX(10deg);
+            box-shadow: 
+                0 10px 20px rgba(0, 122, 255, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-3d::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-3d:hover::before {
+            left: 100%;
+        }
+
+        .btn-3d:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+            box-shadow: 
+                0 20px 40px rgba(0, 122, 255, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        /* 3D Button Particles */
+        .btn-3d-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-3d:hover .btn-3d-particles {
+            opacity: 1;
+        }
+
+        .btn-3d-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: white;
+            animation: float3d 3s infinite ease-in-out;
+        }
+
+        .btn-3d-particle:nth-child(1) {
+            width: 3px;
+            height: 3px;
+            top: 20%;
+            left: 15%;
+            opacity: 0.9;
+            animation-delay: 0s;
+            animation-duration: 2.5s;
+        }
+
+        .btn-3d-particle:nth-child(2) {
+            width: 2px;
+            height: 2px;
+            top: 60%;
+            left: 80%;
+            opacity: 0.6;
+            animation-delay: 0.4s;
+            animation-duration: 3.2s;
+        }
+
+        .btn-3d-particle:nth-child(3) {
+            width: 4px;
+            height: 4px;
+            top: 40%;
+            left: 60%;
+            opacity: 0.8;
+            animation-delay: 0.8s;
+            animation-duration: 2.8s;
+        }
+
+        .btn-3d-particle:nth-child(4) {
+            width: 2px;
+            height: 2px;
+            top: 80%;
+            left: 25%;
+            opacity: 0.5;
+            animation-delay: 1.2s;
+            animation-duration: 3.5s;
+        }
+
+        .btn-3d-particle:nth-child(5) {
+            width: 3px;
+            height: 3px;
+            top: 30%;
+            left: 90%;
+            opacity: 0.7;
+            animation-delay: 1.6s;
+            animation-duration: 2.2s;
+        }
+
+        .btn-3d-particle:nth-child(6) {
+            width: 2px;
+            height: 2px;
+            top: 70%;
+            left: 45%;
+            opacity: 0.4;
+            animation-delay: 2s;
+            animation-duration: 3.8s;
+        }
+
+        .btn-3d-particle:nth-child(7) {
+            width: 3px;
+            height: 3px;
+            top: 15%;
+            left: 70%;
+            opacity: 0.6;
+            animation-delay: 2.4s;
+            animation-duration: 2.6s;
+        }
+
+        @keyframes float3d {
+            0%, 100% {
+                transform: translateY(0px) translateX(0px) scale(1);
+                opacity: 0.3;
+            }
+            25% {
+                transform: translateY(-12px) translateX(8px) scale(1.2);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-6px) translateX(-6px) scale(0.8);
+                opacity: 0.7;
+            }
+            75% {
+                transform: translateY(-18px) translateX(12px) scale(1.1);
+                opacity: 0.9;
+            }
+        }
+
+        /* 9. Retro Wave Designer */
+        .btn-retro {
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 16px 32px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+
+        .btn-retro::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .btn-retro:hover::before {
+            animation: shine 0.5s ease-in-out;
+        }
+
+        .btn-retro:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.8);
+        }
+
+        @keyframes shine {
+            0% { opacity: 0; transform: rotate(45deg) translateX(-100%); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: rotate(45deg) translateX(100%); }
+        }
+
+        /* 10. Swiss Design Expert */
+        .btn-swiss {
+            background: #007AFF;
+            border: none;
+            border-radius: 0;
+            color: white;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            padding: 20px 40px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .btn-swiss::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: #fff;
+            transition: width 0.3s ease;
+        }
+
+        .btn-swiss:hover::after {
+            width: 100%;
+        }
+
+        .btn-swiss:hover {
+            background: #0051D5;
+        }
+
+        @media (max-width: 768px) {
+            .buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MountainView</h1>
+            <p>10 Button Interpretations by Different Design Experts</p>
+        </div>
+
+        <div class="buttons-grid">
+            <div class="button-section">
+                <h3 class="designer-title">Apple iOS Designer</h3>
+                <p class="designer-desc">Clean, refined, and intuitive with subtle depth and perfect curves</p>
+                <button class="btn-ios">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Material Design Expert</h3>
+                <p class="designer-desc">Google's design language with elevation, ripple effects, and bold typography</p>
+                <button class="btn-material">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Neumorphism Designer</h3>
+                <p class="designer-desc">Soft, tactile interface that appears to extrude from the background</p>
+                <button class="btn-neumorphism">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Glassmorphism Expert</h3>
+                <p class="designer-desc">Translucent surfaces with blur effects and subtle transparency</p>
+                <button class="btn-glass">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Brutalist Designer</h3>
+                <p class="designer-desc">Bold, raw, and unapologetic with sharp edges and high contrast</p>
+                <button class="btn-brutalist">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Cyberpunk UI Designer</h3>
+                <p class="designer-desc">Futuristic with neon glows, scan lines, and digital aesthetics</p>
+                <button class="btn-cyberpunk">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Minimalist Designer</h3>
+                <p class="designer-desc">Less is more - essential elements only with subtle interactions</p>
+                <button class="btn-minimal">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">3D CSS Artist</h3>
+                <p class="designer-desc">Dimensional depth with perspective transforms and realistic shadows</p>
+                <button class="btn-3d">
+                    MountainView
+                    <div class="btn-3d-particles">
+                        <div class="btn-3d-particle"></div>
+                        <div class="btn-3d-particle"></div>
+                        <div class="btn-3d-particle"></div>
+                        <div class="btn-3d-particle"></div>
+                        <div class="btn-3d-particle"></div>
+                        <div class="btn-3d-particle"></div>
+                        <div class="btn-3d-particle"></div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Retro Wave Designer</h3>
+                <p class="designer-desc">80s inspired with vibrant gradients, neon effects, and synthwave vibes</p>
+                <button class="btn-retro">MountainView</button>
+            </div>
+
+            <div class="button-section">
+                <h3 class="designer-title">Swiss Design Expert</h3>
+                <p class="designer-desc">Functional, grid-based design with clean typography and precise geometry</p>
+                <button class="btn-swiss">MountainView</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click feedback for all buttons
+            const buttons = document.querySelectorAll('button[class*="btn-"]');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Create a ripple effect
+                    const rect = this.getBoundingClientRect();
+                    const ripple = document.createElement('span');
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.pointerEvents = 'none';
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add some hover sound simulation (visual feedback)
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transition = 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            });
+        });
+    </script>
+</body>
+</html>
+
+
