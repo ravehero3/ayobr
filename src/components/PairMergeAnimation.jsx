@@ -232,19 +232,20 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
 
         {animationStage === 'merged' && (
           <motion.div
-            className="absolute flex items-center justify-center inset-0"
+            className="absolute inset-0 flex items-center justify-center p-4"
             initial={{ opacity: 0, scale: 0.3 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {/* Image Container with Video Preview Background */}
+            {/* Container with proper sizing constraints */}
             <div 
               className="glass-container rounded-2xl relative overflow-hidden mx-auto"
               style={{
-                width: '500px',
-                height: '300px',
-                maxWidth: '90vw'
+                width: 'min(500px, 90vw)',
+                height: 'min(300px, 60vh)',
+                maxWidth: '100%',
+                maxHeight: '100%'
               }}
             >
               {/* Background image preview - shows what the video will look like */}
@@ -259,17 +260,17 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
               {/* Dark overlay for better text readability */}
               <div className="absolute inset-0 bg-black/40" />
 
-              {/* Title overlay - positioned at top */}
+              {/* Title overlay - positioned at top with proper spacing */}
               <motion.div
-                className="absolute top-6 left-6 right-6 z-20 text-center"
+                className="absolute top-4 left-4 right-4 z-20 text-center"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
                 <h3 
-                  className="text-white font-semibold"
+                  className="text-white font-semibold break-words"
                   style={{
-                    fontSize: '18px',
+                    fontSize: '16px',
                     fontWeight: '600',
                     textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
                     lineHeight: '1.3'
@@ -282,13 +283,13 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 </h3>
               </motion.div>
 
-              {/* Progress Bar - centered in the middle */}
+              {/* Progress Bar - centered in the middle with blue gradient */}
               <motion.div 
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 px-4"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 }}
-                style={{ width: '80%', maxWidth: '300px' }}
+                style={{ width: '90%', maxWidth: '280px' }}
               >
                 <div className="text-center mb-3">
                   <p 
@@ -309,8 +310,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                   <motion.div
                     className="h-full rounded-full relative"
                     style={{
-                      background: 'linear-gradient(90deg, #1300ff 0%, #4facfe 100%)',
-                      boxShadow: '0 0 20px rgba(19, 0, 255, 0.4), 0 0 40px rgba(19, 0, 255, 0.2)'
+                      background: 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #93c5fd 100%)',
+                      boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2)'
                     }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
@@ -321,9 +322,9 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 </div>
               </motion.div>
 
-              {/* Processing indicator at bottom */}
+              {/* Processing indicator at bottom with proper spacing */}
               <motion.div
-                className="absolute bottom-6 left-6 right-6 z-20 text-center"
+                className="absolute bottom-4 left-4 right-4 z-20 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
@@ -343,36 +344,57 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
 
         {animationStage === 'completed' && generatedVideo && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center p-4"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Video Preview Container */}
-            <div className="w-full h-full glass-container rounded-2xl flex flex-col items-center justify-center p-6 relative overflow-hidden">
-              {/* Success glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-2xl" />
+            {/* Video Preview Container - properly contained */}
+            <div 
+              className="glass-container rounded-2xl relative overflow-hidden mx-auto"
+              style={{
+                width: 'min(500px, 90vw)',
+                height: 'min(300px, 60vh)',
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
+            >
+              {/* Generated video as background preview */}
+              <video
+                src={generatedVideo.url}
+                className="absolute inset-0 w-full h-full object-cover"
+                muted
+                loop
+                autoPlay
+                playsInline
+              />
 
-              {/* Success indicator */}
+              {/* Dark overlay for better text readability */}
+              <div className="absolute inset-0 bg-black/30" />
+
+              {/* Success indicator at top */}
               <motion.div 
-                className="mb-4 flex items-center gap-2"
+                className="absolute top-4 left-4 right-4 z-20 flex items-center justify-center gap-2"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
                 <motion.div
-                  className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center"
+                  className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                 >
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </motion.div>
                 <motion.span 
-                  className="text-green-400 font-medium"
+                  className="text-green-400 font-medium text-sm"
+                  style={{
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)'
+                  }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
@@ -381,60 +403,65 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 </motion.span>
               </motion.div>
 
-              {/* Video Preview */}
+              {/* Video title overlay */}
               <motion.div
-                className="w-full max-w-[700px] aspect-video relative"
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
+                className="absolute top-12 left-4 right-4 z-20 text-center"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
               >
-                <video
-                  src={generatedVideo.url}
-                  controls
-                  className="w-full h-full rounded-xl shadow-2xl object-contain border border-white/10"
+                <h3 
+                  className="text-white font-semibold break-words"
                   style={{
-                    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.2)',
-                    background: 'rgba(0, 0, 0, 0.3)'
-                  }}
-                  preload="metadata"
-                  autoPlay={false}
-                />
-
-                {/* Video overlay with play button when not playing */}
-                <motion.div 
-                  className="absolute inset-0 bg-black/20 rounded-xl flex items-center justify-center cursor-pointer group"
-                  initial={{ opacity: 1 }}
-                  whileHover={{ opacity: 0.8 }}
-                  onClick={(e) => {
-                    const video = e.currentTarget.previousElementSibling;
-                    if (video && video.paused) {
-                      video.play();
-                      e.currentTarget.style.opacity = '0';
-                      e.currentTarget.style.pointerEvents = 'none';
-                    }
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
+                    lineHeight: '1.3'
                   }}
                 >
-                  <motion.div
-                    className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <svg className="w-8 h-8 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </motion.div>
+                  {pair.audio?.name && pair.image?.name ? 
+                    `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}` :
+                    'Generated Video'
+                  }
+                </h3>
+              </motion.div>
+
+              {/* Play button overlay - centered */}
+              <motion.div 
+                className="absolute inset-0 flex items-center justify-center z-20"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <motion.div
+                  className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center cursor-pointer group hover:bg-white transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    // This is a preview - the actual video controls will be in the main view
+                    console.log('Video preview clicked');
+                  }}
+                >
+                  <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
                 </motion.div>
               </motion.div>
 
-              {/* Video info */}
-              <motion.div 
-                className="mt-4 text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+              {/* Info text at bottom */}
+              <motion.div
+                className="absolute bottom-4 left-4 right-4 z-20 text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <p className="text-gray-300 text-sm">
-                  Click the play button to preview your generated video
+                <p 
+                  className="text-white/90 text-xs font-medium"
+                  style={{
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)'
+                  }}
+                >
+                  Video ready for download
                 </p>
               </motion.div>
             </div>
