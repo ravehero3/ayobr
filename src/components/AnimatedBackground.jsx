@@ -6,7 +6,11 @@ const AnimatedBackground = () => {
   // Get reactive state from Zustand store - these will trigger re-renders
   const pairs = useAppStore(state => state.pairs);
   const generatedVideos = useAppStore(state => state.generatedVideos);
-  const isGenerating = useAppStore(state => state.isGenerating);
+  const storeIsGenerating = useAppStore(state => state.isGenerating);
+  const videoGenerationStates = useAppStore(state => state.videoGenerationStates);
+  
+  // Check if any pair is currently generating
+  const isGenerating = storeIsGenerating || Object.values(videoGenerationStates).some(state => state?.isGenerating);
 
   const [backgroundLoaded, setBackgroundLoaded] = useState({});
 

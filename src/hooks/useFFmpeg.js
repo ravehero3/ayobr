@@ -35,6 +35,9 @@ export const useFFmpeg = () => {
 
     try {
       setIsGenerating(true);
+      // Also set the store state
+      const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
+      setStoreIsGenerating(true);
       resetCancellation();
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations

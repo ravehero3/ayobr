@@ -126,11 +126,14 @@ export const useAppStore = create((set, get) => ({
     // Fallback to automatic detection with improved logic
     const hasFiles = state.pairs.some(pair => pair.audio || pair.image);
     const hasVideos = state.generatedVideos.length > 0;
+    
+    // Check if any pair is generating
+    const isGenerating = state.isGenerating || Object.values(state.videoGenerationStates).some(genState => genState?.isGenerating);
 
     // Priority order: videos > generation > files > upload
-    if (hasVideos && !state.isGenerating) {
+    if (hasVideos && !isGenerating) {
       return 'download';
-    } else if (state.isGenerating) {
+    } else if (isGenerating) {
       return 'generation';
     } else if (hasFiles) {
       return 'fileManagement';
