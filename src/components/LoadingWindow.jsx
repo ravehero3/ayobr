@@ -16,7 +16,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         transition={{ duration: 0.4 }}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       >
-        {/* Loading Window - Glassmorphism Style */}
+        {/* Loading Window - No Background */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -24,10 +24,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="relative w-full max-w-4xl mx-4 p-2 rounded-lg overflow-hidden"
           style={{
-            background: 'rgba(0, 0, 0, 0.2)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 25px 45px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
             maxHeight: '85vh',
             width: '100%',
             maxWidth: '4rem * 16'
@@ -47,9 +43,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-
-          {/* Ambient glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg" />
 
           {/* Content Container with proper padding */}
           <div className="p-10">
@@ -239,7 +232,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
           {/* Overall Progress */}
             <motion.div
-              className="relative z-10 mt-8 text-center bg-white/5 rounded-xl p-6 border border-white/10"
+              className="relative z-10 mt-8 text-center rounded-xl p-6"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
