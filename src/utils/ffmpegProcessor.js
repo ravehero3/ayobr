@@ -195,9 +195,9 @@ export const initializeFFmpeg = async () => {
   return initPromise;
 };
 
-export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel, logoSettings = null) => {
+export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel, videoSettings = null) => {
   console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
-  console.log('Logo settings:', logoSettings);
+  console.log('Video settings:', videoSettings);
 
   try {
     const ffmpeg = await initializeFFmpeg();
@@ -274,16 +274,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     await ffmpeg.writeFile(audioFileName, audioData);
     await ffmpeg.writeFile(imageFileName, imageData);
 
-    // Handle logo file if provided and enabled
-    if (logoSettings && logoSettings.useLogoInVideos && logoSettings.logoFile) {
-      logoFileName = `logo_${Date.now()}.png`;
-      
-      // Convert base64 logo to binary data
-      const logoBase64 = logoSettings.logoFile.split(',')[1]; // Remove data:image/... prefix
-      const logoData = Uint8Array.from(atob(logoBase64), c => c.charCodeAt(0));
-      await ffmpeg.writeFile(logoFileName, logoData);
-      console.log('Logo file written to FFmpeg filesystem:', logoFileName);
-    }
+    // Handle logo file if provided and enabled (temporarily disabled for debugging)
+    // if (logoSettings && logoSettings.useLogoInVideos && logoSettings.logoFile) {
+    //   logoFileName = `logo_${Date.now()}.png`;
+    //   
+    //   // Convert base64 logo to binary data
+    //   const logoBase64 = logoSettings.logoFile.split(',')[1]; // Remove data:image/... prefix
+    //   const logoData = Uint8Array.from(atob(logoBase64), c => c.charCodeAt(0));
+    //   await ffmpeg.writeFile(logoFileName, logoData);
+    //   console.log('Logo file written to FFmpeg filesystem:', logoFileName);
+    // }
 
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
@@ -299,27 +299,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-i', audioFileName
     ];
 
-    // Add logo input if provided
-    if (logoFileName) {
-      ffmpegArgs.push('-i', logoFileName);
-    }
+    // Add logo input if provided (temporarily disabled)
+    // if (logoFileName) {
+    //   ffmpegArgs.push('-i', logoFileName);
+    // }
 
     // Map inputs
     ffmpegArgs.push('-map', '0:v');  // Map video from first input (image)
     ffmpegArgs.push('-map', '1:a');  // Map audio from second input (audio file)
 
-    // Build video filter chain
-    let videoFilter;
+    // Get background color from settings (default to white)
+    const backgroundColor = (videoSettings && videoSettings.backgroundColor) ? videoSettings.backgroundColor : 'white';
     
-    if (logoFileName) {
-      // Complex filter with logo overlay - positioned at 27% horizontally from left edge
-      const logoX = Math.round(1920 * 0.27); // 27% of video width (518px from left edge)
-      const logoY = '(main_h-overlay_h)/2'; // Vertically centered
-      videoFilter = `[0:v]scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white[background];[2:v]scale=-1:80[logo];[background][logo]overlay=${logoX}:${logoY}`;
-    } else {
-      // Simple filter without logo
-      videoFilter = 'scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:white,pad=1920:1080:0:20:white';
-    }
+    // Build video filter chain with customizable background
+    const videoFilter = `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:${backgroundColor},pad=1920:1080:0:20:${backgroundColor}`;
 
     ffmpegArgs.push('-vf', videoFilter);
 

@@ -193,12 +193,14 @@ export const useFFmpeg = () => {
 
       console.log(`Processing video for pair ${pair.id}:`, pair);
       
-      // Get logo settings from app store
-      const logoSettings = {
-        logoFile: store.logoFile,
-        useLogoInVideos: store.useLogoInVideos
+      // Get video settings from app store (including background and logo)
+      const videoSettings = {
+        backgroundColor: store.videoSettings.background === 'white' ? 'white' : 
+                         store.videoSettings.background === 'black' ? 'black' : 'white',
+        logoFile: store.logoSettings.logoFile,
+        useLogoInVideos: store.logoSettings.useLogoInVideos
       };
-      console.log('Logo settings for video generation:', logoSettings);
+      console.log('Video settings for generation:', videoSettings);
       
       const videoData = await processVideoWithFFmpeg(
         pair.audio, 
@@ -219,7 +221,7 @@ export const useFFmpeg = () => {
           }
           return false;
         },
-        logoSettings
+        videoSettings
       );
 
       if (isCancelling) {
