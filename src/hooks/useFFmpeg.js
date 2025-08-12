@@ -123,7 +123,7 @@ export const useFFmpeg = () => {
         console.log('Video generation was cancelled');
         setIsGenerating(false);
         setProgress(0);
-        
+
         // Clean up any partial state
         pairs.forEach(pair => {
           setVideoGenerationState(pair.id, {
@@ -134,36 +134,36 @@ export const useFFmpeg = () => {
             error: null
           });
         });
-        
+
         return;
       }
 
       console.log('Video generation completed successfully');
       setProgress(100);
-      
+
       // Reset the global generation state immediately
       setIsGenerating(false);
       setProgress(0);
       console.log('Generation completed and state reset');
-      
+
     } catch (error) {
       console.error('Error in generateVideos:', error);
-      
+
       // Force stop any remaining processes
       forceStopAllProcesses();
-      
+
       // Use comprehensive reset from store
       const { resetGenerationState } = useAppStore.getState();
       resetGenerationState();
-      
+
       // Reset progress in hook
       setProgress(0);
-      
+
       // Show user-friendly error message only if not cancelled
       if (!isCancelling) {
         alert(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);
       }
-      
+
       // Reset cancellation state
       setTimeout(() => {
         resetCancellation();
@@ -195,7 +195,7 @@ export const useFFmpeg = () => {
       });
 
       console.log(`Processing video for pair ${pair.id}:`, pair);
-      
+
       // Get video settings from app store (including background and logo)
       const videoSettings = {
         backgroundColor: store.videoSettings.background === 'white' ? 'white' : 
@@ -204,7 +204,7 @@ export const useFFmpeg = () => {
         useLogoInVideos: store.logoSettings.useLogoInVideos
       };
       console.log('Video settings for generation:', videoSettings);
-      
+
       const videoData = await processVideoWithFFmpeg(
         pair.audio, 
         pair.image, 
@@ -234,11 +234,11 @@ export const useFFmpeg = () => {
 
       console.log('Creating video blob and URL...');
       console.log('Video data size received:', videoData ? videoData.length : 'null/undefined');
-      
+
       if (!videoData || videoData.length === 0) {
         throw new Error('Invalid video data received from FFmpeg processor');
       }
-      
+
       let videoBlob, videoUrl;
       try {
         videoBlob = new Blob([videoData], { type: 'video/mp4' });
@@ -248,11 +248,11 @@ export const useFFmpeg = () => {
         console.error('Error creating video blob:', blobError);
         throw new Error(`Failed to create video blob: ${blobError.message}`);
       }
-      
+
       // Ensure clean filename
       const audioName = pair.audio.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
       const imageName = pair.image.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-      
+
       const video = {
         id: crypto.randomUUID(),
         pairId: pair.id,
@@ -269,19 +269,19 @@ export const useFFmpeg = () => {
         size: video.size,
         pairId: video.pairId
       });
-      
+
       // Add video to store immediately
       try {
         console.log('Adding video to store...');
         addGeneratedVideo(video);
         console.log('Video added to store successfully');
-        
+
         // Verify video was added immediately
         const storeState = useAppStore.getState();
         const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
         console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
         console.log('Total videos in store:', storeState.generatedVideos.length);
-        
+
         if (!addedVideo) {
           throw new Error('Video was not properly added to store');
         }
@@ -315,7 +315,7 @@ export const useFFmpeg = () => {
         message: error.message,
         cause: error.cause
       });
-      
+
       // Check if generation was cancelled
       if (isCancelling || (error && error.message === 'Generation cancelled by user')) {
         console.log(`Video generation cancelled for pair ${pair.id}`);
@@ -353,23 +353,23 @@ export const useFFmpeg = () => {
 
   const stopGeneration = useCallback(() => {
     console.log('Stop generation clicked - forcing immediate termination');
-    
+
     // Set cancelling flag first
     cancelGeneration();
-    
+
     // Force stop all FFmpeg processes
     forceStopAllProcesses();
-    
+
     // Immediately clear all generation states and return to containers view
     const { resetGenerationState, clearAllVideoGenerationStates, pairs } = useAppStore.getState();
-    
+
     // Reset all states immediately
     setIsGenerating(false);
     setProgress(0);
-    
+
     // Clear all video generation states for all pairs
     clearAllVideoGenerationStates();
-    
+
     // Reset each pair's video generation state to ensure UI shows containers
     pairs.forEach(pair => {
       const { setVideoGenerationState } = useAppStore.getState();
@@ -381,10 +381,10 @@ export const useFFmpeg = () => {
         error: null
       });
     });
-    
+
     // Use comprehensive reset from store
     resetGenerationState();
-    
+
     // Final cleanup after a short delay
     setTimeout(() => {
       resetCancellation();
@@ -394,19 +394,19 @@ export const useFFmpeg = () => {
 
   const resetAppForNewGeneration = useCallback(() => {
     console.log('Resetting app for new generation');
-    
+
     // Reset all states
     setIsGenerating(false);
     setProgress(0);
     resetCancellation();
-    
+
     // Clear all video generation states
     const { pairs, clearAllVideoGenerationStates } = useAppStore.getState();
     clearAllVideoGenerationStates();
-    
+
     // Force cleanup of any lingering processes
     forceStopAllProcesses();
-    
+
     console.log('App reset complete - ready for new generation');
   }, [setIsGenerating, setProgress, resetCancellation]);
 
