@@ -1,46 +1,4 @@
 
-<style>
-  .btn-3d-download:hover .btn-3d-particles {
-    opacity: 1 !important;
-  }
-
-  @keyframes float3d {
-    0%, 100% {
-      transform: translateY(0px) translateX(0px) scale(1);
-      opacity: 0.3;
-    }
-    25% {
-      transform: translateY(-12px) translateX(8px) scale(1.2);
-      opacity: 1;
-    }
-    50% {
-      transform: translateY(-6px) translateX(-6px) scale(0.8);
-      opacity: 0.7;
-    }
-    75% {
-      transform: translateY(-18px) translateX(12px) scale(1.1);
-      opacity: 0.9;
-    }
-  }
-
-  .btn-3d-download::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s ease;
-  }
-
-  .btn-3d-download:hover::before {
-    left: 100%;
-  }
-</style>
-
-
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
