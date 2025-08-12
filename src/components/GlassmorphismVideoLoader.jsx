@@ -71,7 +71,7 @@ const GlassmorphismVideoLoader = ({
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-[420px] h-[280px] p-8 overflow-hidden"
+          className="relative w-[420px] h-[280px] p-8 overflow-hidden transition-all duration-300"
           style={{
             background: 'rgba(255, 255, 255, 0.08)',
             backdropFilter: 'blur(20px)',
@@ -84,6 +84,12 @@ const GlassmorphismVideoLoader = ({
               inset 0 -1px 0 rgba(0, 0, 0, 0.3),
               0 0 30px rgba(59, 130, 246, 0.1)
             `
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
           }}
         >
           {/* Close Button */}

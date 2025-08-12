@@ -110,7 +110,7 @@ const Footer = ({ onGenerateVideos }) => {
             </button>
           )}
           
-          {/* 3D Download All Videos Button */}
+          {/* Download All Videos Button - matching Generate Videos styling */}
           {generatedVideos.length > 0 && (
             <button
               onClick={() => {
@@ -123,17 +123,17 @@ const Footer = ({ onGenerateVideos }) => {
                   document.body.removeChild(link);
                 });
               }}
-              className="btn-3d-download"
+              className="generate-btn-subtle-particles"
             >
               Download All Videos
-              <div className="btn-3d-particles">
-                <div className="btn-3d-particle"></div>
-                <div className="btn-3d-particle"></div>
-                <div className="btn-3d-particle"></div>
-                <div className="btn-3d-particle"></div>
-                <div className="btn-3d-particle"></div>
-                <div className="btn-3d-particle"></div>
-                <div className="btn-3d-particle"></div>
+              <div className="particle-system">
+                <div className="particle particle-1"></div>
+                <div className="particle particle-2"></div>
+                <div className="particle particle-3"></div>
+                <div className="particle particle-4"></div>
+                <div className="particle particle-5"></div>
+                <div className="particle particle-6"></div>
+                <div className="particle particle-7"></div>
               </div>
             </button>
           )}
