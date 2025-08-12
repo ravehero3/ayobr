@@ -308,8 +308,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     ffmpegArgs.push('-map', '0:v');  // Map video from first input (image)
     ffmpegArgs.push('-map', '1:a');  // Map audio from second input (audio file)
 
-    // Get background color from settings (default to white)
-    const backgroundColor = (videoSettings && videoSettings.backgroundColor) ? videoSettings.backgroundColor : 'white';
+    // Get background color from settings (default to black)
+    const backgroundColor = (videoSettings && videoSettings.background) ? videoSettings.background : 'black';
     
     // Build video filter chain with customizable background
     const videoFilter = `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:${backgroundColor},pad=1920:1080:0:20:${backgroundColor}`;
@@ -319,34 +319,17 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Add encoding parameters
     ffmpegArgs.push(
       '-c:v', 'libx264',
-      '-preset', 'superfast',        // Even faster encoding preset
-      '-tune', 'zerolatency',        // Ultra-low latency encoding
-      '-crf', '30',                  // Higher CRF for faster encoding (slightly lower quality but much faster)
-      '-g', '1000',                  // Maximum GOP size for static images
-      '-bf', '0',                    // Disable B-frames for faster encoding
-      '-refs', '1',                  // Single reference frame
-      '-me_method', 'dia',           // Fastest motion estimation
-      '-subq', '0',                  // Disable subpixel refinement completely
-      '-trellis', '0',               // Disable trellis quantization
-      '-aq-mode', '0',               // Disable adaptive quantization
-      '-fast-pskip', '1',            // Enable fast P-frame skip
-      '-mbtree', '0',                // Disable macroblock tree
-      '-rc_lookahead', '0',          // Disable lookahead
-      '-sc_threshold', '0',          // Disable scene change detection
-      '-partitions', 'none',         // Disable all partitions
-      '-me_range', '4',              // Minimal motion estimation range
-      '-r', '0.5',                   // Even lower FPS for static content
-      '-c:a', 'aac',                 // Use AAC codec for audio (guaranteed compatibility)
-      '-b:a', '320k',                // High bitrate for uncompressed quality
-      '-ar', '48000',                // High sample rate
+      '-preset', 'ultrafast',        // Fastest preset for better performance
+      '-crf', '23',                  // Good quality/speed balance
+      '-r', '1',                     // 1 FPS for static content
+      '-c:a', 'aac',                 // Use AAC codec for audio
+      '-b:a', '128k',                // Standard audio bitrate
+      '-ar', '44100',                // Standard sample rate
       '-ac', '2',                    // Stereo audio
       '-pix_fmt', 'yuv420p',
       '-shortest',
       '-t', audioDuration.toString(),
       '-avoid_negative_ts', 'make_zero',
-      '-fflags', '+fastseek+genpts+discardcorrupt', // Fast seeking and error tolerance
-      '-threads', '1',               // Single thread for WASM efficiency
-      '-max_muxing_queue_size', '1024', // Increase muxing queue
       '-y',
       outputFileName
     );

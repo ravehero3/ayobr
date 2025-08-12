@@ -198,8 +198,7 @@ export const useFFmpeg = () => {
 
       // Get video settings from app store (including background and logo)
       const videoSettings = {
-        backgroundColor: store.videoSettings.background === 'white' ? 'white' : 
-                         store.videoSettings.background === 'black' ? 'black' : 'white',
+        background: store.videoSettings.background || 'black',
         logoFile: store.logoSettings.logoFile,
         useLogoInVideos: store.logoSettings.useLogoInVideos
       };
@@ -301,6 +300,9 @@ export const useFFmpeg = () => {
           error: null
         });
         console.log(`Video generation completed successfully for pair ${pair.id}`);
+        
+        // Small delay to ensure state is properly set before returning
+        await new Promise(resolve => setTimeout(resolve, 100));
         return video;
       } catch (stateError) {
         console.error(`Error setting final state for pair ${pair.id}:`, stateError);

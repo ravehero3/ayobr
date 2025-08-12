@@ -195,14 +195,17 @@ export const useAppStore = create((set, get) => ({
   setVideoGenerationState: (pairId, state) => set(store => {
     const currentState = store.videoGenerationStates[pairId];
 
-    console.log(`Setting video generation state for pair ${pairId}:`, state);
-    console.log(`Current state:`, currentState);
+    // Only log important state changes to reduce noise
+    if (!currentState || currentState.progress !== state.progress || currentState.isComplete !== state.isComplete) {
+      console.log(`Setting video generation state for pair ${pairId}:`, state);
+    }
 
     // More careful state comparison to prevent loops
     if (currentState && 
         currentState.isGenerating === state.isGenerating &&
         currentState.progress === state.progress &&
         currentState.isComplete === state.isComplete &&
+        currentState.error === state.error &&
         ((currentState.video === null && state.video === null) || 
          (currentState.video && state.video && currentState.video.id === state.video.id))) {
       return store; // No change needed
