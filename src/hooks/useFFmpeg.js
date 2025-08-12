@@ -230,8 +230,21 @@ export const useFFmpeg = () => {
       }
 
       console.log('Creating video blob and URL...');
-      const videoBlob = new Blob([videoData], { type: 'video/mp4' });
-      const videoUrl = URL.createObjectURL(videoBlob);
+      console.log('Video data size received:', videoData ? videoData.length : 'null/undefined');
+      
+      if (!videoData || videoData.length === 0) {
+        throw new Error('Invalid video data received from FFmpeg processor');
+      }
+      
+      let videoBlob, videoUrl;
+      try {
+        videoBlob = new Blob([videoData], { type: 'video/mp4' });
+        videoUrl = URL.createObjectURL(videoBlob);
+        console.log('Video blob created successfully, size:', videoBlob.size);
+      } catch (blobError) {
+        console.error('Error creating video blob:', blobError);
+        throw new Error(`Failed to create video blob: ${blobError.message}`);
+      }
       
       // Ensure clean filename
       const audioName = pair.audio.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -247,39 +260,64 @@ export const useFFmpeg = () => {
         size: videoData.length
       };
 
-      console.log('Adding generated video to store:', video.filename, 'Size:', video.size);
+      console.log('Video object created:', {
+        id: video.id,
+        filename: video.filename,
+        size: video.size,
+        pairId: video.pairId
+      });
       
       // Add video to store immediately
-      addGeneratedVideo(video);
-      
-      // Verify video was added immediately
-      const storeState = useAppStore.getState();
-      const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
-      console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
-      console.log('Total videos in store:', storeState.generatedVideos.length);
+      try {
+        console.log('Adding video to store...');
+        addGeneratedVideo(video);
+        console.log('Video added to store successfully');
+        
+        // Verify video was added immediately
+        const storeState = useAppStore.getState();
+        const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
+        console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
+        console.log('Total videos in store:', storeState.generatedVideos.length);
+        
+        if (!addedVideo) {
+          throw new Error('Video was not properly added to store');
+        }
+      } catch (storeError) {
+        console.error('Error adding video to store:', storeError);
+        throw new Error(`Failed to add video to store: ${storeError.message}`);
+      }
 
       // Set final state with 100% progress for animation
-      setVideoGenerationState(pair.id, {
-        isGenerating: true, // Keep generating true for animation
-        progress: 100,
-        isComplete: true,
-        video: video,
-        error: null
-      });
-
-      // After a shorter delay, mark as fully complete for animation
-      setTimeout(() => {
+      try {
+        console.log(`Setting final state for pair ${pair.id}...`);
         setVideoGenerationState(pair.id, {
-          isGenerating: false,
+          isGenerating: true, // Keep generating true for animation
           progress: 100,
           isComplete: true,
           video: video,
           error: null
         });
-      }, 1000); // Shorter delay for animation
+        console.log(`Final state set successfully for pair ${pair.id}`);
 
-      console.log(`Video generation completed for pair ${pair.id}`);
-      return video;
+        // After a shorter delay, mark as fully complete for animation
+        setTimeout(() => {
+          console.log(`Setting completion state for pair ${pair.id}...`);
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: video,
+            error: null
+          });
+          console.log(`Completion state set successfully for pair ${pair.id}`);
+        }, 1000); // Shorter delay for animation
+
+        console.log(`Video generation completed successfully for pair ${pair.id}`);
+        return video;
+      } catch (stateError) {
+        console.error(`Error setting final state for pair ${pair.id}:`, stateError);
+        throw new Error(`Failed to set final state: ${stateError.message}`);
+      }
 
     } catch (error) {
       console.error(`Error generating video for pair ${pair.id}:`, error);
