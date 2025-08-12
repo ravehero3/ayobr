@@ -89,7 +89,7 @@ const Footer = ({ onGenerateVideos }) => {
           )}
         </div>
 
-        {/* Generate Videos Button - centered with footer */}
+        {/* Generate Videos Button or Download All Videos Button - centered with footer */}
         <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 18px)', top: 'calc(50% + 2px)', transform: 'translateY(-50%)' }}>
           {generatedVideos.length === 0 && !isGenerating && (
             <button
@@ -106,6 +106,34 @@ const Footer = ({ onGenerateVideos }) => {
                 <div className="particle particle-5"></div>
                 <div className="particle particle-6"></div>
                 <div className="particle particle-7"></div>
+              </div>
+            </button>
+          )}
+          
+          {/* 3D Download All Videos Button */}
+          {generatedVideos.length > 0 && (
+            <button
+              onClick={() => {
+                generatedVideos.forEach(video => {
+                  const link = document.createElement('a');
+                  link.href = video.url;
+                  link.download = video.filename;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                });
+              }}
+              className="btn-3d-download"
+            >
+              Download All Videos
+              <div className="btn-3d-particles">
+                <div className="btn-3d-particle"></div>
+                <div className="btn-3d-particle"></div>
+                <div className="btn-3d-particle"></div>
+                <div className="btn-3d-particle"></div>
+                <div className="btn-3d-particle"></div>
+                <div className="btn-3d-particle"></div>
+                <div className="btn-3d-particle"></div>
               </div>
             </button>
           )}

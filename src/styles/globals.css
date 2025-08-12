@@ -2168,8 +2168,136 @@ input[type="file"] {
 }
 
 /* 3D CSS Artist Button Styles */
+.btn-3d-download {
+  background: linear-gradient(145deg, #007AFF, #0051D5);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 16px 32px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  transform: perspective(1000px) rotateX(10deg);
+  box-shadow: 
+    0 10px 20px rgba(0, 122, 255, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-3d-download::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-3d-download:hover::before {
+  left: 100%;
+}
+
+.btn-3d-download:hover {
+  transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+  box-shadow: 
+    0 20px 40px rgba(0, 122, 255, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.btn-3d-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
 .btn-3d-download:hover .btn-3d-particles {
   opacity: 1 !important;
+}
+
+.btn-3d-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: float3d 3s infinite ease-in-out;
+}
+
+.btn-3d-particle:nth-child(1) {
+  width: 3px;
+  height: 3px;
+  top: 20%;
+  left: 15%;
+  opacity: 0.9;
+  animation-delay: 0s;
+  animation-duration: 2.5s;
+}
+
+.btn-3d-particle:nth-child(2) {
+  width: 2px;
+  height: 2px;
+  top: 60%;
+  left: 80%;
+  opacity: 0.6;
+  animation-delay: 0.4s;
+  animation-duration: 3.2s;
+}
+
+.btn-3d-particle:nth-child(3) {
+  width: 4px;
+  height: 4px;
+  top: 40%;
+  left: 60%;
+  opacity: 0.8;
+  animation-delay: 0.8s;
+  animation-duration: 2.8s;
+}
+
+.btn-3d-particle:nth-child(4) {
+  width: 2px;
+  height: 2px;
+  top: 80%;
+  left: 25%;
+  opacity: 0.5;
+  animation-delay: 1.2s;
+  animation-duration: 3.5s;
+}
+
+.btn-3d-particle:nth-child(5) {
+  width: 3px;
+  height: 3px;
+  top: 30%;
+  left: 90%;
+  opacity: 0.7;
+  animation-delay: 1.6s;
+  animation-duration: 2.2s;
+}
+
+.btn-3d-particle:nth-child(6) {
+  width: 2px;
+  height: 2px;
+  top: 70%;
+  left: 45%;
+  opacity: 0.4;
+  animation-delay: 2s;
+  animation-duration: 3.8s;
+}
+
+.btn-3d-particle:nth-child(7) {
+  width: 3px;
+  height: 3px;
+  top: 15%;
+  left: 70%;
+  opacity: 0.6;
+  animation-delay: 2.4s;
+  animation-duration: 2.6s;
 }
 
 @keyframes float3d {
@@ -2189,19 +2317,4 @@ input[type="file"] {
     transform: translateY(-18px) translateX(12px) scale(1.1);
     opacity: 0.9;
   }
-}
-
-.btn-3d-download::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s ease;
-}
-
-.btn-3d-download:hover::before {
-  left: 100%;
 }
