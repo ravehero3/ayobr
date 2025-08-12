@@ -287,31 +287,16 @@ export const useFFmpeg = () => {
         throw new Error(`Failed to add video to store: ${storeError.message}`);
       }
 
-      // Set final state with 100% progress for animation
+      // Set final completion state immediately
       try {
-        console.log(`Setting final state for pair ${pair.id}...`);
+        console.log(`Setting completion state for pair ${pair.id}...`);
         setVideoGenerationState(pair.id, {
-          isGenerating: true, // Keep generating true for animation
+          isGenerating: false,
           progress: 100,
           isComplete: true,
           video: video,
           error: null
         });
-        console.log(`Final state set successfully for pair ${pair.id}`);
-
-        // After a shorter delay, mark as fully complete for animation
-        setTimeout(() => {
-          console.log(`Setting completion state for pair ${pair.id}...`);
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: video,
-            error: null
-          });
-          console.log(`Completion state set successfully for pair ${pair.id}`);
-        }, 1000); // Shorter delay for animation
-
         console.log(`Video generation completed successfully for pair ${pair.id}`);
         return video;
       } catch (stateError) {
