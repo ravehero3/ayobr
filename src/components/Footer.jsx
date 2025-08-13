@@ -52,7 +52,7 @@ const Footer = ({ onGenerateVideos }) => {
         }}
       >
         {/* Left side - Back Arrow */}
-        <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 284px)' }}>
+        <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 289px)' }}>
           <button
             onClick={() => {
               // Handle going back to previous step
@@ -87,7 +87,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Center - Ready Status or Progress */}
-        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-60px', marginTop: '-2px' }}>
+        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-70px', marginTop: '-2px' }}>
           {isGenerating ? (
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
