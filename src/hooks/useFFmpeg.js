@@ -42,11 +42,11 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Sequential processing to prevent FFmpeg termination issues
-      // Process one video at a time for stability (January 13, 2025 update)
-      const maxConcurrent = 1;  // Force sequential processing to prevent termination
+      // Parallel processing for faster generation - user wants multiple videos at once
+      // Process multiple videos simultaneously for better speed
+      const maxConcurrent = Math.min(4, pairs.length);  // Process up to 4 videos at once for good balance
 
-      console.log(`Processing ${pairs.length} videos sequentially (one at a time) for stability`);
+      console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes for speed`);
       const processingQueue = [...pairs];
       const activePromises = new Set();
       let completedCount = 0;
