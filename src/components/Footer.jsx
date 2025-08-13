@@ -8,7 +8,7 @@ const Footer = ({ onGenerateVideos }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
-  
+
   // Calculate completion count during generation
   const completedVideosCount = Object.values(videoGenerationStates || {}).filter(state => state.isComplete).length;
 
@@ -16,6 +16,21 @@ const Footer = ({ onGenerateVideos }) => {
   if (!hasFiles) {
     return null;
   }
+
+  // Define a placeholder function for handleGoBack
+  const handleGoBack = () => {
+    // This function would contain the logic from the original button click handler
+    const { clearAllPairs, setCurrentPage } = useAppStore.getState();
+    if (generatedVideos.length > 0) {
+      setCurrentPage('fileManagement');
+    } else if (completePairs.length > 0) {
+      clearAllPairs();
+      setCurrentPage('upload');
+    } else if (hasFiles) {
+      clearAllPairs();
+      setCurrentPage('upload');
+    }
+  };
 
   return (
     <motion.footer
@@ -112,7 +127,7 @@ const Footer = ({ onGenerateVideos }) => {
               </div>
             </button>
           )}
-          
+
           {/* Download All Videos Button - matching Generate Videos styling */}
           {generatedVideos.length > 0 && (
             <button
@@ -146,12 +161,14 @@ const Footer = ({ onGenerateVideos }) => {
         <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 280px)' }}>
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
-            className="settings-icon w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-300 focus:outline-none"
-            whileHover={{
-              rotate: 360,
-              transition: { duration: 2, repeat: Infinity, ease: "linear" }
+            className="flex items-center justify-center w-10 h-10 bg-space-gray/60 hover:bg-space-gray/80 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105 flex-shrink-0"
+            style={{
+              marginRight: '-10px', // Move settings 4px more to the right (from -6px to -10px)
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)'
             }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

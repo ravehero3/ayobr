@@ -33,7 +33,7 @@ const Header = () => {
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(64, 64, 64, 0.8)',
           paddingLeft: 'calc((100vw - 500px) / 2 - 249px)', // Move logo 2px to the right (from -251px to -249px)
-          paddingRight: 'calc((100vw - 500px) / 2 - 254px)', // Move profile icon 3px to the left (from -257px to -254px)
+          paddingRight: 'calc((100vw - 500px) / 2 - 257px)', // Move profile icon 3px to the left (from -254px to -257px)
         }}
       >
         {/* TypeBeatz Logo - Clickable */}
@@ -54,7 +54,7 @@ const Header = () => {
         </div>
 
         {/* Status Indicator - Center (hide during generation) */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4" style={{ marginLeft: '-20px' }}>
           {generatedVideos.length > 0 && !isGenerating && (
             <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
               <div className="w-2 h-2 rounded-full bg-green-400"></div>

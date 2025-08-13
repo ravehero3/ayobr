@@ -132,7 +132,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             }
           }}
           type="button"
-          className="px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
+          className="px-7 py-2 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}

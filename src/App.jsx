@@ -188,13 +188,13 @@ function App() {
     const checkForStuckState = () => {
       const hasFiles = pairs.some(pair => pair.audio || pair.image);
       const hasVideos = generatedVideos.length > 0;
-      
+
       // If we're on upload page but have files, and not generating or dropping files
       if (currentPage === 'upload' && hasFiles && !isGenerating && !useAppStore.getState().isFilesBeingDropped) {
         console.log('Detected stuck state: on upload page with files, recovering...');
         resetPageState();
       }
-      
+
       // If we're stuck in file dropping state for too long
       if (useAppStore.getState().isFilesBeingDropped) {
         setTimeout(() => {
@@ -211,7 +211,7 @@ function App() {
         const stuckStates = Object.values(videoGenerationStates).filter(state => 
           state.isGenerating && state.progress > 0 && state.progress < 100 && !state.isComplete
         );
-        
+
         if (stuckStates.length > 0) {
           console.log('Detected stuck video generation states, clearing...');
           clearStuckGenerationStates();
@@ -303,6 +303,9 @@ function App() {
     }
   };
 
+  // Determine if files are present for conditional rendering
+  const hasFiles = pairs.some(pair => pair.audio || pair.image);
+
   return (
     <div 
       className={`fixed inset-0 w-screen h-screen transition-all duration-300 overflow-auto ${
@@ -377,7 +380,7 @@ function App() {
 
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Main Content with conditional header/footer spacing */}
-        <main className={`flex-1 flex flex-col ${pairs.some(pair => pair.audio || pair.image) ? 'pt-20 px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
+        <main className={`flex-1 flex flex-col ${hasFiles ? 'pt-20 px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
 
             {/* Page 2: File Management - Pairs Grid */}
@@ -388,7 +391,7 @@ function App() {
                 >
                   <motion.div
                     className="flex flex-col max-w-[1200px] w-full px-6"
-                    style={{ gap: `${containerSpacing}px`, marginTop: '80px' }}
+                    style={{ gap: `${containerSpacing}px`, marginTop: '50px' }} // Adjusted marginTop by 30px
                   >
                     <AnimatePresence>
                       {pairs
@@ -552,7 +555,7 @@ function App() {
             )}
 
             {/* Batch Status Indicator */}
-            {pairs.some(pair => pair.audio || pair.image) && (
+            {hasFiles && (
               <BatchStatusIndicator 
                 totalPairs={pairs.length} 
                 completedPairs={generatedVideos.length}
