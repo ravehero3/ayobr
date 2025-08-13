@@ -139,10 +139,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       ))}
                     </div>
 
-                    <div className="relative z-10">
-                      {/* Title - Audio + Image names */}
+                    <div className="relative z-10 h-full flex flex-col">
+                      {/* Title - Audio + Image names - positioned at top */}
                       <div
-                        className="text-white font-semibold mb-2 text-center"
+                        className="text-white font-semibold mb-3 text-center"
                         style={{
                           fontSize: '14px',
                           fontWeight: '600',
@@ -156,22 +156,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         }
                       </div>
 
-                      {/* Processing status */}
-                      <div
-                        className="text-white/80 mb-4"
-                        style={{
-                          fontSize: '12px',
-                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-                        }}
-                      >
-                        {isComplete ? 'Generation Complete' : `Processing... ${Math.round(progress)}%`}
-                      </div>
-
-                      {/* Video Preview Area */}
-                      <div className="mb-4 w-full max-w-[200px] mx-auto">
+                      {/* Video Preview Area - moved 60px higher, centered in container */}
+                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-60px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
-                          style={{ minHeight: '100px' }}
+                          style={{ width: '160px', height: '90px' }}
                         >
                           {/* Background image preview */}
                           {pair.image && (
@@ -182,10 +171,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             />
                           )}
 
-                          {/* Progress overlay */}
+                          {/* Single progress overlay in center of preview - only percentage counter we keep */}
                           {!isComplete && (
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <div className="text-white text-xs font-medium">
+                              <div className="text-white text-sm font-medium">
                                 {Math.round(progress)}%
                               </div>
                             </div>
@@ -194,8 +183,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           {/* Completion checkmark */}
                           {isComplete && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                               </div>
@@ -204,79 +193,18 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         </div>
                       </div>
 
-                      {/* Progress Bar */}
-                      <div className="w-full bg-white/10 rounded-full h-2 mb-4">
-                        <div 
-                          className="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-
-                      {/* Miniature containers row */}
-                      <div className="flex items-center justify-center gap-2 mb-6">
-                        {/* Audio mini container */}
-                        {pair.audio && (
-                          <div className="w-10 h-6 bg-black/20 rounded border border-white/10 flex items-center justify-center">
-                            <div className="w-4 h-1 bg-green-400 rounded-full"></div>
-                          </div>
-                        )}
-
-                        <div className="text-gray-400 text-sm">+</div>
-
-                        {/* Image mini container */}
-                        {pair.image && (
-                          <div className="w-10 h-6 bg-black/20 rounded border border-white/10 flex items-center justify-center">
-                            <div className="w-4 h-4 bg-purple-400 rounded"></div>
-                          </div>
-                        )}
-
-                        <div className="text-gray-400 text-sm">→</div>
-
-                        {/* Video result */}
-                        <div className="w-12 h-8 bg-black/20 rounded border border-white/10 flex items-center justify-center">
-                          {isComplete ? (
-                            <div className="text-green-400 font-bold">✓</div>
-                          ) : (
-                            <div className="flex gap-0.5">
-                              {[1,2,3].map((i) => (
-                                <motion.div
-                                  key={i}
-                                  className="w-1 h-1 bg-blue-400 rounded-full"
-                                  animate={{
-                                    scale: [1, 1.5, 1],
-                                    opacity: [0.3, 1, 0.3]
-                                  }}
-                                  transition={{
-                                    duration: 0.8,
-                                    repeat: Infinity,
-                                    delay: i * 0.2
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Progress Container */}
-                      <div
-                        className="relative w-full bg-white/10 rounded overflow-visible"
-                        style={{ height: '8px' }}
-                      >
+                      {/* Single Progress Bar - only the colorful one */}
+                      <div className="w-full bg-white/10 rounded-full h-2 mt-4">
                         <motion.div
-                          className="h-full rounded relative transition-all duration-300"
+                          className="h-full rounded-full transition-all duration-300"
                           style={{
                             width: `${progress}%`,
-                            background: isComplete
-                              ? 'linear-gradient(90deg, #1300ff 0%, #4facfe 100%)'
-                              : '#333',
-                            boxShadow: isComplete
-                              ? '0 0 20px rgba(19, 0, 255, 0.25), 0 0 40px rgba(19, 0, 255, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.2)'
-                              : 'none'
+                            background: 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #93c5fd 100%)',
+                            boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
                           }}
                           initial={{ width: 0 }}
                           animate={{ width: `${progress}%` }}
-                          transition={{ duration: 0.5 }}
+                          transition={{ duration: 0.3 }}
                         />
                       </div>
                     </div>
