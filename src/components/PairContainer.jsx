@@ -320,7 +320,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
             width: '32px', 
             height: '48px',
-            marginTop: '-42px',
+            marginTop: '-12px',
             marginLeft: '-3px',
             marginRight: '-10px'
           }}>

@@ -30,8 +30,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-40 flex items-center justify-center bg-space-dark/90 backdrop-blur-sm"
+        style={{ paddingTop: '80px', paddingBottom: '80px' }}
       >
         {/* Loading Window - No Background */}
         <motion.div
@@ -91,7 +91,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
                 const isComplete = !!generatedVideo;
                 const progress = isComplete ? 100 : (videoState?.progress || 0);
-                
+
                 console.log(`LoadingWindow pair ${pair.id}:`, {
                   hasVideo: !!generatedVideo,
                   isComplete,
@@ -196,7 +196,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             className="absolute inset-0"
                             style={getVideoBackgroundStyle()}
                           />
-                          
+
                           {/* Foreground image preview */}
                           {pair.image && (
                             <img 

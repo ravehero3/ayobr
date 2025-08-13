@@ -8,7 +8,7 @@ const AnimatedBackground = () => {
   const generatedVideos = useAppStore(state => state.generatedVideos);
   const storeIsGenerating = useAppStore(state => state.isGenerating);
   const videoGenerationStates = useAppStore(state => state.videoGenerationStates);
-  
+
   // Check if any pair is currently generating
   const isGenerating = storeIsGenerating || Object.values(videoGenerationStates).some(state => state?.isGenerating);
 
@@ -116,9 +116,9 @@ const AnimatedBackground = () => {
       </AnimatePresence>
 
       {/* Background Overlay */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/40"
-        style={{ 
+        style={{
           zIndex: 1,
           pointerEvents: 'none'
         }}

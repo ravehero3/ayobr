@@ -68,7 +68,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
       <div className="relative text-center space-y-6 w-full flex flex-col items-center justify-center" style={{ zIndex: 60 }}>
         {/* Upload Icon */}
         <motion.div
-          className="inline-flex items-center justify-center w-24 h-24 mx-auto mb-6 rounded-full bg-white/10 border-2 border-white/20 group-hover:border-white/40 group-hover:bg-white/20 transition-all duration-300"
+          className="inline-flex items-center justify-center w-24 h-24 mx-auto mb-6"
           whileHover={{ scale: 1.1, rotate: 5 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -132,7 +132,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             }
           }}
           type="button"
-          className="mt-8 px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold"
+          className="mt-8 px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}
