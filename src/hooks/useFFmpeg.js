@@ -42,11 +42,11 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Parallel processing for faster generation
-      // Process multiple videos simultaneously for better speed
-      const maxConcurrent = Math.min(6, pairs.length);  // Process up to 6 videos at once for speed
+      // Sequential processing to prevent FFmpeg termination issues
+      // Process one video at a time for stability (January 13, 2025 update)
+      const maxConcurrent = 1;  // Force sequential processing to prevent termination
 
-      console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);
+      console.log(`Processing ${pairs.length} videos sequentially (one at a time) for stability`);
       const processingQueue = [...pairs];
       const activePromises = new Set();
       let completedCount = 0;
@@ -151,7 +151,9 @@ export const useFFmpeg = () => {
 
       // Show user-friendly error message only if not cancelled
       if (!isCancelling) {
-        alert(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);
+        console.error('Video generation error details:', error);
+        // More informative error without alert popup that might cause issues
+        console.warn(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);
       }
 
       // Reset cancellation state

@@ -136,22 +136,24 @@ export const getBatchProgress = () => {
 };
 
 export const initializeFFmpeg = async () => {
-  console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing);
+  console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing, 'isForceStopped:', isForceStopped);
 
-  // Reset force stopped flag if we're initializing fresh
+  // Always reset force stopped flag when initializing
   if (isForceStopped) {
     console.log('Resetting force stopped flag for fresh initialization');
     isForceStopped = false;
+    isLoaded = false; // Force re-initialization when recovering from force stop
+    ffmpeg = null;
   }
 
-  // Return existing instance if already loaded
+  // Return existing instance if already loaded and not force stopped
   if (isLoaded && ffmpeg && !isForceStopped) {
     console.log('Returning existing FFmpeg instance');
     return ffmpeg;
   }
 
-  // Return existing promise if already initializing
-  if (isInitializing && initPromise) {
+  // Return existing promise if already initializing and not force stopped
+  if (isInitializing && initPromise && !isForceStopped) {
     console.log('Returning existing initialization promise');
     return initPromise;
   }
@@ -161,11 +163,13 @@ export const initializeFFmpeg = async () => {
 
   initPromise = (async () => {
     try {
-      if (!ffmpeg || isForceStopped) {
+      // Always create a new FFmpeg instance for fresh start
+      if (!ffmpeg) {
+        console.log('Creating new FFmpeg instance');
         ffmpeg = new FFmpeg();
       }
 
-      if (!isLoaded || isForceStopped) {
+      if (!isLoaded) {
         // Simplified initialization optimized for Replit web environment
         try {
           console.log('Initializing FFmpeg with simplified approach...');
@@ -192,12 +196,14 @@ export const initializeFFmpeg = async () => {
           }
         }
         isLoaded = true;
+        isForceStopped = false; // Ensure force stopped is cleared on successful load
       }
 
       return ffmpeg;
     } catch (error) {
       console.error('FFmpeg initialization error:', error);
       isLoaded = false;
+      isForceStopped = false; // Reset on error to allow retry
       ffmpeg = null;
       throw error;
     } finally {
