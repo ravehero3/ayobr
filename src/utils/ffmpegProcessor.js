@@ -63,6 +63,19 @@ export const forceStopAllProcesses = () => {
   }
 };
 
+// Restart FFmpeg completely - useful for debugging
+export const restartFFmpeg = async () => {
+  console.log('Restarting FFmpeg completely...');
+  forceStopAllProcesses();
+  
+  // Wait a moment for cleanup
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Initialize fresh
+  isForceStopped = false;
+  return await initializeFFmpeg();
+};
+
 // Enhanced memory cleanup for 100-file batches
 const cleanupMemory = () => {
   processedCount++;
@@ -141,41 +154,29 @@ export const initializeFFmpeg = async () => {
       }
 
       if (!isLoaded || isForceStopped) {
-        // Direct initialization without blob URLs for Replit compatibility
+        // Simplified initialization optimized for Replit web environment
         try {
-          console.log('Initializing FFmpeg with CDN...');
+          console.log('Initializing FFmpeg with simplified approach...');
 
-          // Try the default CDN approach first
-          await ffmpeg.load();
-          console.log('FFmpeg loaded successfully via CDN');
+          // Use a simpler load approach that works better in web environments
+          await ffmpeg.load({
+            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+            wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+            workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
+          });
+          console.log('FFmpeg loaded successfully with external CDN');
 
         } catch (cdnError) {
-          console.error('CDN loading failed:', cdnError);
+          console.error('External CDN loading failed:', cdnError);
 
           try {
-            console.log('Trying direct URL loading...');
-            // Use direct URLs without blob conversion
-            await ffmpeg.load({
-              coreURL: '/ffmpeg/ffmpeg-core.js',
-              wasmURL: '/ffmpeg/ffmpeg-core.wasm'
-            });
-            console.log('FFmpeg loaded successfully from local files');
-
-          } catch (localError) {
-            console.error('Local files failed:', localError);
-
-            // Final fallback to node_modules with direct paths
-            try {
-              console.log('Trying node_modules fallback...');
-              await ffmpeg.load({
-                coreURL: '/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js',
-                wasmURL: '/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm'
-              });
-              console.log('FFmpeg loaded successfully from node_modules');
-            } catch (finalError) {
-              console.error('All FFmpeg loading methods failed:', finalError);
-              throw finalError;
-            }
+            console.log('Trying default CDN fallback...');
+            // Try the default load method as fallback
+            await ffmpeg.load();
+            console.log('FFmpeg loaded successfully with default CDN');
+          } catch (fallbackError) {
+            console.error('All FFmpeg loading methods failed:', fallbackError);
+            throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
           }
         }
         isLoaded = true;
@@ -317,25 +318,37 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Get background color from settings (default to black)
     const backgroundColor = (videoSettings && videoSettings.background) ? videoSettings.background : 'black';
     
-    // Build video filter chain with customizable background
-    const videoFilter = `scale=1920:1040:force_original_aspect_ratio=decrease,pad=1920:1040:(ow-iw)/2:(oh-ih)/2:${backgroundColor},pad=1920:1080:0:20:${backgroundColor}`;
+    // Simplified video filter for better web performance
+    const videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
 
     ffmpegArgs.push('-vf', videoFilter);
 
-    // Add encoding parameters
+    // Ultra-optimized parameters for web environment
     ffmpegArgs.push(
+      '-threads', '0',               // Use all available CPU cores
       '-c:v', 'libx264',
-      '-preset', 'ultrafast',        // Fastest preset for better performance
-      '-crf', '23',                  // Good quality/speed balance
-      '-r', '1',                     // 1 FPS for static content
+      '-preset', 'superfast',        // Even faster preset
+      '-profile:v', 'baseline',      // Simple profile for compatibility
+      '-level:v', '3.0',            // Lower level for better compatibility
+      '-crf', '30',                  // Higher CRF for much faster encoding
+      '-r', '10',                    // Very low frame rate for static content
+      '-g', '250',                   // Large GOP size for static content
+      '-bf', '0',                    // No B-frames for simplicity
+      '-refs', '1',                  // Single reference frame
+      '-me_method', 'dia',           // Fastest motion estimation
+      '-subq', '0',                  // Fastest subpel refinement
+      '-trellis', '0',               // Disable trellis quantization
+      '-aq-mode', '0',               // Disable adaptive quantization
       '-c:a', 'aac',                 // Use AAC codec for audio
-      '-b:a', '128k',                // Standard audio bitrate
-      '-ar', '44100',                // Standard sample rate
-      '-ac', '2',                    // Stereo audio
+      '-b:a', '64k',                 // Lower audio bitrate for speed
+      '-ar', '22050',                // Lower sample rate for speed
+      '-ac', '1',                    // Mono audio for speed
       '-pix_fmt', 'yuv420p',
+      '-movflags', '+faststart',     // Optimize for streaming
       '-shortest',
       '-t', audioDuration.toString(),
       '-avoid_negative_ts', 'make_zero',
+      '-f', 'mp4',                   // Explicit format
       '-y',
       outputFileName
     );
@@ -343,11 +356,26 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     console.log('FFmpeg command args:', ffmpegArgs);
     
     try {
-      await ffmpeg.exec(ffmpegArgs);
+      // Add timeout to prevent hanging with better error handling
+      const ffmpegPromise = ffmpeg.exec(ffmpegArgs);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('FFmpeg execution timeout after 60 seconds')), 60000);
+      });
+      
+      console.log('Starting FFmpeg execution...');
+      await Promise.race([ffmpegPromise, timeoutPromise]);
       console.log('FFmpeg command executed successfully');
     } catch (ffmpegError) {
       console.error('FFmpeg execution failed:', ffmpegError);
       console.error('FFmpeg command that failed:', ffmpegArgs);
+      
+      // Try to restart FFmpeg if it seems stuck
+      if (ffmpegError.message.includes('timeout') || ffmpegError.message.includes('stuck')) {
+        console.log('Attempting to restart FFmpeg due to timeout...');
+        await forceStopAllProcesses();
+        throw new Error(`FFmpeg processing timed out - please try again`);
+      }
+      
       throw new Error(`FFmpeg processing failed: ${ffmpegError.message}`);
     }
 
