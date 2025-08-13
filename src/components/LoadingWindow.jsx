@@ -74,6 +74,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
                 const isComplete = !!generatedVideo;
                 const progress = isComplete ? 100 : (videoState?.progress || 0);
+                
+                console.log(`LoadingWindow pair ${pair.id}:`, {
+                  hasVideo: !!generatedVideo,
+                  isComplete,
+                  progress,
+                  videoState
+                });
 
                 return (
                   <motion.div

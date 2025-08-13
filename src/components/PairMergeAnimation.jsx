@@ -19,7 +19,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
     progress,
     animationStage,
     hasGeneratedVideo: !!generatedVideo,
-    generatedVideo: generatedVideo ? { id: generatedVideo.id, filename: generatedVideo.filename } : null
+    generatedVideo: generatedVideo ? { id: generatedVideo.id, filename: generatedVideo.filename } : null,
+    showProgress
   });
 
   useEffect(() => {
@@ -125,7 +126,15 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
         if (onAnimationComplete) onAnimationComplete();
       }, 1000);
     }
-  }, [generatedVideo, animationStage, onAnimationComplete]);
+    // Also check if progress reaches 100% and we have a video
+    else if (progress >= 100 && generatedVideo && animationStage === 'merged') {
+      setTimeout(() => {
+        setAnimationStage('completed');
+        setShowProgress(false);
+        if (onAnimationComplete) onAnimationComplete();
+      }, 500);
+    }
+  }, [generatedVideo, animationStage, progress, onAnimationComplete]);
 
   useEffect(() => {
     // Only reset if generation stops without completion AND we don't have a video
@@ -371,7 +380,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
           </motion.div>
         )}
 
-        {animationStage === 'completed' && generatedVideo && (
+        {(animationStage === 'completed' || (progress >= 100 && generatedVideo && !isGenerating)) && generatedVideo && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center p-4"
             initial={{ opacity: 0, scale: 0.9 }}
