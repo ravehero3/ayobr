@@ -178,7 +178,33 @@ export const useAppStore = create((set, get) => ({
   resetPageState: () => set({ currentPage: null, isFilesBeingDropped: false }),
 
   // Clear stuck generation states
-  clearStuckGenerationStates: () => set(store => {
+  clearStuckGenerationStates: () => set((state) => {
+    const now = Date.now();
+    const timeout = 5 * 60 * 1000; // 5 minutes
+    const updatedStates = { ...state.videoGenerationStates };
+    
+    Object.keys(updatedStates).forEach(pairId => {
+      const genState = updatedStates[pairId];
+      if (genState.isGenerating && genState.startTime && (now - genState.startTime > timeout)) {
+        console.log(`Clearing stuck generation state for pair ${pairId}`);
+        updatedStates[pairId] = {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: 'Generation timed out and was reset'
+        };
+      }
+    });
+    
+    return {
+      ...state,
+      videoGenerationStates: updatedStates
+    };
+  }),
+
+  // Clear stuck generation states (fallback method)
+  clearStuckGenerationStatesFallback: () => set(store => {
     const clearedStates = {};
     Object.keys(store.videoGenerationStates).forEach(pairId => {
       const state = store.videoGenerationStates[pairId];

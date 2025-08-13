@@ -396,7 +396,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       // Reduced timeout for faster failure detection
       const ffmpegPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout after 60 seconds')), 60000);
+        setTimeout(() => reject(new Error('FFmpeg execution timeout after 30 seconds')), 30000);
       });
 
       console.log('Starting FFmpeg execution with optimized settings...');
@@ -408,20 +408,45 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     } catch (ffmpegError) {
       console.error('FFmpeg execution failed:', ffmpegError);
       console.error('FFmpeg command that failed:', ffmpegArgs);
+      console.error('FFmpeg error stack:', ffmpegError?.stack);
 
-      // Check if this is a restart-related error that we can retry
-      const errorMessage = ffmpegError && ffmpegError.message ? ffmpegError.message : '';
-      const isRestartableError = errorMessage.includes('restarting for next attempt') || 
-                               errorMessage.includes('terminate') ||
-                               errorMessage.includes('timeout');
+      // Disable progress callback on error
+      progressCallbackActive = false;
+      ffmpeg.off('progress');
 
+      // Check if this is a memory or resource error
+      const errorMessage = ffmpegError && ffmpegError.message ? ffmpegError.message.toLowerCase() : '';
+      const isMemoryError = errorMessage.includes('memory') || 
+                           errorMessage.includes('out of memory') ||
+                           errorMessage.includes('cannot allocate');
+      
+      const isResourceError = errorMessage.includes('resource') || 
+                             errorMessage.includes('file descriptor') ||
+                             errorMessage.includes('too many');
 
-      // Try to restart FFmpeg if it seems stuck or terminated
-      if (isRestartableError) {
-        console.log('Attempting to restart FFmpeg due to error...');
+      const isTimeoutError = errorMessage.includes('timeout');
+
+      // Handle specific error types
+      if (isMemoryError) {
+        console.log('Memory error detected - forcing cleanup...');
         await forceStopAllProcesses();
-        throw new Error(`FFmpeg processing failed - restarting for next attempt`);
+        throw new Error('FFmpeg failed due to memory constraints. Try processing fewer files at once.');
       }
+
+      if (isResourceError) {
+        console.log('Resource error detected - forcing cleanup...');
+        await forceStopAllProcesses();
+        throw new Error('FFmpeg failed due to resource constraints. Please try again.');
+      }
+
+      if (isTimeoutError) {
+        console.log('Timeout error detected - forcing cleanup...');
+        await forceStopAllProcesses();
+        throw new Error('FFmpeg processing timed out. Please try again with smaller files.');
+      }
+
+      // For other errors, just throw them without restarting
+      throw new Error(`FFmpeg processing failed: ${ffmpegError.message || 'Unknown error'}`);
 
       throw new Error(`FFmpeg processing failed: ${errorMessage}`);
     }
@@ -451,9 +476,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     await Promise.allSettled(cleanupPromises);
 
-    // Increment processed count and cleanup memory for large batches
+    // Increment processed count and cleanup memory more frequently to prevent crashes
     processedCount++;
-    if (processedCount % 10 === 0) {
+    if (processedCount % 3 === 0) {
       cleanupMemory();
     }
 

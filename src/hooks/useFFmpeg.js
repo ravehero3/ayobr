@@ -42,11 +42,11 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Parallel processing for faster generation - user wants multiple videos at once
-      // Process multiple videos simultaneously for better speed
-      const maxConcurrent = Math.min(4, pairs.length);  // Process up to 4 videos at once for good balance
+      // Reduced concurrency to prevent crashes - debugging video generation issues
+      // Process fewer videos simultaneously for stability
+      const maxConcurrent = Math.min(2, pairs.length);  // Process only 2 videos at once for stability during debugging
 
-      console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes for speed`);
+      console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes (reduced for stability)`);
       const processingQueue = [...pairs];
       const activePromises = new Set();
       let completedCount = 0;
@@ -61,13 +61,16 @@ export const useFFmpeg = () => {
           console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
         }
 
-        // Memory cleanup every 10 completed videos for large batches
-        if (pairs.length > 20 && completedCount % 10 === 0 && completedCount > 0) {
+        // Memory cleanup every 5 completed videos to prevent crashes
+        if (completedCount % 5 === 0 && completedCount > 0) {
           console.log(`Performing memory cleanup after ${completedCount} completed videos`);
           // Force garbage collection if available
           if (window.gc) {
             window.gc();
           }
+          
+          // Small delay to allow cleanup to complete
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       };
 
@@ -93,6 +96,16 @@ export const useFFmpeg = () => {
 
           const promise = processPairAsync(pair).catch(error => {
             console.error(`Error in processPairAsync for pair ${pair.id}:`, error);
+            
+            // Set error state for this specific pair
+            setVideoGenerationState(pair.id, {
+              isGenerating: false,
+              progress: 0,
+              isComplete: false,
+              video: null,
+              error: error.message || 'Video generation failed'
+            });
+            
             // Don't re-throw to prevent unhandled rejection
             return null;
           });
@@ -183,7 +196,9 @@ export const useFFmpeg = () => {
         isGenerating: true,
         progress: 0,
         isComplete: false,
-        video: null
+        video: null,
+        error: null,
+        startTime: Date.now()  // Track when generation started for timeout detection
       });
 
       console.log(`Processing video for pair ${pair.id}:`, pair);
