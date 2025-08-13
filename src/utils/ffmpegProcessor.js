@@ -212,6 +212,11 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
   console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
   console.log('Video settings:', videoSettings);
 
+  let audioFileName = null;
+  let imageFileName = null;
+  let outputFileName = null;
+  let logoFileName = null; // Declare logoFileName here
+
   try {
     const ffmpeg = await initializeFFmpeg();
     console.log('FFmpeg initialized successfully');
@@ -292,10 +297,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     ]);
 
     // Use unique filenames to avoid conflicts
-    const audioFileName = `audio_${Date.now()}.mp3`;
-    const imageFileName = `image_${Date.now()}.jpg`;
-    const outputFileName = `output_${Date.now()}.mp4`;
-    let logoFileName = null;
+    audioFileName = `audio_${Date.now()}.mp3`;
+    imageFileName = `image_${Date.now()}.jpg`;
+    outputFileName = `output_${Date.now()}.mp4`;
 
     // Write files to FFmpeg filesystem
     await ffmpeg.writeFile(audioFileName, audioData);
@@ -399,14 +403,21 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       console.error('FFmpeg execution failed:', ffmpegError);
       console.error('FFmpeg command that failed:', ffmpegArgs);
 
+      // Check if this is a restart-related error that we can retry
+      const errorMessage = ffmpegError && ffmpegError.message ? ffmpegError.message : '';
+      const isRestartableError = errorMessage.includes('restarting for next attempt') || 
+                               errorMessage.includes('terminate') ||
+                               errorMessage.includes('timeout');
+
+
       // Try to restart FFmpeg if it seems stuck or terminated
-      if (ffmpegError.message.includes('timeout') || ffmpegError.message.includes('stuck') || ffmpegError.message.includes('terminate')) {
+      if (isRestartableError) {
         console.log('Attempting to restart FFmpeg due to error...');
         await forceStopAllProcesses();
         throw new Error(`FFmpeg processing failed - restarting for next attempt`);
       }
 
-      throw new Error(`FFmpeg processing failed: ${ffmpegError.message}`);
+      throw new Error(`FFmpeg processing failed: ${errorMessage}`);
     }
 
     console.log('FFmpeg execution completed successfully');
@@ -470,6 +481,13 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       cancellationError.isCancellation = true;
       throw cancellationError;
     }
+
+    // Handle actual errors
+    const errorMessage = error && error.message ? error.message : 'Unknown error occurred';
+    // Assuming setVideoGenerationState is available in the scope where processVideoWithFFmpeg is called
+    // If not, this part might need adjustment or passing setVideoGenerationState as a parameter.
+    // For now, we'll log the error as the original code implies it's handled elsewhere.
+    console.error(`Error during video generation for unknown pair: ${errorMessage}`);
 
     throw error;
   }
