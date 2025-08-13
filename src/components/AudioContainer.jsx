@@ -278,8 +278,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </button>
           </div>
 
-          {/* Waveform - moved 2px higher */}
-          <div className="flex-1 flex items-start" style={{ marginTop: '-2px' }}>
+          {/* Waveform - moved 4px higher */}
+          <div className="flex-1 flex items-start" style={{ marginTop: '-4px' }}>
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer relative z-10"
@@ -310,7 +310,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           </div>
 
           {/* Play button and time information - moved 2px higher */}
-          <div className="flex items-center justify-between relative z-10" style={{ marginTop: '18px' }}>
+          <div className="flex items-center justify-between relative z-10" style={{ marginTop: '16px' }}>
             <div className="text-xs text-white">
               {formatTime(currentTime)}
             </div>

@@ -5,10 +5,12 @@ import { useAppStore } from '../store/appStore';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import userIcon from '../assets/user_1754478889614.png';
 import UserProfile from './UserProfile';
+import AppInfoWindow from './AppInfoWindow';
 
 const Header = () => {
   const { generatedVideos, pairs, userProfileImage } = useAppStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAppInfoOpen, setIsAppInfoOpen] = useState(false);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
   // Don't render header if no files are present
@@ -34,16 +36,21 @@ const Header = () => {
           paddingRight: 'calc((100vw - 500px) / 2 - 257px)', // Move profile icon 7px to the left (from -264px to -257px)
         }}
       >
-        {/* TypeBeatz Logo */}
+        {/* TypeBeatz Logo - Clickable */}
         <div className="flex items-center">
-          <img 
-            src={typebeatLogo}
-            alt="TypeBeatz"
-            className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
-            style={{ 
-              height: '20px' // Much smaller logo
-            }}
-          />
+          <button
+            onClick={() => setIsAppInfoOpen(true)}
+            className="hover:scale-105 transition-all duration-200"
+          >
+            <img 
+              src={typebeatLogo}
+              alt="TypeBeatz"
+              className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
+              style={{ 
+                height: '20px' // Much smaller logo
+              }}
+            />
+          </button>
         </div>
 
         {/* Status Indicator - Center (only show videos ready, removed pair counter) */}
@@ -77,6 +84,12 @@ const Header = () => {
         <UserProfile 
           isOpen={isProfileOpen}
           onClose={() => setIsProfileOpen(false)}
+        />
+
+        {/* App Info Window */}
+        <AppInfoWindow
+          isOpen={isAppInfoOpen}
+          onClose={() => setIsAppInfoOpen(false)}
         />
       </div>
     </motion.header>
