@@ -66,20 +66,20 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
       {/* Content - Centered */}
       <div className="relative text-center space-y-6 w-full flex flex-col items-center justify-center" style={{ zIndex: 60 }}>
-        {/* Upload Icon */}
+        {/* Upload Icon with Circle */}
         <motion.div
-          className="inline-flex items-center justify-center w-24 h-24 mx-auto mb-6"
-          whileHover={{ scale: 1.1, rotate: 5 }}
+          className="inline-flex items-center justify-center w-20 h-20 mx-auto mb-8 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-all duration-300"
+          whileHover={{ scale: 1.1, rotate: 5, borderColor: 'rgba(255, 255, 255, 0.6)' }}
           whileTap={{ scale: 0.95 }}
         >
-          <svg className="w-12 h-12 text-white group-hover:text-white/80 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-8 h-8 text-white group-hover:text-white/80 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
         </motion.div>
 
         {/* Title */}
         <motion.h2
-          className="text-4xl font-bold text-white mb-4 group-hover:text-neon-blue/90 transition-colors duration-300"
+          className="text-3xl font-semibold text-white mb-3 group-hover:text-neon-blue/90 transition-colors duration-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
@@ -89,7 +89,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
         {/* Description */}
         <motion.p
-          className="text-xl text-gray-300 mb-6 max-w-md mx-auto leading-relaxed group-hover:text-gray-200 transition-colors duration-300"
+          className="text-lg text-gray-300 mb-8 max-w-md mx-auto leading-relaxed group-hover:text-gray-200 transition-colors duration-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
@@ -99,7 +99,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
         {/* Supported Formats */}
         <motion.div
-          className="flex flex-wrap justify-center gap-3 max-w-lg mx-auto"
+          className="flex flex-wrap justify-center gap-4 max-w-lg mx-auto mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
@@ -132,7 +132,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             }
           }}
           type="button"
-          className="mt-8 px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
+          className="px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}

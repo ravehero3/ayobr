@@ -64,15 +64,15 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* Content Container with proper padding */}
           <div className="p-10">
             {/* Header */}
-            <div className="relative z-10 text-center mb-8">
-            <motion.h2
-              className="text-3xl font-bold text-white mb-2"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              Generating Videos
-            </motion.h2>
+            <div className="flex items-center justify-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Generating Videos
+              </h2>
+            </div>
             <motion.p
               className="text-gray-300 text-lg"
               initial={{ opacity: 0, y: -10 }}
