@@ -391,7 +391,7 @@ function App() {
                 >
                   <motion.div
                     className="flex flex-col max-w-[1200px] w-full px-6"
-                    style={{ gap: `${containerSpacing}px`, marginTop: '50px' }} // Adjusted marginTop by 30px
+                    style={{ gap: `${containerSpacing}px`, marginTop: '64px' }} // Set to 64px to match header height
                   >
                     <AnimatePresence>
                       {pairs

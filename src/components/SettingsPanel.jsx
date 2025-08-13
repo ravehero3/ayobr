@@ -44,6 +44,20 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleCustomBackgroundUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      // Convert file to base64 for storage
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64Data = e.target.result;
+        setCustomBackground(base64Data);
+        setSelectedBackground('custom');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
     setVideoBackground(selectedBackground);
     setVideoQuality(selectedResolution);
@@ -329,7 +343,11 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                     border: selectedBackground === 'custom' 
                       ? '2px solid rgba(59, 130, 246, 0.8)' 
                       : '2px solid rgba(255, 255, 255, 0.1)',
-                    background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(17, 24, 39, 0.6))',
+                    background: videoSettings.customBackground 
+                      ? `url(${videoSettings.customBackground})` 
+                      : 'linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(17, 24, 39, 0.6))',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -340,15 +358,28 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => handleBackgroundChange('custom')}
+                  onClick={() => document.getElementById('customBackgroundUpload').click()}
                 >
                   <div style={{
                     color: '#e0e0e0',
                     fontSize: '12px',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                    background: videoSettings.customBackground 
+                      ? 'rgba(0,0,0,0.6)' 
+                      : 'transparent',
+                    padding: videoSettings.customBackground ? '8px 12px' : '0',
+                    borderRadius: videoSettings.customBackground ? '8px' : '0'
                   }}>
                     Custom
                   </div>
+                  <input
+                    type="file"
+                    id="customBackgroundUpload"
+                    accept="image/png,image/jpeg,image/jpg,image/heic,image/gif"
+                    onChange={handleCustomBackgroundUpload}
+                    style={{ display: 'none' }}
+                  />
                 </motion.div>
               </div>
             </div>
