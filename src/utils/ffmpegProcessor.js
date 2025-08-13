@@ -11,7 +11,7 @@ let isForceStopped = false; // Track if processes were force stopped
 // Scalable concurrency management for up to 100 files
 const getOptimalConcurrency = (totalFiles) => {
   if (totalFiles <= 5) return 4;      // Small batches: 4 concurrent
-  if (totalFiles <= 20) return 6;     // Medium batches: 6 concurrent  
+  if (totalFiles <= 20) return 6;     // Medium batches: 6 concurrent
   if (totalFiles <= 50) return 8;     // Large batches: 8 concurrent
   if (totalFiles <= 75) return 10;    // Very large batches: 10 concurrent
   return 12;                          // Maximum 100 files: 12 concurrent
@@ -38,29 +38,29 @@ export const forceStopAllProcesses = async () => {
     try {
       // Clear any progress listeners first to prevent further callbacks
       ffmpeg.off('progress');
-      
+
       // Only terminate if FFmpeg is actually loaded
       if (isLoaded) {
         console.log('Gracefully terminating FFmpeg...');
         await ffmpeg.terminate();
       }
-      
+
       // Clear the instance and state
       ffmpeg = null;
       isLoaded = false;
       isInitializing = false;
       initPromise = null;
       activeProcesses.clear();
-      
+
       // Clean up caches
       fileCache.clear();
       processedImageCache.clear();
       audioBufferCache.clear();
       memoryCache.clear();
-      
+
       // Reset process count
       processedCount = 0;
-      
+
       console.log('All FFmpeg processes terminated and cleaned up');
     } catch (error) {
       console.error('Error terminating FFmpeg:', error);
@@ -71,7 +71,7 @@ export const forceStopAllProcesses = async () => {
       initPromise = null;
     }
   }
-  
+
   // Reset force stopped flag immediately for fresh start
   isForceStopped = false;
 };
@@ -80,10 +80,10 @@ export const forceStopAllProcesses = async () => {
 export const restartFFmpeg = async () => {
   console.log('Restarting FFmpeg completely...');
   await forceStopAllProcesses(); // Now awaits the async operation
-  
+
   // Wait a moment for cleanup
   await new Promise(resolve => setTimeout(resolve, 500));
-  
+
   // Initialize fresh (force stopped flag is already reset in forceStopAllProcesses)
   return await initializeFFmpeg();
 };
@@ -91,11 +91,11 @@ export const restartFFmpeg = async () => {
 // Enhanced memory cleanup for 100-file batches
 const cleanupMemory = () => {
   processedCount++;
-  
+
   // Clean memory every 10 processed videos
   if (processedCount % MEMORY_CLEANUP_INTERVAL === 0) {
     console.log(`Performing memory cleanup after ${processedCount} processed videos`);
-    
+
     // Clear excessive cache entries
     if (memoryCache.size > MAX_CACHE_SIZE) {
       const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - MAX_CACHE_SIZE);
@@ -223,7 +223,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     let lastProgressTime = 0;
     let hasCompleted = false;
     let progressCallbackActive = true;
-    
+
     ffmpeg.on('progress', ({ progress }) => {
       const now = Date.now();
       // Throttle progress updates to every 200ms for better performance and prevent overload
@@ -231,9 +231,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         onProgress(normalizedProgress);
         lastProgressTime = now;
-        
+
         console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
-        
+
         // Mark as completed when we reach 100% to prevent restart
         if (normalizedProgress >= 100) {
           hasCompleted = true;
@@ -301,7 +301,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Handle logo file if provided and enabled (temporarily disabled for debugging)
     // if (logoSettings && logoSettings.useLogoInVideos && logoSettings.logoFile) {
     //   logoFileName = `logo_${Date.now()}.png`;
-    //   
+    //
     //   // Convert base64 logo to binary data
     //   const logoBase64 = logoSettings.logoFile.split(',')[1]; // Remove data:image/... prefix
     //   const logoData = Uint8Array.from(atob(logoBase64), c => c.charCodeAt(0));
@@ -312,10 +312,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
 
-    // Ultra-fast FFmpeg command - with guaranteed high-quality audio
     // Create 1920x1080 video with image centered and 20px white space above/below
     console.log('Executing FFmpeg command...');
-    
+
     // Build FFmpeg command array
     let ffmpegArgs = [
       '-loop', '1',
@@ -334,64 +333,65 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Get background color from settings (default to black)
     const backgroundColor = (videoSettings && videoSettings.background) ? videoSettings.background : 'black';
-    
+
     // Simplified video filter for better web performance
     const videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
 
     ffmpegArgs.push('-vf', videoFilter);
 
-    // Balanced parameters for sequential processing - better quality with GPU acceleration support
-    ffmpegArgs.push(
-      '-threads', '0',               // Use all available CPU cores
-      '-c:v', 'libx264',
-      '-preset', 'fast',             // Balanced speed/quality preset
-      '-profile:v', 'high',          // Better compression profile
-      '-level:v', '4.0',             // Higher level for better quality
-      '-crf', '23',                  // Standard quality setting
-      '-r', '30',                    // Standard frame rate (30 fps)
-      '-g', '60',                    // Standard keyframe interval
-      '-refs', '3',                  // Multiple reference frames for better compression
-      '-me_method', 'hex',           // Better motion estimation
-      '-c:a', 'aac',                 // Use AAC codec for audio
-      '-b:a', '128k',                // Standard audio bitrate
-      '-ar', '44100',                // CD quality sample rate
-      '-ac', '2',                    // Stereo audio
-      '-pix_fmt', 'yuv420p',
-      '-movflags', '+faststart',     // Optimize for streaming
-      '-shortest',
-      '-t', audioDuration.toString(),
-      '-avoid_negative_ts', 'make_zero',
-      '-f', 'mp4',                   // Explicit format
-      '-y',
-      outputFileName
-    );
+    // Ultra-fast parameters optimized for speed over quality
+      ffmpegArgs.push(
+        '-threads', '0',               // Use all available CPU cores
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast',        // Fastest encoding preset
+        '-tune', 'fastdecode',         // Optimize for fast decoding
+        '-profile:v', 'baseline',      // Simpler profile for faster encoding
+        '-level:v', '3.0',             // Lower level for faster processing
+        '-crf', '28',                  // Lower quality but much faster
+        '-r', '15',                    // Reduced frame rate for speed
+        '-g', '30',                    // Smaller keyframe interval
+        '-refs', '1',                  // Single reference frame for speed
+        '-me_method', 'dia',           // Fastest motion estimation
+        '-c:a', 'aac',                 // Use AAC codec for audio
+        '-b:a', '96k',                 // Lower audio bitrate for speed
+        '-ar', '22050',                // Lower sample rate for speed
+        '-ac', '1',                    // Mono audio for speed
+        '-pix_fmt', 'yuv420p',
+        '-movflags', '+faststart',     // Optimize for streaming
+        '-shortest',
+        '-t', audioDuration.toString(),
+        '-avoid_negative_ts', 'make_zero',
+        '-f', 'mp4',                   // Explicit format
+        '-y',
+        outputFileName
+      );
 
     console.log('FFmpeg command args:', ffmpegArgs);
-    
+
     try {
       // Add timeout to prevent hanging with extended time for web environment
       const ffmpegPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('FFmpeg execution timeout after 120 seconds')), 120000);
       });
-      
+
       console.log('Starting FFmpeg execution with optimized settings...');
       await Promise.race([ffmpegPromise, timeoutPromise]);
-      
+
       // Disable progress callback to prevent issues during cleanup
       progressCallbackActive = false;
       console.log('FFmpeg command executed successfully');
     } catch (ffmpegError) {
       console.error('FFmpeg execution failed:', ffmpegError);
       console.error('FFmpeg command that failed:', ffmpegArgs);
-      
+
       // Try to restart FFmpeg if it seems stuck or terminated
       if (ffmpegError.message.includes('timeout') || ffmpegError.message.includes('stuck') || ffmpegError.message.includes('terminate')) {
         console.log('Attempting to restart FFmpeg due to error...');
         await forceStopAllProcesses();
         throw new Error(`FFmpeg processing failed - restarting for next attempt`);
       }
-      
+
       throw new Error(`FFmpeg processing failed: ${ffmpegError.message}`);
     }
 
@@ -412,12 +412,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       ffmpeg.deleteFile(imageFileName).catch(() => {}),
       ffmpeg.deleteFile(outputFileName).catch(() => {})
     ];
-    
+
     // Clean up logo file if it was used
     if (logoFileName) {
       cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
     }
-    
+
     await Promise.allSettled(cleanupPromises);
 
     // Increment processed count and cleanup memory for large batches
@@ -431,7 +431,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);
-    
+
     // Clean up files on error
     try {
       const cleanupPromises = [
@@ -439,24 +439,24 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         ffmpeg.deleteFile(imageFileName).catch(() => {}),
         ffmpeg.deleteFile(outputFileName).catch(() => {})
       ];
-      
+
       // Clean up logo file if it was used
       if (logoFileName) {
         cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
       }
-      
+
       await Promise.allSettled(cleanupPromises);
     } catch (cleanupError) {
       console.warn('Error during cleanup:', cleanupError);
     }
-    
+
     // Check if this is a cancellation error
     if (shouldCancel && shouldCancel()) {
       const cancellationError = new Error('Generation cancelled by user');
       cancellationError.isCancellation = true;
       throw cancellationError;
     }
-    
+
     throw error;
   }
 };
