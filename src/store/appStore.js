@@ -1,6 +1,25 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 
+// Helper function to load from localStorage
+const loadFromLocalStorage = (key, fallback) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+// Helper function to save to localStorage
+const saveToLocalStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Handle localStorage errors silently
+  }
+};
+
 export const useAppStore = create((set, get) => ({
   // State
   pairs: [
@@ -23,19 +42,19 @@ export const useAppStore = create((set, get) => ({
   // Container spacing
   containerSpacing: 4, // Default spacing in pixels between container pairs
 
-  // Logo settings
-  logoSettings: {
+  // Logo settings - Load from localStorage
+  logoSettings: loadFromLocalStorage('logoSettings', {
     logoFile: null, // Store the uploaded logo file as base64
     logoFileName: null, // Store the original filename
     useLogoInVideos: false // Checkbox to enable/disable logo in video generation
-  },
+  }),
 
-  // Video generation settings
-  videoSettings: {
+  // Video generation settings - Load from localStorage
+  videoSettings: loadFromLocalStorage('videoSettings', {
     background: 'black', // 'white', 'black', or 'custom'
     customBackground: null, // File object for custom background
     quality: 'fullhd' // 'fullhd' or '4k'
-  },
+  }),
 
   // Concurrency settings optimized for up to 100 files
   concurrencySettings: {
@@ -289,9 +308,11 @@ export const useAppStore = create((set, get) => ({
     videoSettings: { ...state.videoSettings, background }
   })),
 
-  setCustomBackground: (file) => set(state => ({
-    videoSettings: { ...state.videoSettings, customBackground: file }
-  })),
+  setCustomBackground: (file) => set(state => {
+    const newVideoSettings = { ...state.videoSettings, customBackground: file };
+    saveToLocalStorage('videoSettings', newVideoSettings);
+    return { videoSettings: newVideoSettings };
+  }),
 
   setVideoQuality: (quality) => set(state => ({
     videoSettings: { ...state.videoSettings, quality }
@@ -301,20 +322,24 @@ export const useAppStore = create((set, get) => ({
   setContainerSpacing: (spacing) => set({ containerSpacing: spacing }),
 
   // Logo settings actions
-  setLogoFile: (file, fileName) => set(state => ({
-    logoSettings: { 
+  setLogoFile: (file, fileName) => set(state => {
+    const newLogoSettings = { 
       ...state.logoSettings, 
       logoFile: file, 
       logoFileName: fileName 
-    }
-  })),
+    };
+    saveToLocalStorage('logoSettings', newLogoSettings);
+    return { logoSettings: newLogoSettings };
+  }),
 
-  setUseLogoInVideos: (useLogoInVideos) => set(state => ({
-    logoSettings: { 
+  setUseLogoInVideos: (useLogoInVideos) => set(state => {
+    const newLogoSettings = { 
       ...state.logoSettings, 
       useLogoInVideos 
-    }
-  })),
+    };
+    saveToLocalStorage('logoSettings', newLogoSettings);
+    return { logoSettings: newLogoSettings };
+  }),
 
   clearLogo: () => set(state => ({
     logoSettings: { 

@@ -13,8 +13,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     } else if (videoSettings.background === 'black') {
       return { backgroundColor: 'black' };
     } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
+      // Check if it's already a data URL (base64) or needs to be converted from File object
+      const backgroundUrl = typeof videoSettings.customBackground === 'string' 
+        ? videoSettings.customBackground 
+        : URL.createObjectURL(videoSettings.customBackground);
+      
       return {
-        backgroundImage: `url(${URL.createObjectURL(videoSettings.customBackground)})`,
+        backgroundImage: `url(${backgroundUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
