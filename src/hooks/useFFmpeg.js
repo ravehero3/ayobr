@@ -44,7 +44,7 @@ export const useFFmpeg = () => {
 
       // Parallel processing for faster generation
       // Process multiple videos simultaneously for better speed
-      const maxConcurrent = Math.min(3, pairs.length);  // Process up to 3 videos at once
+      const maxConcurrent = Math.min(6, pairs.length);  // Process up to 6 videos at once for speed
 
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);
       const processingQueue = [...pairs];

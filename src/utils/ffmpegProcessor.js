@@ -8,13 +8,13 @@ let initPromise = null;
 let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
 let isForceStopped = false; // Track if processes were force stopped
 
-// Scalable concurrency management for up to 100 files
+// Optimized concurrency management for maximum speed
 const getOptimalConcurrency = (totalFiles) => {
-  if (totalFiles <= 5) return 4;      // Small batches: 4 concurrent
-  if (totalFiles <= 20) return 6;     // Medium batches: 6 concurrent
-  if (totalFiles <= 50) return 8;     // Large batches: 8 concurrent
-  if (totalFiles <= 75) return 10;    // Very large batches: 10 concurrent
-  return 12;                          // Maximum 100 files: 12 concurrent
+  if (totalFiles <= 5) return 6;      // Small batches: 6 concurrent
+  if (totalFiles <= 20) return 8;     // Medium batches: 8 concurrent
+  if (totalFiles <= 50) return 12;    // Large batches: 12 concurrent
+  if (totalFiles <= 75) return 16;    // Very large batches: 16 concurrent
+  return 20;                          // Maximum 100 files: 20 concurrent
 };
 
 // Memory management for large batches
@@ -226,13 +226,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     ffmpeg.on('progress', ({ progress }) => {
       const now = Date.now();
-      // Throttle progress updates to every 200ms for better performance and prevent overload
-      if (onProgress && progressCallbackActive && (now - lastProgressTime > 200) && !hasCompleted) {
+      // Throttle progress updates to every 100ms for faster updates
+      if (onProgress && progressCallbackActive && (now - lastProgressTime > 100) && !hasCompleted) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         onProgress(normalizedProgress);
         lastProgressTime = now;
 
-        console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
+        // Only log every 10% for performance
+        if (normalizedProgress % 10 === 0) {
+          console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
+        }
 
         // Mark as completed when we reach 100% to prevent restart
         if (normalizedProgress >= 100) {
@@ -339,25 +342,36 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     ffmpegArgs.push('-vf', videoFilter);
 
-    // Ultra-fast parameters optimized for speed over quality
+    // Ultra-optimized parameters for maximum speed
       ffmpegArgs.push(
         '-threads', '0',               // Use all available CPU cores
         '-c:v', 'libx264',
         '-preset', 'ultrafast',        // Fastest encoding preset
-        '-tune', 'fastdecode',         // Optimize for fast decoding
+        '-tune', 'zerolatency',        // Optimize for minimal latency
         '-profile:v', 'baseline',      // Simpler profile for faster encoding
         '-level:v', '3.0',             // Lower level for faster processing
-        '-crf', '28',                  // Lower quality but much faster
-        '-r', '15',                    // Reduced frame rate for speed
-        '-g', '30',                    // Smaller keyframe interval
+        '-crf', '30',                  // Even lower quality for maximum speed
+        '-r', '10',                    // Very low frame rate for speed
+        '-g', '10',                    // Very small keyframe interval
         '-refs', '1',                  // Single reference frame for speed
         '-me_method', 'dia',           // Fastest motion estimation
+        '-subq', '1',                  // Fastest subpixel estimation
+        '-trellis', '0',               // Disable trellis quantization
+        '-aq-mode', '0',               // Disable adaptive quantization
+        '-fast-pskip', '1',            // Enable fast P-frame skipping
+        '-partitions', 'none',         // Disable partitions for speed
+        '-flags', '+cgop',             // Closed GOP for faster seeking
+        '-bf', '0',                    // No B-frames for speed
+        '-wpredp', '0',                // Disable weighted prediction
+        '-mixed-refs', '0',            // Disable mixed references
+        '-8x8dct', '0',                // Disable 8x8 DCT
+        '-fast-first-pass', '1',       // Fast first pass
         '-c:a', 'aac',                 // Use AAC codec for audio
-        '-b:a', '96k',                 // Lower audio bitrate for speed
+        '-b:a', '64k',                 // Even lower audio bitrate
         '-ar', '22050',                // Lower sample rate for speed
         '-ac', '1',                    // Mono audio for speed
         '-pix_fmt', 'yuv420p',
-        '-movflags', '+faststart',     // Optimize for streaming
+        '-movflags', '+faststart+frag_keyframe+empty_moov', // Optimize for streaming
         '-shortest',
         '-t', audioDuration.toString(),
         '-avoid_negative_ts', 'make_zero',
@@ -369,10 +383,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     console.log('FFmpeg command args:', ffmpegArgs);
 
     try {
-      // Add timeout to prevent hanging with extended time for web environment
+      // Reduced timeout for faster failure detection
       const ffmpegPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout after 120 seconds')), 120000);
+        setTimeout(() => reject(new Error('FFmpeg execution timeout after 60 seconds')), 60000);
       });
 
       console.log('Starting FFmpeg execution with optimized settings...');
