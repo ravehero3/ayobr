@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -253,30 +254,29 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           </div>
 
           {/* Overall Progress */}
-            <motion.div
-              className="relative z-10 mt-8 text-center rounded-xl p-6"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="text-sm text-gray-200 mb-3 font-medium">
-                Overall Progress: {generatedVideos.length} of {pairs.length} completed
-              </div>
-              <div className="w-full bg-gray-800/60 rounded-full h-4 overflow-hidden backdrop-blur-sm border border-white/15 max-w-md mx-auto shadow-inner">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(generatedVideos.length / pairs.length) * 100}%` }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-                </motion.div>
-              </div>
-              <div className="text-xs text-gray-400 mt-2">
-                {Math.round((generatedVideos.length / pairs.length) * 100)}% Complete
-              </div>
-            </motion.div>
-          </div>
+          <motion.div
+            className="relative z-10 mt-8 text-center rounded-xl p-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="text-sm text-gray-200 mb-3 font-medium">
+              Overall Progress: {generatedVideos.length} of {pairs.length} completed
+            </div>
+            <div className="w-full bg-gray-800/60 rounded-full h-4 overflow-hidden backdrop-blur-sm border border-white/15 max-w-md mx-auto shadow-inner">
+              <motion.div
+                className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative"
+                initial={{ width: 0 }}
+                animate={{ width: `${(generatedVideos.length / pairs.length) * 100}%` }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+              </motion.div>
+            </div>
+            <div className="text-xs text-gray-400 mt-2">
+              {Math.round((generatedVideos.length / pairs.length) * 100)}% Complete
+            </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
