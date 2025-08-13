@@ -8,7 +8,7 @@ import UserProfile from './UserProfile';
 import AppInfoWindow from './AppInfoWindow';
 
 const Header = () => {
-  const { generatedVideos, pairs, userProfileImage } = useAppStore();
+  const { generatedVideos, pairs, userProfileImage, isGenerating } = useAppStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAppInfoOpen, setIsAppInfoOpen] = useState(false);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
@@ -53,9 +53,9 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Status Indicator - Center (only show videos ready, removed pair counter) */}
+        {/* Status Indicator - Center (hide during generation) */}
         <div className="flex items-center space-x-4">
-          {generatedVideos.length > 0 && (
+          {generatedVideos.length > 0 && !isGenerating && (
             <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
               <div className="w-2 h-2 rounded-full bg-green-400"></div>
               <span className="text-xs text-green-300 font-medium">

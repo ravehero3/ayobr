@@ -42,19 +42,9 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Scalable concurrency for up to 100 files with optimized performance
-      let maxConcurrent;
-      if (pairs.length <= 5) {
-        maxConcurrent = 4;       // Small batches: 4 concurrent
-      } else if (pairs.length <= 20) {
-        maxConcurrent = 6;       // Medium batches: 6 concurrent  
-      } else if (pairs.length <= 50) {
-        maxConcurrent = 8;       // Large batches: 8 concurrent
-      } else if (pairs.length <= 75) {
-        maxConcurrent = 10;      // Very large batches: 10 concurrent
-      } else {
-        maxConcurrent = 12;      // Maximum 100 files: 12 concurrent
-      }
+      // Sequential processing for stability - generate videos one by one
+      // This prevents FFmpeg termination issues and allows GPU acceleration
+      const maxConcurrent = 1;  // Process one video at a time
 
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes`);
       const processingQueue = [...pairs];

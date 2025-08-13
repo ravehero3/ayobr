@@ -340,28 +340,22 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     ffmpegArgs.push('-vf', videoFilter);
 
-    // Ultra-optimized parameters for web environment - maximum speed settings
+    // Balanced parameters for sequential processing - better quality with GPU acceleration support
     ffmpegArgs.push(
       '-threads', '0',               // Use all available CPU cores
       '-c:v', 'libx264',
-      '-preset', 'ultrafast',        // Fastest possible preset
-      '-profile:v', 'baseline',      // Simple profile for compatibility
-      '-level:v', '3.0',            // Lower level for better compatibility
-      '-crf', '35',                  // Much higher CRF for maximum speed (lower quality but much faster)
-      '-r', '5',                     // Very low frame rate for static content (5fps)
-      '-g', '300',                   // Very large GOP size for static content
-      '-bf', '0',                    // No B-frames for simplicity
-      '-refs', '1',                  // Single reference frame
-      '-me_method', 'dia',           // Fastest motion estimation
-      '-subq', '0',                  // Fastest subpel refinement
-      '-trellis', '0',               // Disable trellis quantization
-      '-aq-mode', '0',               // Disable adaptive quantization
-      '-fast-pskip', '1',            // Enable fast P-frame skip
-      '-me_range', '4',              // Minimum motion estimation range
+      '-preset', 'fast',             // Balanced speed/quality preset
+      '-profile:v', 'high',          // Better compression profile
+      '-level:v', '4.0',             // Higher level for better quality
+      '-crf', '23',                  // Standard quality setting
+      '-r', '30',                    // Standard frame rate (30 fps)
+      '-g', '60',                    // Standard keyframe interval
+      '-refs', '3',                  // Multiple reference frames for better compression
+      '-me_method', 'hex',           // Better motion estimation
       '-c:a', 'aac',                 // Use AAC codec for audio
-      '-b:a', '32k',                 // Very low audio bitrate for maximum speed
-      '-ar', '22050',                // Lower sample rate for speed
-      '-ac', '1',                    // Mono audio for speed
+      '-b:a', '128k',                // Standard audio bitrate
+      '-ar', '44100',                // CD quality sample rate
+      '-ac', '2',                    // Stereo audio
       '-pix_fmt', 'yuv420p',
       '-movflags', '+faststart',     // Optimize for streaming
       '-shortest',

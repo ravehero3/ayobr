@@ -4,10 +4,13 @@ import { useAppStore } from '../store/appStore';
 import SettingsPanel from './SettingsPanel';
 
 const Footer = ({ onGenerateVideos }) => {
-  const { pairs, generatedVideos, isGenerating } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, videoGenerationStates } = useAppStore();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
+  
+  // Calculate completion count during generation
+  const completedVideosCount = Object.values(videoGenerationStates || {}).filter(state => state.isComplete).length;
 
   // Don't render footer if no files are present
   if (!hasFiles) {
@@ -68,23 +71,23 @@ const Footer = ({ onGenerateVideos }) => {
           </button>
         </div>
 
-        {/* Center - Ready Status */}
-        <div className="flex items-center space-x-6">
-          {/* Ready counter */}
-          <div className="flex items-center space-x-2" style={{ marginLeft: '-91px' }}>
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span className="text-sm text-gray-300">
-              {completePairs.length} Ready
-            </span>
-          </div>
-
-          {/* Processing status */}
-          {isGenerating && (
+        {/* Center - Ready Status or Progress */}
+        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
+          {isGenerating ? (
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
-              <span className="text-sm text-blue-300 font-medium">Processing...</span>
+              <span className="text-sm text-blue-300 font-medium">
+                {completedVideosCount} of {completePairs.length} completed
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span className="text-sm text-gray-300">
+                {completePairs.length} Ready
+              </span>
             </div>
           )}
         </div>
