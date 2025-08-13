@@ -37,7 +37,7 @@ const Footer = ({ onGenerateVideos }) => {
         }}
       >
         {/* Left side - Back Arrow */}
-        <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 267px)' }}>
+        <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 274px)' }}>
           <button
             onClick={() => {
               // Handle going back to previous step
@@ -72,7 +72,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Center - Ready Status or Progress */}
-        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
+        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-20px', marginTop: '-2px' }}>
           {isGenerating ? (
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
@@ -93,7 +93,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Generate Videos Button or Download All Videos Button - centered with footer */}
-        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 18px)', top: 'calc(50% + 2px)', transform: 'translateY(-50%)' }}>
+        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 25px)', top: 'calc(50% + 0px)', transform: 'translateY(-50%)' }}>
           {generatedVideos.length === 0 && !isGenerating && (
             <button
               onClick={onGenerateVideos}
@@ -143,7 +143,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Right side - Settings Button */}
-        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 273px)' }}>
+        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 280px)' }}>
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
             className="settings-icon w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-300 focus:outline-none"

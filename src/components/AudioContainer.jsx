@@ -278,8 +278,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </button>
           </div>
 
-          {/* Waveform - moved 4px higher */}
-          <div className="flex-1 flex items-start" style={{ marginTop: '-4px' }}>
+          {/* Waveform - moved 7px higher */}
+          <div className="flex-1 flex items-start" style={{ marginTop: '-7px' }}>
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer relative z-10"
