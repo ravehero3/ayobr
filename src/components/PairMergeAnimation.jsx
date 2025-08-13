@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -8,7 +9,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   const [audioPosition, setAudioPosition] = useState(null);
   const [imagePosition, setImagePosition] = useState(null);
   const containerRef = useRef(null);
-  const { generatedVideos } = useAppStore();
+  const { generatedVideos, videoSettings } = useAppStore();
 
   // Find the generated video for this pair
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -135,6 +136,23 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
     }
   }, [isGenerating, generatedVideo, animationStage]);
 
+  // Get background style based on video settings
+  const getBackgroundStyle = () => {
+    if (videoSettings.background === 'white') {
+      return { backgroundColor: 'white' };
+    } else if (videoSettings.background === 'black') {
+      return { backgroundColor: 'black' };
+    } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
+      return {
+        backgroundImage: `url(${URL.createObjectURL(videoSettings.customBackground)})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      };
+    }
+    return { backgroundColor: 'black' }; // fallback
+  };
+
   if (animationStage === 'idle') {
     return null;
   }
@@ -238,7 +256,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
             exit={{ opacity: 0, scale: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {/* Container with proper sizing constraints */}
+            {/* Video Preview Container - shows what the video will look like */}
             <div 
               className="glass-container rounded-2xl relative overflow-hidden mx-auto"
               style={{
@@ -248,19 +266,30 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 maxHeight: '100%'
               }}
             >
-              {/* Background image preview - shows what the video will look like */}
+              {/* Background layer - shows the actual video background that will be used */}
+              <div 
+                className="absolute inset-0"
+                style={getBackgroundStyle()}
+              />
+
+              {/* Image preview - shows how the image will appear in the video */}
               {pair.image && (
-                <img 
-                  src={URL.createObjectURL(pair.image)}
-                  alt="Video Preview"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <img 
+                    src={URL.createObjectURL(pair.image)}
+                    alt="Video Preview"
+                    className="max-w-full max-h-full object-contain"
+                    style={{
+                      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
+                    }}
+                  />
+                </div>
               )}
               
               {/* Dark overlay for better text readability */}
               <div className="absolute inset-0 bg-black/40" />
 
-              {/* Title overlay - positioned at top with proper spacing */}
+              {/* Title overlay - positioned at top */}
               <motion.div
                 className="absolute top-4 left-4 right-4 z-20 text-center"
                 initial={{ opacity: 0, y: -20 }}
@@ -283,7 +312,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 </h3>
               </motion.div>
 
-              {/* Progress Bar - centered in the middle with blue gradient */}
+              {/* Single Progress Bar - centered in the middle */}
               <motion.div 
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 px-4"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -322,7 +351,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 </div>
               </motion.div>
 
-              {/* Processing indicator at bottom with proper spacing */}
+              {/* Processing indicator at bottom */}
               <motion.div
                 className="absolute bottom-4 left-4 right-4 z-20 text-center"
                 initial={{ opacity: 0, y: 20 }}

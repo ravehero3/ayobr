@@ -174,21 +174,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                               className="absolute inset-0 w-full h-full object-cover opacity-50"
                             />
                           )}
-                          
-                          {/* Audio waveform indicator */}
-                          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1">
-                            {[...Array(8)].map((_, i) => (
-                              <div 
-                                key={i}
-                                className="bg-green-400/70 rounded-full"
-                                style={{
-                                  width: '3px',
-                                  height: `${8 + Math.random() * 12}px`,
-                                  animation: isComplete ? 'none' : `pulse ${0.5 + i * 0.1}s infinite alternate`
-                                }}
-                              />
-                            ))}
-                          </div>
 
                           {/* Progress overlay */}
                           {!isComplete && (
