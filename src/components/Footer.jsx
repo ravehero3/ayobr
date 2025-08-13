@@ -87,7 +87,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Center - Ready Status or Progress */}
-        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-50px', marginTop: '-2px' }}>
+        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-60px', marginTop: '-2px' }}>
           {isGenerating ? (
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
@@ -108,7 +108,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Generate Videos Button or Download All Videos Button - centered with footer */}
-        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 27px)', top: 'calc(50% + 0px)', transform: 'translateY(-50%)' }}>
+        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 27px)', top: 'calc(50% + 1px)', transform: 'translateY(-50%)' }}>
           {generatedVideos.length === 0 && !isGenerating && (
             <button
               onClick={onGenerateVideos}
@@ -158,19 +158,23 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Right side - Settings Button */}
-        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 257px)' }}>
+        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 264px)' }}>
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center justify-center w-10 h-10 bg-gray-800/80 hover:bg-gray-700/90 rounded-xl border border-gray-600/50 hover:border-gray-500/70 transition-all duration-300 hover:scale-105 flex-shrink-0 shadow-lg"
+            className="flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0"
             style={{
-              marginRight: '-10px', // Move settings 4px more to the right (from -6px to -10px)
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)'
+              marginRight: '-3px' // Fine-tune positioning
             }}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ 
+              scale: 1.05,
+              rotate: 360
+            }}
             whileTap={{ scale: 0.95 }}
+            transition={{
+              rotate: { duration: 2, ease: "linear" }
+            }}
           >
-            <svg className="w-6 h-6 text-gray-300 hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <svg className="w-6 h-6 text-gray-400 hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
