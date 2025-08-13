@@ -3,7 +3,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
-  const { getVideoGenerationState, generatedVideos } = useAppStore();
+  const { getVideoGenerationState, generatedVideos, videoSettings, removePair } = useAppStore();
+
+  // Function to get video background style based on user settings
+  const getVideoBackgroundStyle = () => {
+    if (videoSettings.background === 'white') {
+      return { backgroundColor: 'white' };
+    } else if (videoSettings.background === 'black') {
+      return { backgroundColor: 'black' };
+    } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
+      return {
+        backgroundImage: `url(${URL.createObjectURL(videoSettings.customBackground)})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      };
+    }
+    return { backgroundColor: 'black' }; // fallback
+  };
 
   if (!isVisible) return null;
 
@@ -88,7 +105,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="video-loading-container"
+                    className="video-loading-container group"
                     style={{
                       position: 'relative',
                       width: '100%',
@@ -139,6 +156,18 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       ))}
                     </div>
 
+                    {/* Delete button - appears on hover */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removePair(pair.id);
+                      }}
+                      className="absolute top-2 right-2 z-30 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-white"
+                      style={{ fontSize: '16px', fontWeight: 'bold' }}
+                    >
+                      ×
+                    </button>
+
                     <div className="relative z-10 h-full flex flex-col">
                       {/* Title - Audio + Image names - positioned at top */}
                       <div
@@ -156,18 +185,25 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         }
                       </div>
 
-                      {/* Video Preview Area - moved 60px higher, centered in container */}
-                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-60px' }}>
+                      {/* Video Preview Area - moved 40px higher (was 60px), then moved down 20px */}
+                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-40px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '160px', height: '90px' }}
                         >
-                          {/* Background image preview */}
+                          {/* Video background preview based on user settings */}
+                          <div 
+                            className="absolute inset-0"
+                            style={getVideoBackgroundStyle()}
+                          />
+                          
+                          {/* Foreground image preview */}
                           {pair.image && (
                             <img 
                               src={URL.createObjectURL(pair.image)}
                               alt="Preview"
-                              className="absolute inset-0 w-full h-full object-cover opacity-50"
+                              className="absolute inset-0 w-full h-full object-contain opacity-80"
+                              style={{ zIndex: 1 }}
                             />
                           )}
 
