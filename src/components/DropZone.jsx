@@ -68,7 +68,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
       <div className="relative text-center space-y-6 w-full flex flex-col items-center justify-center" style={{ zIndex: 60 }}>
         {/* Upload Icon with Circle */}
         <motion.div
-          className="inline-flex items-center justify-center w-20 h-20 mx-auto mb-8 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-all duration-300"
+          className="inline-flex items-center justify-center w-20 h-20 mx-auto mb-4 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-all duration-300"
           whileHover={{ scale: 1.1, rotate: 5, borderColor: 'rgba(255, 255, 255, 0.6)' }}
           whileTap={{ scale: 0.95 }}
         >
@@ -79,7 +79,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
         {/* Title */}
         <motion.h2
-          className="text-3xl font-semibold text-white mb-3 group-hover:text-neon-blue/90 transition-colors duration-300"
+          className="text-3xl font-semibold text-white mb-2 group-hover:text-neon-blue/90 transition-colors duration-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
@@ -105,7 +105,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           transition={{ delay: 0.4, duration: 0.5 }}
         >
           {/* Audio formats */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-space-gray/30 rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300">
+          <div className="flex items-center gap-2 px-3 py-2 bg-space-gray/30 rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300">
             <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
@@ -113,7 +113,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           </div>
 
           {/* Image formats */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-space-gray/30 rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300">
+          <div className="flex items-center gap-2 px-3 py-2 bg-space-gray/30 rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300">
             <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -132,7 +132,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             }
           }}
           type="button"
-          className="px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
+          className="px-8 py-3 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}
