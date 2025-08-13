@@ -29,18 +29,23 @@ const maxCacheSize = 50; // Increased cache size for 100 files
 const processedImageCache = new Map();
 const audioBufferCache = new Map(); // Cache for audio file buffers
 
-// Force stop all active FFmpeg processes immediately
-export const forceStopAllProcesses = () => {
+// Force stop all active FFmpeg processes gracefully
+export const forceStopAllProcesses = async () => {
   console.log('Force stopping all FFmpeg processes...');
   isForceStopped = true;
 
   if (ffmpeg) {
     try {
-      // Clear any progress listeners first
+      // Clear any progress listeners first to prevent further callbacks
       ffmpeg.off('progress');
       
-      // Terminate the FFmpeg instance immediately
-      ffmpeg.terminate();
+      // Only terminate if FFmpeg is actually loaded
+      if (isLoaded) {
+        console.log('Gracefully terminating FFmpeg...');
+        await ffmpeg.terminate();
+      }
+      
+      // Clear the instance and state
       ffmpeg = null;
       isLoaded = false;
       isInitializing = false;
@@ -59,20 +64,27 @@ export const forceStopAllProcesses = () => {
       console.log('All FFmpeg processes terminated and cleaned up');
     } catch (error) {
       console.error('Error terminating FFmpeg:', error);
+      // Force clear everything even if termination fails
+      ffmpeg = null;
+      isLoaded = false;
+      isInitializing = false;
+      initPromise = null;
     }
   }
+  
+  // Reset force stopped flag immediately for fresh start
+  isForceStopped = false;
 };
 
 // Restart FFmpeg completely - useful for debugging
 export const restartFFmpeg = async () => {
   console.log('Restarting FFmpeg completely...');
-  forceStopAllProcesses();
+  await forceStopAllProcesses(); // Now awaits the async operation
   
   // Wait a moment for cleanup
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 500));
   
-  // Initialize fresh
-  isForceStopped = false;
+  // Initialize fresh (force stopped flag is already reset in forceStopAllProcesses)
   return await initializeFFmpeg();
 };
 
@@ -210,17 +222,22 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Set up progress callback with throttling for better performance
     let lastProgressTime = 0;
     let hasCompleted = false;
+    let progressCallbackActive = true;
+    
     ffmpeg.on('progress', ({ progress }) => {
       const now = Date.now();
-      // Throttle progress updates to every 100ms for better performance
-      if (onProgress && (now - lastProgressTime > 100) && !hasCompleted) {
+      // Throttle progress updates to every 200ms for better performance and prevent overload
+      if (onProgress && progressCallbackActive && (now - lastProgressTime > 200) && !hasCompleted) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         onProgress(normalizedProgress);
         lastProgressTime = now;
         
+        console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
+        
         // Mark as completed when we reach 100% to prevent restart
         if (normalizedProgress >= 100) {
           hasCompleted = true;
+          progressCallbackActive = false;
         }
       }
     });
@@ -323,24 +340,26 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     ffmpegArgs.push('-vf', videoFilter);
 
-    // Ultra-optimized parameters for web environment
+    // Ultra-optimized parameters for web environment - maximum speed settings
     ffmpegArgs.push(
       '-threads', '0',               // Use all available CPU cores
       '-c:v', 'libx264',
-      '-preset', 'superfast',        // Even faster preset
+      '-preset', 'ultrafast',        // Fastest possible preset
       '-profile:v', 'baseline',      // Simple profile for compatibility
       '-level:v', '3.0',            // Lower level for better compatibility
-      '-crf', '30',                  // Higher CRF for much faster encoding
-      '-r', '10',                    // Very low frame rate for static content
-      '-g', '250',                   // Large GOP size for static content
+      '-crf', '35',                  // Much higher CRF for maximum speed (lower quality but much faster)
+      '-r', '5',                     // Very low frame rate for static content (5fps)
+      '-g', '300',                   // Very large GOP size for static content
       '-bf', '0',                    // No B-frames for simplicity
       '-refs', '1',                  // Single reference frame
       '-me_method', 'dia',           // Fastest motion estimation
       '-subq', '0',                  // Fastest subpel refinement
       '-trellis', '0',               // Disable trellis quantization
       '-aq-mode', '0',               // Disable adaptive quantization
+      '-fast-pskip', '1',            // Enable fast P-frame skip
+      '-me_range', '4',              // Minimum motion estimation range
       '-c:a', 'aac',                 // Use AAC codec for audio
-      '-b:a', '64k',                 // Lower audio bitrate for speed
+      '-b:a', '32k',                 // Very low audio bitrate for maximum speed
       '-ar', '22050',                // Lower sample rate for speed
       '-ac', '1',                    // Mono audio for speed
       '-pix_fmt', 'yuv420p',
@@ -356,24 +375,27 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     console.log('FFmpeg command args:', ffmpegArgs);
     
     try {
-      // Add timeout to prevent hanging with better error handling
+      // Add timeout to prevent hanging with extended time for web environment
       const ffmpegPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout after 60 seconds')), 60000);
+        setTimeout(() => reject(new Error('FFmpeg execution timeout after 120 seconds')), 120000);
       });
       
-      console.log('Starting FFmpeg execution...');
+      console.log('Starting FFmpeg execution with optimized settings...');
       await Promise.race([ffmpegPromise, timeoutPromise]);
+      
+      // Disable progress callback to prevent issues during cleanup
+      progressCallbackActive = false;
       console.log('FFmpeg command executed successfully');
     } catch (ffmpegError) {
       console.error('FFmpeg execution failed:', ffmpegError);
       console.error('FFmpeg command that failed:', ffmpegArgs);
       
-      // Try to restart FFmpeg if it seems stuck
-      if (ffmpegError.message.includes('timeout') || ffmpegError.message.includes('stuck')) {
-        console.log('Attempting to restart FFmpeg due to timeout...');
+      // Try to restart FFmpeg if it seems stuck or terminated
+      if (ffmpegError.message.includes('timeout') || ffmpegError.message.includes('stuck') || ffmpegError.message.includes('terminate')) {
+        console.log('Attempting to restart FFmpeg due to error...');
         await forceStopAllProcesses();
-        throw new Error(`FFmpeg processing timed out - please try again`);
+        throw new Error(`FFmpeg processing failed - restarting for next attempt`);
       }
       
       throw new Error(`FFmpeg processing failed: ${ffmpegError.message}`);

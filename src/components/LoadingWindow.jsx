@@ -210,8 +210,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Single progress overlay in center of preview - only percentage counter we keep */}
                           {!isComplete && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <div className="text-white text-sm font-medium">
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center" style={{ zIndex: 50 }}>
+                              <div className="text-white text-sm font-medium" style={{ zIndex: 51 }}>
                                 {Math.round(progress)}%
                               </div>
                             </div>

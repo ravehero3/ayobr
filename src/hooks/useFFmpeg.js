@@ -347,6 +347,32 @@ export const useFFmpeg = () => {
         }
       }
 
+      // Check if this is a restart-related error that we can retry
+      const isRestartableError = error.message.includes('restarting for next attempt') || 
+                               error.message.includes('terminate') ||
+                               error.message.includes('timeout');
+      
+      if (isRestartableError && !isCancelling) {
+        console.log('Detected restartable error, FFmpeg will reinitialize for next video');
+        // Set the pair as not generating but don't mark it as error - it might work on retry
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: null // Don't show error to user for restartable errors
+        });
+      } else {
+        // Set error state for non-restartable errors
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: error.message
+        });
+      }
+
       return null; // Don't throw to prevent unhandled rejections
     }
   };
