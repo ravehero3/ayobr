@@ -169,14 +169,15 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     </button>
 
                     <div className="relative z-10 h-full flex flex-col">
-                      {/* Title - Audio + Image names - positioned at top */}
+                      {/* Title - Audio + Image names - positioned in front of image */}
                       <div
-                        className="text-white font-semibold mb-3 text-center"
+                        className="text-white font-semibold mb-3 text-center relative"
                         style={{
                           fontSize: '14px',
                           fontWeight: '600',
                           textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                          lineHeight: '1.3'
+                          lineHeight: '1.3',
+                          zIndex: 20
                         }}
                       >
                         {pair.audio?.name && pair.image?.name ? 
@@ -185,8 +186,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         }
                       </div>
 
-                      {/* Video Preview Area - moved 40px higher (was 60px), then moved down 20px */}
-                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-40px' }}>
+                      {/* Video Preview Area - moved 3px down from previous position */}
+                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-37px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '160px', height: '90px' }}

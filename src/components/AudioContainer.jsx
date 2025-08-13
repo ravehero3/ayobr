@@ -189,8 +189,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       />
       {audio ? (
         <div className="w-full h-full flex flex-col justify-between relative z-10">
-          {/* Top header bar with title (center) and controls */}
-          <div className="flex items-center justify-between mb-4 relative" style={{ marginTop: '-2px' }}>
+          {/* Top header bar with title (center) and controls - moved 2px higher */}
+          <div className="flex items-center justify-between mb-4 relative" style={{ marginTop: '-4px' }}>
             {/* Move Handle - Left side, aligned with title */}
             {isHovered && audio && onStartAudioDrag && (
               <button
@@ -278,8 +278,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </button>
           </div>
 
-          {/* Waveform */}
-          <div className="flex-1 flex items-start">
+          {/* Waveform - moved 2px higher */}
+          <div className="flex-1 flex items-start" style={{ marginTop: '-2px' }}>
             <div 
               ref={waveformRef}
               className="w-full cursor-pointer relative z-10"
@@ -309,8 +309,8 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </div>
           </div>
 
-          {/* Play button and time information */}
-          <div className="flex items-center justify-between relative z-10" style={{ marginTop: '20px' }}>
+          {/* Play button and time information - moved 2px higher */}
+          <div className="flex items-center justify-between relative z-10" style={{ marginTop: '18px' }}>
             <div className="text-xs text-white">
               {formatTime(currentTime)}
             </div>

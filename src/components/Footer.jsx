@@ -34,7 +34,7 @@ const Footer = ({ onGenerateVideos }) => {
         }}
       >
         {/* Left side - Back Arrow */}
-        <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 262px)' }}>
+        <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 267px)' }}>
           <button
             onClick={() => {
               // Handle going back to previous step
@@ -140,7 +140,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Right side - Settings Button */}
-        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 280px)' }}>
+        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 273px)' }}>
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
             className="settings-icon w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-300 focus:outline-none"
