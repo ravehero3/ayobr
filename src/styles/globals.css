@@ -994,13 +994,34 @@ html {
 /* Custom button styles */
 .btn-primary {
   background: linear-gradient(to right, #6B7280, #9CA3AF);
-  @apply text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 active:scale-95;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(156, 163, 175, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
 }
 
 .btn-secondary {
   background: #0F1419;
-  @apply text-white font-medium py-2 px-4 rounded-lg border border-gray-500/30 hover:border-gray-500/50 transition-all duration-300;
+  color: white;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  border-color: rgba(107, 114, 128, 0.5);
 }
 
 /* Glass morphism effect */
