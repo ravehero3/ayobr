@@ -222,6 +222,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
   let imageFileName = null;
   let outputFileName = null;
   let logoFileName = null; // Declare logoFileName here
+  const timestamp = Date.now(); // Generate a timestamp for temporary files
 
   try {
     const ffmpeg = await initializeFFmpeg();
@@ -303,13 +304,34 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     ]);
 
     // Use unique filenames to avoid conflicts
-    audioFileName = `audio_${Date.now()}.mp3`;
-    imageFileName = `image_${Date.now()}.jpg`;
-    outputFileName = `output_${Date.now()}.mp4`;
+    audioFileName = `audio_${timestamp}.mp3`;
+    imageFileName = `image_${timestamp}.jpg`;
+    outputFileName = `output_${timestamp}.mp4`;
 
-    // Write files to FFmpeg filesystem
-    await ffmpeg.writeFile(audioFileName, audioData);
-    await ffmpeg.writeFile(imageFileName, imageData);
+    // Write files to FFmpeg filesystem with error checking
+    try {
+      console.log('Writing files to FFmpeg FS:', {
+        imageSize: imageData.length,
+        audioSize: audioData.length
+      });
+
+      ffmpeg.FS('writeFile', imageFileName, imageData);
+      ffmpeg.FS('writeFile', audioFileName, audioData);
+
+      // Verify files were written successfully
+      const imageWritten = ffmpeg.FS('readFile', imageFileName);
+      const audioWritten = ffmpeg.FS('readFile', audioFileName);
+
+      if (imageWritten.length === 0 || audioWritten.length === 0) {
+        throw new Error('Failed to write input files to FFmpeg FS');
+      }
+
+      console.log('Files written successfully to FFmpeg FS');
+    } catch (writeError) {
+      console.error('Error writing files to FFmpeg FS:', writeError);
+      throw new Error(`Failed to prepare input files: ${writeError.message}`);
+    }
+
 
     // Handle logo file if provided and enabled (temporarily disabled for debugging)
     // if (logoSettings && logoSettings.useLogoInVideos && logoSettings.logoFile) {
@@ -405,50 +427,28 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       // Disable progress callback to prevent issues during cleanup
       progressCallbackActive = false;
       console.log('FFmpeg command executed successfully');
-    } catch (ffmpegError) {
-      console.error('FFmpeg execution failed:', ffmpegError);
+    } catch (error) {
+      console.error('FFmpeg execution failed:', error);
       console.error('FFmpeg command that failed:', ffmpegArgs);
-      console.error('FFmpeg error stack:', ffmpegError?.stack);
+      console.error('FFmpeg error stack:', error?.stack);
 
-      // Disable progress callback on error
-      progressCallbackActive = false;
-      ffmpeg.off('progress');
-
-      // Check if this is a memory or resource error
-      const errorMessage = ffmpegError && ffmpegError.message ? ffmpegError.message.toLowerCase() : '';
-      const isMemoryError = errorMessage.includes('memory') || 
-                           errorMessage.includes('out of memory') ||
-                           errorMessage.includes('cannot allocate');
-      
-      const isResourceError = errorMessage.includes('resource') || 
-                             errorMessage.includes('file descriptor') ||
-                             errorMessage.includes('too many');
-
-      const isTimeoutError = errorMessage.includes('timeout');
-
-      // Handle specific error types
-      if (isMemoryError) {
-        console.log('Memory error detected - forcing cleanup...');
-        await forceStopAllProcesses();
-        throw new Error('FFmpeg failed due to memory constraints. Try processing fewer files at once.');
+      // Clean up any temporary files that might be left behind
+      try {
+        const files = ffmpeg.FS('readdir', '/');
+        files.forEach(file => {
+          if (file.includes(timestamp) || file.startsWith('image_') || file.startsWith('audio_') || file.startsWith('output_')) {
+            try {
+              ffmpeg.FS('unlink', file);
+            } catch (cleanupError) {
+              console.warn('Failed to clean up file:', file, cleanupError);
+            }
+          }
+        });
+      } catch (cleanupError) {
+        console.warn('Error during cleanup:', cleanupError);
       }
 
-      if (isResourceError) {
-        console.log('Resource error detected - forcing cleanup...');
-        await forceStopAllProcesses();
-        throw new Error('FFmpeg failed due to resource constraints. Please try again.');
-      }
-
-      if (isTimeoutError) {
-        console.log('Timeout error detected - forcing cleanup...');
-        await forceStopAllProcesses();
-        throw new Error('FFmpeg processing timed out. Please try again with smaller files.');
-      }
-
-      // For other errors, just throw them without restarting
-      throw new Error(`FFmpeg processing failed: ${ffmpegError.message || 'Unknown error'}`);
-
-      throw new Error(`FFmpeg processing failed: ${errorMessage}`);
+      throw new Error(`FFmpeg processing failed: ${error.message || 'Unknown error'}`);
     }
 
     console.log('FFmpeg execution completed successfully');
