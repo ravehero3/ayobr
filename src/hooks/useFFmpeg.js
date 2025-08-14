@@ -52,7 +52,7 @@ export const useFFmpeg = () => {
       let completedCount = 0;
 
       // Enhanced progress tracking for large batches
-      const updateBatchProgress = () => {
+      const updateBatchProgress = async () => {
         const overallProgress = Math.floor((completedCount / pairs.length) * 100);
         setProgress(overallProgress);
 
@@ -90,7 +90,7 @@ export const useFFmpeg = () => {
           if (existingVideo) {
             console.log(`Skipping pair ${pair.id} - video already exists`);
             completedCount++;
-            updateBatchProgress();
+            await updateBatchProgress();
             continue;
           }
 
@@ -110,10 +110,10 @@ export const useFFmpeg = () => {
             return null;
           });
           activePromises.add(promise);
-          promise.finally(() => {
+          promise.finally(async () => {
             activePromises.delete(promise);
             completedCount++;
-            updateBatchProgress();
+            await updateBatchProgress();
           });
         }
 
