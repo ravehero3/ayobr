@@ -166,7 +166,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   return (
     <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ 
       marginLeft: '8px',
-      marginBottom: `${4 + Math.abs(containerSpacing)}px`
+      marginBottom: `${4 + Math.abs(containerSpacing)}px`,
+      marginTop: pairs.findIndex(p => p.id === pair.id) === 0 ? '64px' : '0px'
     }}>
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
