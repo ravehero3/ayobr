@@ -219,15 +219,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
   if (!audioFile || !audioFile.name) {
     throw new Error('Invalid audio file provided');
   }
-  
+
   if (!imageFile || !imageFile.name) {
     throw new Error('Invalid image file provided');
   }
-  
+
   if (audioFile.size === 0) {
     throw new Error(`Audio file ${audioFile.name} is empty`);
   }
-  
+
   if (imageFile.size === 0) {
     throw new Error(`Image file ${imageFile.name} is empty`);
   }
@@ -301,16 +301,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       }
 
       console.log(`Reading ${type} file:`, file.name, 'Size:', file.size);
-      
+
       let data;
       try {
         // Use custom file reader instead of fetchFile to avoid detachment
         data = await readFileAsArrayBuffer(file);
-        
+
         if (!data || data.length === 0) {
           throw new Error(`File ${file.name} is empty or could not be read`);
         }
-        
+
         console.log(`Successfully read ${type} file:`, file.name, 'Data size:', data.length);
       } catch (error) {
         console.error(`Error reading ${type} file:`, error);
@@ -338,25 +338,22 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     imageFileName = `image_${timestamp}.jpg`;
     outputFileName = `output_${timestamp}.mp4`;
 
-    // Validate data before writing
-    if (!audioData || audioData.length === 0) {
-      throw new Error(`Audio file ${audioFile.name} is empty or could not be read`);
-    }
-    
-    if (!imageData || imageData.length === 0) {
-      throw new Error(`Image file ${imageFile.name} is empty or could not be read`);
-    }
-
-    // Write files to FFmpeg filesystem with error checking
-    try {
-      console.log('Writing files to FFmpeg FS:', {
-        imageSize: imageData.length,
-        audioSize: audioData.length
+    console.log('Writing files to FFmpeg FS:', {
+        imageSize: imageData?.length || 0,
+        audioSize: audioData?.length || 0
       });
 
-      // Ensure we have fresh copies for FFmpeg
-      const audioBuffer = new Uint8Array(audioData);
+      // Check if data is valid before processing
+      if (!imageData || imageData.length === 0) {
+        throw new Error('Image data is empty or invalid');
+      }
+      if (!audioData || audioData.length === 0) {
+        throw new Error('Audio data is empty or invalid');
+      }
+
+      // Clone ArrayBuffers to prevent detachment
       const imageBuffer = new Uint8Array(imageData);
+      const audioBuffer = new Uint8Array(audioData);
 
       await ffmpeg.writeFile(imageFileName, imageBuffer);
       await ffmpeg.writeFile(audioFileName, audioBuffer);
@@ -368,7 +365,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       if (!imageWritten || imageWritten.length === 0) {
         throw new Error(`Failed to write image file ${imageFileName} to FFmpeg FS`);
       }
-      
+
       if (!audioWritten || audioWritten.length === 0) {
         throw new Error(`Failed to write audio file ${audioFileName} to FFmpeg FS`);
       }
