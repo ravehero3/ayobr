@@ -89,11 +89,19 @@ const Footer = ({ onGenerateVideos }) => {
         {/* Center - Ready Status or Progress */}
         <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-70px', marginTop: '-2px' }}>
           {isGenerating ? (
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
-              <span className="text-sm text-blue-300 font-medium">
-                {completedVideosCount} of {completePairs.length} completed
-              </span>
+            <div className="flex flex-col items-center space-y-1">
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
+                <span className="text-sm text-blue-300 font-medium">
+                  {completedVideosCount} of {completePairs.length} completed
+                </span>
+              </div>
+              <div className="w-48 bg-gray-700 rounded-full h-1">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-1 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${Math.floor((completedVideosCount / completePairs.length) * 100)}%` }}
+                />
+              </div>
             </div>
           ) : (
             <div className="flex items-center space-x-2">

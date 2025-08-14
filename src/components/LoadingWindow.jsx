@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -11,7 +10,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     // Safely access videoSettings with fallback
     const settings = videoSettings || {};
     const background = settings.background || 'black';
-    
+
     if (background === 'white') {
       return { backgroundColor: 'white' };
     } else if (background === 'black') {
@@ -22,7 +21,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         const backgroundUrl = typeof settings.customBackground === 'string' 
           ? settings.customBackground 
           : URL.createObjectURL(settings.customBackground);
-        
+
         return {
           backgroundImage: `url(${backgroundUrl})`,
           backgroundSize: 'cover',
@@ -61,43 +60,25 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             maxWidth: '4rem * 16'
           }}
         >
-          {/* Close/Cancel Button */}
-          <button
-            onClick={onStop}
-            className="absolute top-6 right-6 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-gray-500/20 hover:bg-gray-500/40 border border-gray-500/30 hover:border-gray-500/50 transition-all duration-200 group"
-          >
-            <svg
-              className="w-4 h-4 text-gray-400 group-hover:text-gray-300 transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Content Container with proper padding */}
-          <div className="p-10">
-            {/* Header */}
-            <div className="flex items-center justify-center mb-8">
-              <motion.h2
-                className="text-3xl font-bold text-white mb-2"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                Generating Videos
-              </motion.h2>
-            </div>
-            <motion.p
-              className="text-gray-300 text-lg"
+          {/* Header */}
+          <div className="flex items-center justify-center p-6 pb-2">
+            <motion.h2
+              className="text-3xl font-bold text-white mb-2"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.2 }}
             >
-              Processing {pairs.length} video pairs...
-            </motion.p>
+              Generating Videos
+            </motion.h2>
           </div>
+          <motion.p
+            className="text-gray-300 text-lg text-center"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            Processing {pairs.length} video pairs...
+          </motion.p>
 
           {/* Miniature Containers Grid */}
           <div className="relative z-10 max-h-80 overflow-y-auto mb-8">
@@ -267,30 +248,21 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             </div>
           </div>
 
-          {/* Overall Progress */}
-          <motion.div
-            className="relative z-10 mt-8 text-center rounded-xl p-6"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="text-sm text-gray-200 mb-3 font-medium">
-              Overall Progress: {generatedVideos.length} of {pairs.length} completed
-            </div>
-            <div className="w-full bg-gray-800/60 rounded-full h-4 overflow-hidden backdrop-blur-sm border border-white/15 max-w-md mx-auto shadow-inner">
-              <motion.div
-                className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative"
-                initial={{ width: 0 }}
-                animate={{ width: `${(generatedVideos.length / pairs.length) * 100}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-              </motion.div>
-            </div>
-            <div className="text-xs text-gray-400 mt-2">
-              {Math.round((generatedVideos.length / pairs.length) * 100)}% Complete
-            </div>
-          </motion.div>
+          {/* Footer with Stop Button */}
+          <div className="p-6 pt-2">
+            {onStop && (
+              <div className="flex justify-center">
+                <motion.button
+                  onClick={onStop}
+                  className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  STOP!
+                </motion.button>
+              </div>
+            )}
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

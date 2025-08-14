@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -42,11 +41,11 @@ const Header = () => {
             onClick={() => setIsAppInfoOpen(true)}
             className="hover:scale-105 transition-all duration-200"
           >
-            <img 
+            <img
               src={typebeatLogo}
               alt="TypeBeatz"
               className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
-              style={{ 
+              style={{
                 height: '20px' // Much smaller logo
               }}
             />
@@ -70,18 +69,18 @@ const Header = () => {
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
-            style={{ marginRight: '-5px' }} // Profile icon positioned via paddingRight
+            style={{ marginRight: 'calc((100vw - 500px) / 2 - 287px)' }} // Move 10px to the left (from -277px to -287px)
           >
-            <img 
+            <img
               src={userProfileImage || userIcon}
               alt="Profile"
               className="w-full h-full object-cover"
             />
           </button>
         </div>
-        
+
         {/* User Profile Modal */}
-        <UserProfile 
+        <UserProfile
           isOpen={isProfileOpen}
           onClose={() => setIsProfileOpen(false)}
         />
