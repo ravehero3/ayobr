@@ -378,16 +378,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     }
 
 
-    // Handle logo file if provided and enabled (temporarily disabled for debugging)
-    // if (logoSettings && logoSettings.useLogoInVideos && logoSettings.logoFile) {
-    //   logoFileName = `logo_${Date.now()}.png`;
-    //
-    //   // Convert base64 logo to binary data
-    //   const logoBase64 = logoSettings.logoFile.split(',')[1]; // Remove data:image/... prefix
-    //   const logoData = Uint8Array.from(atob(logoBase64), c => c.charCodeAt(0));
-    //   await ffmpeg.writeFile(logoFileName, logoData);
-    //   console.log('Logo file written to FFmpeg filesystem:', logoFileName);
-    // }
+    // Logo functionality temporarily disabled for debugging video generation issues
+    console.log('Logo functionality disabled for debugging');
 
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);

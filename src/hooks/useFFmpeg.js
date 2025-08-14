@@ -203,11 +203,12 @@ export const useFFmpeg = () => {
 
       console.log(`Processing video for pair ${pair.id}:`, pair);
 
-      // Get video settings from app store (including background and logo)
+      // Get video settings from app store (temporarily disable logo for debugging)
       const videoSettings = {
-        background: store.videoSettings.background || 'black',
-        logoFile: store.logoSettings.logoFile,
-        useLogoInVideos: store.logoSettings.useLogoInVideos
+        background: (store.videoSettings && store.videoSettings.background) ? store.videoSettings.background : 'black'
+        // Temporarily disable logo functionality for debugging
+        // logoFile: store.logoSettings?.logoFile,
+        // useLogoInVideos: store.logoSettings?.useLogoInVideos
       };
       console.log('Video settings for generation:', videoSettings);
 
