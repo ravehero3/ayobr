@@ -378,8 +378,37 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     }
 
 
-    // Logo functionality temporarily disabled for debugging video generation issues
-    console.log('Logo functionality disabled for debugging');
+    // Handle logo processing with improved error handling
+    let logoFileName = null;
+    if (videoSettings && videoSettings.useLogo && videoSettings.logoFile) {
+      try {
+        console.log('Processing logo for video overlay...');
+        logoFileName = `logo_${timestamp}.png`;
+        
+        // Handle different logo data formats
+        let logoData;
+        if (typeof videoSettings.logoFile === 'string') {
+          // Base64 data - convert to binary
+          const base64Data = videoSettings.logoFile.replace(/^data:image\/[a-z]+;base64,/, '');
+          logoData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        } else {
+          // File object
+          logoData = await getCachedFileData(videoSettings.logoFile, 'logo');
+        }
+        
+        if (logoData && logoData.length > 0) {
+          await ffmpeg.writeFile(logoFileName, logoData);
+          console.log('Logo file written successfully:', logoFileName);
+        } else {
+          console.warn('Logo data is empty, skipping logo overlay');
+          logoFileName = null;
+        }
+      } catch (error) {
+        console.error('Error processing logo:', error);
+        console.warn('Continuing video generation without logo overlay');
+        logoFileName = null;
+      }
+    }
 
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
@@ -394,10 +423,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-i', audioFileName
     ];
 
-    // Add logo input if provided (temporarily disabled)
-    // if (logoFileName) {
-    //   ffmpegArgs.push('-i', logoFileName);
-    // }
+    // Add logo input if provided
+    if (logoFileName) {
+      ffmpegArgs.push('-i', logoFileName);
+    }
 
     // Map inputs
     ffmpegArgs.push('-map', '0:v');  // Map video from first input (image)
@@ -406,8 +435,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Get background color from settings (default to black)
     const backgroundColor = (videoSettings && videoSettings.background) ? videoSettings.background : 'black';
 
-    // Simplified video filter for better web performance
-    const videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+    // Build video filter with optional logo overlay
+    let videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+    
+    // Add logo overlay if logo file is available
+    if (logoFileName) {
+      // Logo positioned at 27% from left edge, vertically centered, scaled to 80px height
+      const logoOverlay = `[0:v]${videoFilter}[bg];[2:v]scale=-1:80[logo];[bg][logo]overlay=(main_w*0.27-overlay_w/2):main_h/2-overlay_h/2`;
+      videoFilter = logoOverlay;
+    }
 
     ffmpegArgs.push('-vf', videoFilter);
 
@@ -474,6 +510,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         await ffmpeg.deleteFile(audioFileName).catch(() => {});
         await ffmpeg.deleteFile(imageFileName).catch(() => {});
         await ffmpeg.deleteFile(outputFileName).catch(() => {});
+        if (logoFileName) {
+          await ffmpeg.deleteFile(logoFileName).catch(() => {});
+        }
       } catch (cleanupError) {
         console.warn('Simple cleanup failed, continuing...', cleanupError);
       }
@@ -507,6 +546,14 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       await ffmpeg.deleteFile(outputFileName);
       console.log('Cleaned output file');
     } catch (e) { console.warn('Failed to clean output file'); }
+    
+    // Clean up logo file if it was used
+    if (logoFileName) {
+      try {
+        await ffmpeg.deleteFile(logoFileName);
+        console.log('Cleaned logo file');
+      } catch (e) { console.warn('Failed to clean logo file'); }
+    }
 
     // Increment processed count and cleanup memory more frequently to prevent crashes
     processedCount++;

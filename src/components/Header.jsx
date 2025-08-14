@@ -32,8 +32,8 @@ const Header = () => {
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(64, 64, 64, 0.8)',
-          paddingLeft: 'calc((100vw - 500px) / 2 - 247px)', // Move logo 2px to the left (from -245px to -247px)
-          paddingRight: 'calc((100vw - 500px) / 2 - 269px)', // Move profile icon 7px to the left (from -262px to -269px)
+          paddingLeft: 'calc((100vw - 500px) / 2 - 247px)', // Logo position
+          paddingRight: 'calc((100vw - 500px) / 2 - 279px)', // Move user icon 10px left (from -269px to -279px)
         }}
       >
         {/* TypeBeatz Logo - Clickable */}

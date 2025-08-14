@@ -158,13 +158,10 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Right side - Settings Button */}
-        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 280px)' }}>
+        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 277px)' }}> {/* Move 3px to the right (from -280px to -277px) */}
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
             className="flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0"
-            style={{
-              marginRight: '-3px' // Fine-tune positioning
-            }}
             whileHover={{ 
               scale: 1.05,
               rotate: 360

@@ -6,7 +6,7 @@ channel = "stable-25_05"
 packages = ["unzip"]
 
 [workflows]
-runButton = "Fix and Start Dev Server"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
