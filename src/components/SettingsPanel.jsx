@@ -33,13 +33,40 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   const handleLogoUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
-      // Convert file to base64 for storage
+      // Create image element to load and resize the uploaded image
+      const img = new Image();
       const reader = new FileReader();
+      
       reader.onload = (e) => {
-        const base64Data = e.target.result;
-        setLocalLogoFile(base64Data);
-        setLocalLogoFileName(file.name);
+        img.onload = () => {
+          // Create canvas for resizing
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Calculate height maintaining aspect ratio for 200px width
+          const targetWidth = 200;
+          const aspectRatio = img.height / img.width;
+          const targetHeight = targetWidth * aspectRatio;
+          
+          // Set canvas dimensions
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          
+          // Draw and resize the image
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+          
+          // Convert resized image to base64
+          const resizedBase64 = canvas.toDataURL('image/png', 0.9);
+          
+          console.log(`Logo resized from ${img.width}x${img.height} to ${targetWidth}x${targetHeight}`);
+          
+          setLocalLogoFile(resizedBase64);
+          setLocalLogoFileName(file.name);
+        };
+        
+        img.src = e.target.result;
       };
+      
       reader.readAsDataURL(file);
     }
   };

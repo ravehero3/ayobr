@@ -440,8 +440,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     
     // Add logo overlay if logo file is available
     if (logoFileName) {
-      // Logo positioned at 27% from left edge, vertically centered, scaled to 80px height
-      const logoOverlay = `[0:v]${videoFilter}[bg];[2:v]scale=-1:80[logo];[bg][logo]overlay=(main_w*0.27-overlay_w/2):main_h/2-overlay_h/2`;
+      // Logo positioned at 27% from left edge, vertically centered, maintain aspect ratio
+      // Since logo is already resized to 200px width, we scale it appropriately for 1920px video
+      const logoOverlay = `[0:v]${videoFilter}[bg];[2:v]scale=w=200:h=-1[logo];[bg][logo]overlay=(main_w*0.27-overlay_w/2):main_h/2-overlay_h/2`;
       videoFilter = logoOverlay;
     }
 
