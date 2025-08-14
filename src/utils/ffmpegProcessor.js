@@ -289,21 +289,6 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       }
     });
 
-    // Fixed file reading to prevent ArrayBuffer detachment
-    const readFileAsArrayBuffer = async (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          // Create a copy of the ArrayBuffer to prevent detachment
-          const arrayBuffer = event.target.result;
-          const uint8Array = new Uint8Array(arrayBuffer);
-          resolve(uint8Array);
-        };
-        reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
-        reader.readAsArrayBuffer(file);
-      });
-    };
-
     // Enhanced file reading with proper error handling
     const getCachedFileData = async (file, type) => {
       const cacheKey = `${file.name}_${file.size}_${file.lastModified}`;
@@ -458,7 +443,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Build video filter with optional logo overlay
     let videoFilter;
-    
+
     if (logoFileName) {
       // Complex filter with logo overlay - more robust approach
       videoFilter = `[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}[bg];[2:v]scale=200:-1:flags=lanczos[logo];[bg][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2:format=auto`;
@@ -485,123 +470,69 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     console.log('FFmpeg command args:', ffmpegArgs);
 
-    try {
-      console.log('Starting FFmpeg execution with command:', ffmpegArgs);
+    // Execute FFmpeg command with timeout protection
+    const execPromise = ffmpeg.exec(ffmpegArgs);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('FFmpeg execution timeout')), 120000); // 2 minute timeout
+    });
 
-      // Execute FFmpeg command with timeout protection
-      const execPromise = ffmpeg.exec(ffmpegArgs);
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 120000); // 2 minute timeout
-      });
+    await Promise.race([execPromise, timeoutPromise]);
 
-      await Promise.race([execPromise, timeoutPromise]);
+    // Disable progress callback to prevent issues during cleanup
+    progressCallbackActive = false;
 
-      // Disable progress callback to prevent issues during cleanup
-      progressCallbackActive = false;
-      console.log('FFmpeg command executed successfully');
+    console.log('FFmpeg execution completed successfully');
 
-      // Wait for filesystem to sync
-      await new Promise(resolve => setTimeout(resolve, 500));
+    // Add small delay to ensure filesystem is ready
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Verify output file was created
-      let outputData = null;
+    // Read the generated video file with retries
+    console.log('Reading output file...');
+
+    let data;
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries) {
       try {
-        console.log('Reading output file...');
-        outputData = await ffmpeg.readFile(outputFileName);
-        
-        if (!outputData || outputData.length === 0) {
+        // Check if output file exists first
+        const outputExists = await ffmpeg.exists(outputFileName);
+        console.log(`Output file ${outputFileName} exists:`, outputExists);
+
+        if (!outputExists) {
+          throw new Error('Output file was not created by FFmpeg');
+        }
+
+        data = await ffmpeg.readFile(outputFileName);
+        console.log('Successfully read output file, size:', data.length);
+
+        if (data && data.length > 0) {
+          break; // Success!
+        } else {
           throw new Error('Output file is empty');
         }
-
-        console.log('Output file read successfully, size:', outputData.length, 'bytes');
       } catch (readError) {
-        console.error('Failed to read output file:', readError);
-        
-        // List files for debugging
-        try {
-          const files = await ffmpeg.listDir('/');
-          console.log('Files after FFmpeg execution:', files);
-          const rootFiles = files.filter(f => !f.isDir).map(f => f.name);
-          console.log('Non-directory files in root:', rootFiles);
-          
-          // Check if output file exists
-          const outputExists = files.some(f => f.name === outputFileName);
-          console.log(`Output file ${outputFileName} exists:`, outputExists);
-          
-          if (outputExists) {
-            // Try reading with different method
-            try {
-              outputData = ffmpeg.FS('readFile', outputFileName);
-              console.log('Alternative file read successful, size:', outputData.length);
-            } catch (altError) {
-              console.error('Alternative file read failed:', altError);
-              throw new Error('FFmpeg executed but output file could not be read');
-            }
-          } else {
-            throw new Error('FFmpeg executed but output file was not created');
+        retryCount++;
+        console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError);
+
+        if (retryCount < maxRetries) {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } else {
+          // Final attempt failed - list files for debugging
+          try {
+            const debugFiles = await ffmpeg.listDir('/');
+            console.log('Files in FFmpeg filesystem after error:', debugFiles);
+          } catch (listError) {
+            console.log('Cannot list files:', listError);
           }
-        } catch (listError) {
-          console.error('Cannot list files:', listError);
-          throw new Error('FFmpeg executed but filesystem is inaccessible');
+
+          throw new Error(`FFmpeg executed but output file is inaccessible after ${maxRetries} attempts`);
         }
-      }
-
-    } catch (error) {
-      console.error('FFmpeg execution failed:', error);
-      console.error('FFmpeg command that failed:', ffmpegArgs);
-
-      // Check for memory access errors that require FFmpeg restart
-      const isMemoryError = error.message && (
-        error.message.includes('memory access out of bounds') ||
-        error.message.includes('RuntimeError') ||
-        error.message.includes('memory')
-      );
-
-      if (isMemoryError) {
-        console.log('Memory error detected, restarting FFmpeg for next attempt...');
-        try {
-          await forceStopAllProcesses();
-          // FFmpeg will be reinitialized on next call
-        } catch (restartError) {
-          console.warn('Failed to restart FFmpeg:', restartError);
-        }
-      }
-
-      // List files for debugging
-      try {
-        const files = await ffmpeg.listDir('/');
-        console.log('Files in FFmpeg filesystem after error:', files);
-      } catch (listError) {
-        console.log('Cannot list files after error:', listError);
-      }
-
-      // Simple cleanup without complex filesystem operations
-      try {
-        console.log('Attempting cleanup after error...');
-        await ffmpeg.deleteFile(audioFileName).catch(() => {});
-        await ffmpeg.deleteFile(imageFileName).catch(() => {});
-        await ffmpeg.deleteFile(outputFileName).catch(() => {});
-        if (logoFileName) {
-          await ffmpeg.deleteFile(logoFileName).catch(() => {});
-        }
-      } catch (cleanupError) {
-        console.warn('Cleanup failed, continuing...', cleanupError);
-      }
-
-      // Provide more specific error message for memory issues
-      if (isMemoryError) {
-        throw new Error(`FFmpeg memory error - restarting for next attempt: ${error.message || 'Unknown error'}`);
-      } else {
-        throw new Error(`FFmpeg processing failed: ${error.message || 'Unknown error'}`);
       }
     }
 
     console.log('FFmpeg execution completed successfully');
-
-    // Verify the data is valid
-    if (!outputData || outputData.length === 0) {
-      throw new Error('Generated video file is empty or invalid');
-    }
 
     // Final progress update to 100%
     if (onProgress && !hasCompleted) {
@@ -634,7 +565,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     }
 
     // Return a new Uint8Array to ensure data integrity
-    return new Uint8Array(outputData);
+    return new Uint8Array(data);
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);
