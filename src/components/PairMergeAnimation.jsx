@@ -152,12 +152,22 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
     } else if (videoSettings.background === 'black') {
       return { backgroundColor: 'black' };
     } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
-      return {
-        backgroundImage: `url(${URL.createObjectURL(videoSettings.customBackground)})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      };
+      try {
+        // Check if it's already a data URL (base64) or needs to be converted from File object
+        const backgroundUrl = typeof videoSettings.customBackground === 'string' 
+          ? videoSettings.customBackground 
+          : URL.createObjectURL(videoSettings.customBackground);
+        
+        return {
+          backgroundImage: `url(${backgroundUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        };
+      } catch (error) {
+        console.warn('Error creating background URL:', error);
+        return { backgroundColor: 'black' }; // fallback on error
+      }
     }
     return { backgroundColor: 'black' }; // fallback
   };
