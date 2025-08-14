@@ -357,10 +357,10 @@ export const useFFmpeg = () => {
       }
 
       // Check if this is a restart-related error that we can retry
-      const errorMessage = error && error.message ? error.message : '';
-      const isRestartableError = errorMessage.includes('restarting for next attempt') || 
-                               errorMessage.includes('terminate') ||
-                               errorMessage.includes('timeout');
+      const errorMsg = error && error.message ? error.message : '';
+      const isRestartableError = errorMsg.includes('restarting for next attempt') || 
+                               errorMsg.includes('terminate') ||
+                               errorMsg.includes('timeout');
       
       if (isRestartableError && !isCancelling) {
         console.log('Detected restartable error, FFmpeg will reinitialize for next video');
@@ -374,14 +374,14 @@ export const useFFmpeg = () => {
         });
       } else {
         // Set error state for non-restartable errors
-        const errorMessage = error && typeof error === 'object' && error.message ? error.message : 
-                            error && typeof error === 'string' ? error : 'Unknown error';
+        const finalErrorMessage = error && typeof error === 'object' && error.message ? error.message : 
+                                 error && typeof error === 'string' ? error : 'Unknown error';
         setVideoGenerationState(pair.id, {
           isGenerating: false,
           progress: 0,
           isComplete: false,
           video: null,
-          error: errorMessage
+          error: finalErrorMessage
         });
       }
 
