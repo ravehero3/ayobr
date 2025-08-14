@@ -214,8 +214,16 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Completion checkmark */}
-                          {isComplete && (
+                          {/* Video Preview or Completion checkmark */}
+                          {isComplete && generatedVideo ? (
+                            <video
+                              src={generatedVideo.url}
+                              className="absolute inset-0 w-full h-full object-contain rounded"
+                              controls
+                              preload="metadata"
+                              style={{ background: 'black' }}
+                            />
+                          ) : isComplete ? (
                             <div className="absolute inset-0 flex items-center justify-center">
                               <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +231,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                 </svg>
                               </div>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </div>
 
