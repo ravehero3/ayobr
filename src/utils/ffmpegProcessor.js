@@ -215,7 +215,25 @@ export const initializeFFmpeg = async () => {
 };
 
 export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel, videoSettings = null) => {
+  // Validate input files
+  if (!audioFile || !audioFile.name) {
+    throw new Error('Invalid audio file provided');
+  }
+  
+  if (!imageFile || !imageFile.name) {
+    throw new Error('Invalid image file provided');
+  }
+  
+  if (audioFile.size === 0) {
+    throw new Error(`Audio file ${audioFile.name} is empty`);
+  }
+  
+  if (imageFile.size === 0) {
+    throw new Error(`Image file ${imageFile.name} is empty`);
+  }
+
   console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
+  console.log('File sizes - Audio:', audioFile.size, 'Image:', imageFile.size);
   console.log('Video settings:', videoSettings);
 
   let audioFileName = null;
@@ -257,56 +275,77 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       }
     });
 
-    // Ultra-optimized file reading with enhanced caching
+    // Fixed file reading to prevent ArrayBuffer detachment
+    const readFileAsArrayBuffer = async (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          // Create a copy of the ArrayBuffer to prevent detachment
+          const arrayBuffer = event.target.result;
+          const uint8Array = new Uint8Array(arrayBuffer);
+          resolve(uint8Array);
+        };
+        reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+        reader.readAsArrayBuffer(file);
+      });
+    };
+
+    // Enhanced file reading with proper error handling
     const getCachedFileData = async (file, type) => {
       const cacheKey = `${file.name}_${file.size}_${file.lastModified}`;
 
       if (fileCache.has(cacheKey)) {
-        return fileCache.get(cacheKey);
+        const cachedData = fileCache.get(cacheKey);
+        // Return a copy to prevent detachment issues
+        return new Uint8Array(cachedData);
       }
 
-      const data = await fetchFile(file);
+      console.log(`Reading ${type} file:`, file.name, 'Size:', file.size);
+      
+      let data;
+      try {
+        // Use custom file reader instead of fetchFile to avoid detachment
+        data = await readFileAsArrayBuffer(file);
+        
+        if (!data || data.length === 0) {
+          throw new Error(`File ${file.name} is empty or could not be read`);
+        }
+        
+        console.log(`Successfully read ${type} file:`, file.name, 'Data size:', data.length);
+      } catch (error) {
+        console.error(`Error reading ${type} file:`, error);
+        throw new Error(`Failed to read ${type} file: ${file.name}`);
+      }
 
-      // Manage cache size with LRU eviction
+      // Cache the data
       if (fileCache.size >= maxCacheSize) {
         const firstKey = fileCache.keys().next().value;
         fileCache.delete(firstKey);
       }
 
       fileCache.set(cacheKey, data);
-      return data;
+      return new Uint8Array(data); // Return a copy
     };
 
-    // Pre-process image if not cached
-    const getOptimizedImageData = async (file) => {
-      const cacheKey = `opt_${file.name}_${file.size}_${file.lastModified}`;
-
-      if (processedImageCache.has(cacheKey)) {
-        return processedImageCache.get(cacheKey);
-      }
-
-      const data = await getCachedFileData(file, 'image');
-
-      // Cache the processed image data
-      if (processedImageCache.size >= maxCacheSize) {
-        const firstKey = processedImageCache.keys().next().value;
-        processedImageCache.delete(firstKey);
-      }
-
-      processedImageCache.set(cacheKey, data);
-      return data;
-    };
-
-    // Use optimized data loading
+    // Use the fixed data loading
     const [audioData, imageData] = await Promise.all([
       getCachedFileData(audioFile, 'audio'),
-      getOptimizedImageData(imageFile)
+      getCachedFileData(imageFile, 'image')
     ]);
 
     // Use unique filenames to avoid conflicts
     audioFileName = `audio_${timestamp}.mp3`;
     imageFileName = `image_${timestamp}.jpg`;
     outputFileName = `output_${timestamp}.mp4`;
+
+    // Validate data before writing
+    if (!audioData || audioData.length === 0) {
+      throw new Error(`Audio file ${audioFile.name} is empty or could not be read`);
+    }
+    
+    if (!imageData || imageData.length === 0) {
+      throw new Error(`Image file ${imageFile.name} is empty or could not be read`);
+    }
 
     // Write files to FFmpeg filesystem with error checking
     try {
@@ -315,15 +354,23 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         audioSize: audioData.length
       });
 
-      await ffmpeg.writeFile(imageFileName, imageData);
-      await ffmpeg.writeFile(audioFileName, audioData);
+      // Ensure we have fresh copies for FFmpeg
+      const audioBuffer = new Uint8Array(audioData);
+      const imageBuffer = new Uint8Array(imageData);
+
+      await ffmpeg.writeFile(imageFileName, imageBuffer);
+      await ffmpeg.writeFile(audioFileName, audioBuffer);
 
       // Verify files were written successfully
       const imageWritten = await ffmpeg.readFile(imageFileName);
       const audioWritten = await ffmpeg.readFile(audioFileName);
 
-      if (imageWritten.length === 0 || audioWritten.length === 0) {
-        throw new Error('Failed to write input files to FFmpeg FS');
+      if (!imageWritten || imageWritten.length === 0) {
+        throw new Error(`Failed to write image file ${imageFileName} to FFmpeg FS`);
+      }
+      
+      if (!audioWritten || audioWritten.length === 0) {
+        throw new Error(`Failed to write audio file ${audioFileName} to FFmpeg FS`);
       }
 
       console.log('Files written successfully to FFmpeg FS');
