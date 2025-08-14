@@ -367,12 +367,14 @@ export const useAppStore = create((set, get) => ({
     return { logoSettings: newLogoSettings };
   }),
 
-  clearLogo: () => set(state => ({
-    logoSettings: { 
+  clearLogo: () => set(state => {
+    const newLogoSettings = { 
       ...state.logoSettings, 
       logoFile: null, 
       logoFileName: null,
       useLogoInVideos: false
-    }
-  }))
+    };
+    saveToLocalStorage('logoSettings', newLogoSettings);
+    return { logoSettings: newLogoSettings };
+  })
 }));

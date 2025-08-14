@@ -13,14 +13,15 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     setVideoQuality,
     logoSettings,
     setLogoFile,
-    setUseLogoInVideos
+    setUseLogoInVideos,
+    clearLogo
   } = useAppStore();
 
   const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
   const [selectedResolution, setSelectedResolution] = useState(videoSettings.quality || 'fullhd');
-  const [localLogoFile, setLocalLogoFile] = useState(logoSettings.logoFile);
-  const [localLogoFileName, setLocalLogoFileName] = useState(logoSettings.logoFileName);
-  const [localUseLogoInVideos, setLocalUseLogoInVideos] = useState(logoSettings.useLogoInVideos);
+  const [localLogoFile, setLocalLogoFile] = useState(logoSettings.logoFile || null);
+  const [localLogoFileName, setLocalLogoFileName] = useState(logoSettings.logoFileName || null);
+  const [localUseLogoInVideos, setLocalUseLogoInVideos] = useState(logoSettings.useLogoInVideos || false);
 
   const handleBackgroundChange = (background) => {
     setSelectedBackground(background);
@@ -102,9 +103,9 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     // Reset selections to current values
     setSelectedBackground(videoSettings.background || 'black');
     setSelectedResolution(videoSettings.quality || 'fullhd');
-    setLocalLogoFile(logoSettings.logoFile);
-    setLocalLogoFileName(logoSettings.logoFileName);
-    setLocalUseLogoInVideos(logoSettings.useLogoInVideos);
+    setLocalLogoFile(logoSettings.logoFile || null);
+    setLocalLogoFileName(logoSettings.logoFileName || null);
+    setLocalUseLogoInVideos(logoSettings.useLogoInVideos || false);
     onClose();
   };
 
@@ -235,7 +236,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 />
               </motion.div>
 
-              {/* Show checkbox when logo is uploaded */}
+              {/* Show checkbox and remove button when logo is uploaded */}
               {localLogoFile && localLogoFileName && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -245,53 +246,85 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                     marginTop: '12px',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'space-between',
                     gap: '8px'
                   }}
                 >
-                  <motion.div
-                    className="cursor-pointer"
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <motion.div
+                      className="cursor-pointer"
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '4px',
+                        border: '2px solid rgba(59, 130, 246, 0.6)',
+                        background: localUseLogoInVideos 
+                          ? 'rgba(59, 130, 246, 0.8)' 
+                          : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease'
+                      }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
+                    >
+                      {localUseLogoInVideos && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            background: 'white',
+                            borderRadius: '2px'
+                          }}
+                        />
+                      )}
+                    </motion.div>
+                    <div 
+                      className="cursor-pointer" 
+                      onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
+                      style={{
+                        color: '#e0e0e0',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        userSelect: 'none'
+                      }}
+                    >
+                      Use logo in videos
+                    </div>
+                  </div>
+                  <motion.button
+                    onClick={() => {
+                      setLocalLogoFile(null);
+                      setLocalLogoFileName(null);
+                      setLocalUseLogoInVideos(false);
+                      clearLogo();
+                    }}
                     style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '4px',
-                      border: '2px solid rgba(59, 130, 246, 0.6)',
-                      background: localUseLogoInVideos 
-                        ? 'rgba(59, 130, 246, 0.8)' 
-                        : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      color: 'rgba(239, 68, 68, 0.8)',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
                       transition: 'all 0.2s ease'
                     }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
-                  >
-                    {localUseLogoInVideos && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        style={{
-                          width: '12px',
-                          height: '12px',
-                          background: 'white',
-                          borderRadius: '2px'
-                        }}
-                      />
-                    )}
-                  </motion.div>
-                  <div 
-                    className="cursor-pointer" 
-                    onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
-                    style={{
-                      color: '#e0e0e0',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      userSelect: 'none'
+                    whileHover={{
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      borderColor: 'rgba(239, 68, 68, 0.5)'
                     }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    Use logo in videos
-                  </div>
+                    Remove
+                  </motion.button>
                 </motion.div>
               )}
             </div>
