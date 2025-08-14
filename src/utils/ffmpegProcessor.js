@@ -457,12 +457,14 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     }
 
     // Build video filter with optional logo overlay
-    let videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
-
-    // Add logo overlay if logo file is available - simplified version
+    let videoFilter;
+    
     if (logoFileName) {
-      // Simpler overlay: scale logo and position it
-      videoFilter = `[0:v]${videoFilter}[bg];[2:v]scale=200:-1[logo];[bg][logo]overlay=x=(main_w*0.27-overlay_w/2):y=(main_h-overlay_h)/2`;
+      // Complex filter with logo overlay - more robust approach
+      videoFilter = `[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}[bg];[2:v]scale=200:-1:flags=lanczos[logo];[bg][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2:format=auto`;
+    } else {
+      // Simple filter without logo
+      videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
     }
 
     // Simplified parameters that are more likely to work
@@ -486,8 +488,13 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     try {
       console.log('Starting FFmpeg execution with command:', ffmpegArgs);
 
-      // Execute FFmpeg command
-      await ffmpeg.exec(ffmpegArgs);
+      // Execute FFmpeg command with timeout protection
+      const execPromise = ffmpeg.exec(ffmpegArgs);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 120000); // 2 minute timeout
+      });
+
+      await Promise.race([execPromise, timeoutPromise]);
 
       // Disable progress callback to prevent issues during cleanup
       progressCallbackActive = false;
@@ -543,6 +550,23 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       console.error('FFmpeg execution failed:', error);
       console.error('FFmpeg command that failed:', ffmpegArgs);
 
+      // Check for memory access errors that require FFmpeg restart
+      const isMemoryError = error.message && (
+        error.message.includes('memory access out of bounds') ||
+        error.message.includes('RuntimeError') ||
+        error.message.includes('memory')
+      );
+
+      if (isMemoryError) {
+        console.log('Memory error detected, restarting FFmpeg for next attempt...');
+        try {
+          await forceStopAllProcesses();
+          // FFmpeg will be reinitialized on next call
+        } catch (restartError) {
+          console.warn('Failed to restart FFmpeg:', restartError);
+        }
+      }
+
       // List files for debugging
       try {
         const files = await ffmpeg.listDir('/');
@@ -564,7 +588,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.warn('Cleanup failed, continuing...', cleanupError);
       }
 
-      throw new Error(`FFmpeg processing failed: ${error.message || 'Unknown error'}`);
+      // Provide more specific error message for memory issues
+      if (isMemoryError) {
+        throw new Error(`FFmpeg memory error - restarting for next attempt: ${error.message || 'Unknown error'}`);
+      } else {
+        throw new Error(`FFmpeg processing failed: ${error.message || 'Unknown error'}`);
+      }
     }
 
     console.log('FFmpeg execution completed successfully');
