@@ -467,22 +467,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     } catch (error) {
       console.error('FFmpeg execution failed:', error);
       console.error('FFmpeg command that failed:', ffmpegArgs);
-      console.error('FFmpeg error stack:', error?.stack);
-
-      // Clean up any temporary files that might be left behind
+      
+      // Simple cleanup without complex filesystem operations
       try {
-        const files = ffmpeg.FS('readdir', '/');
-        files.forEach(file => {
-          if (file.includes(timestamp) || file.startsWith('image_') || file.startsWith('audio_') || file.startsWith('output_')) {
-            try {
-              ffmpeg.FS('unlink', file);
-            } catch (cleanupError) {
-              console.warn('Failed to clean up file:', file, cleanupError);
-            }
-          }
-        });
+        console.log('Attempting simple cleanup...');
+        await ffmpeg.deleteFile(audioFileName).catch(() => {});
+        await ffmpeg.deleteFile(imageFileName).catch(() => {});
+        await ffmpeg.deleteFile(outputFileName).catch(() => {});
       } catch (cleanupError) {
-        console.warn('Error during cleanup:', cleanupError);
+        console.warn('Simple cleanup failed, continuing...', cleanupError);
       }
 
       throw new Error(`FFmpeg processing failed: ${error.message || 'Unknown error'}`);
@@ -499,19 +492,21 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       throw new Error('Generated video file is empty or invalid');
     }
 
-    // Batch cleanup for faster I/O
-    const cleanupPromises = [
-      ffmpeg.deleteFile(audioFileName).catch(() => {}),
-      ffmpeg.deleteFile(imageFileName).catch(() => {}),
-      ffmpeg.deleteFile(outputFileName).catch(() => {})
-    ];
-
-    // Clean up logo file if it was used
-    if (logoFileName) {
-      cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
-    }
-
-    await Promise.allSettled(cleanupPromises);
+    // Simple sequential cleanup
+    try {
+      await ffmpeg.deleteFile(audioFileName);
+      console.log('Cleaned audio file');
+    } catch (e) { console.warn('Failed to clean audio file'); }
+    
+    try {
+      await ffmpeg.deleteFile(imageFileName);
+      console.log('Cleaned image file');
+    } catch (e) { console.warn('Failed to clean image file'); }
+    
+    try {
+      await ffmpeg.deleteFile(outputFileName);
+      console.log('Cleaned output file');
+    } catch (e) { console.warn('Failed to clean output file'); }
 
     // Increment processed count and cleanup memory more frequently to prevent crashes
     processedCount++;

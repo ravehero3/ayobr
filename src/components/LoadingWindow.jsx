@@ -8,22 +8,31 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
   // Function to get video background style based on user settings
   const getVideoBackgroundStyle = () => {
-    if (videoSettings.background === 'white') {
+    // Safely access videoSettings with fallback
+    const settings = videoSettings || {};
+    const background = settings.background || 'black';
+    
+    if (background === 'white') {
       return { backgroundColor: 'white' };
-    } else if (videoSettings.background === 'black') {
+    } else if (background === 'black') {
       return { backgroundColor: 'black' };
-    } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
-      // Check if it's already a data URL (base64) or needs to be converted from File object
-      const backgroundUrl = typeof videoSettings.customBackground === 'string' 
-        ? videoSettings.customBackground 
-        : URL.createObjectURL(videoSettings.customBackground);
-      
-      return {
-        backgroundImage: `url(${backgroundUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      };
+    } else if (background === 'custom' && settings.customBackground) {
+      try {
+        // Check if it's already a data URL (base64) or needs to be converted from File object
+        const backgroundUrl = typeof settings.customBackground === 'string' 
+          ? settings.customBackground 
+          : URL.createObjectURL(settings.customBackground);
+        
+        return {
+          backgroundImage: `url(${backgroundUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        };
+      } catch (error) {
+        console.warn('Error creating background URL:', error);
+        return { backgroundColor: 'black' }; // fallback on error
+      }
     }
     return { backgroundColor: 'black' }; // fallback
   };
