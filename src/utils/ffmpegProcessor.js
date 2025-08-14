@@ -178,28 +178,24 @@ export const initializeFFmpeg = async () => {
       }
 
       if (!isLoaded) {
-        // Simplified initialization optimized for Replit web environment
+        // Try loading FFmpeg with fallback options
         try {
-          console.log('Initializing FFmpeg with simplified approach...');
-
-          // Use a simpler load approach that works better in web environments
-          await ffmpeg.load({
-            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-            wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-            workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
-          });
-          console.log('FFmpeg loaded successfully with external CDN');
-
-        } catch (cdnError) {
-          console.error('External CDN loading failed:', cdnError);
+          console.log('Trying default FFmpeg load...');
+          await ffmpeg.load();
+          console.log('FFmpeg loaded successfully with default method');
+        } catch (defaultError) {
+          console.error('Default FFmpeg loading failed:', defaultError);
 
           try {
-            console.log('Trying default CDN fallback...');
-            // Try the default load method as fallback
-            await ffmpeg.load();
-            console.log('FFmpeg loaded successfully with default CDN');
-          } catch (fallbackError) {
-            console.error('All FFmpeg loading methods failed:', fallbackError);
+            console.log('Trying external CDN...');
+            await ffmpeg.load({
+              coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+              wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+              workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
+            });
+            console.log('FFmpeg loaded successfully with external CDN');
+          } catch (cdnError) {
+            console.error('External CDN loading failed:', cdnError);
             throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
           }
         }
@@ -434,7 +430,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Create 1920x1080 video with image centered and 20px white space above/below
     console.log('Executing FFmpeg command...');
 
-    // Build FFmpeg command array
+    // Build simplified FFmpeg command for better compatibility
     let ffmpegArgs = [
       '-loop', '1',
       '-i', imageFileName,
@@ -446,10 +442,6 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       ffmpegArgs.push('-i', logoFileName);
     }
 
-    // Map inputs
-    ffmpegArgs.push('-map', '0:v');  // Map video from first input (image)
-    ffmpegArgs.push('-map', '1:a');  // Map audio from second input (audio file)
-
     // Get background color from settings (default to black)
     const backgroundColor = (videoSettings && videoSettings.background) ? videoSettings.background : 'black';
 
@@ -459,73 +451,74 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Add logo overlay if logo file is available
     if (logoFileName) {
       // Logo positioned at 27% from left edge, vertically centered, maintain aspect ratio
-      // Since logo is already resized to 200px width, we scale it appropriately for 1920px video
       const logoOverlay = `[0:v]${videoFilter}[bg];[2:v]scale=w=200:h=-1[logo];[bg][logo]overlay=(main_w*0.27-overlay_w/2):main_h/2-overlay_h/2`;
       videoFilter = logoOverlay;
     }
 
-    ffmpegArgs.push('-vf', videoFilter);
-
-    // Ultra-optimized parameters for maximum speed
-      ffmpegArgs.push(
-        '-threads', '0',               // Use all available CPU cores
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',        // Fastest encoding preset
-        '-tune', 'zerolatency',        // Optimize for minimal latency
-        '-profile:v', 'baseline',      // Simpler profile for faster encoding
-        '-level:v', '3.0',             // Lower level for faster processing
-        '-crf', '30',                  // Even lower quality for maximum speed
-        '-r', '10',                    // Very low frame rate for speed
-        '-g', '10',                    // Very small keyframe interval
-        '-refs', '1',                  // Single reference frame for speed
-        '-me_method', 'dia',           // Fastest motion estimation
-        '-subq', '1',                  // Fastest subpixel estimation
-        '-trellis', '0',               // Disable trellis quantization
-        '-aq-mode', '0',               // Disable adaptive quantization
-        '-fast-pskip', '1',            // Enable fast P-frame skipping
-        '-partitions', 'none',         // Disable partitions for speed
-        '-flags', '+cgop',             // Closed GOP for faster seeking
-        '-bf', '0',                    // No B-frames for speed
-        '-wpredp', '0',                // Disable weighted prediction
-        '-mixed-refs', '0',            // Disable mixed references
-        '-8x8dct', '0',                // Disable 8x8 DCT
-        '-fast-first-pass', '1',       // Fast first pass
-        '-c:a', 'aac',                 // Use AAC codec for audio
-        '-b:a', '64k',                 // Even lower audio bitrate
-        '-ar', '22050',                // Lower sample rate for speed
-        '-ac', '1',                    // Mono audio for speed
-        '-pix_fmt', 'yuv420p',
-        '-movflags', '+faststart+frag_keyframe+empty_moov', // Optimize for streaming
-        '-shortest',
-        '-t', audioDuration.toString(),
-        '-avoid_negative_ts', 'make_zero',
-        '-f', 'mp4',                   // Explicit format
-        '-y',
-        outputFileName
-      );
+    // Simplified parameters that are more likely to work
+    ffmpegArgs.push(
+      '-vf', videoFilter,
+      '-c:v', 'libx264',
+      '-preset', 'fast',             // Changed from ultrafast to fast
+      '-crf', '23',                  // Standard quality
+      '-pix_fmt', 'yuv420p',
+      '-c:a', 'aac',
+      '-b:a', '128k',                // Standard audio bitrate
+      '-ar', '44100',                // Standard sample rate
+      '-shortest',
+      '-t', audioDuration.toString(),
+      '-y',                          // Overwrite output file
+      outputFileName
+    );
 
     console.log('FFmpeg command args:', ffmpegArgs);
 
     try {
-      // Reduced timeout for faster failure detection
-      const ffmpegPromise = ffmpeg.exec(ffmpegArgs);
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout after 30 seconds')), 30000);
-      });
-
-      console.log('Starting FFmpeg execution with optimized settings...');
-      await Promise.race([ffmpegPromise, timeoutPromise]);
+      console.log('Starting FFmpeg execution with command:', ffmpegArgs);
+      
+      // Execute FFmpeg command
+      await ffmpeg.exec(ffmpegArgs);
 
       // Disable progress callback to prevent issues during cleanup
       progressCallbackActive = false;
       console.log('FFmpeg command executed successfully');
+
+      // Verify output file was created
+      try {
+        const outputCheck = await ffmpeg.readFile(outputFileName);
+        if (!outputCheck || outputCheck.length === 0) {
+          throw new Error('Output file was created but is empty');
+        }
+        console.log('Output file verified, size:', outputCheck.length);
+      } catch (verifyError) {
+        console.error('Output file verification failed:', verifyError);
+        
+        // List files for debugging
+        try {
+          const files = await ffmpeg.listDir('/');
+          console.log('Files after FFmpeg execution:', files);
+        } catch (listError) {
+          console.log('Cannot list files:', listError);
+        }
+        
+        throw new Error('FFmpeg executed but output file was not created properly');
+      }
+      
     } catch (error) {
       console.error('FFmpeg execution failed:', error);
       console.error('FFmpeg command that failed:', ffmpegArgs);
       
+      // List files for debugging
+      try {
+        const files = await ffmpeg.listDir('/');
+        console.log('Files in FFmpeg filesystem after error:', files);
+      } catch (listError) {
+        console.log('Cannot list files after error:', listError);
+      }
+      
       // Simple cleanup without complex filesystem operations
       try {
-        console.log('Attempting simple cleanup...');
+        console.log('Attempting cleanup after error...');
         await ffmpeg.deleteFile(audioFileName).catch(() => {});
         await ffmpeg.deleteFile(imageFileName).catch(() => {});
         await ffmpeg.deleteFile(outputFileName).catch(() => {});
@@ -533,7 +526,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           await ffmpeg.deleteFile(logoFileName).catch(() => {});
         }
       } catch (cleanupError) {
-        console.warn('Simple cleanup failed, continuing...', cleanupError);
+        console.warn('Cleanup failed, continuing...', cleanupError);
       }
 
       throw new Error(`FFmpeg processing failed: ${error.message || 'Unknown error'}`);
