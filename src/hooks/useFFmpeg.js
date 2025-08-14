@@ -68,7 +68,7 @@ export const useFFmpeg = () => {
           if (window.gc) {
             window.gc();
           }
-          
+
           // Small delay to allow cleanup to complete
           await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -96,7 +96,7 @@ export const useFFmpeg = () => {
 
           const promise = processPairAsync(pair).catch(error => {
             console.error(`Error in processPairAsync for pair ${pair.id}:`, error);
-            
+
             // Set error state for this specific pair
             setVideoGenerationState(pair.id, {
               isGenerating: false,
@@ -105,7 +105,7 @@ export const useFFmpeg = () => {
               video: null,
               error: error.message || 'Video generation failed'
             });
-            
+
             // Don't re-throw to prevent unhandled rejection
             return null;
           });
@@ -307,7 +307,7 @@ export const useFFmpeg = () => {
           error: null
         });
         console.log(`Video generation completed successfully for pair ${pair.id}`);
-        
+
         return video;
       } catch (stateError) {
         console.error(`Error setting final state for pair ${pair.id}:`, stateError);
@@ -361,7 +361,7 @@ export const useFFmpeg = () => {
       const isRestartableError = errorMsg.includes('restarting for next attempt') || 
                                errorMsg.includes('terminate') ||
                                errorMsg.includes('timeout');
-      
+
       if (isRestartableError && !isCancelling) {
         console.log('Detected restartable error, FFmpeg will reinitialize for next video');
         // Set the pair as not generating but don't mark it as error - it might work on retry
