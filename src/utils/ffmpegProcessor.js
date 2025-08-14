@@ -304,8 +304,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
       let data;
       try {
-        // Use custom file reader instead of fetchFile to avoid detachment
-        data = await readFileAsArrayBuffer(file);
+        // Use fetchFile instead of custom reader for better compatibility with FFmpeg
+        data = await fetchFile(file);
 
         if (!data || data.length === 0) {
           throw new Error(`File ${file.name} is empty or could not be read`);
@@ -524,42 +524,48 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     console.log('FFmpeg execution completed successfully');
 
     // Read the output file
-    const data = await ffmpeg.readFile(outputFileName);
-    console.log('Output file read successfully, size:', data.length, 'bytes');
+    let data;
+    try {
+      data = await ffmpeg.readFile(outputFileName);
+      console.log('Output file read successfully, size:', data.length, 'bytes');
+    } catch (readError) {
+      console.error('Failed to read output file:', readError);
+      throw new Error(`Failed to read generated video: ${readError.message}`);
+    }
 
     // Verify the data is valid
     if (!data || data.length === 0) {
       throw new Error('Generated video file is empty or invalid');
     }
 
+    // Final progress update to 100%
+    if (onProgress && !hasCompleted) {
+      onProgress(100);
+      hasCompleted = true;
+    }
+
     // Simple sequential cleanup
     try {
       await ffmpeg.deleteFile(audioFileName);
       console.log('Cleaned audio file');
-    } catch (e) { console.warn('Failed to clean audio file'); }
+    } catch (e) { console.warn('Failed to clean audio file:', e.message); }
     
     try {
       await ffmpeg.deleteFile(imageFileName);
       console.log('Cleaned image file');
-    } catch (e) { console.warn('Failed to clean image file'); }
+    } catch (e) { console.warn('Failed to clean image file:', e.message); }
     
     try {
       await ffmpeg.deleteFile(outputFileName);
       console.log('Cleaned output file');
-    } catch (e) { console.warn('Failed to clean output file'); }
+    } catch (e) { console.warn('Failed to clean output file:', e.message); }
     
     // Clean up logo file if it was used
     if (logoFileName) {
       try {
         await ffmpeg.deleteFile(logoFileName);
         console.log('Cleaned logo file');
-      } catch (e) { console.warn('Failed to clean logo file'); }
-    }
-
-    // Increment processed count and cleanup memory more frequently to prevent crashes
-    processedCount++;
-    if (processedCount % 3 === 0) {
-      cleanupMemory();
+      } catch (e) { console.warn('Failed to clean logo file:', e.message); }
     }
 
     // Return a new Uint8Array to ensure data integrity
