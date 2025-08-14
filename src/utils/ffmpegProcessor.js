@@ -459,11 +459,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Build video filter with optional logo overlay
     let videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
     
-    // Add logo overlay if logo file is available
+    // Add logo overlay if logo file is available - simplified version
     if (logoFileName) {
-      // Logo positioned at 27% from left edge, vertically centered, maintain aspect ratio
-      const logoOverlay = `[0:v]${videoFilter}[bg];[2:v]scale=w=200:h=-1[logo];[bg][logo]overlay=(main_w*0.27-overlay_w/2):main_h/2-overlay_h/2`;
-      videoFilter = logoOverlay;
+      // Simpler overlay: scale logo and position it
+      videoFilter = `[0:v]${videoFilter}[bg];[2:v]scale=200:-1[logo];[bg][logo]overlay=x=(main_w*0.27-overlay_w/2):y=(main_h-overlay_h)/2`;
     }
 
     // Simplified parameters that are more likely to work
@@ -494,25 +493,68 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       progressCallbackActive = false;
       console.log('FFmpeg command executed successfully');
 
-      // Verify output file was created
-      try {
-        const outputCheck = await ffmpeg.readFile(outputFileName);
-        if (!outputCheck || outputCheck.length === 0) {
-          throw new Error('Output file was created but is empty');
-        }
-        console.log('Output file verified, size:', outputCheck.length);
-      } catch (verifyError) {
-        console.error('Output file verification failed:', verifyError);
-        
-        // List files for debugging
+      // Verify output file was created with retry mechanism
+      let outputData = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries && !outputData) {
         try {
-          const files = await ffmpeg.listDir('/');
-          console.log('Files after FFmpeg execution:', files);
-        } catch (listError) {
-          console.log('Cannot list files:', listError);
+          // Wait a bit for filesystem to sync
+          if (retryCount > 0) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+          }
+          
+          outputData = await ffmpeg.readFile(outputFileName);
+          
+          if (!outputData || outputData.length === 0) {
+            throw new Error('Output file is empty');
+          }
+          
+          console.log('Output file verified, size:', outputData.length);
+          break;
+          
+        } catch (verifyError) {
+          retryCount++;
+          console.warn(`Output file verification attempt ${retryCount} failed:`, verifyError.message);
+          
+          if (retryCount === maxRetries) {
+            console.error('All verification attempts failed');
+            
+            // List files for debugging
+            try {
+              const files = await ffmpeg.listDir('/');
+              console.log('Files after FFmpeg execution:', files);
+              
+              // Try to list specific directory if exists
+              const rootFiles = files.filter(f => !f.isDir).map(f => f.name);
+              console.log('Non-directory files in root:', rootFiles);
+            } catch (listError) {
+              console.log('Cannot list files:', listError);
+            }
+            
+            // Try alternative file reading method
+            try {
+              console.log('Attempting alternative file access...');
+              const allFiles = await ffmpeg.listDir('/');
+              const outputExists = allFiles.some(f => f.name === outputFileName);
+              console.log(`Output file ${outputFileName} exists:`, outputExists);
+              
+              if (outputExists) {
+                // Force re-read
+                outputData = await ffmpeg.readFile(outputFileName);
+                if (outputData && outputData.length > 0) {
+                  console.log('Alternative file access successful, size:', outputData.length);
+                  break;
+                }
+              }
+            } catch (altError) {
+              console.log('Alternative file access failed:', altError);
+            }
+            
+            throw new Error('FFmpeg executed but output file was not created or is inaccessible');
+          }
         }
-        
-        throw new Error('FFmpeg executed but output file was not created properly');
       }
       
     } catch (error) {
@@ -545,29 +587,29 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     console.log('FFmpeg execution completed successfully');
 
-    // Read the output file with better error handling
-    let data;
-    try {
-      // Check if file exists first
+    // Use the already verified output data
+    let data = outputData;
+    
+    if (!data) {
+      // Fallback: try to read again if verification didn't capture the data
       try {
-        const fileData = await ffmpeg.readFile(outputFileName);
-        data = fileData;
-        console.log('Output file read successfully, size:', data.length, 'bytes');
-      } catch (fileError) {
+        console.log('Attempting final file read...');
+        data = await ffmpeg.readFile(outputFileName);
+        console.log('Final file read successful, size:', data.length, 'bytes');
+      } catch (readError) {
+        console.error('Failed to read output file:', readError);
+        
         // Try to list files to debug
-        console.log('Failed to read output file, checking filesystem...');
         try {
           const files = await ffmpeg.listDir('/');
-          console.log('Files in FFmpeg filesystem:', files);
+          console.log('Files in FFmpeg filesystem during final read:', files);
         } catch (listError) {
-          console.log('Cannot list filesystem:', listError);
+          console.log('Cannot list filesystem during final read:', listError);
         }
-        throw fileError;
+        
+        const errorMsg = readError && readError.message ? readError.message : 'Unknown file read error';
+        throw new Error(`Failed to read generated video: ${errorMsg}`);
       }
-    } catch (readError) {
-      console.error('Failed to read output file:', readError);
-      const errorMsg = readError && readError.message ? readError.message : 'Unknown file read error';
-      throw new Error(`Failed to read generated video: ${errorMsg}`);
     }
 
     // Verify the data is valid
