@@ -337,8 +337,8 @@ export const useFFmpeg = () => {
       }
 
       // Handle actual errors
-      const errorMessage = error && typeof error === 'object' && error.message ? error.message : 
-                          error && typeof error === 'string' ? error : 'Unknown error';
+      const errorMessage = (error && typeof error === 'object' && error.message) ? error.message : 
+                          (typeof error === 'string') ? error : 'Unknown error';
       setVideoGenerationState(pair.id, {
         isGenerating: false,
         progress: 0,
@@ -357,7 +357,8 @@ export const useFFmpeg = () => {
       }
 
       // Check if this is a restart-related error that we can retry
-      const errorMsg = error && error.message ? error.message : '';
+      const errorMsg = (error && typeof error === 'object' && error.message) ? error.message : 
+                      (typeof error === 'string') ? error : '';
       const isRestartableError = errorMsg.includes('restarting for next attempt') || 
                                errorMsg.includes('terminate') ||
                                errorMsg.includes('timeout');
@@ -374,8 +375,8 @@ export const useFFmpeg = () => {
         });
       } else {
         // Set error state for non-restartable errors
-        const finalErrorMessage = error && typeof error === 'object' && error.message ? error.message : 
-                                 error && typeof error === 'string' ? error : 'Unknown error';
+        const finalErrorMessage = (error && typeof error === 'object' && error.message) ? error.message : 
+                                 (typeof error === 'string') ? error : 'Unknown error';
         setVideoGenerationState(pair.id, {
           isGenerating: false,
           progress: 0,
