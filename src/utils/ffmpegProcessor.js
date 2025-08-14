@@ -148,8 +148,16 @@ export const initializeFFmpeg = async () => {
 
   // Return existing instance if already loaded and not force stopped
   if (isLoaded && ffmpeg && !isForceStopped) {
-    console.log('Returning existing FFmpeg instance');
-    return ffmpeg;
+    // Verify FFmpeg is actually working
+    try {
+      await ffmpeg.listDir('/');
+      console.log('Returning existing FFmpeg instance (verified working)');
+      return ffmpeg;
+    } catch (verifyError) {
+      console.warn('FFmpeg instance appears broken, reinitializing...');
+      isLoaded = false;
+      ffmpeg = null;
+    }
   }
 
   // Return existing promise if already initializing and not force stopped
@@ -195,6 +203,16 @@ export const initializeFFmpeg = async () => {
             throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
           }
         }
+        
+        // Verify initialization worked
+        try {
+          await ffmpeg.listDir('/');
+          console.log('FFmpeg filesystem verification successful');
+        } catch (fsError) {
+          console.error('FFmpeg filesystem verification failed:', fsError);
+          throw new Error('FFmpeg loaded but filesystem is not accessible');
+        }
+        
         isLoaded = true;
         isForceStopped = false; // Ensure force stopped is cleared on successful load
       }
@@ -523,14 +541,29 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     console.log('FFmpeg execution completed successfully');
 
-    // Read the output file
+    // Read the output file with better error handling
     let data;
     try {
-      data = await ffmpeg.readFile(outputFileName);
-      console.log('Output file read successfully, size:', data.length, 'bytes');
+      // Check if file exists first
+      try {
+        const fileData = await ffmpeg.readFile(outputFileName);
+        data = fileData;
+        console.log('Output file read successfully, size:', data.length, 'bytes');
+      } catch (fileError) {
+        // Try to list files to debug
+        console.log('Failed to read output file, checking filesystem...');
+        try {
+          const files = await ffmpeg.listDir('/');
+          console.log('Files in FFmpeg filesystem:', files);
+        } catch (listError) {
+          console.log('Cannot list filesystem:', listError);
+        }
+        throw fileError;
+      }
     } catch (readError) {
       console.error('Failed to read output file:', readError);
-      throw new Error(`Failed to read generated video: ${readError.message}`);
+      const errorMsg = readError && readError.message ? readError.message : 'Unknown file read error';
+      throw new Error(`Failed to read generated video: ${errorMsg}`);
     }
 
     // Verify the data is valid
@@ -574,22 +607,34 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
   } catch (error) {
     console.error('FFmpeg processing error:', error);
 
-    // Clean up files on error
-    try {
-      const cleanupPromises = [
-        ffmpeg.deleteFile(audioFileName).catch(() => {}),
-        ffmpeg.deleteFile(imageFileName).catch(() => {}),
-        ffmpeg.deleteFile(outputFileName).catch(() => {})
-      ];
-
-      // Clean up logo file if it was used
-      if (logoFileName) {
-        cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
+    // Force reinitialize FFmpeg on filesystem errors
+    if (error && error.message && error.message.includes('FS error')) {
+      console.log('Filesystem error detected, reinitializing FFmpeg...');
+      try {
+        await forceStopAllProcesses();
+        // FFmpeg will be reinitialized on next call
+      } catch (reinitError) {
+        console.warn('Failed to reinitialize FFmpeg:', reinitError);
       }
+    }
 
-      await Promise.allSettled(cleanupPromises);
-    } catch (cleanupError) {
-      console.warn('Error during cleanup:', cleanupError);
+    // Clean up files on error (only if FFmpeg is still accessible)
+    if (ffmpeg && isLoaded) {
+      try {
+        const cleanupPromises = [
+          ffmpeg.deleteFile(audioFileName).catch(() => {}),
+          ffmpeg.deleteFile(imageFileName).catch(() => {}),
+          ffmpeg.deleteFile(outputFileName).catch(() => {})
+        ];
+
+        if (logoFileName) {
+          cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
+        }
+
+        await Promise.allSettled(cleanupPromises);
+      } catch (cleanupError) {
+        console.warn('Error during cleanup:', cleanupError);
+      }
     }
 
     // Check if this is a cancellation error
@@ -601,9 +646,6 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Handle actual errors
     const errorMessage = error && error.message ? error.message : 'Unknown error occurred';
-    // Assuming setVideoGenerationState is available in the scope where processVideoWithFFmpeg is called
-    // If not, this part might need adjustment or passing setVideoGenerationState as a parameter.
-    // For now, we'll log the error as the original code implies it's handled elsewhere.
     console.error(`Error during video generation for unknown pair: ${errorMessage}`);
 
     throw error;
