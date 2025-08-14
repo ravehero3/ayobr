@@ -52,7 +52,7 @@ export const useAppStore = create((set, get) => ({
   // Video generation settings - Load from localStorage
   videoSettings: loadFromLocalStorage('videoSettings', {
     background: 'black', // 'white', 'black', or 'custom'
-    customBackground: null, // File object for custom background
+    customBackground: null, // Base64 string for custom background
     quality: 'fullhd' // 'fullhd' or '4k'
   }),
 
@@ -330,9 +330,11 @@ export const useAppStore = create((set, get) => ({
   setUserProfileImage: (imageData) => set({ userProfileImage: imageData }),
 
   // Video settings actions
-  setVideoBackground: (background) => set(state => ({
-    videoSettings: { ...state.videoSettings, background }
-  })),
+  setVideoBackground: (background) => set(state => {
+    const newVideoSettings = { ...state.videoSettings, background };
+    saveToLocalStorage('videoSettings', newVideoSettings);
+    return { videoSettings: newVideoSettings };
+  }),
 
   setCustomBackground: (file) => set(state => {
     const newVideoSettings = { ...state.videoSettings, customBackground: file };
@@ -340,9 +342,11 @@ export const useAppStore = create((set, get) => ({
     return { videoSettings: newVideoSettings };
   }),
 
-  setVideoQuality: (quality) => set(state => ({
-    videoSettings: { ...state.videoSettings, quality }
-  })),
+  setVideoQuality: (quality) => set(state => {
+    const newVideoSettings = { ...state.videoSettings, quality };
+    saveToLocalStorage('videoSettings', newVideoSettings);
+    return { videoSettings: newVideoSettings };
+  }),
 
   // Container spacing actions
   setContainerSpacing: (spacing) => set({ containerSpacing: spacing }),

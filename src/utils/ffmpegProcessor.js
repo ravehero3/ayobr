@@ -199,7 +199,7 @@ export const initializeFFmpeg = async () => {
             throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
           }
         }
-        
+
         // Verify initialization worked
         try {
           await ffmpeg.listDir('/');
@@ -208,7 +208,7 @@ export const initializeFFmpeg = async () => {
           console.error('FFmpeg filesystem verification failed:', fsError);
           throw new Error('FFmpeg loaded but filesystem is not accessible');
         }
-        
+
         isLoaded = true;
         isForceStopped = false; // Ensure force stopped is cleared on successful load
       }
@@ -398,7 +398,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       try {
         console.log('Processing logo for video overlay...');
         logoFileName = `logo_${timestamp}.png`;
-        
+
         // Handle different logo data formats
         let logoData;
         if (typeof videoSettings.logoFile === 'string') {
@@ -409,7 +409,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           // File object
           logoData = await getCachedFileData(videoSettings.logoFile, 'logo');
         }
-        
+
         if (logoData && logoData.length > 0) {
           await ffmpeg.writeFile(logoFileName, logoData);
           console.log('Logo file written successfully:', logoFileName);
@@ -458,7 +458,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Build video filter with optional logo overlay
     let videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
-    
+
     // Add logo overlay if logo file is available - simplified version
     if (logoFileName) {
       // Simpler overlay: scale logo and position it
@@ -485,7 +485,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     try {
       console.log('Starting FFmpeg execution with command:', ffmpegArgs);
-      
+
       // Execute FFmpeg command
       await ffmpeg.exec(ffmpegArgs);
 
@@ -497,49 +497,60 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       let outputData = null;
       let retryCount = 0;
       const maxRetries = 3;
-      
+
       while (retryCount < maxRetries && !outputData) {
         try {
           // Wait a bit for filesystem to sync
           if (retryCount > 0) {
             await new Promise(resolve => setTimeout(resolve, 200));
           }
-          
-          outputData = await ffmpeg.readFile(outputFileName);
-          
+
+          // Check if output file exists and get the data
+          let outputData;
+          try {
+            outputData = ffmpeg.FS('readFile', outputFileName);
+          } catch (error) {
+            console.error('Failed to read output file:', error);
+            throw new Error('Failed to read generated video file');
+          }
+
+          console.log('Output file size:', outputData.length, 'bytes');
+
           if (!outputData || outputData.length === 0) {
             throw new Error('Output file is empty');
           }
-          
-          console.log('Output file verified, size:', outputData.length);
+
+          // Create blob and URL for the generated video
+          const outputBlob = new Blob([outputData.buffer], { type: 'video/mp4' });
+          const videoUrl = URL.createObjectURL(outputBlob);
           break;
-          
+
         } catch (verifyError) {
           retryCount++;
           console.warn(`Output file verification attempt ${retryCount} failed:`, verifyError.message);
-          
+
           if (retryCount === maxRetries) {
             console.error('All verification attempts failed');
-            
+
             // List files for debugging
             try {
               const files = await ffmpeg.listDir('/');
               console.log('Files after FFmpeg execution:', files);
-              
+
               // Try to list specific directory if exists
               const rootFiles = files.filter(f => !f.isDir).map(f => f.name);
               console.log('Non-directory files in root:', rootFiles);
             } catch (listError) {
               console.log('Cannot list files:', listError);
             }
-            
+
             // Try alternative file reading method
             try {
               console.log('Attempting alternative file access...');
               const allFiles = await ffmpeg.listDir('/');
               const outputExists = allFiles.some(f => f.name === outputFileName);
               console.log(`Output file ${outputFileName} exists:`, outputExists);
-              
+
               if (outputExists) {
                 // Force re-read
                 outputData = await ffmpeg.readFile(outputFileName);
@@ -551,16 +562,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
             } catch (altError) {
               console.log('Alternative file access failed:', altError);
             }
-            
+
             throw new Error('FFmpeg executed but output file was not created or is inaccessible');
           }
         }
       }
-      
+
     } catch (error) {
       console.error('FFmpeg execution failed:', error);
       console.error('FFmpeg command that failed:', ffmpegArgs);
-      
+
       // List files for debugging
       try {
         const files = await ffmpeg.listDir('/');
@@ -568,7 +579,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       } catch (listError) {
         console.log('Cannot list files after error:', listError);
       }
-      
+
       // Simple cleanup without complex filesystem operations
       try {
         console.log('Attempting cleanup after error...');
@@ -589,7 +600,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Use the already verified output data
     let data = outputData;
-    
+
     if (!data) {
       // Fallback: try to read again if verification didn't capture the data
       try {
@@ -598,7 +609,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.log('Final file read successful, size:', data.length, 'bytes');
       } catch (readError) {
         console.error('Failed to read output file:', readError);
-        
+
         // Try to list files to debug
         try {
           const files = await ffmpeg.listDir('/');
@@ -606,7 +617,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         } catch (listError) {
           console.log('Cannot list filesystem during final read:', listError);
         }
-        
+
         const errorMsg = readError && readError.message ? readError.message : 'Unknown file read error';
         throw new Error(`Failed to read generated video: ${errorMsg}`);
       }
@@ -628,17 +639,17 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       await ffmpeg.deleteFile(audioFileName);
       console.log('Cleaned audio file');
     } catch (e) { console.warn('Failed to clean audio file:', e.message); }
-    
+
     try {
       await ffmpeg.deleteFile(imageFileName);
       console.log('Cleaned image file');
     } catch (e) { console.warn('Failed to clean image file:', e.message); }
-    
+
     try {
       await ffmpeg.deleteFile(outputFileName);
       console.log('Cleaned output file');
     } catch (e) { console.warn('Failed to clean output file:', e.message); }
-    
+
     // Clean up logo file if it was used
     if (logoFileName) {
       try {
