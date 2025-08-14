@@ -338,7 +338,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     imageFileName = `image_${timestamp}.jpg`;
     outputFileName = `output_${timestamp}.mp4`;
 
-    console.log('Writing files to FFmpeg FS:', {
+    try {
+      console.log('Writing files to FFmpeg FS:', {
         imageSize: imageData?.length || 0,
         audioSize: audioData?.length || 0
       });
