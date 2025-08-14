@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+</head>
+<body>
+    <div id="test">Testing basic functionality...</div>
+    <script>
+        console.log('Basic script loading works');
+        document.getElementById('test').innerHTML = 'JavaScript execution works!';
+        
+        // Test React bundle loading
+        const script = document.createElement('script');
+        script.src = '/bundle.js';
+        script.onload = () => console.log('Bundle loaded successfully');
+        script.onerror = (e) => console.error('Bundle loading failed:', e);
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
