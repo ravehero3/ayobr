@@ -391,7 +391,7 @@ function App() {
                 >
                   <motion.div
                     className="flex flex-col max-w-[1200px] w-full px-6"
-                    style={{ gap: `${containerSpacing}px`, marginTop: '-60px' }} // Moved 124px higher from original 64px
+                    style={{ gap: `${containerSpacing}px`, marginTop: '-180px' }} // Reduced from top to bring containers closer
                   >
                     <AnimatePresence>
                       {pairs
