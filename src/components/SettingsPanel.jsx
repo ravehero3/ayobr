@@ -62,6 +62,9 @@ const SettingsPanel = ({ isOpen, onClose }) => {
           
           setLocalLogoFile(resizedBase64);
           setLocalLogoFileName(file.name);
+          
+          // Save to store immediately to persist the logo
+          setLogoFile(resizedBase64, file.name);
         };
         
         img.src = e.target.result;
@@ -160,15 +163,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
             {/* Logo Upload Area */}
             <div>
-              <div style={{
-                color: '#e0e0e0',
-                fontSize: '14px',
-                fontWeight: '600',
-                marginBottom: '12px',
-                opacity: '0.9'
-              }}>
-                Logo
-              </div>
               <motion.div
                 className="cursor-pointer relative overflow-hidden"
                 style={{
@@ -177,7 +171,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                     ? 'rgba(15, 15, 25, 0.3)' 
                     : 'rgba(15, 15, 25, 0.6)',
                   border: localLogoFile 
-                    ? '2px solid rgba(34, 197, 94, 0.4)' 
+                    ? '2px solid rgba(59, 130, 246, 0.6)' 
                     : '2px dashed rgba(255, 255, 255, 0.15)',
                   borderRadius: '12px',
                   display: 'flex',
@@ -187,7 +181,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 }}
                 whileHover={{
                   borderColor: localLogoFile 
-                    ? 'rgba(34, 197, 94, 0.6)' 
+                    ? 'rgba(59, 130, 246, 0.8)' 
                     : 'rgba(59, 130, 246, 0.4)',
                   background: localLogoFile 
                     ? 'rgba(15, 15, 25, 0.4)' 
@@ -260,9 +254,9 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       width: '20px',
                       height: '20px',
                       borderRadius: '4px',
-                      border: '2px solid rgba(34, 197, 94, 0.6)',
+                      border: '2px solid rgba(59, 130, 246, 0.6)',
                       background: localUseLogoInVideos 
-                        ? 'rgba(34, 197, 94, 0.8)' 
+                        ? 'rgba(59, 130, 246, 0.8)' 
                         : 'transparent',
                       display: 'flex',
                       alignItems: 'center',
