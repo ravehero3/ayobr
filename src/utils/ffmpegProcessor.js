@@ -315,12 +315,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         audioSize: audioData.length
       });
 
-      ffmpeg.FS('writeFile', imageFileName, imageData);
-      ffmpeg.FS('writeFile', audioFileName, audioData);
+      await ffmpeg.writeFile(imageFileName, imageData);
+      await ffmpeg.writeFile(audioFileName, audioData);
 
       // Verify files were written successfully
-      const imageWritten = ffmpeg.FS('readFile', imageFileName);
-      const audioWritten = ffmpeg.FS('readFile', audioFileName);
+      const imageWritten = await ffmpeg.readFile(imageFileName);
+      const audioWritten = await ffmpeg.readFile(audioFileName);
 
       if (imageWritten.length === 0 || audioWritten.length === 0) {
         throw new Error('Failed to write input files to FFmpeg FS');
