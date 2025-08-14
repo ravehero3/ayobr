@@ -442,8 +442,19 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       ffmpegArgs.push('-i', logoFileName);
     }
 
-    // Get background color from settings (default to black)
-    const backgroundColor = (videoSettings && videoSettings.background) ? videoSettings.background : 'black';
+    // Get background color from settings (default to black) and ensure FFmpeg compatibility
+    let backgroundColor = 'black';
+    if (videoSettings && videoSettings.background) {
+      if (videoSettings.background === 'white') {
+        backgroundColor = 'white';
+      } else if (videoSettings.background === 'black') {
+        backgroundColor = 'black';
+      } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
+        backgroundColor = 'black'; // Use black as fallback for custom backgrounds
+      } else {
+        backgroundColor = 'black';
+      }
+    }
 
     // Build video filter with optional logo overlay
     let videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
