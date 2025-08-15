@@ -31,7 +31,7 @@ const Header = () => {
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(64, 64, 64, 0.8)',
-          paddingLeft: '32px', // Simple left padding
+          paddingLeft: 'calc((100vw - 500px) / 2 - 247px)', // Restore original logo position
           paddingRight: '0px', // No right padding needed
         }}
       >
@@ -69,7 +69,7 @@ const Header = () => {
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
-            style={{ marginRight: '32px' }} // Simple 32px margin from right edge
+            style={{ marginRight: '72px' }} // Moved 40px left (from 32px to 72px)
           >
             <img
               src={userProfileImage || userIcon}
