@@ -8,13 +8,12 @@ let initPromise = null;
 let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
 let isForceStopped = false; // Track if processes were force stopped
 
-// Optimized concurrency management for maximum speed
+// Reduced concurrency for memory stability
 const getOptimalConcurrency = (totalFiles) => {
-  if (totalFiles <= 5) return 6;      // Small batches: 6 concurrent
-  if (totalFiles <= 20) return 8;     // Medium batches: 8 concurrent
-  if (totalFiles <= 50) return 12;    // Large batches: 12 concurrent
-  if (totalFiles <= 75) return 16;    // Very large batches: 16 concurrent
-  return 20;                          // Maximum 100 files: 20 concurrent
+  if (totalFiles <= 5) return 2;      // Small batches: 2 concurrent
+  if (totalFiles <= 20) return 3;     // Medium batches: 3 concurrent
+  if (totalFiles <= 50) return 4;     // Large batches: 4 concurrent
+  return 5;                           // Maximum: 5 concurrent for memory stability
 };
 
 // Memory management for large batches
@@ -38,6 +37,24 @@ export const forceStopAllProcesses = async () => {
     try {
       // Clear any progress listeners first to prevent further callbacks
       ffmpeg.off('progress');
+
+      // Clean up old logo files before terminating
+      try {
+        const files = await ffmpeg.listDir('/');
+        const logoFiles = files.filter(f => f.name.startsWith('logo_') && !f.isDir);
+        console.log(`Found ${logoFiles.length} logo files to clean up`);
+        
+        for (const logoFile of logoFiles) {
+          try {
+            await ffmpeg.deleteFile(logoFile.name);
+            console.log(`Cleaned up old logo file: ${logoFile.name}`);
+          } catch (e) {
+            console.warn(`Failed to clean logo file ${logoFile.name}:`, e.message);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to clean up logo files:', e.message);
+      }
 
       // Only terminate if FFmpeg is actually loaded
       if (isLoaded) {
@@ -92,29 +109,29 @@ export const restartFFmpeg = async () => {
 const cleanupMemory = () => {
   processedCount++;
 
-  // Clean memory every 10 processed videos
-  if (processedCount % MEMORY_CLEANUP_INTERVAL === 0) {
+  // Clean memory every 5 processed videos (more frequent cleanup)
+  if (processedCount % 5 === 0) {
     console.log(`Performing memory cleanup after ${processedCount} processed videos`);
 
     // Clear excessive cache entries
-    if (memoryCache.size > MAX_CACHE_SIZE) {
-      const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - MAX_CACHE_SIZE);
+    if (memoryCache.size > 20) { // Reduced cache size
+      const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - 10);
       keysToDelete.forEach(key => memoryCache.delete(key));
       console.log(`Cleaned up ${keysToDelete.length} cached items`);
     }
 
-    // Clear file caches
-    if (fileCache.size > maxCacheSize) {
-      const oldestKeys = Array.from(fileCache.keys()).slice(0, fileCache.size - maxCacheSize);
+    // Clear file caches more aggressively
+    if (fileCache.size > 10) {
+      const oldestKeys = Array.from(fileCache.keys()).slice(0, fileCache.size - 5);
       oldestKeys.forEach(key => fileCache.delete(key));
     }
 
-    if (audioBufferCache.size > 20) {
+    if (audioBufferCache.size > 5) {
       audioBufferCache.clear();
       console.log('Cleared audio buffer cache');
     }
 
-    if (processedImageCache.size > 30) {
+    if (processedImageCache.size > 5) {
       processedImageCache.clear();
       console.log('Cleared processed image cache');
     }
@@ -491,10 +508,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     let data;
     let retryCount = 0;
-    const maxRetries = 3;
+    const maxRetries = 5; // Increased retries
 
     while (retryCount < maxRetries) {
       try {
+        // Add delay before first read attempt
+        if (retryCount === 0) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
         // Check if output file exists first
         const outputExists = await ffmpeg.exists(outputFileName);
         console.log(`Output file ${outputFileName} exists:`, outputExists);
@@ -503,21 +525,37 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           throw new Error('Output file was not created by FFmpeg');
         }
 
-        data = await ffmpeg.readFile(outputFileName);
-        console.log('Successfully read output file, size:', data.length);
+        // Try to get file stats
+        try {
+          const fileList = await ffmpeg.listDir('/');
+          const outputFile = fileList.find(f => f.name === outputFileName);
+          if (outputFile && !outputFile.isDir) {
+            console.log(`Found output file ${outputFileName} in filesystem`);
+          }
+        } catch (e) {
+          console.warn('Could not verify file in filesystem:', e.message);
+        }
 
-        if (data && data.length > 0) {
+        data = await ffmpeg.readFile(outputFileName);
+        console.log('Successfully read output file, size:', data ? data.length : 'null');
+
+        if (data && data.length > 1000) { // Minimum reasonable file size
           break; // Success!
         } else {
-          throw new Error('Output file is empty');
+          throw new Error(`Output file is too small: ${data ? data.length : 0} bytes`);
         }
       } catch (readError) {
         retryCount++;
-        console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError);
+        console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError.message || readError);
 
         if (retryCount < maxRetries) {
-          // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Progressive delay: 1s, 2s, 3s, 4s
+          await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+          
+          // Force garbage collection between retries
+          if (window.gc) {
+            window.gc();
+          }
         } else {
           // Final attempt failed - list files for debugging
           try {
