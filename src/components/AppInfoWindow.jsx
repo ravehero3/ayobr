@@ -8,6 +8,11 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
     <AnimatePresence>
       <motion.div
         className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          display: 'flex'
+        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -25,7 +30,11 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
             backdropFilter: 'blur(9.7px)',
             WebkitBackdropFilter: 'blur(9.7px)',
-            border: '1px solid rgba(0, 0, 0, 0.44)'
+            border: '1px solid rgba(0, 0, 0, 0.44)',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
           }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
