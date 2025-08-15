@@ -33,9 +33,12 @@ args = "npm install electron react react-dom @babel/core @babel/preset-env @babe
 name = "Dev Server"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "webpack serve --config webpack.simple.config.js --mode=development"
+args = "webpack serve --config webpack.simple.config.js --mode development"
 waitForPort = 5000
 
 [[workflows.workflow]]
