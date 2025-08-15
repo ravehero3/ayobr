@@ -24,7 +24,7 @@ const SpacingSlider = () => {
         
         <input
           type="range"
-          min="-120"
+          min="-200"
           max="80"
           value={containerSpacing}
           onChange={(e) => setContainerSpacing(parseInt(e.target.value))}
