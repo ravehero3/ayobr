@@ -197,13 +197,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             style={getVideoBackgroundStyle()}
                           />
 
-                          {/* Foreground image preview - moved 10px lower */}
+                          {/* Foreground image preview - moved 20px lower total */}
                           {pair.image && (
                             <img 
                               src={URL.createObjectURL(pair.image)}
                               alt="Preview"
                               className="absolute w-full h-full object-contain opacity-80"
-                              style={{ zIndex: 1, top: '10px', left: '0' }}
+                              style={{ zIndex: 1, top: '20px', left: '0' }}
                             />
                           )}
 

@@ -445,23 +445,23 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     let videoFilter;
 
     if (logoFileName) {
-      // Complex filter with logo overlay - more robust approach
-      videoFilter = `[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}[bg];[2:v]scale=200:-1:flags=lanczos[logo];[bg][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2:format=auto`;
+      // Simplified filter with logo overlay for faster processing
+      videoFilter = `[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}[bg];[2:v]scale=200:-1[logo];[bg][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2`;
     } else {
-      // Simple filter without logo
+      // Simple filter without logo - fastest option
       videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
     }
 
-    // Simplified parameters that are more likely to work
+    // Optimized parameters for maximum speed
     ffmpegArgs.push(
       '-vf', videoFilter,
       '-c:v', 'libx264',
-      '-preset', 'fast',             // Changed from ultrafast to fast
-      '-crf', '23',                  // Standard quality
+      '-preset', 'ultrafast',        // Fastest encoding preset
+      '-crf', '28',                  // Higher CRF for faster encoding (lower quality but much faster)
       '-pix_fmt', 'yuv420p',
       '-c:a', 'aac',
-      '-b:a', '128k',                // Standard audio bitrate
-      '-ar', '44100',                // Standard sample rate
+      '-b:a', '64k',                 // Lower audio bitrate for faster processing
+      '-ar', '22050',                // Lower sample rate for faster processing
       '-shortest',
       '-t', audioDuration.toString(),
       '-y',                          // Overwrite output file
