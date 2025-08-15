@@ -10,7 +10,12 @@ const Footer = ({ onGenerateVideos }) => {
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
   // Calculate completion count during generation
-  const completedVideosCount = Object.values(videoGenerationStates || {}).filter(state => state.isComplete).length;
+  // Count videos that are successfully generated (either in store or marked complete with video data)
+  const completedVideosCount = completePairs.filter(pair => {
+    const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+    const videoState = videoGenerationStates[pair.id];
+    return generatedVideo || (videoState?.isComplete && videoState?.video);
+  }).length;
 
   // Don't render footer if no files are present
   if (!hasFiles) {
