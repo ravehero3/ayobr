@@ -296,22 +296,20 @@ export const useFFmpeg = () => {
       }
 
       // Set final completion state immediately
-      try {
-        console.log(`Setting completion state for pair ${pair.id}...`);
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 100,
-          isComplete: true,
-          video: video,
-          error: null
-        });
-        console.log(`Video generation completed successfully for pair ${pair.id}`);
-
-        return video;
-      } catch (stateError) {
-        console.error(`Error setting final state for pair ${pair.id}:`, stateError);
-        throw new Error(`Failed to set final state: ${stateError.message}`);
-      }
+      console.log(`Setting completion state for pair ${pair.id}...`);
+      setVideoGenerationState(pair.id, {
+        isGenerating: false,
+        progress: 100,
+        isComplete: true,
+        video: video,
+        error: null
+      });
+      
+      // Force a brief delay to ensure state updates are processed
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      console.log(`Video generation completed successfully for pair ${pair.id}`);
+      return video;
 
     } catch (error) {
       console.error(`Error generating video for pair ${pair.id}:`, error);

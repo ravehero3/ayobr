@@ -86,8 +86,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               {pairs.map((pair, index) => {
                 const videoState = getVideoGenerationState(pair.id);
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
-                const isComplete = !!generatedVideo;
+                const isComplete = !!generatedVideo || (videoState?.isComplete && videoState?.video);
                 const progress = isComplete ? 100 : (videoState?.progress || 0);
+                const videoToShow = generatedVideo || videoState?.video;
 
                 console.log(`LoadingWindow pair ${pair.id}:`, {
                   hasVideo: !!generatedVideo,
@@ -217,13 +218,17 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           )}
 
                           {/* Video Preview or Completion checkmark */}
-                          {isComplete && generatedVideo ? (
+                          {isComplete && videoToShow ? (
                             <video
-                              src={generatedVideo.url}
+                              src={videoToShow.url}
                               className="absolute inset-0 w-full h-full object-contain rounded"
                               controls
                               preload="metadata"
                               style={{ background: 'black' }}
+                              onError={(e) => {
+                                console.error('Video playback error:', e);
+                                console.log('Video URL:', videoToShow.url);
+                              }}
                             />
                           ) : isComplete ? (
                             <div className="absolute inset-0 flex items-center justify-center">
