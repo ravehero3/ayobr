@@ -53,11 +53,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative w-full max-w-4xl mx-4 p-2 rounded-lg overflow-hidden"
+          className="relative w-full max-w-7xl mx-4 p-2 rounded-lg overflow-hidden"
           style={{
-            maxHeight: '85vh',
+            maxHeight: '90vh',
             width: '100%',
-            maxWidth: '4rem * 16'
+            maxWidth: '7rem * 16'
           }}
         >
           {/* Header */}
@@ -80,9 +80,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             Processing {pairs.length} video pairs...
           </motion.p>
 
-          {/* Miniature Containers Grid */}
-          <div className="relative z-10 max-h-80 overflow-y-auto mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
+          {/* Miniature Containers Grid - Larger container area */}
+          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
               {pairs.map((pair, index) => {
                 const videoState = getVideoGenerationState(pair.id);
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -256,20 +256,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             </div>
           </div>
 
-          {/* Footer with Stop Button */}
+          {/* Footer - removed Stop Button */}
           <div className="p-6 pt-2">
-            {onStop && (
-              <div className="flex justify-center">
-                <motion.button
-                  onClick={onStop}
-                  className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  STOP!
-                </motion.button>
-              </div>
-            )}
+            {/* Empty footer space */}
           </div>
         </motion.div>
       </motion.div>
