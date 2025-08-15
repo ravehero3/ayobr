@@ -55,17 +55,22 @@ const Footer = ({ onGenerateVideos }) => {
         <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 292px)' }}>
           <button
             onClick={() => {
-              // Handle going back to previous step
-              const { clearAllPairs, setCurrentPage } = useAppStore.getState();
+              // Handle going back to previous step with proper state cleanup
+              const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates } = useAppStore.getState();
+              
+              // First, stop any ongoing generation and clear video states
+              setIsGenerating(false);
+              clearAllVideoGenerationStates();
+              
               if (generatedVideos.length > 0) {
                 // From download page, go back to file management
                 setCurrentPage('fileManagement');
-              } else if (completePairs.length > 0) {
-                // From file management with complete pairs, go back to upload
+              } else if (completePairs.length > 0 || hasFiles) {
+                // From generation page or file management, go back to upload and clear everything
                 clearAllPairs();
                 setCurrentPage('upload');
-              } else if (hasFiles) {
-                // From file management with files, go back to upload
+              } else {
+                // Fallback: ensure we go to upload page
                 clearAllPairs();
                 setCurrentPage('upload');
               }
