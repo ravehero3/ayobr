@@ -490,7 +490,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Execute FFmpeg command with timeout protection
     const execPromise = ffmpeg.exec(ffmpegArgs);
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('FFmpeg execution timeout')), 120000); // 2 minute timeout
+      setTimeout(() => reject(new Error('FFmpeg execution timeout')), 300000); // 5 minute timeout
     });
 
     await Promise.race([execPromise, timeoutPromise]);
