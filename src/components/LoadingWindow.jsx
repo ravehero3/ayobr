@@ -119,7 +119,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       overflow: 'visible'
                     }}
                     whileHover={{
-                      scale: 1.02,
+                      backgroundColor: isComplete 
+                        ? 'rgba(255, 255, 255, 0.02)' 
+                        : 'rgba(255, 255, 255, 0.02)',
                       boxShadow: isComplete
                         ? '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)'
                         : '0 4px 30px rgba(0, 0, 0, 0.1)'
