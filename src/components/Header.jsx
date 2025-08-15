@@ -31,8 +31,8 @@ const Header = () => {
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(64, 64, 64, 0.8)',
-          paddingLeft: 'calc((100vw - 500px) / 2 - 247px)', // Logo position
-          paddingRight: 'calc((100vw - 500px) / 2 - 247px)', // Align user icon right edge with logo left edge distance
+          paddingLeft: '32px', // Simple left padding
+          paddingRight: '0px', // No right padding needed
         }}
       >
         {/* TypeBeatz Logo - Clickable */}
@@ -64,12 +64,12 @@ const Header = () => {
           )}
         </div>
 
-        {/* Profile Icon - Moved 350px to the right */}
+        {/* Profile Icon - Fixed in top right corner */}
         <div className="flex items-center">
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
-            style={{ marginRight: 'calc((100vw - 500px) / 2 - 77px)' }} // Moved 200px to the right (from -277px to -77px)
+            style={{ marginRight: '32px' }} // Simple 32px margin from right edge
           >
             <img
               src={userProfileImage || userIcon}
