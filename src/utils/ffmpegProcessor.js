@@ -444,29 +444,96 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       ffmpegArgs.push('-i', logoFileName);
     }
 
+    // Add custom background input if provided
+    if (customBackgroundFileName) {
+      ffmpegArgs.push('-i', customBackgroundFileName);
+    }
+
     // Get background color from settings (default to black) and ensure FFmpeg compatibility
     let backgroundColor = 'black';
+    let useCustomBackground = false;
+    let customBackgroundFile = null;
+    
     if (videoSettings && videoSettings.background) {
       if (videoSettings.background === 'white') {
         backgroundColor = 'white';
       } else if (videoSettings.background === 'black') {
         backgroundColor = 'black';
       } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
-        backgroundColor = 'black'; // Use black as fallback for custom backgrounds
+        useCustomBackground = true;
+        customBackgroundFile = videoSettings.customBackground;
+        backgroundColor = 'black'; // Fallback if custom fails
       } else {
         backgroundColor = 'black';
       }
     }
+    
+    console.log('Background settings:', { 
+      backgroundColor, 
+      useCustomBackground, 
+      hasCustomFile: !!customBackgroundFile 
+    });
 
-    // Build video filter with optional logo overlay
+    // Handle custom background implementation
+    let customBackgroundFileName = null;
+    if (useCustomBackground && customBackgroundFile) {
+      try {
+        console.log('Processing custom background...');
+        customBackgroundFileName = `bg_${timestamp}.jpg`;
+        
+        let backgroundData;
+        if (typeof customBackgroundFile === 'string') {
+          // Base64 data - convert to binary
+          const base64Data = customBackgroundFile.replace(/^data:image\/[a-z]+;base64,/, '');
+          backgroundData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        } else {
+          // File object
+          backgroundData = await getCachedFileData(customBackgroundFile, 'background');
+        }
+        
+        if (backgroundData && backgroundData.length > 0) {
+          await ffmpeg.writeFile(customBackgroundFileName, backgroundData);
+          console.log('Custom background written successfully:', customBackgroundFileName);
+        } else {
+          console.warn('Custom background data is empty, using fallback');
+          useCustomBackground = false;
+          customBackgroundFileName = null;
+        }
+      } catch (error) {
+        console.error('Error processing custom background:', error);
+        console.warn('Using black background as fallback');
+        useCustomBackground = false;
+        customBackgroundFileName = null;
+      }
+    }
+
+    // Build video filter with proper input index handling
     let videoFilter;
+    let inputIndex = 0; // image=0, audio=1, logo=2, background=3
+    let logoIndex = 2;
+    let backgroundIndex = logoFileName ? 3 : 2;
 
-    if (logoFileName) {
-      // Simplified filter with logo overlay for faster processing
-      videoFilter = `[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}[bg];[2:v]scale=200:-1[logo];[bg][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2`;
+    console.log('Video filter inputs:', {
+      hasLogo: !!logoFileName,
+      hasCustomBackground: useCustomBackground,
+      logoIndex,
+      backgroundIndex
+    });
+
+    if (useCustomBackground && customBackgroundFileName) {
+      // Custom background video filter
+      if (logoFileName) {
+        videoFilter = `[${backgroundIndex}:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg];[0:v]scale=1920:1080:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2[comp];[${logoIndex}:v]scale=200:-1[logo];[comp][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2`;
+      } else {
+        videoFilter = `[${backgroundIndex}:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg];[0:v]scale=1920:1080:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`;
+      }
     } else {
-      // Simple filter without logo - fastest option
-      videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+      // Standard solid color background
+      if (logoFileName) {
+        videoFilter = `[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}[bg];[${logoIndex}:v]scale=200:-1[logo];[bg][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2`;
+      } else {
+        videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+      }
     }
 
     // Optimized parameters for maximum speed

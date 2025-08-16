@@ -86,15 +86,26 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               {pairs.map((pair, index) => {
                 const videoState = getVideoGenerationState(pair.id);
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
-                const isComplete = !!generatedVideo || (videoState?.isComplete && videoState?.video);
-                const progress = isComplete ? 100 : (videoState?.progress || 0);
+                
+                // More robust completion detection
+                const isComplete = !!generatedVideo || 
+                                 (videoState?.isComplete === true) || 
+                                 (videoState?.progress === 100 && videoState?.video);
+                                 
+                const progress = isComplete ? 100 : Math.max(0, videoState?.progress || 0);
                 const videoToShow = generatedVideo || videoState?.video;
 
                 console.log(`LoadingWindow pair ${pair.id}:`, {
                   hasVideo: !!generatedVideo,
+                  hasStateVideo: !!videoState?.video,
                   isComplete,
                   progress,
-                  videoState
+                  videoState: videoState ? {
+                    isGenerating: videoState.isGenerating,
+                    isComplete: videoState.isComplete,
+                    progress: videoState.progress,
+                    hasVideo: !!videoState.video
+                  } : null
                 });
 
                 return (

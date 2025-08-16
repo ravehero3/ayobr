@@ -313,6 +313,13 @@ export const useFFmpeg = () => {
         error: null
       });
       
+      // Log the completion for debugging
+      console.log(`Video completion state set for pair ${pair.id}:`, {
+        isComplete: true,
+        hasVideo: !!video,
+        videoId: video.id
+      });
+      
       // Force state update to ensure video shows up immediately
       const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
       
