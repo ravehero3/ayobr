@@ -125,18 +125,19 @@ const AnimatedBackground = () => {
         }}
       />
 
-      {/* Sleeping Alien - only visible during video generation, positioned lower */}
+      {/* Sleeping Alien - only visible during video generation, positioned above footer */}
       {isGenerating && (
         <motion.img
           src={sleepingAlienImg}
           alt="Sleeping Alien"
-          className="absolute w-64 h-64"
+          className="absolute w-80 h-80"
           style={{
             left: '50%',
-            bottom: '-120px', // Moved 200px down from previous position (80px to -120px)
+            bottom: '80px', // Above the footer (footer height is 64px + margin)
             transform: 'translateX(-50%)',
-            zIndex: 20,
-            opacity: 1, // Full opacity
+            zIndex: 25,
+            opacity: 1,
+            filter: 'brightness(1.1) contrast(1.2)', // Enhanced visibility
           }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
