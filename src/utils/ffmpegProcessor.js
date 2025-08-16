@@ -293,8 +293,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         onProgress(normalizedProgress);
         lastProgressTime = now;
 
-        // Only log every 10% for performance
-        if (normalizedProgress % 10 === 0) {
+        // Log progress more frequently for better user feedback
+        if (normalizedProgress % 5 === 0 || normalizedProgress > 95) {
           console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
         }
 
@@ -538,16 +538,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       }
     }
 
-    // Optimized parameters for maximum speed
+    // Ultra-optimized parameters for maximum speed
     ffmpegArgs.push(
       '-vf', videoFilter,
       '-c:v', 'libx264',
       '-preset', 'ultrafast',        // Fastest encoding preset
-      '-crf', '28',                  // Higher CRF for faster encoding (lower quality but much faster)
+      '-tune', 'fastdecode',         // Optimize for fast decoding
+      '-crf', '30',                  // Higher CRF for much faster encoding (lower quality but significantly faster)
       '-pix_fmt', 'yuv420p',
+      '-r', '15',                    // Lower frame rate for faster processing (15 fps instead of default 25)
       '-c:a', 'aac',
-      '-b:a', '64k',                 // Lower audio bitrate for faster processing
+      '-b:a', '48k',                 // Even lower audio bitrate for faster processing
       '-ar', '22050',                // Lower sample rate for faster processing
+      '-ac', '1',                    // Mono audio for faster processing
+      '-threads', '0',               // Use all CPU cores
       '-shortest',
       '-t', audioDuration.toString(),
       '-y',                          // Overwrite output file
@@ -562,7 +566,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     try {
       const execPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 300000); // 5 minute timeout
+        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 600000); // Increased to 10 minute timeout
       });
 
       await Promise.race([execPromise, timeoutPromise]);
@@ -575,7 +579,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       const isWarningError = errorMsg.includes('Application provided invalid, non monotonically increasing dts') ||
                            errorMsg.includes('deprecated') ||
                            errorMsg.includes('warning') ||
-                           errorMsg.toLowerCase().includes('non-monotonic');
+                           errorMsg.toLowerCase().includes('non-monotonic') ||
+                           errorMsg.includes('Last message repeated') ||
+                           errorMsg.includes('Past duration') ||
+                           errorMsg.includes('monotonic dts');
       
       if (isWarningError) {
         console.log('FFmpeg warning detected, continuing with output check...');
@@ -590,8 +597,11 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     console.log('FFmpeg execution completed successfully');
 
-    // Add small delay to ensure filesystem is ready
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Add small delay to ensure filesystem is ready and force garbage collection
+    if (window.gc) {
+      window.gc();
+    }
+    await new Promise(resolve => setTimeout(resolve, 200)); // Reduced delay for faster processing
 
     // Read the generated video file with retries
     console.log('Reading output file...');
@@ -602,9 +612,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     while (retryCount < maxRetries) {
       try {
-        // Add delay before first read attempt
+        // Add delay before first read attempt and cleanup memory
         if (retryCount === 0) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          if (window.gc) {
+            window.gc();
+          }
+          await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
         }
 
         // Check if output file exists first
