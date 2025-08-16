@@ -620,18 +620,24 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
         }
 
-        // Check if output file exists first
-        const outputExists = await ffmpeg.exists(outputFileName);
-        console.log(`Output file ${outputFileName} exists:`, outputExists);
+        // Check if output file exists first using listDir
+        try {
+          const files = await ffmpeg.listDir('/');
+          const outputExists = files.some(f => f.name === outputFileName && !f.isDir);
+          console.log(`Output file ${outputFileName} exists:`, outputExists);
 
-        if (!outputExists) {
-          if (retryCount === 0) {
-            // On first attempt, wait longer for filesystem sync
-            console.log('Output file not found, waiting for filesystem sync...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            continue; // Try again without incrementing retry count
+          if (!outputExists) {
+            if (retryCount === 0) {
+              // On first attempt, wait longer for filesystem sync
+              console.log('Output file not found, waiting for filesystem sync...');
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              continue; // Try again without incrementing retry count
+            }
+            throw new Error('Output file was not created by FFmpeg');
           }
-          throw new Error('Output file was not created by FFmpeg');
+        } catch (listError) {
+          console.warn('Could not check file existence:', listError.message);
+          // Continue anyway and try to read the file
         }
 
         // Try to get file stats
