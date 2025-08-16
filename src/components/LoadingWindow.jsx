@@ -61,17 +61,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             maxWidth: '7rem * 16'
           }}
         >
-          {/* Background Image - positioned behind text */}
-          <div 
-            className="absolute inset-0 opacity-20 z-0"
-            style={{
-              backgroundImage: `url(${mrakyBackground})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              filter: 'blur(1px)'
-            }}
-          />
+          {/* Removed sleeping alien background - now only shows in AnimatedBackground */}
 
           {/* Header */}
           <div className="relative z-10 flex items-center justify-center p-6 pb-2">

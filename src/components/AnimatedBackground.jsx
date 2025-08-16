@@ -125,7 +125,7 @@ const AnimatedBackground = () => {
         }}
       />
 
-      {/* Sleeping Alien - only visible during video generation, positioned above header */}
+      {/* Sleeping Alien - only visible during video generation, positioned 100px lower */}
       {isGenerating && (
         <motion.img
           key="sleeping-alien-single" // Ensure single instance
@@ -134,7 +134,7 @@ const AnimatedBackground = () => {
           className="absolute w-80 h-80"
           style={{
             left: '50%',
-            top: '80px', // Above the header (header height is 64px + margin)
+            top: '180px', // Moved 100px lower (80px + 100px)
             transform: 'translateX(-50%)',
             zIndex: 25,
             opacity: 1,
