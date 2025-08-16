@@ -42,8 +42,8 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Set concurrent video generation to 3 for memory stability
-      const maxConcurrent = Math.min(3, pairs.length);  // Process up to 3 videos concurrently
+      // Set concurrent video generation to 5 for optimal speed
+      const maxConcurrent = Math.min(5, pairs.length);  // Process up to 5 videos concurrently
 
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes (reduced for stability)`);
       const processingQueue = [...pairs];
@@ -83,11 +83,13 @@ export const useFFmpeg = () => {
         while (activePromises.size < maxConcurrent && processingQueue.length > 0) {
           const pair = processingQueue.shift();
 
-          // Skip if this pair already has a completed video
+          // Skip if this pair already has a completed video or is complete
           const currentStore = useAppStore.getState();
           const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
-          if (existingVideo) {
-            console.log(`Skipping pair ${pair.id} - video already exists`);
+          const videoState = currentStore.videoGenerationStates[pair.id];
+          
+          if (existingVideo || (videoState && videoState.isComplete && videoState.video)) {
+            console.log(`Skipping pair ${pair.id} - video already exists or is complete`);
             completedCount++;
             await updateBatchProgress();
             continue;
@@ -183,12 +185,14 @@ export const useFFmpeg = () => {
     try {
       if (isCancelling) return;
 
-      // Check if this pair already has a generated video
+      // Check if this pair already has a generated video or is complete
       const store = useAppStore.getState();
       const existingVideo = store.generatedVideos.find(v => v.pairId === pair.id);
-      if (existingVideo) {
-        console.log(`Video already exists for pair ${pair.id}, skipping`);
-        return;
+      const videoState = store.videoGenerationStates[pair.id];
+      
+      if (existingVideo || (videoState && videoState.isComplete && videoState.video)) {
+        console.log(`Video already exists or is complete for pair ${pair.id}, skipping`);
+        return existingVideo || videoState.video;
       }
 
       setVideoGenerationState(pair.id, {
