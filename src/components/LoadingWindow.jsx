@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import mrakyBackground from '../assets/mraky-a-zzz.png';
 
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
   const { getVideoGenerationState, generatedVideos, videoSettings, removePair } = useAppStore();
@@ -60,24 +61,38 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             maxWidth: '7rem * 16'
           }}
         >
+          {/* Background Image - positioned behind text */}
+          <div 
+            className="absolute inset-0 opacity-20 z-0"
+            style={{
+              backgroundImage: `url(${mrakyBackground})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              filter: 'blur(1px)'
+            }}
+          />
+
           {/* Header */}
-          <div className="flex items-center justify-center p-6 pb-2">
+          <div className="relative z-10 flex items-center justify-center p-6 pb-2">
             <motion.h2
               className="text-3xl font-bold text-white mb-2"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
+              style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
             >
-              Generating Videos
+              We are generating your videos
             </motion.h2>
           </div>
           <motion.p
-            className="text-gray-300 text-lg text-center"
+            className="relative z-10 text-gray-300 text-lg text-center"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
           >
-            Processing {pairs.length} video pairs...
+            take a break bro
           </motion.p>
 
           {/* Miniature Containers Grid - Larger container area */}
@@ -203,10 +218,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '160px', height: '90px' }}
                         >
-                          {/* Video background preview based on user settings */}
+                          {/* Video background preview based on user settings - moved 4px down */}
                           <div 
                             className="absolute inset-0"
-                            style={getVideoBackgroundStyle()}
+                            style={{
+                              ...getVideoBackgroundStyle(),
+                              top: '4px'
+                            }}
                           />
 
                           {/* Foreground image preview - moved 20px lower total */}
