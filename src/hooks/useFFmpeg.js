@@ -148,6 +148,11 @@ export const useFFmpeg = () => {
       // Reset the global generation state immediately
       setIsGenerating(false);
       setProgress(0);
+      
+      // Force update the store state
+      const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
+      setStoreIsGenerating(false);
+      
       console.log('Generation completed and state reset');
 
     } catch (error) {
@@ -308,6 +313,20 @@ export const useFFmpeg = () => {
         video: video,
         error: null
       });
+      
+      // Force state update to ensure video shows up immediately
+      const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
+      
+      // Check if all videos are complete to update global state
+      const allStates = useAppStore.getState().videoGenerationStates;
+      const allPairsComplete = Object.values(allStates).every(state => 
+        state && (state.isComplete || !state.isGenerating)
+      );
+      
+      if (allPairsComplete) {
+        console.log('All videos completed, updating global state');
+        setStoreIsGenerating(false);
+      }
       
       // Force a brief delay to ensure state updates are processed
       await new Promise(resolve => setTimeout(resolve, 100));
