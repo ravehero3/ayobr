@@ -150,7 +150,6 @@ export const useFFmpeg = () => {
       setProgress(0);
       
       // Force update the store state
-      const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
       setStoreIsGenerating(false);
       
       console.log('Generation completed and state reset');
