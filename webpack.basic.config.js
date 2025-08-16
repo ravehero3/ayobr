@@ -28,6 +28,42 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader']
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'assets/images/',
+              publicPath: 'assets/images/'
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'assets/fonts/',
+              publicPath: 'assets/fonts/'
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(mp3|wav|ogg)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'assets/audio/',
+              publicPath: 'assets/audio/'
+            }
+          }
+        ]
       }
     ]
   },
