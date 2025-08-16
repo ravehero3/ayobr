@@ -58,10 +58,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           style={{
             maxHeight: '90vh',
             width: '100%',
-            maxWidth: '7rem * 16'
+            maxWidth: '7rem * 16',
+            background: 'transparent', // Ensure no background images
           }}
         >
-          {/* Removed sleeping alien background - now only shows in AnimatedBackground */}
+          {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
           {/* Header */}
           <div className="relative z-10 flex items-center justify-center p-6 pb-2">

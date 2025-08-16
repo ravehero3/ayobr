@@ -125,25 +125,26 @@ const AnimatedBackground = () => {
         }}
       />
 
-      {/* Sleeping Alien - only visible during video generation, positioned 100px lower */}
+      {/* Sleeping Alien - only visible during video generation, positioned above footer */}
       {isGenerating && (
         <motion.img
-          key="sleeping-alien-single" // Ensure single instance
+          key="sleeping-alien-big" // Unique key to prevent conflicts
           src={sleepingAlienImg}
           alt="Sleeping Alien"
-          className="absolute w-80 h-80"
+          className="absolute w-96 h-96" // Increased size (w-96 h-96 instead of w-80 h-80)
           style={{
             left: '50%',
-            top: '180px', // Moved 100px lower (80px + 100px)
+            bottom: '120px', // Above the footer (footer is ~64px + margin)
             transform: 'translateX(-50%)',
-            zIndex: 25,
+            zIndex: 30, // Higher z-index to ensure visibility
             opacity: 1,
-            filter: 'brightness(1.1) contrast(1.2)', // Enhanced visibility
+            filter: 'brightness(1.2) contrast(1.3)', // Enhanced visibility
+            pointerEvents: 'none', // Don't interfere with UI interactions
           }}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         />
       )}
 
