@@ -124,6 +124,19 @@ const AnimatedBackground = () => {
         }}
       />
 
+      {/* Sleeping Alien - positioned lower */}
+      <motion.img
+        src={sleepingAlienImg}
+        alt="Sleeping Alien"
+        className="absolute w-64 h-64 opacity-80"
+        style={{
+          left: '50%',
+          top: 'calc(50% + 140px)',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 20,
+        }}
+      />
+
     </div>
   );
 };
