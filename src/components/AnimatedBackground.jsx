@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import sleepingAlienImg from '../assets/mraky-a-zzz.png';
 
 const AnimatedBackground = () => {
   // Get reactive state from Zustand store - these will trigger re-renders
