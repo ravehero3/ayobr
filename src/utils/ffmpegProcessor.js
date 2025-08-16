@@ -444,10 +444,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       ffmpegArgs.push('-i', logoFileName);
     }
 
-    // Add custom background input if provided
-    if (customBackgroundFileName) {
-      ffmpegArgs.push('-i', customBackgroundFileName);
-    }
+
 
     // Get background color from settings (default to black) and ensure FFmpeg compatibility
     let backgroundColor = 'black';
@@ -507,15 +504,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       }
     }
 
+    // Add custom background input if provided
+    if (customBackgroundFileName && useCustomBackground) {
+      ffmpegArgs.push('-i', customBackgroundFileName);
+    }
+
     // Build video filter with proper input index handling
     let videoFilter;
-    let inputIndex = 0; // image=0, audio=1, logo=2, background=3
+    // Input indices: image=0, audio=1, logo=2 (if exists), background=3 (if exists)
     let logoIndex = 2;
     let backgroundIndex = logoFileName ? 3 : 2;
 
     console.log('Video filter inputs:', {
       hasLogo: !!logoFileName,
-      hasCustomBackground: useCustomBackground,
+      hasCustomBackground: useCustomBackground && !!customBackgroundFileName,
       logoIndex,
       backgroundIndex
     });
@@ -554,13 +556,34 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     console.log('FFmpeg command args:', ffmpegArgs);
 
-    // Execute FFmpeg command with timeout protection
-    const execPromise = ffmpeg.exec(ffmpegArgs);
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('FFmpeg execution timeout')), 300000); // 5 minute timeout
-    });
+    // Execute FFmpeg command with enhanced timeout protection
+    console.log('Starting FFmpeg execution...');
+    
+    try {
+      const execPromise = ffmpeg.exec(ffmpegArgs);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 300000); // 5 minute timeout
+      });
 
-    await Promise.race([execPromise, timeoutPromise]);
+      await Promise.race([execPromise, timeoutPromise]);
+      console.log('FFmpeg command executed successfully');
+    } catch (execError) {
+      console.error('FFmpeg execution error:', execError);
+      
+      // Check if this is a recoverable error or just a warning
+      const errorMsg = execError.message || String(execError);
+      const isWarningError = errorMsg.includes('Application provided invalid, non monotonically increasing dts') ||
+                           errorMsg.includes('deprecated') ||
+                           errorMsg.includes('warning') ||
+                           errorMsg.toLowerCase().includes('non-monotonic');
+      
+      if (isWarningError) {
+        console.log('FFmpeg warning detected, continuing with output check...');
+      } else {
+        // Re-throw for actual errors
+        throw execError;
+      }
+    }
 
     // Disable progress callback to prevent issues during cleanup
     progressCallbackActive = false;
@@ -589,6 +612,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.log(`Output file ${outputFileName} exists:`, outputExists);
 
         if (!outputExists) {
+          if (retryCount === 0) {
+            // On first attempt, wait longer for filesystem sync
+            console.log('Output file not found, waiting for filesystem sync...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            continue; // Try again without incrementing retry count
+          }
           throw new Error('Output file was not created by FFmpeg');
         }
 
@@ -632,7 +661,14 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
             console.log('Cannot list files:', listError);
           }
 
-          throw new Error(`FFmpeg executed but output file is inaccessible after ${maxRetries} attempts`);
+          // Enhanced error details for debugging
+          console.error('Video generation failed - detailed error:');
+          console.error('- Audio file:', audioFile.name, 'size:', audioFile.size);
+          console.error('- Image file:', imageFile.name, 'size:', imageFile.size);
+          console.error('- Output file expected:', outputFileName);
+          console.error('- Last read error:', readError.message || readError);
+          
+          throw new Error(`Video generation failed: Output file could not be read after ${maxRetries} attempts`);
         }
       }
     }

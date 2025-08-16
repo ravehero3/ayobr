@@ -218,27 +218,50 @@ export const useFFmpeg = () => {
       };
       console.log('Video settings for generation:', videoSettings);
 
-      const videoData = await processVideoWithFFmpeg(
-        pair.audio, 
-        pair.image, 
-        (progress) => {
-          const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
-          setVideoGenerationState(pair.id, {
-            isGenerating: true,
-            progress: clampedProgress,
-            isComplete: false,
-            video: null
-          });
-        },
-        () => {
-          if (isCancelling) {
-            console.log('Cancellation detected, stopping FFmpeg process');
-            return true;
-          }
-          return false;
-        },
-        videoSettings
-      );
+      let videoData;
+      try {
+        videoData = await processVideoWithFFmpeg(
+          pair.audio, 
+          pair.image, 
+          (progress) => {
+            const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
+            console.log(`Setting video generation state for pair ${pair.id}:`, {
+              isGenerating: true,
+              progress: clampedProgress,
+              isComplete: false,
+              video: null
+            });
+            setVideoGenerationState(pair.id, {
+              isGenerating: true,
+              progress: clampedProgress,
+              isComplete: false,
+              video: null
+            });
+          },
+          () => {
+            if (isCancelling) {
+              console.log('Cancellation detected, stopping FFmpeg process');
+              return true;
+            }
+            return false;
+          },
+          videoSettings
+        );
+        console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
+      } catch (processingError) {
+        console.error(`Error during video processing for pair ${pair.id}:`, processingError);
+        
+        // Set error state for the pair
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: processingError.message || 'Video processing failed'
+        });
+        
+        throw processingError; // Re-throw to be handled by the main catch block
+      }
 
       if (isCancelling) {
         console.log('Video generation cancelled during blob creation');
