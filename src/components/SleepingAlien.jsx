@@ -15,19 +15,12 @@ const SleepingAlien = () => {
   // Only show during active video generation - more strict conditions
   const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
 
-  // Debug logging
-  console.log('SleepingAlien Debug:', {
-    storeIsGenerating,
-    videoGenerationStates,
-    isGenerating,
-    hasCompletePairs,
-    pairsCount: pairs.length,
-    shouldShow: isGenerating && hasCompletePairs
-  });
+  // TEMPORARY: Always show for testing
+  const alwaysShow = true;
 
   return (
     <AnimatePresence>
-      {isGenerating && hasCompletePairs && (
+      {alwaysShow && (
         <motion.div
           key="sleeping-alien-container" 
           className="pointer-events-none sleeping-alien-no-blur"
@@ -46,7 +39,8 @@ const SleepingAlien = () => {
             willChange: 'transform, opacity',
             transform: 'translateZ(0)', // Force new composite layer
             contain: 'strict', // Full containment
-            // Remove debug background now that we're using the new image
+            // Temporary background to see if container renders
+            backgroundColor: 'rgba(0, 255, 0, 0.5)' // Green background for testing
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
