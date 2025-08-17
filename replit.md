@@ -9,7 +9,7 @@ Container styling preferences: 4px thick glassmorphism stroke around all contain
 FFmpeg optimization preferences: Use hardware acceleration when available, faster encoding presets (ultrafast/superfast), lower frame rates for processing speed, parallel processing with all CPU cores.
 UI positioning preferences: "We are generating your videos" text positioned 80px higher, sleeping alien positioned at bottom of screen during video generation.
 Z-index preferences: Sleeping alien should appear in front of background but behind footer during video generation.
-Video container width: Generating video containers should be 200px wide (fixed size).
+Video container width: Generating video containers should be 150px wide (fixed size, no responsive resizing).
 
 ## System Architecture
 
@@ -37,7 +37,7 @@ Key features include:
 ## Recent Changes (August 17, 2025)
 - **Migration Completed**: Successfully migrated project from Replit Agent to Replit environment
 - **Z-index Hierarchy**: Fixed sleeping alien visibility during video generation (z-index: 9900, above background but below footer)
-- **Video Container Sizing**: Updated generating video containers to 200px width (fixed size) as requested
+- **Video Container Sizing**: Set generating video containers to 150px width with fixed dimensions (no responsive resizing)
 - **Layer Management**: Ensured proper layering with footer (z-index: 99999) > loading window (z-index: 9950) > sleeping alien (z-index: 9900) > background
 
 ### System Design Choices

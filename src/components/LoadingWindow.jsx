@@ -84,12 +84,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           <div 
             className="grid gap-6 w-full mx-auto"
             style={{
-              gridTemplateColumns: `repeat(3, 1fr)`,
+              gridTemplateColumns: 'repeat(auto-fit, 220px)',
               justifyContent: 'center',
               justifyItems: 'center',
-              maxWidth: 'calc(100vw - 160px)', // Full width minus 80px on each side
+              maxWidth: 'calc(100vw - 160px)',
               padding: '0 80px',
-              zIndex: 50
+              zIndex: 50,
+              gap: '24px'
             }}
           >
               {pairs.map((pair, index) => {
@@ -126,8 +127,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     className="video-loading-container group"
                     style={{
                       position: 'relative',
-                      width: '100%',
+                      width: '220px',
                       minWidth: '220px',
+                      maxWidth: '220px',
                       height: '200px',
                       background: 'rgba(0, 0, 0, 0.41)',
                       borderRadius: '16px',
@@ -209,7 +211,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-37px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
-                          style={{ width: '200px', height: '112px' }}
+                          style={{ width: '150px', height: '84px', minWidth: '150px', maxWidth: '150px', minHeight: '84px', maxHeight: '84px' }}
                         >
                           {/* Video background preview based on user settings - centered */}
                           <div 
