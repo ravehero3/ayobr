@@ -209,7 +209,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-37px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
-                          style={{ width: '150px', height: '84px' }}
+                          style={{ width: '200px', height: '112px' }}
                         >
                           {/* Video background preview based on user settings - centered */}
                           <div 
