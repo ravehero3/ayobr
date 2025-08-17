@@ -125,8 +125,8 @@ const AnimatedBackground = () => {
         }}
       />
 
-      {/* Sleeping Alien - only visible during video generation, positioned behind footer */}
-      {isGenerating && (
+      {/* Sleeping Alien - only visible during video generation when on file management page */}
+      {isGenerating && hasFiles && hasCompletePairs && (
         <motion.div
           key="sleeping-alien-container"
           className="fixed inset-0 pointer-events-none"
@@ -154,6 +154,8 @@ const AnimatedBackground = () => {
               WebkitBackdropFilter: 'none !important', // Webkit support
               willChange: 'transform', // Optimize for animations
               isolation: 'isolate', // Additional isolation
+              imageRendering: 'crisp-edges', // Prevent blurriness
+              WebkitImageRendering: 'crisp-edges', // Webkit support
             }}
             initial={{ scale: 0.8, y: 20 }}
             animate={{ scale: 1, y: 0 }}
