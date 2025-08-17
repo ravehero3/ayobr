@@ -84,7 +84,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           <div 
             className="grid gap-6 w-full mx-auto"
             style={{
-              gridTemplateColumns: `repeat(4, 1fr)`,
+              gridTemplateColumns: `repeat(3, 1fr)`,
               justifyContent: 'center',
               justifyItems: 'center',
               maxWidth: 'calc(100vw - 160px)', // Full width minus 80px on each side

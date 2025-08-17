@@ -71,14 +71,19 @@ const SleepingAlien = () => {
               '--backdrop-filter': 'none !important',
               // Create new stacking context
               contain: 'layout style paint',
-              // Override any parent blur effects
+              // Override any parent blur effects with more specificity
               WebkitFilter: 'none !important',
               msFilter: 'none !important',
+              filter: 'none !important',
               // Force hardware acceleration
               WebkitTransform: 'translate3d(0, 0, 0)',
+              transform: 'translate3d(0, 0, 0)',
               // Ensure crisp rendering
-              imageRendering: 'crisp-edges',
-              WebkitImageRendering: 'crisp-edges',
+              imageRendering: 'auto',
+              WebkitImageRendering: 'auto',
+              // Additional blur prevention
+              backdropFilter: 'none !important',
+              WebkitBackdropFilter: 'none !important',
             }}
           />
         </motion.div>
