@@ -136,24 +136,20 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       width: '100%',
                       minWidth: '400px',
                       height: '200px',
-                      background: isComplete ? 'rgba(0, 0, 0, 0.44)' : 'transparent',
+                      background: 'rgba(0, 0, 0, 0.41)',
                       borderRadius: '16px',
                       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                       backdropFilter: 'blur(11.4px)',
                       WebkitBackdropFilter: 'blur(11.4px)',
-                      border: isComplete ? '1px solid rgba(0, 0, 0, 0.09)' : '1px solid rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(0, 0, 0, 0.4)',
                       padding: '20px',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
                       overflow: 'visible'
                     }}
                     whileHover={{
-                      backgroundColor: isComplete 
-                        ? 'rgba(255, 255, 255, 0.02)' 
-                        : 'rgba(255, 255, 255, 0.02)',
-                      boxShadow: isComplete
-                        ? '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)'
-                        : '0 4px 30px rgba(0, 0, 0, 0.1)'
+                      backgroundColor: 'rgba(0, 0, 0, 0.51)',
+                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)'
                     }}
                   >
                     {/* Particle system */}
