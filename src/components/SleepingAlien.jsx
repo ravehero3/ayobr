@@ -15,12 +15,9 @@ const SleepingAlien = () => {
   // Only show during active video generation - more strict conditions
   const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
 
-  // TEMPORARY: Always show for testing
-  const alwaysShow = true;
-
   return (
     <AnimatePresence>
-      {alwaysShow && (
+      {isGenerating && hasCompletePairs && (
         <motion.div
           key="sleeping-alien-container" 
           className="pointer-events-none sleeping-alien-no-blur"
@@ -30,7 +27,7 @@ const SleepingAlien = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 9950, // Above background and loading window
+            zIndex: 99998, // Below footer (99999) but above everything else
             isolation: 'isolate',
             filter: 'none !important',
             backdropFilter: 'none !important',
@@ -39,8 +36,8 @@ const SleepingAlien = () => {
             willChange: 'transform, opacity',
             transform: 'translateZ(0)', // Force new composite layer
             contain: 'strict', // Full containment
-            // Temporary background to see if container renders
-            backgroundColor: 'rgba(0, 255, 0, 0.5)' // Green background for testing
+            // Remove debug background - positioning fixed
+            // backgroundColor: 'rgba(0, 255, 0, 0.5)' // Green background for testing
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -52,7 +49,7 @@ const SleepingAlien = () => {
               // Create another isolation layer
               position: 'fixed',
               left: '50%',
-              bottom: '10vh',
+              bottom: '15vh',
               transform: 'translateX(-50%)',
               width: '40vw',
               maxWidth: '600px',
