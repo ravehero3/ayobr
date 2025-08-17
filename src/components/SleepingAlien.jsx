@@ -31,14 +31,15 @@ const SleepingAlien = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <motion.img
+          <img
             src={sleepingAlienImg}
             alt="Sleeping Alien"
             style={{
-              position: 'absolute',
-              left: 'calc(50% - 540px)', // Original position 580px, moved 40px right = 540px
-              top: 'calc(50% - 220px)', // Keep same vertical position
-              transform: 'translateX(-50%) translateY(-50%)',
+              position: 'fixed',
+              left: '50%',
+              top: '50%',
+              marginLeft: '-40vw', // Half of 80vw to center it
+              marginTop: '-25vh', // Approximate vertical centering
               width: '80vw',
               height: 'auto',
               filter: 'none !important',
@@ -52,10 +53,6 @@ const SleepingAlien = () => {
               mixBlendMode: 'normal',
               opacity: 1,
             }}
-            initial={{ scale: 0.8, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.8, y: 20 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
           />
         </motion.div>
       )}
