@@ -114,7 +114,7 @@ const Footer = ({ onGenerateVideos }) => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center space-x-2" style={{ marginLeft: '-70px' }}>
+            <div className="flex items-center space-x-2" style={{ marginLeft: '-90px' }}>
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
