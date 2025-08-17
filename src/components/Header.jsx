@@ -64,8 +64,8 @@ const Header = () => {
           )}
         </div>
 
-        {/* Profile Icon - Fixed in top right corner */}
-        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center" style={{ right: '325px' }}>
+        {/* Profile Icon - Fixed relative to logo position */}
+        <div className="absolute top-1/2 transform -translate-y-1/2 flex items-center" style={{ left: 'calc((100vw - 500px) / 2 + 325px)' }}>
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
