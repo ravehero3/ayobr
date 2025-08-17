@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import sleepingAlienImg from '../assets/sleeping-alien-zzz.png';
+import sleepingAlienImg from '../assets/sleeping-alien-new.png';
 
 const SleepingAlien = () => {
   // Get reactive state from Zustand store
@@ -46,8 +46,7 @@ const SleepingAlien = () => {
             willChange: 'transform, opacity',
             transform: 'translateZ(0)', // Force new composite layer
             contain: 'strict', // Full containment
-            // Temporary debug background
-            backgroundColor: 'rgba(255, 0, 0, 0.3)' // Red background for debugging
+            // Remove debug background now that we're using the new image
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
