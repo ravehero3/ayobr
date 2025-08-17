@@ -156,6 +156,9 @@ const AnimatedBackground = () => {
               isolation: 'isolate', // Additional isolation
               imageRendering: 'crisp-edges', // Prevent blurriness
               WebkitImageRendering: 'crisp-edges', // Webkit support
+              imageRendering: '-webkit-optimize-contrast', // Additional webkit optimization
+              msInterpolationMode: 'nearest-neighbor', // IE support
+              position: 'relative', // Ensure it's not affected by parent filters
             }}
             initial={{ scale: 0.8, y: 20 }}
             animate={{ scale: 1, y: 0 }}
