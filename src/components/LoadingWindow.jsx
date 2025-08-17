@@ -209,22 +209,22 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '160px', height: '90px' }}
                         >
-                          {/* Video background preview based on user settings - moved 40px down behind image */}
+                          {/* Video background preview based on user settings - moved 70px down behind image */}
                           <div 
                             className="absolute inset-0"
                             style={{
                               ...getVideoBackgroundStyle(),
-                              top: '40px'
+                              top: '70px'
                             }}
                           />
 
-                          {/* Foreground image preview - back to original position */}
+                          {/* Foreground image preview - moved 30px down */}
                           {pair.image && (
                             <img 
                               src={URL.createObjectURL(pair.image)}
                               alt="Preview"
                               className="absolute w-full h-full object-contain opacity-80"
-                              style={{ zIndex: 1 }}
+                              style={{ zIndex: 1, top: '30px' }}
                             />
                           )}
 
