@@ -23,11 +23,16 @@ const SleepingAlien = () => {
           key="sleeping-alien-container"
           className="fixed inset-0 pointer-events-none"
           style={{
-            zIndex: 30, // Below LoadingWindow (z-40) but above everything else
+            zIndex: 9999, // Highest possible z-index to be above everything
             isolation: 'isolate',
             filter: 'none !important',
             backdropFilter: 'none !important',
             WebkitBackdropFilter: 'none !important',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -37,7 +42,11 @@ const SleepingAlien = () => {
           <img
             src={sleepingAlienImg}
             alt="Sleeping Alien"
+            className=""
             style={{
+              // Complete override of any inherited styles
+              all: 'unset',
+              display: 'block',
               position: 'fixed',
               left: '50%',
               bottom: '0', // Position from bottom instead of top
@@ -59,10 +68,18 @@ const SleepingAlien = () => {
               transform: 'translateZ(0)',
               willChange: 'transform',
               // Force no blur with CSS variables override
-              '--webkit-backdrop-filter': 'none',
-              '--backdrop-filter': 'none',
+              '--webkit-backdrop-filter': 'none !important',
+              '--backdrop-filter': 'none !important',
               // Create new stacking context
               contain: 'layout style paint',
+              // Override any parent blur effects
+              WebkitFilter: 'none !important',
+              msFilter: 'none !important',
+              // Force hardware acceleration
+              WebkitTransform: 'translate3d(0, 0, 0)',
+              // Ensure crisp rendering
+              imageRendering: 'crisp-edges',
+              WebkitImageRendering: 'crisp-edges',
             }}
           />
         </motion.div>
