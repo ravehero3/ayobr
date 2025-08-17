@@ -216,30 +216,24 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '160px', height: '90px' }}
                         >
-                          {/* Video background preview based on user settings - centered at same point as image */}
+                          {/* Video background preview based on user settings - centered */}
                           <div 
-                            className="absolute w-full h-full"
+                            className="absolute inset-0 w-full h-full flex items-center justify-center"
                             style={{
-                              ...getVideoBackgroundStyle(),
-                              top: '50%',
-                              left: '50%',
-                              transform: 'translate(-50%, -50%)'
+                              ...getVideoBackgroundStyle()
                             }}
                           />
 
-                          {/* Foreground image preview - centered at same point as background */}
+                          {/* Foreground image preview - centered */}
                           {pair.image && (
-                            <img 
-                              src={URL.createObjectURL(pair.image)}
-                              alt="Preview"
-                              className="absolute w-full h-full object-contain opacity-80"
-                              style={{ 
-                                zIndex: 1, 
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)'
-                              }}
-                            />
+                            <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                              <img 
+                                src={URL.createObjectURL(pair.image)}
+                                alt="Preview"
+                                className="max-w-full max-h-full object-contain opacity-80"
+                                style={{ zIndex: 1 }}
+                              />
+                            </div>
                           )}
 
                           {/* Single progress overlay in center of preview - only percentage counter we keep */}
