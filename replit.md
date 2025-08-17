@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 Container styling preferences: 4px thick glassmorphism stroke around all containers with semitransparent shadows below and beneath.
 FFmpeg optimization preferences: Use hardware acceleration when available, faster encoding presets (ultrafast/superfast), lower frame rates for processing speed, parallel processing with all CPU cores.
 UI positioning preferences: "We are generating your videos" text positioned 80px higher, sleeping alien positioned at bottom of screen during video generation.
+Z-index preferences: Sleeping alien should appear in front of background but behind footer during video generation.
+Video container width: Generating video containers should be 150px wide.
 
 ## System Architecture
 
@@ -31,6 +33,12 @@ Key features include:
 - **User Profile System**: Glassmorphism modal for user profiles, allowing custom profile pictures (JPG/PNG, max 5MB) stored as base64, with username and email fields.
 - **Logo Integration System**: Settings panel allows users to upload logos (PNG, JPG, HEIC, SVG) for video overlay. Logos are stored as base64, displayed as miniature previews, and automatically resized to 200px width while maintaining aspect ratio when used in videos.
 - **Deployment**: Web-based deployment running with webpack dev server, ensuring client-side processing for privacy and performance.
+
+## Recent Changes (August 17, 2025)
+- **Migration Completed**: Successfully migrated project from Replit Agent to Replit environment
+- **Z-index Hierarchy**: Fixed sleeping alien visibility during video generation (z-index: 9900, above background but below footer)
+- **Video Container Sizing**: Adjusted generating video containers to 150px width as requested
+- **Layer Management**: Ensured proper layering with footer (z-index: 99999) > loading window (z-index: 9950) > sleeping alien (z-index: 9900) > background
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.
