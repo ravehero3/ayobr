@@ -69,7 +69,7 @@ const Header = () => {
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
-            style={{ marginRight: '251px' }} // Moved 20px more to the left (231 + 20 = 251px total)
+            style={{ marginRight: '271px' }} // Moved 20px more to the left (251 + 20 = 271px total)
           >
             <img
               src={userProfileImage || userIcon}
