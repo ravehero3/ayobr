@@ -43,6 +43,7 @@ const Footer = ({ onGenerateVideos }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="fixed bottom-0 left-0 right-0 z-50 h-16"
+      style={{ zIndex: 99999 }}
     >
       <div
         className="w-full h-full flex items-center justify-between px-8"
