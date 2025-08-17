@@ -23,8 +23,8 @@ const SleepingAlien = () => {
           key="sleeping-alien-container"
           className="fixed inset-0 pointer-events-none"
           style={{
-            zIndex: 9999, // Highest z-index to be above everything
-            isolation: 'isolate', // Create completely separate stacking context
+            zIndex: 30, // Below LoadingWindow (z-40) but above everything else
+            isolation: 'isolate',
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

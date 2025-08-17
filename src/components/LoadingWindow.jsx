@@ -45,8 +45,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40 flex items-center justify-center bg-space-dark/90 backdrop-blur-sm"
-        style={{ paddingTop: '80px', paddingBottom: '80px' }}
+        className="fixed inset-0 z-40 flex flex-col items-center justify-start bg-space-dark/90 backdrop-blur-sm"
+        style={{ paddingTop: '40px', paddingBottom: '40px' }}
       >
         {/* Loading Window - No Background */}
         <motion.div
@@ -54,18 +54,18 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative w-full max-w-7xl mx-4 p-2 rounded-lg overflow-hidden"
+          className="relative w-full max-w-7xl mx-4 p-2 rounded-lg overflow-visible"
           style={{
-            maxHeight: '90vh',
+            maxHeight: 'calc(100vh - 80px)',
             width: '100%',
-            maxWidth: '7rem * 16',
-            background: 'transparent', // Ensure no background images
+            maxWidth: '112rem',
+            background: 'transparent',
           }}
         >
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
-          {/* Header - moved 80px higher */}
-          <div className="relative z-10 flex flex-col items-center justify-center pt-20 pb-6" style={{ marginTop: '-160px' }}>
+          {/* Header */}
+          <div className="relative z-10 flex flex-col items-center justify-center pt-8 pb-6">
             <motion.h2
               className="text-3xl font-bold text-white mb-4 text-center"
               initial={{ opacity: 0, y: -10 }}
@@ -86,8 +86,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             </motion.p>
           </div>
 
-          {/* Miniature Containers Grid - moved 130px higher */}
-          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '-210px' }}>
+          {/* Miniature Containers Grid */}
+          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
               {pairs.map((pair, index) => {
                 const videoState = getVideoGenerationState(pair.id);
