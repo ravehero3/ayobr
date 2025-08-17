@@ -309,7 +309,7 @@ function App() {
 
   return (
     <div 
-      className={`fixed inset-0 w-screen h-screen transition-all duration-300 overflow-auto ${
+      className={`fixed inset-0 w-screen h-screen transition-all duration-300 overflow-hidden ${
         isDragOver ? 'bg-opacity-80 ring-4 ring-neon-blue/50' : ''
       } ${
         dragState.isAudioDragging ? 'audio-drag-active' : ''
@@ -320,11 +320,13 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Animated Background */}
-      <AnimatedBackground />
+      {/* Fixed Aspect Ratio Container - maintains layout proportions */}
+      <div className="fixed-aspect-ratio-container">
+        {/* Animated Background */}
+        <AnimatedBackground />
 
       <div className="fixed inset-0 flex justify-center">
-        <div className="w-full max-w-6xl transition-all duration-300 overflow-auto">
+        <div className="w-full max-w-6xl transition-all duration-300 overflow-hidden">
       {/* Drag Overlay */}
       <AnimatePresence>
         {isDragOver && (
@@ -605,6 +607,7 @@ function App() {
 
         </div>
       </div>
+      </div> {/* Close fixed-aspect-ratio-container */}
     </div>
   );
 }

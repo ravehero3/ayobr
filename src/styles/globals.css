@@ -8,15 +8,75 @@ body {
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
+  overflow-y: hidden; /* Prevent scrollbars */
 }
 
 html {
   background-color: #050A13;
+  overflow: hidden; /* Prevent scrollbars */
 }
 
 #root {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   background-color: #050A13;
+  overflow: hidden; /* Prevent scrollbars */
+  position: relative;
+}
+
+/* Fixed aspect ratio container - maintains 16:9 ratio like desktop app */
+.fixed-aspect-ratio-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 100vh;
+  
+  /* If window is too wide, scale based on height */
+  max-width: calc(100vh * (16/9));
+  
+  /* If window is too tall, scale based on width */  
+  max-height: calc(100vw * (9/16));
+  
+  background-color: #050A13;
+  overflow: hidden;
+  
+  /* Ensure content maintains its aspect ratio */
+  display: flex;
+  flex-direction: column;
+  
+  /* Add smooth scaling transitions */
+  transition: all 0.2s ease-out;
+}
+
+/* Ensure all content inside the fixed container uses relative positioning */
+.fixed-aspect-ratio-container > * {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Prevent any scrolling within the fixed container */
+.fixed-aspect-ratio-container * {
+  box-sizing: border-box;
+}
+
+/* Override any overflow settings within the fixed container */
+.fixed-aspect-ratio-container .overflow-auto {
+  overflow: hidden !important;
+}
+
+/* Ensure header maintains fixed position within the aspect ratio container */
+.fixed-aspect-ratio-container header {
+  position: absolute !important;
+  z-index: 50;
+}
+
+/* Ensure footer maintains fixed position within the aspect ratio container */
+.fixed-aspect-ratio-container footer {
+  position: absolute !important;
+  bottom: 0;
+  z-index: 50;
 }
 
 /* Modern glassmorphism effect for all containers */
