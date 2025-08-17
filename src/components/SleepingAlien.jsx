@@ -34,19 +34,14 @@ const SleepingAlien = () => {
           key="sleeping-alien-container" 
           className="pointer-events-none"
           style={{
-            // Simple centered positioning - NO full screen overlay
+            // Perfect center positioning
             position: 'fixed',
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '600px',
-            height: '400px',
-            zIndex: 999999,
-            // Strong debug background to verify visibility
-            backgroundColor: 'rgba(255, 0, 0, 0.8)',
-            border: '5px solid yellow',
-            padding: '20px',
-            borderRadius: '20px',
+            width: '1800px', // 3x bigger (600px * 3)
+            height: '1200px', // 3x bigger (400px * 3)
+            zIndex: 99997, // Behind footer (99999) but above other content
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
