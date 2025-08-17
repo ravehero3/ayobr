@@ -127,28 +127,40 @@ const AnimatedBackground = () => {
 
       {/* Sleeping Alien - only visible during video generation, positioned behind footer */}
       {isGenerating && (
-        <motion.img
-          key="sleeping-alien-big" // Unique key to prevent conflicts
-          src={sleepingAlienImg}
-          alt="Sleeping Alien"
-          className="absolute" // Removed size classes to use custom width
+        <motion.div
+          key="sleeping-alien-container"
+          className="fixed inset-0 pointer-events-none"
           style={{
-            left: 'calc(50% - 580px)', // Moved 20px more to the left (560px + 20px = 580px total)
-            top: 'calc(50% - 170px)', // Moved 80px higher (90px + 80px = 170px total)
-            transform: 'translateX(-50%) translateY(-50%)',
-            width: '80vw', // Increased from 66.67vw to 80vw (bigger)
-            height: 'auto', // Maintain aspect ratio
-            zIndex: 1000, // Above blur effects and other background elements
-            opacity: 1,
-            filter: 'none', // Explicitly no filters - no blur or effects
-            // No blur or brightness filters - keep original image quality
-            pointerEvents: 'none', // Don't interfere with UI interactions
+            zIndex: 2000, // Higher z-index to ensure it's above all background effects
+            isolation: 'isolate', // Create new stacking context to prevent filter inheritance
           }}
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-        />
+        >
+          <motion.img
+            src={sleepingAlienImg}
+            alt="Sleeping Alien"
+            className="absolute"
+            style={{
+              left: 'calc(50% - 580px)', // Moved 20px more to the left (560px + 20px = 580px total)
+              top: 'calc(50% - 170px)', // Moved 80px higher (90px + 80px = 170px total)
+              transform: 'translateX(-50%) translateY(-50%)',
+              width: '80vw', // Increased from 66.67vw to 80vw (bigger)
+              height: 'auto', // Maintain aspect ratio
+              filter: 'none !important', // Force no filters with !important
+              backdropFilter: 'none !important', // Ensure no backdrop filters
+              WebkitBackdropFilter: 'none !important', // Webkit support
+              willChange: 'transform', // Optimize for animations
+              isolation: 'isolate', // Additional isolation
+            }}
+            initial={{ scale: 0.8, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.8, y: 20 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+        </motion.div>
       )}
 
     </div>
