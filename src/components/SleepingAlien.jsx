@@ -27,6 +27,9 @@ const SleepingAlien = () => {
             filter: 'none !important',
             backdropFilter: 'none !important',
             WebkitBackdropFilter: 'none !important',
+            // Create a new stacking context completely isolated from background blur
+            willChange: 'transform',
+            transform: 'translateZ(0)', // Force hardware layer
             position: 'fixed',
             top: 0,
             left: 0,
@@ -38,24 +41,38 @@ const SleepingAlien = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <img
-            src={sleepingAlienImg}
-            alt="Sleeping Alien"
-            className=""
+          <div
             style={{
-              // Complete override of any inherited styles
-              all: 'unset',
-              display: 'block',
+              // Create another isolation layer
               position: 'fixed',
               left: '50%',
-              bottom: '0', // Position from bottom instead of top
-              marginLeft: '-40vw', // Half of 80vw to center it
-              marginBottom: '-10vh', // Move slightly below bottom edge
+              bottom: '0',
+              marginLeft: '-40vw',
+              marginBottom: '-10vh',
               width: '80vw',
               height: 'auto',
+              isolation: 'isolate',
               filter: 'none !important',
               backdropFilter: 'none !important',
               WebkitBackdropFilter: 'none !important',
+              transform: 'translateZ(0)',
+              willChange: 'transform',
+              contain: 'layout style paint',
+            }}
+          >
+            <img
+              src={sleepingAlienImg}
+              alt="Sleeping Alien"
+              style={{
+                // Complete override of any inherited styles
+                all: 'unset',
+                display: 'block',
+                position: 'relative',
+                width: '100%',
+                height: 'auto',
+                filter: 'none !important',
+                backdropFilter: 'none !important',
+                WebkitBackdropFilter: 'none !important',
               imageRendering: 'auto',
               WebkitImageRendering: 'auto',
               MozImageRendering: 'auto',
@@ -86,6 +103,7 @@ const SleepingAlien = () => {
               WebkitBackdropFilter: 'none !important',
             }}
           />
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
