@@ -64,8 +64,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         >
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
-          {/* Header - positioned below app header with proper spacing */}
-          <div className="relative z-10 flex flex-col items-center justify-center pt-20 pb-6">
+          {/* Header - moved 80px higher */}
+          <div className="relative z-10 flex flex-col items-center justify-center pt-20 pb-6" style={{ marginTop: '-80px' }}>
             <motion.h2
               className="text-3xl font-bold text-white mb-4 text-center"
               initial={{ opacity: 0, y: -10 }}
@@ -86,8 +86,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             </motion.p>
           </div>
 
-          {/* Miniature Containers Grid - positioned below header text */}
-          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4">
+          {/* Miniature Containers Grid - moved 80px higher */}
+          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '-80px' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
               {pairs.map((pair, index) => {
                 const videoState = getVideoGenerationState(pair.id);
