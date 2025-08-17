@@ -133,8 +133,8 @@ const AnimatedBackground = () => {
           alt="Sleeping Alien"
           className="absolute" // Removed size classes to use custom width
           style={{
-            left: 'calc(50% - 70px)', // Moved 70px to the left from center
-            top: 'calc(50% - 20px)', // Moved 20px higher from center
+            left: 'calc(50% - 190px)', // Moved 120px more to the left (70px + 120px = 190px total)
+            top: 'calc(50% - 90px)', // Moved 70px higher (20px + 70px = 90px total)
             transform: 'translateX(-50%) translateY(-50%)',
             width: '80vw', // Increased from 66.67vw to 80vw (bigger)
             height: 'auto', // Maintain aspect ratio
