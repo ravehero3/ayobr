@@ -46,7 +46,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90 backdrop-blur-sm"
-        style={{ zIndex: 9950, paddingTop: '40px', paddingBottom: '40px' }} // Above sleeping alien but below footer
+        style={{ zIndex: 9950, paddingTop: '72px', paddingBottom: '40px' }} // Above sleeping alien but below header and footer
       >
         {/* Loading Window - No Background */}
         <motion.div
@@ -84,7 +84,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           <div 
             className="grid gap-6 w-full mx-auto"
             style={{
-              gridTemplateColumns: 'repeat(auto-fit, 220px)',
+              gridTemplateColumns: 'repeat(auto-fit, 240px)',
               justifyContent: 'center',
               justifyItems: 'center',
               maxWidth: 'calc(100vw - 160px)',
@@ -127,9 +127,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     className="video-loading-container group"
                     style={{
                       position: 'relative',
-                      width: '220px',
-                      minWidth: '220px',
-                      maxWidth: '220px',
+                      width: '240px',
+                      minWidth: '240px',
+                      maxWidth: '240px',
                       height: '200px',
                       background: 'rgba(0, 0, 0, 0.41)',
                       borderRadius: '16px',
@@ -211,7 +211,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-37px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
-                          style={{ width: '150px', height: '84px', minWidth: '150px', maxWidth: '150px', minHeight: '84px', maxHeight: '84px' }}
+                          style={{ width: '200px', height: '112px', minWidth: '200px', maxWidth: '200px', minHeight: '112px', maxHeight: '112px' }}
                         >
                           {/* Video background preview based on user settings - centered */}
                           <div 

@@ -22,7 +22,8 @@ const Header = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 h-16"
+      className="fixed top-0 left-0 right-0 h-16"
+      style={{ zIndex: 10000 }}
     >
       <div
         className="w-full h-full flex items-center justify-between"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import sleepingAlienImg from '../assets/mraky-a-zzz.png';
+import sleepingAlienImg from '../assets/sleeping-alien-zzz.png';
 
 const SleepingAlien = () => {
   // Get reactive state from Zustand store
@@ -14,6 +14,16 @@ const SleepingAlien = () => {
 
   // Only show during active video generation - more strict conditions
   const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
+
+  // Debug logging
+  console.log('SleepingAlien Debug:', {
+    storeIsGenerating,
+    videoGenerationStates,
+    isGenerating,
+    hasCompletePairs,
+    pairsCount: pairs.length,
+    shouldShow: isGenerating && hasCompletePairs
+  });
 
   return (
     <AnimatePresence>
