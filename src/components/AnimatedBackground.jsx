@@ -138,7 +138,7 @@ const AnimatedBackground = () => {
             transform: 'translateX(-50%) translateY(-50%)',
             width: '80vw', // Increased from 66.67vw to 80vw (bigger)
             height: 'auto', // Maintain aspect ratio
-            zIndex: 20, // Behind footer (footer typically has higher z-index)
+            zIndex: 1000, // Above blur effects and other background elements
             opacity: 1,
             filter: 'none', // Explicitly no filters - no blur or effects
             // No blur or brightness filters - keep original image quality
