@@ -65,11 +65,10 @@ const Header = () => {
         </div>
 
         {/* Profile Icon - Fixed in top right corner */}
-        <div className="flex items-center">
+        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center" style={{ right: '325px' }}>
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
-            style={{ marginRight: '325px' }} // Moved 40px to the right from previous position
           >
             <img
               src={userProfileImage || userIcon}
