@@ -214,7 +214,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             className="absolute inset-0"
                             style={{
                               ...getVideoBackgroundStyle(),
-                              top: '70px'
+                              top: '100px'
                             }}
                           />
 
