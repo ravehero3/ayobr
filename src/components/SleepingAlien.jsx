@@ -24,24 +24,24 @@ const SleepingAlien = () => {
     videoGenerationStatesCount: Object.keys(videoGenerationStates).length
   });
 
-  // TEMPORARY: Always show for testing positioning
-  const testMode = true;
+  // Show only when actually generating videos
+  const shouldShow = isGenerating && hasCompletePairs;
 
   return (
     <AnimatePresence>
-      {(testMode || (isGenerating && hasCompletePairs)) && (
+      {shouldShow && (
         <motion.div
           key="sleeping-alien-container" 
           className="pointer-events-none"
           style={{
-            // Perfect center positioning
+            // Perfect center positioning - centered to the entire viewport
             position: 'fixed',
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '1800px', // 3x bigger (600px * 3)
-            height: '1200px', // 3x bigger (400px * 3)
-            zIndex: 99997, // Behind footer (99999) but above other content
+            width: '600px', // Reasonable size for the alien
+            height: '400px', 
+            zIndex: 99998, // Behind footer (99999) but above other content
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
