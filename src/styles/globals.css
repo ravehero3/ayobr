@@ -81,6 +81,30 @@ html {
   --backdrop-filter: none !important;
 }
 
+/* Header no-blur override - ensure header stays visible during generation */
+.header-no-blur,
+.header-no-blur *,
+.header-no-blur h1,
+.header-no-blur h2,
+.header-no-blur div,
+.header-no-blur span {
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  -webkit-filter: none !important;
+  
+  /* Ensure visibility and clarity */
+  opacity: 1 !important;
+  visibility: visible !important;
+  
+  /* Force hardware acceleration */
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  
+  /* Complete isolation */
+  isolation: isolate !important;
+}
+
 /* Premium container styles */
 .premium-container {
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
