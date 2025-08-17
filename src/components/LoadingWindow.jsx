@@ -64,10 +64,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         >
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
-          {/* Header - moved 130px higher */}
-          <div className="relative z-10 flex items-center justify-center p-6 pb-2" style={{ marginTop: '-130px' }}>
+          {/* Header - properly positioned and visible */}
+          <div className="relative z-10 flex flex-col items-center justify-center p-6 pb-4">
             <motion.h2
-              className="text-3xl font-bold text-white mb-2"
+              className="text-3xl font-bold text-white mb-4 text-center"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -75,19 +75,19 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             >
               We are generating your videos
             </motion.h2>
+            <motion.p
+              className="text-gray-300 text-lg text-center"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
+            >
+              take a break bro
+            </motion.p>
           </div>
-          <motion.p
-            className="relative z-10 text-gray-300 text-lg text-center"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)', marginTop: '-130px' }}
-          >
-            take a break bro
-          </motion.p>
 
-          {/* Miniature Containers Grid - moved 130px higher */}
-          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '-130px' }}>
+          {/* Miniature Containers Grid - positioned right below header */}
+          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
               {pairs.map((pair, index) => {
                 const videoState = getVideoGenerationState(pair.id);
