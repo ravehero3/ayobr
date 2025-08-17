@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import sleepingAlienLogo from '../assets/sleeping-alien-zzz.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -25,12 +27,12 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative w-96 h-72 p-8 flex flex-col items-center justify-center text-center"
           style={{
-            background: 'rgba(0, 0, 0, 0.47)',
+            background: 'rgba(0, 0, 0, 0.41)',
             borderRadius: '16px',
             boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-            backdropFilter: 'blur(9.7px)',
-            WebkitBackdropFilter: 'blur(9.7px)',
-            border: '1px solid rgba(0, 0, 0, 0.44)',
+            backdropFilter: 'blur(11.4px)',
+            WebkitBackdropFilter: 'blur(11.4px)',
+            border: '1px solid rgba(0, 0, 0, 0.4)',
             position: 'absolute',
             top: '50%',
             left: '50%',
@@ -51,11 +53,11 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             </svg>
           </button>
 
-          {/* TypeBeatz Logo */}
+          {/* Sleeping Alien Logo */}
           <img 
-            src="/src/assets/typebeatz logo 2 white version_1754509091303.png" 
-            alt="TypeBeatz Logo" 
-            className="w-24 h-auto mb-6"
+            src={sleepingAlienLogo} 
+            alt="Sleeping Alien Logo" 
+            className="w-24 h-24 mb-6 object-contain"
           />
 
           {/* App Info */}
