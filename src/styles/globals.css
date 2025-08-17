@@ -57,6 +57,30 @@ html {
   transition: all 0.3s ease;
 }
 
+/* Sleeping alien blur override - absolute priority */
+.sleeping-alien-no-blur,
+.sleeping-alien-no-blur *,
+.sleeping-alien-no-blur img {
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  -webkit-filter: none !important;
+  -moz-filter: none !important;
+  -ms-filter: none !important;
+  
+  /* Force hardware acceleration and new composite layer */
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  
+  /* Complete visual isolation */
+  isolation: isolate !important;
+  contain: strict !important;
+  
+  /* Override any parent blur inheritance */
+  --webkit-backdrop-filter: none !important;
+  --backdrop-filter: none !important;
+}
+
 /* Premium container styles */
 .premium-container {
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);

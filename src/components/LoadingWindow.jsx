@@ -127,7 +127,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     style={{
                       position: 'relative',
                       width: '100%',
-                      minWidth: '360px',
+                      minWidth: '320px',
                       height: '200px',
                       background: 'rgba(0, 0, 0, 0.41)',
                       borderRadius: '16px',

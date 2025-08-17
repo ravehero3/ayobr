@@ -19,22 +19,23 @@ const SleepingAlien = () => {
     <AnimatePresence>
       {isGenerating && hasCompletePairs && (
         <motion.div
-          key="sleeping-alien-container"
-          className="fixed inset-0 pointer-events-none"
+          key="sleeping-alien-container" 
+          className="pointer-events-none sleeping-alien-no-blur"
           style={{
-            zIndex: 9500, // Below loading containers but above other elements
-            isolation: 'isolate',
-            filter: 'none !important',
-            backdropFilter: 'none !important',
-            WebkitBackdropFilter: 'none !important',
-            // Create a new stacking context completely isolated from background blur
-            willChange: 'transform',
-            transform: 'translateZ(0)', // Force hardware layer
             position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
+            zIndex: 9500, // Below loading containers but above other elements
+            isolation: 'isolate',
+            filter: 'none !important',
+            backdropFilter: 'none !important',
+            WebkitBackdropFilter: 'none !important',
+            // Create a completely new rendering context
+            willChange: 'transform, opacity',
+            transform: 'translateZ(0)', // Force new composite layer
+            contain: 'strict', // Full containment
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
