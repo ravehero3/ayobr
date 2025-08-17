@@ -209,12 +209,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '160px', height: '90px' }}
                         >
-                          {/* Video background preview based on user settings - moved 70px down behind image */}
+                          {/* Video background preview based on user settings - moved 100px down behind image */}
                           <div 
                             className="absolute inset-0"
                             style={{
                               ...getVideoBackgroundStyle(),
-                              top: '100px'
+                              top: '130px'
                             }}
                           />
 
