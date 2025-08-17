@@ -97,7 +97,7 @@ const Footer = ({ onGenerateVideos }) => {
         </div>
 
         {/* Center - Ready Status or Progress */}
-        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginLeft: '-70px', marginTop: '-2px' }}>
+        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginTop: '-2px' }}>
           {isGenerating ? (
             <div className="flex flex-col items-center space-y-1">
               <div className="flex items-center space-x-2">
