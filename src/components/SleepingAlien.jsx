@@ -25,6 +25,9 @@ const SleepingAlien = () => {
           style={{
             zIndex: 30, // Below LoadingWindow (z-40) but above everything else
             isolation: 'isolate',
+            filter: 'none !important',
+            backdropFilter: 'none !important',
+            WebkitBackdropFilter: 'none !important',
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -55,6 +58,11 @@ const SleepingAlien = () => {
               // Ensure no inherited blur effects
               transform: 'translateZ(0)',
               willChange: 'transform',
+              // Force no blur with CSS variables override
+              '--webkit-backdrop-filter': 'none',
+              '--backdrop-filter': 'none',
+              // Create new stacking context
+              contain: 'layout style paint',
             }}
           />
         </motion.div>

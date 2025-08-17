@@ -90,12 +90,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px' }}>
             {/* Grid of pairs */}
           <div 
-            className="grid gap-6 w-full mx-auto"
+            className="grid gap-8 w-full mx-auto"
             style={{
-              gridTemplateColumns: `repeat(auto-fit, minmax(380px, 1fr))`,
+              gridTemplateColumns: `repeat(auto-fit, minmax(420px, 1fr))`,
               justifyContent: 'center',
               justifyItems: 'center',
-              maxWidth: 'fit-content'
+              maxWidth: '1800px',
+              padding: '0 20px'
             }}
           >
               {pairs.map((pair, index) => {
@@ -133,7 +134,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     style={{
                       position: 'relative',
                       width: '100%',
-                      height: '180px',
+                      minWidth: '400px',
+                      height: '200px',
                       background: isComplete ? 'rgba(0, 0, 0, 0.44)' : 'transparent',
                       borderRadius: '16px',
                       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
