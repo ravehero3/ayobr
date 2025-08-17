@@ -75,15 +75,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             >
               We are generating your videos
             </motion.h2>
-            <motion.p
-              className="text-gray-300 text-lg text-center"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
-            >
-              take a break bro
-            </motion.p>
+
           </div>
 
           {/* Miniature Containers Grid */}

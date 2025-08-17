@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import sleepingAlienImg from '../assets/mraky-a-zzz.png';
+import page1Background from '../assets/page-1-background.png';
 
 const AnimatedBackground = () => {
   // Get reactive state from Zustand store - these will trigger re-renders
@@ -37,19 +38,19 @@ const AnimatedBackground = () => {
   console.log('AnimatedBackground: Has videos:', hasVideos);
   console.log('AnimatedBackground: Is generating:', isGenerating);
 
-  // Preload both background images when needed
+  // Preload background images when needed
   useEffect(() => {
     // Preload Page 1 background
     if (!backgroundLoaded.page1) {
       const img1 = new Image();
       img1.onload = () => {
-        console.log('AnimatedBackground: Page 1 PNG loaded');
+        console.log('AnimatedBackground: Page 1 background loaded');
         setBackgroundLoaded(prev => ({
           ...prev,
           page1: true
         }));
       };
-      img1.src = '/src/assets/page1-background-new.png';
+      img1.src = page1Background;
     }
 
     // Preload Page 2 background (Earth from Space)
@@ -75,22 +76,27 @@ const AnimatedBackground = () => {
     <div className="fixed inset-0 w-full h-full overflow-hidden" style={{ zIndex: -10 }}>
 
 
-      {/* Single background layer that transitions blur smoothly */}
+      {/* Page 1 background with fade-in from black */}
       <motion.div
         className="absolute inset-0 w-full h-full bg-cover bg-center"
         style={{
           backgroundImage: backgroundLoaded.page1
-            ? 'url(/src/assets/page1-background-new.png)'
+            ? `url(${page1Background})`
             : 'none',
           backgroundColor: '#000000',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           zIndex: -12
         }}
-        animate={{
-          filter: hasFiles && !hasVideos && !isGenerating ? 'blur(20px)' : 'blur(0px)', // 20px blur when files added but not generating, no blur when generating or initially
+        initial={{ opacity: 0 }}
+        animate={{ 
+          opacity: backgroundLoaded.page1 ? 1 : 0,
+          filter: hasFiles && !hasVideos && !isGenerating ? 'blur(40px)' : 'blur(0px)'
         }}
-        transition={{ duration: 1.0, ease: "easeInOut" }}
+        transition={{ 
+          opacity: { duration: 2.0, ease: "easeInOut", delay: 0.5 },
+          filter: { duration: 1.0, ease: "easeInOut" }
+        }}
       />
 
       {/* Page 4 background (Earth) - shown when videos are generated */}
