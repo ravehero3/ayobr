@@ -27,7 +27,7 @@ const SleepingAlien = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 9500, // Below loading containers but above other elements
+            zIndex: 9900, // Above background but below footer
             isolation: 'isolate',
             filter: 'none !important',
             backdropFilter: 'none !important',

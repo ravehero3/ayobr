@@ -46,7 +46,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90 backdrop-blur-sm"
-        style={{ zIndex: 10000, paddingTop: '40px', paddingBottom: '40px' }} // Above sleeping alien
+        style={{ zIndex: 9950, paddingTop: '40px', paddingBottom: '40px' }} // Above sleeping alien but below footer
       >
         {/* Loading Window - No Background */}
         <motion.div
@@ -209,7 +209,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-37px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
-                          style={{ width: '160px', height: '90px' }}
+                          style={{ width: '150px', height: '84px' }}
                         >
                           {/* Video background preview based on user settings - centered */}
                           <div 
