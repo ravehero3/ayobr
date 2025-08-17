@@ -152,8 +152,13 @@ export const useAppStore = create((set, get) => ({
     // Check if any pair is generating
     const isGenerating = state.isGenerating || Object.values(state.videoGenerationStates).some(genState => genState?.isGenerating);
 
-    // Priority order: videos > generation > files > upload
-    if (hasVideos && !isGenerating) {
+    // Check if we have completed videos (videos with complete state)
+    const hasCompletedVideos = hasVideos || Object.values(state.videoGenerationStates).some(
+      genState => genState?.isComplete && genState?.video
+    );
+
+    // Priority order: completed videos > generation > files > upload
+    if (hasCompletedVideos && !isGenerating) {
       return 'download';
     } else if (isGenerating) {
       return 'generation';

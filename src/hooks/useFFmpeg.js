@@ -145,14 +145,12 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
 
-      // Reset the global generation state immediately
+      // Don't immediately reset - let the UI handle the transition
+      // Only reset generation state, keep videos visible
       setIsGenerating(false);
-      setProgress(0);
-      
-      // Force update the store state
       setStoreIsGenerating(false);
       
-      console.log('Generation completed and state reset');
+      console.log('Generation completed, videos should now be visible');
 
     } catch (error) {
       console.error('Error in generateVideos:', error);
@@ -326,7 +324,7 @@ export const useFFmpeg = () => {
         throw new Error(`Failed to add video to store: ${storeError.message}`);
       }
 
-      // Set final completion state immediately
+      // Set final completion state
       console.log(`Setting completion state for pair ${pair.id}...`);
       setVideoGenerationState(pair.id, {
         isGenerating: false,
@@ -343,9 +341,6 @@ export const useFFmpeg = () => {
         videoId: video.id
       });
       
-      // Force state update to ensure video shows up immediately
-      const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
-      
       // Check if all videos are complete to update global state
       const allStates = useAppStore.getState().videoGenerationStates;
       const allPairsComplete = Object.values(allStates).every(state => 
@@ -354,11 +349,9 @@ export const useFFmpeg = () => {
       
       if (allPairsComplete) {
         console.log('All videos completed, updating global state');
+        const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
         setStoreIsGenerating(false);
       }
-      
-      // Force a brief delay to ensure state updates are processed
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       console.log(`Video generation completed successfully for pair ${pair.id}`);
       return video;
