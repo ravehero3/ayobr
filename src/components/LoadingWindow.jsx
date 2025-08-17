@@ -45,8 +45,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40 flex flex-col items-center justify-start bg-space-dark/90 backdrop-blur-sm"
-        style={{ paddingTop: '40px', paddingBottom: '40px' }}
+        className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90 backdrop-blur-sm"
+        style={{ zIndex: 10000, paddingTop: '40px', paddingBottom: '40px' }} // Above sleeping alien
       >
         {/* Loading Window - No Background */}
         <motion.div

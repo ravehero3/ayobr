@@ -22,7 +22,7 @@ const SleepingAlien = () => {
           key="sleeping-alien-container"
           className="fixed inset-0 pointer-events-none"
           style={{
-            zIndex: 9999, // Highest possible z-index to be above everything
+            zIndex: 9500, // Below loading containers but above other elements
             isolation: 'isolate',
             filter: 'none !important',
             backdropFilter: 'none !important',
