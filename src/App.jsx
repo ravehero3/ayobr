@@ -17,6 +17,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SettingsPanel from './components/SettingsPanel';
 import SpacingSlider from './components/SpacingSlider';
+import SleepingAlien from './components/SleepingAlien';
 
 
 function App() {
@@ -598,6 +599,9 @@ function App() {
         }}
         onStop={stopGeneration}
       />
+
+      {/* Sleeping Alien - rendered completely outside all other containers */}
+      <SleepingAlien />
 
         </div>
       </div>
