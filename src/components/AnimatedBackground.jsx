@@ -154,10 +154,10 @@ const AnimatedBackground = () => {
               WebkitBackdropFilter: 'none !important', // Webkit support
               willChange: 'transform', // Optimize for animations
               isolation: 'isolate', // Additional isolation
-              imageRendering: 'pixelated', // Prevent blurriness - use pixelated for crisp rendering
-              WebkitImageRendering: 'pixelated', // Webkit support
-              MozImageRendering: 'crisp-edges', // Firefox support
-              msInterpolationMode: 'nearest-neighbor', // IE support
+              imageRendering: 'auto', // Use default rendering for crisp, unblurred image
+              WebkitImageRendering: 'auto', // Webkit support
+              MozImageRendering: 'auto', // Firefox support
+              msInterpolationMode: 'bicubic', // IE support for smooth rendering
               position: 'relative', // Ensure it's not affected by parent filters
               transformOrigin: 'center center', // Ensure proper scaling origin
             }}
