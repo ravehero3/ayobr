@@ -52,10 +52,11 @@ const SleepingAlien = () => {
               // Create another isolation layer
               position: 'fixed',
               left: '50%',
-              bottom: '0',
-              marginLeft: '-30vw',
-              marginBottom: '0vh',
-              width: '60vw',
+              bottom: '10vh',
+              transform: 'translateX(-50%)',
+              width: '40vw',
+              maxWidth: '600px',
+              minWidth: '300px',
               height: 'auto',
               isolation: 'isolate',
               filter: 'none !important',
@@ -71,11 +72,12 @@ const SleepingAlien = () => {
               alt="Sleeping Alien"
               style={{
                 // Complete override of any inherited styles
-                all: 'unset',
                 display: 'block',
                 position: 'relative',
                 width: '100%',
                 height: 'auto',
+                maxHeight: '30vh',
+                objectFit: 'contain',
                 filter: 'none !important',
                 backdropFilter: 'none !important',
                 WebkitBackdropFilter: 'none !important',
