@@ -127,46 +127,63 @@ const AnimatedBackground = () => {
 
       {/* Sleeping Alien - only visible during video generation when on file management page */}
       {isGenerating && hasFiles && hasCompletePairs && (
-        <motion.div
-          key="sleeping-alien-container"
+        <div
           className="fixed inset-0 pointer-events-none"
           style={{
-            zIndex: 2000, // Higher z-index to ensure it's above all background effects
-            isolation: 'isolate', // Create new stacking context to prevent filter inheritance
+            zIndex: 9999, // Highest possible z-index to be above everything
+            isolation: 'isolate', // Create completely separate stacking context
+            filter: 'none !important', // Prevent any filter inheritance at parent level
+            backdropFilter: 'none !important', // No backdrop filter at parent level
+            WebkitBackdropFilter: 'none !important', // Webkit support at parent level
+            contain: 'layout style paint', // CSS containment to prevent outside interference
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <motion.img
-            src={sleepingAlienImg}
-            alt="Sleeping Alien"
+          <motion.div
+            key="sleeping-alien-container"
             className="absolute"
             style={{
-              left: 'calc(50% - 680px)', // Moved 100px more to the left (580px + 100px = 680px total)
-              top: 'calc(50% - 220px)', // Moved 50px higher (170px + 50px = 220px total)
-              transform: 'translateX(-50%) translateY(-50%)',
-              width: '80vw', // Increased from 66.67vw to 80vw (bigger)
-              height: 'auto', // Maintain aspect ratio
-              filter: 'none !important', // Force no filters with !important
-              backdropFilter: 'none !important', // Ensure no backdrop filters
-              WebkitBackdropFilter: 'none !important', // Webkit support
-              willChange: 'transform', // Optimize for animations
-              isolation: 'isolate', // Additional isolation
-              imageRendering: 'auto', // Use default rendering for crisp, unblurred image
-              WebkitImageRendering: 'auto', // Webkit support
-              MozImageRendering: 'auto', // Firefox support
-              msInterpolationMode: 'bicubic', // IE support for smooth rendering
-              position: 'relative', // Ensure it's not affected by parent filters
-              transformOrigin: 'center center', // Ensure proper scaling origin
+              isolation: 'isolate', // Additional isolation layer
+              filter: 'none !important', // Double protection against filters
+              backdropFilter: 'none !important',
+              WebkitBackdropFilter: 'none !important',
+              zIndex: 1, // Local z-index within parent
             }}
-            initial={{ scale: 0.8, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.8, y: 20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-          />
-        </motion.div>
+          >
+            <motion.img
+              src={sleepingAlienImg}
+              alt="Sleeping Alien"
+              className="absolute"
+              style={{
+                left: 'calc(50% - 640px)', // Moved 40px to the right (680px - 40px = 640px total)
+                top: 'calc(50% - 220px)', // Moved 50px higher (170px + 50px = 220px total)
+                transform: 'translateX(-50%) translateY(-50%)',
+                width: '80vw', // Increased from 66.67vw to 80vw (bigger)
+                height: 'auto', // Maintain aspect ratio
+                filter: 'none !important', // Triple protection - force no filters with !important
+                backdropFilter: 'none !important', // Ensure no backdrop filters
+                WebkitBackdropFilter: 'none !important', // Webkit support
+                willChange: 'transform', // Optimize for animations
+                isolation: 'isolate', // Additional isolation at image level
+                imageRendering: 'auto', // Use default rendering for crisp, unblurred image
+                WebkitImageRendering: 'auto', // Webkit support
+                MozImageRendering: 'auto', // Firefox support
+                msInterpolationMode: 'bicubic', // IE support for smooth rendering
+                position: 'relative', // Ensure it's not affected by parent filters
+                transformOrigin: 'center center', // Ensure proper scaling origin
+                mixBlendMode: 'normal', // Prevent blend mode issues
+                opacity: 1, // Explicit opacity to prevent transparency issues
+              }}
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 20 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            />
+          </motion.div>
+        </div>
       )}
 
     </div>
