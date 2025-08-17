@@ -39,7 +39,8 @@ Key features include:
 - **Z-index Hierarchy**: Fixed sleeping alien visibility during video generation (z-index: 9900, above background but below footer)
 - **Video Container Sizing**: Set generating video containers to 200px width with fixed dimensions (no responsive resizing)
 - **Header Visibility Fix**: Fixed header z-index (10000) to ensure visibility above loading window during video generation
-- **Layer Management**: Updated layering hierarchy: footer (z-index: 99999) > header (z-index: 10000) > loading window (z-index: 9950) > sleeping alien (z-index: 9900) > background
+- **Layer Management**: Updated layering hierarchy: footer (z-index: 99999) > header (z-index: 10000) > sleeping alien (z-index: 9950) > loading window (z-index: 9940) > background
+- **Sleeping Alien Fixes**: Improved positioning (60vw width, better centering) and z-index hierarchy to ensure visibility during video generation
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.

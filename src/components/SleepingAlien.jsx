@@ -37,7 +37,7 @@ const SleepingAlien = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 9900, // Above background but below footer
+            zIndex: 9950, // Above background and loading window
             isolation: 'isolate',
             filter: 'none !important',
             backdropFilter: 'none !important',
@@ -46,6 +46,8 @@ const SleepingAlien = () => {
             willChange: 'transform, opacity',
             transform: 'translateZ(0)', // Force new composite layer
             contain: 'strict', // Full containment
+            // Temporary debug background
+            backgroundColor: 'rgba(255, 0, 0, 0.3)' // Red background for debugging
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -58,9 +60,9 @@ const SleepingAlien = () => {
               position: 'fixed',
               left: '50%',
               bottom: '0',
-              marginLeft: '-40vw',
-              marginBottom: '-10vh',
-              width: '80vw',
+              marginLeft: '-30vw',
+              marginBottom: '0vh',
+              width: '60vw',
               height: 'auto',
               isolation: 'isolate',
               filter: 'none !important',
