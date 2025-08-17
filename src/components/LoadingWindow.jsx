@@ -88,16 +88,25 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
           {/* Miniature Containers Grid */}
           <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px' }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
+            {/* Grid of pairs */}
+          <div 
+            className="grid gap-6 w-full mx-auto"
+            style={{
+              gridTemplateColumns: `repeat(auto-fit, minmax(380px, 1fr))`,
+              justifyContent: 'center',
+              justifyItems: 'center',
+              maxWidth: 'fit-content'
+            }}
+          >
               {pairs.map((pair, index) => {
                 const videoState = getVideoGenerationState(pair.id);
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
-                
+
                 // More robust completion detection
                 const isComplete = !!generatedVideo || 
                                  (videoState?.isComplete === true) || 
                                  (videoState?.progress === 100 && videoState?.video);
-                                 
+
                 const progress = isComplete ? 100 : Math.max(0, videoState?.progress || 0);
                 const videoToShow = generatedVideo || videoState?.video;
 

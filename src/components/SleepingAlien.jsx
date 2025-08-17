@@ -52,6 +52,9 @@ const SleepingAlien = () => {
               isolation: 'isolate',
               mixBlendMode: 'normal',
               opacity: 1,
+              // Ensure no inherited blur effects
+              transform: 'translateZ(0)',
+              willChange: 'transform',
             }}
           />
         </motion.div>
