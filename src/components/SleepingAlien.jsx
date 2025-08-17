@@ -12,13 +12,12 @@ const SleepingAlien = () => {
   // Check if any pair is currently generating
   const isGenerating = storeIsGenerating || Object.values(videoGenerationStates).some(state => state?.isGenerating);
 
-  // Enhanced page detection
-  const hasFiles = pairs.some(pair => pair.audio || pair.image);
+  // Only show during active video generation - more strict conditions
   const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
 
   return (
     <AnimatePresence>
-      {isGenerating && hasFiles && hasCompletePairs && (
+      {isGenerating && hasCompletePairs && (
         <motion.div
           key="sleeping-alien-container"
           className="fixed inset-0 pointer-events-none"

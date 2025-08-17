@@ -49,7 +49,7 @@ const AnimatedBackground = () => {
           page1: true
         }));
       };
-      img1.src = '/attached_assets/page%201_1754508034866.png';
+      img1.src = '/src/assets/page1-background-new.png';
     }
 
     // Preload Page 2 background (Earth from Space)
@@ -80,7 +80,7 @@ const AnimatedBackground = () => {
         className="absolute inset-0 w-full h-full bg-cover bg-center"
         style={{
           backgroundImage: backgroundLoaded.page1
-            ? 'url(/attached_assets/page%201_1754508034866.png)'
+            ? 'url(/src/assets/page1-background-new.png)'
             : 'none',
           backgroundColor: '#000000',
           backgroundSize: 'cover',
