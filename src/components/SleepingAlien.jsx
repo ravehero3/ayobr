@@ -37,9 +37,9 @@ const SleepingAlien = () => {
             style={{
               position: 'fixed',
               left: '50%',
-              top: '50%',
+              bottom: '0', // Position from bottom instead of top
               marginLeft: '-40vw', // Half of 80vw to center it
-              marginTop: '-25vh', // Approximate vertical centering
+              marginBottom: '-10vh', // Move slightly below bottom edge
               width: '80vw',
               height: 'auto',
               filter: 'none !important',

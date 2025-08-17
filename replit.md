@@ -7,6 +7,7 @@ The Type Beat Video Generator is a desktop application enabling music producers 
 Preferred communication style: Simple, everyday language.
 Container styling preferences: 4px thick glassmorphism stroke around all containers with semitransparent shadows below and beneath.
 FFmpeg optimization preferences: Use hardware acceleration when available, faster encoding presets (ultrafast/superfast), lower frame rates for processing speed, parallel processing with all CPU cores.
+UI positioning preferences: "We are generating your videos" text positioned 80px higher, sleeping alien positioned at bottom of screen during video generation.
 
 ## System Architecture
 
