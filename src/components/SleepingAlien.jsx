@@ -39,7 +39,7 @@ const SleepingAlien = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 99998, // Below footer (99999) but above everything else
+            zIndex: 999999, // Absolute maximum to test visibility
             isolation: 'isolate',
             filter: 'none !important',
             backdropFilter: 'none !important',
@@ -48,8 +48,9 @@ const SleepingAlien = () => {
             willChange: 'transform, opacity',
             transform: 'translateZ(0)', // Force new composite layer
             contain: 'strict', // Full containment
-            // Temporary debug background to verify visibility
-            backgroundColor: 'rgba(255, 0, 255, 0.3)' // Magenta background for debugging
+            // Strong debug background to verify visibility
+            backgroundColor: 'rgba(255, 0, 0, 0.8)', // Bright red background for debugging
+            border: '5px solid yellow' // Yellow border for maximum visibility
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -58,14 +59,14 @@ const SleepingAlien = () => {
         >
           <div
             style={{
-              // Create another isolation layer
+              // Move to absolute center of screen
               position: 'fixed',
               left: '50%',
-              bottom: '15vh',
-              transform: 'translateX(-50%)',
-              width: '40vw',
-              maxWidth: '600px',
-              minWidth: '300px',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '50vw',
+              maxWidth: '800px',
+              minWidth: '400px',
               height: 'auto',
               isolation: 'isolate',
               filter: 'none !important',
