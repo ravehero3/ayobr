@@ -144,8 +144,8 @@ const AnimatedBackground = () => {
             alt="Sleeping Alien"
             className="absolute"
             style={{
-              left: 'calc(50% - 580px)', // Moved 20px more to the left (560px + 20px = 580px total)
-              top: 'calc(50% - 170px)', // Moved 80px higher (90px + 80px = 170px total)
+              left: 'calc(50% - 680px)', // Moved 100px more to the left (580px + 100px = 680px total)
+              top: 'calc(50% - 220px)', // Moved 50px higher (170px + 50px = 220px total)
               transform: 'translateX(-50%) translateY(-50%)',
               width: '80vw', // Increased from 66.67vw to 80vw (bigger)
               height: 'auto', // Maintain aspect ratio
@@ -154,11 +154,12 @@ const AnimatedBackground = () => {
               WebkitBackdropFilter: 'none !important', // Webkit support
               willChange: 'transform', // Optimize for animations
               isolation: 'isolate', // Additional isolation
-              imageRendering: 'crisp-edges', // Prevent blurriness
-              WebkitImageRendering: 'crisp-edges', // Webkit support
-              imageRendering: '-webkit-optimize-contrast', // Additional webkit optimization
+              imageRendering: 'pixelated', // Prevent blurriness - use pixelated for crisp rendering
+              WebkitImageRendering: 'pixelated', // Webkit support
+              MozImageRendering: 'crisp-edges', // Firefox support
               msInterpolationMode: 'nearest-neighbor', // IE support
               position: 'relative', // Ensure it's not affected by parent filters
+              transformOrigin: 'center center', // Ensure proper scaling origin
             }}
             initial={{ scale: 0.8, y: 20 }}
             animate={{ scale: 1, y: 0 }}
