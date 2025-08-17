@@ -65,7 +65,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
           {/* Header */}
-          <div className="relative z-10 flex flex-col items-center justify-center pt-8 pb-6">
+          <div className="relative flex flex-col items-center justify-center pt-8 pb-6" style={{ zIndex: 50 }}>
             <motion.h2
               className="text-3xl font-bold text-white mb-4 text-center"
               initial={{ opacity: 0, y: -10 }}
@@ -87,7 +87,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           </div>
 
           {/* Miniature Containers Grid */}
-          <div className="relative z-10 max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px' }}>
+          <div className="relative max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px', zIndex: 50 }}>
             {/* Grid of pairs */}
           <div 
             className="grid gap-6 w-full mx-auto"
@@ -96,7 +96,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               justifyContent: 'center',
               justifyItems: 'center',
               maxWidth: 'calc(100vw - 160px)', // Full width minus 80px on each side
-              padding: '0 80px'
+              padding: '0 80px',
+              zIndex: 50
             }}
           >
               {pairs.map((pair, index) => {
@@ -145,15 +146,17 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       padding: '20px',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
-                      overflow: 'visible'
+                      overflow: 'visible',
+                      zIndex: 60
                     }}
                     whileHover={{
                       backgroundColor: 'rgba(0, 0, 0, 0.51)',
-                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)'
+                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)',
+                      zIndex: 70
                     }}
                   >
                     {/* Particle system */}
-                    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1000 }}>
+                    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 80 }}>
                       {[...Array(7)].map((_, i) => (
                         <motion.div
                           key={i}
@@ -186,13 +189,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         e.stopPropagation();
                         removePair(pair.id);
                       }}
-                      className="absolute top-2 right-2 z-30 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-white"
-                      style={{ fontSize: '16px', fontWeight: 'bold' }}
+                      className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-white"
+                      style={{ fontSize: '16px', fontWeight: 'bold', zIndex: 90 }}
                     >
                       ×
                     </button>
 
-                    <div className="relative z-10 h-full flex flex-col">
+                    <div className="relative h-full flex flex-col" style={{ zIndex: 70 }}>
                       {/* Title - Audio + Image names - positioned in front of image */}
                       <div
                         className="text-white font-semibold mb-3 text-center relative"
@@ -201,7 +204,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           fontWeight: '600',
                           textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                           lineHeight: '1.3',
-                          zIndex: 20
+                          zIndex: 75
                         }}
                       >
                         {pair.audio?.name && pair.image?.name ? 
