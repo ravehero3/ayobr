@@ -364,6 +364,32 @@ export const useFFmpeg = () => {
         message: error.message,
         cause: error.cause
       });
+      
+      // Check if this is an empty error object (often indicates successful completion)
+      const isEmptyError = error && typeof error === 'object' && 
+                          Object.keys(error).length === 0 && 
+                          !error.message && !error.name;
+      
+      if (isEmptyError) {
+        console.log('Detected empty error object after 100% progress - this is likely a false positive');
+        console.log('Checking if we have valid video data in the generated videos...');
+        
+        // Check if a video was actually generated successfully
+        const storeState = useAppStore.getState();
+        const existingVideo = storeState.generatedVideos.find(v => v.pairId === pair.id);
+        
+        if (existingVideo) {
+          console.log('Found successfully generated video despite empty error, marking as complete');
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: existingVideo,
+            error: null
+          });
+          return existingVideo;
+        }
+      }
 
       // Check if generation was cancelled
       if (isCancelling || (error && error.message === 'Generation cancelled by user')) {

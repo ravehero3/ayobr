@@ -729,6 +729,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);
+    
+    // Check if this is an empty error object (which often indicates success)
+    const isEmptyError = error && typeof error === 'object' && 
+                        Object.keys(error).length === 0 && 
+                        !error.message && !error.name;
+    
+    if (isEmptyError) {
+      console.log('Detected empty error object, this usually indicates successful completion');
+      // Try to return the data if we have it
+      if (data && data.length > 0) {
+        console.log('Found valid data despite empty error, returning successfully');
+        return new Uint8Array(data);
+      }
+    }
 
     // Force reinitialize FFmpeg on filesystem errors
     if (error && error.message && error.message.includes('FS error')) {
