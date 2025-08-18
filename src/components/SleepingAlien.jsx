@@ -34,10 +34,10 @@ const SleepingAlien = () => {
           key="sleeping-alien-container" 
           className="pointer-events-none"
           style={{
-            // Perfect center positioning - moved 170px higher and 160px to the left (100px right from previous), 180px lower (150px down from previous)
+            // Perfect center positioning - moved 170px higher and 460px to the right (300px right from previous), 250px lower (70px down from previous)
             position: 'fixed',
-            left: 'calc(50% - 160px)',
-            top: 'calc(50% + 180px)',
+            left: 'calc(50% + 140px)',
+            top: 'calc(50% + 250px)',
             transform: 'translate(-50%, -50%)',
             width: '1200px', // 2x bigger (600px * 2)
             height: '800px', // 2x bigger (400px * 2)

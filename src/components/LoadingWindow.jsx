@@ -208,8 +208,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         }
                       </div>
 
-                      {/* Video Preview Area - moved 10px down from previous position */}
-                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-27px' }}>
+                      {/* Video Preview Area - moved 20px down from previous position */}
+                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-17px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '200px', height: '112px', minWidth: '200px', maxWidth: '200px', minHeight: '112px', maxHeight: '112px' }}
