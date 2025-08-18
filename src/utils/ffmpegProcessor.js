@@ -557,56 +557,37 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     if (window.gc) {
       window.gc();
     }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Allow more time for filesystem sync
-
-    // Read the generated video file with retries
+    // Optimized file reading with shorter delays
     console.log('Reading output file...');
+    
+    // Force garbage collection and small sync delay
+    if (window.gc) {
+      window.gc();
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     let data;
     let retryCount = 0;
-    const maxRetries = 5; // Increased retries
+    const maxRetries = 3; // Reduced retries for faster completion
 
     while (retryCount < maxRetries) {
       try {
-        // Add delay before first read attempt and cleanup memory
-        if (retryCount === 0) {
-          if (window.gc) {
-            window.gc();
+        // Quick file existence check
+        const files = await ffmpeg.listDir('/');
+        const outputExists = files.some(f => f.name === outputFileName && !f.isDir);
+        console.log(`Output file ${outputFileName} exists:`, outputExists);
+
+        if (!outputExists) {
+          if (retryCount === 0) {
+            // Single filesystem sync wait
+            console.log('Output file not found, waiting for filesystem sync...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue; // Try again without incrementing retry count
           }
-          await new Promise(resolve => setTimeout(resolve, 1500)); // More time for filesystem sync
+          throw new Error('Output file was not created by FFmpeg');
         }
 
-        // Check if output file exists first using listDir
-        try {
-          const files = await ffmpeg.listDir('/');
-          const outputExists = files.some(f => f.name === outputFileName && !f.isDir);
-          console.log(`Output file ${outputFileName} exists:`, outputExists);
-
-          if (!outputExists) {
-            if (retryCount < 2) {
-              // On first 2 attempts, wait longer for filesystem sync
-              console.log('Output file not found, waiting for filesystem sync...');
-              await new Promise(resolve => setTimeout(resolve, 3000));
-              continue; // Try again without incrementing retry count
-            }
-            throw new Error('Output file was not created by FFmpeg');
-          }
-        } catch (listError) {
-          console.warn('Could not check file existence:', listError.message);
-          // Continue anyway and try to read the file
-        }
-
-        // Try to get file stats
-        try {
-          const fileList = await ffmpeg.listDir('/');
-          const outputFile = fileList.find(f => f.name === outputFileName);
-          if (outputFile && !outputFile.isDir) {
-            console.log(`Found output file ${outputFileName} in filesystem`);
-          }
-        } catch (e) {
-          console.warn('Could not verify file in filesystem:', e.message);
-        }
-
+        // Read the file directly
         data = await ffmpeg.readFile(outputFileName);
         console.log('Successfully read output file, size:', data ? data.length : 'null');
 
@@ -620,8 +601,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError.message || readError);
 
         if (retryCount < maxRetries) {
-          // Progressive delay: 1s, 2s, 3s, 4s
-          await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+          // Short progressive delay: 500ms, 1s
+          await new Promise(resolve => setTimeout(resolve, retryCount * 500));
           
           // Force garbage collection between retries
           if (window.gc) {

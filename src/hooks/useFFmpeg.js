@@ -227,7 +227,7 @@ export const useFFmpeg = () => {
       let videoData;
       // Add timeout for video processing to prevent hanging
       const processingTimeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Video processing timeout after 8 minutes')), 8 * 60 * 1000);
+        setTimeout(() => reject(new Error('Video processing timeout after 12 minutes')), 12 * 60 * 1000);
       });
 
       try {
