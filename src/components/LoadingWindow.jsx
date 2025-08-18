@@ -199,7 +199,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           fontWeight: '600',
                           textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                           lineHeight: '1.3',
-                          zIndex: 75
+                          zIndex: 75,
+                          minHeight: '36px',
+                          maxHeight: '36px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
                       >
                         {pair.audio?.name && pair.image?.name ? 
@@ -208,11 +214,20 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         }
                       </div>
 
-                      {/* Video Preview Area - moved 20px down from previous position */}
-                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-17px' }}>
+                      {/* Video Preview Area - moved 30px down from previous position and fixed positioning */}
+                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
-                          style={{ width: '200px', height: '112px', minWidth: '200px', maxWidth: '200px', minHeight: '112px', maxHeight: '112px' }}
+                          style={{ 
+                            width: '200px', 
+                            height: '112px', 
+                            minWidth: '200px', 
+                            maxWidth: '200px', 
+                            minHeight: '112px', 
+                            maxHeight: '112px',
+                            position: 'relative',
+                            flexShrink: 0
+                          }}
                         >
                           {/* Video background preview based on user settings - centered */}
                           <div 
@@ -236,8 +251,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Single progress overlay in center of preview - only percentage counter we keep */}
                           {!isComplete && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <div className="text-white text-sm font-medium text-center">
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                              <div className="text-white text-sm font-medium text-center" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                                 {Math.round(progress)}%
                               </div>
                             </div>
