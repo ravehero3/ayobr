@@ -499,15 +499,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-vf', videoFilter,
       '-c:v', 'libx264',
       '-preset', 'ultrafast',        // Fastest encoding preset
-      '-tune', 'fastdecode',         // Optimize for fast decoding
-      '-crf', '30',                  // Higher CRF for much faster encoding (lower quality but significantly faster)
+      '-tune', 'zerolatency',        // Optimize for streaming/low latency processing
+      '-crf', '28',                  // Slightly better quality while still fast
       '-pix_fmt', 'yuv420p',
       '-r', '15',                    // Lower frame rate for faster processing (15 fps instead of default 25)
       '-c:a', 'aac',
-      '-b:a', '320k',                // High-quality audio bitrate (320k)
+      '-b:a', '192k',                // Good quality audio bitrate (192k - balance of quality and stability)
       '-ar', '44100',                // Standard sample rate for high quality (44.1 kHz)
       '-ac', '2',                    // Stereo audio for full quality
-      '-threads', '0',               // Use all CPU cores
+      '-threads', '4',               // Limit threads to prevent browser overload
       '-shortest',
       '-t', audioDuration.toString(),
       '-y',                          // Overwrite output file
