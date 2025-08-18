@@ -156,7 +156,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       {[...Array(8)].map((_, i) => (
                         <motion.div
                           key={`progress-particle-${i}`}
-                          className="absolute rounded-full transition-opacity duration-300"
+                          className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           style={{
                             width: '2px',
                             height: '2px',
@@ -164,15 +164,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             // Position around progress bar area (bottom of container)
                             top: `${75 + (i % 2) * 8}%`, // Around progress bar vertical area
                             left: `${15 + (i * 10)}%`, // Spread across progress bar width
-                            boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)',
-                            opacity: videoState?.isGenerating ? 1 : 0
+                            boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
                           }}
                           animate={{
                             // Circular motion around progress bar
                             x: [0, 15 * Math.cos(i * 45 * Math.PI / 180), 15 * Math.cos((i * 45 + 180) * Math.PI / 180), 0],
                             y: [0, 8 * Math.sin(i * 45 * Math.PI / 180), 8 * Math.sin((i * 45 + 180) * Math.PI / 180), 0],
-                            scale: [0.8, 1.2, 0.8],
-                            opacity: videoState?.isGenerating ? [0.6, 1, 0.6] : [0, 0, 0]
+                            scale: [0.8, 1.2, 0.8]
                           }}
                           transition={{
                             duration: 3,

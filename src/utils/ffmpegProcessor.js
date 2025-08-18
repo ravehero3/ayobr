@@ -557,6 +557,13 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     if (window.gc) {
       window.gc();
     }
+    // Final progress callback to ensure 100% is reported
+    if (onProgress && !hasCompleted) {
+      onProgress(100);
+      hasCompleted = true;
+      console.log('Progress set to 100% after FFmpeg completion');
+    }
+
     // Optimized file reading with shorter delays
     console.log('Reading output file...');
     
@@ -581,7 +588,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           if (retryCount === 0) {
             // Single filesystem sync wait
             console.log('Output file not found, waiting for filesystem sync...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
             continue; // Try again without incrementing retry count
           }
           throw new Error('Output file was not created by FFmpeg');
@@ -601,8 +608,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError.message || readError);
 
         if (retryCount < maxRetries) {
-          // Short progressive delay: 500ms, 1s
-          await new Promise(resolve => setTimeout(resolve, retryCount * 500));
+          // Very short progressive delay: 200ms, 400ms  
+          await new Promise(resolve => setTimeout(resolve, retryCount * 200));
           
           // Force garbage collection between retries
           if (window.gc) {
