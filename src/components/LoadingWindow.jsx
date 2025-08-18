@@ -150,28 +150,59 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       zIndex: 70
                     }}
                   >
-                    {/* Particle system */}
-                    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 80 }}>
-                      {[...Array(7)].map((_, i) => (
+                    {/* Enhanced Particle system - similar to Generate Videos button */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" style={{ zIndex: 80 }}>
+                      {/* Hover-activated particles */}
+                      {[...Array(12)].map((_, i) => (
                         <motion.div
-                          key={i}
-                          className="absolute w-1 h-1 bg-white rounded-full"
+                          key={`hover-particle-${i}`}
+                          className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{
+                            width: '3px',
+                            height: '3px',
+                            background: i % 3 === 0 ? 'rgba(135, 206, 235, 0.8)' : 
+                                       i % 3 === 1 ? 'rgba(30, 58, 138, 0.7)' : 
+                                       'rgba(59, 130, 246, 0.6)',
+                            top: `${15 + (i % 4) * 20}%`,
+                            left: `${10 + (i % 3) * 30}%`,
+                            boxShadow: '0 0 6px rgba(135, 206, 235, 0.6)'
+                          }}
+                          animate={{
+                            x: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
+                            y: [0, Math.random() * 30 - 15, Math.random() * 30 - 15, 0],
+                            scale: [0.5, 1.2, 0.8, 1, 0.5],
+                            rotate: [0, 90, 180, 270, 360]
+                          }}
+                          transition={{
+                            duration: 4 + Math.random() * 2,
+                            repeat: Infinity,
+                            delay: i * 0.3,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      ))}
+                      
+                      {/* Completion particles - only show when complete */}
+                      {isComplete && [...Array(7)].map((_, i) => (
+                        <motion.div
+                          key={`complete-particle-${i}`}
+                          className="absolute w-1 h-1 bg-green-400 rounded-full"
                           style={{
                             top: `${-10 + Math.random() * 60}px`,
                             left: `${12 + i * 12}%`,
-                            boxShadow: '0 0 6px rgba(255, 255, 255, 0.6)',
+                            boxShadow: '0 0 8px rgba(34, 197, 94, 0.8)',
                             opacity: 0
                           }}
-                          animate={isComplete ? {
+                          animate={{
                             x: [0, Math.random() * 60 - 30, Math.random() * 60 - 30, 0],
                             y: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
-                            scale: [0, 1, 0.8, 0],
-                            opacity: [0, 0.8, 0.6, 0]
-                          } : { opacity: 0 }}
+                            scale: [0, 1.5, 0.8, 0],
+                            opacity: [0, 1, 0.8, 0]
+                          }}
                           transition={{
-                            duration: 15 + Math.random() * 10,
+                            duration: 8 + Math.random() * 4,
                             repeat: Infinity,
-                            delay: i * 3,
+                            delay: i * 2,
                             ease: "easeInOut"
                           }}
                         />
@@ -217,7 +248,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       {/* Video Preview Area - moved 30px down from previous position and fixed positioning */}
                       <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
                         <div 
-                          className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
+                          className="aspect-video bg-black/30 rounded flex items-center justify-center relative overflow-hidden"
                           style={{ 
                             width: '192px', 
                             height: '108px', 
