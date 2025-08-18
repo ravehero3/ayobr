@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import sleepingAlienImg from '../assets/sleeping-alien-new.png';
+import sleepingAlienImg from '../assets/sleeping-alien-updated.png';
 
 const SleepingAlien = () => {
   // Get reactive state from Zustand store
@@ -36,7 +36,7 @@ const SleepingAlien = () => {
           style={{
             // Perfect center positioning - moved 150px higher and 250px to the left
             position: 'fixed',
-            left: 'calc(50% - 520px)',
+            left: 'calc(50% - 550px)',
             top: 'calc(50% - 180px)',
             transform: 'translate(-50%, -50%)',
             width: '1200px', // 2x bigger (600px * 2)
