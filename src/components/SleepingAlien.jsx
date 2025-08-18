@@ -36,8 +36,8 @@ const SleepingAlien = () => {
           style={{
             // Perfect center positioning - moved 150px higher and 250px to the left
             position: 'fixed',
-            left: 'calc(50% - 550px)',
-            top: 'calc(50% - 180px)',
+            left: 'calc(50% - 560px)',
+            top: 'calc(50% - 170px)',
             transform: 'translate(-50%, -50%)',
             width: '1200px', // 2x bigger (600px * 2)
             height: '800px', // 2x bigger (400px * 2)
