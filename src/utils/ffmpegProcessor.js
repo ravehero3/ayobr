@@ -522,7 +522,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     try {
       const execPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 600000); // Increased to 10 minute timeout
+        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 300000); // 5 minute timeout for FFmpeg execution
       });
 
       await Promise.race([execPromise, timeoutPromise]);
@@ -557,7 +557,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     if (window.gc) {
       window.gc();
     }
-    await new Promise(resolve => setTimeout(resolve, 200)); // Reduced delay for faster processing
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Allow more time for filesystem sync
 
     // Read the generated video file with retries
     console.log('Reading output file...');
@@ -573,7 +573,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           if (window.gc) {
             window.gc();
           }
-          await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
+          await new Promise(resolve => setTimeout(resolve, 1500)); // More time for filesystem sync
         }
 
         // Check if output file exists first using listDir
@@ -583,10 +583,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           console.log(`Output file ${outputFileName} exists:`, outputExists);
 
           if (!outputExists) {
-            if (retryCount === 0) {
-              // On first attempt, wait longer for filesystem sync
+            if (retryCount < 2) {
+              // On first 2 attempts, wait longer for filesystem sync
               console.log('Output file not found, waiting for filesystem sync...');
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              await new Promise(resolve => setTimeout(resolve, 3000));
               continue; // Try again without incrementing retry count
             }
             throw new Error('Output file was not created by FFmpeg');
