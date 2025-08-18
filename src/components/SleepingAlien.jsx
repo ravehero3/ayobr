@@ -46,12 +46,12 @@ const SleepingAlien = () => {
             alignItems: 'center',
             justifyContent: 'center'
           }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
         >
-          <img
+          <motion.img
             src={sleepingAlienImg}
             alt="Sleeping Alien"
             style={{
@@ -60,6 +60,9 @@ const SleepingAlien = () => {
               height: '100%',
               objectFit: 'contain',
             }}
+            initial={{ opacity: 0, filter: 'brightness(0)' }}
+            animate={{ opacity: 1, filter: 'brightness(1)' }}
+            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
           />
         </motion.div>
       )}
