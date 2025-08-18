@@ -219,12 +219,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ 
-                            width: '200px', 
-                            height: '112px', 
-                            minWidth: '200px', 
-                            maxWidth: '200px', 
-                            minHeight: '112px', 
-                            maxHeight: '112px',
+                            width: '196px', 
+                            height: '110px', 
+                            minWidth: '196px', 
+                            maxWidth: '196px', 
+                            minHeight: '110px', 
+                            maxHeight: '110px',
                             position: 'relative',
                             flexShrink: 0
                           }}
@@ -251,10 +251,18 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Single progress overlay in center of preview - only percentage counter we keep */}
                           {!isComplete && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-                              <div className="text-white text-sm font-medium text-center" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                                {Math.round(progress)}%
-                              </div>
+                            <div 
+                              className="absolute text-white text-sm font-medium text-center bg-black/60 px-2 py-1 rounded"
+                              style={{ 
+                                position: 'absolute', 
+                                top: '50%', 
+                                left: '50%', 
+                                transform: 'translate(-50%, -50%)',
+                                zIndex: 10,
+                                textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)'
+                              }}
+                            >
+                              {Math.round(progress)}%
                             </div>
                           )}
 
