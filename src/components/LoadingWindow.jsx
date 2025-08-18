@@ -131,7 +131,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       width: '240px',
                       minWidth: '240px',
                       maxWidth: '240px',
-                      height: '200px',
+                      height: '220px',
                       background: 'rgba(0, 0, 0, 0.41)',
                       borderRadius: '16px',
                       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
