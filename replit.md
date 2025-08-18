@@ -38,7 +38,7 @@ Key features include:
 - **Migration Completed**: Successfully migrated project from Replit Agent to Replit environment
 - **Dependencies Installation**: Installed all required packages via npm, resolved package conflicts
 - **Webpack Configuration**: Verified webpack dev server configuration for Replit environment
-- **Sleeping Alien Positioning**: Fixed sleeping alien to only appear during video generation, positioned at center of viewport (1200x800px, 2x bigger), moved 150px down from center, removed test mode
+- **Sleeping Alien Positioning**: Fixed sleeping alien to only appear during video generation, positioned at center of viewport (1200x800px, 2x bigger), moved 150px higher and 250px left from center, removed test mode
 - **Security Enhancement**: Ensured proper client/server separation with secure FFmpeg.wasm processing
 - **Environment Setup**: Configured proper port binding (5000) and CORS headers for Replit deployment
 
