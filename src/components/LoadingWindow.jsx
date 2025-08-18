@@ -219,14 +219,15 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ 
-                            width: '196px', 
-                            height: '110px', 
-                            minWidth: '196px', 
-                            maxWidth: '196px', 
-                            minHeight: '110px', 
-                            maxHeight: '110px',
+                            width: '192px', 
+                            height: '108px', 
+                            minWidth: '192px', 
+                            maxWidth: '192px', 
+                            minHeight: '108px', 
+                            maxHeight: '108px',
                             position: 'relative',
-                            flexShrink: 0
+                            flexShrink: 0,
+                            padding: '2px'
                           }}
                         >
                           {/* Video background preview based on user settings - centered */}
@@ -237,9 +238,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             }}
                           />
 
-                          {/* Foreground image preview - centered */}
+                          {/* Foreground image preview - centered with proper spacing */}
                           {pair.image && (
-                            <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                            <div className="absolute flex items-center justify-center" style={{ 
+                              top: '2px', 
+                              left: '2px', 
+                              right: '2px', 
+                              bottom: '2px' 
+                            }}>
                               <img 
                                 src={URL.createObjectURL(pair.image)}
                                 alt="Preview"
