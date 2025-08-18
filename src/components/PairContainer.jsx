@@ -233,7 +233,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             </button>
           </div>
         </div>
-      ) : !videoState?.isGenerating && !generatedVideo ? (
+      ) : !generatedVideo ? (
         <div 
           className="flex flex-col lg:flex-row items-center relative z-10 group/pair"
           style={{ 

@@ -40,6 +40,7 @@ Key features include:
 - **Webpack Configuration**: Verified webpack dev server configuration for Replit environment
 - **Audio Quality Enhancement**: Upgraded audio settings to maximum quality (320k bitrate, 44.1kHz sample rate, stereo)
 - **Particle Visual Update**: Changed generation page particles to white and baby blue colors matching design system
+- **Container Visibility Fix**: Fixed issue where video generation containers disappeared during processing - containers now remain visible with reduced opacity during generation
 - **Security Enhancement**: Ensured proper client/server separation with secure FFmpeg.wasm processing
 - **Environment Setup**: Configured proper port binding (5000) and CORS headers for Replit deployment
 
