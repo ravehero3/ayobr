@@ -42,12 +42,7 @@ export const useAppStore = create((set, get) => ({
   // Container spacing
   containerSpacing: 4, // Default spacing in pixels between container pairs
 
-  // Logo settings - Load from localStorage
-  logoSettings: loadFromLocalStorage('logoSettings', {
-    logoFile: null, // Store the uploaded logo file as base64
-    logoFileName: null, // Store the original filename
-    useLogoInVideos: false // Checkbox to enable/disable logo in video generation
-  }),
+
 
   // Video generation settings - Load from localStorage
   videoSettings: loadFromLocalStorage('videoSettings', {
@@ -356,34 +351,5 @@ export const useAppStore = create((set, get) => ({
   // Container spacing actions
   setContainerSpacing: (spacing) => set({ containerSpacing: spacing }),
 
-  // Logo settings actions
-  setLogoFile: (file, fileName) => set(state => {
-    const newLogoSettings = { 
-      ...state.logoSettings, 
-      logoFile: file, 
-      logoFileName: fileName 
-    };
-    saveToLocalStorage('logoSettings', newLogoSettings);
-    return { logoSettings: newLogoSettings };
-  }),
 
-  setUseLogoInVideos: (useLogoInVideos) => set(state => {
-    const newLogoSettings = { 
-      ...state.logoSettings, 
-      useLogoInVideos 
-    };
-    saveToLocalStorage('logoSettings', newLogoSettings);
-    return { logoSettings: newLogoSettings };
-  }),
-
-  clearLogo: () => set(state => {
-    const newLogoSettings = { 
-      ...state.logoSettings, 
-      logoFile: null, 
-      logoFileName: null,
-      useLogoInVideos: false
-    };
-    saveToLocalStorage('logoSettings', newLogoSettings);
-    return { logoSettings: newLogoSettings };
-  })
 }));

@@ -10,18 +10,11 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     videoSettings,
     setVideoBackground,
     setCustomBackground,
-    setVideoQuality,
-    logoSettings,
-    setLogoFile,
-    setUseLogoInVideos,
-    clearLogo
+    setVideoQuality
   } = useAppStore();
 
   const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
   const [selectedResolution, setSelectedResolution] = useState(videoSettings.quality || 'fullhd');
-  const [localLogoFile, setLocalLogoFile] = useState(logoSettings.logoFile || null);
-  const [localLogoFileName, setLocalLogoFileName] = useState(logoSettings.logoFileName || null);
-  const [localUseLogoInVideos, setLocalUseLogoInVideos] = useState(logoSettings.useLogoInVideos || false);
 
   const handleBackgroundChange = (background) => {
     setSelectedBackground(background);
@@ -31,49 +24,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     setSelectedResolution(resolution);
   };
 
-  const handleLogoUpload = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      // Create image element to load and resize the uploaded image
-      const img = new Image();
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        img.onload = () => {
-          // Create canvas for resizing
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          
-          // Calculate height maintaining aspect ratio for 200px width
-          const targetWidth = 200;
-          const aspectRatio = img.height / img.width;
-          const targetHeight = targetWidth * aspectRatio;
-          
-          // Set canvas dimensions
-          canvas.width = targetWidth;
-          canvas.height = targetHeight;
-          
-          // Draw and resize the image
-          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-          
-          // Convert resized image to base64
-          const resizedBase64 = canvas.toDataURL('image/png', 0.9);
-          
-          console.log(`Logo resized from ${img.width}x${img.height} to ${targetWidth}x${targetHeight}`);
-          
-          setLocalLogoFile(resizedBase64);
-          setLocalLogoFileName(file.name);
-          
-          // Save to store immediately to persist the logo
-          setLogoFile(resizedBase64, file.name);
-        };
-        
-        img.src = e.target.result;
-      };
-      
-      reader.readAsDataURL(file);
-    }
-  };
+
 
   const handleCustomBackgroundUpload = (event) => {
     const file = event.target.files[0];
@@ -92,10 +43,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   const handleSave = () => {
     setVideoBackground(selectedBackground);
     setVideoQuality(selectedResolution);
-    if (localLogoFile && localLogoFileName) {
-      setLogoFile(localLogoFile, localLogoFileName);
-    }
-    setUseLogoInVideos(localUseLogoInVideos);
     onClose();
   };
 
@@ -103,9 +50,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     // Reset selections to current values
     setSelectedBackground(videoSettings.background || 'black');
     setSelectedResolution(videoSettings.quality || 'fullhd');
-    setLocalLogoFile(logoSettings.logoFile || null);
-    setLocalLogoFileName(logoSettings.logoFileName || null);
-    setLocalUseLogoInVideos(logoSettings.useLogoInVideos || false);
     onClose();
   };
 
@@ -134,7 +78,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             transition={{ duration: 0.3, ease: "easeOut" }}
             style={{
               width: '480px',
-              height: '640px',
+              height: '520px',
               background: 'rgba(8, 8, 12, 0.85)',
               backdropFilter: 'blur(20px)',
               borderRadius: '20px',
@@ -162,172 +106,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               Settings
             </h2>
 
-            {/* Logo Upload Area */}
-            <div>
-              <motion.div
-                className="cursor-pointer relative overflow-hidden"
-                style={{
-                  height: '120px',
-                  background: localLogoFile 
-                    ? 'rgba(15, 15, 25, 0.3)' 
-                    : 'rgba(15, 15, 25, 0.6)',
-                  border: localLogoFile 
-                    ? '2px solid rgba(59, 130, 246, 0.6)' 
-                    : '2px dashed rgba(255, 255, 255, 0.15)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease'
-                }}
-                whileHover={{
-                  borderColor: localLogoFile 
-                    ? 'rgba(59, 130, 246, 0.8)' 
-                    : 'rgba(59, 130, 246, 0.4)',
-                  background: localLogoFile 
-                    ? 'rgba(15, 15, 25, 0.4)' 
-                    : 'rgba(59, 130, 246, 0.05)'
-                }}
-                onClick={() => document.getElementById('logoUpload').click()}
-              >
-                {localLogoFile ? (
-                  <div style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '16px'
-                  }}>
-                    <img 
-                      src={localLogoFile} 
-                      alt="Logo preview"
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        objectFit: 'contain',
-                        borderRadius: '8px'
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    textAlign: 'center'
-                  }}>
-                    Your Logo
-                    <div style={{
-                      fontSize: '12px',
-                      color: 'rgba(255, 255, 255, 0.4)',
-                      marginTop: '4px'
-                    }}>
-                      PNG, JPG, HEIC, SVG supported
-                    </div>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  id="logoUpload"
-                  accept="image/png,image/jpeg,image/jpg,image/heic,image/svg+xml"
-                  onChange={handleLogoUpload}
-                  style={{ display: 'none' }}
-                />
-              </motion.div>
 
-              {/* Show checkbox and remove button when logo is uploaded */}
-              {localLogoFile && localLogoFileName && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    marginTop: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px'
-                  }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <motion.div
-                      className="cursor-pointer"
-                      style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '4px',
-                        border: '2px solid rgba(59, 130, 246, 0.6)',
-                        background: localUseLogoInVideos 
-                          ? 'rgba(59, 130, 246, 0.8)' 
-                          : 'transparent',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s ease'
-                      }}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
-                    >
-                      {localUseLogoInVideos && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          style={{
-                            width: '12px',
-                            height: '12px',
-                            background: 'white',
-                            borderRadius: '2px'
-                          }}
-                        />
-                      )}
-                    </motion.div>
-                    <div 
-                      className="cursor-pointer" 
-                      onClick={() => setLocalUseLogoInVideos(!localUseLogoInVideos)}
-                      style={{
-                        color: '#e0e0e0',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        userSelect: 'none'
-                      }}
-                    >
-                      Use logo in videos
-                    </div>
-                  </div>
-                  <motion.button
-                    onClick={() => {
-                      setLocalLogoFile(null);
-                      setLocalLogoFileName(null);
-                      setLocalUseLogoInVideos(false);
-                      clearLogo();
-                    }}
-                    style={{
-                      padding: '4px 8px',
-                      fontSize: '12px',
-                      color: 'rgba(239, 68, 68, 0.8)',
-                      background: 'rgba(239, 68, 68, 0.1)',
-                      border: '1px solid rgba(239, 68, 68, 0.3)',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                    whileHover={{
-                      background: 'rgba(239, 68, 68, 0.2)',
-                      borderColor: 'rgba(239, 68, 68, 0.5)'
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Remove
-                  </motion.button>
-                </motion.div>
-              )}
-            </div>
 
             {/* Background Selection */}
             <div>

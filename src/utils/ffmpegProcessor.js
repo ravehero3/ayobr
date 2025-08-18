@@ -394,37 +394,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     }
 
 
-    // Handle logo processing with improved error handling
-    let logoFileName = null;
-    if (videoSettings && videoSettings.useLogo && videoSettings.logoFile) {
-      try {
-        console.log('Processing logo for video overlay...');
-        logoFileName = `logo_${timestamp}.png`;
 
-        // Handle different logo data formats
-        let logoData;
-        if (typeof videoSettings.logoFile === 'string') {
-          // Base64 data - convert to binary
-          const base64Data = videoSettings.logoFile.replace(/^data:image\/[a-z]+;base64,/, '');
-          logoData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-        } else {
-          // File object
-          logoData = await getCachedFileData(videoSettings.logoFile, 'logo');
-        }
-
-        if (logoData && logoData.length > 0) {
-          await ffmpeg.writeFile(logoFileName, logoData);
-          console.log('Logo file written successfully:', logoFileName);
-        } else {
-          console.warn('Logo data is empty, skipping logo overlay');
-          logoFileName = null;
-        }
-      } catch (error) {
-        console.error('Error processing logo:', error);
-        console.warn('Continuing video generation without logo overlay');
-        logoFileName = null;
-      }
-    }
 
     // Get audio duration using Web Audio API
     const audioDuration = await getAudioDuration(audioFile);
@@ -439,10 +409,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-i', audioFileName
     ];
 
-    // Add logo input if provided
-    if (logoFileName) {
-      ffmpegArgs.push('-i', logoFileName);
-    }
+
 
 
 
@@ -511,31 +478,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Build video filter with proper input index handling
     let videoFilter;
-    // Input indices: image=0, audio=1, logo=2 (if exists), background=3 (if exists)
-    let logoIndex = 2;
-    let backgroundIndex = logoFileName ? 3 : 2;
+    // Input indices: image=0, audio=1, background=2 (if exists)
+    let backgroundIndex = 2;
 
     console.log('Video filter inputs:', {
-      hasLogo: !!logoFileName,
       hasCustomBackground: useCustomBackground && !!customBackgroundFileName,
-      logoIndex,
       backgroundIndex
     });
 
     if (useCustomBackground && customBackgroundFileName) {
-      // Custom background video filter
-      if (logoFileName) {
-        videoFilter = `[${backgroundIndex}:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg];[0:v]scale=1920:1080:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2[comp];[${logoIndex}:v]scale=200:-1[logo];[comp][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2`;
-      } else {
-        videoFilter = `[${backgroundIndex}:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg];[0:v]scale=1920:1080:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`;
-      }
+      // Custom background video filter - overlay image on background
+      videoFilter = `[${backgroundIndex}:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg];[0:v]scale=1920:1080:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`;
     } else {
-      // Standard solid color background
-      if (logoFileName) {
-        videoFilter = `[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}[bg];[${logoIndex}:v]scale=200:-1[logo];[bg][logo]overlay=x=(W*0.27-w/2):y=(H-h)/2`;
-      } else {
-        videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
-      }
+      // Standard solid color background - center image on solid background
+      videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
     }
 
     // Ultra-optimized parameters for maximum speed
@@ -716,12 +672,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       console.log('Cleaned output file');
     } catch (e) { console.warn('Failed to clean output file:', e.message); }
 
-    // Clean up logo file if it was used
-    if (logoFileName) {
+    // Clean up custom background file if it was used
+    if (customBackgroundFileName && useCustomBackground) {
       try {
-        await ffmpeg.deleteFile(logoFileName);
-        console.log('Cleaned logo file');
-      } catch (e) { console.warn('Failed to clean logo file:', e.message); }
+        await ffmpeg.deleteFile(customBackgroundFileName);
+        console.log('Cleaned custom background file');
+      } catch (e) { console.warn('Failed to clean custom background file:', e.message); }
     }
 
     // Return a new Uint8Array to ensure data integrity
@@ -737,10 +693,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     
     if (isEmptyError) {
       console.log('Detected empty error object, this usually indicates successful completion');
-      // Try to return the data if we have it
-      if (data && data.length > 0) {
+      // Check if we completed successfully and have valid data
+      if (hasCompleted && data && data.length > 0) {
         console.log('Found valid data despite empty error, returning successfully');
         return new Uint8Array(data);
+      } else {
+        console.log('Empty error but no valid data available, treating as real error');
       }
     }
 
@@ -764,8 +722,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           ffmpeg.deleteFile(outputFileName).catch(() => {})
         ];
 
-        if (logoFileName) {
-          cleanupPromises.push(ffmpeg.deleteFile(logoFileName).catch(() => {}));
+        if (customBackgroundFileName && useCustomBackground) {
+          cleanupPromises.push(ffmpeg.deleteFile(customBackgroundFileName).catch(() => {}));
         }
 
         await Promise.allSettled(cleanupPromises);
