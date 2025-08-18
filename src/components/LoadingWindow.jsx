@@ -152,58 +152,60 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                   >
                     {/* Enhanced Particle system - similar to Generate Videos button */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" style={{ zIndex: 80 }}>
-                      {/* Hover-activated particles */}
-                      {[...Array(12)].map((_, i) => (
+                      {/* Progress bar area particles - positioned around progress bar */}
+                      {[...Array(8)].map((_, i) => (
                         <motion.div
-                          key={`hover-particle-${i}`}
-                          className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          key={`progress-particle-${i}`}
+                          className="absolute rounded-full transition-opacity duration-300"
                           style={{
-                            width: '3px',
-                            height: '3px',
-                            background: i % 3 === 0 ? 'rgba(135, 206, 235, 0.8)' : 
-                                       i % 3 === 1 ? 'rgba(30, 58, 138, 0.7)' : 
-                                       'rgba(59, 130, 246, 0.6)',
-                            top: `${15 + (i % 4) * 20}%`,
-                            left: `${10 + (i % 3) * 30}%`,
-                            boxShadow: '0 0 6px rgba(135, 206, 235, 0.6)'
+                            width: '2px',
+                            height: '2px',
+                            background: i % 2 === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(179, 229, 252, 0.8)',
+                            // Position around progress bar area (bottom of container)
+                            top: `${75 + (i % 2) * 8}%`, // Around progress bar vertical area
+                            left: `${15 + (i * 10)}%`, // Spread across progress bar width
+                            boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)',
+                            opacity: videoState?.isGenerating ? 1 : 0
                           }}
                           animate={{
-                            x: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
-                            y: [0, Math.random() * 30 - 15, Math.random() * 30 - 15, 0],
-                            scale: [0.5, 1.2, 0.8, 1, 0.5],
-                            rotate: [0, 90, 180, 270, 360]
+                            // Circular motion around progress bar
+                            x: [0, 15 * Math.cos(i * 45 * Math.PI / 180), 15 * Math.cos((i * 45 + 180) * Math.PI / 180), 0],
+                            y: [0, 8 * Math.sin(i * 45 * Math.PI / 180), 8 * Math.sin((i * 45 + 180) * Math.PI / 180), 0],
+                            scale: [0.8, 1.2, 0.8],
+                            opacity: videoState?.isGenerating ? [0.6, 1, 0.6] : [0, 0, 0]
                           }}
                           transition={{
-                            duration: 4 + Math.random() * 2,
+                            duration: 3,
                             repeat: Infinity,
-                            delay: i * 0.3,
+                            delay: i * 0.2,
                             ease: "easeInOut"
                           }}
                         />
                       ))}
                       
-                      {/* Completion particles - only show when complete */}
-                      {isComplete && [...Array(7)].map((_, i) => (
+                      {/* Completion particles - celebration around progress bar when complete */}
+                      {isComplete && [...Array(6)].map((_, i) => (
                         <motion.div
                           key={`complete-particle-${i}`}
-                          className="absolute w-1 h-1 bg-green-400 rounded-full"
+                          className="absolute w-2 h-2 bg-green-400 rounded-full"
                           style={{
-                            top: `${-10 + Math.random() * 60}px`,
-                            left: `${12 + i * 12}%`,
-                            boxShadow: '0 0 8px rgba(34, 197, 94, 0.8)',
-                            opacity: 0
+                            // Position around completed progress bar
+                            top: `${78 + (i % 2) * 6}%`,
+                            left: `${20 + i * 12}%`,
+                            boxShadow: '0 0 12px rgba(34, 197, 94, 0.8)',
                           }}
                           animate={{
-                            x: [0, Math.random() * 60 - 30, Math.random() * 60 - 30, 0],
-                            y: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
-                            scale: [0, 1.5, 0.8, 0],
-                            opacity: [0, 1, 0.8, 0]
+                            // Celebratory burst pattern around progress bar
+                            x: [0, 20 * Math.cos(i * 60 * Math.PI / 180), 0],
+                            y: [0, -15 * Math.sin(i * 60 * Math.PI / 180), 0],
+                            scale: [0, 1.8, 0.5, 1.5, 0],
+                            opacity: [0, 1, 0.8, 1, 0]
                           }}
                           transition={{
-                            duration: 8 + Math.random() * 4,
+                            duration: 2.5,
                             repeat: Infinity,
-                            delay: i * 2,
-                            ease: "easeInOut"
+                            delay: i * 0.3,
+                            ease: "easeOut"
                           }}
                         />
                       ))}

@@ -41,7 +41,7 @@ Key features include:
 - **Audio Quality Enhancement**: Optimized audio settings for quality and stability (192k bitrate, 44.1kHz sample rate, stereo)
 - **Processing Optimization**: Improved FFmpeg settings with zerolatency tuning and limited threads to prevent browser overload
 - **Timeout Resolution**: Extended processing timeout to 12 minutes and optimized file reading with reduced delays to prevent completion failures
-- **Particle Visual Update**: Changed generation page particles to white and baby blue colors matching design system
+- **Particle Visual Update**: Changed generation page particles to white and baby blue colors matching design system, positioned around progress bars with proper looping animations
 - **Container Visibility Fix**: Fixed issue where video generation containers disappeared during processing - containers now remain visible with reduced opacity during generation
 - **Security Enhancement**: Ensured proper client/server separation with secure FFmpeg.wasm processing
 - **Environment Setup**: Configured proper port binding (5000) and CORS headers for Replit deployment
