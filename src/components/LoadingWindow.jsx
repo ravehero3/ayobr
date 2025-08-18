@@ -190,7 +190,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       ×
                     </button>
 
-                    <div className="relative h-full flex flex-col" style={{ zIndex: 70 }}>
+                    <div className="relative h-full flex flex-col">
                       {/* Title - Audio + Image names - positioned in front of image */}
                       <div
                         className="text-white font-semibold mb-3 text-center relative"
@@ -208,8 +208,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         }
                       </div>
 
-                      {/* Video Preview Area - moved 3px down from previous position */}
-                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-37px' }}>
+                      {/* Video Preview Area - moved 10px down from previous position */}
+                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-27px' }}>
                         <div 
                           className="aspect-video bg-black/30 rounded border border-white/20 flex items-center justify-center relative overflow-hidden"
                           style={{ width: '200px', height: '112px', minWidth: '200px', maxWidth: '200px', minHeight: '112px', maxHeight: '112px' }}
@@ -236,8 +236,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Single progress overlay in center of preview - only percentage counter we keep */}
                           {!isComplete && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center" style={{ zIndex: 50 }}>
-                              <div className="text-white text-sm font-medium" style={{ zIndex: 51 }}>
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <div className="text-white text-sm font-medium text-center">
                                 {Math.round(progress)}%
                               </div>
                             </div>
