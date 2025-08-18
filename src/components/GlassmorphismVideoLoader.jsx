@@ -32,7 +32,7 @@ const GlassmorphismVideoLoader = ({
       x: Math.random() * 100,
       y: 50 + Math.random() * 30,
       size: Math.random() * 2 + 2,
-      color: ['#3b82f6', '#1e40af', '#60a5fa', '#93c5fd'][Math.floor(Math.random() * 4)],
+      color: ['#ffffff', '#e0f2fe', '#b3e5fc', '#81d4fa'][Math.floor(Math.random() * 4)],
       duration: Math.random() * 1000 + 1500,
       randomX: (Math.random() - 0.5) * 60
     };

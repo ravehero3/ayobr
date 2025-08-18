@@ -504,9 +504,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-pix_fmt', 'yuv420p',
       '-r', '15',                    // Lower frame rate for faster processing (15 fps instead of default 25)
       '-c:a', 'aac',
-      '-b:a', '48k',                 // Even lower audio bitrate for faster processing
-      '-ar', '22050',                // Lower sample rate for faster processing
-      '-ac', '1',                    // Mono audio for faster processing
+      '-b:a', '320k',                // High-quality audio bitrate (320k)
+      '-ar', '44100',                // Standard sample rate for high quality (44.1 kHz)
+      '-ac', '2',                    // Stereo audio for full quality
       '-threads', '0',               // Use all CPU cores
       '-shortest',
       '-t', audioDuration.toString(),
