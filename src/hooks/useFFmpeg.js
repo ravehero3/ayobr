@@ -109,12 +109,20 @@ export const useFFmpeg = () => {
 
             // Don't re-throw to prevent unhandled rejection
             return null;
-          });
-          activePromises.add(promise);
-          promise.finally(async () => {
-            activePromises.delete(promise);
+          }).finally(async () => {
+            // Ensure we always increment the completed count
             completedCount++;
             await updateBatchProgress();
+            
+            // Log completion for debugging
+            console.log(`Promise completed for pair ${pair.id}, total completed: ${completedCount}/${pairs.length}`);
+          });
+          
+          activePromises.add(promise);
+          
+          // Remove promise from active set when it resolves
+          promise.finally(() => {
+            activePromises.delete(promise);
           });
         }
 
@@ -217,37 +225,52 @@ export const useFFmpeg = () => {
       console.log('Video settings for generation:', videoSettings);
 
       let videoData;
+      // Add timeout for video processing to prevent hanging
+      const processingTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Video processing timeout after 5 minutes')), 5 * 60 * 1000);
+      });
+
       try {
-        videoData = await processVideoWithFFmpeg(
-          pair.audio, 
-          pair.image, 
-          (progress) => {
-            const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
-            console.log(`Setting video generation state for pair ${pair.id}:`, {
-              isGenerating: true,
-              progress: clampedProgress,
-              isComplete: false,
-              video: null
-            });
-            setVideoGenerationState(pair.id, {
-              isGenerating: true,
-              progress: clampedProgress,
-              isComplete: false,
-              video: null
-            });
-          },
-          () => {
-            if (isCancelling) {
-              console.log('Cancellation detected, stopping FFmpeg process');
-              return true;
-            }
-            return false;
-          },
-          videoSettings
-        );
+        videoData = await Promise.race([
+          processVideoWithFFmpeg(
+            pair.audio, 
+            pair.image, 
+            (progress) => {
+              const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
+              console.log(`Setting video generation state for pair ${pair.id}:`, {
+                isGenerating: true,
+                progress: clampedProgress,
+                isComplete: false,
+                video: null
+              });
+              setVideoGenerationState(pair.id, {
+                isGenerating: true,
+                progress: clampedProgress,
+                isComplete: false,
+                video: null,
+                lastUpdate: Date.now()
+              });
+            },
+            () => {
+              if (isCancelling) {
+                console.log('Cancellation detected, stopping FFmpeg process');
+                return true;
+              }
+              return false;
+            },
+            videoSettings
+          ),
+          processingTimeout
+        ]);
         console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
       } catch (processingError) {
         console.error(`Error during video processing for pair ${pair.id}:`, processingError);
+        
+        // Force cleanup on timeout or error
+        if (processingError.message.includes('timeout')) {
+          console.log(`Video processing timed out for pair ${pair.id}, forcing cleanup`);
+          forceStopAllProcesses();
+        }
         
         // Set error state for the pair
         setVideoGenerationState(pair.id, {
@@ -270,7 +293,15 @@ export const useFFmpeg = () => {
       console.log('Video data size received:', videoData ? videoData.length : 'null/undefined');
 
       if (!videoData || videoData.length === 0) {
+        console.error(`Invalid video data for pair ${pair.id}: ${videoData ? 'empty buffer' : 'null/undefined'}`);
         throw new Error('Invalid video data received from FFmpeg processor');
+      }
+
+      // Additional validation - check if video data looks valid (MP4 should start with specific bytes)
+      const uint8Array = new Uint8Array(videoData);
+      if (uint8Array.length < 8) {
+        console.error(`Video data too small for pair ${pair.id}: ${uint8Array.length} bytes`);
+        throw new Error('Video data appears corrupted - file too small');
       }
 
       let videoBlob, videoUrl;
