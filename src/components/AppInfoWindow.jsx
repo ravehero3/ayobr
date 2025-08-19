@@ -87,7 +87,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
                 style={{ maxWidth: '289px' }}
               />
             </div>
-            <div className="text-xs text-gray-400" style={{ marginTop: '40px', width: '143px', margin: '40px auto 0 auto', fontSize: '8px' }}>
+            <div className="text-xs text-gray-400" style={{ marginTop: '20px', width: '143px', margin: '20px auto 0 auto', fontSize: '8px' }}>
               WWW.VOODOO808.COM
             </div>
           </div>
