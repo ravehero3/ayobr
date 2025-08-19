@@ -38,7 +38,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            width: '460px',
+            width: '440px',
             height: '484px',
             padding: '32px',
             background: 'rgba(5, 5, 5, 0.85)',
@@ -73,7 +73,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
               className="h-64 object-contain"
-              style={{ maxWidth: '396px' }}
+              style={{ maxWidth: '376px' }}
             />
           </div>
 
