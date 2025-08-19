@@ -68,7 +68,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           </button>
 
           {/* Logo above title */}
-          <div className="w-full flex justify-center" style={{ marginTop: '12px', marginBottom: '6px' }}>
+          <div className="w-full flex justify-center" style={{ marginTop: '22px', marginBottom: '6px' }}>
             <img 
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
