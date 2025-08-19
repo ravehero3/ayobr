@@ -68,7 +68,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           </button>
 
           {/* Logo above title */}
-          <div className="w-full flex justify-center" style={{ marginTop: '0', marginBottom: '6px' }}>
+          <div className="w-full flex justify-center" style={{ marginTop: '8px', marginBottom: '6px' }}>
             <img 
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
@@ -79,12 +79,12 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
 
           {/* App Info */}
           <div className="text-white space-y-3">
-            <div className="flex justify-center mb-2">
+            <div className="flex justify-center mb-2" style={{ marginTop: '8px' }}>
               <img 
                 src={typebeatzTitleLogo} 
                 alt="TypeBeatz Video Generator" 
                 className="h-14 object-contain"
-                style={{ maxWidth: '294px' }}
+                style={{ maxWidth: '292px' }}
               />
             </div>
             <div className="text-xs text-gray-400" style={{ marginTop: '54px', width: '143px', margin: '54px auto 0 auto', fontSize: '8px' }}>
