@@ -39,7 +39,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           className="relative flex flex-col items-center justify-center text-center cursor-default"
           style={{
             width: '360px',
-            height: '460px',
+            height: '468px',
             padding: '32px',
             background: 'rgba(5, 5, 5, 0.85)',
             borderRadius: '20px',
