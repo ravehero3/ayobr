@@ -33,7 +33,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
       <motion.div
         className="fixed inset-0 flex items-center justify-center"
         style={{
-          zIndex: 99999, // Ensure it appears above everything
+          zIndex: 100000, // Highest z-index to ensure it appears above everything
           pointerEvents: 'auto'
         }}
         initial={{ opacity: 0 }}
