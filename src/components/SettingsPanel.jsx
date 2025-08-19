@@ -57,14 +57,16 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Invisible backdrop for closing */}
+          {/* Enhanced backdrop with Gaussian blur */}
           <motion.div
             className="fixed inset-0 z-40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-              background: 'transparent'
+              background: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
             }}
             onClick={onClose}
           />

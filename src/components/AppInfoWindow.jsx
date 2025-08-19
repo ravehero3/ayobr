@@ -4,29 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import typebeatzLogo from '../assets/typebeatz-alien-logo-updated.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
   if (!isOpen) return null;
-
-  const handleDragStart = (event, info) => {
-    setIsDragging(true);
-  };
-
-  const handleDrag = (event, info) => {
-    // Don't update position state during dragging - let Framer Motion handle it
-    // This prevents the erratic movement
-  };
-
-  const handleDragEnd = (event, info) => {
-    setIsDragging(false);
-    // Save the final position when dragging ends
-    setPosition({
-      x: info.offset.x,
-      y: info.offset.y
-    });
-  };
 
   return (
     <AnimatePresence>
@@ -41,18 +19,17 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         exit={{ opacity: 0 }}
         onClick={onClose}
       >
-        {/* Enhanced Glassmorphism Backdrop with stronger blur */}
+        {/* Enhanced Gaussian blur backdrop matching UserProfile */}
         <div 
           className="absolute inset-0"
           style={{
-            background: 'rgba(0, 0, 0, 0.75)', /* 75% black overlay */
-            backdropFilter: 'blur(50px) saturate(200%) brightness(60%) contrast(130%)',
-            WebkitBackdropFilter: 'blur(50px) saturate(200%) brightness(60%) contrast(130%)',
-            opacity: 0.8 /* 80% opacity for darker effect */
+            background: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
           }}
         />
         
-        {/* App Info Window - Positioned at exact center */}
+        {/* App Info Window - Fixed centered position, no dragging */}
         <motion.div
           className="relative p-8 flex flex-col items-center justify-center text-center cursor-default"
           style={{
@@ -69,70 +46,20 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             backdropFilter: 'blur(25px) saturate(120%) brightness(70%) contrast(125%)',
             WebkitBackdropFilter: 'blur(25px) saturate(120%) brightness(70%) contrast(125%)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px)`,
             zIndex: 999999
           }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          drag
-          dragConstraints={{
-            left: -window.innerWidth/2 + 200,
-            right: window.innerWidth/2 - 200,
-            top: -window.innerHeight/2 + 200,
-            bottom: window.innerHeight/2 - 200
-          }}
-          onDragStart={handleDragStart}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          whileDrag={{ scale: 1.02 }}
         >
-          {/* Move Handle - Top Left Corner */}
-          <motion.div
-            className="absolute top-3 left-3 w-6 h-6 cursor-move flex items-center justify-center"
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(15px) saturate(150%)',
-              WebkitBackdropFilter: 'blur(15px) saturate(150%)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 0.6)">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </motion.div>
-
-          {/* Close Button - Only visible on hover */}
-          <motion.button
-            className="absolute top-4 right-4 w-6 h-6 flex items-center justify-center text-white hover:text-gray-300 transition-colors z-10"
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(15px) saturate(150%)',
-              WebkitBackdropFilter: 'blur(15px) saturate(150%)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
+          {/* Close Button - Always visible */}
+          <button
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white hover:text-gray-300 transition-colors z-10 rounded-full text-xl"
             onClick={onClose}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M12.854 4.854a.5.5 0 0 0-.708-.708L8 8.293 3.854 4.146a.5.5 0 1 0-.708.708L7.293 9l-4.147 4.146a.5.5 0 0 0 .708.708L8 9.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 9l4.147-4.146z"/>
-            </svg>
-          </motion.button>
+            ×
+          </button>
 
           {/* Logo above title */}
           <div className="w-full flex justify-center mb-4">

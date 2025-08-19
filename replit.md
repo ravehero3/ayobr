@@ -51,6 +51,8 @@ Key features include:
 - **Header Status Enhancement**: Added "We are generating your videos" indicator in header during video generation with animated pulse effect
 - **User Profile Modal Enhancement**: Added Gaussian blur backdrop when user profile is opened, creating elegant modal overlay effect while maintaining app functionality
 - **Generation Text Positioning**: Moved "We are generating your videos" text 40px higher on the generation page and removed redundant header indicator per user preference
+- **Modal Blur Enhancement**: Added consistent Gaussian blur backdrop to SettingsPanel and AppInfoWindow modals, matching UserProfile's elegant overlay effect
+- **AppInfoWindow Improvements**: Removed dragging functionality and fixed window to perfect center position with simplified close button for better UX
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.
