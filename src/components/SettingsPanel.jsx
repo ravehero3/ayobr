@@ -55,8 +55,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          <motion.div
+        <motion.div
           className="fixed inset-0 flex items-center justify-center"
           style={{
             zIndex: 999999,
