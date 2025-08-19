@@ -84,10 +84,10 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
                 src={typebeatzTitleLogo} 
                 alt="TypeBeatz Video Generator" 
                 className="h-12 object-contain"
-                style={{ maxWidth: '340px' }}
+                style={{ maxWidth: '366px' }}
               />
             </div>
-            <div className="text-xs text-gray-400" style={{ marginTop: '-16px', width: '183px', margin: '-16px auto 0 auto' }}>
+            <div className="text-xs text-gray-400" style={{ marginTop: '14px', width: '163px', margin: '14px auto 0 auto', fontSize: '10px' }}>
               WWW.VOODOO808.COM
             </div>
           </div>
