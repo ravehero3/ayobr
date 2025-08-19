@@ -38,8 +38,8 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            width: '410px',
-            height: '484px',
+            width: '390px',
+            height: '460px',
             padding: '32px',
             background: 'rgba(5, 5, 5, 0.85)',
             borderRadius: '20px',
@@ -73,7 +73,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
               className="h-64 object-contain"
-              style={{ maxWidth: '346px' }}
+              style={{ maxWidth: '326px' }}
             />
           </div>
 
@@ -83,8 +83,8 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
               <img 
                 src={typebeatzTitleLogo} 
                 alt="TypeBeatz Video Generator" 
-                className="h-12 object-contain"
-                style={{ maxWidth: '346px' }}
+                className="h-14 object-contain"
+                style={{ maxWidth: '366px' }}
               />
             </div>
             <div className="text-xs text-gray-400" style={{ marginTop: '54px', width: '143px', margin: '54px auto 0 auto', fontSize: '8px' }}>
