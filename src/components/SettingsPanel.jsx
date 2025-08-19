@@ -428,7 +428,8 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               100% { background-position: 0% 50%; }
             }
           `}</style>
-        </>
+          </motion.div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
