@@ -13,7 +13,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         style={{
           zIndex: 999999, // Absolute highest z-index to ensure it appears above everything
           pointerEvents: 'auto',
-          paddingTop: '80px', // Account for header (64px) + spacing
+          paddingTop: '380px', // Move 300px down from original position
           paddingBottom: '96px' // Account for footer (64px) + spacing
         }}
         initial={{ opacity: 0 }}
