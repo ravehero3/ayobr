@@ -38,7 +38,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            width: '430px',
+            width: '410px',
             height: '484px',
             padding: '32px',
             background: 'rgba(5, 5, 5, 0.85)',
@@ -73,7 +73,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
               className="h-64 object-contain"
-              style={{ maxWidth: '366px' }}
+              style={{ maxWidth: '346px' }}
             />
           </div>
 
@@ -84,10 +84,10 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
                 src={typebeatzTitleLogo} 
                 alt="TypeBeatz Video Generator" 
                 className="h-12 object-contain"
-                style={{ maxWidth: '366px' }}
+                style={{ maxWidth: '346px' }}
               />
             </div>
-            <div className="text-xs text-gray-400" style={{ marginTop: '14px', width: '163px', margin: '14px auto 0 auto', fontSize: '10px' }}>
+            <div className="text-xs text-gray-400" style={{ marginTop: '54px', width: '143px', margin: '54px auto 0 auto', fontSize: '8px' }}>
               WWW.VOODOO808.COM
             </div>
           </div>
