@@ -41,7 +41,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             width: '360px',
             height: '468px',
             padding: '32px',
-            background: 'rgba(5, 5, 5, 0.68)',
+            background: 'rgba(5, 5, 5, 0.5)',
             borderRadius: '20px',
             boxShadow: `
               0 8px 40px rgba(0, 0, 0, 0.8),
@@ -87,7 +87,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
                 style={{ maxWidth: '289px' }}
               />
             </div>
-            <div className="text-xs text-gray-400" style={{ marginTop: '50px', width: '143px', margin: '50px auto 0 auto', fontSize: '8px' }}>
+            <div className="text-xs text-gray-400" style={{ marginTop: '40px', width: '143px', margin: '40px auto 0 auto', fontSize: '8px' }}>
               WWW.VOODOO808.COM
             </div>
           </div>
