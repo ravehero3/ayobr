@@ -87,7 +87,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
               />
             </div>
             <div className="text-xs text-gray-400 pt-2">
-              Version 1.0
+              WWW.VOODOO808.COM
             </div>
           </div>
         </motion.div>
