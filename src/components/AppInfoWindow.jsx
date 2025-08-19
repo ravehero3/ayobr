@@ -68,7 +68,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           </button>
 
           {/* Logo above title */}
-          <div className="w-full flex justify-center mb-4" style={{ marginTop: '0' }}>
+          <div className="w-full flex justify-center" style={{ marginTop: '0', marginBottom: '6px' }}>
             <img 
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
@@ -83,11 +83,11 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
               <img 
                 src={typebeatzTitleLogo} 
                 alt="TypeBeatz Video Generator" 
-                className="h-10 object-contain"
-                style={{ maxWidth: '320px' }}
+                className="h-12 object-contain"
+                style={{ maxWidth: '340px' }}
               />
             </div>
-            <div className="text-xs text-gray-400" style={{ marginTop: '-6px' }}>
+            <div className="text-xs text-gray-400" style={{ marginTop: '-16px', width: '183px', margin: '-16px auto 0 auto' }}>
               WWW.VOODOO808.COM
             </div>
           </div>
