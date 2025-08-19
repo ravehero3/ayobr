@@ -53,8 +53,16 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Status Indicator - Center (hide during generation) */}
+        {/* Status Indicator - Center */}
         <div className="flex items-center space-x-4" style={{ marginLeft: '-30px' }}>
+          {isGenerating && (
+            <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30">
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+              <span className="text-xs text-blue-300 font-medium">
+                We are generating your videos
+              </span>
+            </div>
+          )}
           {generatedVideos.length > 0 && !isGenerating && (
             <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
               <div className="w-2 h-2 rounded-full bg-green-400"></div>

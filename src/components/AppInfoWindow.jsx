@@ -33,7 +33,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
       <motion.div
         className="fixed inset-0 flex items-center justify-center"
         style={{
-          zIndex: 100000, // Highest z-index to ensure it appears above everything
+          zIndex: 999999, // Absolute highest z-index to ensure it appears above everything
           pointerEvents: 'auto'
         }}
         initial={{ opacity: 0 }}
@@ -73,7 +73,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             top: '50%',
             left: '50%',
             transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px)`,
-            zIndex: 100000
+            zIndex: 999999
           }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

@@ -47,7 +47,9 @@ Key features include:
 - **Environment Setup**: Configured proper port binding (5000) and CORS headers for Replit deployment
 - **Migration from Replit Agent (August 19, 2025)**: Successfully migrated project from Replit Agent to standard Replit environment with all dependencies installed and webpack dev server running on port 5000
 - **Logo Update**: Fixed broken logo in AppInfoWindow component and updated to use new TypeBeatz alien logo with 'zzz' text
-- **Z-Index Improvements**: Updated AppInfoWindow and UserProfile components to use consistent high z-index values (100000) ensuring they appear above all other elements, matching settings window behavior
+- **Z-Index Improvements**: Updated AppInfoWindow and UserProfile components to use consistent high z-index values (999999) ensuring they appear above all other elements, matching settings window behavior
+- **Header Status Enhancement**: Added "We are generating your videos" indicator in header during video generation with animated pulse effect
+- **User Profile Modal Enhancement**: Added Gaussian blur backdrop when user profile is opened, creating elegant modal overlay effect while maintaining app functionality
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.
