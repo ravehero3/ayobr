@@ -45,7 +45,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90 backdrop-blur-sm"
+        className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
         style={{ zIndex: 999998, paddingTop: '72px', paddingBottom: '40px' }} // Above all elements including header
       >
         {/* Loading Window - No Background */}
