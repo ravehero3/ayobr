@@ -15,9 +15,10 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
   };
 
   const handleDrag = (event, info) => {
+    // Use absolute position from drag info instead of accumulating deltas
     setPosition({
-      x: position.x + info.delta.x,
-      y: position.y + info.delta.y
+      x: info.offset.x,
+      y: info.offset.y
     });
   };
 
@@ -52,12 +53,12 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative w-96 h-80 p-8 flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            background: 'rgba(10, 15, 28, 0.85)',
+            background: 'rgba(10, 15, 28, 0.15)',
             borderRadius: '20px',
             boxShadow: '0 16px 60px rgba(0, 0, 0, 0.5), 0 8px 32px rgba(96, 165, 250, 0.1)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            border: '1px solid rgba(96, 165, 250, 0.2)',
+            backdropFilter: 'blur(40px) saturate(200%) brightness(120%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(120%)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             position: 'absolute',
             top: '50%',
             left: '50%',
