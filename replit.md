@@ -54,7 +54,7 @@ Key features include:
 - **Modal Blur Enhancement**: Added consistent Gaussian blur backdrop to SettingsPanel and AppInfoWindow modals, matching UserProfile's elegant overlay effect
 - **AppInfoWindow Improvements**: Removed dragging functionality and fixed window to perfect center position with simplified close button for better UX
 - **AppInfoWindow Title Logo Fix**: Updated broken title logo in AppInfoWindow component to use new "TypeBeatz Logo 2 White Version" provided by user, ensuring proper branding display
-- **AppInfoWindow Spacing Optimization**: Adjusted padding to ensure exactly 32px free space between TypeBeatz icon and window edges, with maximum width set to 396px for proper containment
+- **AppInfoWindow Spacing Optimization**: Adjusted padding to ensure exactly 32px free space between TypeBeatz icon and window edges, with maximum width set to 396px for proper containment. Close button repositioned to maintain consistent 32px spacing from all edges
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.

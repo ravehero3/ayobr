@@ -61,14 +61,14 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         >
           {/* Close Button - Always visible */}
           <button
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white hover:text-gray-300 transition-colors z-10 rounded-full text-xl"
+            className="absolute top-8 right-8 w-8 h-8 flex items-center justify-center text-white hover:text-gray-300 transition-colors z-10 rounded-full text-xl"
             onClick={onClose}
           >
             ×
           </button>
 
           {/* Logo above title */}
-          <div className="w-full flex justify-center mb-4">
+          <div className="w-full flex justify-center mb-4" style={{ marginTop: '0' }}>
             <img 
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
