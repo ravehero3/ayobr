@@ -87,14 +87,15 @@ const UserProfile = ({ isOpen, onClose }) => {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="relative w-[420px] max-h-[80vh] rounded-3xl overflow-y-auto"
             style={{
-              background: 'rgba(0, 0, 0, 0.98)',
-              backdropFilter: 'blur(25px)',
-              WebkitBackdropFilter: 'blur(25px)',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
+              background: 'rgba(5, 5, 5, 0.5)',
+              backdropFilter: 'blur(25px) saturate(120%) brightness(70%) contrast(125%)',
+              WebkitBackdropFilter: 'blur(25px) saturate(120%) brightness(70%) contrast(125%)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
               boxShadow: `
-                0 25px 50px rgba(0, 0, 0, 0.9),
-                inset 0 1px 0 rgba(59, 130, 246, 0.08),
-                0 0 20px rgba(59, 130, 246, 0.1)
+                0 8px 40px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.4)
               `,
               padding: '40px',
             }}
