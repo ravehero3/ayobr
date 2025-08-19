@@ -41,13 +41,13 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         exit={{ opacity: 0 }}
         onClick={onClose}
       >
-        {/* Enhanced Backdrop with stronger blur */}
+        {/* Enhanced Glassmorphism Backdrop with stronger blur */}
         <div 
           className="absolute inset-0"
           style={{
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(25px) saturate(150%)',
-            WebkitBackdropFilter: 'blur(25px) saturate(150%)'
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(40px) saturate(180%) brightness(110%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%) brightness(110%)'
           }}
         />
         
@@ -55,12 +55,12 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative w-96 h-80 p-8 flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            background: 'rgba(17, 0, 0, 0.36)',
-            borderRadius: '16px',
-            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-            backdropFilter: 'blur(11px)',
-            WebkitBackdropFilter: 'blur(11px)',
-            border: '1px solid rgba(17, 0, 0, 0.3)',
+            background: 'rgba(15, 15, 15, 0.25)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(120%)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
             position: 'absolute',
             top: '50%',
             left: '50%',
@@ -89,11 +89,12 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           <motion.div
             className="absolute top-3 left-3 w-6 h-6 cursor-move flex items-center justify-center"
             style={{
-              background: 'rgba(96, 165, 250, 0.15)',
-              borderRadius: '6px',
-              border: '1px solid rgba(96, 165, 250, 0.3)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)'
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(15px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(15px) saturate(150%)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
