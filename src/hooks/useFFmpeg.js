@@ -225,43 +225,37 @@ export const useFFmpeg = () => {
       console.log('Video settings for generation:', videoSettings);
 
       let videoData;
-      // Add timeout for video processing to prevent hanging
-      const processingTimeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Video processing timeout after 12 minutes')), 12 * 60 * 1000);
-      });
-
+      
       try {
-        videoData = await Promise.race([
-          processVideoWithFFmpeg(
-            pair.audio, 
-            pair.image, 
-            (progress) => {
-              const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
-              console.log(`Setting video generation state for pair ${pair.id}:`, {
-                isGenerating: true,
-                progress: clampedProgress,
-                isComplete: false,
-                video: null
-              });
-              setVideoGenerationState(pair.id, {
-                isGenerating: true,
-                progress: clampedProgress,
-                isComplete: false,
-                video: null,
-                lastUpdate: Date.now()
-              });
-            },
-            () => {
-              if (isCancelling) {
-                console.log('Cancellation detected, stopping FFmpeg process');
-                return true;
-              }
-              return false;
-            },
-            videoSettings
-          ),
-          processingTimeout
-        ]);
+        // Process video without timeout racing - let FFmpeg handle its own timeouts
+        videoData = await processVideoWithFFmpeg(
+          pair.audio, 
+          pair.image, 
+          (progress) => {
+            const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
+            console.log(`Setting video generation state for pair ${pair.id}:`, {
+              isGenerating: true,
+              progress: clampedProgress,
+              isComplete: false,
+              video: null
+            });
+            setVideoGenerationState(pair.id, {
+              isGenerating: true,
+              progress: clampedProgress,
+              isComplete: false,
+              video: null,
+              lastUpdate: Date.now()
+            });
+          },
+          () => {
+            if (isCancelling) {
+              console.log('Cancellation detected, stopping FFmpeg process');
+              return true;
+            }
+            return false;
+          },
+          videoSettings
+        );
         console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
       } catch (processingError) {
         console.error(`Error during video processing for pair ${pair.id}:`, processingError);

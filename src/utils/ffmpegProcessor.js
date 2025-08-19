@@ -522,7 +522,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     try {
       const execPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 300000); // 5 minute timeout for FFmpeg execution
+        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 600000); // 10 minute timeout for FFmpeg execution
       });
 
       await Promise.race([execPromise, timeoutPromise]);
@@ -571,11 +571,11 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     if (window.gc) {
       window.gc();
     }
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 200)); // Reduced delay
 
     let data;
     let retryCount = 0;
-    const maxRetries = 3; // Reduced retries for faster completion
+    const maxRetries = 5; // Increased retries for better reliability
 
     while (retryCount < maxRetries) {
       try {
@@ -588,7 +588,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           if (retryCount === 0) {
             // Single filesystem sync wait
             console.log('Output file not found, waiting for filesystem sync...');
-            await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
+            await new Promise(resolve => setTimeout(resolve, 300)); // Further reduced delay
             continue; // Try again without incrementing retry count
           }
           throw new Error('Output file was not created by FFmpeg');
