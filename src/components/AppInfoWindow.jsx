@@ -12,7 +12,9 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         className="fixed inset-0 flex items-center justify-center"
         style={{
           zIndex: 999999, // Absolute highest z-index to ensure it appears above everything
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          paddingTop: '80px', // Account for header (64px) + spacing
+          paddingBottom: '96px' // Account for footer (64px) + spacing
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
