@@ -50,6 +50,7 @@ Key features include:
 - **Z-Index Improvements**: Updated AppInfoWindow and UserProfile components to use consistent high z-index values (999999) ensuring they appear above all other elements, matching settings window behavior
 - **Header Status Enhancement**: Added "We are generating your videos" indicator in header during video generation with animated pulse effect
 - **User Profile Modal Enhancement**: Added Gaussian blur backdrop when user profile is opened, creating elegant modal overlay effect while maintaining app functionality
+- **Generation Text Positioning**: Moved "We are generating your videos" text 40px higher on the generation page and removed redundant header indicator per user preference
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.

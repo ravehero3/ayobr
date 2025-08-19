@@ -64,8 +64,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         >
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
-          {/* Header */}
-          <div className="relative flex flex-col items-center justify-center pt-8 pb-6 header-no-blur" style={{ zIndex: 10100 }}>
+          {/* Header - Moved 40px higher */}
+          <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 10100, paddingTop: '0px', paddingBottom: '24px', marginTop: '-40px' }}>
             <motion.h2
               className="text-3xl font-bold text-white mb-4 text-center"
               initial={{ opacity: 0, y: -10 }}
