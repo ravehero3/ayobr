@@ -45,9 +45,10 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <div 
           className="absolute inset-0"
           style={{
-            background: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(40px) saturate(180%) brightness(110%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(180%) brightness(110%)'
+            background: 'rgba(0, 0, 0, 0.3)', /* 30% black overlay */
+            backdropFilter: 'blur(50px) saturate(200%) brightness(80%) contrast(120%)',
+            WebkitBackdropFilter: 'blur(50px) saturate(200%) brightness(80%) contrast(120%)',
+            opacity: 0.5 /* 50% transparency */
           }}
         />
         
@@ -55,12 +56,17 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative w-96 h-80 p-8 flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            background: 'rgba(15, 15, 15, 0.25)',
+            background: 'rgba(15, 15, 15, 0.4)', /* Slightly more opaque for better contrast */
             borderRadius: '20px',
-            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px) saturate(120%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: `
+              0 8px 40px rgba(0, 0, 0, 0.5),
+              0 0 0 1px rgba(255, 255, 255, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.2)
+            `,
+            backdropFilter: 'blur(25px) saturate(150%) brightness(110%) contrast(105%)',
+            WebkitBackdropFilter: 'blur(25px) saturate(150%) brightness(110%) contrast(105%)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             position: 'absolute',
             top: '50%',
             left: '50%',
