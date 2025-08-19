@@ -26,6 +26,8 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             background: 'rgba(0, 0, 0, 0.6)',
             backdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
             WebkitBackdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
+            minHeight: '100vh',
+            minWidth: '100vw',
           }}
         />
         
