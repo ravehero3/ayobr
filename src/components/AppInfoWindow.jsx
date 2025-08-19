@@ -54,7 +54,8 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         
         {/* App Info Window - Positioned at exact center */}
         <motion.div
-          className="relative w-96 h-80 p-8 flex flex-col items-center justify-center text-center cursor-default"
+          className="relative p-8 flex flex-col items-center justify-center text-center cursor-default"
+          style={{ width: '460px', height: '384px' }} /* 20% bigger: 384px * 1.2 = 460px, 320px * 1.2 = 384px */
           style={{
             background: 'rgba(5, 5, 5, 0.85)', /* Much darker background - 85% opacity */
             borderRadius: '20px',
@@ -132,22 +133,14 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             </svg>
           </motion.button>
 
-          {/* TypeBeatz Alien Logo - Full width of window */}
-          <div className="w-full flex justify-center mb-6">
-            {typebeatzAlienLogo ? (
-              <img 
-                src={typebeatzAlienLogo} 
-                alt="TypeBeatz Alien Logo" 
-                className="max-w-full h-20 object-contain"
-                style={{ maxWidth: '280px' }}
-                onError={(e) => {
-                  console.log('Logo failed to load:', typebeatzAlienLogo);
-                  e.target.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="text-gray-400 text-sm">Logo not found</div>
-            )}
+          {/* Logo above title */}
+          <div className="w-full flex justify-center mb-4">
+            <img 
+              src={require('../assets/typebeatz logo 2 white version_1754509091303.png')} 
+              alt="TypeBeatz Logo" 
+              className="h-16 object-contain"
+              style={{ maxWidth: '320px' }}
+            />
           </div>
 
           {/* App Info */}
