@@ -46,7 +46,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90 backdrop-blur-sm"
-        style={{ zIndex: 9940, paddingTop: '72px', paddingBottom: '40px' }} // Below sleeping alien, above background
+        style={{ zIndex: 999998, paddingTop: '72px', paddingBottom: '40px' }} // Above all elements including header
       >
         {/* Loading Window - No Background */}
         <motion.div
@@ -65,7 +65,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
           {/* Header - Moved 40px higher */}
-          <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-50px' }}>
+          <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-58px' }}>
             <motion.h2
               className="text-3xl font-bold text-white mb-4 text-center"
               initial={{ opacity: 0, y: -10 }}
