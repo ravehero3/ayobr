@@ -41,7 +41,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             width: '360px',
             height: '468px',
             padding: '32px',
-            background: 'rgba(5, 5, 5, 0.85)',
+            background: 'rgba(5, 5, 5, 0.68)',
             borderRadius: '20px',
             boxShadow: `
               0 8px 40px rgba(0, 0, 0, 0.8),
@@ -68,7 +68,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           </button>
 
           {/* Logo above title */}
-          <div className="w-full flex justify-center" style={{ marginTop: '8px', marginBottom: '6px' }}>
+          <div className="w-full flex justify-center" style={{ marginTop: '12px', marginBottom: '6px' }}>
             <img 
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
@@ -79,7 +79,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
 
           {/* App Info */}
           <div className="text-white space-y-3">
-            <div className="flex justify-center mb-2" style={{ marginTop: '8px' }}>
+            <div className="flex justify-center mb-2" style={{ marginTop: '12px' }}>
               <img 
                 src={typebeatzTitleLogo} 
                 alt="TypeBeatz Video Generator" 
