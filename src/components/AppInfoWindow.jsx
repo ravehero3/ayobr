@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import typebeatzLogo from '../assets/typebeatz-alien-logo-updated.png';
-import typebeatzTitleLogo from '../assets/typebeatz-title-logo.png';
+import typebeatzTitleLogo from '../assets/typebeatz-logo-2-white.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
   if (!isOpen) return null;

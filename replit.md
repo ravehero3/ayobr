@@ -53,6 +53,7 @@ Key features include:
 - **Generation Text Positioning**: Moved "We are generating your videos" text 40px higher on the generation page and removed redundant header indicator per user preference
 - **Modal Blur Enhancement**: Added consistent Gaussian blur backdrop to SettingsPanel and AppInfoWindow modals, matching UserProfile's elegant overlay effect
 - **AppInfoWindow Improvements**: Removed dragging functionality and fixed window to perfect center position with simplified close button for better UX
+- **AppInfoWindow Title Logo Fix**: Updated broken title logo in AppInfoWindow component to use new "TypeBeatz Logo 2 White Version" provided by user, ensuring proper branding display
 
 ### System Design Choices
 - **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.
