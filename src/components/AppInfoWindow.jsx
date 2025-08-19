@@ -36,10 +36,11 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         
         {/* App Info Window - Fixed centered position, no dragging */}
         <motion.div
-          className="relative p-8 flex flex-col items-center justify-center text-center cursor-default"
+          className="relative flex flex-col items-center justify-center text-center cursor-default"
           style={{
             width: '460px',
             height: '484px',
+            padding: '32px',
             background: 'rgba(5, 5, 5, 0.85)',
             borderRadius: '20px',
             boxShadow: `
@@ -72,7 +73,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
               className="h-64 object-contain"
-              style={{ maxWidth: '280px' }}
+              style={{ maxWidth: '396px' }}
             />
           </div>
 
