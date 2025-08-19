@@ -105,24 +105,43 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             </svg>
           </motion.div>
 
-          {/* Close Button */}
-          <button
+          {/* Close Button - Only visible on hover */}
+          <motion.button
             className="absolute top-4 right-4 w-6 h-6 flex items-center justify-center text-white hover:text-gray-300 transition-colors z-10"
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(15px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(15px) saturate(150%)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
               <path d="M12.854 4.854a.5.5 0 0 0-.708-.708L8 8.293 3.854 4.146a.5.5 0 1 0-.708.708L7.293 9l-4.147 4.146a.5.5 0 0 0 .708.708L8 9.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 9l4.147-4.146z"/>
             </svg>
-          </button>
+          </motion.button>
 
-          {/* Sleeping Alien Logo - Full width of window */}
+          {/* TypeBeatz Alien Logo - Full width of window */}
           <div className="w-full flex justify-center mb-6">
-            <img 
-              src={typebeatzAlienLogo} 
-              alt="TypeBeatz Alien Logo" 
-              className="max-w-full h-20 object-contain"
-              style={{ maxWidth: '280px' }}
-            />
+            {typebeatzAlienLogo ? (
+              <img 
+                src={typebeatzAlienLogo} 
+                alt="TypeBeatz Alien Logo" 
+                className="max-w-full h-20 object-contain"
+                style={{ maxWidth: '280px' }}
+                onError={(e) => {
+                  console.log('Logo failed to load:', typebeatzAlienLogo);
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="text-gray-400 text-sm">Logo not found</div>
+            )}
           </div>
 
           {/* App Info */}
