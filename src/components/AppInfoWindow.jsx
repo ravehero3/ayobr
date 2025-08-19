@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import typebeatzAlienLogo from '../assets/typebeatz-alien-logo.png';
+import typebeatzLogo from '../assets/typebeatz-logo-new.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -55,9 +55,10 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         {/* App Info Window - Positioned at exact center */}
         <motion.div
           className="relative p-8 flex flex-col items-center justify-center text-center cursor-default"
-          style={{ width: '460px', height: '384px' }} /* 20% bigger: 384px * 1.2 = 460px, 320px * 1.2 = 384px */
           style={{
-            background: 'rgba(5, 5, 5, 0.85)', /* Much darker background - 85% opacity */
+            width: '460px',
+            height: '384px',
+            background: 'rgba(5, 5, 5, 0.85)',
             borderRadius: '20px',
             boxShadow: `
               0 8px 40px rgba(0, 0, 0, 0.8),
@@ -136,7 +137,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           {/* Logo above title */}
           <div className="w-full flex justify-center mb-4">
             <img 
-              src={require('../assets/typebeatz logo 2 white version_1754509091303.png')} 
+              src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
               className="h-16 object-contain"
               style={{ maxWidth: '320px' }}
