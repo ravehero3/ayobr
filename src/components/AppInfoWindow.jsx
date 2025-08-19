@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import typebeatzLogo from '../assets/typebeatz-logo-new.png';
+import typebeatzLogo from '../assets/typebeatz-alien-logo-updated.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -139,8 +139,8 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             <img 
               src={typebeatzLogo} 
               alt="TypeBeatz Logo" 
-              className="h-16 object-contain"
-              style={{ maxWidth: '320px' }}
+              className="h-64 object-contain"
+              style={{ maxWidth: '280px' }}
             />
           </div>
 
