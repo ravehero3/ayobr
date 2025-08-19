@@ -78,13 +78,14 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
 
           {/* App Info */}
           <div className="text-white space-y-3">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              TypeBeatz Video Generator
-            </h1>
-            <p className="text-gray-300 text-sm leading-relaxed px-2">
-              Create stunning type beat videos by combining your audio tracks with images. 
-              Perfect for music producers and content creators.
-            </p>
+            <div className="flex justify-center mb-2">
+              <img 
+                src={typebeatzTitleLogo} 
+                alt="TypeBeatz Video Generator" 
+                className="h-8 object-contain"
+                style={{ maxWidth: '280px' }}
+              />
+            </div>
             <div className="text-xs text-gray-400 pt-2">
               Version 1.0
             </div>
