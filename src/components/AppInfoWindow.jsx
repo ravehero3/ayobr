@@ -1,51 +1,107 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import sleepingAlienLogo from '../assets/sleeping-alien-zzz.png';
+import sleepingAlienLogo from '../assets/sleeping-alien-updated.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleDragStart = (event, info) => {
+    setIsDragging(true);
+  };
+
+  const handleDrag = (event, info) => {
+    setPosition({
+      x: position.x + info.delta.x,
+      y: position.y + info.delta.y
+    });
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center"
+        className="fixed inset-0 flex items-center justify-center"
         style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          display: 'flex'
+          zIndex: 99999, // Ensure it appears above everything
+          pointerEvents: 'auto'
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
       >
-        {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-        
-        {/* App Info Window */}
-        <motion.div
-          className="relative w-96 h-72 p-8 flex flex-col items-center justify-center text-center"
+        {/* Enhanced Backdrop with stronger blur */}
+        <div 
+          className="absolute inset-0"
           style={{
-            background: 'rgba(0, 0, 0, 0.41)',
-            borderRadius: '16px',
-            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-            backdropFilter: 'blur(11.4px)',
-            WebkitBackdropFilter: 'blur(11.4px)',
-            border: '1px solid rgba(0, 0, 0, 0.4)',
+            background: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)'
+          }}
+        />
+        
+        {/* App Info Window - Positioned at exact center */}
+        <motion.div
+          className="relative w-96 h-80 p-8 flex flex-col items-center justify-center text-center cursor-default"
+          style={{
+            background: 'rgba(0, 0, 0, 0.45)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -50%)'
+            transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px)`,
+            zIndex: 100000
           }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          drag
+          dragConstraints={{
+            left: -window.innerWidth/2 + 200,
+            right: window.innerWidth/2 - 200,
+            top: -window.innerHeight/2 + 200,
+            bottom: window.innerHeight/2 - 200
+          }}
+          onDragStart={handleDragStart}
+          onDrag={handleDrag}
+          onDragEnd={handleDragEnd}
+          whileDrag={{ scale: 1.02 }}
         >
+          {/* Move Handle - Top Left Corner */}
+          <motion.div
+            className="absolute top-3 left-3 w-6 h-6 cursor-move flex items-center justify-center"
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '6px',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 0.6)">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </motion.div>
+
           {/* Close Button */}
           <button
-            className="absolute top-4 right-4 w-6 h-6 flex items-center justify-center text-white hover:text-gray-300 transition-colors"
+            className="absolute top-4 right-4 w-6 h-6 flex items-center justify-center text-white hover:text-gray-300 transition-colors z-10"
             onClick={onClose}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -53,17 +109,20 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
             </svg>
           </button>
 
-          {/* Sleeping Alien Logo */}
-          <img 
-            src={sleepingAlienLogo} 
-            alt="Sleeping Alien Logo" 
-            className="w-24 h-24 mb-6 object-contain"
-          />
+          {/* Sleeping Alien Logo - Full width of window */}
+          <div className="w-full flex justify-center mb-6">
+            <img 
+              src={sleepingAlienLogo} 
+              alt="TypeBeatz Sleeping Alien Logo" 
+              className="max-w-full h-20 object-contain"
+              style={{ maxWidth: '280px' }}
+            />
+          </div>
 
           {/* App Info */}
           <div className="text-white space-y-3">
             <h2 className="text-xl font-semibold">TypeBeatz Video Generator</h2>
-            <p className="text-gray-300 text-sm leading-relaxed">
+            <p className="text-gray-300 text-sm leading-relaxed px-2">
               Create stunning type beat videos by combining your audio tracks with images. 
               Perfect for music producers and content creators.
             </p>
