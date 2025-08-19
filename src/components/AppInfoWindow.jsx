@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import sleepingAlienLogo from '../assets/sleeping-alien-updated.png';
+import typebeatzAlienLogo from '../assets/typebeatz-alien-logo.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -42,9 +42,9 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <div 
           className="absolute inset-0"
           style={{
-            background: 'rgba(0, 0, 0, 0.6)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
+            background: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(25px) saturate(150%)',
+            WebkitBackdropFilter: 'blur(25px) saturate(150%)'
           }}
         />
         
@@ -52,12 +52,12 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative w-96 h-80 p-8 flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            background: 'rgba(0, 0, 0, 0.45)',
+            background: 'rgba(10, 15, 28, 0.85)',
             borderRadius: '20px',
-            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.3)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 16px 60px rgba(0, 0, 0, 0.5), 0 8px 32px rgba(96, 165, 250, 0.1)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            border: '1px solid rgba(96, 165, 250, 0.2)',
             position: 'absolute',
             top: '50%',
             left: '50%',
@@ -86,9 +86,11 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           <motion.div
             className="absolute top-3 left-3 w-6 h-6 cursor-move flex items-center justify-center"
             style={{
-              background: 'rgba(255, 255, 255, 0.1)',
+              background: 'rgba(96, 165, 250, 0.15)',
               borderRadius: '6px',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
+              border: '1px solid rgba(96, 165, 250, 0.3)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)'
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
@@ -112,8 +114,8 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           {/* Sleeping Alien Logo - Full width of window */}
           <div className="w-full flex justify-center mb-6">
             <img 
-              src={sleepingAlienLogo} 
-              alt="TypeBeatz Sleeping Alien Logo" 
+              src={typebeatzAlienLogo} 
+              alt="TypeBeatz Alien Logo" 
               className="max-w-full h-20 object-contain"
               style={{ maxWidth: '280px' }}
             />
