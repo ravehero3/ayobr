@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import typebeatzLogo from '../assets/typebeatz-alien-logo-updated.png';
+import typebeatzTitleLogo from '../assets/typebeatz-title-logo.png';
 
 const AppInfoWindow = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -38,7 +39,7 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
           className="relative p-8 flex flex-col items-center justify-center text-center cursor-default"
           style={{
             width: '460px',
-            height: '454px',
+            height: '484px',
             background: 'rgba(5, 5, 5, 0.85)',
             borderRadius: '20px',
             boxShadow: `
@@ -77,7 +78,14 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
 
           {/* App Info */}
           <div className="text-white space-y-3">
-            <h2 className="text-xl font-semibold">TypeBeatz Video Generator</h2>
+            <div className="flex justify-center mb-2">
+              <img 
+                src={typebeatzTitleLogo} 
+                alt="TypeBeatz Video Generator" 
+                className="h-8 object-contain"
+                style={{ maxWidth: '280px' }}
+              />
+            </div>
             <p className="text-gray-300 text-sm leading-relaxed px-2">
               Create stunning type beat videos by combining your audio tracks with images. 
               Perfect for music producers and content creators.
