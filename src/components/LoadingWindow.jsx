@@ -180,7 +180,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           }}
                         />
                       ))}
-                      
+
                       {/* Completion particles - celebration around progress bar when complete */}
                       {isComplete && [...Array(6)].map((_, i) => (
                         <motion.div
