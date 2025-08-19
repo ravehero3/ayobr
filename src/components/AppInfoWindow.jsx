@@ -15,15 +15,17 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
   };
 
   const handleDrag = (event, info) => {
-    // Use absolute position from drag info instead of accumulating deltas
+    // Don't update position state during dragging - let Framer Motion handle it
+    // This prevents the erratic movement
+  };
+
+  const handleDragEnd = (event, info) => {
+    setIsDragging(false);
+    // Save the final position when dragging ends
     setPosition({
       x: info.offset.x,
       y: info.offset.y
     });
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
   };
 
   return (
@@ -53,12 +55,12 @@ const AppInfoWindow = ({ isOpen, onClose }) => {
         <motion.div
           className="relative w-96 h-80 p-8 flex flex-col items-center justify-center text-center cursor-default"
           style={{
-            background: 'rgba(10, 15, 28, 0.15)',
-            borderRadius: '20px',
-            boxShadow: '0 16px 60px rgba(0, 0, 0, 0.5), 0 8px 32px rgba(96, 165, 250, 0.1)',
-            backdropFilter: 'blur(40px) saturate(200%) brightness(120%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(120%)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            background: 'rgba(17, 0, 0, 0.36)',
+            borderRadius: '16px',
+            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+            backdropFilter: 'blur(11px)',
+            WebkitBackdropFilter: 'blur(11px)',
+            border: '1px solid rgba(17, 0, 0, 0.3)',
             position: 'absolute',
             top: '50%',
             left: '50%',
