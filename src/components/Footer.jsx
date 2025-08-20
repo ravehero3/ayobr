@@ -180,14 +180,19 @@ const Footer = ({ onGenerateVideos }) => {
         <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 286px)' }}> {/* Moved 1px to the right (287 - 1) */}
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0"
+            className="flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0 active:shadow-[0_0_15px_rgba(59,130,246,0.8)]"
+            style={{ transition: 'all 0.15s ease-out' }}
             whileHover={{ 
               scale: 1.05,
               rotate: 360
             }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ 
+              scale: 0.95,
+              filter: 'brightness(1.5)'
+            }}
             transition={{
-              rotate: { duration: 2, ease: "linear" }
+              rotate: { duration: 2, ease: "linear" },
+              filter: { duration: 0.15, ease: "easeOut" }
             }}
           >
             <svg className="w-6 h-6 text-gray-400 hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">

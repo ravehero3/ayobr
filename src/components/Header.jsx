@@ -40,7 +40,8 @@ const Header = () => {
         <div className="flex items-center">
           <button
             onClick={() => setIsAppInfoOpen(true)}
-            className="hover:scale-105 transition-all duration-200"
+            className="hover:scale-105 transition-all duration-200 active:shadow-[0_0_15px_rgba(59,130,246,0.8)] active:brightness-150"
+            style={{ transition: 'all 0.15s ease-out' }}
           >
             <img
               src={typebeatLogo}
@@ -70,7 +71,8 @@ const Header = () => {
         <div className="absolute top-1/2 transform -translate-y-1/2 flex items-center" style={{ left: 'calc((100vw - 500px) / 2 + 715px)' }}>
           <button
             onClick={() => setIsProfileOpen(true)}
-            className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
+            className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105 active:shadow-[0_0_15px_rgba(59,130,246,0.8)] active:brightness-150"
+            style={{ transition: 'all 0.15s ease-out' }}
           >
             <img
               src={userProfileImage || userIcon}
