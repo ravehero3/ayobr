@@ -107,6 +107,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                 // Determine if we should show this video - improved logic
                 const shouldShowVideo = (generatedVideo || videoState?.video) && (isComplete || progress >= 100);
+                
+                // Force video display check - if we have a video in the store, show it
+                const forceVideoDisplay = generatedVideo && generatedVideo.url;
 
                 // For debugging
                 const debugInfo = {
@@ -309,25 +312,24 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Video Preview or Completion checkmark */}
-                          {shouldShowVideo ? (
+                          {/* Video Preview - prioritize showing actual videos */}
+                          {(shouldShowVideo || forceVideoDisplay) ? (
                             <video
-                              src={videoToShow.url}
+                              src={(generatedVideo || videoState?.video)?.url}
                               className="absolute inset-0 w-full h-full object-contain rounded"
                               controls
                               preload="metadata"
                               style={{ background: 'black' }}
                               onError={(e) => {
                                 console.error('Video playback error:', e);
-                                console.log('Video URL:', videoToShow.url);
+                                console.log('Video URL:', (generatedVideo || videoState?.video)?.url);
                               }}
                             />
                           ) : isComplete ? (
+                            // Show a placeholder or loading state while video is being processed
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
+                              <div className="text-white text-xs">
+                                Video Ready - Processing...
                               </div>
                             </div>
                           ) : null}
