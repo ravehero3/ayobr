@@ -8,9 +8,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
   // Function to get video background style based on user settings
   const getVideoBackgroundStyle = () => {
-    // Safely access videoSettings with fallback
-    const settings = videoSettings || {};
+    // Safely access videoSettings with fallback - ensure we get the most recent settings
+    const currentStore = useAppStore.getState();
+    const settings = currentStore.videoSettings || {};
     const background = settings.background || 'black';
+
+    console.log('LoadingWindow - Background settings:', { background, settings });
 
     if (background === 'white') {
       return { backgroundColor: 'white' };

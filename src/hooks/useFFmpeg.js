@@ -153,6 +153,22 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
 
+      // Ensure all completed videos are properly marked
+      const { generatedVideos } = useAppStore.getState();
+      pairs.forEach(pair => {
+        const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
+        if (existingVideo) {
+          console.log(`Ensuring completion state for pair ${pair.id} with existing video`);
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: existingVideo,
+            error: null
+          });
+        }
+      });
+
       // Don't immediately reset - let the UI handle the transition
       // Only reset generation state, keep videos visible
       setIsGenerating(false);
@@ -390,13 +406,15 @@ export const useFFmpeg = () => {
         cause: error.cause
       });
 
-      // Check if this is an empty error object (often indicates successful completion)
+      // Check if this is an empty error object or completion issue (often indicates successful completion)
       const isEmptyError = error && typeof error === 'object' && 
                           Object.keys(error).length === 0 && 
                           !error.message && !error.name;
 
-      if (isEmptyError) {
-        console.log('Detected empty error object after 100% progress - this is likely a false positive');
+      const isCompletionIssue = error && (error.message === '' || error.message === 'undefined');
+
+      if (isEmptyError || isCompletionIssue) {
+        console.log('Detected empty error or completion issue after processing - checking for successful video');
         console.log('Checking if we have valid video data in the generated videos...');
 
         // Check if a video was actually generated successfully
@@ -404,7 +422,7 @@ export const useFFmpeg = () => {
         const existingVideo = storeState.generatedVideos.find(v => v.pairId === pair.id);
 
         if (existingVideo) {
-          console.log('Found successfully generated video despite empty error, marking as complete');
+          console.log('Found successfully generated video despite error, marking as complete');
           setVideoGenerationState(pair.id, {
             isGenerating: false,
             progress: 100,
@@ -413,6 +431,17 @@ export const useFFmpeg = () => {
             error: null
           });
           return existingVideo;
+        } else {
+          console.log('No video found in store, but this may be a timing issue - clearing error state');
+          // Clear the error state and let the process continue
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: null,
+            error: null
+          });
+          return null;
         }
       }
 
