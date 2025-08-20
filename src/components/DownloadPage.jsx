@@ -4,185 +4,306 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 
 const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
-  const { generatedVideos, clearGeneratedVideos, removeVideo } = useAppStore();
-  const [hoveredVideo, setHoveredVideo] = useState(null);
+  const { generatedVideos, pairs, videoSettings, removePair } = useAppStore();
+  const [downloadingAll, setDownloadingAll] = useState(false);
 
-  const handleStartOver = () => {
-    clearGeneratedVideos();
-    onBackToFileManagement();
+  // Function to get video background style based on user settings
+  const getVideoBackgroundStyle = () => {
+    // Safely access videoSettings with fallback
+    const currentStore = useAppStore.getState();
+    const settings = currentStore.videoSettings || {};
+    const background = settings.background || 'black';
+
+    console.log('DownloadPage - Background settings:', { background, settings });
+
+    if (background === 'white') {
+      return { backgroundColor: 'white' };
+    } else if (background === 'black') {
+      return { backgroundColor: 'black' };
+    } else if (background === 'custom' && settings.customBackground) {
+      try {
+        // Check if it's already a data URL (base64) or needs to be converted from File object
+        const backgroundUrl = typeof settings.customBackground === 'string' 
+          ? settings.customBackground 
+          : URL.createObjectURL(settings.customBackground);
+
+        return {
+          backgroundImage: `url(${backgroundUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        };
+      } catch (error) {
+        console.warn('Error creating background URL:', error);
+        return { backgroundColor: 'black' }; // fallback on error
+      }
+    }
+    return { backgroundColor: 'black' }; // fallback
   };
 
-  const handleVideoDownload = (video) => {
-    const link = document.createElement('a');
-    link.href = video.url;
-    link.download = video.filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadAll = async () => {
+    setDownloadingAll(true);
+    try {
+      await onDownloadAll();
+    } finally {
+      setDownloadingAll(false);
+    }
   };
 
-  const handleRemoveVideo = (videoId, e) => {
-    e.stopPropagation();
-    removeVideo(videoId);
+  const handleDownloadSingle = async (video) => {
+    try {
+      const link = document.createElement('a');
+      link.href = video.url;
+      link.download = video.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading video:', error);
+    }
   };
-
-  const formatDuration = (duration) => {
-    if (!duration) return '3:24';
-    const minutes = Math.floor(duration / 60);
-    const seconds = Math.floor(duration % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  // Particle component for hover effect
-  const Particle = ({ index, isHovered }) => (
-    <motion.div
-      className="absolute w-1 h-1 bg-blue-400 rounded-full"
-      animate={isHovered ? {
-        x: [0, Math.random() * 60 - 30, Math.random() * 60 - 30, 0],
-        y: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
-        opacity: [0.3, 0.8, 0.5, 0.3],
-        scale: [0.5, 1, 0.8, 0.5]
-      } : {
-        opacity: 0
-      }}
-      transition={{
-        duration: 2 + Math.random() * 2,
-        repeat: Infinity,
-        delay: index * 0.2
-      }}
-      style={{
-        left: `${20 + Math.random() * 60}%`,
-        top: `${30 + Math.random() * 40}%`
-      }}
-    />
-  );
 
   return (
-    <div className="fixed inset-0 text-white overflow-auto" style={{ 
-      zIndex: 20,
-      backgroundImage: 'url(/attached_assets/background%20page%202_1754507959583.jpg)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
-    }}>
-      {/* Background overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/40" style={{ zIndex: -1 }} />
-      <div className="min-h-screen py-12 px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
+      style={{ zIndex: 999998, paddingTop: '72px', paddingBottom: '40px' }}
+    >
+      {/* Download Window - Same structure as LoadingWindow */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative w-full max-w-7xl mx-4 p-2 rounded-lg overflow-visible"
+        style={{
+          maxHeight: 'calc(100vh - 80px)',
+          width: '100%',
+          maxWidth: '112rem',
+          background: 'transparent',
+        }}
+      >
+        {/* Header - Same as LoadingWindow */}
+        <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-58px' }}>
+          <motion.h2
+            className="text-3xl font-bold text-white mb-4 text-center"
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            transition={{ delay: 0.2 }}
+            style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
           >
-            <h1 className="text-4xl font-light mb-4 text-white">
-              Videos Generated
-            </h1>
-            <p className="text-lg text-gray-400 mb-8">
-              {generatedVideos.length} video{generatedVideos.length !== 1 ? 's' : ''} ready for download
-            </p>
-            
-            
-          </motion.div>
-          
-          {/* Video Grid - 4 per row matching audio container width (384px) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="grid grid-cols-4 gap-4 max-w-6xl mx-auto"
+            Your videos are ready!
+          </motion.h2>
+        </div>
+
+        {/* Videos Grid - Same layout as LoadingWindow but with completed videos */}
+        <div className="relative max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px', zIndex: 50 }}>
+          <div 
+            className="grid gap-6 w-full mx-auto"
+            style={{
+              gridTemplateColumns: 'repeat(auto-fit, 240px)',
+              justifyContent: 'center',
+              justifyItems: 'center',
+              maxWidth: 'calc(100vw - 160px)',
+              padding: '0 80px',
+              zIndex: 50,
+              gap: '24px'
+            }}
           >
-            <AnimatePresence>
-              {generatedVideos.map((video, index) => (
+            {pairs.filter(pair => generatedVideos.some(v => v.pairId === pair.id)).map((pair, index) => {
+              const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+
+              return (
                 <motion.div
-                  key={video.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className={`relative glass-container cursor-pointer transition-all duration-300 ${
-                    hoveredVideo === video.id 
-                      ? 'shadow-2xl shadow-blue-500/20' 
-                      : ''
-                  }`}
+                  key={pair.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="video-complete-container group"
                   style={{
-                    width: '384px',
-                    height: '192px',
-                    padding: '16px'
+                    position: 'relative',
+                    width: '240px',
+                    minWidth: '240px',
+                    maxWidth: '240px',
+                    height: '220px',
+                    background: 'rgba(0, 0, 0, 0.41)',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                    backdropFilter: 'blur(11.4px)',
+                    WebkitBackdropFilter: 'blur(11.4px)',
+                    border: '1px solid rgba(34, 197, 94, 0.6)', // Green border for completed
+                    padding: '20px',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    overflow: 'visible',
+                    zIndex: 60
                   }}
-                  onMouseEnter={() => setHoveredVideo(video.id)}
-                  onMouseLeave={() => setHoveredVideo(null)}
-                  onClick={() => handleVideoDownload(video)}
+                  whileHover={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.51)',
+                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(34, 197, 94, 0.3), 0 0 80px rgba(34, 197, 94, 0.2)',
+                    zIndex: 70
+                  }}
                 >
-                  {/* Remove button - shows on hover */}
-                  <AnimatePresence>
-                    {hoveredVideo === video.id && (
-                      <motion.button
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        onClick={(e) => handleRemoveVideo(video.id, e)}
-                        className="absolute top-3 right-3 w-6 h-6 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center text-white text-sm z-10 transition-colors"
+                  {/* Success particles - always visible for completed videos */}
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" style={{ zIndex: 80 }}>
+                    {[...Array(6)].map((_, i) => (
+                      <motion.div
+                        key={`success-particle-${i}`}
+                        className="absolute w-2 h-2 bg-green-400 rounded-full opacity-70"
+                        style={{
+                          top: `${20 + (i % 3) * 20}%`,
+                          left: `${20 + (i % 3) * 20}%`,
+                          boxShadow: '0 0 12px rgba(34, 197, 94, 0.8)',
+                        }}
+                        animate={{
+                          x: [0, 15 * Math.cos(i * 60 * Math.PI / 180), 0],
+                          y: [0, -10 * Math.sin(i * 60 * Math.PI / 180), 0],
+                          scale: [0.8, 1.2, 0.8],
+                          opacity: [0.4, 0.8, 0.4]
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          delay: i * 0.5,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removePair(pair.id);
+                    }}
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-white"
+                    style={{ fontSize: '16px', fontWeight: 'bold', zIndex: 90 }}
+                  >
+                    ×
+                  </button>
+
+                  {/* Download button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownloadSingle(generatedVideo);
+                    }}
+                    className="absolute top-2 left-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-green-400 hover:text-green-300"
+                    style={{ fontSize: '14px', zIndex: 90 }}
+                    title="Download video"
+                  >
+                    ↓
+                  </button>
+
+                  <div className="relative h-full flex flex-col">
+                    {/* Title - Same as LoadingWindow */}
+                    <div
+                      className="text-white font-semibold mb-3 text-center relative"
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                        lineHeight: '1.3',
+                        zIndex: 75,
+                        minHeight: '36px',
+                        maxHeight: '36px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {pair.audio?.name && pair.image?.name ? 
+                        `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}` :
+                        generatedVideo?.filename || `Video ${index + 1}`
+                      }
+                    </div>
+
+                    {/* Video Preview Area - Same positioning as LoadingWindow */}
+                    <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
+                      <div 
+                        className="aspect-video bg-black/30 rounded flex items-center justify-center relative overflow-hidden"
+                        style={{ 
+                          width: '192px', 
+                          height: '108px', 
+                          minWidth: '192px', 
+                          maxWidth: '192px', 
+                          minHeight: '108px', 
+                          maxHeight: '108px',
+                          position: 'relative',
+                          flexShrink: 0,
+                          padding: '2px'
+                        }}
                       >
-                        ×
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Particles */}
-                  {hoveredVideo === video.id && (
-                    <div className="absolute inset-0 pointer-events-none">
-                      {[...Array(7)].map((_, i) => (
-                        <Particle key={i} index={i} isHovered={hoveredVideo === video.id} />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Compact Video Preview */}
-                  <div className="flex flex-col h-full">
-                    {/* Video Icon - smaller */}
-                    <div className="flex items-center justify-center mb-2">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-                        <div className="text-lg font-bold">▶</div>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar - thinner */}
-                    <div className="mb-3">
-                      <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
-                        <motion.div 
-                          className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full shadow-lg shadow-blue-500/30"
-                          initial={{ width: 0 }}
-                          animate={{ width: '100%' }}
-                          transition={{ duration: 0.8, delay: index * 0.1 }}
+                        {/* Video background preview based on user settings */}
+                        <div 
+                          className="absolute inset-0 w-full h-full flex items-center justify-center"
+                          style={{
+                            ...getVideoBackgroundStyle()
+                          }}
                         />
+
+                        {/* Generated Video Preview - Always show the actual video */}
+                        {generatedVideo && (
+                          <video
+                            src={generatedVideo.url}
+                            className="absolute inset-0 w-full h-full object-contain rounded"
+                            controls
+                            preload="metadata"
+                            style={{ background: 'transparent' }}
+                            onError={(e) => {
+                              console.error('Video playback error:', e);
+                              console.log('Video URL:', generatedVideo.url);
+                            }}
+                          />
+                        )}
+
+                        {/* Success indicator overlay */}
+                        <div className="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center" style={{ zIndex: 10 }}>
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Compact Video Info */}
-                    <div className="text-center flex-1 flex flex-col justify-center">
-                      <h3 className="text-white font-medium text-xs mb-1 truncate">
-                        {video.filename || `Video ${index + 1}`}
-                      </h3>
-                      <div className="flex justify-between text-xs text-gray-400 mb-1">
-                        <span>1920×1080</span>
-                        <span>{formatDuration(video.duration)}</span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {(video.size / (1024 * 1024)).toFixed(1)} MB
-                      </div>
+                    {/* Completed Status Bar - Green instead of blue */}
+                    <div className="w-full bg-white/10 rounded-full h-2 mt-4">
+                      <div
+                        className="h-full rounded-full w-full"
+                        style={{
+                          background: 'linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%)',
+                          boxShadow: '0 0 15px rgba(16, 185, 129, 0.4)'
+                        }}
+                      />
                     </div>
                   </div>
                 </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-
-
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </div>
+
+        {/* Footer with Download All Button */}
+        <div className="p-6 pt-2 flex justify-center">
+          <motion.button
+            onClick={handleDownloadAll}
+            disabled={downloadingAll}
+            className="relative overflow-hidden bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span className="relative z-10">
+              {downloadingAll ? 'Downloading...' : `Download All Videos (${generatedVideos.length})`}
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 opacity-0 hover:opacity-20 transition-opacity duration-300" />
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
