@@ -187,8 +187,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
       {/* Individual pair animations are now handled by the central LoadingWindow */}
 
-      {/* Show generated video if available and not generating */}
-      {generatedVideo && !videoState?.isGenerating ? (
+      {/* Show generated video if available (either from store or video state) */}
+      {(generatedVideo || videoState?.video) && !videoState?.isGenerating ? (
         <div className="flex justify-center relative z-10">
           <div
             className="relative w-full max-w-[800px] border overflow-hidden group/container glass-container"
@@ -203,7 +203,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             {/* Clean video display - just the video */}
             <div className="absolute inset-0 p-6 flex items-center justify-center">
               <video
-                src={generatedVideo.url}
+                src={(generatedVideo || videoState?.video)?.url}
                 controls
                 className="w-full h-full rounded-lg shadow-lg object-contain"
                 style={{

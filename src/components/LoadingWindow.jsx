@@ -102,22 +102,25 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const progress = isComplete ? 100 : Math.max(0, videoState?.progress || 0);
                 const videoToShow = generatedVideo || videoState?.video;
 
-                console.log(`LoadingWindow pair ${pair.id}:`, {
+                // Determine if we should show this video - improved logic
+                const shouldShowVideo = (generatedVideo || videoState?.video) && (isComplete || progress >= 100) && !videoState?.isGenerating;
+
+                // For debugging
+                const debugInfo = {
                   hasVideo: !!generatedVideo,
                   hasStateVideo: !!videoState?.video,
                   isComplete,
                   progress,
-                  videoToShow: !!videoToShow,
-                  videoUrl: videoToShow?.url,
-                  videoState: videoState ? {
-                    isGenerating: videoState.isGenerating,
-                    isComplete: videoState.isComplete,
-                    progress: videoState.progress,
-                    hasVideo: !!videoState.video,
-                    videoUrl: videoState.video?.url
-                  } : null,
+                  videoToShow: shouldShowVideo,
+                  videoState: {
+                    isGenerating: videoState?.isGenerating,
+                    isComplete: videoState?.isComplete,
+                    progress: videoState?.progress,
+                    hasVideo: !!videoState?.video
+                  },
                   allGeneratedVideos: generatedVideos.length
-                });
+                };
+                console.log(`LoadingWindow pair ${pair.id}:`, debugInfo);
 
                 return (
                   <motion.div
@@ -304,7 +307,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           )}
 
                           {/* Video Preview or Completion checkmark */}
-                          {isComplete && videoToShow ? (
+                          {shouldShowVideo ? (
                             <video
                               src={videoToShow.url}
                               className="absolute inset-0 w-full h-full object-contain rounded"

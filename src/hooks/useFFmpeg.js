@@ -87,7 +87,7 @@ export const useFFmpeg = () => {
           const currentStore = useAppStore.getState();
           const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
           const videoState = currentStore.videoGenerationStates[pair.id];
-          
+
           if (existingVideo || (videoState && videoState.isComplete && videoState.video)) {
             console.log(`Skipping pair ${pair.id} - video already exists or is complete`);
             completedCount++;
@@ -113,13 +113,13 @@ export const useFFmpeg = () => {
             // Ensure we always increment the completed count
             completedCount++;
             await updateBatchProgress();
-            
+
             // Log completion for debugging
             console.log(`Promise completed for pair ${pair.id}, total completed: ${completedCount}/${pairs.length}`);
           });
-          
+
           activePromises.add(promise);
-          
+
           // Remove promise from active set when it resolves
           promise.finally(() => {
             activePromises.delete(promise);
@@ -157,7 +157,7 @@ export const useFFmpeg = () => {
       // Only reset generation state, keep videos visible
       setIsGenerating(false);
       setStoreIsGenerating(false);
-      
+
       console.log('Generation completed, videos should now be visible');
 
     } catch (error) {
@@ -199,7 +199,7 @@ export const useFFmpeg = () => {
       const store = useAppStore.getState();
       const existingVideo = store.generatedVideos.find(v => v.pairId === pair.id);
       const videoState = store.videoGenerationStates[pair.id];
-      
+
       if (existingVideo || (videoState && videoState.isComplete && videoState.video)) {
         console.log(`Video already exists or is complete for pair ${pair.id}, skipping`);
         return existingVideo || videoState.video;
@@ -225,7 +225,7 @@ export const useFFmpeg = () => {
       console.log('Video settings for generation:', videoSettings);
 
       let videoData;
-      
+
       try {
         // Process video without timeout racing - let FFmpeg handle its own timeouts
         videoData = await processVideoWithFFmpeg(
@@ -259,13 +259,13 @@ export const useFFmpeg = () => {
         console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
       } catch (processingError) {
         console.error(`Error during video processing for pair ${pair.id}:`, processingError);
-        
+
         // Force cleanup on timeout or error
         if (processingError.message.includes('timeout')) {
           console.log(`Video processing timed out for pair ${pair.id}, forcing cleanup`);
           forceStopAllProcesses();
         }
-        
+
         // Set error state for the pair
         setVideoGenerationState(pair.id, {
           isGenerating: false,
@@ -274,7 +274,7 @@ export const useFFmpeg = () => {
           video: null,
           error: processingError.message || 'Video processing failed'
         });
-        
+
         throw processingError; // Re-throw to be handled by the main catch block
       }
 
@@ -358,26 +358,26 @@ export const useFFmpeg = () => {
         video: video,
         error: null
       });
-      
+
       // Log the completion for debugging
-      console.log(`Video completion state set for pair ${pair.id}:`, {
+      console.log('Video completion state set for pair', pair.id, ':', {
         isComplete: true,
         hasVideo: !!video,
         videoId: video.id
       });
-      
+
       // Check if all videos are complete to update global state
       const allStates = useAppStore.getState().videoGenerationStates;
       const allPairsComplete = Object.values(allStates).every(state => 
         state && (state.isComplete || !state.isGenerating)
       );
-      
+
       if (allPairsComplete) {
         console.log('All videos completed, updating global state');
         const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
         setStoreIsGenerating(false);
       }
-      
+
       console.log(`Video generation completed successfully for pair ${pair.id}`);
       return video;
 
@@ -389,20 +389,20 @@ export const useFFmpeg = () => {
         message: error.message,
         cause: error.cause
       });
-      
+
       // Check if this is an empty error object (often indicates successful completion)
       const isEmptyError = error && typeof error === 'object' && 
                           Object.keys(error).length === 0 && 
                           !error.message && !error.name;
-      
+
       if (isEmptyError) {
         console.log('Detected empty error object after 100% progress - this is likely a false positive');
         console.log('Checking if we have valid video data in the generated videos...');
-        
+
         // Check if a video was actually generated successfully
         const storeState = useAppStore.getState();
         const existingVideo = storeState.generatedVideos.find(v => v.pairId === pair.id);
-        
+
         if (existingVideo) {
           console.log('Found successfully generated video despite empty error, marking as complete');
           setVideoGenerationState(pair.id, {
