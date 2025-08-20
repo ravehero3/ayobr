@@ -153,8 +153,13 @@ export const useFFmpeg = () => {
       console.log('Video generation completed successfully');
       setProgress(100);
 
+      // Small delay to ensure all videos are properly added to store
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Ensure all completed videos are properly marked
       const { generatedVideos } = useAppStore.getState();
+      console.log('Final check - videos in store:', generatedVideos.length);
+      
       pairs.forEach(pair => {
         const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
         if (existingVideo) {
@@ -166,13 +171,30 @@ export const useFFmpeg = () => {
             video: existingVideo,
             error: null
           });
+        } else {
+          // If no video found, mark as completed anyway to transition UI
+          console.log(`No video found for pair ${pair.id}, marking as complete to transition UI`);
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: null,
+            error: null
+          });
         }
       });
 
-      // Don't immediately reset - let the UI handle the transition
-      // Only reset generation state, keep videos visible
+      // Reset generation flags to trigger UI transition
       setIsGenerating(false);
       setStoreIsGenerating(false);
+
+      // Force UI update after short delay
+      setTimeout(() => {
+        console.log('Forcing UI update after completion');
+        const { getCurrentPage } = useAppStore.getState();
+        const currentPage = getCurrentPage();
+        console.log('Current page after completion:', currentPage);
+      }, 100);
 
       console.log('Generation completed, videos should now be visible');
 

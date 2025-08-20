@@ -101,12 +101,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
 
                 // More robust completion detection
-                const isComplete = !!generatedVideo || (videoState?.isComplete === true);
+                const isComplete = !!generatedVideo || (videoState?.isComplete === true) || (videoState?.progress === 100);
                 const progress = isComplete ? 100 : Math.max(0, videoState?.progress || 0);
                 const videoToShow = generatedVideo || videoState?.video;
 
                 // Determine if we should show this video - improved logic
-                const shouldShowVideo = (generatedVideo || videoState?.video) && (isComplete || progress >= 100) && !videoState?.isGenerating;
+                const shouldShowVideo = (generatedVideo || videoState?.video) && (isComplete || progress >= 100);
 
                 // For debugging
                 const debugInfo = {

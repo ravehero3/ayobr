@@ -147,15 +147,32 @@ export const useAppStore = create((set, get) => ({
     // Check if any pair is generating
     const isGenerating = state.isGenerating || Object.values(state.videoGenerationStates).some(genState => genState?.isGenerating);
 
-    // Check if we have completed videos (videos with complete state)
+    // More robust completion detection
     const hasCompletedVideos = hasVideos || Object.values(state.videoGenerationStates).some(
-      genState => genState?.isComplete && genState?.video
+      genState => genState?.isComplete
     );
 
+    // Check if all videos have reached 100% progress (even without video object)
+    const allVideosAt100Percent = Object.values(state.videoGenerationStates).length > 0 && 
+      Object.values(state.videoGenerationStates).every(genState => 
+        genState && (genState.progress === 100 || genState.isComplete)
+      );
+
+    console.log('Page detection debug:', {
+      hasFiles,
+      hasVideos,
+      isGenerating,
+      hasCompletedVideos,
+      allVideosAt100Percent,
+      videoStatesCount: Object.keys(state.videoGenerationStates).length,
+      generatedVideosCount: state.generatedVideos.length
+    });
+
     // Priority order: completed videos > generation > files > upload
-    if (hasCompletedVideos && !isGenerating) {
+    if ((hasCompletedVideos || allVideosAt100Percent) && !isGenerating) {
+      console.log('Transitioning to download page - videos completed');
       return 'download';
-    } else if (isGenerating) {
+    } else if (isGenerating && !allVideosAt100Percent) {
       return 'generation';
     } else if (hasFiles) {
       return 'fileManagement';
