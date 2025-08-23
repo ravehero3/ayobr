@@ -97,11 +97,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Show video preview immediately when progress reaches 100%
-                const shouldShowVideoPreview = progressValue >= 100;
+                // Show video preview immediately when progress reaches 100% OR when we have a generated video
+                const shouldShowVideoPreview = (progressValue >= 100 && !!videoToShow) || !!generatedVideo;
                 
-                // Hide progress bar when video preview is showing
-                const shouldShowProgressBar = progressValue < 100;
+                // Show progress bar until we have a video to show
+                const shouldShowProgressBar = !shouldShowVideoPreview;
                 
                 // Force video display check - if we have a video in the store, show it
                 const forceVideoDisplay = generatedVideo && generatedVideo.url;
@@ -177,16 +177,16 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             scale: [0.8, 1.2, 1.0, 0.8, 1.0, 0.8]
                           }}
                           transition={{
-                            duration: 3.3, // 10% slower (3 * 1.1 = 3.3)
+                            duration: 4.95, // 50% slower (3.3 * 1.5 = 4.95)
                             repeat: Infinity,
-                            delay: i * 0.22, // Also make delay 10% slower
-                            ease: "easeInOut"
+                            delay: i * 0.33, // Also make delay 50% slower (0.22 * 1.5 = 0.33)
+                            ease: "linear" // Linear easing for consistent speed throughout
                           }}
                         />
                       ))}
 
-                      {/* Completion particles - only show during progress, not after completion */}
-                      {progressValue >= 100 && progressValue < 100 && [...Array(6)].map((_, i) => (
+                      {/* Completion particles - only show when reaching 100% but no video yet */}
+                      {progressValue >= 100 && !shouldShowVideoPreview && [...Array(6)].map((_, i) => (
                         <motion.div
                           key={`complete-particle-${i}`}
                           className="absolute w-2 h-2 bg-green-400 rounded-full"
@@ -204,10 +204,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             opacity: [0, 1, 0.8, 1, 0.6, 0]
                           }}
                           transition={{
-                            duration: 2.75, // 10% slower (2.5 * 1.1 = 2.75)
+                            duration: 4.125, // 50% slower (2.75 * 1.5 = 4.125)
                             repeat: Infinity,
-                            delay: i * 0.33, // 10% slower delay
-                            ease: "easeOut"
+                            delay: i * 0.495, // 50% slower delay (0.33 * 1.5 = 0.495)
+                            ease: "linear" // Linear easing for consistent speed
                           }}
                         />
                       ))}
@@ -243,10 +243,16 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           justifyContent: 'center'
                         }}
                       >
-                        {pair.audio?.name && pair.image?.name ? 
-                          `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}` :
-                          generatedVideo?.filename || `Video ${index + 1}`
-                        }
+                        {(() => {
+                          let title = '';
+                          if (pair.audio?.name && pair.image?.name) {
+                            title = `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}`;
+                          } else {
+                            title = generatedVideo?.filename || `Video ${index + 1}`;
+                          }
+                          // Truncate to 44 characters maximum
+                          return title.length > 44 ? title.substring(0, 44) : title;
+                        })()}
                       </div>
 
                       {/* Video Preview Area - moved 30px down from previous position and fixed positioning */}
