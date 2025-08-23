@@ -7,7 +7,7 @@ module.exports = {
   
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     publicPath: '/',
     clean: true
   },
@@ -43,7 +43,7 @@ module.exports = {
             options: {
               postcssOptions: {
                 plugins: [
-                  require('tailwindcss'),
+                  require('@tailwindcss/postcss'),
                   require('autoprefixer')
                 ]
               }
@@ -136,11 +136,13 @@ module.exports = {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
           chunks: 'all',
+          filename: 'vendors.bundle.js',
         },
         ffmpeg: {
           test: /[\\/]node_modules[\\/]@ffmpeg[\\/]/,
           name: 'ffmpeg',
           chunks: 'all',
+          filename: 'ffmpeg.bundle.js',
         }
       }
     }

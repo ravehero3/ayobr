@@ -137,10 +137,7 @@ const cleanupMemory = () => {
     }
   }
 
-  // Force garbage collection if available
-  if (window.gc) {
-    window.gc();
-  }
+  // Browser will handle garbage collection automatically
 };
 
 // Progress tracking for large batches

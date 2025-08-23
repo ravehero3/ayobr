@@ -63,10 +63,7 @@ export const useFFmpeg = () => {
         // Memory cleanup every 5 completed videos to prevent crashes
         if (completedCount % 5 === 0 && completedCount > 0) {
           console.log(`Performing memory cleanup after ${completedCount} completed videos`);
-          // Force garbage collection if available
-          if (window.gc) {
-            window.gc();
-          }
+          // Browser will handle garbage collection automatically
 
           // Small delay to allow cleanup to complete
           await new Promise(resolve => setTimeout(resolve, 100));
