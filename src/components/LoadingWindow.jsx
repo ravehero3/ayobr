@@ -118,7 +118,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                   hasStateVideo: !!videoState?.video,
                   isComplete,
                   progress,
-                  videoToShow: shouldShowVideo,
+                  videoToShow: shouldShowVideoPreview,
                   videoState: {
                     isGenerating: videoState?.isGenerating,
                     isComplete: videoState?.isComplete,
