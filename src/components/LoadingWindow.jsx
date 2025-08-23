@@ -67,18 +67,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         >
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
-          {/* Header - Moved 40px higher */}
+          {/* Header space - keeping for layout consistency */}
           <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-64px' }}>
-            <motion.h2
-              className="text-3xl font-bold text-white mb-4 text-center"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
-            >
-              generating videos
-            </motion.h2>
-
+            {/* Header text removed */}
           </div>
 
           {/* Miniature Containers Grid */}
@@ -106,8 +97,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Always show video preview when progress reaches 100% - no completion messages
+                // Show video preview immediately when progress reaches 100%
                 const shouldShowVideoPreview = progressValue >= 100;
+                
+                // Hide progress bar when video preview is showing
+                const shouldShowProgressBar = progressValue < 100;
                 
                 // Force video display check - if we have a video in the store, show it
                 const forceVideoDisplay = generatedVideo && generatedVideo.url;
@@ -177,22 +171,22 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
                           }}
                           animate={{
-                            // Circular motion around progress bar
-                            x: [0, 15 * Math.cos(i * 45 * Math.PI / 180), 15 * Math.cos((i * 45 + 180) * Math.PI / 180), 0],
-                            y: [0, 8 * Math.sin(i * 45 * Math.PI / 180), 8 * Math.sin((i * 45 + 180) * Math.PI / 180), 0],
-                            scale: [0.8, 1.2, 0.8]
+                            // Perfect circular motion around progress bar - returns to start position
+                            x: [0, 15 * Math.cos(i * 45 * Math.PI / 180), 15 * Math.cos((i * 45 + 90) * Math.PI / 180), 15 * Math.cos((i * 45 + 180) * Math.PI / 180), 15 * Math.cos((i * 45 + 270) * Math.PI / 180), 0],
+                            y: [0, 8 * Math.sin(i * 45 * Math.PI / 180), 8 * Math.sin((i * 45 + 90) * Math.PI / 180), 8 * Math.sin((i * 45 + 180) * Math.PI / 180), 8 * Math.sin((i * 45 + 270) * Math.PI / 180), 0],
+                            scale: [0.8, 1.2, 1.0, 0.8, 1.0, 0.8]
                           }}
                           transition={{
-                            duration: 3,
+                            duration: 3.3, // 10% slower (3 * 1.1 = 3.3)
                             repeat: Infinity,
-                            delay: i * 0.2,
+                            delay: i * 0.22, // Also make delay 10% slower
                             ease: "easeInOut"
                           }}
                         />
                       ))}
 
-                      {/* Completion particles - celebration around progress bar when complete */}
-                      {isComplete && [...Array(6)].map((_, i) => (
+                      {/* Completion particles - only show during progress, not after completion */}
+                      {progressValue >= 100 && progressValue < 100 && [...Array(6)].map((_, i) => (
                         <motion.div
                           key={`complete-particle-${i}`}
                           className="absolute w-2 h-2 bg-green-400 rounded-full"
@@ -203,16 +197,16 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             boxShadow: '0 0 12px rgba(34, 197, 94, 0.8)',
                           }}
                           animate={{
-                            // Celebratory burst pattern around progress bar
-                            x: [0, 20 * Math.cos(i * 60 * Math.PI / 180), 0],
-                            y: [0, -15 * Math.sin(i * 60 * Math.PI / 180), 0],
-                            scale: [0, 1.8, 0.5, 1.5, 0],
-                            opacity: [0, 1, 0.8, 1, 0]
+                            // Perfect celebratory burst pattern around progress bar
+                            x: [0, 20 * Math.cos(i * 60 * Math.PI / 180), 10 * Math.cos(i * 60 * Math.PI / 180), 0],
+                            y: [0, -15 * Math.sin(i * 60 * Math.PI / 180), -8 * Math.sin(i * 60 * Math.PI / 180), 0],
+                            scale: [0, 1.8, 0.5, 1.5, 0.8, 0],
+                            opacity: [0, 1, 0.8, 1, 0.6, 0]
                           }}
                           transition={{
-                            duration: 2.5,
+                            duration: 2.75, // 10% slower (2.5 * 1.1 = 2.75)
                             repeat: Infinity,
-                            delay: i * 0.3,
+                            delay: i * 0.33, // 10% slower delay
                             ease: "easeOut"
                           }}
                         />
@@ -297,7 +291,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           )}
 
                           {/* Progress overlay - only show when progress is less than 100% */}
-                          {progressValue < 100 && (
+                          {!shouldShowVideoPreview && (
                             <div 
                               className="absolute text-white text-sm font-medium text-center"
                               style={{ 
@@ -313,7 +307,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Video Preview with Play Button - show when progress reaches 100% */}
+                          {/* Video Preview with Play Button - show immediately when progress reaches 100% */}
                           {shouldShowVideoPreview && (
                             <div className="absolute inset-0 flex items-center justify-center">
                               {(generatedVideo || videoState?.video)?.url ? (
@@ -369,10 +363,19 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                   </div>
                                 </div>
                               ) : (
-                                // Fallback for videos that completed but don't have URLs yet
-                                <div className="text-green-400 text-xs text-center">
-                                  ✓ Video Generated<br/>
-                                  <span className="text-white/60">Preparing preview...</span>
+                                // Show progress overlay while waiting for video URL
+                                <div 
+                                  className="absolute text-white text-sm font-medium text-center"
+                                  style={{ 
+                                    position: 'absolute', 
+                                    top: '50%', 
+                                    left: '50%', 
+                                    transform: 'translate(-50%, -50%)',
+                                    zIndex: 10,
+                                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 1)'
+                                  }}
+                                >
+                                  {Math.round(progress)}%
                                 </div>
                               )}
                             </div>
@@ -380,8 +383,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         </div>
                       </div>
 
-                      {/* Single Progress Bar - only the colorful one */}
-                      <div className="w-full bg-white/10 rounded-full h-2 mt-4">
+                      {/* Single Progress Bar - fade out when video preview shows */}
+                      <motion.div 
+                        className="w-full bg-white/10 rounded-full h-2 mt-4"
+                        animate={{ opacity: shouldShowProgressBar ? 1 : 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         <motion.div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
@@ -393,7 +400,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           animate={{ width: `${progress}%` }}
                           transition={{ duration: 0.3 }}
                         />
-                      </div>
+                      </motion.div>
                     </div>
                   </motion.div>
                 );
