@@ -157,29 +157,32 @@ export const useFFmpeg = () => {
       // Small delay to ensure all videos are properly added to store
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Ensure all completed videos are properly marked
-      const { generatedVideos } = useAppStore.getState();
+      // Force completion for all videos that reached 100%
+      const { generatedVideos, videoGenerationStates } = useAppStore.getState();
       console.log('Final check - videos in store:', generatedVideos.length);
+      console.log('Video generation states:', videoGenerationStates);
       
       pairs.forEach(pair => {
+        const currentState = videoGenerationStates[pair.id];
         const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
-        if (existingVideo) {
+        
+        // Force completion for any video that's at 100% but not marked complete
+        if (currentState && currentState.progress === 100 && !currentState.isComplete) {
+          console.log(`Force completing stuck video for pair ${pair.id}`);
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: existingVideo || currentState.video,
+            error: null
+          });
+        } else if (existingVideo && (!currentState || !currentState.isComplete)) {
           console.log(`Ensuring completion state for pair ${pair.id} with existing video`);
           setVideoGenerationState(pair.id, {
             isGenerating: false,
             progress: 100,
             isComplete: true,
             video: existingVideo,
-            error: null
-          });
-        } else {
-          // If no video found, mark as completed anyway to transition UI
-          console.log(`No video found for pair ${pair.id}, marking as complete to transition UI`);
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: null,
             error: null
           });
         }
@@ -471,28 +474,27 @@ export const useFFmpeg = () => {
         error: null
       });
       
-      // Force UI update by setting store state directly
-      const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
-      console.log('Forcing immediate UI state update for video preview');
-
-      // Log the completion for debugging
       console.log('Video completion state set for pair', pair.id, ':', {
         isComplete: true,
         hasVideo: !!video,
         videoId: video.id
       });
 
-      // Check if all videos are complete to update global state
-      const allStates = useAppStore.getState().videoGenerationStates;
-      const allPairsComplete = Object.values(allStates).every(state => 
-        state && (state.isComplete || !state.isGenerating)
-      );
-
-      if (allPairsComplete) {
-        console.log('All videos completed, updating global state');
-        const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
-        setStoreIsGenerating(false);
-      }
+      // Force immediate UI state update
+      setTimeout(() => {
+        // Double-check the completion state after a small delay
+        const currentState = useAppStore.getState().videoGenerationStates[pair.id];
+        if (currentState && !currentState.isComplete) {
+          console.log(`Force completing stuck video for pair ${pair.id}`);
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: video,
+            error: null
+          });
+        }
+      }, 100);
 
       console.log(`Video generation completed successfully for pair ${pair.id}`);
       return video;

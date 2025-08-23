@@ -97,17 +97,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Show video preview when we have a generated video (regardless of progress)
-                const shouldShowVideoPreview = !!generatedVideo;
-                
-                // Show progress bar until we have a generated video
-                const shouldShowProgressBar = !shouldShowVideoPreview;
-                
-                // Show percentage text until progress reaches 100% AND we don't have a video
-                const shouldShowPercentage = progressValue < 100 && !shouldShowVideoPreview;
-                
-                // Only show play button when we actually have a generated video
-                const shouldShowPlayButton = !!generatedVideo && shouldShowVideoPreview;
+                // Determine what to show in the video preview area
+                const shouldShowVideoPreview = (isComplete && (generatedVideo || videoState?.video)) || (progress === 100 && (generatedVideo || videoState?.video));
+                const shouldShowPercentage = videoState?.isGenerating && progress < 100 && !shouldShowVideoPreview;
+                const shouldShowPlayButton = (isComplete || progress === 100) && (generatedVideo || videoState?.video) && !shouldShowPercentage;
 
                 // For debugging
                 const debugInfo = {
@@ -320,7 +313,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          
+
 
                           {/* Video Preview with Play Button - show when we have a generated video */}
                           {shouldShowVideoPreview && generatedVideo?.url && (
@@ -342,7 +335,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                     console.log('Video URL:', generatedVideo.url);
                                   }}
                                 />
-                                
+
                                 {/* Video thumbnail with play button overlay */}
                                 <div 
                                   className="absolute inset-0 cursor-pointer group"
@@ -367,7 +360,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                     muted
                                     style={{ background: 'transparent' }}
                                   />
-                                  
+
                                   {/* Play button overlay */}
                                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
                                     <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg">
@@ -386,7 +379,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       {/* Single Progress Bar - fade out when video preview shows */}
                       <motion.div 
                         className="w-full bg-white/10 rounded-full h-2 mt-4"
-                        animate={{ opacity: shouldShowProgressBar ? 1 : 0 }}
+                        animate={{ opacity: shouldShowPercentage ? 1 : 0 }}
                         transition={{ duration: 0.5 }}
                       >
                         <motion.div
