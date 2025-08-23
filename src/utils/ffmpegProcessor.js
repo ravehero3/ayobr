@@ -589,7 +589,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     let data;
     let retryCount = 0;
-    const maxRetries = 5; // Increased retries for better reliability
+    const maxRetries = 2; // Reduce retries to fail faster if file isn't ready
 
     while (retryCount < maxRetries) {
       try {
@@ -599,22 +599,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.log(`Output file ${outputFileName} exists:`, outputExists);
 
         if (!outputExists) {
-          if (retryCount === 0) {
-            // Single filesystem sync wait
-            console.log('Output file not found, waiting for filesystem sync...');
-            await new Promise(resolve => setTimeout(resolve, 300)); // Further reduced delay
-            continue; // Try again without incrementing retry count
-          }
+          // Don't wait - if file doesn't exist immediately, FFmpeg likely failed
           throw new Error('Output file was not created by FFmpeg');
         }
 
-        // Read the file directly
+        // Read the file directly with timeout
+        console.log('Attempting to read output file...');
         data = await ffmpeg.readFile(outputFileName);
         console.log('Successfully read output file, size:', data ? data.length : 'null');
 
         if (data && data.length > 1000) { // Minimum reasonable file size
+          console.log('File size validation passed, video data is ready');
           break; // Success!
         } else {
+          console.warn(`Output file too small (${data ? data.length : 0} bytes), retrying...`);
           throw new Error(`Output file is too small: ${data ? data.length : 0} bytes`);
         }
       } catch (readError) {
@@ -622,8 +620,8 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError.message || readError);
 
         if (retryCount < maxRetries) {
-          // Very short progressive delay: 200ms, 400ms  
-          await new Promise(resolve => setTimeout(resolve, retryCount * 200));
+          // Very short delay: 100ms only
+          await new Promise(resolve => setTimeout(resolve, 100));
           
           // Force garbage collection between retries
           if (window.gc) {

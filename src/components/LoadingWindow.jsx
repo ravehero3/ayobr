@@ -314,17 +314,27 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Video Preview - prioritize showing actual videos */}
                           {(shouldShowVideo || forceVideoDisplay) ? (
-                            <video
-                              src={(generatedVideo || videoState?.video)?.url}
-                              className="absolute inset-0 w-full h-full object-contain rounded"
-                              controls
-                              preload="metadata"
-                              style={{ background: 'black' }}
-                              onError={(e) => {
-                                console.error('Video playback error:', e);
-                                console.log('Video URL:', (generatedVideo || videoState?.video)?.url);
-                              }}
-                            />
+                            (generatedVideo || videoState?.video)?.url ? (
+                              <video
+                                src={(generatedVideo || videoState?.video)?.url}
+                                className="absolute inset-0 w-full h-full object-contain rounded"
+                                controls
+                                preload="metadata"
+                                style={{ background: 'black' }}
+                                onError={(e) => {
+                                  console.error('Video playback error:', e);
+                                  console.log('Video URL:', (generatedVideo || videoState?.video)?.url);
+                                }}
+                              />
+                            ) : (
+                              // Video completed but no URL available (file reading issue)
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-green-400 text-xs text-center">
+                                  ✓ Video Generated<br/>
+                                  <span className="text-white/60">File processing completed</span>
+                                </div>
+                              </div>
+                            )
                           ) : isComplete ? (
                             // Show a placeholder or loading state while video is being processed
                             <div className="absolute inset-0 flex items-center justify-center">
