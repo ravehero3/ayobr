@@ -322,24 +322,68 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Play button - show when 100% but no video yet */}
                           {shouldShowPlayButton && (
-                            <div 
-                              className="absolute text-white text-center transition-opacity duration-500"
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // If we have a video in the state but not in generated videos yet
+                                const videoToPlay = videoState?.video || generatedVideo;
+                                if (videoToPlay?.url) {
+                                  // Create a temporary video element to play the video
+                                  const tempVideo = document.createElement('video');
+                                  tempVideo.src = videoToPlay.url;
+                                  tempVideo.controls = true;
+                                  tempVideo.style.position = 'absolute';
+                                  tempVideo.style.top = '0';
+                                  tempVideo.style.left = '0';
+                                  tempVideo.style.width = '100%';
+                                  tempVideo.style.height = '100%';
+                                  tempVideo.style.objectFit = 'contain';
+                                  tempVideo.style.backgroundColor = 'black';
+                                  tempVideo.style.zIndex = '20';
+                                  
+                                  // Add the video to the preview container
+                                  const container = e.currentTarget.parentElement;
+                                  container.appendChild(tempVideo);
+                                  
+                                  // Hide the play button
+                                  e.currentTarget.style.display = 'none';
+                                  
+                                  // Play the video
+                                  tempVideo.play().catch(err => {
+                                    console.error('Video play failed:', err);
+                                  });
+                                  
+                                  // Clean up when video ends or is paused
+                                  tempVideo.addEventListener('ended', () => {
+                                    container.removeChild(tempVideo);
+                                    e.currentTarget.style.display = 'block';
+                                  });
+                                  
+                                  tempVideo.addEventListener('pause', () => {
+                                    container.removeChild(tempVideo);
+                                    e.currentTarget.style.display = 'block';
+                                  });
+                                }
+                              }}
+                              className="absolute text-white text-center transition-opacity duration-500 cursor-pointer hover:scale-105"
                               style={{ 
                                 position: 'absolute', 
                                 top: '50%', 
                                 left: '50%', 
                                 transform: 'translate(-50%, -50%)',
                                 zIndex: 10,
-                                opacity: shouldShowPlayButton ? 1 : 0
+                                opacity: shouldShowPlayButton ? 1 : 0,
+                                background: 'none',
+                                border: 'none'
                               }}
                             >
-                              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+                              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30 hover:bg-white/30 transition-colors">
                                 <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M8 5v14l11-7z"/>
                                 </svg>
                               </div>
-                              <div className="text-xs mt-2 text-white/80">Processing...</div>
-                            </div>
+                              <div className="text-xs mt-2 text-white/80">Ready to play</div>
+                            </button>
                           )}
 
                           {/* Video Preview with Play Button - show when we have a generated video */}

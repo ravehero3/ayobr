@@ -9,12 +9,17 @@ const Footer = ({ onGenerateVideos }) => {
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
+  // Helper function to get the video generation state for a given pair ID
+  const getVideoGenerationState = (pairId) => {
+    return videoGenerationStates[pairId];
+  };
+
   // Calculate completion count during generation
-  // Count videos that are successfully generated (either in store or marked complete with video data)
-  const completedVideosCount = completePairs.filter(pair => {
-    const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
-    const videoState = videoGenerationStates[pair.id];
-    return generatedVideo || (videoState?.isComplete && videoState?.video);
+  // Count videos that have reached 100% progress OR have been generated
+  const completedVideosCount = pairs.filter(pair => {
+    const videoState = getVideoGenerationState(pair.id);
+    const hasGeneratedVideo = generatedVideos.some(v => v.pairId === pair.id);
+    return hasGeneratedVideo || (videoState && videoState.progress >= 100);
   }).length;
 
   // Don't render footer if no files are present
@@ -63,11 +68,11 @@ const Footer = ({ onGenerateVideos }) => {
             onClick={() => {
               // Handle going back to previous step with proper state cleanup
               const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates } = useAppStore.getState();
-              
+
               // First, stop any ongoing generation and clear video states
               setIsGenerating(false);
               clearAllVideoGenerationStates();
-              
+
               if (generatedVideos.length > 0) {
                 // From download page, go back to file management
                 setCurrentPage('fileManagement');
@@ -110,7 +115,7 @@ const Footer = ({ onGenerateVideos }) => {
               <div className="w-48 bg-gray-700 rounded-full h-1">
                 <div
                   className="bg-gradient-to-r from-blue-500 to-purple-600 h-1 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${Math.floor((completedVideosCount / completePairs.length) * 100)}%` }}
+                  style={{ width: `${completePairs.length > 0 ? Math.floor((completedVideosCount / completePairs.length) * 100) : 0}%` }}
                 />
               </div>
             </div>
