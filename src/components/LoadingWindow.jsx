@@ -68,7 +68,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
           {/* Header - Moved 40px higher */}
-          <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-58px' }}>
+          <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-64px' }}>
             <motion.h2
               className="text-3xl font-bold text-white mb-4 text-center"
               initial={{ opacity: 0, y: -10 }}
@@ -76,13 +76,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               transition={{ delay: 0.2 }}
               style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
             >
-              We are generating your videos
+              generating videos
             </motion.h2>
 
           </div>
 
           {/* Miniature Containers Grid */}
-          <div className="relative max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px', zIndex: 50 }}>
+          <div className="relative overflow-y-auto mb-8 px-4" style={{ marginTop: '20px', zIndex: 50, maxHeight: 'calc(24rem + 100px)' }}>
             {/* Grid of pairs */}
           <div 
             className="grid gap-6 w-full mx-auto"
@@ -100,13 +100,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const videoState = getVideoGenerationState(pair.id);
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
 
-                // More robust completion detection
-                const isComplete = !!generatedVideo || (videoState?.isComplete === true) || (videoState?.progress === 100);
-                const progress = isComplete ? 100 : Math.max(0, videoState?.progress || 0);
+                // Enhanced completion detection - force completion at 100% progress
+                const progressValue = Math.max(0, videoState?.progress || 0);
+                const isComplete = !!generatedVideo || (videoState?.isComplete === true) || (progressValue >= 100);
+                const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Determine if we should show this video - improved logic
-                const shouldShowVideo = (generatedVideo || videoState?.video) && (isComplete || progress >= 100);
+                // CRITICAL FIX: Force video preview mode when progress reaches 100%
+                const shouldShowVideo = (generatedVideo || videoState?.video) || (progressValue >= 100);
                 
                 // Force video display check - if we have a video in the store, show it
                 const forceVideoDisplay = generatedVideo && generatedVideo.url;
@@ -295,8 +296,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Single progress overlay in center of preview - only percentage counter we keep */}
-                          {!isComplete && (
+                          {/* Single progress overlay in center of preview - hide when video reaches 100% */}
+                          {!isComplete && progressValue < 100 && (
                             <div 
                               className="absolute text-white text-sm font-medium text-center"
                               style={{ 
@@ -312,8 +313,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Video Preview - prioritize showing actual videos */}
-                          {(shouldShowVideo || forceVideoDisplay) ? (
+                          {/* Video Preview - show preview when progress hits 100% */}
+                          {(shouldShowVideo || forceVideoDisplay || progressValue >= 100) ? (
                             (generatedVideo || videoState?.video)?.url ? (
                               <video
                                 src={(generatedVideo || videoState?.video)?.url}
@@ -326,6 +327,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                   console.log('Video URL:', (generatedVideo || videoState?.video)?.url);
                                 }}
                               />
+                            ) : progressValue >= 100 ? (
+                              // Video reached 100% - show completion message instead of progress
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-green-400 text-xs text-center">
+                                  ✓ Video Generated<br/>
+                                  <span className="text-white/60">Processing completed</span>
+                                </div>
+                              </div>
                             ) : (
                               // Video completed but no URL available (file reading issue)
                               <div className="absolute inset-0 flex items-center justify-center">

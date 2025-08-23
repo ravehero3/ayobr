@@ -65,18 +65,6 @@ const Header = () => {
 
         {/* Status Indicator - Center */}
         <div className="flex items-center space-x-4" style={{ marginLeft: '-30px' }}>
-          {isGenerating && (
-            <button
-              onClick={handleResetApp}
-              className="flex items-center space-x-2 px-4 py-1.5 rounded-full bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all duration-200"
-            >
-              <div className="w-2 h-2 rounded-full bg-red-400"></div>
-              <span className="text-xs text-red-300 font-medium">
-                Reset Stuck Videos
-              </span>
-            </button>
-          )}
-
           {generatedVideos.length > 0 && !isGenerating && (
             <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
               <div className="w-2 h-2 rounded-full bg-green-400"></div>
