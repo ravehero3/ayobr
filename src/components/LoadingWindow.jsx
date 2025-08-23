@@ -106,8 +106,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // CRITICAL FIX: Force video preview mode when progress reaches 100%
-                const shouldShowVideo = (generatedVideo || videoState?.video) || (progressValue >= 100);
+                // Always show video preview when progress reaches 100% - no completion messages
+                const shouldShowVideoPreview = progressValue >= 100;
                 
                 // Force video display check - if we have a video in the store, show it
                 const forceVideoDisplay = generatedVideo && generatedVideo.url;
@@ -296,8 +296,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Single progress overlay in center of preview - hide when video reaches 100% */}
-                          {!isComplete && progressValue < 100 && (
+                          {/* Progress overlay - only show when progress is less than 100% */}
+                          {progressValue < 100 && (
                             <div 
                               className="absolute text-white text-sm font-medium text-center"
                               style={{ 
@@ -313,45 +313,70 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Video Preview - show preview when progress hits 100% */}
-                          {(shouldShowVideo || forceVideoDisplay || progressValue >= 100) ? (
-                            (generatedVideo || videoState?.video)?.url ? (
-                              <video
-                                src={(generatedVideo || videoState?.video)?.url}
-                                className="absolute inset-0 w-full h-full object-contain rounded"
-                                controls
-                                preload="metadata"
-                                style={{ background: 'black' }}
-                                onError={(e) => {
-                                  console.error('Video playback error:', e);
-                                  console.log('Video URL:', (generatedVideo || videoState?.video)?.url);
-                                }}
-                              />
-                            ) : progressValue >= 100 ? (
-                              // Video reached 100% - show completion message instead of progress
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="text-green-400 text-xs text-center">
-                                  ✓ Video Generated<br/>
-                                  <span className="text-white/60">Processing completed</span>
-                                </div>
-                              </div>
-                            ) : (
-                              // Video completed but no URL available (file reading issue)
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="text-green-400 text-xs text-center">
-                                  ✓ Video Generated<br/>
-                                  <span className="text-white/60">File processing completed</span>
-                                </div>
-                              </div>
-                            )
-                          ) : isComplete ? (
-                            // Show a placeholder or loading state while video is being processed
+                          {/* Video Preview with Play Button - show when progress reaches 100% */}
+                          {shouldShowVideoPreview && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="text-white text-xs">
-                                Video Ready - Processing...
-                              </div>
+                              {(generatedVideo || videoState?.video)?.url ? (
+                                <div className="relative w-full h-full">
+                                  {/* Video element (hidden by default) */}
+                                  <video
+                                    ref={(video) => {
+                                      if (video) {
+                                        video.style.display = 'none';
+                                      }
+                                    }}
+                                    src={(generatedVideo || videoState?.video)?.url}
+                                    className="absolute inset-0 w-full h-full object-contain rounded"
+                                    preload="metadata"
+                                    style={{ background: 'transparent' }}
+                                    onError={(e) => {
+                                      console.error('Video playback error:', e);
+                                      console.log('Video URL:', (generatedVideo || videoState?.video)?.url);
+                                    }}
+                                  />
+                                  
+                                  {/* Video thumbnail with play button overlay */}
+                                  <div 
+                                    className="absolute inset-0 cursor-pointer group"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const video = e.currentTarget.parentElement.querySelector('video');
+                                      if (video) {
+                                        video.style.display = 'block';
+                                        video.setAttribute('controls', 'true');
+                                        video.play();
+                                        e.currentTarget.style.display = 'none';
+                                      }
+                                    }}
+                                  >
+                                    {/* Video first frame as background */}
+                                    <video
+                                      src={(generatedVideo || videoState?.video)?.url}
+                                      className="absolute inset-0 w-full h-full object-contain rounded pointer-events-none"
+                                      preload="metadata"
+                                      muted
+                                      style={{ background: 'transparent' }}
+                                    />
+                                    
+                                    {/* Play button overlay */}
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                                      <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg">
+                                        <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                          <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                // Fallback for videos that completed but don't have URLs yet
+                                <div className="text-green-400 text-xs text-center">
+                                  ✓ Video Generated<br/>
+                                  <span className="text-white/60">Preparing preview...</span>
+                                </div>
+                              )}
                             </div>
-                          ) : null}
+                          )}
                         </div>
                       </div>
 
