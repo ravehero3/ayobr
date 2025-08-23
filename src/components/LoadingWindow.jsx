@@ -93,18 +93,21 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                 // Enhanced completion detection - force completion at 100% progress
                 const progressValue = Math.max(0, videoState?.progress || 0);
-                const isComplete = !!generatedVideo || (videoState?.isComplete === true) || (progressValue >= 100);
+                const isComplete = !!generatedVideo || (videoState?.isComplete === true);
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Show video preview immediately when progress reaches 100% OR when we have a generated video
-                const shouldShowVideoPreview = (progressValue >= 100 && !!videoToShow) || !!generatedVideo;
+                // Show video preview when we have a generated video (regardless of progress)
+                const shouldShowVideoPreview = !!generatedVideo;
                 
-                // Show progress bar until we have a video to show
+                // Show progress bar until we have a generated video
                 const shouldShowProgressBar = !shouldShowVideoPreview;
                 
-                // Force video display check - if we have a video in the store, show it
-                const forceVideoDisplay = generatedVideo && generatedVideo.url;
+                // Show percentage text until progress reaches 100%
+                const shouldShowPercentage = progressValue < 100 || !shouldShowVideoPreview;
+                
+                // Show play button when progress reaches 100% but no video yet
+                const shouldShowPlayButton = progressValue >= 100 && !shouldShowVideoPreview;
 
                 // For debugging
                 const debugInfo = {
@@ -112,7 +115,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                   hasStateVideo: !!videoState?.video,
                   isComplete,
                   progress,
-                  videoToShow: shouldShowVideoPreview,
+                  progressValue,
+                  shouldShowVideoPreview,
+                  shouldShowPercentage,
+                  shouldShowPlayButton,
                   videoState: {
                     isGenerating: videoState?.isGenerating,
                     isComplete: videoState?.isComplete,
@@ -296,94 +302,102 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             </div>
                           )}
 
-                          {/* Progress overlay - only show when progress is less than 100% */}
-                          {!shouldShowVideoPreview && (
+                          {/* Progress percentage - fade out when reaching 100% or when video is ready */}
+                          {shouldShowPercentage && (
                             <div 
-                              className="absolute text-white text-sm font-medium text-center"
+                              className="absolute text-white text-sm font-medium text-center transition-opacity duration-500"
                               style={{ 
                                 position: 'absolute', 
                                 top: '50%', 
                                 left: '50%', 
                                 transform: 'translate(-50%, -50%)',
                                 zIndex: 10,
-                                textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 1)'
+                                textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 1)',
+                                opacity: shouldShowPercentage ? 1 : 0
                               }}
                             >
                               {Math.round(progress)}%
                             </div>
                           )}
 
-                          {/* Video Preview with Play Button - show immediately when progress reaches 100% */}
-                          {shouldShowVideoPreview && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              {(generatedVideo || videoState?.video)?.url ? (
-                                <div className="relative w-full h-full">
-                                  {/* Video element (hidden by default) */}
+                          {/* Play button - show when 100% but no video yet */}
+                          {shouldShowPlayButton && (
+                            <div 
+                              className="absolute text-white text-center transition-opacity duration-500"
+                              style={{ 
+                                position: 'absolute', 
+                                top: '50%', 
+                                left: '50%', 
+                                transform: 'translate(-50%, -50%)',
+                                zIndex: 10,
+                                opacity: shouldShowPlayButton ? 1 : 0
+                              }}
+                            >
+                              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+                                <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z"/>
+                                </svg>
+                              </div>
+                              <div className="text-xs mt-2 text-white/80">Processing...</div>
+                            </div>
+                          )}
+
+                          {/* Video Preview with Play Button - show when we have a generated video */}
+                          {shouldShowVideoPreview && generatedVideo?.url && (
+                            <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-500" style={{ opacity: shouldShowVideoPreview ? 1 : 0 }}>
+                              <div className="relative w-full h-full">
+                                {/* Video element (hidden by default) */}
+                                <video
+                                  ref={(video) => {
+                                    if (video) {
+                                      video.style.display = 'none';
+                                    }
+                                  }}
+                                  src={generatedVideo.url}
+                                  className="absolute inset-0 w-full h-full object-contain rounded"
+                                  preload="metadata"
+                                  style={{ background: 'transparent' }}
+                                  onError={(e) => {
+                                    console.error('Video playback error:', e);
+                                    console.log('Video URL:', generatedVideo.url);
+                                  }}
+                                />
+                                
+                                {/* Video thumbnail with play button overlay */}
+                                <div 
+                                  className="absolute inset-0 cursor-pointer group"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const video = e.currentTarget.parentElement.querySelector('video');
+                                    if (video) {
+                                      video.style.display = 'block';
+                                      video.setAttribute('controls', 'true');
+                                      video.play().catch(err => {
+                                        console.error('Video play failed:', err);
+                                      });
+                                      e.currentTarget.style.display = 'none';
+                                    }
+                                  }}
+                                >
+                                  {/* Video first frame as background */}
                                   <video
-                                    ref={(video) => {
-                                      if (video) {
-                                        video.style.display = 'none';
-                                      }
-                                    }}
-                                    src={(generatedVideo || videoState?.video)?.url}
-                                    className="absolute inset-0 w-full h-full object-contain rounded"
+                                    src={generatedVideo.url}
+                                    className="absolute inset-0 w-full h-full object-contain rounded pointer-events-none"
                                     preload="metadata"
+                                    muted
                                     style={{ background: 'transparent' }}
-                                    onError={(e) => {
-                                      console.error('Video playback error:', e);
-                                      console.log('Video URL:', (generatedVideo || videoState?.video)?.url);
-                                    }}
                                   />
                                   
-                                  {/* Video thumbnail with play button overlay */}
-                                  <div 
-                                    className="absolute inset-0 cursor-pointer group"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      const video = e.currentTarget.parentElement.querySelector('video');
-                                      if (video) {
-                                        video.style.display = 'block';
-                                        video.setAttribute('controls', 'true');
-                                        video.play();
-                                        e.currentTarget.style.display = 'none';
-                                      }
-                                    }}
-                                  >
-                                    {/* Video first frame as background */}
-                                    <video
-                                      src={(generatedVideo || videoState?.video)?.url}
-                                      className="absolute inset-0 w-full h-full object-contain rounded pointer-events-none"
-                                      preload="metadata"
-                                      muted
-                                      style={{ background: 'transparent' }}
-                                    />
-                                    
-                                    {/* Play button overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                                      <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg">
-                                        <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                          <path d="M8 5v14l11-7z"/>
-                                        </svg>
-                                      </div>
+                                  {/* Play button overlay */}
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                                    <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg">
+                                      <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                      </svg>
                                     </div>
                                   </div>
                                 </div>
-                              ) : (
-                                // Show progress overlay while waiting for video URL
-                                <div 
-                                  className="absolute text-white text-sm font-medium text-center"
-                                  style={{ 
-                                    position: 'absolute', 
-                                    top: '50%', 
-                                    left: '50%', 
-                                    transform: 'translate(-50%, -50%)',
-                                    zIndex: 10,
-                                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 1)'
-                                  }}
-                                >
-                                  {Math.round(progress)}%
-                                </div>
-                              )}
+                              </div>
                             </div>
                           )}
                         </div>
