@@ -63,16 +63,9 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Status Indicator - Center */}
+        {/* Status Indicator - Center - Removed */}
         <div className="flex items-center space-x-4" style={{ marginLeft: '-30px' }}>
-          {generatedVideos.length > 0 && !isGenerating && (
-            <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">
-              <div className="w-2 h-2 rounded-full bg-green-400"></div>
-              <span className="text-xs text-green-300 font-medium">
-                {generatedVideos.length} Video{generatedVideos.length !== 1 ? 's' : ''} Ready
-              </span>
-            </div>
-          )}
+          {/* Green video ready indicator removed */}
         </div>
 
         {/* Profile Icon - Fixed relative to logo position */}

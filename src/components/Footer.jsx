@@ -125,7 +125,7 @@ const Footer = ({ onGenerateVideos }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <span className="text-sm text-gray-300">
-                {completePairs.length} Ready
+                {completePairs.length} Video{completePairs.length !== 1 ? 's' : ''} Ready
               </span>
             </div>
           )}

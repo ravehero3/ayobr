@@ -287,20 +287,9 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
           </div>
         </div>
 
-        {/* Footer with Download All Button */}
-        <div className="p-6 pt-2 flex justify-center">
-          <motion.button
-            onClick={handleDownloadAll}
-            disabled={downloadingAll}
-            className="relative overflow-hidden bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className="relative z-10">
-              {downloadingAll ? 'Downloading...' : `Download All Videos (${generatedVideos.length})`}
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 opacity-0 hover:opacity-20 transition-opacity duration-300" />
-          </motion.button>
+        {/* Footer - Empty */}
+        <div className="p-6 pt-2">
+          {/* Buttons removed */}
         </div>
       </motion.div>
     </motion.div>
