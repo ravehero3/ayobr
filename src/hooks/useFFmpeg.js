@@ -42,8 +42,8 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Set concurrent video generation to 5 for optimal speed
-      const maxConcurrent = Math.min(5, pairs.length);  // Process up to 5 videos concurrently
+      // Reduce concurrency for browser stability (web environment has less memory than Electron)
+      const maxConcurrent = Math.min(2, pairs.length);  // Process up to 2 videos concurrently for stability
 
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes (reduced for stability)`);
       const processingQueue = [...pairs];
@@ -60,13 +60,17 @@ export const useFFmpeg = () => {
           console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
         }
 
-        // Memory cleanup every 5 completed videos to prevent crashes
-        if (completedCount % 5 === 0 && completedCount > 0) {
+        // Memory cleanup every 2 completed videos to prevent crashes in browser
+        if (completedCount % 2 === 0 && completedCount > 0) {
           console.log(`Performing memory cleanup after ${completedCount} completed videos`);
-          // Browser will handle garbage collection automatically
-
-          // Small delay to allow cleanup to complete
-          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Force browser garbage collection and cleanup
+          if (window.gc) {
+            try { window.gc(); } catch(e) { /* ignore */ }
+          }
+          
+          // Longer delay to allow browser memory cleanup
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       };
 
@@ -364,24 +368,42 @@ export const useFFmpeg = () => {
         pairId: video.pairId
       });
 
-      // Add video to store immediately
-      try {
-        console.log('Adding video to store...');
-        addGeneratedVideo(video);
-        console.log('Video added to store successfully');
+      // Add video to store with retry logic
+      let addToStoreSuccess = false;
+      let retryCount = 0;
+      const maxRetries = 3;
 
-        // Verify video was added immediately
-        const storeState = useAppStore.getState();
-        const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
-        console.log('Video verification:', addedVideo ? 'Successfully added' : 'Failed to add');
-        console.log('Total videos in store:', storeState.generatedVideos.length);
-
-        if (!addedVideo) {
-          throw new Error('Video was not properly added to store');
+      while (!addToStoreSuccess && retryCount < maxRetries) {
+        try {
+          console.log(`Adding video to store (attempt ${retryCount + 1})...`);
+          addGeneratedVideo(video);
+          
+          // Wait a moment for state update
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Verify video was added
+          const storeState = useAppStore.getState();
+          const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
+          
+          if (addedVideo) {
+            console.log('Video successfully added to store');
+            console.log('Total videos in store:', storeState.generatedVideos.length);
+            addToStoreSuccess = true;
+          } else {
+            throw new Error('Video was not found in store after addition');
+          }
+        } catch (storeError) {
+          retryCount++;
+          console.error(`Error adding video to store (attempt ${retryCount}):`, storeError);
+          
+          if (retryCount >= maxRetries) {
+            console.error('Failed to add video to store after all retries');
+            throw new Error(`Failed to add video to store: ${storeError.message}`);
+          }
+          
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 200));
         }
-      } catch (storeError) {
-        console.error('Error adding video to store:', storeError);
-        throw new Error(`Failed to add video to store: ${storeError.message}`);
       }
 
       // Set final completion state

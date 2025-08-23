@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useFFmpeg } from '../hooks/useFFmpeg';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import userIcon from '../assets/user_1754478889614.png';
 import UserProfile from './UserProfile';
 import AppInfoWindow from './AppInfoWindow';
 
 const Header = () => {
-  const { generatedVideos, pairs, userProfileImage, isGenerating } = useAppStore();
+  const { generatedVideos, pairs, userProfileImage, isGenerating, resetGenerationState } = useAppStore();
+  const { stopGeneration, resetAppForNewGeneration } = useFFmpeg();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAppInfoOpen, setIsAppInfoOpen] = useState(false);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
+
+  const handleResetApp = () => {
+    console.log('Resetting stuck video generation...');
+    stopGeneration();
+    resetAppForNewGeneration();
+    resetGenerationState();
+  };
 
   // Don't render header if no files are present
   if (!hasFiles) {
@@ -56,6 +65,17 @@ const Header = () => {
 
         {/* Status Indicator - Center */}
         <div className="flex items-center space-x-4" style={{ marginLeft: '-30px' }}>
+          {isGenerating && (
+            <button
+              onClick={handleResetApp}
+              className="flex items-center space-x-2 px-4 py-1.5 rounded-full bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all duration-200"
+            >
+              <div className="w-2 h-2 rounded-full bg-red-400"></div>
+              <span className="text-xs text-red-300 font-medium">
+                Reset Stuck Videos
+              </span>
+            </button>
+          )}
 
           {generatedVideos.length > 0 && !isGenerating && (
             <div className="flex items-center space-x-2 px-5 py-1.5 rounded-full bg-green-500/20 border border-green-500/30">

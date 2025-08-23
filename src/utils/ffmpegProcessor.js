@@ -137,7 +137,24 @@ const cleanupMemory = () => {
     }
   }
 
-  // Browser will handle garbage collection automatically
+  // Force browser memory cleanup for web environment
+  if (window.gc) {
+    try { window.gc(); } catch(e) { /* ignore */ }
+  }
+  
+  // Clear URL objects that might be holding memory
+  if (typeof window !== 'undefined' && window.URL && window.URL.revokeObjectURL) {
+    // Clear any blob URLs that might be in memory (browser cleanup)
+    try {
+      const memoryKeys = Object.keys(memoryCache);
+      memoryKeys.forEach(key => {
+        const item = memoryCache.get(key);
+        if (item && typeof item === 'string' && item.startsWith('blob:')) {
+          window.URL.revokeObjectURL(item);
+        }
+      });
+    } catch(e) { /* ignore cleanup errors */ }
+  }
 };
 
 // Progress tracking for large batches
