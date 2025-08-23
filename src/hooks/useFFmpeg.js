@@ -339,11 +339,18 @@ export const useFFmpeg = () => {
 
       let videoBlob, videoUrl;
       try {
+        console.log('Creating Blob object...');
         videoBlob = new Blob([videoData], { type: 'video/mp4' });
+        console.log('Blob created, size:', videoBlob.size);
+        
+        console.log('Creating object URL...');
         videoUrl = URL.createObjectURL(videoBlob);
-        console.log('Video blob created successfully, size:', videoBlob.size);
+        console.log('Object URL created:', videoUrl.substring(0, 50) + '...');
+        
+        console.log('Video blob and URL created successfully');
       } catch (blobError) {
         console.error('Error creating video blob:', blobError);
+        console.error('Blob error stack:', blobError.stack);
         throw new Error(`Failed to create video blob: ${blobError.message}`);
       }
 
@@ -376,13 +383,28 @@ export const useFFmpeg = () => {
       while (!addToStoreSuccess && retryCount < maxRetries) {
         try {
           console.log(`Adding video to store (attempt ${retryCount + 1})...`);
+          console.log('Video object to add:', {
+            id: video.id,
+            pairId: video.pairId,
+            filename: video.filename,
+            size: video.size,
+            hasBlob: !!video.blob,
+            hasUrl: !!video.url
+          });
+          
           addGeneratedVideo(video);
+          console.log('addGeneratedVideo called successfully');
           
           // Wait a moment for state update
           await new Promise(resolve => setTimeout(resolve, 100));
           
           // Verify video was added
           const storeState = useAppStore.getState();
+          console.log('Current store state:', {
+            totalVideos: storeState.generatedVideos.length,
+            videoIds: storeState.generatedVideos.map(v => v.id)
+          });
+          
           const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
           
           if (addedVideo) {
@@ -395,6 +417,11 @@ export const useFFmpeg = () => {
         } catch (storeError) {
           retryCount++;
           console.error(`Error adding video to store (attempt ${retryCount}):`, storeError);
+          console.error('Store error details:', {
+            name: storeError.name,
+            message: storeError.message,
+            stack: storeError.stack
+          });
           
           if (retryCount >= maxRetries) {
             console.error('Failed to add video to store after all retries');
@@ -444,8 +471,11 @@ export const useFFmpeg = () => {
       console.error('Error details:', {
         name: error.name,
         message: error.message,
-        cause: error.cause
+        cause: error.cause,
+        type: typeof error,
+        toString: error.toString()
       });
+      console.error('Full error object:', error);
 
       // Check if this is an empty error object or completion issue (often indicates successful completion)
       const isEmptyError = error && typeof error === 'object' && 
