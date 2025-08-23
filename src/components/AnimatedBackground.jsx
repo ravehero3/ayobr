@@ -91,7 +91,7 @@ const AnimatedBackground = () => {
         initial={{ opacity: 0 }}
         animate={{ 
           opacity: backgroundLoaded.page1 ? 1 : 0,
-          filter: hasFiles && !hasVideos && !isGenerating ? 'blur(40px)' : 'blur(0px)'
+          filter: hasFiles && !hasVideos ? 'blur(40px)' : 'blur(0px)'
         }}
         transition={{ 
           opacity: { duration: 2.0, ease: "easeInOut", delay: 0.5 },
