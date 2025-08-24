@@ -42,8 +42,8 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Allow higher concurrency for better user experience - users want all videos to start
-      const maxConcurrent = Math.min(4, pairs.length);  // Process up to 4 videos concurrently
+      // Limit concurrency for memory stability - processing too many at once causes failures
+      const maxConcurrent = Math.min(2, pairs.length);  // Process max 2 videos concurrently for stability
 
       console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes (reduced for stability)`);
       const processingQueue = [...pairs];

@@ -10,10 +10,10 @@ let isForceStopped = false; // Track if processes were force stopped
 
 // Reduced concurrency for memory stability
 const getOptimalConcurrency = (totalFiles) => {
-  if (totalFiles <= 5) return 2;      // Small batches: 2 concurrent
-  if (totalFiles <= 20) return 3;     // Medium batches: 3 concurrent
-  if (totalFiles <= 50) return 4;     // Large batches: 4 concurrent
-  return 5;                           // Maximum: 5 concurrent for memory stability
+  if (totalFiles <= 5) return 1;      // Small batches: 1 at a time for stability
+  if (totalFiles <= 20) return 2;     // Medium batches: 2 concurrent maximum
+  if (totalFiles <= 50) return 2;     // Large batches: 2 concurrent maximum
+  return 2;                           // Maximum: 2 concurrent for memory stability
 };
 
 // Memory management for large batches
@@ -536,7 +536,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     try {
       const execPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 600000); // 10 minute timeout for FFmpeg execution
+        setTimeout(() => reject(new Error('FFmpeg execution timeout')), 900000); // 15 minute timeout for multiple video batches
       });
 
       await Promise.race([execPromise, timeoutPromise]);
