@@ -116,10 +116,10 @@ export const useFFmpeg = () => {
           continue;
         }
 
-        // Clear any existing state and ensure this video starts fresh
-        console.log(`Clearing any existing state for pair ${pair.id} before processing`);
+        // Initialize state for this video to show it's starting
+        console.log(`Initializing generation state for pair ${pair.id}`);
         setVideoGenerationState(pair.id, {
-          isGenerating: false,
+          isGenerating: true,
           progress: 0,
           isComplete: false,
           video: null,
@@ -144,9 +144,15 @@ export const useFFmpeg = () => {
           // Signal that next video should start immediately (if there is one)
           if (i < pairs.length - 1) {
             const nextPair = pairs[i + 1];
-            console.log(`Immediately starting next video ${nextPair.id}`);
-            // Don't just pre-initialize - actually start the next video
-            // The next iteration of the loop will pick this up
+            console.log(`Immediately triggering next video ${nextPair.id}`);
+            // Pre-initialize the next video to show it's about to start
+            setVideoGenerationState(nextPair.id, {
+              isGenerating: true,
+              progress: 0,
+              isComplete: false,
+              video: null,
+              error: null
+            });
           }
           
         } catch (error) {
