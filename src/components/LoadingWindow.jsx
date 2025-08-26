@@ -116,11 +116,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const currentIndex = pairs.findIndex(p => p.id === pair.id);
                 const shouldBeGenerating = currentIndex === completedVideosCount && !hasGeneratedVideo && !hasStateVideo;
                 
-                // Check if any video is currently generating
-                const anyVideoGenerating = pairs.some(p => getVideoGenerationState(p.id)?.isGenerating);
+                // Check if any video is actively generating (not just at 100% waiting for completion)
+                const anyVideoActivelyGenerating = pairs.some(p => {
+                  const pState = getVideoGenerationState(p.id);
+                  return pState?.isGenerating && pState?.progress < 100 && !pState?.isComplete;
+                });
                 
-                const shouldShowPercentage = (isCurrentlyGenerating && progress >= 0 && progress < 100) || 
-                                           (shouldBeGenerating && !anyVideoGenerating);
+                const shouldShowPercentage = (isCurrentlyGenerating && progress < 100) || 
+                                           (shouldBeGenerating && !anyVideoActivelyGenerating);
                 
                 const shouldShowPlayButton = shouldShowVideoPreview;
 
