@@ -543,6 +543,12 @@ export const useFFmpeg = () => {
         }
       }, 100);
 
+      // Trigger automatic continuation for next video in queue
+      console.log(`✅ Video ${pair.id} completed - triggering automatic continuation check`);
+      setTimeout(() => {
+        triggerNextVideoGeneration();
+      }, 200);
+
       console.log(`Video generation completed successfully for pair ${pair.id}`);
       return video;
 

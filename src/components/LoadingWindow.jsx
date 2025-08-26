@@ -319,8 +319,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Video Preview with Play Button - show when we have a generated video */}
                           {shouldShowVideoPreview && videoToShow?.url && (
-                            <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-500" style={{ opacity: shouldShowVideoPreview ? 1 : 0 }}>
-                              <div className="relative w-full h-full">
+                            <div 
+                              className="absolute inset-0 flex items-center justify-center transition-opacity duration-500" 
+                              style={{ 
+                                opacity: shouldShowVideoPreview ? 1 : 0,
+                                zIndex: 9999999 // Ensure video preview is above all other elements
+                              }}
+                            >
+                              <div className="relative w-full h-full" style={{ zIndex: 9999999 }}>
                                 {/* Enhanced video player with better error handling */}
                                 <video
                                   key={`video-player-${pair.id}`}
@@ -328,7 +334,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                   className="absolute inset-0 w-full h-full object-contain rounded"
                                   style={{ 
                                     background: 'transparent',
-                                    display: 'none' // Initially hidden until play button is clicked
+                                    display: 'none', // Initially hidden until play button is clicked
+                                    zIndex: 9999999
                                   }}
                                   preload="metadata"
                                   onLoadedData={() => {
@@ -344,6 +351,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                 {/* Interactive video thumbnail with play button */}
                                 <div 
                                   className="absolute inset-0 cursor-pointer group"
+                                  style={{ zIndex: 9999999 }}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     console.log(`Play button clicked for video ${pair.id}`);
@@ -359,6 +367,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                       videoElement.style.display = 'block';
                                       videoElement.setAttribute('controls', 'true');
                                       videoElement.setAttribute('controlsList', 'nodownload');
+                                      videoElement.style.zIndex = '9999999';
                                       
                                       // Start playback
                                       videoElement.play()
@@ -387,7 +396,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                       background: 'rgba(0,0,0,0.3)',
                                       color: 'white',
                                       fontSize: '12px',
-                                      textAlign: 'center'
+                                      textAlign: 'center',
+                                      zIndex: 9999999
                                     }}
                                   >
                                     Video Ready
@@ -395,9 +405,15 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                     Click to Play
                                   </div>
 
-                                  {/* Play button overlay */}
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                                    <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg">
+                                  {/* Play button overlay with highest z-index */}
+                                  <div 
+                                    className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors"
+                                    style={{ zIndex: 9999999 }}
+                                  >
+                                    <div 
+                                      className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg"
+                                      style={{ zIndex: 9999999 }}
+                                    >
                                       <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M8 5v14l11-7z"/>
                                       </svg>
