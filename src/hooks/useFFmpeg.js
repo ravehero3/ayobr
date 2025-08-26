@@ -49,6 +49,17 @@ export const useFFmpeg = () => {
       const processingQueue = [...pairs];
       const activePromises = new Set();
       let completedCount = 0;
+      
+      // Clear any existing generation states to prevent confusion
+      pairs.forEach(pair => {
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: null
+        });
+      });
 
       // Enhanced progress tracking for large batches
       const updateBatchProgress = async () => {
@@ -60,8 +71,8 @@ export const useFFmpeg = () => {
           console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
         }
 
-        // Memory cleanup every 2 completed videos to prevent crashes in browser
-        if (completedCount % 2 === 0 && completedCount > 0) {
+        // Memory cleanup every completed video to prevent crashes in browser
+        if (completedCount > 0 && completedCount % 1 === 0) {
           console.log(`Performing memory cleanup after ${completedCount} completed videos`);
           
           // Force browser garbage collection and cleanup
@@ -69,8 +80,8 @@ export const useFFmpeg = () => {
             try { window.gc(); } catch(e) { /* ignore */ }
           }
           
-          // Longer delay to allow browser memory cleanup
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Brief delay to allow browser memory cleanup
+          await new Promise(resolve => setTimeout(resolve, 200));
         }
       };
 
@@ -84,13 +95,20 @@ export const useFFmpeg = () => {
         while (activePromises.size < maxConcurrent && processingQueue.length > 0) {
           const pair = processingQueue.shift();
 
-          // Skip if this pair already has a completed video or is complete
+          // Skip if this pair already has a completed video
           const currentStore = useAppStore.getState();
           const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
-          const videoState = currentStore.videoGenerationStates[pair.id];
 
-          if (existingVideo || (videoState && videoState.isComplete && videoState.video)) {
-            console.log(`Skipping pair ${pair.id} - video already exists or is complete`);
+          if (existingVideo) {
+            console.log(`Skipping pair ${pair.id} - video already exists`);
+            // Ensure state is consistent
+            setVideoGenerationState(pair.id, {
+              isGenerating: false,
+              progress: 100,
+              isComplete: true,
+              video: existingVideo,
+              error: null
+            });
             completedCount++;
             await updateBatchProgress();
             continue;
@@ -110,13 +128,11 @@ export const useFFmpeg = () => {
 
             // Don't re-throw to prevent unhandled rejection
             return null;
-          }).finally(async () => {
+          }).then(result => {
             // Ensure we always increment the completed count
             completedCount++;
-            await updateBatchProgress();
-
-            // Log completion for debugging
             console.log(`Promise completed for pair ${pair.id}, total completed: ${completedCount}/${pairs.length}`);
+            return result;
           });
 
           activePromises.add(promise);
@@ -162,28 +178,32 @@ export const useFFmpeg = () => {
       console.log('Final check - videos in store:', generatedVideos.length);
       console.log('Video generation states:', videoGenerationStates);
       
-      pairs.forEach(pair => {
-        const currentState = videoGenerationStates[pair.id];
+      // Ensure all completed videos have proper states before finishing
+      console.log('Finalizing video generation states...');
+      pairs.forEach((pair) => {
         const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
+        const currentState = videoGenerationStates[pair.id];
         
-        // Force completion for any video that's at 100% but not marked complete
-        if (currentState && currentState.progress === 100 && !currentState.isComplete) {
-          console.log(`Force completing stuck video for pair ${pair.id}`);
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: existingVideo || currentState.video,
-            error: null
-          });
-        } else if (existingVideo && (!currentState || !currentState.isComplete)) {
-          console.log(`Ensuring completion state for pair ${pair.id} with existing video`);
+        if (existingVideo) {
+          console.log(`Finalizing state for pair ${pair.id} with video`);
           setVideoGenerationState(pair.id, {
             isGenerating: false,
             progress: 100,
             isComplete: true,
             video: existingVideo,
             error: null
+          });
+        } else if (currentState && currentState.error) {
+          console.log(`Keeping error state for pair ${pair.id}:`, currentState.error);
+          // Keep error state as is
+        } else {
+          console.log(`No video found for pair ${pair.id}, clearing state`);
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 0,
+            isComplete: false,
+            video: null,
+            error: 'Video generation failed'
           });
         }
       });
@@ -237,23 +257,24 @@ export const useFFmpeg = () => {
     try {
       if (isCancelling) return;
 
-      // Check if this pair already has a generated video or is complete
+      // Check if this pair already has a generated video
       const store = useAppStore.getState();
       const existingVideo = store.generatedVideos.find(v => v.pairId === pair.id);
-      const videoState = store.videoGenerationStates[pair.id];
 
-      if (existingVideo || (videoState && videoState.isComplete && videoState.video)) {
-        console.log(`Video already exists or is complete for pair ${pair.id}, skipping`);
-        return existingVideo || videoState.video;
+      if (existingVideo) {
+        console.log(`Video already exists for pair ${pair.id}, skipping`);
+        return existingVideo;
       }
 
+      // Initialize generation state
+      console.log(`Starting video generation for pair ${pair.id}`);
       setVideoGenerationState(pair.id, {
         isGenerating: true,
         progress: 0,
         isComplete: false,
         video: null,
         error: null,
-        startTime: Date.now()  // Track when generation started for timeout detection
+        startTime: Date.now()
       });
 
       console.log(`Processing video for pair ${pair.id}:`, pair);

@@ -91,16 +91,18 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const videoState = getVideoGenerationState(pair.id);
                 const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
 
-                // Enhanced completion detection - force completion at 100% progress
+                // Simplified completion detection
                 const progressValue = Math.max(0, videoState?.progress || 0);
-                const isComplete = !!generatedVideo || (videoState?.isComplete === true);
+                const hasGeneratedVideo = !!generatedVideo;
+                const hasStateVideo = !!(videoState?.video);
+                const isComplete = hasGeneratedVideo || (videoState?.isComplete === true && hasStateVideo);
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Determine what to show in the video preview area
-                const shouldShowVideoPreview = (isComplete && (generatedVideo || videoState?.video)) || (progress === 100 && (generatedVideo || videoState?.video));
-                const shouldShowPercentage = videoState?.isGenerating && progress < 100 && !shouldShowVideoPreview;
-                const shouldShowPlayButton = (isComplete || progress === 100) && (generatedVideo || videoState?.video) && !shouldShowPercentage;
+                // Clear display logic
+                const shouldShowVideoPreview = isComplete && !!videoToShow;
+                const shouldShowPercentage = !isComplete && videoState?.isGenerating && progress >= 0 && progress < 100;
+                const shouldShowPlayButton = isComplete && !!videoToShow;
 
                 // For debugging
                 const debugInfo = {
