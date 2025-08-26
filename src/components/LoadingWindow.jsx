@@ -22,8 +22,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     } else if (background === 'custom' && settings.customBackground) {
       try {
         // Check if it's already a data URL (base64) or needs to be converted from File object
-        const backgroundUrl = typeof settings.customBackground === 'string' 
-          ? settings.customBackground 
+        const backgroundUrl = typeof settings.customBackground === 'string'
+          ? settings.customBackground
           : URL.createObjectURL(settings.customBackground);
 
         return {
@@ -75,7 +75,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* Miniature Containers Grid - Moved 30px down */}
           <div className="relative overflow-y-auto mb-8 px-4" style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)' }}>
             {/* Grid of pairs */}
-          <div 
+          <div
             className="grid gap-6 w-full mx-auto"
             style={{
               gridTemplateColumns: 'repeat(auto-fit, 240px)',
@@ -258,14 +258,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                       {/* Video Preview Area - moved 30px down from previous position and fixed positioning */}
                       <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
-                        <div 
+                        <div
                           className="aspect-video bg-black/30 rounded flex items-center justify-center relative overflow-hidden"
-                          style={{ 
-                            width: '192px', 
-                            height: '108px', 
-                            minWidth: '192px', 
-                            maxWidth: '192px', 
-                            minHeight: '108px', 
+                          style={{
+                            width: '192px',
+                            height: '108px',
+                            minWidth: '192px',
+                            maxWidth: '192px',
+                            minHeight: '108px',
                             maxHeight: '108px',
                             position: 'relative',
                             flexShrink: 0,
@@ -273,7 +273,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           }}
                         >
                           {/* Video background preview based on user settings - centered */}
-                          <div 
+                          <div
                             className="absolute inset-0 w-full h-full flex items-center justify-center"
                             style={{
                               ...getVideoBackgroundStyle()
@@ -282,13 +282,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Foreground image preview - centered with proper spacing */}
                           {pair.image && (
-                            <div className="absolute flex items-center justify-center" style={{ 
-                              top: '2px', 
-                              left: '2px', 
-                              right: '2px', 
-                              bottom: '2px' 
+                            <div className="absolute flex items-center justify-center" style={{
+                              top: '2px',
+                              left: '2px',
+                              right: '2px',
+                              bottom: '2px'
                             }}>
-                              <img 
+                              <img
                                 src={URL.createObjectURL(pair.image)}
                                 alt="Preview"
                                 className="max-w-full max-h-full object-contain opacity-80"
@@ -299,12 +299,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Progress percentage - fade out when reaching 100% or when video is ready */}
                           {shouldShowPercentage && (
-                            <div 
+                            <div
                               className="absolute text-white text-sm font-medium text-center transition-opacity duration-500"
-                              style={{ 
-                                position: 'absolute', 
-                                top: '50%', 
-                                left: '50%', 
+                              style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
                                 transform: 'translate(-50%, -50%)',
                                 zIndex: 10,
                                 textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 1)',
@@ -319,9 +319,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                           {/* Video Preview with Play Button - show when we have a generated video */}
                           {shouldShowVideoPreview && videoToShow?.url && (
-                            <div 
-                              className="absolute inset-0 flex items-center justify-center transition-opacity duration-500" 
-                              style={{ 
+                            <div
+                              className="absolute inset-0 flex items-center justify-center transition-opacity duration-500"
+                              style={{
                                 opacity: shouldShowVideoPreview ? 1 : 0,
                                 zIndex: 9999999 // Ensure video preview is above all other elements
                               }}
@@ -332,7 +332,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                   key={`video-player-${pair.id}`}
                                   src={videoToShow.url}
                                   className="absolute inset-0 w-full h-full object-contain rounded"
-                                  style={{ 
+                                  style={{
                                     background: 'transparent',
                                     display: 'none', // Initially hidden until play button is clicked
                                     zIndex: 9999999
@@ -349,26 +349,26 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                 />
 
                                 {/* Interactive video thumbnail with play button */}
-                                <div 
+                                <div
                                   className="absolute inset-0 cursor-pointer group"
                                   style={{ zIndex: 9999999 }}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     console.log(`Play button clicked for video ${pair.id}`);
                                     console.log('Video URL:', videoToShow.url);
-                                    
+
                                     const videoElement = e.currentTarget.parentElement.querySelector('video');
                                     const overlay = e.currentTarget;
-                                    
+
                                     if (videoElement && videoToShow.url) {
                                       console.log('Starting video playback...');
-                                      
+
                                       // Show video player
                                       videoElement.style.display = 'block';
                                       videoElement.setAttribute('controls', 'true');
                                       videoElement.setAttribute('controlsList', 'nodownload');
                                       videoElement.style.zIndex = '9999999';
-                                      
+
                                       // Start playback
                                       videoElement.play()
                                         .then(() => {
@@ -378,7 +378,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                         .catch(err => {
                                           console.error('Video playback failed:', err);
                                           console.log('Attempting to create new video element...');
-                                          
+
                                           // Fallback: Try opening in new tab
                                           window.open(videoToShow.url, '_blank');
                                         });
@@ -390,9 +390,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                   }}
                                 >
                                   {/* Simple video preview thumbnail */}
-                                  <div 
+                                  <div
                                     className="absolute inset-0 w-full h-full object-contain rounded pointer-events-none flex items-center justify-center"
-                                    style={{ 
+                                    style={{
                                       background: 'rgba(0,0,0,0.3)',
                                       color: 'white',
                                       fontSize: '12px',
@@ -406,11 +406,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                   </div>
 
                                   {/* Play button overlay with highest z-index */}
-                                  <div 
+                                  <div
                                     className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors"
                                     style={{ zIndex: 9999999 }}
                                   >
-                                    <div 
+                                    <div
                                       className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg"
                                       style={{ zIndex: 9999999 }}
                                     >
@@ -427,7 +427,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       </div>
 
                       {/* Single Progress Bar - fade out when video preview shows */}
-                      <motion.div 
+                      <motion.div
                         className="w-full bg-white/10 rounded-full h-2 mt-4"
                         animate={{ opacity: shouldShowPercentage ? 1 : 0 }}
                         transition={{ duration: 0.5 }}
