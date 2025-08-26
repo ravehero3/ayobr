@@ -578,18 +578,18 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       console.log('Progress set to 100% after FFmpeg completion');
     }
 
-    // Optimized file reading with shorter delays
+    // Optimized file reading with longer stabilization delay
     console.log('Reading output file...');
     
-    // Force garbage collection and small sync delay
+    // Force garbage collection and ensure FFmpeg has finished writing
     if (window.gc) {
       window.gc();
     }
-    await new Promise(resolve => setTimeout(resolve, 200)); // Reduced delay
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Increased delay for stability
 
     let data;
     let retryCount = 0;
-    const maxRetries = 2; // Reduce retries to fail faster if file isn't ready
+    const maxRetries = 5; // More retries with better timing
 
     while (retryCount < maxRetries) {
       try {
@@ -599,11 +599,16 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.log(`Output file ${outputFileName} exists:`, outputExists);
 
         if (!outputExists) {
-          // Don't wait - if file doesn't exist immediately, FFmpeg likely failed
-          throw new Error('Output file was not created by FFmpeg');
+          if (retryCount === 0) {
+            console.log('Output file not found on first attempt, waiting for FFmpeg to finish...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            continue;
+          } else {
+            throw new Error('Output file was not created by FFmpeg');
+          }
         }
 
-        // Read the file directly with timeout
+        // Read the file directly
         console.log('Attempting to read output file...');
         data = await ffmpeg.readFile(outputFileName);
         console.log('Successfully read output file, size:', data ? data.length : 'null');
@@ -620,8 +625,10 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError.message || readError);
 
         if (retryCount < maxRetries) {
-          // Very short delay: 100ms only
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Progressive delays: 500ms, 1s, 1.5s, 2s
+          const delayMs = 500 * retryCount;
+          console.log(`Waiting ${delayMs}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
           
           // Force garbage collection between retries
           if (window.gc) {

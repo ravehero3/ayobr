@@ -42,12 +42,10 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Limit concurrency for memory stability - processing too many at once causes failures
-      const maxConcurrent = Math.min(2, pairs.length);  // Process max 2 videos concurrently for stability
+      // Process videos one at a time for maximum stability
+      const maxConcurrent = 1;  // Process only 1 video at a time for stability
 
-      console.log(`Processing ${pairs.length} videos with ${maxConcurrent} concurrent processes (reduced for stability)`);
-      const processingQueue = [...pairs];
-      const activePromises = new Set();
+      console.log(`Processing ${pairs.length} videos sequentially (1 at a time for maximum stability)`);
       let completedCount = 0;
       
       // Clear any existing generation states to prevent confusion
@@ -85,66 +83,62 @@ export const useFFmpeg = () => {
         }
       };
 
-      while (processingQueue.length > 0 || activePromises.size > 0) {
+      // Process pairs sequentially one by one
+      for (let i = 0; i < pairs.length; i++) {
         if (isCancelling) {
-          console.log('Video generation cancelled - force stopping all processes');
+          console.log('Video generation cancelled - stopping sequential processing');
           forceStopAllProcesses();
           break;
         }
 
-        while (activePromises.size < maxConcurrent && processingQueue.length > 0) {
-          const pair = processingQueue.shift();
+        const pair = pairs[i];
+        console.log(`Processing video ${i + 1}/${pairs.length} for pair ${pair.id}`);
 
-          // Skip if this pair already has a completed video
-          const currentStore = useAppStore.getState();
-          const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
+        // Skip if this pair already has a completed video
+        const currentStore = useAppStore.getState();
+        const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
 
-          if (existingVideo) {
-            console.log(`Skipping pair ${pair.id} - video already exists`);
-            // Ensure state is consistent
-            setVideoGenerationState(pair.id, {
-              isGenerating: false,
-              progress: 100,
-              isComplete: true,
-              video: existingVideo,
-              error: null
-            });
-            completedCount++;
-            await updateBatchProgress();
-            continue;
-          }
-
-          const promise = processPairAsync(pair).catch(error => {
-            console.error(`Error in processPairAsync for pair ${pair.id}:`, error);
-
-            // Set error state for this specific pair
-            setVideoGenerationState(pair.id, {
-              isGenerating: false,
-              progress: 0,
-              isComplete: false,
-              video: null,
-              error: error.message || 'Video generation failed'
-            });
-
-            // Don't re-throw to prevent unhandled rejection
-            return null;
-          }).then(result => {
-            // Ensure we always increment the completed count
-            completedCount++;
-            console.log(`Promise completed for pair ${pair.id}, total completed: ${completedCount}/${pairs.length}`);
-            return result;
+        if (existingVideo) {
+          console.log(`Skipping pair ${pair.id} - video already exists`);
+          // Ensure state is consistent
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: existingVideo,
+            error: null
           });
-
-          activePromises.add(promise);
-
-          // Remove promise from active set when it resolves
-          promise.finally(() => {
-            activePromises.delete(promise);
-          });
+          completedCount++;
+          await updateBatchProgress();
+          continue;
         }
 
-        if (activePromises.size > 0) {
-          await Promise.race(Array.from(activePromises));
+        try {
+          console.log(`Starting processing for pair ${pair.id} (${i + 1}/${pairs.length})`);
+          await processPairAsync(pair);
+          completedCount++;
+          console.log(`Completed video ${i + 1}/${pairs.length} for pair ${pair.id}`);
+        } catch (error) {
+          console.error(`Error processing pair ${pair.id}:`, error);
+          
+          // Set error state for this specific pair
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 0,
+            isComplete: false,
+            video: null,
+            error: error.message || 'Video generation failed'
+          });
+          
+          completedCount++;
+        }
+
+        await updateBatchProgress();
+
+        // Add breathing room between video processing
+        if (i < pairs.length - 1) {
+          console.log(`Taking 1 second break before processing next video...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
       // Check if generation was cancelled before finishing
@@ -427,10 +421,19 @@ export const useFFmpeg = () => {
         pairId: video.pairId
       });
 
-      // Add video to store with retry logic
+      // Add video to store with retry logic and immediate state update
       let addToStoreSuccess = false;
       let retryCount = 0;
       const maxRetries = 3;
+
+      // Update state first to show immediate completion
+      setVideoGenerationState(pair.id, {
+        isGenerating: false,
+        progress: 100,
+        isComplete: true,
+        video: video,
+        error: null
+      });
 
       while (!addToStoreSuccess && retryCount < maxRetries) {
         try {
