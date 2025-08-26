@@ -318,50 +318,82 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
 
                           {/* Video Preview with Play Button - show when we have a generated video */}
-                          {shouldShowVideoPreview && generatedVideo?.url && (
+                          {shouldShowVideoPreview && videoToShow?.url && (
                             <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-500" style={{ opacity: shouldShowVideoPreview ? 1 : 0 }}>
                               <div className="relative w-full h-full">
-                                {/* Video element (hidden by default) */}
+                                {/* Enhanced video player with better error handling */}
                                 <video
-                                  ref={(video) => {
-                                    if (video) {
-                                      video.style.display = 'none';
-                                    }
-                                  }}
-                                  src={generatedVideo.url}
+                                  key={`video-player-${pair.id}`}
+                                  src={videoToShow.url}
                                   className="absolute inset-0 w-full h-full object-contain rounded"
+                                  style={{ 
+                                    background: 'transparent',
+                                    display: 'none' // Initially hidden until play button is clicked
+                                  }}
                                   preload="metadata"
-                                  style={{ background: 'transparent' }}
+                                  onLoadedData={() => {
+                                    console.log(`Video loaded successfully for ${pair.id}`);
+                                  }}
                                   onError={(e) => {
-                                    console.error('Video playback error:', e);
-                                    console.log('Video URL:', generatedVideo.url);
+                                    console.error(`Video error for ${pair.id}:`, e);
+                                    console.log('Video URL:', videoToShow.url);
+                                    console.log('Video object:', videoToShow);
                                   }}
                                 />
 
-                                {/* Video thumbnail with play button overlay */}
+                                {/* Interactive video thumbnail with play button */}
                                 <div 
                                   className="absolute inset-0 cursor-pointer group"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const video = e.currentTarget.parentElement.querySelector('video');
-                                    if (video) {
-                                      video.style.display = 'block';
-                                      video.setAttribute('controls', 'true');
-                                      video.play().catch(err => {
-                                        console.error('Video play failed:', err);
-                                      });
-                                      e.currentTarget.style.display = 'none';
+                                    console.log(`Play button clicked for video ${pair.id}`);
+                                    console.log('Video URL:', videoToShow.url);
+                                    
+                                    const videoElement = e.currentTarget.parentElement.querySelector('video');
+                                    const overlay = e.currentTarget;
+                                    
+                                    if (videoElement && videoToShow.url) {
+                                      console.log('Starting video playback...');
+                                      
+                                      // Show video player
+                                      videoElement.style.display = 'block';
+                                      videoElement.setAttribute('controls', 'true');
+                                      videoElement.setAttribute('controlsList', 'nodownload');
+                                      
+                                      // Start playback
+                                      videoElement.play()
+                                        .then(() => {
+                                          console.log('Video playback started successfully');
+                                          overlay.style.display = 'none'; // Hide overlay after successful play
+                                        })
+                                        .catch(err => {
+                                          console.error('Video playback failed:', err);
+                                          console.log('Attempting to create new video element...');
+                                          
+                                          // Fallback: Try opening in new tab
+                                          window.open(videoToShow.url, '_blank');
+                                        });
+                                    } else {
+                                      console.error('Video element or URL not available');
+                                      console.log('VideoElement exists:', !!videoElement);
+                                      console.log('Video URL exists:', !!videoToShow.url);
                                     }
                                   }}
                                 >
-                                  {/* Video first frame as background */}
-                                  <video
-                                    src={generatedVideo.url}
-                                    className="absolute inset-0 w-full h-full object-contain rounded pointer-events-none"
-                                    preload="metadata"
-                                    muted
-                                    style={{ background: 'transparent' }}
-                                  />
+                                  {/* Simple video preview thumbnail */}
+                                  <div 
+                                    className="absolute inset-0 w-full h-full object-contain rounded pointer-events-none flex items-center justify-center"
+                                    style={{ 
+                                      background: 'rgba(0,0,0,0.3)',
+                                      color: 'white',
+                                      fontSize: '12px',
+                                      textAlign: 'center'
+                                    }}
+                                  >
+                                    Video Ready
+                                    <br />
+                                    Click to Play
+                                  </div>
 
                                   {/* Play button overlay */}
                                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
