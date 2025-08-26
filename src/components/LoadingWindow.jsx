@@ -102,11 +102,22 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 // Enhanced display logic for video previews with proper sequential generation
                 const shouldShowVideoPreview = (isComplete || progress === 100) && !!videoToShow && videoToShow.url;
                 
-                // Show percentage for generating videos OR for the next video in queue that should be generating
+                // Show percentage for generating videos OR trigger next video in sequence
                 const isCurrentlyGenerating = videoState?.isGenerating;
                 const isNextInQueue = !hasGeneratedVideo && !hasStateVideo && !isComplete && progress === 0;
+                
+                // Check if this should be the next video to generate (first incomplete video after any completed ones)
+                const completedVideosCount = pairs.filter(p => {
+                  const pState = getVideoGenerationState(p.id);
+                  const pVideo = generatedVideos.find(v => v.pairId === p.id);
+                  return pVideo || (pState?.isComplete && pState?.video);
+                }).length;
+                
+                const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                const shouldBeGenerating = currentIndex === completedVideosCount && !hasGeneratedVideo && !hasStateVideo;
+                
                 const shouldShowPercentage = (isCurrentlyGenerating && progress >= 0 && progress < 100) || 
-                                           (isNextInQueue && pairs.some(p => getVideoGenerationState(p.id)?.isGenerating));
+                                           (shouldBeGenerating && pairs.some(p => getVideoGenerationState(p.id)?.isGenerating));
                 
                 const shouldShowPlayButton = shouldShowVideoPreview;
 

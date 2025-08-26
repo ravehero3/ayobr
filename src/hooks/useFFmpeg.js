@@ -116,6 +116,16 @@ export const useFFmpeg = () => {
           continue;
         }
 
+        // Clear any existing state and ensure this video starts fresh
+        console.log(`Clearing any existing state for pair ${pair.id} before processing`);
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: null
+        });
+
         try {
           console.log(`Starting processing for pair ${pair.id} (${i + 1}/${pairs.length})`);
           const result = await processPairAsync(pair);
@@ -131,18 +141,12 @@ export const useFFmpeg = () => {
             console.warn(`⚠ Video ${i + 1}/${pairs.length} completed but not found in store`);
           }
           
-          // Immediately signal that next video should start (if there is one)
+          // Signal that next video should start immediately (if there is one)
           if (i < pairs.length - 1) {
             const nextPair = pairs[i + 1];
-            console.log(`Preparing next video ${nextPair.id} for generation`);
-            // Pre-initialize the next video's state to show it's about to start
-            setVideoGenerationState(nextPair.id, {
-              isGenerating: true,
-              progress: 0,
-              isComplete: false,
-              video: null,
-              error: null
-            });
+            console.log(`Immediately starting next video ${nextPair.id}`);
+            // Don't just pre-initialize - actually start the next video
+            // The next iteration of the loop will pick this up
           }
           
         } catch (error) {
