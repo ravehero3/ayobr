@@ -114,7 +114,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 }).length;
                 
                 const currentIndex = pairs.findIndex(p => p.id === pair.id);
-                const shouldBeGenerating = currentIndex === completedVideosCount && !hasGeneratedVideo && !hasStateVideo;
+                const shouldBeGenerating = currentIndex === completedVideosCount && !hasGeneratedVideo && !hasStateVideo && !isComplete;
                 
                 // Check if any video is actively generating (not just at 100% waiting for completion)
                 const anyVideoActivelyGenerating = pairs.some(p => {
@@ -122,13 +122,15 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                   return pState?.isGenerating && !pState?.isComplete;
                 });
                 
-                const shouldShowPercentage = (isCurrentlyGenerating && progress >= 0 && progress <= 100 && !isComplete) || 
-                                           (shouldBeGenerating && !anyVideoActivelyGenerating && !isComplete);
+                // Show percentage for currently generating OR next video that should start
+                const shouldShowPercentage = (isCurrentlyGenerating && !isComplete) || 
+                                           (shouldBeGenerating && !anyVideoActivelyGenerating);
                 
                 const shouldShowPlayButton = shouldShowVideoPreview;
 
                 // For debugging
                 const debugInfo = {
+                  index: currentIndex,
                   hasVideo: !!generatedVideo,
                   hasStateVideo: !!videoState?.video,
                   isComplete,
@@ -137,15 +139,20 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                   shouldShowVideoPreview,
                   shouldShowPercentage,
                   shouldShowPlayButton,
+                  shouldBeGenerating,
+                  completedVideosCount,
+                  anyVideoActivelyGenerating,
                   videoState: {
                     isGenerating: videoState?.isGenerating,
                     isComplete: videoState?.isComplete,
                     progress: videoState?.progress,
-                    hasVideo: !!videoState?.video
+                    hasVideo: !!videoState?.video,
+                    isCurrentlyProcessing: videoState?.isCurrentlyProcessing,
+                    isFinished: videoState?.isFinished
                   },
                   allGeneratedVideos: generatedVideos.length
                 };
-                console.log(`LoadingWindow pair ${pair.id}:`, debugInfo);
+                console.log(`LoadingWindow pair ${pair.id} (${currentIndex + 1}/${pairs.length}):`, debugInfo);
 
                 return (
                   <motion.div

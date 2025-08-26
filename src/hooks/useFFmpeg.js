@@ -48,14 +48,16 @@ export const useFFmpeg = () => {
       console.log(`Processing ${pairs.length} videos sequentially (1 at a time for maximum stability)`);
       let completedCount = 0;
 
-      // Clear any existing generation states to prevent confusion
-      pairs.forEach(pair => {
+      // Clear any existing generation states and set up sequential generation
+      pairs.forEach((pair, index) => {
         setVideoGenerationState(pair.id, {
           isGenerating: false,
           progress: 0,
           isComplete: false,
           video: null,
-          error: null
+          error: null,
+          queuePosition: index, // Track position in generation queue
+          isInQueue: true
         });
       });
 
@@ -117,13 +119,15 @@ export const useFFmpeg = () => {
         }
 
         // Initialize state for this video to show it's starting
-        console.log(`Starting generation for pair ${pair.id}`);
+        console.log(`Starting generation for pair ${pair.id} (${i + 1}/${pairs.length})`);
         setVideoGenerationState(pair.id, {
           isGenerating: true,
           progress: 0,
           isComplete: false,
           video: null,
-          error: null
+          error: null,
+          queuePosition: i,
+          isCurrentlyProcessing: true
         });
 
         try {
@@ -141,11 +145,26 @@ export const useFFmpeg = () => {
             console.warn(`⚠ Video ${i + 1}/${pairs.length} completed but not found in store`);
           }
 
+          // Mark current video as completely finished and clear processing flag
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 100,
+            isComplete: true,
+            video: result,
+            error: null,
+            isCurrentlyProcessing: false,
+            isFinished: true
+          });
+
           // Signal that next video should start immediately (if there is one)
           if (i < pairs.length - 1) {
             const nextPair = pairs[i + 1];
-            console.log(`Next video ${nextPair.id} will start in next iteration`);
-            // Don't pre-initialize - let the next iteration handle it properly
+            console.log(`Preparing next video ${nextPair.id} for immediate start`);
+            
+            // Force immediate UI update to show next video is ready to start
+            setTimeout(() => {
+              console.log(`Triggering UI update for next video ${nextPair.id}`);
+            }, 10);
           }
 
         } catch (error) {
@@ -524,7 +543,7 @@ export const useFFmpeg = () => {
         }
       }
 
-      // Set final completion state IMMEDIATELY when video is ready and force UI update
+      // Set final completion state IMMEDIATELY when video is ready
       console.log(`Setting completion state for pair ${pair.id}...`);
       const completionState = {
         isGenerating: false,
@@ -532,16 +551,15 @@ export const useFFmpeg = () => {
         isComplete: true,
         video: video,
         error: null,
-        startTime: null // Clear start time to prevent timeout cleanup
+        isCurrentlyProcessing: false,
+        isFinished: true,
+        completedAt: Date.now()
       };
 
       setVideoGenerationState(pair.id, completionState);
 
-      // Immediately clear generating flag to allow next video to start
-      console.log(`Video ${pair.id} completed - clearing isGenerating flag for next video`);
-
-      // Force immediate state update to trigger next video
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Force immediate UI update to show completion
+      console.log(`✅ Video ${pair.id} marked as complete - ready for next video`);
 
       // Force immediate UI state update
       setTimeout(() => {
