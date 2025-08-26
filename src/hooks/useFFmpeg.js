@@ -115,9 +115,19 @@ export const useFFmpeg = () => {
 
         try {
           console.log(`Starting processing for pair ${pair.id} (${i + 1}/${pairs.length})`);
-          await processPairAsync(pair);
+          const result = await processPairAsync(pair);
           completedCount++;
           console.log(`Completed video ${i + 1}/${pairs.length} for pair ${pair.id}`);
+          
+          // Verify the video was properly completed
+          const finalState = useAppStore.getState();
+          const completedVideo = finalState.generatedVideos.find(v => v.pairId === pair.id);
+          if (completedVideo) {
+            console.log(`✓ Video ${i + 1}/${pairs.length} successfully added to store`);
+          } else {
+            console.warn(`⚠ Video ${i + 1}/${pairs.length} completed but not found in store`);
+          }
+          
         } catch (error) {
           console.error(`Error processing pair ${pair.id}:`, error);
           
@@ -133,12 +143,18 @@ export const useFFmpeg = () => {
           completedCount++;
         }
 
+        // Ensure UI updates and add breathing room between video processing
         await updateBatchProgress();
-
-        // Add breathing room between video processing
+        
         if (i < pairs.length - 1) {
           console.log(`Taking 1 second break before processing next video...`);
           await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Verify we can continue (not cancelled)
+          if (isCancelling) {
+            console.log('Generation was cancelled during break');
+            break;
+          }
         }
       }
       // Check if generation was cancelled before finishing
@@ -488,20 +504,27 @@ export const useFFmpeg = () => {
         }
       }
 
-      // Set final completion state IMMEDIATELY when video is ready
+      // Set final completion state IMMEDIATELY when video is ready and force UI update
       console.log(`Setting completion state for pair ${pair.id}...`);
-      setVideoGenerationState(pair.id, {
+      const completionState = {
         isGenerating: false,
         progress: 100,
         isComplete: true,
         video: video,
-        error: null
-      });
+        error: null,
+        startTime: null // Clear start time to prevent timeout cleanup
+      };
+      
+      setVideoGenerationState(pair.id, completionState);
+      
+      // Force immediate UI refresh
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       console.log('Video completion state set for pair', pair.id, ':', {
         isComplete: true,
         hasVideo: !!video,
-        videoId: video.id
+        videoId: video.id,
+        hasUrl: !!video.url
       });
 
       // Force immediate UI state update

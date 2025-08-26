@@ -72,8 +72,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             {/* Header text removed */}
           </div>
 
-          {/* Miniature Containers Grid */}
-          <div className="relative overflow-y-auto mb-8 px-4" style={{ marginTop: '20px', zIndex: 50, maxHeight: 'calc(24rem + 100px)' }}>
+          {/* Miniature Containers Grid - Moved 30px down */}
+          <div className="relative overflow-y-auto mb-8 px-4" style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)' }}>
             {/* Grid of pairs */}
           <div 
             className="grid gap-6 w-full mx-auto"
@@ -99,10 +99,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Clear display logic
-                const shouldShowVideoPreview = isComplete && !!videoToShow;
+                // Enhanced display logic for video previews
+                const shouldShowVideoPreview = (isComplete || progress === 100) && !!videoToShow && videoToShow.url;
                 const shouldShowPercentage = !isComplete && videoState?.isGenerating && progress >= 0 && progress < 100;
-                const shouldShowPlayButton = isComplete && !!videoToShow;
+                const shouldShowPlayButton = shouldShowVideoPreview;
 
                 // For debugging
                 const debugInfo = {
