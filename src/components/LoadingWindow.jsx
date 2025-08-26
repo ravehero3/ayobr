@@ -99,9 +99,15 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const progress = isComplete ? 100 : progressValue;
                 const videoToShow = generatedVideo || videoState?.video;
 
-                // Enhanced display logic for video previews
+                // Enhanced display logic for video previews with proper sequential generation
                 const shouldShowVideoPreview = (isComplete || progress === 100) && !!videoToShow && videoToShow.url;
-                const shouldShowPercentage = !isComplete && videoState?.isGenerating && progress >= 0 && progress < 100;
+                
+                // Show percentage for generating videos OR for the next video in queue that should be generating
+                const isCurrentlyGenerating = videoState?.isGenerating;
+                const isNextInQueue = !hasGeneratedVideo && !hasStateVideo && !isComplete && progress === 0;
+                const shouldShowPercentage = (isCurrentlyGenerating && progress >= 0 && progress < 100) || 
+                                           (isNextInQueue && pairs.some(p => getVideoGenerationState(p.id)?.isGenerating));
+                
                 const shouldShowPlayButton = shouldShowVideoPreview;
 
                 // For debugging

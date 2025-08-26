@@ -131,6 +131,20 @@ export const useFFmpeg = () => {
             console.warn(`⚠ Video ${i + 1}/${pairs.length} completed but not found in store`);
           }
           
+          // Immediately signal that next video should start (if there is one)
+          if (i < pairs.length - 1) {
+            const nextPair = pairs[i + 1];
+            console.log(`Preparing next video ${nextPair.id} for generation`);
+            // Pre-initialize the next video's state to show it's about to start
+            setVideoGenerationState(nextPair.id, {
+              isGenerating: true,
+              progress: 0,
+              isComplete: false,
+              video: null,
+              error: null
+            });
+          }
+          
         } catch (error) {
           console.error(`Error processing pair ${pair.id}:`, error);
           
