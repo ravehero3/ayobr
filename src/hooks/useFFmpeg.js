@@ -428,6 +428,16 @@ export const useFFmpeg = () => {
 
       if (!videoData || videoData.length === 0) {
         console.error(`Invalid video data for pair ${pair.id}: ${videoData ? 'empty buffer' : 'null/undefined'}`);
+        
+        // Set error state immediately
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: 'Invalid video data received from FFmpeg processor'
+        });
+        
         throw new Error('Invalid video data received from FFmpeg processor');
       }
 
@@ -556,7 +566,14 @@ export const useFFmpeg = () => {
         completedAt: Date.now()
       };
 
+      // Force immediate state update with multiple calls to ensure it sticks
       setVideoGenerationState(pair.id, completionState);
+      
+      // Double-check with immediate callback
+      setTimeout(() => {
+        setVideoGenerationState(pair.id, completionState);
+        console.log(`✅ Video ${pair.id} completion state confirmed`);
+      }, 50);
 
       // Force immediate UI update to show completion
       console.log(`✅ Video ${pair.id} marked as complete - ready for next video`);
