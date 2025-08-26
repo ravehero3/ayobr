@@ -93,6 +93,9 @@ export const useFFmpeg = () => {
 
         const pair = pairs[i];
         console.log(`Processing video ${i + 1}/${pairs.length} for pair ${pair.id}`);
+        
+        // Ensure UI shows which video is currently being processed
+        console.log(`Setting active generation for pair ${pair.id}`);
 
         // Skip if this pair already has a completed video
         const currentStore = useAppStore.getState();
