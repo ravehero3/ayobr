@@ -206,15 +206,27 @@ function App() {
         }, 3000); // 3 second timeout
       }
 
-      // Check for stuck video generation states
+      // Check for stuck video generation states including broken completion states
       if (isGenerating) {
-        const { videoGenerationStates, clearStuckGenerationStates } = useAppStore.getState();
+        const { videoGenerationStates, clearStuckGenerationStates, generatedVideos } = useAppStore.getState();
+        
+        // Check for traditional stuck states
         const stuckStates = Object.values(videoGenerationStates).filter(state => 
           state.isGenerating && state.progress > 0 && state.progress < 100 && !state.isComplete
         );
 
-        if (stuckStates.length > 0) {
-          console.log('Detected stuck video generation states, clearing...');
+        // Check for broken completion states (marked complete but no video in store)
+        const brokenStates = Object.keys(videoGenerationStates).filter(pairId => {
+          const state = videoGenerationStates[pairId];
+          const hasVideoInStore = generatedVideos.find(v => v.pairId === pairId);
+          return state && state.isComplete && state.progress === 100 && !hasVideoInStore;
+        });
+
+        if (stuckStates.length > 0 || brokenStates.length > 0) {
+          console.log('Detected stuck/broken video generation states, clearing...', {
+            stuckStates: stuckStates.length,
+            brokenStates: brokenStates.length
+          });
           clearStuckGenerationStates();
         }
       }

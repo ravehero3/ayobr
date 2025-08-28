@@ -199,11 +199,14 @@ export const useAppStore = create((set, get) => ({
     const now = Date.now();
     const timeout = 5 * 60 * 1000; // 5 minutes
     const updatedStates = { ...state.videoGenerationStates };
+    let hasChanges = false;
     
     Object.keys(updatedStates).forEach(pairId => {
       const genState = updatedStates[pairId];
+      
+      // Clear stuck generation states (long running)
       if (genState.isGenerating && genState.startTime && (now - genState.startTime > timeout)) {
-        console.log(`Clearing stuck generation state for pair ${pairId}`);
+        console.log(`Clearing stuck generation state for pair ${pairId} (timeout)`);
         updatedStates[pairId] = {
           isGenerating: false,
           progress: 0,
@@ -211,13 +214,30 @@ export const useAppStore = create((set, get) => ({
           video: null,
           error: 'Generation timed out and was reset'
         };
+        hasChanges = true;
+      }
+      
+      // Clear broken completion states (marked complete but no video in store)
+      if (genState.isComplete && genState.progress === 100 && genState.video === null) {
+        const existingVideo = state.generatedVideos.find(v => v.pairId === pairId);
+        if (!existingVideo) {
+          console.log(`Clearing broken completion state for pair ${pairId} (no video in store)`);
+          updatedStates[pairId] = {
+            isGenerating: false,
+            progress: 0,
+            isComplete: false,
+            video: null,
+            error: null
+          };
+          hasChanges = true;
+        }
       }
     });
     
-    return {
+    return hasChanges ? {
       ...state,
       videoGenerationStates: updatedStates
-    };
+    } : state;
   }),
 
   // Clear stuck generation states (fallback method)

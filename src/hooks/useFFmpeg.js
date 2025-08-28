@@ -118,6 +118,19 @@ export const useFFmpeg = () => {
           continue;
         }
 
+        // Check if the video generation state claims completion but no video exists in store
+        const currentVideoState = currentStore.videoGenerationStates[pair.id];
+        if (currentVideoState && currentVideoState.isComplete && currentVideoState.progress === 100 && !existingVideo) {
+          console.log(`⚠️ Found broken state for pair ${pair.id} - marked complete but no video in store, resetting...`);
+          setVideoGenerationState(pair.id, {
+            isGenerating: false,
+            progress: 0,
+            isComplete: false,
+            video: null,
+            error: null
+          });
+        }
+
         // Initialize state for this video to show it's starting
         console.log(`Starting generation for pair ${pair.id} (${i + 1}/${pairs.length})`);
         setVideoGenerationState(pair.id, {
@@ -136,13 +149,25 @@ export const useFFmpeg = () => {
           completedCount++;
           console.log(`Completed video ${i + 1}/${pairs.length} for pair ${pair.id}`);
 
-          // Verify the video was properly completed
+          // Verify the video was properly completed with retry mechanism
           const finalState = useAppStore.getState();
-          const completedVideo = finalState.generatedVideos.find(v => v.pairId === pair.id);
+          let completedVideo = finalState.generatedVideos.find(v => v.pairId === pair.id);
           if (completedVideo) {
             console.log(`✓ Video ${i + 1}/${pairs.length} successfully added to store`);
           } else {
-            console.warn(`⚠ Video ${i + 1}/${pairs.length} completed but not found in store`);
+            console.warn(`⚠️ Video ${i + 1}/${pairs.length} completed but not found in store, retrying...`);
+            
+            // Wait a moment and try again - sometimes state updates are delayed
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const retryState = useAppStore.getState();
+            completedVideo = retryState.generatedVideos.find(v => v.pairId === pair.id);
+            
+            if (completedVideo) {
+              console.log(`✓ Video ${i + 1}/${pairs.length} found in store after retry`);
+            } else {
+              console.error(`❌ Video ${i + 1}/${pairs.length} still not found in store after retry - continuing anyway`);
+              // Continue processing rather than blocking entire sequence
+            }
           }
 
           // Mark current video as completely finished and clear processing flag
@@ -512,26 +537,37 @@ export const useFFmpeg = () => {
             hasUrl: !!video.url
           });
 
-          addGeneratedVideo(video);
+          // Get current store reference to ensure we're working with fresh state
+          const { addGeneratedVideo: addVideoToStore } = useAppStore.getState();
+          addVideoToStore(video);
           console.log('addGeneratedVideo called successfully');
 
           // Wait a moment for state update
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 200));
 
-          // Verify video was added
+          // Verify video was added with multiple checks
           const storeState = useAppStore.getState();
           console.log('Current store state:', {
             totalVideos: storeState.generatedVideos.length,
-            videoIds: storeState.generatedVideos.map(v => v.id)
+            videoIds: storeState.generatedVideos.map(v => v.id),
+            videoPairIds: storeState.generatedVideos.map(v => v.pairId)
           });
 
-          const addedVideo = storeState.generatedVideos.find(v => v.id === video.id);
+          // Check by both ID and pairId for better verification
+          const addedVideoById = storeState.generatedVideos.find(v => v.id === video.id);
+          const addedVideoByPairId = storeState.generatedVideos.find(v => v.pairId === video.pairId);
 
-          if (addedVideo) {
+          if (addedVideoById || addedVideoByPairId) {
             console.log('Video successfully added to store');
             console.log('Total videos in store:', storeState.generatedVideos.length);
             addToStoreSuccess = true;
           } else {
+            console.error('Video verification failed:', {
+              expectedVideoId: video.id,
+              expectedPairId: video.pairId,
+              actualVideoIds: storeState.generatedVideos.map(v => v.id),
+              actualPairIds: storeState.generatedVideos.map(v => v.pairId)
+            });
             throw new Error('Video was not found in store after addition');
           }
         } catch (storeError) {
