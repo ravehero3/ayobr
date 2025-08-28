@@ -94,7 +94,13 @@ export const useFFmpeg = () => {
         }
 
         const pair = pairs[i];
-        console.log(`Processing video ${i + 1}/${pairs.length} for pair ${pair.id}`);
+        console.log(`🔄 Processing video ${i + 1}/${pairs.length} for pair ${pair.id}`);
+        console.log(`📊 Current processing status:`, {
+          currentIndex: i,
+          totalPairs: pairs.length,
+          pairId: pair.id,
+          isCancelling
+        });
 
         // Ensure UI shows which video is currently being processed
         console.log(`Setting active generation for pair ${pair.id}`);
@@ -211,7 +217,10 @@ export const useFFmpeg = () => {
         await updateBatchProgress();
 
         if (i < pairs.length - 1) {
-          console.log(`Taking 1 second break before processing next video...`);
+          const nextPair = pairs[i + 1];
+          console.log(`✅ Video ${i + 1} completed. Preparing to start video ${i + 2}/${pairs.length} for pair ${nextPair.id}...`);
+          
+          // Take a short break and prepare the next video
           await new Promise(resolve => setTimeout(resolve, 1000));
 
           // Verify we can continue (not cancelled)
@@ -219,6 +228,10 @@ export const useFFmpeg = () => {
             console.log('Generation was cancelled during break');
             break;
           }
+          
+          console.log(`🚀 Starting next video ${i + 2}/${pairs.length} for pair ${nextPair.id}`);
+        } else {
+          console.log(`🎉 All videos completed! Processed ${pairs.length} videos total.`);
         }
       }
       // Check if generation was cancelled before finishing

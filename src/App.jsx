@@ -222,12 +222,45 @@ function App() {
           return state && state.isComplete && state.progress === 100 && !hasVideoInStore;
         });
 
-        if (stuckStates.length > 0 || brokenStates.length > 0) {
+        // Check for videos that should be generating but aren't (showing particles but no progress)
+        const { pairs } = useAppStore.getState();
+        const stuckGeneratingStates = pairs.filter((pair, index) => {
+          const state = videoGenerationStates[pair.id];
+          const hasVideoInStore = generatedVideos.find(v => v.pairId === pair.id);
+          
+          // Count completed videos before this one
+          const completedCount = pairs.slice(0, index).filter(p => {
+            const pState = videoGenerationStates[p.id];
+            const pVideo = generatedVideos.find(v => v.pairId === p.id);
+            return pVideo || (pState?.isComplete && pState?.video);
+          }).length;
+          
+          // This video should be generating if it's next in line but has no state or progress
+          const shouldBeGenerating = index === completedCount && !hasVideoInStore && (!state || (!state.isGenerating && !state.isComplete));
+          
+          return shouldBeGenerating;
+        });
+
+        if (stuckStates.length > 0 || brokenStates.length > 0 || stuckGeneratingStates.length > 0) {
           console.log('Detected stuck/broken video generation states, clearing...', {
             stuckStates: stuckStates.length,
-            brokenStates: brokenStates.length
+            brokenStates: brokenStates.length,
+            stuckGeneratingStates: stuckGeneratingStates.length
           });
           clearStuckGenerationStates();
+          
+          // If there are videos that should be generating but aren't, restart the generation process
+          if (stuckGeneratingStates.length > 0) {
+            console.log('🔄 Restarting generation for stuck containers:', stuckGeneratingStates.map(p => p.id));
+            // Trigger generation restart after a short delay
+            setTimeout(() => {
+              const { generateVideos } = useFFmpeg();
+              if (generateVideos) {
+                console.log('🚀 Restarting video generation...');
+                generateVideos();
+              }
+            }, 1000);
+          }
         }
       }
     };
