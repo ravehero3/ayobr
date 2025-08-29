@@ -38,28 +38,38 @@ export const forceStopAllProcesses = async () => {
       // Clear any progress listeners first to prevent further callbacks
       ffmpeg.off('progress');
 
-      // Clean up old logo files before terminating
+      // Clean up ALL temporary files before terminating
       try {
         const files = await ffmpeg.listDir('/');
-        const logoFiles = files.filter(f => f.name.startsWith('logo_') && !f.isDir);
-        console.log(`Found ${logoFiles.length} logo files to clean up`);
+        const tempFiles = files.filter(f => 
+          !f.isDir && (
+            f.name.startsWith('logo_') || 
+            f.name.startsWith('audio_') || 
+            f.name.startsWith('image_') || 
+            f.name.startsWith('output_') ||
+            f.name.startsWith('bg_')
+          )
+        );
+        console.log(`Found ${tempFiles.length} temporary files to clean up`);
 
-        for (const logoFile of logoFiles) {
+        for (const tempFile of tempFiles) {
           try {
-            await ffmpeg.deleteFile(logoFile.name);
-            console.log(`Cleaned up old logo file: ${logoFile.name}`);
+            await ffmpeg.deleteFile(tempFile.name);
+            console.log(`Cleaned up temporary file: ${tempFile.name}`);
           } catch (e) {
-            console.warn(`Failed to clean logo file ${logoFile.name}:`, e.message);
+            console.warn(`Failed to clean temp file ${tempFile.name}:`, e.message);
           }
         }
       } catch (e) {
-        console.warn('Failed to clean up logo files:', e.message);
+        console.warn('Failed to clean up temporary files:', e.message);
       }
 
       // Only terminate if FFmpeg is actually loaded
       if (isLoaded) {
         console.log('Gracefully terminating FFmpeg...');
         await ffmpeg.terminate();
+        // Wait for termination to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Clear the instance and state
@@ -175,19 +185,40 @@ export const initializeFFmpeg = async () => {
     isForceStopped = false;
     isLoaded = false; // Force re-initialization when recovering from force stop
     ffmpeg = null;
+    initPromise = null; // Clear existing promise
   }
 
-  // Return existing instance if already loaded and not force stopped
+  // For sequential video processing, always verify FFmpeg state
   if (isLoaded && ffmpeg && !isForceStopped) {
-    // Verify FFmpeg is actually working
+    // Verify FFmpeg is actually working and not stuck
     try {
-      await ffmpeg.listDir('/');
+      const files = await ffmpeg.listDir('/');
+      console.log('FFmpeg verification passed, current files:', files.length);
+      
+      // Check for stuck temporary files from previous operations
+      const stuckFiles = files.filter(f => 
+        !f.isDir && (f.name.includes('_') && 
+        (f.name.startsWith('audio_') || f.name.startsWith('image_') || f.name.startsWith('output_')))
+      );
+      
+      if (stuckFiles.length > 0) {
+        console.log(`Found ${stuckFiles.length} stuck files, cleaning up...`);
+        for (const file of stuckFiles) {
+          try {
+            await ffmpeg.deleteFile(file.name);
+          } catch (e) {
+            console.warn(`Failed to clean stuck file ${file.name}:`, e.message);
+          }
+        }
+      }
+      
       console.log('Returning existing FFmpeg instance (verified working)');
       return ffmpeg;
     } catch (verifyError) {
-      console.warn('FFmpeg instance appears broken, reinitializing...');
+      console.warn('FFmpeg instance appears broken, reinitializing...', verifyError.message);
       isLoaded = false;
       ffmpeg = null;
+      initPromise = null;
     }
   }
 

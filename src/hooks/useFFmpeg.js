@@ -144,8 +144,17 @@ export const useFFmpeg = () => {
           isCurrentlyProcessing: false
         });
 
-        // Wait a moment to ensure state is cleared
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait longer to ensure proper cleanup between videos
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Force cleanup any lingering FFmpeg processes before starting next video
+        if (i > 0) {
+          console.log(`Ensuring clean FFmpeg state before video ${i + 1}`);
+          const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
+          await forceStopAllProcesses();
+          // Additional wait for cleanup to complete
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
         // Initialize state for this video to show it's starting
         console.log(`Starting generation for pair ${pair.id} (${i + 1}/${pairs.length})`);
