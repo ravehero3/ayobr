@@ -102,9 +102,6 @@ export const useFFmpeg = () => {
           isCancelling
         });
 
-        // Ensure UI shows which video is currently being processed
-        console.log(`Setting active generation for pair ${pair.id}`);
-
         // Skip if this pair already has a completed video
         const currentStore = useAppStore.getState();
         const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
@@ -137,6 +134,19 @@ export const useFFmpeg = () => {
           });
         }
 
+        // Clear any existing state before starting
+        setVideoGenerationState(pair.id, {
+          isGenerating: false,
+          progress: 0,
+          isComplete: false,
+          video: null,
+          error: null,
+          isCurrentlyProcessing: false
+        });
+
+        // Wait a moment to ensure state is cleared
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         // Initialize state for this video to show it's starting
         console.log(`Starting generation for pair ${pair.id} (${i + 1}/${pairs.length})`);
         setVideoGenerationState(pair.id, {
@@ -154,53 +164,29 @@ export const useFFmpeg = () => {
         try {
           console.log(`Starting processing for pair ${pair.id} (${i + 1}/${pairs.length})`);
           const result = await processPairAsync(pair);
-          completedCount++;
-          console.log(`Completed video ${i + 1}/${pairs.length} for pair ${pair.id}`);
-          console.log(`🎯 processPairAsync returned successfully for ${pair.id}`);
+          
+          // Only increment if we got a valid result
+          if (result) {
+            completedCount++;
+            console.log(`Completed video ${i + 1}/${pairs.length} for pair ${pair.id}`);
+            console.log(`🎯 processPairAsync returned successfully for ${pair.id}`);
 
-          // Verify the video was properly completed with retry mechanism
-          const finalState = useAppStore.getState();
-          let completedVideo = finalState.generatedVideos.find(v => v.pairId === pair.id);
-          if (completedVideo) {
-            console.log(`✓ Video ${i + 1}/${pairs.length} successfully added to store`);
+            // Mark current video as completely finished
+            setVideoGenerationState(pair.id, {
+              isGenerating: false,
+              progress: 100,
+              isComplete: true,
+              video: result,
+              error: null,
+              isCurrentlyProcessing: false,
+              isFinished: true
+            });
+
+            console.log(`✅ Video ${i + 1}/${pairs.length} (${pair.id}) marked as complete`);
           } else {
-            console.warn(`⚠️ Video ${i + 1}/${pairs.length} completed but not found in store, retrying...`);
-            
-            // Wait a moment and try again - sometimes state updates are delayed
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const retryState = useAppStore.getState();
-            completedVideo = retryState.generatedVideos.find(v => v.pairId === pair.id);
-            
-            if (completedVideo) {
-              console.log(`✓ Video ${i + 1}/${pairs.length} found in store after retry`);
-            } else {
-              console.error(`❌ Video ${i + 1}/${pairs.length} still not found in store after retry - continuing anyway`);
-              // Continue processing rather than blocking entire sequence
-            }
-          }
-
-          // Mark current video as completely finished and clear processing flag
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: result,
-            error: null,
-            isCurrentlyProcessing: false,
-            isFinished: true
-          });
-
-          console.log(`✅ Video ${i + 1}/${pairs.length} (${pair.id}) marked as complete`);
-
-          // Signal that next video should start immediately (if there is one)
-          if (i < pairs.length - 1) {
-            const nextPair = pairs[i + 1];
-            console.log(`Preparing next video ${nextPair.id} for immediate start`);
-            
-            // Force immediate UI update to show next video is ready to start
-            setTimeout(() => {
-              console.log(`Triggering UI update for next video ${nextPair.id}`);
-            }, 10);
+            console.warn(`⚠️ Video ${i + 1}/${pairs.length} returned null result`);
+            // Still count as completed to continue the sequence
+            completedCount++;
           }
 
         } catch (error) {
@@ -212,7 +198,8 @@ export const useFFmpeg = () => {
             progress: 0,
             isComplete: false,
             video: null,
-            error: error.message || 'Video generation failed'
+            error: error.message || 'Video generation failed',
+            isCurrentlyProcessing: false
           });
 
           completedCount++;
@@ -228,8 +215,8 @@ export const useFFmpeg = () => {
           const nextPair = pairs[i + 1];
           console.log(`✅ Video ${i + 1} completed. Preparing to start video ${i + 2}/${pairs.length} for pair ${nextPair.id}...`);
           
-          // Take a short break and prepare the next video
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Take a longer break to ensure proper cleanup between videos
+          await new Promise(resolve => setTimeout(resolve, 2000));
 
           // Verify we can continue (not cancelled)
           if (isCancelling) {

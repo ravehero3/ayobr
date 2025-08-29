@@ -224,6 +224,7 @@ function App() {
 
         // Check for videos that should be generating but are stuck at 0% with isCurrentlyProcessing=true
         // Only check for stuck states if generation has been inactive for a while
+        const now = Date.now();
         const stuckAtZeroStates = pairs?.filter((pair, index) => {
           const state = videoGenerationStates[pair.id];
           const hasVideo = generatedVideos.find(v => v.pairId === pair.id);

@@ -663,28 +663,28 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       hasCompleted = true;
     }
 
-    // Simple sequential cleanup
-    try {
-      await ffmpeg.deleteFile(audioFileName);
-      console.log('Cleaned audio file');
-    } catch (e) { console.warn('Failed to clean audio file:', e.message); }
-
-    try {
-      await ffmpeg.deleteFile(imageFileName);
-      console.log('Cleaned image file');
-    } catch (e) { console.warn('Failed to clean image file:', e.message); }
-
-    try {
-      await ffmpeg.deleteFile(outputFileName);
-      console.log('Cleaned output file');
-    } catch (e) { console.warn('Failed to clean output file:', e.message); }
-
-    // Clean up custom background file if it was used
+    // Enhanced cleanup with proper sequencing
+    const cleanupFiles = [audioFileName, imageFileName, outputFileName];
     if (customBackgroundFileName && useCustomBackground) {
+      cleanupFiles.push(customBackgroundFileName);
+    }
+
+    for (const fileName of cleanupFiles) {
       try {
-        await ffmpeg.deleteFile(customBackgroundFileName);
-        console.log('Cleaned custom background file');
-      } catch (e) { console.warn('Failed to clean custom background file:', e.message); }
+        await ffmpeg.deleteFile(fileName);
+        console.log(`Cleaned up file: ${fileName}`);
+      } catch (e) { 
+        console.warn(`Failed to clean file ${fileName}:`, e.message); 
+      }
+    }
+
+    // Clear progress callback to prevent interference with next video
+    progressCallbackActive = false;
+    ffmpeg.off('progress');
+
+    // Force garbage collection between videos for memory stability
+    if (window.gc) {
+      try { window.gc(); } catch(e) { /* ignore */ }
     }
 
     // Return a new Uint8Array to ensure data integrity
