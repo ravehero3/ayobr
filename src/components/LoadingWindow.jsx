@@ -103,13 +103,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const shouldShowVideoPreview = hasGeneratedVideo || (videoState?.isComplete === true && hasStateVideo);
                 const progressToDisplay = isComplete ? 100 : progressValue;
 
-                // Determine what should be shown based on state
-                const shouldShowVideoPreview = hasVideo && video?.url;
-                const shouldShowPercentage = !hasVideo && progress < 100 && !isComplete;
-                const shouldShowPlayButton = hasVideo && video?.url;
-                // Fix: Don't show generating state if progress is 100% or video is complete
-                const shouldBeGenerating = !isComplete && !hasVideo && progress < 100 && (isGenerating || index === completedVideosCount);
-
                 // Check if this should be the next video to generate (first incomplete video after any completed ones)
                 const completedVideosCount = pairs.filter(p => {
                   const pState = getVideoGenerationState(p.id);
