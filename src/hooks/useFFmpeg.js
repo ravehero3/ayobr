@@ -164,7 +164,7 @@ export const useFFmpeg = () => {
         try {
           console.log(`Starting processing for pair ${pair.id} (${i + 1}/${pairs.length})`);
           const result = await processPairAsync(pair);
-          
+
           // Only increment if we got a valid result
           if (result) {
             completedCount++;
@@ -210,11 +210,11 @@ export const useFFmpeg = () => {
 
         console.log(`🔍 End of iteration ${i + 1}/${pairs.length}. Checking if we should continue...`);
         console.log(`Loop status: i=${i}, pairs.length=${pairs.length}, hasMore=${i < pairs.length - 1}`);
-        
+
         if (i < pairs.length - 1) {
           const nextPair = pairs[i + 1];
           console.log(`✅ Video ${i + 1} completed. Preparing to start video ${i + 2}/${pairs.length} for pair ${nextPair.id}...`);
-          
+
           // Take a longer break to ensure proper cleanup between videos
           await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -223,12 +223,12 @@ export const useFFmpeg = () => {
             console.log('Generation was cancelled during break');
             break;
           }
-          
+
           console.log(`🚀 Starting next video ${i + 2}/${pairs.length} for pair ${nextPair.id}`);
         } else {
           console.log(`🎉 All videos completed! Processed ${pairs.length} videos total.`);
         }
-        
+
         console.log(`📈 About to continue to next iteration: ${i + 1} -> ${i + 2}`);
       }
       // Check if generation was cancelled before finishing
@@ -464,7 +464,7 @@ export const useFFmpeg = () => {
 
       if (!videoData || videoData.length === 0) {
         console.error(`Invalid video data for pair ${pair.id}: ${videoData ? 'empty buffer' : 'null/undefined'}`);
-        
+
         // Set error state immediately
         setVideoGenerationState(pair.id, {
           isGenerating: false,
@@ -473,7 +473,7 @@ export const useFFmpeg = () => {
           video: null,
           error: 'Invalid video data received from FFmpeg processor'
         });
-        
+
         throw new Error('Invalid video data received from FFmpeg processor');
       }
 
@@ -566,7 +566,7 @@ export const useFFmpeg = () => {
 
           // Check by both ID and pairId for better verification
           const addedVideoById = storeState.generatedVideos.find(v => v.id === video.id);
-          const addedVideoByPairId = storeState.generatedVideos.find(v => v.pairId === video.pairId);
+          const addedVideoByPairId = storeState.generatedVideos.find(v => v.pairId === pair.id);
 
           if (addedVideoById || addedVideoByPairId) {
             console.log('Video successfully added to store');
@@ -615,7 +615,7 @@ export const useFFmpeg = () => {
 
       // Force immediate state update with multiple calls to ensure it sticks
       setVideoGenerationState(pair.id, completionState);
-      
+
       // Double-check with immediate callback
       setTimeout(() => {
         setVideoGenerationState(pair.id, completionState);
