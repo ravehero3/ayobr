@@ -43,7 +43,7 @@ export const forceStopAllProcesses = async () => {
         const files = await ffmpeg.listDir('/');
         const logoFiles = files.filter(f => f.name.startsWith('logo_') && !f.isDir);
         console.log(`Found ${logoFiles.length} logo files to clean up`);
-        
+
         for (const logoFile of logoFiles) {
           try {
             await ffmpeg.deleteFile(logoFile.name);
@@ -141,7 +141,7 @@ const cleanupMemory = () => {
   if (window.gc) {
     try { window.gc(); } catch(e) { /* ignore */ }
   }
-  
+
   // Clear URL objects that might be holding memory
   if (typeof window !== 'undefined' && window.URL && window.URL.revokeObjectURL) {
     // Clear any blob URLs that might be in memory (browser cleanup)
@@ -431,7 +431,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     let backgroundColor = 'black';
     let useCustomBackground = false;
     let customBackgroundFile = null;
-    
+
     if (videoSettings && videoSettings.background) {
       if (videoSettings.background === 'white') {
         backgroundColor = 'white';
@@ -445,7 +445,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         backgroundColor = 'black';
       }
     }
-    
+
     console.log('Background settings:', { 
       backgroundColor, 
       useCustomBackground, 
@@ -458,7 +458,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       try {
         console.log('Processing custom background...');
         customBackgroundFileName = `bg_${timestamp}.jpg`;
-        
+
         let backgroundData;
         if (typeof customBackgroundFile === 'string') {
           // Base64 data - convert to binary
@@ -468,7 +468,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           // File object
           backgroundData = await getCachedFileData(customBackgroundFile, 'background');
         }
-        
+
         if (backgroundData && backgroundData.length > 0) {
           await ffmpeg.writeFile(customBackgroundFileName, backgroundData);
           console.log('Custom background written successfully:', customBackgroundFileName);
@@ -532,7 +532,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Execute FFmpeg command with enhanced timeout protection
     console.log('Starting FFmpeg execution...');
-    
+
     try {
       const execPromise = ffmpeg.exec(ffmpegArgs);
       const timeoutPromise = new Promise((_, reject) => {
@@ -543,7 +543,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       console.log('FFmpeg command executed successfully');
     } catch (execError) {
       console.error('FFmpeg execution error:', execError);
-      
+
       // Check if this is a recoverable error or just a warning
       const errorMsg = execError.message || String(execError);
       const isWarningError = errorMsg.includes('Application provided invalid, non monotonically increasing dts') ||
@@ -553,7 +553,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
                            errorMsg.includes('Last message repeated') ||
                            errorMsg.includes('Past duration') ||
                            errorMsg.includes('monotonic dts');
-      
+
       if (isWarningError) {
         console.log('FFmpeg warning detected, continuing with output check...');
       } else {
@@ -580,7 +580,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
     // Optimized file reading with longer stabilization delay
     console.log('Reading output file...');
-    
+
     // Force garbage collection and ensure FFmpeg has finished writing
     if (window.gc) {
       window.gc();
@@ -629,7 +629,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           const delayMs = 500 * retryCount;
           console.log(`Waiting ${delayMs}ms before retry...`);
           await new Promise(resolve => setTimeout(resolve, delayMs));
-          
+
           // Force garbage collection between retries
           if (window.gc) {
             window.gc();
@@ -649,7 +649,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           console.error('- Image file:', imageFile.name, 'size:', imageFile.size);
           console.error('- Output file expected:', outputFileName);
           console.error('- Last read error:', readError.message || readError);
-          
+
           throw new Error(`Video generation failed: Output file could not be read after ${maxRetries} attempts`);
         }
       }
@@ -692,12 +692,12 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);
-    
+
     // Check if this is an empty error object (which often indicates success)
     const isEmptyError = error && typeof error === 'object' && 
                         Object.keys(error).length === 0 && 
                         !error.message && !error.name;
-    
+
     if (isEmptyError) {
       console.log('Detected empty error object, this usually indicates successful completion');
       // Check if we completed successfully and have valid data

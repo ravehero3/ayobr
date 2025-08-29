@@ -146,7 +146,9 @@ export const useFFmpeg = () => {
           video: null,
           error: null,
           queuePosition: i,
-          isCurrentlyProcessing: true
+          isCurrentlyProcessing: true,
+          startTime: Date.now(),
+          lastUpdate: Date.now()
         });
 
         try {
@@ -369,7 +371,8 @@ export const useFFmpeg = () => {
         isComplete: false,
         video: null,
         error: null,
-        startTime: Date.now()
+        startTime: Date.now(),
+        lastUpdate: Date.now()
       });
 
       console.log(`Processing video for pair ${pair.id}:`, pair);

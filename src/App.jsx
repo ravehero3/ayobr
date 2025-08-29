@@ -223,11 +223,17 @@ function App() {
         });
 
         // Check for videos that should be generating but are stuck at 0% with isCurrentlyProcessing=true
+        // Only check for stuck states if generation has been inactive for a while
         const stuckAtZeroStates = pairs?.filter((pair, index) => {
           const state = videoGenerationStates[pair.id];
           const hasVideo = generatedVideos.find(v => v.pairId === pair.id);
           
           if (hasVideo) return false; // Already has video
+          
+          // Don't interfere if FFmpeg is actively processing (has recent progress updates)
+          if (state?.lastUpdate && (now - state.lastUpdate < 30000)) {
+            return false; // Less than 30 seconds since last update, don't interfere
+          }
           
           // Count completed videos before this one
           const completedBefore = pairs.slice(0, index).filter(p => {
@@ -239,8 +245,9 @@ function App() {
           // This should be the next video to process
           const shouldBeActive = index === completedBefore;
           const isStuckAtZero = state?.isCurrentlyProcessing && state?.progress === 0;
+          const hasBeenStuckLongEnough = state?.startTime && (now - state.startTime > 60000); // 1 minute
           
-          return shouldBeActive && isStuckAtZero;
+          return shouldBeActive && isStuckAtZero && hasBeenStuckLongEnough;
         }) || [];
 
         if (stuckStates.length > 0 || brokenStates.length > 0 || stuckAtZeroStates.length > 0) {
