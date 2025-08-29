@@ -222,39 +222,12 @@ function App() {
           return state && state.isComplete && state.progress === 100 && !hasVideoInStore;
         });
 
-        // Check for videos that should be generating but aren't (showing particles but no progress)
-        const { pairs } = useAppStore.getState();
-        const stuckGeneratingStates = pairs.filter((pair, index) => {
-          const state = videoGenerationStates[pair.id];
-          const hasVideoInStore = generatedVideos.find(v => v.pairId === pair.id);
-          
-          // Count completed videos before this one
-          const completedCount = pairs.slice(0, index).filter(p => {
-            const pState = videoGenerationStates[p.id];
-            const pVideo = generatedVideos.find(v => v.pairId === p.id);
-            return pVideo || (pState?.isComplete && pState?.video);
-          }).length;
-          
-          // This video should be generating if it's next in line but has no state or progress
-          const shouldBeGenerating = index === completedCount && !hasVideoInStore && (!state || (!state.isGenerating && !state.isComplete));
-          
-          return shouldBeGenerating;
-        });
-
-        if (stuckStates.length > 0 || brokenStates.length > 0 || stuckGeneratingStates.length > 0) {
+        if (stuckStates.length > 0 || brokenStates.length > 0) {
           console.log('Detected stuck/broken video generation states, clearing...', {
             stuckStates: stuckStates.length,
-            brokenStates: brokenStates.length,
-            stuckGeneratingStates: stuckGeneratingStates.length
+            brokenStates: brokenStates.length
           });
           clearStuckGenerationStates();
-          
-          // If there are videos that should be generating but aren't, restart the generation process
-          if (stuckGeneratingStates.length > 0) {
-            console.log('🔄 Detected stuck containers:', stuckGeneratingStates.map(p => p.id));
-            // The clearStuckGenerationStates() call above should be sufficient to reset states
-            // The generateVideos hook will automatically continue processing
-          }
         }
       }
     };
