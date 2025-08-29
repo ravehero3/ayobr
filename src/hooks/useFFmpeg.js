@@ -144,16 +144,29 @@ export const useFFmpeg = () => {
           isCurrentlyProcessing: false
         });
 
-        // Wait longer to ensure proper cleanup between videos
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Ensure complete cleanup between videos
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Force cleanup any lingering FFmpeg processes before starting next video
-        if (i > 0) {
-          console.log(`Ensuring clean FFmpeg state before video ${i + 1}`);
-          const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
-          await forceStopAllProcesses();
-          // Additional wait for cleanup to complete
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        // Always force cleanup FFmpeg processes before starting next video (not just after first)
+        console.log(`Ensuring clean FFmpeg state before video ${i + 1}/${pairs.length}`);
+        const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
+        await forceStopAllProcesses();
+        
+        // Wait longer for complete cleanup and state stabilization
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Verify all previous videos are properly completed before continuing
+        const store = useAppStore.getState();
+        const previousPairs = pairs.slice(0, i);
+        for (const prevPair of previousPairs) {
+          const prevState = store.videoGenerationStates[prevPair.id];
+          const prevVideo = store.generatedVideos.find(v => v.pairId === prevPair.id);
+          
+          if (!prevVideo || !prevState?.isComplete) {
+            console.log(`Waiting for previous video ${prevPair.id} to complete properly...`);
+            // Wait additional time for previous video to fully complete
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
         }
 
         // Initialize state for this video to show it's starting
@@ -225,7 +238,17 @@ export const useFFmpeg = () => {
           console.log(`✅ Video ${i + 1} completed. Preparing to start video ${i + 2}/${pairs.length} for pair ${nextPair.id}...`);
 
           // Take a longer break to ensure proper cleanup between videos
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise(resolve => setTimeout(resolve, 3000));
+
+          // Verify current video is completely finished before starting next
+          const finalStore = useAppStore.getState();
+          const currentState = finalStore.videoGenerationStates[pair.id];
+          const currentVideo = finalStore.generatedVideos.find(v => v.pairId === pair.id);
+          
+          if (!currentVideo || !currentState?.isComplete) {
+            console.log(`Warning: Current video ${pair.id} may not be fully complete, waiting additional time...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
 
           // Verify we can continue (not cancelled)
           if (isCancelling) {

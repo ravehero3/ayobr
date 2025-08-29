@@ -325,10 +325,11 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
 
-    // Set up progress callback with throttling for better performance
+    // Set up progress callback with better completion handling
     let lastProgressTime = 0;
     let hasCompleted = false;
     let progressCallbackActive = true;
+    let isNearCompletion = false;
 
     ffmpeg.on('progress', ({ progress }) => {
       const now = Date.now();
@@ -336,21 +337,25 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       if (onProgress && progressCallbackActive && (now - lastProgressTime > 100) && !hasCompleted) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         
-        // Only call onProgress for values less than 100% to prevent premature completion
-        if (normalizedProgress < 100) {
+        // Handle near-completion differently to prevent stuck at 99%
+        if (normalizedProgress >= 99) {
+          if (!isNearCompletion) {
+            console.log('FFmpeg approaching completion (99%+), preparing for file output...');
+            isNearCompletion = true;
+            // Report 99% but don't mark as fully completed yet
+            onProgress(99);
+            lastProgressTime = now;
+          }
+          // Don't update progress further until file is actually ready
+        } else {
+          // Normal progress updates
           onProgress(normalizedProgress);
           lastProgressTime = now;
 
-          // Log progress more frequently for better user feedback
-          if (normalizedProgress % 5 === 0 || normalizedProgress > 95) {
+          // Log progress for better user feedback
+          if (normalizedProgress % 10 === 0 || normalizedProgress > 90) {
             console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
           }
-        } else {
-          // When we reach 100%, mark as completed but don't call onProgress yet
-          // Let the actual completion logic handle the final state transition
-          console.log('FFmpeg reached 100%, waiting for file completion...');
-          hasCompleted = true;
-          progressCallbackActive = false;
         }
       }
     });
@@ -597,21 +602,13 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       }
     }
 
-    // Disable progress callback to prevent issues during cleanup
-    progressCallbackActive = false;
-
     console.log('FFmpeg execution completed successfully');
 
-    // Add small delay to ensure filesystem is ready and force garbage collection
+    // Add delay to ensure filesystem is ready and force garbage collection
     if (window.gc) {
       window.gc();
     }
-    // Final progress callback to ensure 100% is reported only after file is successfully read
-    if (onProgress) {
-      onProgress(100);
-      hasCompleted = true;
-      console.log('Progress set to 100% after successful file read');
-    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Optimized file reading with longer stabilization delay
     console.log('Reading output file...');
@@ -650,6 +647,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
         if (data && data.length > 1000) { // Minimum reasonable file size
           console.log('File size validation passed, video data is ready');
+          
+          // Now that file is successfully read, report final progress
+          if (onProgress && !hasCompleted) {
+            onProgress(100);
+            hasCompleted = true;
+            progressCallbackActive = false;
+            console.log('Progress set to 100% after successful file read');
+          }
+          
           break; // Success!
         } else {
           console.warn(`Output file too small (${data ? data.length : 0} bytes), retrying...`);
