@@ -119,6 +119,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                   return pState?.isGenerating && !pState?.isComplete;
                 });
 
+                // Check if this video is currently generating
+                const isCurrentlyGenerating = videoState?.isGenerating && !isComplete;
+                
                 // Show percentage for currently generating (but not when at 100% and complete) OR next video that should start
                 const shouldShowPercentage = (isCurrentlyGenerating && progressToDisplay < 100 && !isComplete) ||
                                            (shouldBeGeneratingNext && !anyVideoActivelyGenerating && !isComplete);
