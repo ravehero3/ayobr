@@ -208,7 +208,7 @@ function App() {
 
       // Check for stuck video generation states including broken completion states
       if (isGenerating) {
-        const { videoGenerationStates, clearStuckGenerationStates, generatedVideos } = useAppStore.getState();
+        const { videoGenerationStates, clearStuckGenerationStates, generatedVideos, pairs } = useAppStore.getState();
         
         // Check for traditional stuck states
         const stuckStates = Object.values(videoGenerationStates).filter(state => 
@@ -222,11 +222,50 @@ function App() {
           return state && state.isComplete && state.progress === 100 && !hasVideoInStore;
         });
 
-        if (stuckStates.length > 0 || brokenStates.length > 0) {
+        // Check for videos that should be generating but are stuck at 0% with isCurrentlyProcessing=true
+        const stuckAtZeroStates = pairs?.filter((pair, index) => {
+          const state = videoGenerationStates[pair.id];
+          const hasVideo = generatedVideos.find(v => v.pairId === pair.id);
+          
+          if (hasVideo) return false; // Already has video
+          
+          // Count completed videos before this one
+          const completedBefore = pairs.slice(0, index).filter(p => {
+            const pState = videoGenerationStates[p.id];
+            const pVideo = generatedVideos.find(v => v.pairId === p.id);
+            return pVideo || (pState?.isComplete && pState?.video);
+          }).length;
+          
+          // This should be the next video to process
+          const shouldBeActive = index === completedBefore;
+          const isStuckAtZero = state?.isCurrentlyProcessing && state?.progress === 0;
+          
+          return shouldBeActive && isStuckAtZero;
+        }) || [];
+
+        if (stuckStates.length > 0 || brokenStates.length > 0 || stuckAtZeroStates.length > 0) {
           console.log('Detected stuck/broken video generation states, clearing...', {
             stuckStates: stuckStates.length,
-            brokenStates: brokenStates.length
+            brokenStates: brokenStates.length,
+            stuckAtZeroStates: stuckAtZeroStates.length
           });
+          
+          // Clear stuck states specifically
+          if (stuckAtZeroStates.length > 0) {
+            stuckAtZeroStates.forEach(pair => {
+              console.log(`🔧 Clearing stuck state for ${pair.id}`);
+              const { setVideoGenerationState } = useAppStore.getState();
+              setVideoGenerationState(pair.id, {
+                isGenerating: false,
+                progress: 0,
+                isComplete: false,
+                video: null,
+                error: null,
+                isCurrentlyProcessing: false
+              });
+            });
+          }
+          
           clearStuckGenerationStates();
         }
       }

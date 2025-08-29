@@ -154,6 +154,7 @@ export const useFFmpeg = () => {
           const result = await processPairAsync(pair);
           completedCount++;
           console.log(`Completed video ${i + 1}/${pairs.length} for pair ${pair.id}`);
+          console.log(`🎯 processPairAsync returned successfully for ${pair.id}`);
 
           // Verify the video was properly completed with retry mechanism
           const finalState = useAppStore.getState();
@@ -187,6 +188,8 @@ export const useFFmpeg = () => {
             isFinished: true
           });
 
+          console.log(`✅ Video ${i + 1}/${pairs.length} (${pair.id}) marked as complete`);
+
           // Signal that next video should start immediately (if there is one)
           if (i < pairs.length - 1) {
             const nextPair = pairs[i + 1];
@@ -216,6 +219,9 @@ export const useFFmpeg = () => {
         // Ensure UI updates and add breathing room between video processing
         await updateBatchProgress();
 
+        console.log(`🔍 End of iteration ${i + 1}/${pairs.length}. Checking if we should continue...`);
+        console.log(`Loop status: i=${i}, pairs.length=${pairs.length}, hasMore=${i < pairs.length - 1}`);
+        
         if (i < pairs.length - 1) {
           const nextPair = pairs[i + 1];
           console.log(`✅ Video ${i + 1} completed. Preparing to start video ${i + 2}/${pairs.length} for pair ${nextPair.id}...`);
@@ -233,6 +239,8 @@ export const useFFmpeg = () => {
         } else {
           console.log(`🎉 All videos completed! Processed ${pairs.length} videos total.`);
         }
+        
+        console.log(`📈 About to continue to next iteration: ${i + 1} -> ${i + 2}`);
       }
       // Check if generation was cancelled before finishing
       if (isCancelling) {
