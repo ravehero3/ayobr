@@ -251,15 +251,9 @@ function App() {
           
           // If there are videos that should be generating but aren't, restart the generation process
           if (stuckGeneratingStates.length > 0) {
-            console.log('🔄 Restarting generation for stuck containers:', stuckGeneratingStates.map(p => p.id));
-            // Trigger generation restart after a short delay
-            setTimeout(() => {
-              const { generateVideos } = useFFmpeg();
-              if (generateVideos) {
-                console.log('🚀 Restarting video generation...');
-                generateVideos();
-              }
-            }, 1000);
+            console.log('🔄 Detected stuck containers:', stuckGeneratingStates.map(p => p.id));
+            // The clearStuckGenerationStates() call above should be sufficient to reset states
+            // The generateVideos hook will automatically continue processing
           }
         }
       }
