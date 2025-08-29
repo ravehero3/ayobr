@@ -100,53 +100,57 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 const videoToShow = generatedVideo || videoState?.video;
 
                 // Enhanced display logic for video previews with proper sequential generation
-                const shouldShowVideoPreview = (isComplete || progress === 100) && !!videoToShow && videoToShow.url;
-                
-                // Show percentage for generating videos OR trigger next video in sequence
-                const isCurrentlyGenerating = videoState?.isGenerating;
-                const isNextInQueue = !hasGeneratedVideo && !hasStateVideo && !isComplete && progress === 0;
-                
+                const shouldShowVideoPreview = hasGeneratedVideo || (videoState?.isComplete === true && hasStateVideo);
+                const progressToDisplay = isComplete ? 100 : progressValue;
+
+                // Determine what should be shown based on state
+                const shouldShowVideoPreview = hasVideo && video?.url;
+                const shouldShowPercentage = !hasVideo && progress < 100 && !isComplete;
+                const shouldShowPlayButton = hasVideo && video?.url;
+                // Fix: Don't show generating state if progress is 100% or video is complete
+                const shouldBeGenerating = !isComplete && !hasVideo && progress < 100 && (isGenerating || index === completedVideosCount);
+
                 // Check if this should be the next video to generate (first incomplete video after any completed ones)
                 const completedVideosCount = pairs.filter(p => {
                   const pState = getVideoGenerationState(p.id);
                   const pVideo = generatedVideos.find(v => v.pairId === p.id);
                   return pVideo || (pState?.isComplete && pState?.video);
                 }).length;
-                
+
                 const currentIndex = pairs.findIndex(p => p.id === pair.id);
-                const shouldBeGenerating = currentIndex === completedVideosCount && !hasGeneratedVideo && !hasStateVideo && !isComplete;
-                
+                const shouldBeGeneratingNext = currentIndex === completedVideosCount && !hasGeneratedVideo && !hasStateVideo && !isComplete;
+
                 // Check if any video is actively generating (not just at 100% waiting for completion)
                 const anyVideoActivelyGenerating = pairs.some(p => {
                   const pState = getVideoGenerationState(p.id);
                   return pState?.isGenerating && !pState?.isComplete;
                 });
-                
+
                 // Show percentage for currently generating (but not when at 100% and complete) OR next video that should start
-                const shouldShowPercentage = (isCurrentlyGenerating && progress < 100 && !isComplete) || 
-                                           (shouldBeGenerating && !anyVideoActivelyGenerating && !isComplete);
-                
-                const shouldShowPlayButton = shouldShowVideoPreview;
+                const shouldShowPercentage = (isCurrentlyGenerating && progressToDisplay < 100 && !isComplete) ||
+                                           (shouldBeGeneratingNext && !anyVideoActivelyGenerating && !isComplete);
+
+                const shouldShowPlayButton = isComplete && !!videoToShow && videoToShow.url;
 
                 // For debugging
                 const debugInfo = {
                   index: currentIndex,
-                  hasVideo: !!generatedVideo,
-                  hasStateVideo: !!videoState?.video,
+                  hasGeneratedVideo: !!hasGeneratedVideo,
+                  hasStateVideo: !!hasStateVideo,
                   isComplete,
-                  progress,
-                  progressValue,
+                  progress: progressValue,
+                  progressToDisplay,
                   shouldShowVideoPreview,
                   shouldShowPercentage,
                   shouldShowPlayButton,
-                  shouldBeGenerating,
+                  shouldBeGeneratingNext,
                   completedVideosCount,
                   anyVideoActivelyGenerating,
                   videoState: {
                     isGenerating: videoState?.isGenerating,
                     isComplete: videoState?.isComplete,
                     progress: videoState?.progress,
-                    hasVideo: !!videoState?.video,
+                    video: videoState?.video,
                     isCurrentlyProcessing: videoState?.isCurrentlyProcessing,
                     isFinished: videoState?.isFinished
                   },
@@ -341,7 +345,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                 opacity: shouldShowPercentage ? 1 : 0
                               }}
                             >
-                              {Math.round(progress)}%
+                              {Math.round(progressToDisplay)}%
                             </div>
                           )}
 
@@ -465,12 +469,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         <motion.div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
-                            width: `${progress}%`,
+                            width: `${progressToDisplay}%`,
                             background: 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #93c5fd 100%)',
                             boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
                           }}
                           initial={{ width: 0 }}
-                          animate={{ width: `${progress}%` }}
+                          animate={{ width: `${progressToDisplay}%` }}
                           transition={{ duration: 0.3 }}
                         />
                       </motion.div>

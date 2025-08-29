@@ -304,16 +304,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       // Throttle progress updates to every 100ms for faster updates
       if (onProgress && progressCallbackActive && (now - lastProgressTime > 100) && !hasCompleted) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
-        onProgress(normalizedProgress);
-        lastProgressTime = now;
+        
+        // Only call onProgress for values less than 100% to prevent premature completion
+        if (normalizedProgress < 100) {
+          onProgress(normalizedProgress);
+          lastProgressTime = now;
 
-        // Log progress more frequently for better user feedback
-        if (normalizedProgress % 5 === 0 || normalizedProgress > 95) {
-          console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
-        }
-
-        // Mark as completed when we reach 100% to prevent restart
-        if (normalizedProgress >= 100) {
+          // Log progress more frequently for better user feedback
+          if (normalizedProgress % 5 === 0 || normalizedProgress > 95) {
+            console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
+          }
+        } else {
+          // When we reach 100%, mark as completed but don't call onProgress yet
+          // Let the actual completion logic handle the final state transition
+          console.log('FFmpeg reached 100%, waiting for file completion...');
           hasCompleted = true;
           progressCallbackActive = false;
         }
@@ -571,11 +575,11 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     if (window.gc) {
       window.gc();
     }
-    // Final progress callback to ensure 100% is reported
-    if (onProgress && !hasCompleted) {
+    // Final progress callback to ensure 100% is reported only after file is successfully read
+    if (onProgress) {
       onProgress(100);
       hasCompleted = true;
-      console.log('Progress set to 100% after FFmpeg completion');
+      console.log('Progress set to 100% after successful file read');
     }
 
     // Optimized file reading with longer stabilization delay

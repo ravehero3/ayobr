@@ -616,10 +616,22 @@ export const useFFmpeg = () => {
       // Force immediate state update with multiple calls to ensure it sticks
       setVideoGenerationState(pair.id, completionState);
 
-      // Double-check with immediate callback
+      // Double-check with immediate callback and force UI update
       setTimeout(() => {
         setVideoGenerationState(pair.id, completionState);
         console.log(`✅ Video ${pair.id} completion state confirmed`);
+        
+        // Force a state verification to ensure completion stuck
+        const currentState = useAppStore.getState().videoGenerationStates[pair.id];
+        if (currentState && currentState.isGenerating) {
+          console.log(`🔧 Force completing stuck video ${pair.id}`);
+          setVideoGenerationState(pair.id, {
+            ...completionState,
+            isGenerating: false,
+            isComplete: true,
+            progress: 100
+          });
+        }
       }, 50);
 
       // Force immediate UI update to show completion
