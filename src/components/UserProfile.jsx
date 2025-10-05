@@ -8,7 +8,6 @@ const UserProfile = ({ isOpen, onClose }) => {
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [localUsername, setLocalUsername] = useState(username);
-  const [email, setEmail] = useState('');
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -116,15 +115,15 @@ const UserProfile = ({ isOpen, onClose }) => {
                 disabled={isUploading}
                 className="relative w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 group cursor-pointer transition-all duration-400"
                 style={{
-                  border: '3px solid rgba(59, 130, 246, 0.5)',
+                  border: '3px solid rgba(128, 128, 128, 0.3)',
                   background: userProfileImage 
                     ? 'transparent' 
-                    : 'linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(0, 0, 0, 0.9) 100%)',
+                    : 'linear-gradient(135deg, rgba(64, 64, 64, 0.3) 0%, rgba(0, 0, 0, 0.9) 100%)',
                 }}
                 whileHover={{ 
                   scale: 1.05,
-                  borderColor: 'rgba(59, 130, 246, 0.7)',
-                  boxShadow: '0 0 30px rgba(59, 130, 246, 0.2)'
+                  borderColor: 'rgba(160, 160, 160, 0.5)',
+                  boxShadow: '0 0 20px rgba(100, 100, 100, 0.2)'
                 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -132,7 +131,7 @@ const UserProfile = ({ isOpen, onClose }) => {
                 <div 
                   className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-600 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent)',
+                    background: 'linear-gradient(45deg, transparent, rgba(128, 128, 128, 0.2), transparent)',
                     transform: 'rotate(45deg) translateX(-100%) translateY(-100%)',
                     animation: 'shine 0.6s ease',
                   }}
@@ -153,8 +152,10 @@ const UserProfile = ({ isOpen, onClose }) => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-white text-5xl">
-                    👤
+                  <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                    <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
                   </div>
                 )}
 
@@ -184,25 +185,6 @@ const UserProfile = ({ isOpen, onClose }) => {
                   value={localUsername}
                   onChange={(e) => setLocalUsername(e.target.value)}
                   placeholder="Enter your username"
-                  className="w-full px-4 py-4 rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-blue-400/60 focus:shadow-lg focus:shadow-blue-500/10"
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.85)',
-                    border: '1px solid rgba(59, 130, 246, 0.35)',
-                    backdropFilter: 'blur(10px)',
-                  }}
-                />
-              </div>
-
-              {/* Email Input */}
-              <div className="space-y-2">
-                <label className="block text-white text-sm font-medium uppercase tracking-wider">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
                   className="w-full px-4 py-4 rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-blue-400/60 focus:shadow-lg focus:shadow-blue-500/10"
                   style={{
                     background: 'rgba(0, 0, 0, 0.85)',
