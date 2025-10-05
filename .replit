@@ -15,19 +15,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Install Dependencies"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "TypeBeatz Dev Server"
-
-[[workflows.workflow]]
-name = "Install Dependencies"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install electron react react-dom @babel/core @babel/preset-env @babel/preset-react @babel/plugin-proposal-class-properties @babel/plugin-syntax-dynamic-import babel-loader webpack webpack-cli webpack-dev-server html-webpack-plugin style-loader css-loader postcss-loader tailwindcss autoprefixer file-loader framer-motion wavesurfer.js zustand uuid @ffmpeg/ffmpeg @ffmpeg/util"
 
 [[workflows.workflow]]
 name = "Start Dev Server"
@@ -91,6 +79,10 @@ outputType = "webview"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 35893
+externalPort = 3000
 
 [deployment]
 run = ["sh", "-c", "node index.js"]
