@@ -65,25 +65,46 @@ const Footer = ({ onGenerateVideos }) => {
         {/* Left side - Back Arrow */}
         <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 292px)' }}>
           <button
-            onClick={() => {
+            onClick={async () => {
               // Handle going back to previous step with proper state cleanup
-              const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates } = useAppStore.getState();
+              const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates, clearGeneratedVideos, resetGenerationState } = useAppStore.getState();
 
-              // First, stop any ongoing generation and clear video states
-              setIsGenerating(false);
-              clearAllVideoGenerationStates();
-
-              if (generatedVideos.length > 0) {
-                // From download page, go back to file management
-                setCurrentPage('fileManagement');
-              } else if (completePairs.length > 0 || hasFiles) {
-                // From generation page or file management, go back to upload and clear everything
+              // If generating, clean up FFmpeg temporary files and do a fresh start
+              if (isGenerating) {
+                console.log('Cleaning up temporary files and resetting app for fresh start...');
+                
+                // Import forceStopAllProcesses dynamically
+                const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
+                
+                // Stop all FFmpeg processes and clean up temporary files
+                await forceStopAllProcesses();
+                
+                // Complete reset of the app state
+                resetGenerationState();
+                clearGeneratedVideos();
                 clearAllPairs();
+                
+                // Go back to upload page for fresh start
                 setCurrentPage('upload');
+                
+                console.log('Fresh start complete - all temporary files cleaned up');
               } else {
-                // Fallback: ensure we go to upload page
-                clearAllPairs();
-                setCurrentPage('upload');
+                // Normal back navigation without generation
+                setIsGenerating(false);
+                clearAllVideoGenerationStates();
+
+                if (generatedVideos.length > 0) {
+                  // From download page, go back to file management
+                  setCurrentPage('fileManagement');
+                } else if (completePairs.length > 0 || hasFiles) {
+                  // From generation page or file management, go back to upload and clear everything
+                  clearAllPairs();
+                  setCurrentPage('upload');
+                } else {
+                  // Fallback: ensure we go to upload page
+                  clearAllPairs();
+                  setCurrentPage('upload');
+                }
               }
             }}
             className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"

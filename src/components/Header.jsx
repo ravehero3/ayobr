@@ -68,21 +68,31 @@ const Header = () => {
           {/* Green video ready indicator removed */}
         </div>
 
-        {/* Profile Icon and Username - Fixed relative to logo position */}
-        <div className="absolute top-1/2 transform -translate-y-1/2 flex items-center gap-3" style={{ left: 'calc((100vw - 500px) / 2 + 715px)' }}>
-          <span className="text-white text-sm font-medium opacity-90">{username}</span>
-          <button
-            onClick={() => setIsProfileOpen(true)}
-            className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105 active:shadow-[0_0_15px_rgba(59,130,246,0.8)] active:brightness-150"
-            style={{ transition: 'all 0.15s ease-out' }}
-          >
-            <img
-              src={userProfileImage || userIcon}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          </button>
-        </div>
+        {/* Profile Icon - Fixed position */}
+        <button
+          onClick={() => setIsProfileOpen(true)}
+          className="absolute top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105 active:shadow-[0_0_15px_rgba(59,130,246,0.8)] active:brightness-150"
+          style={{ 
+            left: 'calc((100vw - 500px) / 2 + 715px)',
+            transition: 'all 0.15s ease-out'
+          }}
+        >
+          <img
+            src={userProfileImage || userIcon}
+            alt="Profile"
+            className="w-full h-full object-cover"
+          />
+        </button>
+
+        {/* Username - Positioned to the left of user icon with 20px gap */}
+        <span 
+          className="absolute top-1/2 transform -translate-y-1/2 text-white text-sm font-medium opacity-90"
+          style={{ 
+            right: 'calc(100vw - ((100vw - 500px) / 2 + 715px) + 20px)'
+          }}
+        >
+          {username}
+        </span>
 
         
 
