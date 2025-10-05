@@ -556,7 +556,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       '-tune', 'zerolatency',        // Optimize for streaming/low latency processing
       '-crf', '28',                  // Slightly better quality while still fast
       '-pix_fmt', 'yuv420p',
-      '-r', '15',                    // Lower frame rate for faster processing (15 fps instead of default 25)
+      '-r', '12',                    // Lower frame rate for faster processing (12 fps for maximum speed)
       '-c:a', 'aac',
       '-b:a', '320k',                // High quality audio bitrate (320k - no compression for best quality)
       '-ar', '48000',                // High sample rate for professional quality (48 kHz)

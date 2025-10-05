@@ -235,30 +235,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         />
                       ))}
 
-                      {/* Success particles - show when video is complete */}
-                      {isComplete && [...Array(6)].map((_, i) => (
-                        <motion.div
-                          key={`success-particle-${i}`}
-                          className="absolute w-2 h-2 bg-green-400 rounded-full opacity-70"
-                          style={{
-                            top: `${20 + (i % 3) * 20}%`,
-                            left: `${20 + (i % 3) * 20}%`,
-                            boxShadow: '0 0 12px rgba(34, 197, 94, 0.8)',
-                          }}
-                          animate={{
-                            x: [0, 15 * Math.cos(i * 60 * Math.PI / 180), 0],
-                            y: [0, -10 * Math.sin(i * 60 * Math.PI / 180), 0],
-                            scale: [0.8, 1.2, 0.8],
-                            opacity: [0.4, 0.8, 0.4]
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            delay: i * 0.5,
-                            ease: "easeInOut"
-                          }}
-                        />
-                      ))}
                     </div>
 
                     {/* Delete button - appears on hover */}

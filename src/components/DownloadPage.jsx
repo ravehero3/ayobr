@@ -133,7 +133,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                     boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                     backdropFilter: 'blur(11.4px)',
                     WebkitBackdropFilter: 'blur(11.4px)',
-                    border: '1px solid rgba(34, 197, 94, 0.6)', // Green border for completed
+                    border: '1px solid rgba(29, 78, 216, 0.6)', // Dark blue border for completed
                     padding: '20px',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
@@ -142,36 +142,10 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                   }}
                   whileHover={{
                     backgroundColor: 'rgba(0, 0, 0, 0.51)',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(34, 197, 94, 0.3), 0 0 80px rgba(34, 197, 94, 0.2)',
+                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(29, 78, 216, 0.3), 0 0 80px rgba(29, 78, 216, 0.2)',
                     zIndex: 70
                   }}
                 >
-                  {/* Success particles - always visible for completed videos */}
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" style={{ zIndex: 80 }}>
-                    {[...Array(6)].map((_, i) => (
-                      <motion.div
-                        key={`success-particle-${i}`}
-                        className="absolute w-2 h-2 bg-green-400 rounded-full opacity-70"
-                        style={{
-                          top: `${20 + (i % 3) * 20}%`,
-                          left: `${20 + (i % 3) * 20}%`,
-                          boxShadow: '0 0 12px rgba(34, 197, 94, 0.8)',
-                        }}
-                        animate={{
-                          x: [0, 15 * Math.cos(i * 60 * Math.PI / 180), 0],
-                          y: [0, -10 * Math.sin(i * 60 * Math.PI / 180), 0],
-                          scale: [0.8, 1.2, 0.8],
-                          opacity: [0.4, 0.8, 0.4]
-                        }}
-                        transition={{
-                          duration: 3,
-                          repeat: Infinity,
-                          delay: i * 0.5,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    ))}
-                  </div>
 
                   {/* Delete button */}
                   <button
