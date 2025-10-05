@@ -168,11 +168,9 @@ export const useAppStore = create((set, get) => ({
       generatedVideosCount: state.generatedVideos.length
     });
 
-    // Priority order: completed videos > generation > files > upload
-    if ((hasCompletedVideos || allVideosAt100Percent) && !isGenerating) {
-      console.log('Transitioning to download page - videos completed');
-      return 'download';
-    } else if (isGenerating && !allVideosAt100Percent) {
+    // Priority order: generation (including completed) > files > upload
+    // Stay on generation page when videos are complete (no more download page)
+    if (isGenerating || hasCompletedVideos || allVideosAt100Percent) {
       return 'generation';
     } else if (hasFiles) {
       return 'fileManagement';
