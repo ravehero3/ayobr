@@ -34,7 +34,11 @@ Key features include:
 - **Logo Integration System**: Settings panel allows users to upload logos (PNG, JPG, HEIC, SVG) for video overlay. Logos are stored as base64, displayed as miniature previews, and automatically resized to 200px width while maintaining aspect ratio when used in videos.
 - **Deployment**: Web-based deployment running with webpack dev server, ensuring client-side processing for privacy and performance.
 
-## Recent Changes (August 26, 2025)
+## Recent Changes (October 5, 2025)
+- **Back Button Cleanup Enhancement**: When clicking "back" during video generation, the app now performs a complete cleanup by stopping all FFmpeg processes, removing temporary files, resetting all generation state, and returning to upload page for a fresh start. This ensures no orphaned processes or temporary files remain in memory.
+- **Fixed Header User Icon Position**: User profile icon now stays in a fixed position when username changes. Username is positioned to the left of the icon with its right edge exactly 20px from the icon's left edge, preventing layout shift when the username is updated.
+
+## Previous Changes (August 26, 2025)
 - **Video Generation Logic Overhaul**: Completely restructured video generation to process one video at a time sequentially for maximum stability. Eliminated race conditions and concurrent processing issues that were causing stuck generations.
 - **Enhanced Audio Quality**: Upgraded audio settings to 320k bitrate, 48kHz sample rate with stereo output for professional quality uncompressed sound.
 - **Improved State Management**: Simplified video generation state tracking with clear progression indicators and immediate UI updates when videos complete.
