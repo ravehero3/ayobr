@@ -86,9 +86,10 @@ const Header = () => {
 
         {/* Username - Positioned to the left of user icon with 20px gap */}
         <span 
-          className="absolute top-1/2 transform -translate-y-1/2 text-white text-sm font-medium opacity-90"
+          className="absolute top-1/2 transform -translate-y-1/2 text-white text-sm opacity-90"
           style={{ 
-            right: 'calc(100vw - ((100vw - 500px) / 2 + 715px) + 20px)'
+            right: 'calc(100vw - ((100vw - 500px) / 2 + 715px) + 20px)',
+            fontWeight: '800'
           }}
         >
           {username}

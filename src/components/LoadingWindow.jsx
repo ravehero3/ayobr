@@ -66,7 +66,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
-        style={{ zIndex: 999998, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none' }} // Backdrop doesn't block clicks
+        style={{ zIndex: 9999, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none' }} // Backdrop doesn't block clicks, z-index below header
       >
         {/* Loading Window - No Background */}
         <motion.div
@@ -86,7 +86,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
           {/* Header space - keeping for layout consistency */}
-          <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-64px' }}>
+          <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 50, paddingTop: '0px', paddingBottom: '24px', marginTop: '-64px' }}>
             {/* Header text removed */}
           </div>
 
@@ -200,41 +200,49 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     whileHover={{
                       backgroundColor: 'rgba(0, 0, 0, 0.51)',
                       boxShadow: isComplete 
-                        ? '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(34, 197, 94, 0.3), 0 0 80px rgba(34, 197, 94, 0.2)'
+                        ? '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(59, 130, 246, 0.4), 0 0 80px rgba(96, 165, 250, 0.3)'
                         : '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)',
                       zIndex: 70
                     }}
                   >
                     {/* Enhanced Particle system - similar to Generate Videos button */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" style={{ zIndex: 80 }}>
-                      {/* Progress bar area particles - positioned around progress bar */}
-                      {[...Array(8)].map((_, i) => (
-                        <motion.div
-                          key={`progress-particle-${i}`}
-                          className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{
-                            width: '2px',
-                            height: '2px',
-                            background: i % 2 === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(179, 229, 252, 0.8)',
-                            // Position around progress bar area (bottom of container)
-                            top: `${75 + (i % 2) * 8}%`, // Around progress bar vertical area
-                            left: `${15 + (i * 10)}%`, // Spread across progress bar width
-                            boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
-                          }}
-                          animate={{
-                            // Perfect circular motion around progress bar - returns to start position
-                            x: [0, 15 * Math.cos(i * 45 * Math.PI / 180), 15 * Math.cos((i * 45 + 90) * Math.PI / 180), 15 * Math.cos((i * 45 + 180) * Math.PI / 180), 15 * Math.cos((i * 45 + 270) * Math.PI / 180), 0],
-                            y: [0, 8 * Math.sin(i * 45 * Math.PI / 180), 8 * Math.sin((i * 45 + 90) * Math.PI / 180), 8 * Math.sin((i * 45 + 180) * Math.PI / 180), 8 * Math.sin((i * 45 + 270) * Math.PI / 180), 0],
-                            scale: [0.8, 1.2, 1.0, 0.8, 1.0, 0.8]
-                          }}
-                          transition={{
-                            duration: 4.95, // 50% slower (3.3 * 1.5 = 4.95)
-                            repeat: Infinity,
-                            delay: i * 0.33, // Also make delay 50% slower (0.22 * 1.5 = 0.33)
-                            ease: "linear" // Linear easing for consistent speed throughout
-                          }}
-                        />
-                      ))}
+                      {/* Particles positioned around entire video preview container */}
+                      {[...Array(12)].map((_, i) => {
+                        // Distribute particles around the perimeter of the container
+                        const angle = (i * 360) / 12; // Evenly space particles in a circle
+                        const radius = 45; // Distance from center (percentage)
+                        const centerX = 50; // Center X position
+                        const centerY = 50; // Center Y position
+                        
+                        return (
+                          <motion.div
+                            key={`progress-particle-${i}`}
+                            className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            style={{
+                              width: '2px',
+                              height: '2px',
+                              background: i % 2 === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(179, 229, 252, 0.8)',
+                              // Position around entire container perimeter
+                              top: `${centerY + radius * Math.sin(angle * Math.PI / 180)}%`,
+                              left: `${centerX + radius * Math.cos(angle * Math.PI / 180)}%`,
+                              boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
+                            }}
+                            animate={{
+                              // Circular motion around the video preview
+                              x: [0, 20 * Math.cos(i * 30 * Math.PI / 180), 20 * Math.cos((i * 30 + 90) * Math.PI / 180), 20 * Math.cos((i * 30 + 180) * Math.PI / 180), 20 * Math.cos((i * 30 + 270) * Math.PI / 180), 0],
+                              y: [0, 20 * Math.sin(i * 30 * Math.PI / 180), 20 * Math.sin((i * 30 + 90) * Math.PI / 180), 20 * Math.sin((i * 30 + 180) * Math.PI / 180), 20 * Math.sin((i * 30 + 270) * Math.PI / 180), 0],
+                              scale: [0.8, 1.2, 1.0, 0.8, 1.0, 0.8]
+                            }}
+                            transition={{
+                              duration: 4.95,
+                              repeat: Infinity,
+                              delay: i * 0.25,
+                              ease: "linear"
+                            }}
+                          />
+                        );
+                      })}
 
                     </div>
 
