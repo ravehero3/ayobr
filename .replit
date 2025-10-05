@@ -80,6 +80,10 @@ waitForPort = 5000
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 44223
+externalPort = 3000
+
 [deployment]
 run = ["sh", "-c", "node index.js"]
 

@@ -30,7 +30,7 @@ Key features include:
 - **Download Page**: Dedicated page for video preview, bulk download, and options to create more videos.
 - **Smart Page Management**: Automatic page detection based on application state.
 - **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images with MIME type and extension checking.
-- **User Profile System**: Glassmorphism modal for user profiles, allowing custom profile pictures (JPG/PNG, max 5MB) stored as base64, with username and email fields.
+- **User Profile System**: Glassmorphism modal for user profiles, allowing custom profile pictures (JPG/PNG, max 5MB) stored as base64, with username field. Monochrome image icon placeholder with gray accents.
 - **Logo Integration System**: Settings panel allows users to upload logos (PNG, JPG, HEIC, SVG) for video overlay. Logos are stored as base64, displayed as miniature previews, and automatically resized to 200px width while maintaining aspect ratio when used in videos.
 - **Deployment**: Web-based deployment running with webpack dev server, ensuring client-side processing for privacy and performance.
 
@@ -41,6 +41,9 @@ Key features include:
   - Changed username font-weight from '800' (extra bold) to 'normal' for better visual balance in header
   - Removed rotating square animation from settings icon click (removed fastSpin animation on active/focus states)
   - **Performance Optimization**: Eliminated excessive FFmpeg cleanup between videos - reduced delay from 3+ seconds to 300ms while maintaining proper file cleanup. Second and subsequent videos now generate much faster.
+  - **User Profile UI Cleanup**: Removed email field and input from user profile window for cleaner interface
+  - **Profile Picture Placeholder Update**: Changed from user silhouette to monochrome image icon with gray accents (removed blue theme from profile placeholder)
+  - **Video Preview Text Enhancement**: "Video Ready! Click to Play" now displays on one line, positioned 40px lower, and only appears on hover over completed video previews
 
 ## Previous Changes (October 5, 2025)
 - **Back Button Cleanup Enhancement**: When clicking "back" during video generation, the app now performs a complete cleanup by stopping all FFmpeg processes, removing temporary files, resetting all generation state, and returning to upload page for a fresh start. This ensures no orphaned processes or temporary files remain in memory.
