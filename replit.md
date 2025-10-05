@@ -35,6 +35,14 @@ Key features include:
 - **Deployment**: Web-based deployment running with webpack dev server, ensuring client-side processing for privacy and performance.
 
 ## Recent Changes (October 5, 2025)
+- **UI/UX Fixes and Optimizations**:
+  - Fixed z-index hierarchy: Settings window (AppInfoWindow) now properly appears above sleeping alien during video generation (sleeping alien z-index reduced to 9998)
+  - Changed video preview container border from green to gradient stroke with multiple blue shades (2 dark blue corners, 1 baby blue, 1 very dark blue) for completed videos on page 3
+  - Changed username font-weight from '800' (extra bold) to 'normal' for better visual balance in header
+  - Removed rotating square animation from settings icon click (removed fastSpin animation on active/focus states)
+  - **Performance Optimization**: Eliminated excessive FFmpeg cleanup between videos - reduced delay from 3+ seconds to 300ms while maintaining proper file cleanup. Second and subsequent videos now generate much faster.
+
+## Previous Changes (October 5, 2025)
 - **Back Button Cleanup Enhancement**: When clicking "back" during video generation, the app now performs a complete cleanup by stopping all FFmpeg processes, removing temporary files, resetting all generation state, and returning to upload page for a fresh start. This ensures no orphaned processes or temporary files remain in memory.
 - **Fixed Header User Icon Position**: User profile icon now stays in a fixed position when username changes. Username is positioned to the left of the icon with its right edge exactly 20px from the icon's left edge, preventing layout shift when the username is updated.
 - **Header Elements Clickable During Video Generation**: Fixed z-index hierarchy so LoadingWindow (z-index 9999) stays below header (z-index 10000), ensuring user profile and logo elements remain clickable during video generation. Clicking these elements now properly opens their respective windows/modals.
