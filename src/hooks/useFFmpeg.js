@@ -144,16 +144,8 @@ export const useFFmpeg = () => {
           isCurrentlyProcessing: false
         });
 
-        // Ensure complete cleanup between videos
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Always force cleanup FFmpeg processes before starting next video (not just after first)
-        console.log(`Ensuring clean FFmpeg state before video ${i + 1}/${pairs.length}`);
-        const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
-        await forceStopAllProcesses();
-        
-        // Wait longer for complete cleanup and state stabilization
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Brief pause between videos for state stabilization
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         // Verify all previous videos are properly completed before continuing
         const store = useAppStore.getState();
