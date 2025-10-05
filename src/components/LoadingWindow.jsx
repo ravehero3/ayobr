@@ -209,7 +209,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     }}
                   >
                     {/* Enhanced Particle system - similar to Generate Videos button */}
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" style={{ zIndex: 80 }}>
+                    <div className="absolute inset-0 pointer-events-none overflow-visible rounded-2xl" style={{ zIndex: 80 }}>
                       {/* Particles positioned around entire video preview container */}
                       {[...Array(12)].map((_, i) => {
                         // Distribute particles around the perimeter of the container
