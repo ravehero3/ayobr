@@ -44,6 +44,8 @@ Key features include:
   - **User Profile UI Cleanup**: Removed email field and input from user profile window for cleaner interface
   - **Profile Picture Placeholder Update**: Changed from user silhouette to monochrome image icon with gray accents (removed blue theme from profile placeholder)
   - **Video Preview Text Enhancement**: "Video Ready! Click to Play" now displays on one line, positioned 40px lower, and only appears on hover over completed video previews
+  - **Particle Visibility Fix**: Changed video preview particle container from overflow-hidden to overflow-visible so particles appear above all other elements and are not clipped at container edges
+  - **Settings Icon Animation Removal**: Removed slowSpin hover animation from settings icon to eliminate the rotating square effect when clicking
 
 ## Previous Changes (October 5, 2025)
 - **Back Button Cleanup Enhancement**: When clicking "back" during video generation, the app now performs a complete cleanup by stopping all FFmpeg processes, removing temporary files, resetting all generation state, and returning to upload page for a fresh start. This ensures no orphaned processes or temporary files remain in memory.
