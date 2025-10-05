@@ -19,11 +19,10 @@ import SleepingAlien from './components/SleepingAlien';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
-  const [hasLeftDownloadPage, setHasLeftDownloadPage] = useState(false);
 
   // Drag overlay state
   const [dragState, setDragState] = useState({
@@ -173,15 +172,6 @@ function App() {
   // Page management
   const currentPage = getCurrentPage();
 
-  // Track when user leaves download page after generating videos
-  React.useEffect(() => {
-    if (currentPage === 'download' && generatedVideos.length > 0) {
-      setHasLeftDownloadPage(false); // Reset when on download page
-    } else if (currentPage !== 'download' && generatedVideos.length > 0) {
-      setHasLeftDownloadPage(true); // Mark as left when navigating away with videos
-    }
-  }, [currentPage, generatedVideos.length]);
-
   // Recovery mechanism for stuck states
   React.useEffect(() => {
     const checkForStuckState = () => {
@@ -281,17 +271,6 @@ function App() {
     return () => clearTimeout(timeoutId);
   }, [currentPage, pairs, generatedVideos, isGenerating, resetPageState, setIsFilesBeingDropped]);
 
-  const handleBackToFileManagement = useCallback(() => {
-    clearGeneratedVideos();
-    setHasLeftDownloadPage(false); // Reset when clearing videos
-    // This will automatically set page to 'fileManagement' or 'upload' based on files
-  }, [clearGeneratedVideos]);
-
-  const handleBackToDownloads = useCallback(() => {
-    // Force navigate back to download page
-    setHasLeftDownloadPage(false);
-    setCurrentPage('download');
-  }, [setHasLeftDownloadPage, setCurrentPage]);
 
   const handleGenerateVideos = async () => {
     console.log('Generate Videos button clicked');
@@ -488,37 +467,6 @@ function App() {
                 className="flex justify-center gap-4 mb-8"
                 style={{ marginTop: '10px' }}
               >
-                {/* Back to Downloads button - only show if user has generated videos and left download page */}
-                {hasLeftDownloadPage && generatedVideos.length > 0 && (
-                  <motion.button
-                    onClick={handleBackToDownloads}
-                    className="spotlight-button back-to-downloads-button"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="wrapper">
-                      <span>← BACK TO DOWNLOADS</span>
-                      <div className="circle circle-1"></div>
-                      <div className="circle circle-2"></div>
-                      <div className="circle circle-3"></div>
-                      <div className="circle circle-4"></div>
-                      <div className="circle circle-5"></div>
-                      <div className="circle circle-6"></div>
-                      <div className="circle circle-7"></div>
-                      <div className="circle circle-8"></div>
-                      <div className="circle circle-9"></div>
-                      <div className="circle circle-10"></div>
-                      <div className="circle circle-11"></div>
-                      <div className="circle circle-12"></div>
-                    </div>
-                  </motion.button>
-                )}
-
-                {/* Generate Videos button moved to Footer */}
-
                 {/* Stop Generation Button */}
                 {isGenerating && !isCancelling && (
                   <motion.button
