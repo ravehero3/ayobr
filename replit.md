@@ -37,6 +37,10 @@ Key features include:
 ## Recent Changes (October 5, 2025)
 - **Back Button Cleanup Enhancement**: When clicking "back" during video generation, the app now performs a complete cleanup by stopping all FFmpeg processes, removing temporary files, resetting all generation state, and returning to upload page for a fresh start. This ensures no orphaned processes or temporary files remain in memory.
 - **Fixed Header User Icon Position**: User profile icon now stays in a fixed position when username changes. Username is positioned to the left of the icon with its right edge exactly 20px from the icon's left edge, preventing layout shift when the username is updated.
+- **Header Elements Clickable During Video Generation**: Fixed z-index hierarchy so LoadingWindow (z-index 9999) stays below header (z-index 10000), ensuring user profile and logo elements remain clickable during video generation. Clicking these elements now properly opens their respective windows/modals.
+- **Particle Distribution Enhancement**: Changed video preview container particles from 8 particles positioned only at bottom (75-83% vertical) to 12 particles distributed evenly around entire container perimeter using polar coordinates. Particles now appear around the whole video preview on hover, creating a more immersive visual effect.
+- **Blue Theme Consistency**: Changed completed video hover glow from green (rgba(34, 197, 94)) to blue (rgba(59, 130, 246) and rgba(96, 165, 250)), matching the overall blue theme throughout the application.
+- **Username Typography Enhancement**: Changed username font-weight from 'medium' (500) to '800' (extra bold) for improved visibility and prominence in the header.
 
 ## Previous Changes (August 26, 2025)
 - **Video Generation Logic Overhaul**: Completely restructured video generation to process one video at a time sequentially for maximum stability. Eliminated race conditions and concurrent processing issues that were causing stuck generations.
