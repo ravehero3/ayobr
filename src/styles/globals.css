@@ -1630,20 +1630,11 @@ input[type="file"] {
   transition: transform 0.3s ease;
 }
 
-.settings-icon:hover {
-  animation: slowSpin 9.6s linear infinite;
-}
-
 .settings-icon:active,
 .settings-icon:focus {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
-}
-
-@keyframes slowSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 @keyframes fastSpin {
