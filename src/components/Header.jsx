@@ -8,7 +8,7 @@ import UserProfile from './UserProfile';
 import AppInfoWindow from './AppInfoWindow';
 
 const Header = () => {
-  const { generatedVideos, pairs, userProfileImage, isGenerating, resetGenerationState } = useAppStore();
+  const { generatedVideos, pairs, userProfileImage, username, isGenerating, resetGenerationState } = useAppStore();
   const { stopGeneration, resetAppForNewGeneration } = useFFmpeg();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAppInfoOpen, setIsAppInfoOpen] = useState(false);
@@ -68,8 +68,9 @@ const Header = () => {
           {/* Green video ready indicator removed */}
         </div>
 
-        {/* Profile Icon - Fixed relative to logo position */}
-        <div className="absolute top-1/2 transform -translate-y-1/2 flex items-center" style={{ left: 'calc((100vw - 500px) / 2 + 715px)' }}>
+        {/* Profile Icon and Username - Fixed relative to logo position */}
+        <div className="absolute top-1/2 transform -translate-y-1/2 flex items-center gap-3" style={{ left: 'calc((100vw - 500px) / 2 + 715px)' }}>
+          <span className="text-white text-sm font-medium opacity-90">{username}</span>
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105 active:shadow-[0_0_15px_rgba(59,130,246,0.8)] active:brightness-150"

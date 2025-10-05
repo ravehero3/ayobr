@@ -153,7 +153,7 @@ const Footer = ({ onGenerateVideos }) => {
           )}
 
           {/* Download All Videos Button - matching Generate Videos styling */}
-          {generatedVideos.length > 0 && (
+          {generatedVideos.length > 0 && generatedVideos.length === completePairs.length && !isGenerating && (
             <button
               onClick={() => {
                 generatedVideos.forEach(video => {

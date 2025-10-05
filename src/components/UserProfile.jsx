@@ -4,10 +4,10 @@ import { useAppStore } from '../store/appStore';
 import userIcon from '../assets/user_1754478889614.png';
 
 const UserProfile = ({ isOpen, onClose }) => {
-  const { userProfileImage, setUserProfileImage } = useAppStore();
+  const { userProfileImage, setUserProfileImage, username, setUsername: setStoreUsername } = useAppStore();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [username, setUsername] = useState('Producer');
+  const [localUsername, setLocalUsername] = useState(username);
   const [email, setEmail] = useState('');
 
   const handleFileSelect = () => {
@@ -181,8 +181,8 @@ const UserProfile = ({ isOpen, onClose }) => {
                 </label>
                 <input
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={localUsername}
+                  onChange={(e) => setLocalUsername(e.target.value)}
                   placeholder="Enter your username"
                   className="w-full px-4 py-4 rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-blue-400/60 focus:shadow-lg focus:shadow-blue-500/10"
                   style={{
@@ -217,7 +217,7 @@ const UserProfile = ({ isOpen, onClose }) => {
             <div className="flex gap-3 justify-center mt-8">
               <motion.button
                 onClick={() => {
-                  // Save functionality would go here
+                  setStoreUsername(localUsername);
                   onClose();
                 }}
                 className="relative px-6 py-3 rounded-xl text-white text-sm font-semibold overflow-hidden transition-all duration-300 hover:-translate-y-0.5"

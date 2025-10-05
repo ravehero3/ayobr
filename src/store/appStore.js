@@ -38,6 +38,7 @@ export const useAppStore = create((set, get) => ({
   
   // User profile
   userProfileImage: null, // Store base64 image data
+  username: loadFromLocalStorage('username', 'Producer'), // Store username with persistence
 
   // Container spacing
   containerSpacing: 4, // Default spacing in pixels between container pairs
@@ -363,6 +364,11 @@ export const useAppStore = create((set, get) => ({
 
   // User profile actions
   setUserProfileImage: (imageData) => set({ userProfileImage: imageData }),
+  
+  setUsername: (username) => {
+    saveToLocalStorage('username', username);
+    set({ username });
+  },
 
   // Video settings actions
   setVideoBackground: (background) => set(state => {
