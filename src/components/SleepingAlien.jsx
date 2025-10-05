@@ -41,7 +41,7 @@ const SleepingAlien = () => {
             transform: 'translate(-50%, -50%)',
             width: '1200px', // 2x bigger (600px * 2)
             height: '800px', // 2x bigger (400px * 2)
-            zIndex: 99998, // Behind footer (99999) but above other content
+            zIndex: 9998, // Below modals and settings window
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
