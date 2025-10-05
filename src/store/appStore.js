@@ -140,11 +140,41 @@ export const useAppStore = create((set, get) => ({
       return state.currentPage;
     }
 
-    // Simplified: only 2 pages - upload and fileManagement
+    // Fallback to automatic detection with improved logic
     const hasFiles = state.pairs.some(pair => pair.audio || pair.image);
+    const hasVideos = state.generatedVideos.length > 0;
     
-    // Stay on fileManagement during generation and after videos are complete
-    if (hasFiles) {
+    // Check if any pair is generating
+    const isGenerating = state.isGenerating || Object.values(state.videoGenerationStates).some(genState => genState?.isGenerating);
+
+    // More robust completion detection
+    const hasCompletedVideos = hasVideos || Object.values(state.videoGenerationStates).some(
+      genState => genState?.isComplete
+    );
+
+    // Check if all videos have reached 100% progress (even without video object)
+    const allVideosAt100Percent = Object.values(state.videoGenerationStates).length > 0 && 
+      Object.values(state.videoGenerationStates).every(genState => 
+        genState && (genState.progress === 100 || genState.isComplete)
+      );
+
+    console.log('Page detection debug:', {
+      hasFiles,
+      hasVideos,
+      isGenerating,
+      hasCompletedVideos,
+      allVideosAt100Percent,
+      videoStatesCount: Object.keys(state.videoGenerationStates).length,
+      generatedVideosCount: state.generatedVideos.length
+    });
+
+    // Priority order: completed videos > generation > files > upload
+    if ((hasCompletedVideos || allVideosAt100Percent) && !isGenerating) {
+      console.log('Transitioning to download page - videos completed');
+      return 'download';
+    } else if (isGenerating && !allVideosAt100Percent) {
+      return 'generation';
+    } else if (hasFiles) {
       return 'fileManagement';
     } else if (state.isFilesBeingDropped) {
       // Still processing files, stay on current page to avoid flickering
