@@ -436,20 +436,19 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                     }
                                   }}
                                 >
-                                  {/* Simple video preview thumbnail */}
+                                  {/* Simple video preview thumbnail - hover text */}
                                   <div
-                                    className="absolute inset-0 w-full h-full object-contain rounded pointer-events-none flex items-center justify-center"
+                                    className="absolute w-full h-full object-contain rounded pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                     style={{
                                       background: 'rgba(0,0,0,0.3)',
                                       color: 'white',
                                       fontSize: '12px',
                                       textAlign: 'center',
-                                      zIndex: 9999999
+                                      zIndex: 9999999,
+                                      top: '40px'
                                     }}
                                   >
-                                    Video Ready
-                                    <br />
-                                    Click to Play
+                                    Video Ready! Click to Play
                                   </div>
 
                                   {/* Play button overlay with highest z-index */}
