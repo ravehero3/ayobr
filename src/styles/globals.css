@@ -1639,7 +1639,6 @@ input[type="file"] {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
-  animation: fastSpin 0.5s ease-out;
 }
 
 @keyframes slowSpin {
