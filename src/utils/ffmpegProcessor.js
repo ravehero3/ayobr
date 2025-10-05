@@ -119,32 +119,29 @@ export const restartFFmpeg = async () => {
 const cleanupMemory = () => {
   processedCount++;
 
-  // Clean memory every 5 processed videos (more frequent cleanup)
-  if (processedCount % 5 === 0) {
-    console.log(`Performing memory cleanup after ${processedCount} processed videos`);
+  console.log(`Memory cleanup after video ${processedCount}`);
 
-    // Clear excessive cache entries
-    if (memoryCache.size > 20) { // Reduced cache size
-      const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - 10);
-      keysToDelete.forEach(key => memoryCache.delete(key));
-      console.log(`Cleaned up ${keysToDelete.length} cached items`);
-    }
+  // Clear excessive cache entries
+  if (memoryCache.size > 20) { // Reduced cache size
+    const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - 10);
+    keysToDelete.forEach(key => memoryCache.delete(key));
+    console.log(`Cleaned up ${keysToDelete.length} cached items`);
+  }
 
-    // Clear file caches more aggressively
-    if (fileCache.size > 10) {
-      const oldestKeys = Array.from(fileCache.keys()).slice(0, fileCache.size - 5);
-      oldestKeys.forEach(key => fileCache.delete(key));
-    }
+  // Clear file caches more aggressively
+  if (fileCache.size > 10) {
+    const oldestKeys = Array.from(fileCache.keys()).slice(0, fileCache.size - 5);
+    oldestKeys.forEach(key => fileCache.delete(key));
+  }
 
-    if (audioBufferCache.size > 5) {
-      audioBufferCache.clear();
-      console.log('Cleared audio buffer cache');
-    }
+  if (audioBufferCache.size > 5) {
+    audioBufferCache.clear();
+    console.log('Cleared audio buffer cache');
+  }
 
-    if (processedImageCache.size > 5) {
-      processedImageCache.clear();
-      console.log('Cleared processed image cache');
-    }
+  if (processedImageCache.size > 5) {
+    processedImageCache.clear();
+    console.log('Cleared processed image cache');
   }
 
   // Force browser memory cleanup for web environment
@@ -165,6 +162,8 @@ const cleanupMemory = () => {
       });
     } catch(e) { /* ignore cleanup errors */ }
   }
+  
+  console.log(`Memory cleanup complete. Active processes: ${activeProcesses.size}, Cache size: ${memoryCache.size}`);
 };
 
 // Progress tracking for large batches
@@ -719,6 +718,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       }
     }
 
+    // Call memory cleanup after successful video generation
+    cleanupMemory();
+
     // Clear progress callback to prevent interference with next video
     progressCallbackActive = false;
     ffmpeg.off('progress');
@@ -775,6 +777,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         }
 
         await Promise.allSettled(cleanupPromises);
+        
+        // Call memory cleanup after error cleanup
+        cleanupMemory();
       } catch (cleanupError) {
         console.warn('Error during cleanup:', cleanupError);
       }

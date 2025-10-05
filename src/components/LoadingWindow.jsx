@@ -66,7 +66,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
-        style={{ zIndex: 999998, paddingTop: '72px', paddingBottom: '40px' }} // Above all elements including header
+        style={{ zIndex: 999998, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none' }} // Backdrop doesn't block clicks
       >
         {/* Loading Window - No Background */}
         <motion.div
@@ -80,6 +80,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             width: '100%',
             maxWidth: '112rem',
             background: 'transparent',
+            pointerEvents: 'auto', // Modal content can be clicked
           }}
         >
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
