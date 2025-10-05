@@ -6,6 +6,23 @@ import mrakyBackground from '../assets/mraky-a-zzz.png';
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
   const { getVideoGenerationState, generatedVideos, videoSettings, removePair } = useAppStore();
 
+  // Function to download a single video
+  const handleDownloadSingle = async (video, event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    try {
+      const link = document.createElement('a');
+      link.href = video.url;
+      link.download = video.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading video:', error);
+    }
+  };
+
   // Function to get video background style based on user settings
   const getVideoBackgroundStyle = () => {
     // Safely access videoSettings with fallback - ensure we get the most recent settings
@@ -172,7 +189,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                       backdropFilter: 'blur(11.4px)',
                       WebkitBackdropFilter: 'blur(11.4px)',
-                      border: '1px solid rgba(0, 0, 0, 0.4)',
+                      border: isComplete ? '1px solid rgba(34, 197, 94, 0.6)' : '1px solid rgba(0, 0, 0, 0.4)',
                       padding: '20px',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
@@ -181,7 +198,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     }}
                     whileHover={{
                       backgroundColor: 'rgba(0, 0, 0, 0.51)',
-                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)',
+                      boxShadow: isComplete 
+                        ? '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(34, 197, 94, 0.3), 0 0 80px rgba(34, 197, 94, 0.2)'
+                        : '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)',
                       zIndex: 70
                     }}
                   >
@@ -216,29 +235,27 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         />
                       ))}
 
-                      {/* Completion particles - only show when reaching 100% but no video yet */}
-                      {progressValue >= 100 && !shouldShowVideoPreview && [...Array(6)].map((_, i) => (
+                      {/* Success particles - show when video is complete */}
+                      {isComplete && [...Array(6)].map((_, i) => (
                         <motion.div
-                          key={`complete-particle-${i}`}
-                          className="absolute w-2 h-2 bg-green-400 rounded-full"
+                          key={`success-particle-${i}`}
+                          className="absolute w-2 h-2 bg-green-400 rounded-full opacity-70"
                           style={{
-                            // Position around completed progress bar
-                            top: `${78 + (i % 2) * 6}%`,
-                            left: `${20 + i * 12}%`,
+                            top: `${20 + (i % 3) * 20}%`,
+                            left: `${20 + (i % 3) * 20}%`,
                             boxShadow: '0 0 12px rgba(34, 197, 94, 0.8)',
                           }}
                           animate={{
-                            // Perfect celebratory burst pattern around progress bar
-                            x: [0, 20 * Math.cos(i * 60 * Math.PI / 180), 10 * Math.cos(i * 60 * Math.PI / 180), 0],
-                            y: [0, -15 * Math.sin(i * 60 * Math.PI / 180), -8 * Math.sin(i * 60 * Math.PI / 180), 0],
-                            scale: [0, 1.8, 0.5, 1.5, 0.8, 0],
-                            opacity: [0, 1, 0.8, 1, 0.6, 0]
+                            x: [0, 15 * Math.cos(i * 60 * Math.PI / 180), 0],
+                            y: [0, -10 * Math.sin(i * 60 * Math.PI / 180), 0],
+                            scale: [0.8, 1.2, 0.8],
+                            opacity: [0.4, 0.8, 0.4]
                           }}
                           transition={{
-                            duration: 4.125, // 50% slower (2.75 * 1.5 = 4.125)
+                            duration: 3,
                             repeat: Infinity,
-                            delay: i * 0.495, // 50% slower delay (0.33 * 1.5 = 0.495)
-                            ease: "linear" // Linear easing for consistent speed
+                            delay: i * 0.5,
+                            ease: "easeInOut"
                           }}
                         />
                       ))}
@@ -255,6 +272,18 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     >
                       ×
                     </button>
+
+                    {/* Download button - appears on hover when video is complete */}
+                    {isComplete && videoToShow && (
+                      <button
+                        onClick={(e) => handleDownloadSingle(videoToShow, e)}
+                        className="absolute top-2 left-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-green-400 hover:text-green-300"
+                        style={{ fontSize: '14px', zIndex: 90 }}
+                        title="Download video"
+                      >
+                        ↓
+                      </button>
+                    )}
 
                     <div className="relative h-full flex flex-col">
                       {/* Title - Audio + Image names - positioned in front of image */}
@@ -456,18 +485,22 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         </div>
                       </div>
 
-                      {/* Single Progress Bar - fade out when video preview shows */}
+                      {/* Single Progress Bar - shows green when complete, blue when loading */}
                       <motion.div
                         className="w-full bg-white/10 rounded-full h-2 mt-4"
-                        animate={{ opacity: shouldShowPercentage ? 1 : 0 }}
+                        animate={{ opacity: isComplete ? 0 : 1 }}
                         transition={{ duration: 0.5 }}
                       >
                         <motion.div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
                             width: `${progressToDisplay}%`,
-                            background: 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #93c5fd 100%)',
-                            boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
+                            background: isComplete 
+                              ? 'linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%)'
+                              : 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #93c5fd 100%)',
+                            boxShadow: isComplete 
+                              ? '0 0 15px rgba(16, 185, 129, 0.4)'
+                              : '0 0 15px rgba(59, 130, 246, 0.4)'
                           }}
                           initial={{ width: 0 }}
                           animate={{ width: `${progressToDisplay}%` }}
