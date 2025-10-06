@@ -9,10 +9,13 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   const [audioPosition, setAudioPosition] = useState(null);
   const [imagePosition, setImagePosition] = useState(null);
   const containerRef = useRef(null);
-  const { generatedVideos, videoSettings } = useAppStore();
+  const { generatedVideos, videoSettings, getVideoGenerationState } = useAppStore();
 
   // Find the generated video for this pair
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+  
+  // Get this pair's specific generation state
+  const pairVideoState = getVideoGenerationState(pair.id);
 
   console.log(`PairMergeAnimation for pair ${pair.id}:`, {
     isGenerating,
@@ -137,13 +140,18 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   }, [generatedVideo, animationStage, progress, onAnimationComplete]);
 
   useEffect(() => {
-    // Only reset if generation stops without completion AND we don't have a video
-    if (!isGenerating && !generatedVideo && animationStage !== 'idle') {
-      // Reset animation when generation stops without completion
+    // Only reset if THIS PAIR's generation stops without completion AND we don't have a video
+    // Use per-pair state instead of global isGenerating to prevent race conditions with concurrent videos
+    const pairIsGenerating = pairVideoState?.isGenerating || false;
+    const pairIsComplete = pairVideoState?.isComplete || false;
+    
+    if (!pairIsGenerating && !generatedVideo && !pairIsComplete && animationStage !== 'idle') {
+      // Reset animation when THIS pair's generation stops without completion
+      console.log(`Resetting animation for pair ${pair.id} - generation stopped without completion`);
       setAnimationStage('idle');
       setShowProgress(false);
     }
-  }, [isGenerating, generatedVideo, animationStage]);
+  }, [pairVideoState, generatedVideo, animationStage, pair.id]);
 
   // Get background style based on video settings
   const getBackgroundStyle = () => {
