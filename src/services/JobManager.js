@@ -18,6 +18,7 @@ class JobManager {
     this.ffmpegBaseURLs = null;
     this.sharedFFmpeg = null;
     this.ffmpegInitPromise = null;
+    this.ffmpegLock = null;
     this.initializeBaseURLs();
   }
 
@@ -315,7 +316,17 @@ class JobManager {
     let ffmpeg = null;
     let progressHandler = null;
 
+    while (this.ffmpegLock) {
+      await this.ffmpegLock;
+    }
+
+    let releaseLock;
+    this.ffmpegLock = new Promise(resolve => {
+      releaseLock = resolve;
+    });
+
     try {
+      console.log(`Job ${job.id.substring(0, 8)}: Acquired FFmpeg lock, starting processing`);
       ffmpeg = await this.getSharedFFmpegInstance();
 
       const imageFile = await fetchFile(job.imagePath);
@@ -406,6 +417,11 @@ class JobManager {
       }
     } finally {
       this.activeCancelFlags.delete(job.id);
+      if (releaseLock) {
+        console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock`);
+        releaseLock();
+        this.ffmpegLock = null;
+      }
     }
   }
 
