@@ -16,6 +16,8 @@ class JobManager {
     this.cleanupTimers = new Map();
     this.eventListeners = new Map();
     this.ffmpegBaseURLs = null;
+    this.sharedFFmpeg = null;
+    this.ffmpegInitPromise = null;
     this.initializeBaseURLs();
   }
 
@@ -33,6 +35,40 @@ class JobManager {
       console.error('Failed to initialize FFmpeg base URLs:', error);
       throw error;
     }
+  }
+
+  async getSharedFFmpegInstance() {
+    if (this.sharedFFmpeg) {
+      return this.sharedFFmpeg;
+    }
+
+    if (this.ffmpegInitPromise) {
+      return this.ffmpegInitPromise;
+    }
+
+    this.ffmpegInitPromise = (async () => {
+      try {
+        const baseURLs = await this.initializeBaseURLs();
+        const ffmpeg = new FFmpeg();
+        
+        ffmpeg.on('log', ({ message }) => {
+          console.log(`FFmpeg [shared]:`, message);
+        });
+
+        console.log('Loading shared FFmpeg instance (this happens only once)...');
+        await ffmpeg.load(baseURLs);
+        console.log('Shared FFmpeg instance loaded and ready!');
+        
+        this.sharedFFmpeg = ffmpeg;
+        return ffmpeg;
+      } catch (error) {
+        console.error('Failed to initialize shared FFmpeg instance:', error);
+        this.ffmpegInitPromise = null;
+        throw error;
+      }
+    })();
+
+    return this.ffmpegInitPromise;
   }
 
   async createFFmpegInstance(jobId) {
@@ -232,16 +268,6 @@ class JobManager {
         cancelFlag.cancelled = true;
       }
 
-      const ffmpeg = this.ffmpegInstances.get(jobId);
-      if (ffmpeg) {
-        try {
-          await ffmpeg.terminate();
-          this.ffmpegInstances.delete(jobId);
-        } catch (error) {
-          console.error(`Error terminating FFmpeg for ${jobId}:`, error);
-        }
-      }
-
       job.status = 'failed';
       job.error = 'Cancelled by user';
       job.completedAt = Date.now();
@@ -269,7 +295,6 @@ class JobManager {
         URL.revokeObjectURL(job.videoBlobURL);
       }
 
-      await this.destroyFFmpegInstance(jobId);
       this.activeCancelFlags.delete(jobId);
 
       this.jobs.delete(jobId);
@@ -288,9 +313,10 @@ class JobManager {
     const cancelFlag = { cancelled: false };
     this.activeCancelFlags.set(job.id, cancelFlag);
     let ffmpeg = null;
+    let progressHandler = null;
 
     try {
-      ffmpeg = await this.createFFmpegInstance(job.id);
+      ffmpeg = await this.getSharedFFmpegInstance();
 
       const imageFile = await fetchFile(job.imagePath);
       const audioFile = await fetchFile(job.audioPath);
@@ -300,7 +326,7 @@ class JobManager {
 
       let lastProgress = 0;
 
-      ffmpeg.on('progress', ({ progress, time }) => {
+      progressHandler = ({ progress, time }) => {
         if (cancelFlag.cancelled) return;
 
         const currentProgress = Math.min(Math.round(progress * 100), 100);
@@ -308,14 +334,16 @@ class JobManager {
           lastProgress = currentProgress;
           this.updateProgress(job.id, currentProgress);
         }
-      });
+      };
+
+      ffmpeg.on('progress', progressHandler);
 
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled before exec`);
-        if (ffmpeg) {
-          ffmpeg.off('progress');
-          await this.destroyFFmpegInstance(job.id);
+        if (ffmpeg && progressHandler) {
+          ffmpeg.off('progress', progressHandler);
         }
+        await this.cleanupTempFiles(ffmpeg, job);
         return;
       }
 
@@ -335,10 +363,10 @@ class JobManager {
 
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled after exec`);
-        if (ffmpeg) {
-          ffmpeg.off('progress');
-          await this.destroyFFmpegInstance(job.id);
+        if (ffmpeg && progressHandler) {
+          ffmpeg.off('progress', progressHandler);
         }
+        await this.cleanupTempFiles(ffmpeg, job);
         return;
       }
 
@@ -353,10 +381,13 @@ class JobManager {
         this.jobs.set(job.id, updatedJob);
       }
 
-      ffmpeg.off('progress');
+      if (progressHandler) {
+        ffmpeg.off('progress', progressHandler);
+      }
+
+      await this.cleanupTempFiles(ffmpeg, job);
 
       if (!cancelFlag.cancelled) {
-        await this.destroyFFmpegInstance(job.id);
         await this.markCompleted(job.id);
       }
 
@@ -365,14 +396,30 @@ class JobManager {
         console.log(`Job ${job.id.substring(0, 8)} execution interrupted by cancellation`);
       } else {
         console.error(`Failed to process video for job ${job.id}:`, error);
-        if (ffmpeg) {
-          ffmpeg.off('progress');
+        if (ffmpeg && progressHandler) {
+          ffmpeg.off('progress', progressHandler);
         }
-        await this.destroyFFmpegInstance(job.id);
+        if (ffmpeg) {
+          await this.cleanupTempFiles(ffmpeg, job);
+        }
         await this.markFailed(job.id, error.message);
       }
     } finally {
       this.activeCancelFlags.delete(job.id);
+    }
+  }
+
+  async cleanupTempFiles(ffmpeg, job) {
+    try {
+      const filesToDelete = [job.inputImageName, job.inputAudioName, job.outputName];
+      for (const filename of filesToDelete) {
+        try {
+          await ffmpeg.deleteFile(filename);
+        } catch (e) {
+        }
+      }
+    } catch (error) {
+      console.error(`Error cleaning up temp files for job ${job.id}:`, error);
     }
   }
 
