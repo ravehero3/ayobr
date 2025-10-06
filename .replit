@@ -81,12 +81,12 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 36841
-externalPort = 3001
-
-[[ports]]
 localPort = 40547
 externalPort = 3000
+
+[[ports]]
+localPort = 42733
+externalPort = 3001
 
 [deployment]
 run = ["sh", "-c", "node index.js"]

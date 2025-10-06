@@ -42,10 +42,10 @@ export const useFFmpeg = () => {
       setProgress(0);
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Process videos one at a time for maximum stability
-      const maxConcurrent = 1;  // Process only 1 video at a time for stability
+      // Process videos with controlled concurrency for optimal performance
+      const maxConcurrent = 2;  // Process 2 videos at a time for balanced speed and stability
 
-      console.log(`Processing ${pairs.length} videos sequentially (1 at a time for maximum stability)`);
+      console.log(`Processing ${pairs.length} videos with concurrency limit of ${maxConcurrent}`);
       let completedCount = 0;
 
       // Clear any existing generation states and set up sequential generation
@@ -85,176 +85,168 @@ export const useFFmpeg = () => {
         }
       };
 
-      // Process pairs sequentially one by one
-      for (let i = 0; i < pairs.length; i++) {
+      // Process pairs in concurrent batches
+      // Create batches of videos to process concurrently
+      const batches = [];
+      for (let i = 0; i < pairs.length; i += maxConcurrent) {
+        batches.push(pairs.slice(i, i + maxConcurrent));
+      }
+
+      console.log(`Created ${batches.length} batches from ${pairs.length} videos (${maxConcurrent} per batch)`);
+
+      // Process each batch concurrently
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         if (isCancelling) {
-          console.log('Video generation cancelled - stopping sequential processing');
+          console.log('Video generation cancelled - stopping batch processing');
           forceStopAllProcesses();
           break;
         }
 
-        const pair = pairs[i];
-        console.log(`🔄 Processing video ${i + 1}/${pairs.length} for pair ${pair.id}`);
-        console.log(`📊 Current processing status:`, {
-          currentIndex: i,
-          totalPairs: pairs.length,
-          pairId: pair.id,
-          isCancelling
-        });
-
-        // Skip if this pair already has a completed video
-        const currentStore = useAppStore.getState();
-        const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
-
-        if (existingVideo) {
-          console.log(`Skipping pair ${pair.id} - video already exists`);
-          // Ensure state is consistent
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: existingVideo,
-            error: null
-          });
-          completedCount++;
-          await updateBatchProgress();
-          continue;
-        }
-
-        // Check if the video generation state claims completion but no video exists in store
-        const currentVideoState = currentStore.videoGenerationStates[pair.id];
-        if (currentVideoState && currentVideoState.isComplete && currentVideoState.progress === 100 && !existingVideo) {
-          console.log(`⚠️ Found broken state for pair ${pair.id} - marked complete but no video in store, resetting...`);
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 0,
-            isComplete: false,
-            video: null,
-            error: null
-          });
-        }
-
-        // Clear any existing state before starting
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: null,
-          isCurrentlyProcessing: false
-        });
-
-        // Brief pause between videos for state stabilization
-        await new Promise(resolve => setTimeout(resolve, 300));
+        const batch = batches[batchIndex];
+        const batchStartIndex = batchIndex * maxConcurrent;
         
-        // Verify all previous videos are properly completed before continuing
-        const store = useAppStore.getState();
-        const previousPairs = pairs.slice(0, i);
-        for (const prevPair of previousPairs) {
-          const prevState = store.videoGenerationStates[prevPair.id];
-          const prevVideo = store.generatedVideos.find(v => v.pairId === prevPair.id);
+        console.log(`\n🚀 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} videos)`);
+
+        // Process all videos in this batch concurrently
+        const batchPromises = batch.map(async (pair, indexInBatch) => {
+          const overallIndex = batchStartIndex + indexInBatch;
           
-          if (!prevVideo || !prevState?.isComplete) {
-            console.log(`Waiting for previous video ${prevPair.id} to complete properly...`);
-            // Wait additional time for previous video to fully complete
-            await new Promise(resolve => setTimeout(resolve, 1000));
+          if (isCancelling) {
+            console.log(`Cancelled before processing ${pair.id}`);
+            return { pair, success: false, error: 'Cancelled' };
           }
-        }
 
-        // Initialize state for this video to show it's starting
-        console.log(`Starting generation for pair ${pair.id} (${i + 1}/${pairs.length})`);
-        setVideoGenerationState(pair.id, {
-          isGenerating: true,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: null,
-          queuePosition: i,
-          isCurrentlyProcessing: true,
-          startTime: Date.now(),
-          lastUpdate: Date.now()
-        });
+          try {
+            // Skip if this pair already has a completed video
+            const currentStore = useAppStore.getState();
+            const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
 
-        try {
-          console.log(`Starting processing for pair ${pair.id} (${i + 1}/${pairs.length})`);
-          const result = await processPairAsync(pair);
+            if (existingVideo) {
+              console.log(`Skipping pair ${pair.id} - video already exists`);
+              setVideoGenerationState(pair.id, {
+                isGenerating: false,
+                progress: 100,
+                isComplete: true,
+                video: existingVideo,
+                error: null
+              });
+              return { pair, success: true, video: existingVideo, skipped: true };
+            }
 
-          // Only increment if we got a valid result
-          if (result) {
-            completedCount++;
-            console.log(`Completed video ${i + 1}/${pairs.length} for pair ${pair.id}`);
-            console.log(`🎯 processPairAsync returned successfully for ${pair.id}`);
+            // Check if the video generation state claims completion but no video exists in store
+            const currentVideoState = currentStore.videoGenerationStates[pair.id];
+            if (currentVideoState && currentVideoState.isComplete && currentVideoState.progress === 100 && !existingVideo) {
+              console.log(`⚠️ Found broken state for pair ${pair.id} - marked complete but no video in store, resetting...`);
+              setVideoGenerationState(pair.id, {
+                isGenerating: false,
+                progress: 0,
+                isComplete: false,
+                video: null,
+                error: null
+              });
+            }
 
-            // Mark current video as completely finished
+            // Clear any existing state before starting
             setVideoGenerationState(pair.id, {
               isGenerating: false,
-              progress: 100,
-              isComplete: true,
-              video: result,
+              progress: 0,
+              isComplete: false,
+              video: null,
               error: null,
-              isCurrentlyProcessing: false,
-              isFinished: true
+              isCurrentlyProcessing: false
             });
 
-            console.log(`✅ Video ${i + 1}/${pairs.length} (${pair.id}) marked as complete`);
-          } else {
-            console.warn(`⚠️ Video ${i + 1}/${pairs.length} returned null result`);
-            // Still count as completed to continue the sequence
-            completedCount++;
+            // Brief pause for state stabilization
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Initialize state for this video to show it's starting
+            console.log(`🔄 Starting generation for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
+            setVideoGenerationState(pair.id, {
+              isGenerating: true,
+              progress: 0,
+              isComplete: false,
+              video: null,
+              error: null,
+              queuePosition: overallIndex,
+              isCurrentlyProcessing: true,
+              startTime: Date.now(),
+              lastUpdate: Date.now()
+            });
+
+            console.log(`Starting processing for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
+            const result = await processPairAsync(pair);
+
+            if (result) {
+              console.log(`✅ Completed video ${overallIndex + 1}/${pairs.length} for pair ${pair.id}`);
+
+              // Mark current video as completely finished
+              setVideoGenerationState(pair.id, {
+                isGenerating: false,
+                progress: 100,
+                isComplete: true,
+                video: result,
+                error: null,
+                isCurrentlyProcessing: false,
+                isFinished: true
+              });
+
+              return { pair, success: true, video: result };
+            } else {
+              console.warn(`⚠️ Video ${overallIndex + 1}/${pairs.length} returned null result`);
+              return { pair, success: false, error: 'No video returned' };
+            }
+
+          } catch (error) {
+            console.error(`Error processing pair ${pair.id}:`, error);
+
+            // Set error state for this specific pair
+            setVideoGenerationState(pair.id, {
+              isGenerating: false,
+              progress: 0,
+              isComplete: false,
+              video: null,
+              error: error.message || 'Video generation failed',
+              isCurrentlyProcessing: false
+            });
+
+            return { pair, success: false, error: error.message };
           }
+        });
 
-        } catch (error) {
-          console.error(`Error processing pair ${pair.id}:`, error);
+        // Wait for all videos in this batch to complete
+        console.log(`⏳ Waiting for batch ${batchIndex + 1} to complete...`);
+        const batchResults = await Promise.allSettled(batchPromises);
 
-          // Set error state for this specific pair
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 0,
-            isComplete: false,
-            video: null,
-            error: error.message || 'Video generation failed',
-            isCurrentlyProcessing: false
-          });
+        // Process results and update completed count
+        let batchSuccessCount = 0;
+        batchResults.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const { success, skipped } = result.value;
+            if (success || skipped) {
+              completedCount++;
+              batchSuccessCount++;
+            } else {
+              completedCount++; // Still count as processed even if failed
+            }
+          } else {
+            console.error(`Batch promise rejected:`, result.reason);
+            completedCount++; // Count as processed
+          }
+        });
 
-          completedCount++;
-        }
+        console.log(`✅ Batch ${batchIndex + 1}/${batches.length} completed: ${batchSuccessCount}/${batch.length} successful`);
 
-        // Ensure UI updates and add breathing room between video processing
+        // Update overall progress
         await updateBatchProgress();
 
-        console.log(`🔍 End of iteration ${i + 1}/${pairs.length}. Checking if we should continue...`);
-        console.log(`Loop status: i=${i}, pairs.length=${pairs.length}, hasMore=${i < pairs.length - 1}`);
-
-        if (i < pairs.length - 1) {
-          const nextPair = pairs[i + 1];
-          console.log(`✅ Video ${i + 1} completed. Preparing to start video ${i + 2}/${pairs.length} for pair ${nextPair.id}...`);
-
-          // Take a longer break to ensure proper cleanup between videos
-          await new Promise(resolve => setTimeout(resolve, 3000));
-
-          // Verify current video is completely finished before starting next
-          const finalStore = useAppStore.getState();
-          const currentState = finalStore.videoGenerationStates[pair.id];
-          const currentVideo = finalStore.generatedVideos.find(v => v.pairId === pair.id);
-          
-          if (!currentVideo || !currentState?.isComplete) {
-            console.log(`Warning: Current video ${pair.id} may not be fully complete, waiting additional time...`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          }
-
-          // Verify we can continue (not cancelled)
-          if (isCancelling) {
-            console.log('Generation was cancelled during break');
-            break;
-          }
-
-          console.log(`🚀 Starting next video ${i + 2}/${pairs.length} for pair ${nextPair.id}`);
-        } else {
-          console.log(`🎉 All videos completed! Processed ${pairs.length} videos total.`);
+        // Add breathing room between batches for stability
+        if (batchIndex < batches.length - 1 && !isCancelling) {
+          console.log(`Taking a ${1000}ms break before next batch...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
-
-        console.log(`📈 About to continue to next iteration: ${i + 1} -> ${i + 2}`);
       }
+
+      console.log(`🎉 All batches completed! Processed ${pairs.length} videos total.`);
       // Check if generation was cancelled before finishing
       if (isCancelling) {
         console.log('Video generation was cancelled');

@@ -26,7 +26,7 @@ Key features include:
 -   **Modular Pair Containers**: Glassmorphism-designed containers for audio and images with drag-and-drop swapping and hover effects.
 -   **Media Previews**: Waveform visualization for audio and image display.
 -   **Enhanced Merge Animation**: Visual merging of audio and image containers into a "Video Loading Container" during generation using Framer Motion.
--   **Video Generation**: Outputs 1920x1080 videos with white background, high-quality audio (AAC 320k), and optional user logo overlay. Includes real-time progress and cancellation. Processes videos sequentially for stability.
+-   **Video Generation**: Outputs 1920x1080 videos with white background, high-quality audio (AAC 320k), and optional user logo overlay. Includes real-time progress and cancellation. Processes videos with controlled concurrency (2 at a time) for optimal performance while maintaining stability across 1-100 video batches.
 -   **Download Page**: For video preview, bulk download, and options to create more videos.
 -   **Smart Page Management**: Automatic page detection based on application state.
 -   **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images.
