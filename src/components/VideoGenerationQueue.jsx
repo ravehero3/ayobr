@@ -128,7 +128,7 @@ function VideoGenerationQueue() {
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">
                   <img 
-                    src={`file://${job.imagePath}`} 
+                    src={job.imagePath} 
                     alt="thumbnail" 
                     className="w-20 h-20 object-cover rounded-lg"
                     onError={(e) => {
@@ -230,7 +230,7 @@ function VideoGenerationQueue() {
               </button>
             </div>
             <video 
-              src={`file://${previewVideo.path}`}
+              src={previewVideo.path}
               controls 
               autoPlay
               className="w-full rounded-lg"
