@@ -91,7 +91,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           </div>
 
           {/* Miniature Containers Grid - Moved 30px down */}
-          <div className="relative overflow-y-auto mb-8 px-4" style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)' }}>
+          <div className="relative overflow-y-scroll mb-8 px-4" style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)' }}>
             {/* Grid of pairs */}
           <div
             className="grid gap-6 w-full mx-auto"
@@ -190,10 +190,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                       backdropFilter: 'blur(11.4px)',
                       WebkitBackdropFilter: 'blur(11.4px)',
-                      border: isComplete ? '1px solid transparent' : '1px solid rgba(0, 0, 0, 0.4)',
-                      backgroundImage: isComplete ? 'linear-gradient(rgba(0, 0, 0, 0.41), rgba(0, 0, 0, 0.41)), linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%)' : 'none',
-                      backgroundOrigin: isComplete ? 'border-box' : 'padding-box',
-                      backgroundClip: isComplete ? 'padding-box, border-box' : 'padding-box',
+                      border: isComplete ? '2px solid transparent' : '1px solid rgba(0, 0, 0, 0.4)',
+                      borderImage: isComplete ? 'linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%) 1' : 'none',
                       padding: '20px',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
