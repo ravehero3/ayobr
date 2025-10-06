@@ -1,0 +1,525 @@
+# Complete Replit Prompt: Professional Concurrent FFmpeg Video Generation System
+
+## Problem Statement
+My Electron + React + Node.js app generates videos from image+audio pairs using FFmpeg. Currently:
+- ✅ Generating 1 video works perfectly and shows preview
+- ❌ Generating 2+ videos simultaneously causes conflicts - progress bars restart instead of showing multiple previews
+- ❌ Root cause: shared temp files and state between concurrent FFmpeg processes
+
+I need a production-ready system that handles multiple concurrent video generations safely.
+
+---
+
+## Complete Solution Requirements
+
+Build a professional video generation system with these components:
+
+### 1️⃣ Job Manager (`src/services/JobManager.js`)
+
+Create a `JobManager` class that manages the video generation queue.
+
+**Job Object Structure:**
+```javascript
+{
+  id: string,              // UUID v4
+  status: "queued" | "processing" | "completed" | "failed",
+  progress: number,        // 0-100
+  imagePath: string,       // Original input file path
+  audioPath: string,       // Original input file path
+  tempDir: string,         // Unique: ./temp/video-jobs/{jobId}/
+  outputPath: string,      // {tempDir}/output.mp4
+  error: string | null,
+  createdAt: number,       // timestamp
+  startedAt: number | null,
+  completedAt: number | null
+}
+```
+
+**Configuration:**
+```javascript
+const CONFIG = {
+  MAX_CONCURRENT_JOBS: 2,
+  TEMP_BASE_DIR: './temp/video-jobs',
+  MAX_QUEUE_SIZE: 20,
+  CLEANUP_COMPLETED_AFTER_MS: 600000  // 10 minutes
+};
+```
+
+**Required Methods:**
+
+```javascript
+class JobManager extends EventEmitter {
+  constructor()
+  // - Initialize jobs Map
+  // - Create temp base directory if doesn't exist
+  // - Run cleanupOrphanedDirs() on startup
+  
+  async createJob(imagePath, audioPath)
+  // - Generate UUID
+  // - Create temp directory ./temp/video-jobs/{uuid}/
+  // - Copy image to {tempDir}/input-image.{ext}
+  // - Copy audio to {tempDir}/input-audio.{ext}
+  // - Create job object with status="queued"
+  // - Add to jobs Map
+  // - Emit 'job-created' event
+  // - Call processQueue()
+  // - Return jobId
+  
+  async createBatchJobs(pairsArray)
+  // pairsArray: [{image: path, audio: path}, ...]
+  // - Create multiple jobs
+  // - Return array of jobIds
+  
+  getJob(jobId)
+  getAllJobs()           // Returns array sorted by createdAt
+  getQueuedJobs()
+  getProcessingJobs()
+  getCompletedJobs()
+  
+  async processQueue()
+  // - Count jobs with status="processing"
+  // - While count < MAX_CONCURRENT_JOBS:
+  //   - Get oldest queued job
+  //   - If found: await startJob(jobId)
+  //   - Else: break
+  
+  async startJob(jobId)
+  // - Update status to "processing", set startedAt
+  // - Emit 'job-started' event
+  // - Call processVideo(job) (see FFmpeg Worker section)
+  
+  updateProgress(jobId, progress)
+  // - Update job.progress
+  // - Emit 'job-progress' event with {jobId, progress}
+  
+  async markCompleted(jobId)
+  // - Set status="completed", completedAt timestamp
+  // - Emit 'job-completed' event
+  // - Schedule cleanup after CLEANUP_COMPLETED_AFTER_MS
+  // - Call processQueue() to start next job
+  
+  async markFailed(jobId, error)
+  // - Set status="failed", error message, completedAt
+  // - Emit 'job-failed' event
+  // - Call processQueue()
+  
+  async cancelJob(jobId)
+  // - If queued: just remove
+  // - If processing: kill FFmpeg process, mark failed
+  // - Emit 'job-cancelled' event
+  // - Clean up temp directory
+  // - Call processQueue()
+  
+  async cleanupJob(jobId)
+  // - Delete temp directory recursively
+  // - Retry up to 3 times if files locked (1 second delay)
+  // - Remove from jobs Map
+  // - Log errors but don't throw
+  
+  async cleanupOrphanedDirs()
+  // - Read ./temp/video-jobs/ directory
+  // - For each subdirectory:
+  //   - Check if older than 1 hour
+  //   - If yes: delete recursively
+  
+  getVideoPath(jobId)
+  // - Return job.outputPath for preview
+}
+```
+
+**Events to Emit:**
+- `'job-created'` → (jobId)
+- `'job-started'` → (jobId)
+- `'job-progress'` → ({jobId, progress})
+- `'job-completed'` → (jobId)
+- `'job-failed'` → ({jobId, error})
+- `'job-cancelled'` → (jobId)
+
+---
+
+### 2️⃣ FFmpeg Worker (integrated into JobManager)
+
+Add this method to JobManager:
+
+```javascript
+async processVideo(job)
+// - Build FFmpeg command:
+//   ffmpeg -loop 1 -i {tempDir}/input-image.{ext} 
+//          -i {tempDir}/input-audio.{ext}
+//          -c:v libx264 -tune stillimage 
+//          -c:a aac -b:a 192k -pix_fmt yuv420p 
+//          -shortest -y {tempDir}/output.mp4
+//
+// - Spawn FFmpeg process using child_process.spawn()
+// - Store process reference in Map for cancellation: activeProcesses.set(jobId, ffmpegProcess)
+// - Parse stderr for progress:
+//   - Look for "Duration: HH:MM:SS" to get total duration
+//   - Look for "time=HH:MM:SS" to get current time
+//   - Calculate: progress = (currentTime / totalDuration) * 100
+//   - Call updateProgress(jobId, progress) every time progress changes
+//
+// - On process exit:
+//   - Remove from activeProcesses Map
+//   - If exit code === 0: call markCompleted(jobId)
+//   - If exit code !== 0: call markFailed(jobId, stderr)
+//
+// - On error: call markFailed(jobId, error.message)
+//
+// - Wrap everything in try-catch
+```
+
+**FFmpeg Progress Parsing Example:**
+```javascript
+// FFmpeg outputs to stderr like:
+// "Duration: 00:00:30.50, start: 0.000000, bitrate: N/A"
+// "frame=  120 fps= 30 q=-1.0 size=     512kB time=00:00:04.00 bitrate=1048.6kbits/s speed=1.2x"
+
+// Parse duration once at start
+const durationMatch = stderr.match(/Duration: (\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+const totalSeconds = hours*3600 + minutes*60 + seconds;
+
+// Parse current time from each progress line
+const timeMatch = line.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+const currentSeconds = hours*3600 + minutes*60 + seconds;
+
+// Calculate percentage
+const progress = Math.min(Math.round((currentSeconds / totalSeconds) * 100), 100);
+```
+
+---
+
+### 3️⃣ Video Generation Service (`src/services/VideoGenerationService.js`)
+
+Create a singleton service that wraps JobManager with a clean API:
+
+```javascript
+class VideoGenerationService {
+  constructor() {
+    this.jobManager = new JobManager();
+    this.setupEventForwarding();
+  }
+  
+  setupEventForwarding() {
+    // Forward all JobManager events to external listeners
+    // This allows UI to subscribe without knowing about JobManager
+  }
+  
+  async generateVideo(imageFile, audioFile) {
+    // Returns jobId
+    return await this.jobManager.createJob(imageFile, audioFile);
+  }
+  
+  async generateVideos(pairsArray) {
+    // pairsArray: [{image: File/path, audio: File/path}, ...]
+    // Returns array of jobIds
+    return await this.jobManager.createBatchJobs(pairsArray);
+  }
+  
+  getJobStatus(jobId) {
+    return this.jobManager.getJob(jobId);
+  }
+  
+  getAllJobs() {
+    return this.jobManager.getAllJobs();
+  }
+  
+  async cancelJob(jobId) {
+    return await this.jobManager.cancelJob(jobId);
+  }
+  
+  getVideoPath(jobId) {
+    return this.jobManager.getVideoPath(jobId);
+  }
+  
+  async cleanupJob(jobId) {
+    return await this.jobManager.cleanupJob(jobId);
+  }
+  
+  // Subscribe to updates
+  onJobUpdate(callback) {
+    // callback receives (eventType, data)
+    // Returns unsubscribe function
+    const events = ['job-created', 'job-started', 'job-progress', 
+                    'job-completed', 'job-failed', 'job-cancelled'];
+    
+    events.forEach(event => {
+      this.jobManager.on(event, (data) => callback(event, data));
+    });
+    
+    return () => {
+      events.forEach(event => {
+        this.jobManager.removeListener(event, callback);
+      });
+    };
+  }
+}
+
+// Export singleton
+export default new VideoGenerationService();
+```
+
+---
+
+### 4️⃣ React UI Component (`src/components/VideoGenerationQueue.jsx`)
+
+Create a component that displays the video generation queue:
+
+**Features:**
+1. File upload section for selecting multiple image+audio pairs
+2. "Generate Videos" button
+3. Queue display showing all jobs with:
+   - Thumbnail (from image)
+   - Status badge (Queued/Processing/Completed/Failed)
+   - Progress bar (for processing jobs)
+   - Action buttons (Cancel/Preview/Retry/Remove)
+4. Real-time updates via service events
+
+**Component Structure:**
+```jsx
+import React, { useState, useEffect } from 'react';
+import VideoGenerationService from '../services/VideoGenerationService';
+
+function VideoGenerationQueue() {
+  const [jobs, setJobs] = useState([]);
+  const [selectedPairs, setSelectedPairs] = useState([]);
+  const [previewVideo, setPreviewVideo] = useState(null);
+  
+  // Subscribe to job updates
+  useEffect(() => {
+    // Initial load
+    setJobs(VideoGenerationService.getAllJobs());
+    
+    // Subscribe to updates
+    const unsubscribe = VideoGenerationService.onJobUpdate((eventType, data) => {
+      // Update jobs state based on event
+      setJobs(VideoGenerationService.getAllJobs());
+    });
+    
+    return unsubscribe;
+  }, []);
+  
+  const handleFileSelection = (files) => {
+    // Build pairs array from selected files
+    // User should select files in pairs or you provide UI to match them
+  };
+  
+  const handleGenerateVideos = async () => {
+    if (selectedPairs.length === 0) return;
+    
+    const jobIds = await VideoGenerationService.generateVideos(selectedPairs);
+    setSelectedPairs([]); // Clear selection
+  };
+  
+  const handleCancel = async (jobId) => {
+    await VideoGenerationService.cancelJob(jobId);
+  };
+  
+  const handlePreview = (jobId) => {
+    const videoPath = VideoGenerationService.getVideoPath(jobId);
+    setPreviewVideo({ jobId, path: videoPath });
+  };
+  
+  const handleClosePreview = async () => {
+    if (previewVideo) {
+      await VideoGenerationService.cleanupJob(previewVideo.jobId);
+      setPreviewVideo(null);
+    }
+  };
+  
+  const handleRetry = async (jobId) => {
+    const job = VideoGenerationService.getJobStatus(jobId);
+    await VideoGenerationService.cleanupJob(jobId);
+    await VideoGenerationService.generateVideo(job.imagePath, job.audioPath);
+  };
+  
+  return (
+    <div className="video-generation-queue">
+      {/* File Upload Section */}
+      <div className="upload-section">
+        {/* File inputs or drag-drop area */}
+        <button onClick={handleGenerateVideos} disabled={selectedPairs.length === 0}>
+          Generate {selectedPairs.length} Video{selectedPairs.length !== 1 ? 's' : ''}
+        </button>
+      </div>
+      
+      {/* Queue Display */}
+      <div className="queue-list">
+        {jobs.map(job => (
+          <div key={job.id} className={`job-item status-${job.status}`}>
+            {/* Thumbnail */}
+            <img src={job.imagePath} alt="thumbnail" className="thumbnail" />
+            
+            {/* Job Info */}
+            <div className="job-info">
+              <div className="job-status">
+                {job.status === 'queued' && '⏳ Waiting in queue...'}
+                {job.status === 'processing' && '🔄 Processing...'}
+                {job.status === 'completed' && '✅ Completed'}
+                {job.status === 'failed' && `❌ Failed: ${job.error}`}
+              </div>
+              
+              {/* Progress Bar */}
+              {job.status === 'processing' && (
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill" 
+                    style={{ width: `${job.progress}%` }}
+                  />
+                  <span className="progress-text">{job.progress}%</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Actions */}
+            <div className="job-actions">
+              {(job.status === 'queued' || job.status === 'processing') && (
+                <button onClick={() => handleCancel(job.id)}>Cancel</button>
+              )}
+              {job.status === 'completed' && (
+                <button onClick={() => handlePreview(job.id)}>Preview</button>
+              )}
+              {job.status === 'failed' && (
+                <button onClick={() => handleRetry(job.id)}>Retry</button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Preview Modal */}
+      {previewVideo && (
+        <div className="preview-modal" onClick={handleClosePreview}>
+          <div className="preview-content" onClick={e => e.stopPropagation()}>
+            <video src={previewVideo.path} controls autoPlay />
+            <button onClick={handleClosePreview}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default VideoGenerationQueue;
+```
+
+**Add basic CSS** for styling the queue (or use your existing styles).
+
+---
+
+## Critical Implementation Rules
+
+### ⚠️ File Isolation (PREVENTS YOUR BUG!)
+- **Each job MUST have UUID-based temp directory**
+- Never use shared names like "temp-image.png"
+- Structure: `./temp/video-jobs/{uuid}/[input-image.ext, input-audio.ext, output.mp4]`
+
+### ⚠️ Concurrency Control
+- **Never exceed MAX_CONCURRENT_JOBS = 2**
+- Use counter of jobs with status="processing"
+- Auto-start next queued job when one completes
+
+### ⚠️ State Management
+- Use Map for jobs storage (not plain object)
+- Each job update creates new object (immutable)
+- Include jobId in all events and callbacks
+
+### ⚠️ Process Management
+- Store active FFmpeg processes in Map: `activeProcesses.set(jobId, process)`
+- On cancel: `process.kill()` then remove from Map
+- Clean up Map on process exit
+
+### ⚠️ Error Handling
+- Wrap all async operations in try-catch
+- Log errors with job context
+- Never let one job's error crash the system
+- Always cleanup temp files even on error
+
+### ⚠️ Memory Management
+- Auto-cleanup completed jobs after 10 minutes
+- Remove from Map after cleanup
+- Clean orphaned directories on startup
+- Limit queue size to prevent memory issues
+
+---
+
+## Dependencies Needed
+
+```json
+{
+  "uuid": "^9.0.0"
+}
+```
+
+Built-in Node.js modules:
+- `events` (EventEmitter)
+- `fs/promises` (file operations)
+- `path` (path manipulation)
+- `child_process` (spawn FFmpeg)
+
+---
+
+## Testing Checklist
+
+After implementation, verify these scenarios work:
+
+1. ✅ Generate 1 video → completes and shows preview
+2. ✅ Generate 2 videos → both complete with separate previews
+3. ✅ Generate 5 videos → only 2 process at once, others queue
+4. ✅ Progress bars → each job shows its own progress independently
+5. ✅ Cancel queued job → doesn't start processing
+6. ✅ Cancel processing job → FFmpeg stops, temp files cleaned
+7. ✅ Retry failed job → creates new job and processes
+8. ✅ Close preview → temp files deleted
+9. ✅ Restart app → old temp directories cleaned up
+10. ✅ Generate 10 jobs → no file leaks, memory stable
+
+---
+
+## Expected File Structure
+
+```
+src/
+├── services/
+│   ├── JobManager.js          (queue + state + FFmpeg processing)
+│   └── VideoGenerationService.js  (public API wrapper)
+├── components/
+│   └── VideoGenerationQueue.jsx   (React UI)
+└── App.jsx (import and use VideoGenerationQueue)
+
+temp/
+└── video-jobs/
+    ├── {uuid-1}/
+    │   ├── input-image.png
+    │   ├── input-audio.mp3
+    │   └── output.mp4
+    ├── {uuid-2}/
+    └── ...
+```
+
+---
+
+## Implementation Order
+
+1. **First:** Create `JobManager.js` with all queue logic and file management
+2. **Second:** Add FFmpeg processing to `JobManager.js` (the `processVideo` method)
+3. **Third:** Create `VideoGenerationService.js` wrapper
+4. **Fourth:** Build `VideoGenerationQueue.jsx` React component
+5. **Finally:** Replace old FFmpeg code in your app with `VideoGenerationService`
+
+---
+
+## Success Criteria
+
+✅ Multiple videos generate concurrently without conflicts  
+✅ Each video has independent progress bar  
+✅ Each video shows its own preview when complete  
+✅ No temp file leaks after operations  
+✅ System handles errors gracefully  
+✅ UI updates in real-time for all jobs  
+✅ Cancellation works correctly  
+✅ Queue respects MAX_CONCURRENT_JOBS limit  
+✅ Orphaned files cleaned on app restart  
+
+---
+
+Please implement this complete system following Node.js and React best practices. Use detailed comments and error handling throughout.
