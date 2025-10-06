@@ -34,7 +34,11 @@ Key features include:
 - **Logo Integration System**: Settings panel allows users to upload logos (PNG, JPG, HEIC, SVG) for video overlay. Logos are stored as base64, displayed as miniature previews, and automatically resized to 200px width while maintaining aspect ratio when used in videos.
 - **Deployment**: Web-based deployment running with webpack dev server, ensuring client-side processing for privacy and performance.
 
-## Recent Changes (October 5, 2025)
+## Recent Changes (October 6, 2025)
+- **Scrollbar Layout Shift Fix**: Changed video generation containers overflow from `overflow-y-auto` to `overflow-y-scroll` to prevent layout shift when scrollbar appears/disappears. The scrollbar is now always visible (even if disabled), eliminating the jarring left-right movement of containers during video generation.
+- **Video Preview Border Gradient Enhancement**: Moved gradient from background to border on completed video preview containers. Gradient now appears only on the 2px border stroke using `borderImage`, while maintaining the dark glassmorphism background. This creates a cleaner, more elegant completed video indicator.
+
+## Previous Changes (October 5, 2025)
 - **UI/UX Fixes and Optimizations**:
   - Fixed z-index hierarchy: Settings window (AppInfoWindow) now properly appears above sleeping alien during video generation (sleeping alien z-index reduced to 9998)
   - Changed video preview container border from green to gradient stroke with multiple blue shades (2 dark blue corners, 1 baby blue, 1 very dark blue) for completed videos on page 3
