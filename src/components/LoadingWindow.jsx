@@ -274,22 +274,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                     </div>
 
-                    {/* Delete button - appears on hover, disabled during generation */}
+                    {/* Delete button - appears on hover */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!isCurrentlyGenerating) {
-                          removePair(pair.id);
-                        }
+                        removePair(pair.id);
                       }}
-                      disabled={isCurrentlyGenerating}
-                      className={`absolute top-2 right-2 w-6 h-6 flex items-center justify-center transition-opacity duration-200 ${
-                        isCurrentlyGenerating 
-                          ? 'opacity-0 cursor-not-allowed' 
-                          : 'opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white cursor-pointer'
-                      }`}
+                      className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-white"
                       style={{ fontSize: '16px', fontWeight: 'bold', zIndex: 90 }}
-                      title={isCurrentlyGenerating ? "Cannot delete while generating" : "Delete"}
                     >
                       ×
                     </button>
