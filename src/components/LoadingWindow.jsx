@@ -185,17 +185,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       minWidth: '240px',
                       maxWidth: '240px',
                       height: '220px',
-                      background: isComplete 
-                        ? 'linear-gradient(rgba(0, 0, 0, 0.41), rgba(0, 0, 0, 0.41)), linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%)'
-                        : 'rgba(0, 0, 0, 0.41)',
-                      backgroundOrigin: isComplete ? 'padding-box, border-box' : 'padding-box',
-                      backgroundClip: isComplete ? 'padding-box, border-box' : 'padding-box',
+                      background: 'rgba(0, 0, 0, 0.41)',
                       borderRadius: '16px',
                       boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                       backdropFilter: 'blur(11.4px)',
                       WebkitBackdropFilter: 'blur(11.4px)',
-                      border: isComplete ? '2px solid transparent' : '1px solid rgba(0, 0, 0, 0.4)',
-                      padding: '20px',
+                      border: isComplete ? 'none' : '1px solid rgba(0, 0, 0, 0.4)',
+                      padding: isComplete ? '2px' : '20px',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
                       overflow: 'visible',
@@ -209,6 +205,34 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       zIndex: 70
                     }}
                   >
+                    {/* Gradient border layer - positioned behind container */}
+                    {isComplete && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          borderRadius: '16px',
+                          background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%)',
+                          zIndex: 0
+                        }}
+                      />
+                    )}
+                    {/* Dark inner background - covers gradient except for 2px border */}
+                    {isComplete && (
+                      <div
+                        className="absolute pointer-events-none"
+                        style={{
+                          top: '2px',
+                          left: '2px',
+                          right: '2px',
+                          bottom: '2px',
+                          borderRadius: '14px',
+                          background: 'rgba(0, 0, 0, 0.41)',
+                          backdropFilter: 'blur(11.4px)',
+                          WebkitBackdropFilter: 'blur(11.4px)',
+                          zIndex: 1
+                        }}
+                      />
+                    )}
                     {/* Enhanced Particle system - similar to Generate Videos button */}
                     <div className="absolute inset-0 pointer-events-none overflow-visible rounded-2xl" style={{ zIndex: 80 }}>
                       {/* Particles positioned around entire video preview container */}
