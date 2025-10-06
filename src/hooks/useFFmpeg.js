@@ -133,19 +133,6 @@ export const useFFmpeg = () => {
               return { pair, success: true, video: existingVideo, skipped: true };
             }
 
-            // Check if the video generation state claims completion but no video exists in store
-            const currentVideoState = currentStore.videoGenerationStates[pair.id];
-            if (currentVideoState && currentVideoState.isComplete && currentVideoState.progress === 100 && !existingVideo) {
-              console.log(`⚠️ Found broken state for pair ${pair.id} - marked complete but no video in store, resetting...`);
-              setVideoGenerationState(pair.id, {
-                isGenerating: false,
-                progress: 0,
-                isComplete: false,
-                video: null,
-                error: null
-              });
-            }
-
             // Clear any existing state before starting
             setVideoGenerationState(pair.id, {
               isGenerating: false,

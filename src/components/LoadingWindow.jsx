@@ -91,7 +91,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           </div>
 
           {/* Miniature Containers Grid - Moved 30px down */}
-          <div className="relative overflow-y-scroll mb-8 px-4" style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)' }}>
+          <div className="relative overflow-y-auto mb-8 px-4" style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)', paddingTop: '60px', paddingBottom: '60px' }}>
             {/* Grid of pairs */}
           <div
             className="grid gap-6 w-full mx-auto"
