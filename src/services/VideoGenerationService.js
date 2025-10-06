@@ -1,4 +1,4 @@
-const JobManager = require('./JobManager');
+import JobManager from './JobManager';
 
 class VideoGenerationService {
   constructor() {
@@ -100,4 +100,4 @@ class VideoGenerationService {
   }
 }
 
-module.exports = new VideoGenerationService();
+export default new VideoGenerationService();

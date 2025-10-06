@@ -1,54 +1,64 @@
-const { EventEmitter } = require('events');
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs/promises');
-const fsSync = require('fs');
-const path = require('path');
-const { spawn } = require('child_process');
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { v4 as uuidv4 } from 'uuid';
 
 const CONFIG = {
   MAX_CONCURRENT_JOBS: 2,
-  TEMP_BASE_DIR: './temp/video-jobs',
   MAX_QUEUE_SIZE: 20,
   CLEANUP_COMPLETED_AFTER_MS: 600000
 };
 
-class JobManager extends EventEmitter {
+class JobManager {
   constructor() {
-    super();
     this.jobs = new Map();
     this.activeProcesses = new Map();
     this.cleanupTimers = new Map();
-    this.initialize();
+    this.eventListeners = new Map();
+    this.ffmpeg = null;
+    this.isFFmpegLoaded = false;
+    this.initializeFFmpeg();
   }
 
-  async initialize() {
+  async initializeFFmpeg() {
+    if (this.isFFmpegLoaded) return;
+
     try {
-      await fs.mkdir(CONFIG.TEMP_BASE_DIR, { recursive: true });
-      await this.cleanupOrphanedDirs();
+      console.log('Initializing FFmpeg...');
+      this.ffmpeg = new FFmpeg();
+
+      this.ffmpeg.on('log', ({ message }) => {
+        console.log('FFmpeg:', message);
+      });
+
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
+      await this.ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      });
+
+      this.isFFmpegLoaded = true;
+      console.log('FFmpeg initialized successfully');
     } catch (error) {
-      console.error('JobManager initialization error:', error);
+      console.error('Failed to initialize FFmpeg:', error);
+      throw error;
     }
   }
 
   async createJob(imagePath, audioPath) {
+    await this.initializeFFmpeg();
+
     if (this.jobs.size >= CONFIG.MAX_QUEUE_SIZE) {
       throw new Error('Queue is full. Maximum jobs limit reached.');
     }
 
     const jobId = uuidv4();
-    const tempDir = path.join(CONFIG.TEMP_BASE_DIR, jobId);
 
     try {
-      await fs.mkdir(tempDir, { recursive: true });
-
-      const imageExt = path.extname(imagePath);
-      const audioExt = path.extname(audioPath);
-      const tempImagePath = path.join(tempDir, `input-image${imageExt}`);
-      const tempAudioPath = path.join(tempDir, `input-audio${audioExt}`);
-      const outputPath = path.join(tempDir, 'output.mp4');
-
-      await fs.copyFile(imagePath, tempImagePath);
-      await fs.copyFile(audioPath, tempAudioPath);
+      const imageExt = this.getFileExtension(imagePath);
+      const audioExt = this.getFileExtension(audioPath);
+      const inputImageName = `input-image-${jobId}${imageExt}`;
+      const inputAudioName = `input-audio-${jobId}${audioExt}`;
+      const outputName = `output-${jobId}.mp4`;
 
       const job = {
         id: jobId,
@@ -56,10 +66,11 @@ class JobManager extends EventEmitter {
         progress: 0,
         imagePath: imagePath,
         audioPath: audioPath,
-        tempDir: tempDir,
-        tempImagePath: tempImagePath,
-        tempAudioPath: tempAudioPath,
-        outputPath: outputPath,
+        inputImageName: inputImageName,
+        inputAudioName: inputAudioName,
+        outputName: outputName,
+        videoBlob: null,
+        videoBlobURL: null,
         error: null,
         createdAt: Date.now(),
         startedAt: null,
@@ -74,11 +85,6 @@ class JobManager extends EventEmitter {
       return jobId;
     } catch (error) {
       console.error(`Failed to create job ${jobId}:`, error);
-      try {
-        await fs.rm(tempDir, { recursive: true, force: true });
-      } catch (cleanupError) {
-        console.error('Cleanup error:', cleanupError);
-      }
       throw error;
     }
   }
@@ -94,6 +100,11 @@ class JobManager extends EventEmitter {
       }
     }
     return jobIds;
+  }
+
+  getFileExtension(path) {
+    const match = path.match(/\.([^.]+)$/);
+    return match ? `.${match[1]}` : '';
   }
 
   getJob(jobId) {
@@ -128,7 +139,7 @@ class JobManager extends EventEmitter {
     const jobsToStart = queuedJobs.slice(0, availableSlots);
 
     for (const job of jobsToStart) {
-      await this.startJob(job.id);
+      this.startJob(job.id);
     }
   }
 
@@ -197,10 +208,9 @@ class JobManager extends EventEmitter {
     }
 
     if (job.status === 'processing') {
-      const process = this.activeProcesses.get(jobId);
-      if (process) {
-        process.kill('SIGTERM');
-        this.activeProcesses.delete(jobId);
+      const cancelFlag = this.activeProcesses.get(jobId);
+      if (cancelFlag) {
+        cancelFlag.cancelled = true;
       }
 
       job.status = 'failed';
@@ -225,64 +235,67 @@ class JobManager extends EventEmitter {
       this.cleanupTimers.delete(jobId);
     }
 
-    let retries = 3;
-    while (retries > 0) {
-      try {
-        if (fsSync.existsSync(job.tempDir)) {
-          await fs.rm(job.tempDir, { recursive: true, force: true });
-        }
-        this.jobs.delete(jobId);
-        return;
-      } catch (error) {
-        console.error(`Cleanup attempt failed for ${jobId}, retries left: ${retries - 1}`, error);
-        retries--;
-        if (retries > 0) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-    }
-
-    console.error(`Failed to cleanup job ${jobId} after all retries`);
-    this.jobs.delete(jobId);
-  }
-
-  async cleanupOrphanedDirs() {
     try {
-      if (!fsSync.existsSync(CONFIG.TEMP_BASE_DIR)) {
-        return;
+      if (job.videoBlobURL) {
+        URL.revokeObjectURL(job.videoBlobURL);
       }
 
-      const entries = await fs.readdir(CONFIG.TEMP_BASE_DIR);
-      const oneHourAgo = Date.now() - 3600000;
-
-      for (const entry of entries) {
-        const dirPath = path.join(CONFIG.TEMP_BASE_DIR, entry);
+      if (this.ffmpeg && this.isFFmpegLoaded) {
         try {
-          const stats = await fs.stat(dirPath);
-          if (stats.isDirectory() && stats.mtimeMs < oneHourAgo) {
-            console.log(`Cleaning orphaned directory: ${entry}`);
-            await fs.rm(dirPath, { recursive: true, force: true });
-          }
+          await this.ffmpeg.deleteFile(job.inputImageName).catch(() => {});
+          await this.ffmpeg.deleteFile(job.inputAudioName).catch(() => {});
+          await this.ffmpeg.deleteFile(job.outputName).catch(() => {});
         } catch (error) {
-          console.error(`Failed to cleanup orphaned dir ${entry}:`, error);
+          console.log('Error cleaning up FFmpeg files:', error);
         }
       }
+
+      this.jobs.delete(jobId);
+      this.activeProcesses.delete(jobId);
     } catch (error) {
-      console.error('Error during orphaned dirs cleanup:', error);
+      console.error(`Cleanup error for job ${jobId}:`, error);
+      this.jobs.delete(jobId);
     }
   }
 
   getVideoPath(jobId) {
     const job = this.jobs.get(jobId);
-    return job ? job.outputPath : null;
+    return job ? job.videoBlobURL : null;
   }
 
   async processVideo(job) {
+    const cancelFlag = { cancelled: false };
+    this.activeProcesses.set(job.id, cancelFlag);
+
     try {
-      const args = [
+      const imageFile = await fetchFile(job.imagePath);
+      const audioFile = await fetchFile(job.audioPath);
+
+      await this.ffmpeg.writeFile(job.inputImageName, imageFile);
+      await this.ffmpeg.writeFile(job.inputAudioName, audioFile);
+
+      let totalDuration = null;
+      let lastProgress = 0;
+
+      this.ffmpeg.on('progress', ({ progress, time }) => {
+        if (cancelFlag.cancelled) return;
+
+        const currentProgress = Math.min(Math.round(progress * 100), 100);
+        if (currentProgress !== lastProgress) {
+          lastProgress = currentProgress;
+          this.updateProgress(job.id, currentProgress);
+        }
+      });
+
+      if (cancelFlag.cancelled) {
+        await this.markFailed(job.id, 'Cancelled');
+        return;
+      }
+
+      await this.ffmpeg.exec([
         '-loop', '1',
-        '-i', job.tempImagePath,
-        '-i', job.tempAudioPath,
+        '-i', job.inputImageName,
+        '-i', job.inputAudioName,
         '-c:v', 'libx264',
         '-tune', 'stillimage',
         '-c:a', 'aac',
@@ -290,66 +303,66 @@ class JobManager extends EventEmitter {
         '-pix_fmt', 'yuv420p',
         '-shortest',
         '-y',
-        job.outputPath
-      ];
+        job.outputName
+      ]);
 
-      const ffmpegProcess = spawn('ffmpeg', args);
-      this.activeProcesses.set(job.id, ffmpegProcess);
+      if (cancelFlag.cancelled) {
+        await this.markFailed(job.id, 'Cancelled');
+        return;
+      }
 
-      let stderrOutput = '';
-      let totalDuration = null;
+      const data = await this.ffmpeg.readFile(job.outputName);
+      const blob = new Blob([data.buffer], { type: 'video/mp4' });
+      const blobURL = URL.createObjectURL(blob);
 
-      ffmpegProcess.stderr.on('data', (data) => {
-        const output = data.toString();
-        stderrOutput += output;
+      const updatedJob = this.jobs.get(job.id);
+      if (updatedJob) {
+        updatedJob.videoBlob = blob;
+        updatedJob.videoBlobURL = blobURL;
+        this.jobs.set(job.id, updatedJob);
+      }
 
-        if (!totalDuration) {
-          const durationMatch = output.match(/Duration: (\d{2}):(\d{2}):(\d{2}\.\d{2})/);
-          if (durationMatch) {
-            const hours = parseInt(durationMatch[1]);
-            const minutes = parseInt(durationMatch[2]);
-            const seconds = parseFloat(durationMatch[3]);
-            totalDuration = hours * 3600 + minutes * 60 + seconds;
-          }
-        }
-
-        if (totalDuration) {
-          const timeMatch = output.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
-          if (timeMatch) {
-            const hours = parseInt(timeMatch[1]);
-            const minutes = parseInt(timeMatch[2]);
-            const seconds = parseFloat(timeMatch[3]);
-            const currentTime = hours * 3600 + minutes * 60 + seconds;
-            const progress = Math.min(Math.round((currentTime / totalDuration) * 100), 100);
-            this.updateProgress(job.id, progress);
-          }
-        }
-      });
-
-      ffmpegProcess.on('error', (error) => {
-        console.error(`FFmpeg process error for job ${job.id}:`, error);
-        this.activeProcesses.delete(job.id);
-        this.markFailed(job.id, error.message);
-      });
-
-      ffmpegProcess.on('close', (code) => {
-        this.activeProcesses.delete(job.id);
-
-        if (code === 0) {
-          this.markCompleted(job.id);
-        } else {
-          const errorMsg = `FFmpeg exited with code ${code}`;
-          console.error(`${errorMsg} for job ${job.id}`);
-          console.error('FFmpeg stderr:', stderrOutput);
-          this.markFailed(job.id, errorMsg);
-        }
-      });
+      this.ffmpeg.off('progress');
+      await this.markCompleted(job.id);
 
     } catch (error) {
       console.error(`Failed to process video for job ${job.id}:`, error);
-      this.markFailed(job.id, error.message);
+      this.ffmpeg.off('progress');
+      await this.markFailed(job.id, error.message);
+    } finally {
+      this.activeProcesses.delete(job.id);
+    }
+  }
+
+  on(event, callback) {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, []);
+    }
+    this.eventListeners.get(event).push(callback);
+  }
+
+  off(event, callback) {
+    if (this.eventListeners.has(event)) {
+      const listeners = this.eventListeners.get(event);
+      const index = listeners.indexOf(callback);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    }
+  }
+
+  emit(event, data) {
+    if (this.eventListeners.has(event)) {
+      const listeners = this.eventListeners.get(event);
+      listeners.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`Error in event listener for ${event}:`, error);
+        }
+      });
     }
   }
 }
 
-module.exports = JobManager;
+export default JobManager;
