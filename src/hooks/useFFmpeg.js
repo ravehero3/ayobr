@@ -296,6 +296,10 @@ export const useFFmpeg = () => {
         } else if (currentState && currentState.error) {
           console.log(`Keeping error state for pair ${pair.id}:`, currentState.error);
           // Keep error state as is
+        } else if (currentState && currentState.isComplete && currentState.video) {
+          // State is already complete with a video - keep it (prevents race condition in concurrent generation)
+          console.log(`Pair ${pair.id} already has complete state with video, keeping it`);
+          // Don't modify the state - it's already correct
         } else {
           console.log(`No video found for pair ${pair.id}, clearing state`);
           setVideoGenerationState(pair.id, {
