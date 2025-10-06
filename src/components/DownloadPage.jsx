@@ -133,8 +133,8 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                     boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                     backdropFilter: 'blur(11.4px)',
                     WebkitBackdropFilter: 'blur(11.4px)',
-                    border: '1px solid rgba(29, 78, 216, 0.6)', // Dark blue border for completed
-                    padding: '20px',
+                    border: 'none',
+                    padding: '2px',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
                     overflow: 'visible',
@@ -142,10 +142,71 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                   }}
                   whileHover={{
                     backgroundColor: 'rgba(0, 0, 0, 0.51)',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(29, 78, 216, 0.3), 0 0 80px rgba(29, 78, 216, 0.2)',
+                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(59, 130, 246, 0.4), 0 0 80px rgba(96, 165, 250, 0.3)',
                     zIndex: 70
                   }}
                 >
+                  {/* Gradient border layer - positioned behind container */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      borderRadius: '16px',
+                      background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%)',
+                      zIndex: 0
+                    }}
+                  />
+                  {/* Dark inner background - covers gradient except for 2px border */}
+                  <div
+                    className="absolute pointer-events-none"
+                    style={{
+                      top: '2px',
+                      left: '2px',
+                      right: '2px',
+                      bottom: '2px',
+                      borderRadius: '14px',
+                      background: 'rgba(0, 0, 0, 0.41)',
+                      backdropFilter: 'blur(11.4px)',
+                      WebkitBackdropFilter: 'blur(11.4px)',
+                      zIndex: 1
+                    }}
+                  />
+                  {/* Enhanced Particle system - same as LoadingWindow */}
+                  <div className="absolute inset-0 pointer-events-none overflow-visible rounded-2xl" style={{ zIndex: 80 }}>
+                    {/* Particles positioned around entire video preview container */}
+                    {[...Array(12)].map((_, i) => {
+                      // Distribute particles around the perimeter of the container
+                      const angle = (i * 360) / 12;
+                      const radius = 45;
+                      const centerX = 50;
+                      const centerY = 50;
+                      
+                      return (
+                        <motion.div
+                          key={`progress-particle-${i}`}
+                          className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{
+                            width: '2px',
+                            height: '2px',
+                            background: i % 2 === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(179, 229, 252, 0.8)',
+                            top: `${centerY + radius * Math.sin(angle * Math.PI / 180)}%`,
+                            left: `${centerX + radius * Math.cos(angle * Math.PI / 180)}%`,
+                            boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
+                          }}
+                          animate={{
+                            x: [0, 20 * Math.cos(i * 30 * Math.PI / 180), 20 * Math.cos((i * 30 + 90) * Math.PI / 180), 20 * Math.cos((i * 30 + 180) * Math.PI / 180), 20 * Math.cos((i * 30 + 270) * Math.PI / 180), 0],
+                            y: [0, 20 * Math.sin(i * 30 * Math.PI / 180), 20 * Math.sin((i * 30 + 90) * Math.PI / 180), 20 * Math.sin((i * 30 + 180) * Math.PI / 180), 20 * Math.sin((i * 30 + 270) * Math.PI / 180), 0],
+                            scale: [0.8, 1.2, 1.0, 0.8, 1.0, 0.8]
+                          }}
+                          transition={{
+                            duration: 4.95,
+                            repeat: Infinity,
+                            delay: i * 0.25,
+                            ease: "linear"
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
 
                   {/* Delete button */}
                   <button
@@ -236,7 +297,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                         )}
 
                         {/* Success indicator overlay */}
-                        <div className="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center" style={{ zIndex: 10 }}>
+                        <div className="absolute top-1 right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center" style={{ zIndex: 10 }}>
                           <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
@@ -244,13 +305,13 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                       </div>
                     </div>
 
-                    {/* Completed Status Bar - Green instead of blue */}
+                    {/* Completed Status Bar - Blue to match LoadingWindow */}
                     <div className="w-full bg-white/10 rounded-full h-2 mt-4">
                       <div
                         className="h-full rounded-full w-full"
                         style={{
-                          background: 'linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%)',
-                          boxShadow: '0 0 15px rgba(16, 185, 129, 0.4)'
+                          background: 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)',
+                          boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
                         }}
                       />
                     </div>
