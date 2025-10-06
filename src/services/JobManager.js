@@ -3,7 +3,7 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { v4 as uuidv4 } from 'uuid';
 
 const CONFIG = {
-  MAX_CONCURRENT_JOBS: 2,
+  MAX_CONCURRENT_JOBS: 1,
   MAX_QUEUE_SIZE: 20,
   CLEANUP_COMPLETED_AFTER_MS: 600000
 };
