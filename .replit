@@ -15,7 +15,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "TypeBeatz Dev Server"
+args = "Server"
 
 [[workflows.workflow]]
 name = "Start Dev Server"
@@ -65,23 +65,23 @@ task = "shell.exec"
 args = "npx webpack serve --config webpack.simple.config.js --host 0.0.0.0 --port 5000"
 
 [[workflows.workflow]]
-name = "TypeBeatz Dev Server"
+name = "Server"
 author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 40547
+localPort = 37903
 externalPort = 3000
 
 [[ports]]
