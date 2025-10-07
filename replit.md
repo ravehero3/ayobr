@@ -19,6 +19,8 @@ The application features a futuristic dark theme with deep navy and matte black 
 ### Technical Implementations
 The application is a cross-platform desktop application built with Electron, a React (19.1.0) frontend, and TailwindCSS (4.1.11). State management is handled by Zustand (5.0.6). Client-side video generation uses FFmpeg.wasm (0.12.15), and audio analysis for waveforms uses WaveSurfer.js (7.9.9). The build system relies on Webpack (5.99.9) and Babel. The application is deployed via a web-based webpack dev server, ensuring client-side processing for privacy and performance.
 
+**Video Processing Optimizations**: JobManager implements FFmpeg instance pooling with a maximum of 3 concurrent instances to prevent memory exhaustion. Each video job uses a dedicated FFmpeg instance from the pool, eliminating lock contention and enabling true parallel processing. Intelligent prefetching prepares files for upcoming jobs while current ones process, with automatic buffer cleanup on cancellation to prevent memory leaks. The system supports up to 3 concurrent video generations with robust cancellation handling and terminal state guards to prevent race conditions.
+
 ### Feature Specifications
 Key features include:
 -   **4-Page Navigation System**: Smart transitions between Upload, File Management, Generation, and Download pages.
