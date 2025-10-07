@@ -4,7 +4,7 @@ import { useAppStore } from '../store/appStore';
 import mrakyBackground from '../assets/mraky-a-zzz.png';
 
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
-  const { getVideoGenerationState, generatedVideos, videoSettings, removePair } = useAppStore();
+  const { getVideoGenerationState, generatedVideos, videoSettings, removePair, popPage, resetApp } = useAppStore();
 
   // Function to download a single video
   const handleDownloadSingle = async (video, event) => {
@@ -85,9 +85,65 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         >
           {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
 
-          {/* Header space - keeping for layout consistency */}
+          {/* Header space with action buttons */}
           <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 50, paddingTop: '0px', paddingBottom: '24px', marginTop: '-64px' }}>
-            {/* Header text removed */}
+            {/* Action Buttons */}
+            <div className="flex gap-4 items-center justify-center mb-4">
+              {/* Back Button - returns to fileManagement with files preserved */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Back button clicked - preserving files and returning to fileManagement');
+                  popPage('fileManagement');
+                }}
+                className="px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+                style={{
+                  background: 'rgba(59, 130, 246, 0.2)',
+                  border: '1px solid rgba(59, 130, 246, 0.4)',
+                  color: '#60a5fa',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(59, 130, 246, 0.3)';
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
+                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                }}
+              >
+                <span>←</span>
+                <span>Back to Edit</span>
+              </button>
+
+              {/* Reset Button - complete app reset */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Reset button clicked - initiating complete app reset');
+                  if (onStop) onStop(); // Stop any ongoing generation
+                  resetApp(); // Complete state reset
+                }}
+                className="px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  color: '#f87171',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
+                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                }}
+              >
+                <span>×</span>
+                <span>Start Over</span>
+              </button>
+            </div>
           </div>
 
           {/* Miniature Containers Grid - Moved 30px down */}

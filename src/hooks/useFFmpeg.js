@@ -32,7 +32,7 @@ export const useFFmpeg = () => {
     }
 
     // Clear any stuck generation states before starting
-    const { clearStuckGenerationStates } = useAppStore.getState();
+    const { clearStuckGenerationStates, ensureAutoNavigation } = useAppStore.getState();
     clearStuckGenerationStates();
 
     try {
@@ -42,6 +42,10 @@ export const useFFmpeg = () => {
       setStoreIsGenerating(true);
       resetCancellation();
       setProgress(0);
+      
+      // Ensure navigation returns to auto mode so LoadingWindow appears
+      ensureAutoNavigation();
+      
       // Don't clear existing videos - let users accumulate multiple generations
 
       // Process videos sequentially - one at a time

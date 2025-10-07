@@ -44,6 +44,14 @@ export const useAppStore = create((set, get) => ({
   currentPage: null, // null means auto-detect, otherwise explicit page
   isFilesBeingDropped: false, // Track when files are being processed
   
+  // Navigation state machine
+  navigation: {
+    current: null, // Current page override (null means use auto-detection)
+    stack: [], // Navigation history (max 5 entries)
+    intent: null, // User intent: null | 'reset' | 'back'
+    mode: 'auto' // 'auto' | 'manual' - determines if we use auto-detection or manual navigation
+  },
+  
   // User profile
   userProfileImage: null, // Store base64 image data
   username: loadFromLocalStorage('username', 'Producer'), // Store username with persistence
@@ -218,6 +226,75 @@ export const useAppStore = create((set, get) => ({
   // Reset page state to auto-detect (useful for recovery)
   resetPageState: () => set({ currentPage: null, isFilesBeingDropped: false }),
 
+  // Navigation state machine actions
+  navigateTo: (page, options = {}) => set(state => {
+    const { mode = 'manual', pushToHistory = true } = options;
+    const newStack = pushToHistory && state.navigation.current 
+      ? [...state.navigation.stack, state.navigation.current].slice(-5) // Keep last 5 entries
+      : state.navigation.stack;
+    
+    return {
+      navigation: {
+        ...state.navigation,
+        current: page,
+        stack: newStack,
+        mode
+      }
+    };
+  }),
+
+  pushPage: (page) => set(state => ({
+    navigation: {
+      ...state.navigation,
+      current: page,
+      stack: [...state.navigation.stack, state.navigation.current || 'upload'].slice(-5),
+      mode: 'manual'
+    }
+  })),
+
+  popPage: (defaultPage = 'fileManagement') => set(state => {
+    const stack = [...state.navigation.stack];
+    const previousPage = stack.pop() || defaultPage;
+    
+    return {
+      navigation: {
+        ...state.navigation,
+        current: previousPage,
+        stack,
+        mode: 'manual',
+        intent: 'back'
+      }
+    };
+  }),
+
+  setNavigationIntent: (intent) => set(state => ({
+    navigation: {
+      ...state.navigation,
+      intent
+    }
+  })),
+
+  ensureAutoNavigation: () => set(state => ({
+    navigation: {
+      ...state.navigation,
+      mode: 'auto',
+      intent: null
+    }
+  })),
+
+  // Get current page respecting navigation mode
+  selectCurrentPage: () => {
+    const state = get();
+    
+    // If in manual mode, use the explicit navigation current page
+    if (state.navigation.mode === 'manual' && state.navigation.current) {
+      return state.navigation.current;
+    }
+    
+    // Otherwise fall back to auto-detection
+    return state.getCurrentPage();
+  },
+
   // Clear stuck generation states
   clearStuckGenerationStates: () => set((state) => {
     const now = Date.now();
@@ -365,6 +442,56 @@ export const useAppStore = create((set, get) => ({
     currentProgress: 0,
     videoGenerationStates: {}
   }),
+
+  // Complete app reset - fresh start (for X button)
+  resetApp: () => {
+    console.log('Complete app reset initiated');
+    
+    // Signal cancellation first (FFmpeg hook will handle actual process termination)
+    const state = get();
+    if (state.isGenerating) {
+      console.log('App reset: Signaling generation cancellation');
+      set({ isCancelling: true });
+    }
+    
+    // Create fresh pair IDs
+    const freshPairs = [
+      { id: uuidv4(), audio: null, image: null },
+      { id: uuidv4(), audio: null, image: null }
+    ];
+    
+    return set({
+      // Reset all pairs and videos
+      pairs: freshPairs,
+      generatedVideos: [],
+      
+      // Reset generation state
+      isGenerating: false,
+      isCancelling: false,
+      currentProgress: 0,
+      videoGenerationStates: {},
+      
+      // Reset preparation state
+      pairPreparationStates: {},
+      preparedAssets: {},
+      displayIndices: {},
+      nextDisplayIndex: 1,
+      preparationQueue: [],
+      isPreparingPairs: false,
+      
+      // Reset page tracking
+      currentPage: null,
+      isFilesBeingDropped: false,
+      
+      // Reset navigation to auto mode on upload page
+      navigation: {
+        current: null,
+        stack: [],
+        intent: 'reset',
+        mode: 'auto'
+      }
+    });
+  },
 
   // Clear all video generation states
   clearAllVideoGenerationStates: () => set({

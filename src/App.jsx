@@ -21,7 +21,7 @@ import SleepingAlien from './components/SleepingAlien';
 
 
 function App() {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, selectCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped, ensureAutoNavigation } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { prepareCompletePairs } = usePairPreparation(); // Activate automatic pair preparation
   const { generateVideos, stopGeneration } = useFFmpeg();
@@ -173,7 +173,7 @@ function App() {
   }, [handleFileDrop, clearFileCache]);
 
   // Page management
-  const currentPage = getCurrentPage();
+  const currentPage = selectCurrentPage();
 
   // Recovery mechanism for stuck states
   React.useEffect(() => {
