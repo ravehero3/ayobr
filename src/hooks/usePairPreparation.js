@@ -11,7 +11,6 @@ export const usePairPreparation = () => {
     getPreparationMemoryUsage,
     getPreparedAssets,
     clearPreparedAssets,
-    assignDisplayIndex,
     isPreparingPairs,
     setIsPreparingPairs,
     preparedAssets
@@ -57,11 +56,6 @@ export const usePairPreparation = () => {
     console.log(`Starting preparation for ${pairsToPrep.length} pairs`);
     preparingRef.current = true;
     setIsPreparingPairs(true);
-
-    // Assign display indices to new pairs
-    pairsToPrep.forEach(pair => {
-      assignDisplayIndex(pair.id);
-    });
 
     // Set initial preparation state for all pairs
     pairsToPrep.forEach(pair => {
@@ -127,7 +121,7 @@ export const usePairPreparation = () => {
       preparingRef.current = false;
       setIsPreparingPairs(false);
     }
-  }, [pairs, videoSettings, needsPreparation, setPairPreparationState, setPreparedAssets, getPreparationMemoryUsage, assignDisplayIndex, setIsPreparingPairs]);
+  }, [pairs, videoSettings, needsPreparation, setPairPreparationState, setPreparedAssets, getPreparationMemoryUsage, setIsPreparingPairs]);
 
   /**
    * Retry preparation for a specific pair
