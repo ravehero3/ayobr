@@ -7,7 +7,7 @@ import PairMergeAnimation from './PairMergeAnimation';
 import { useAppStore } from '../store/appStore';
 
 const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
-  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair, containerSpacing } = useAppStore();
+  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair, containerSpacing, getDisplayIndex, getPairPreparationState } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
   const [isValidDragTarget, setIsValidDragTarget] = useState(false);
@@ -19,6 +19,9 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
   const videoState = getVideoGenerationState(pair.id);
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+  const displayIndex = getDisplayIndex(pair.id);
+  const preparationState = getPairPreparationState(pair.id);
+  const isComplete = pair.audio && pair.image;
 
   const handleDelete = () => {
     removePair(pair.id);
@@ -169,6 +172,52 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       marginBottom: `${4 + Math.abs(containerSpacing)}px`,
       marginTop: pairs.findIndex(p => p.id === pair.id) === 0 ? '281px' : '0px'
     }}>
+      {/* Container Header - Number and Status */}
+      {displayIndex && (
+        <div className="absolute -top-10 left-0 flex items-center gap-3 z-20">
+          {/* Container Number */}
+          <div className="text-white/60 font-medium text-sm">
+            Pair #{displayIndex}
+          </div>
+          
+          {/* Preparation Status Indicator */}
+          {isComplete && (
+            <div className="flex items-center gap-2">
+              {preparationState.status === 'ready' && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 border border-green-400/40 backdrop-blur-sm">
+                  <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                  <span className="text-green-400 text-xs font-medium">Ready</span>
+                </div>
+              )}
+              {preparationState.status === 'preparing' && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-500/20 border border-yellow-400/40 backdrop-blur-sm">
+                  <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                  <span className="text-yellow-400 text-xs font-medium">Preparing {preparationState.progress}%</span>
+                </div>
+              )}
+              {preparationState.status === 'queued' && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 backdrop-blur-sm">
+                  <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                  <span className="text-blue-400 text-xs font-medium">Queued</span>
+                </div>
+              )}
+              {preparationState.status === 'failed' && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/20 border border-red-400/40 backdrop-blur-sm">
+                  <div className="w-2 h-2 rounded-full bg-red-400"></div>
+                  <span className="text-red-400 text-xs font-medium">Failed</span>
+                </div>
+              )}
+              {preparationState.status === 'idle' && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-500/20 border border-gray-400/40 backdrop-blur-sm">
+                  <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                  <span className="text-gray-400 text-xs font-medium">Pending</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
         <button
