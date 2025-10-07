@@ -32,6 +32,14 @@ export const useAppStore = create((set, get) => ({
   currentProgress: 0,
   videoGenerationStates: {}, // Track generation progress for each pair
   
+  // Pair preparation state (new optimization feature)
+  pairPreparationStates: {}, // Track preparation status for each pair: { pairId: { status, progress, error } }
+  preparedAssets: {}, // Cache prepared data for each pair: { pairId: { audioBuffer, imageBuffer, audioDuration, etc } }
+  displayIndices: {}, // Stable display numbers for containers: { pairId: displayIndex }
+  nextDisplayIndex: 1, // Counter for assigning display indices
+  preparationQueue: [], // Queue of pair IDs waiting to be prepared
+  isPreparingPairs: false, // Flag to track if preparation is in progress
+  
   // Page tracking
   currentPage: null, // null means auto-detect, otherwise explicit page
   isFilesBeingDropped: false, // Track when files are being processed
@@ -86,6 +94,19 @@ export const useAppStore = create((set, get) => ({
     const newVideoGenerationStates = { ...state.videoGenerationStates };
     delete newVideoGenerationStates[pairId];
 
+    // Clean up preparation states for the removed pair
+    const newPairPreparationStates = { ...state.pairPreparationStates };
+    delete newPairPreparationStates[pairId];
+
+    const newPreparedAssets = { ...state.preparedAssets };
+    delete newPreparedAssets[pairId];
+
+    const newDisplayIndices = { ...state.displayIndices };
+    delete newDisplayIndices[pairId];
+
+    // Remove from preparation queue
+    const newPreparationQueue = state.preparationQueue.filter(id => id !== pairId);
+
     // Remove associated generated videos
     const filteredVideos = state.generatedVideos.filter(video => video.pairId !== pairId);
 
@@ -98,6 +119,10 @@ export const useAppStore = create((set, get) => ({
     return {
       pairs: filteredPairs,
       videoGenerationStates: newVideoGenerationStates,
+      pairPreparationStates: newPairPreparationStates,
+      preparedAssets: newPreparedAssets,
+      displayIndices: newDisplayIndices,
+      preparationQueue: newPreparationQueue,
       generatedVideos: filteredVideos
     };
   }),
@@ -392,5 +417,125 @@ export const useAppStore = create((set, get) => ({
   // Container spacing actions
   setContainerSpacing: (spacing) => set({ containerSpacing: spacing }),
 
+  // Pair preparation actions
+  getDisplayIndex: (pairId) => {
+    const { displayIndices } = get();
+    return displayIndices[pairId] || null;
+  },
+
+  assignDisplayIndex: (pairId) => set(state => {
+    // If already has an index, return unchanged
+    if (state.displayIndices[pairId]) {
+      return state;
+    }
+    
+    return {
+      displayIndices: {
+        ...state.displayIndices,
+        [pairId]: state.nextDisplayIndex
+      },
+      nextDisplayIndex: state.nextDisplayIndex + 1
+    };
+  }),
+
+  reassignDisplayIndices: () => set(state => {
+    const newIndices = {};
+    let counter = 1;
+    
+    state.pairs.forEach(pair => {
+      newIndices[pair.id] = counter++;
+    });
+    
+    return {
+      displayIndices: newIndices,
+      nextDisplayIndex: counter
+    };
+  }),
+
+  setPairPreparationState: (pairId, preparationState) => set(state => ({
+    pairPreparationStates: {
+      ...state.pairPreparationStates,
+      [pairId]: {
+        ...state.pairPreparationStates[pairId],
+        ...preparationState
+      }
+    }
+  })),
+
+  getPairPreparationState: (pairId) => {
+    const { pairPreparationStates } = get();
+    return pairPreparationStates[pairId] || { status: 'idle', progress: 0, error: null };
+  },
+
+  setPreparedAssets: (pairId, assets) => set(state => ({
+    preparedAssets: {
+      ...state.preparedAssets,
+      [pairId]: assets
+    }
+  })),
+
+  getPreparedAssets: (pairId) => {
+    const { preparedAssets } = get();
+    return preparedAssets[pairId] || null;
+  },
+
+  clearPreparedAssets: (pairId) => set(state => {
+    const newPreparedAssets = { ...state.preparedAssets };
+    delete newPreparedAssets[pairId];
+    
+    return { preparedAssets: newPreparedAssets };
+  }),
+
+  clearAllPreparedAssets: () => set({
+    preparedAssets: {},
+    pairPreparationStates: {},
+    preparationQueue: []
+  }),
+
+  addToPreparationQueue: (pairId) => set(state => {
+    if (state.preparationQueue.includes(pairId)) {
+      return state;
+    }
+    return {
+      preparationQueue: [...state.preparationQueue, pairId]
+    };
+  }),
+
+  removeFromPreparationQueue: (pairId) => set(state => ({
+    preparationQueue: state.preparationQueue.filter(id => id !== pairId)
+  })),
+
+  setIsPreparingPairs: (isPreparing) => set({ isPreparingPairs: isPreparing }),
+
+  // Get total memory usage of prepared assets
+  getPreparationMemoryUsage: () => {
+    const { preparedAssets } = get();
+    let totalBytes = 0;
+    
+    Object.values(preparedAssets).forEach(asset => {
+      if (asset.audioBuffer) totalBytes += asset.audioBuffer.byteLength;
+      if (asset.imageBuffer) totalBytes += asset.imageBuffer.byteLength;
+      if (asset.backgroundBuffer) totalBytes += asset.backgroundBuffer.byteLength;
+    });
+    
+    return totalBytes;
+  },
+
+  // Get preparation statistics
+  getPreparationStats: () => {
+    const { pairs, pairPreparationStates } = get();
+    const completePairs = pairs.filter(p => p.audio && p.image);
+    const preparedCount = Object.values(pairPreparationStates).filter(s => s.status === 'ready').length;
+    const preparingCount = Object.values(pairPreparationStates).filter(s => s.status === 'preparing').length;
+    const failedCount = Object.values(pairPreparationStates).filter(s => s.status === 'failed').length;
+    
+    return {
+      total: completePairs.length,
+      prepared: preparedCount,
+      preparing: preparingCount,
+      failed: failedCount,
+      pending: completePairs.length - preparedCount - preparingCount - failedCount
+    };
+  },
 
 }));
