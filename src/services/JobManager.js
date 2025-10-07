@@ -272,8 +272,14 @@ class JobManager {
       const imageFile = await fetchFile(job.imagePath);
       const audioFile = await fetchFile(job.audioPath);
       
-      job.prefetchedFiles = { imageFile, audioFile };
-      this.jobs.set(job.id, job);
+      const currentJob = this.jobs.get(job.id);
+      if (!currentJob || currentJob.status !== 'queued') {
+        console.log(`Prefetch completed but job ${job.id.substring(0, 8)} is ${currentJob ? currentJob.status : 'missing'}, discarding buffers`);
+        return;
+      }
+      
+      currentJob.prefetchedFiles = { imageFile, audioFile };
+      this.jobs.set(job.id, currentJob);
       console.log(`Files prefetched for job ${job.id.substring(0, 8)}`);
     } catch (error) {
       console.warn(`Failed to prefetch files for job ${job.id.substring(0, 8)}:`, error);
