@@ -211,33 +211,23 @@ class PreparationService {
       }
     };
 
-    // Process pairs with concurrency limit
-    const processingPromises = [];
+    // Process pairs with concurrency limit using proper promise tracking
+    const activePromises = new Map();
     
-    while (queue.length > 0 || processingPromises.length > 0) {
+    while (queue.length > 0 || activePromises.size > 0) {
       // Start new preparations up to the concurrency limit
-      while (queue.length > 0 && processingPromises.length < CONFIG.MAX_CONCURRENT_PREPARATIONS) {
+      while (queue.length > 0 && activePromises.size < CONFIG.MAX_CONCURRENT_PREPARATIONS) {
         const pair = queue.shift();
-        const promise = processPair(pair);
-        processingPromises.push(promise);
+        const promise = processPair(pair)
+          .finally(() => activePromises.delete(pair.id));
+        activePromises.set(pair.id, promise);
       }
 
-      // Wait for at least one to complete
-      if (processingPromises.length > 0) {
-        await Promise.race(processingPromises);
-        // Remove completed promises
-        processingPromises.splice(0, processingPromises.length, 
-          ...processingPromises.filter(p => {
-            let completed = false;
-            p.then(() => completed = true).catch(() => completed = true);
-            return !completed;
-          })
-        );
+      // Wait for at least one to complete if we have active promises
+      if (activePromises.size > 0) {
+        await Promise.race(activePromises.values());
       }
     }
-
-    // Wait for all remaining promises
-    await Promise.allSettled(processingPromises);
 
     console.log(`PreparationService: Completed preparation of ${results.length} pairs`);
     return results;
