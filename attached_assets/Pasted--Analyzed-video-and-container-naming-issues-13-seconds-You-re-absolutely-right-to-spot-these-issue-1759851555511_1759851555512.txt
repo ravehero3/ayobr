@@ -1,0 +1,97 @@
+
+Analyzed video and container naming issues (13 seconds)
+You're absolutely right to spot these issues - they're both significant problems that need fixing. Let me analyze what's happening and create a comprehensive plan to solve them like a senior engineer would.
+🔍 Root Cause Analysis
+Issue 1: Second Video Progress Bug (0% → 99% → 0% → slow crawl)
+This is a classic race condition in the FFmpeg progress tracking system. Here's what's likely happening:
+1. First video finishes → Progress callback still active
+2. Second video starts → Gets assigned, shows 0%
+3. First video's final progress event fires late → Reports 99-100%, gets incorrectly applied to second video
+4. Progress resets → Second video's actual progress starts from 0%
+5. Slow counting → Real progress, but seems slower because user expects continuation
+The core problem: Progress callbacks from previous videos are bleeding into new videos because FFmpeg instances or progress listeners aren't being properly cleaned up between sequential jobs.
+Issue 2: Container Naming (Pair 2, 3, 4, blank)
+This is a display index assignment bug. Looking at the system:
+* When files are dropped, assignDisplayIndex() should assign sequential numbers (1, 2, 3, 4...)
+* But the first pair likely gets created with default empty pairs, then files are added
+* The assignment logic might be skipping the first pair or starting from the wrong index
+The root cause is likely in the pairing logic - when you drop 4+4 files, the system creates pairs but the display index assignment happens at the wrong time or in the wrong order.
+📋 Comprehensive Fix Plan
+Let me check the current state first to give you an accurate plan:
+
+Searched for "How does the display index assignment work and when is assignDisplayIndex called?"
+
+Planned comprehensive fix strategy (10 seconds)
+Perfect, I've identified both root causes. Let me give you a comprehensive senior-level plan to fix these issues properly.
+🎯 Comprehensive Fix Plan
+Problem 1: Display Index Bug (Pair 2, 3, 4, blank)
+Root Cause Identified:
+* App starts with 2 default empty pairs
+* When you drop 4 audio + 4 image files, it reuses those 2 pairs + creates 2 new ones
+* Display indices are assigned AFTER pairs exist, but the initial pairs already have a nextDisplayIndex that started at 1
+* Result: First pair might get skipped or not displayed
+The Fix:
+1. Force display index reassignment when files are dropped to ensure sequential numbering starting from 1
+2. Update the pairing logic to call reassignDisplayIndices() after all pairs are created from dropped files
+3. Ensure UI displays indices correctly by always checking if displayIndex exists before rendering
+
+Problem 2: Second Video Progress Bug (0% → 99% → 0% → slow)
+Root Cause Identified:
+* Progress callback from Video 1 bleeding into Video 2 due to async timing
+* When Video 1 completes, there's a delay before the FFmpeg instance is fully released
+* Video 2 starts, but Video 1's final progress event (99-100%) fires late and gets incorrectly assigned to Video 2's state
+* This creates the illusion of jumping to 99%, then restarting at 0%
+The Fix - Multi-Layered Defense:
+1. Add pair ID tracking to progress callbacks - Bind the progress callback to a specific pair ID so it can't cross-contaminate
+2. Implement progress callback guards - Check if the callback belongs to the currently processing video before updating state
+3. Force cleanup between videos - Add explicit ffmpeg.off('progress') with a small delay to ensure previous callbacks are dead
+4. Add state validation - Before updating progress, validate that the pair's isGenerating state matches the incoming update
+
+📝 Implementation Plan
+Here's the exact sequence of fixes I propose:
+Phase 1: Fix Display Indices (Quick Win - 15 min)
+1. Modify handleFileDrop in usePairingLogic.js:
+    * After creating all pairs from dropped files
+    * Call reassignDisplayIndices() to force sequential numbering 1, 2, 3, 4...
+2. Update PairContainer rendering:
+    * Check if displayIndex exists before showing "Pair #X"
+    * Fallback to pair position in array if index is missing
+Phase 2: Fix Progress Callback Isolation (Critical - 30 min)
+1. In ffmpegProcessor.js:
+    * Add pairId parameter to processVideoWithFFmpeg function
+    * Store pairId in progress callback closure
+    * Add guard: if (currentPairId !== pairId) return; in progress handler
+2. In useFFmpeg.js:
+    * Pass pair.id to processVideoWithFFmpeg
+    * Before starting Video 2, add explicit cleanup:// Force cleanup of previous video's callbacks await new Promise(resolve => setTimeout(resolve, 100));  
+3. Add state validation:
+    * Before calling setVideoGenerationState, check:const currentState = getVideoGenerationState(pairId); if (!currentState.isGenerating && progress > 0) return; // Stale update  
+Phase 3: Optimize Sequential Processing (Performance - 20 min)
+1. Ensure proper FFmpeg instance cleanup:
+    * After each video, explicitly call ffmpeg.terminate() if using pooling
+    * Wait 50ms before starting next video
+2. Improve pre-processing coordination:
+    * Ensure prepared assets for Video 2 are ready BEFORE Video 1 completes
+    * This eliminates the startup delay that makes Video 2 seem slow
+
+🔬 Testing Strategy
+After implementing fixes, test this specific scenario:
+1. Upload 4 audio + 4 image files
+2. Verify naming: Should show "Pair #1, #2, #3, #4" (not 2, 3, 4, blank)
+3. Start generation
+4. Watch Video 1: Should progress smoothly 0-100%
+5. Watch Video 2: Should show 0%, then progressively count up WITHOUT jumping to 99%
+6. Measure speed: Video 2 should be similar speed to Video 1 (within 10-15%)
+
+⚙️ Technical Deep Dive
+Why the second video seems slower:
+* It's not actually slower in processing
+* The jump to 99% creates a visual "reset" that makes it FEEL slower
+* Once we fix the progress contamination, both videos will feel equally fast
+Why Pair 2, 3, 4, blank happens:
+* Default pairs get IDs before display indices assigned
+* New pairs from drop get indices 1, 2
+* But the default pairs already incremented the counter
+* Result: Indices are 2, 3, 4, and the 4th gets no index
+
+Would you like me to implement these fixes? I'll tackle them in phases so you can test each improvement incrementally. This is a textbook case of race conditions meeting state management - very fixable with proper isolation and cleanup! 🚀
