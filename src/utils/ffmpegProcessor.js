@@ -8,6 +8,7 @@ let initPromise = null;
 let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
 let isForceStopped = false; // Track if processes were force stopped
 let currentProcessingPairId = null; // Track which pair is currently being processed
+let processingSessionCounter = 0; // Session counter to track unique processing sessions
 
 // Reduced concurrency for memory stability
 const getOptimalConcurrency = (totalFiles) => {
@@ -329,12 +330,17 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     ffmpeg.off('progress');
 
     // Wait for any lingering callbacks to clear before starting new video
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Increased from 100ms to 250ms to ensure callbacks fully drain
+    await new Promise(resolve => setTimeout(resolve, 250));
 
+    // Increment session counter and capture for this processing session
+    processingSessionCounter++;
+    const currentSessionId = processingSessionCounter;
+    
     // Set the current processing pair for callback isolation
     currentProcessingPairId = pairId;
     const capturedPairId = pairId; // Capture for closure comparison
-    console.log('Starting FFmpeg for pair:', pairId);
+    console.log(`Starting FFmpeg for pair: ${pairId}, session: ${currentSessionId}`);
 
     // Set up progress callback with better completion handling
     let lastProgressTime = 0;
@@ -344,9 +350,10 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     const processingPairId = pairId;
 
     ffmpeg.on('progress', ({ progress }) => {
-      // Guard: Prevent progress bleeding from previous videos
-      if (!capturedPairId || capturedPairId !== currentProcessingPairId) {
-        console.warn(`Progress callback mismatch: expected ${currentProcessingPairId}, got ${capturedPairId} - ignoring stale update`);
+      // Enhanced Guard: Prevent progress bleeding from previous videos
+      // Check BOTH pairId AND session ID to ensure this callback belongs to current processing
+      if (!capturedPairId || capturedPairId !== currentProcessingPairId || currentSessionId !== processingSessionCounter) {
+        console.warn(`Progress callback rejected - pairId: ${capturedPairId}, currentPair: ${currentProcessingPairId}, session: ${currentSessionId}, currentSession: ${processingSessionCounter} - ignoring stale update`);
         return;
       }
       

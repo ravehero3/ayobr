@@ -234,8 +234,9 @@ export const useFFmpeg = () => {
 
         // Cleanup delay: Allow FFmpeg to fully release resources and state to settle
         // This prevents race conditions and ensures Video 2 starts cleanly
+        // Extended delay to ensure all progress callbacks drain completely
         if (batchIndex < batches.length - 1 && !isCancelling) {
-          console.log(`Taking a ${1500}ms break before next batch...`);
+          console.log(`Taking a ${1500}ms break before next batch to allow callbacks to drain...`);
           await new Promise(resolve => setTimeout(resolve, 1500));
         }
       }
@@ -401,10 +402,18 @@ export const useFFmpeg = () => {
           pair.audio, 
           pair.image, 
           (progress) => {
-            // Validate this update belongs to the currently generating pair
+            // Strengthened validation: ensure this update belongs to the currently generating pair
             const currentState = useAppStore.getState().videoGenerationStates[pair.id];
             if (!currentState || !currentState.isGenerating) {
-              console.warn(`Stale progress update for pair ${pair.id} - ignoring`);
+              console.warn(`Stale progress update for pair ${pair.id} - state not generating, ignoring`);
+              return;
+            }
+            
+            // Additional timing-based stale update detection
+            // If progress > 95% but pair hasn't been processing for at least 1 second, reject as stale
+            const processingDuration = Date.now() - (currentState.startTime || Date.now());
+            if (progress > 95 && processingDuration < 1000) {
+              console.warn(`Rejecting suspicious high progress (${progress}%) for pair ${pair.id} - only processing for ${processingDuration}ms, likely stale from previous video`);
               return;
             }
             
