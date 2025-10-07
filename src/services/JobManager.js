@@ -6,7 +6,8 @@ const CONFIG = {
   MAX_CONCURRENT_JOBS: 3,
   MAX_QUEUE_SIZE: 20,
   CLEANUP_COMPLETED_AFTER_MS: 600000,
-  ENABLE_PREFETCHING: true
+  ENABLE_PREFETCHING: true,
+  MAX_FFMPEG_INSTANCES: 3
 };
 
 class JobManager {
@@ -20,6 +21,9 @@ class JobManager {
     this.sharedFFmpeg = null;
     this.ffmpegInitPromise = null;
     this.ffmpegLock = null;
+    this.ffmpegPool = [];
+    this.ffmpegSemaphore = CONFIG.MAX_FFMPEG_INSTANCES;
+    this.waitingForFFmpeg = [];
     this.initializeBaseURLs();
   }
 
@@ -73,30 +77,58 @@ class JobManager {
     return this.ffmpegInitPromise;
   }
 
-  async createFFmpegInstance(jobId) {
-    const baseURLs = await this.initializeBaseURLs();
-    const ffmpeg = new FFmpeg();
+  async acquireFFmpegInstance(jobId) {
+    if (this.ffmpegPool.length > 0) {
+      const ffmpeg = this.ffmpegPool.pop();
+      this.ffmpegInstances.set(jobId, ffmpeg);
+      console.log(`Job ${jobId.substring(0, 8)}: Reusing pooled FFmpeg instance`);
+      return ffmpeg;
+    }
 
-    ffmpeg.on('log', ({ message }) => {
-      console.log(`FFmpeg [${jobId.substring(0, 8)}]:`, message);
+    if (this.ffmpegSemaphore > 0) {
+      this.ffmpegSemaphore--;
+      console.log(`Job ${jobId.substring(0, 8)}: Creating new FFmpeg instance (${CONFIG.MAX_FFMPEG_INSTANCES - this.ffmpegSemaphore}/${CONFIG.MAX_FFMPEG_INSTANCES})`);
+      
+      const baseURLs = await this.initializeBaseURLs();
+      const ffmpeg = new FFmpeg();
+      
+      ffmpeg.on('log', ({ message }) => {
+        console.log(`FFmpeg [${jobId.substring(0, 8)}]:`, message);
+      });
+      
+      await ffmpeg.load(baseURLs);
+      this.ffmpegInstances.set(jobId, ffmpeg);
+      return ffmpeg;
+    }
+
+    console.log(`Job ${jobId.substring(0, 8)}: Waiting for available FFmpeg instance...`);
+    return new Promise((resolve) => {
+      this.waitingForFFmpeg.push({ jobId, resolve });
     });
-
-    await ffmpeg.load(baseURLs);
-    this.ffmpegInstances.set(jobId, ffmpeg);
-    console.log(`FFmpeg instance created for job ${jobId.substring(0, 8)}`);
-    return ffmpeg;
   }
 
-  async destroyFFmpegInstance(jobId) {
+  async releaseFFmpegInstance(jobId) {
     const ffmpeg = this.ffmpegInstances.get(jobId);
-    if (ffmpeg) {
+    if (!ffmpeg) return;
+
+    this.ffmpegInstances.delete(jobId);
+
+    if (this.waitingForFFmpeg.length > 0) {
+      const { jobId: waitingJobId, resolve } = this.waitingForFFmpeg.shift();
+      this.ffmpegInstances.set(waitingJobId, ffmpeg);
+      console.log(`Job ${waitingJobId.substring(0, 8)}: Acquired waiting FFmpeg instance`);
+      resolve(ffmpeg);
+    } else if (this.ffmpegPool.length < CONFIG.MAX_FFMPEG_INSTANCES) {
+      this.ffmpegPool.push(ffmpeg);
+      console.log(`FFmpeg instance returned to pool (${this.ffmpegPool.length}/${CONFIG.MAX_FFMPEG_INSTANCES})`);
+    } else {
       try {
         await ffmpeg.terminate();
-        this.ffmpegInstances.delete(jobId);
-        console.log(`FFmpeg instance destroyed for job ${jobId.substring(0, 8)}`);
+        this.ffmpegSemaphore++;
+        console.log(`FFmpeg instance terminated and semaphore released`);
       } catch (error) {
-        console.error(`Error destroying FFmpeg instance for ${jobId}:`, error);
-        this.ffmpegInstances.delete(jobId);
+        console.error(`Error terminating FFmpeg instance:`, error);
+        this.ffmpegSemaphore++;
       }
     }
   }
@@ -261,6 +293,11 @@ class JobManager {
     const job = this.jobs.get(jobId);
     if (!job) return;
 
+    if (job.status === 'cancelled' || job.status === 'failed' || job.status === 'completed') {
+      console.log(`Job ${jobId.substring(0, 8)} already in terminal state: ${job.status}, skipping completion`);
+      return;
+    }
+
     job.status = 'completed';
     job.progress = 100;
     job.completedAt = Date.now();
@@ -279,6 +316,11 @@ class JobManager {
     const job = this.jobs.get(jobId);
     if (!job) return;
 
+    if (job.status === 'cancelled' || job.status === 'failed' || job.status === 'completed') {
+      console.log(`Job ${jobId.substring(0, 8)} already in terminal state: ${job.status}, skipping failure`);
+      return;
+    }
+
     job.status = 'failed';
     job.error = error;
     job.completedAt = Date.now();
@@ -292,7 +334,15 @@ class JobManager {
     const job = this.jobs.get(jobId);
     if (!job) return;
 
+    if (job.prefetchedFiles) {
+      job.prefetchedFiles = null;
+      this.jobs.set(jobId, job);
+      console.log(`Cleaned up prefetched files for cancelled job ${jobId.substring(0, 8)}`);
+    }
+
     if (job.status === 'queued') {
+      job.status = 'cancelled';
+      this.jobs.set(jobId, job);
       await this.cleanupJob(jobId);
       this.emit('job-cancelled', jobId);
       return;
@@ -304,14 +354,12 @@ class JobManager {
         cancelFlag.cancelled = true;
       }
 
-      job.status = 'failed';
+      job.status = 'cancelled';
       job.error = 'Cancelled by user';
       job.completedAt = Date.now();
       this.jobs.set(jobId, job);
 
-      await this.cleanupJob(jobId);
       this.emit('job-cancelled', jobId);
-
       this.processQueue();
     }
   }
@@ -352,8 +400,14 @@ class JobManager {
     let progressHandler = null;
 
     try {
-      console.log(`Job ${job.id.substring(0, 8)}: Creating dedicated FFmpeg instance`);
-      ffmpeg = await this.createFFmpegInstance(job.id);
+      console.log(`Job ${job.id.substring(0, 8)}: Acquiring FFmpeg instance from pool`);
+      ffmpeg = await this.acquireFFmpegInstance(job.id);
+
+      if (cancelFlag.cancelled) {
+        console.log(`Job ${job.id.substring(0, 8)} cancelled while waiting for FFmpeg`);
+        await this.releaseFFmpegInstance(job.id);
+        return;
+      }
 
       let imageFile, audioFile;
       if (job.prefetchedFiles) {
@@ -373,11 +427,11 @@ class JobManager {
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled during file prep`);
         await this.cleanupTempFiles(ffmpeg, job);
-        await this.destroyFFmpegInstance(job.id);
+        await this.releaseFFmpegInstance(job.id);
         return;
       }
 
-      console.log(`Job ${job.id.substring(0, 8)}: Starting video generation (parallel execution enabled)`);
+      console.log(`Job ${job.id.substring(0, 8)}: Starting video generation (pooled execution)`);
 
       let lastProgress = 0;
 
@@ -399,7 +453,7 @@ class JobManager {
           ffmpeg.off('progress', progressHandler);
         }
         await this.cleanupTempFiles(ffmpeg, job);
-        await this.destroyFFmpegInstance(job.id);
+        await this.releaseFFmpegInstance(job.id);
         return;
       }
 
@@ -423,7 +477,7 @@ class JobManager {
           ffmpeg.off('progress', progressHandler);
         }
         await this.cleanupTempFiles(ffmpeg, job);
-        await this.destroyFFmpegInstance(job.id);
+        await this.releaseFFmpegInstance(job.id);
         return;
       }
 
@@ -442,9 +496,9 @@ class JobManager {
         this.jobs.set(job.id, updatedJob);
       }
 
-      console.log(`Job ${job.id.substring(0, 8)}: Cleaning up files and destroying instance`);
+      console.log(`Job ${job.id.substring(0, 8)}: Cleaning up files and releasing instance`);
       await this.cleanupTempFiles(ffmpeg, job);
-      await this.destroyFFmpegInstance(job.id);
+      await this.releaseFFmpegInstance(job.id);
 
       if (!cancelFlag.cancelled) {
         await this.markCompleted(job.id);
@@ -461,7 +515,7 @@ class JobManager {
         if (ffmpeg) {
           await this.cleanupTempFiles(ffmpeg, job);
         }
-        await this.destroyFFmpegInstance(job.id);
+        await this.releaseFFmpegInstance(job.id);
         await this.markFailed(job.id, error.message);
       }
     } finally {
