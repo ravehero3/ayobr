@@ -31,12 +31,22 @@ class VideoGenerationService {
     });
   }
 
-  async generateVideo(imageFile, audioFile) {
-    return await this.jobManager.createJob(imageFile, audioFile);
+  async generateVideo(imageFile, audioFile, preparedAssets = null) {
+    return await this.jobManager.createJob(imageFile, audioFile, preparedAssets);
   }
 
-  async generateVideos(pairsArray) {
-    return await this.jobManager.createBatchJobs(pairsArray);
+  async generateVideos(pairsArray, preparedAssetsMap = {}) {
+    const jobIds = [];
+    for (const pair of pairsArray) {
+      try {
+        const preparedAssets = preparedAssetsMap[pair.id] || null;
+        const jobId = await this.jobManager.createJob(pair.image, pair.audio, preparedAssets);
+        jobIds.push(jobId);
+      } catch (error) {
+        console.error('Failed to create batch job:', error);
+      }
+    }
+    return jobIds;
   }
 
   getJobStatus(jobId) {

@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/appStore';
 import { usePairingLogic } from './hooks/usePairingLogic';
+import { usePairPreparation } from './hooks/usePairPreparation';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import Pairs from './components/Pairs';
 import VideoPreviewCard from './components/VideoPreviewCard';
@@ -22,6 +23,7 @@ import SleepingAlien from './components/SleepingAlien';
 function App() {
   const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, getCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
+  const { prepareCompletePairs } = usePairPreparation(); // Activate automatic pair preparation
   const { generateVideos, stopGeneration } = useFFmpeg();
   const [isDragOver, setIsDragOver] = useState(false);
 

@@ -12,7 +12,9 @@ export const useFFmpeg = () => {
     isCancelling, 
     cancelGeneration, 
     resetCancellation,
-    concurrencySettings 
+    concurrencySettings,
+    getPreparedAssets,
+    clearPreparedAssets 
   } = useAppStore();
 
   const generateVideos = useCallback(async (pairs) => {
@@ -379,6 +381,12 @@ export const useFFmpeg = () => {
       };
       console.log('Video settings for generation:', videoSettings);
 
+      // Get prepared assets for this pair (if available)
+      const preparedAssets = getPreparedAssets(pair.id);
+      if (preparedAssets) {
+        console.log(`Using PREPARED ASSETS for pair ${pair.id} - OPTIMIZATION ACTIVE`);
+      }
+
       let videoData;
 
       try {
@@ -409,8 +417,15 @@ export const useFFmpeg = () => {
             }
             return false;
           },
-          videoSettings
+          videoSettings,
+          preparedAssets  // Pass prepared assets for optimization
         );
+        
+        // Clear prepared assets after successful use to free memory
+        if (preparedAssets) {
+          console.log(`Clearing prepared assets for pair ${pair.id} to free memory`);
+          clearPreparedAssets(pair.id);
+        }
         console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
       } catch (processingError) {
         console.error(`Error during video processing for pair ${pair.id}:`, processingError);

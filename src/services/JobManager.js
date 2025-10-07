@@ -133,7 +133,7 @@ class JobManager {
     }
   }
 
-  async createJob(imagePath, audioPath) {
+  async createJob(imagePath, audioPath, preparedAssets = null) {
     await this.initializeBaseURLs();
 
     if (this.jobs.size >= CONFIG.MAX_QUEUE_SIZE) {
@@ -163,7 +163,8 @@ class JobManager {
         error: null,
         createdAt: Date.now(),
         startedAt: null,
-        completedAt: null
+        completedAt: null,
+        preparedAssets: preparedAssets // Store pre-cached assets
       };
 
       this.jobs.set(jobId, job);
@@ -416,13 +417,22 @@ class JobManager {
       }
 
       let imageFile, audioFile;
-      if (job.prefetchedFiles) {
+      
+      // Priority: preparedAssets > prefetchedFiles > fetch from scratch
+      if (job.preparedAssets && job.preparedAssets.audioBuffer && job.preparedAssets.imageBuffer) {
+        console.log(`Job ${job.id.substring(0, 8)}: Using pre-cached assets (OPTIMIZED)`);
+        audioFile = job.preparedAssets.audioBuffer;
+        imageFile = job.preparedAssets.imageBuffer;
+        
+        // Clear prepared assets after use to free memory
+        delete job.preparedAssets;
+      } else if (job.prefetchedFiles) {
         console.log(`Job ${job.id.substring(0, 8)}: Using prefetched files`);
         imageFile = job.prefetchedFiles.imageFile;
         audioFile = job.prefetchedFiles.audioFile;
         delete job.prefetchedFiles;
       } else {
-        console.log(`Job ${job.id.substring(0, 8)}: Fetching files`);
+        console.log(`Job ${job.id.substring(0, 8)}: Fetching files from scratch`);
         imageFile = await fetchFile(job.imagePath);
         audioFile = await fetchFile(job.audioPath);
       }

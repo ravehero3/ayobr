@@ -289,27 +289,30 @@ export const initializeFFmpeg = async () => {
   return initPromise;
 };
 
-export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel, videoSettings = null) => {
-  // Validate input files
-  if (!audioFile || !audioFile.name) {
-    throw new Error('Invalid audio file provided');
-  }
+export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel, videoSettings = null, preparedAssets = null) => {
+  // Validate input files (skip if we have prepared assets)
+  if (!preparedAssets) {
+    if (!audioFile || !audioFile.name) {
+      throw new Error('Invalid audio file provided');
+    }
 
-  if (!imageFile || !imageFile.name) {
-    throw new Error('Invalid image file provided');
-  }
+    if (!imageFile || !imageFile.name) {
+      throw new Error('Invalid image file provided');
+    }
 
-  if (audioFile.size === 0) {
-    throw new Error(`Audio file ${audioFile.name} is empty`);
-  }
+    if (audioFile.size === 0) {
+      throw new Error(`Audio file ${audioFile.name} is empty`);
+    }
 
-  if (imageFile.size === 0) {
-    throw new Error(`Image file ${imageFile.name} is empty`);
+    if (imageFile.size === 0) {
+      throw new Error(`Image file ${imageFile.name} is empty`);
+    }
   }
 
   console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
   console.log('File sizes - Audio:', audioFile.size, 'Image:', imageFile.size);
   console.log('Video settings:', videoSettings);
+  console.log('Using pre-cached assets:', !!preparedAssets);
 
   let audioFileName = null;
   let imageFileName = null;
@@ -396,11 +399,20 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
       return new Uint8Array(data); // Return a copy
     };
 
-    // Use the fixed data loading
-    const [audioData, imageData] = await Promise.all([
-      getCachedFileData(audioFile, 'audio'),
-      getCachedFileData(imageFile, 'image')
-    ]);
+    // Use prepared assets if available, otherwise read files
+    let audioData, imageData;
+    
+    if (preparedAssets && preparedAssets.audioBuffer && preparedAssets.imageBuffer) {
+      console.log('Using PRE-CACHED ASSETS (OPTIMIZED PATH)');
+      audioData = preparedAssets.audioBuffer;
+      imageData = preparedAssets.imageBuffer;
+    } else {
+      console.log('Reading files from scratch (standard path)');
+      [audioData, imageData] = await Promise.all([
+        getCachedFileData(audioFile, 'audio'),
+        getCachedFileData(imageFile, 'image')
+      ]);
+    }
 
     // Use unique filenames to avoid conflicts
     audioFileName = `audio_${timestamp}.mp3`;
@@ -449,8 +461,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
 
 
 
-    // Get audio duration using Web Audio API
-    const audioDuration = await getAudioDuration(audioFile);
+    // Get audio duration (use pre-cached if available, otherwise calculate)
+    let audioDuration;
+    if (preparedAssets && preparedAssets.audioDuration) {
+      console.log('Using pre-cached audio duration:', preparedAssets.audioDuration);
+      audioDuration = preparedAssets.audioDuration;
+    } else {
+      console.log('Calculating audio duration...');
+      audioDuration = await getAudioDuration(audioFile);
+    }
 
     // Create 1920x1080 video with image centered and 20px white space above/below
     console.log('Executing FFmpeg command...');
