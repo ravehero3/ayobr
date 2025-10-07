@@ -3,9 +3,10 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { v4 as uuidv4 } from 'uuid';
 
 const CONFIG = {
-  MAX_CONCURRENT_JOBS: 1,
+  MAX_CONCURRENT_JOBS: 3,
   MAX_QUEUE_SIZE: 20,
-  CLEANUP_COMPLETED_AFTER_MS: 600000
+  CLEANUP_COMPLETED_AFTER_MS: 600000,
+  ENABLE_PREFETCHING: true
 };
 
 class JobManager {
@@ -211,6 +212,40 @@ class JobManager {
     this.emit('job-started', jobId);
 
     this.processVideo(job);
+
+    if (CONFIG.ENABLE_PREFETCHING) {
+      this.prefetchNextJobs();
+    }
+  }
+
+  async prefetchNextJobs() {
+    const queuedJobs = this.getQueuedJobs();
+    const processingCount = this.getProcessingJobs().length;
+    const availableSlots = CONFIG.MAX_CONCURRENT_JOBS - processingCount;
+
+    const jobsToPrefetch = queuedJobs.slice(0, Math.min(2, availableSlots));
+
+    for (const job of jobsToPrefetch) {
+      if (!job.prefetchedFiles) {
+        this.prefetchJobFiles(job).catch(err => {
+          console.log(`Prefetch failed for job ${job.id.substring(0, 8)}, will fetch during processing:`, err.message);
+        });
+      }
+    }
+  }
+
+  async prefetchJobFiles(job) {
+    try {
+      console.log(`Prefetching files for job ${job.id.substring(0, 8)}`);
+      const imageFile = await fetchFile(job.imagePath);
+      const audioFile = await fetchFile(job.audioPath);
+      
+      job.prefetchedFiles = { imageFile, audioFile };
+      this.jobs.set(job.id, job);
+      console.log(`Files prefetched for job ${job.id.substring(0, 8)}`);
+    } catch (error) {
+      console.warn(`Failed to prefetch files for job ${job.id.substring(0, 8)}:`, error);
+    }
   }
 
   updateProgress(jobId, progress) {
@@ -315,14 +350,22 @@ class JobManager {
     this.activeCancelFlags.set(job.id, cancelFlag);
     let ffmpeg = null;
     let progressHandler = null;
-    let releaseLock = null;
 
     try {
-      ffmpeg = await this.getSharedFFmpegInstance();
+      console.log(`Job ${job.id.substring(0, 8)}: Creating dedicated FFmpeg instance`);
+      ffmpeg = await this.createFFmpegInstance(job.id);
 
-      console.log(`Job ${job.id.substring(0, 8)}: Preparing files (outside lock)`);
-      const imageFile = await fetchFile(job.imagePath);
-      const audioFile = await fetchFile(job.audioPath);
+      let imageFile, audioFile;
+      if (job.prefetchedFiles) {
+        console.log(`Job ${job.id.substring(0, 8)}: Using prefetched files`);
+        imageFile = job.prefetchedFiles.imageFile;
+        audioFile = job.prefetchedFiles.audioFile;
+        delete job.prefetchedFiles;
+      } else {
+        console.log(`Job ${job.id.substring(0, 8)}: Fetching files`);
+        imageFile = await fetchFile(job.imagePath);
+        audioFile = await fetchFile(job.audioPath);
+      }
 
       await ffmpeg.writeFile(job.inputImageName, imageFile);
       await ffmpeg.writeFile(job.inputAudioName, audioFile);
@@ -330,19 +373,11 @@ class JobManager {
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled during file prep`);
         await this.cleanupTempFiles(ffmpeg, job);
+        await this.destroyFFmpegInstance(job.id);
         return;
       }
 
-      while (this.ffmpegLock) {
-        console.log(`Job ${job.id.substring(0, 8)}: Waiting for FFmpeg lock...`);
-        await this.ffmpegLock;
-      }
-
-      this.ffmpegLock = new Promise(resolve => {
-        releaseLock = resolve;
-      });
-
-      console.log(`Job ${job.id.substring(0, 8)}: Acquired FFmpeg lock, starting execution`);
+      console.log(`Job ${job.id.substring(0, 8)}: Starting video generation (parallel execution enabled)`);
 
       let lastProgress = 0;
 
@@ -364,6 +399,7 @@ class JobManager {
           ffmpeg.off('progress', progressHandler);
         }
         await this.cleanupTempFiles(ffmpeg, job);
+        await this.destroyFFmpegInstance(job.id);
         return;
       }
 
@@ -387,6 +423,7 @@ class JobManager {
           ffmpeg.off('progress', progressHandler);
         }
         await this.cleanupTempFiles(ffmpeg, job);
+        await this.destroyFFmpegInstance(job.id);
         return;
       }
 
@@ -398,11 +435,6 @@ class JobManager {
         ffmpeg.off('progress', progressHandler);
       }
 
-      console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock (success path)`);
-      releaseLock();
-      this.ffmpegLock = null;
-      releaseLock = null;
-
       const updatedJob = this.jobs.get(job.id);
       if (updatedJob) {
         updatedJob.videoBlob = blob;
@@ -410,8 +442,9 @@ class JobManager {
         this.jobs.set(job.id, updatedJob);
       }
 
-      console.log(`Job ${job.id.substring(0, 8)}: Cleaning up files (outside lock)`);
+      console.log(`Job ${job.id.substring(0, 8)}: Cleaning up files and destroying instance`);
       await this.cleanupTempFiles(ffmpeg, job);
+      await this.destroyFFmpegInstance(job.id);
 
       if (!cancelFlag.cancelled) {
         await this.markCompleted(job.id);
@@ -428,15 +461,11 @@ class JobManager {
         if (ffmpeg) {
           await this.cleanupTempFiles(ffmpeg, job);
         }
+        await this.destroyFFmpegInstance(job.id);
         await this.markFailed(job.id, error.message);
       }
     } finally {
       this.activeCancelFlags.delete(job.id);
-      if (releaseLock) {
-        console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock in finally`);
-        releaseLock();
-        this.ffmpegLock = null;
-      }
     }
   }
 
