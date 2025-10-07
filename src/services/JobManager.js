@@ -316,24 +316,33 @@ class JobManager {
     let ffmpeg = null;
     let progressHandler = null;
 
-    while (this.ffmpegLock) {
-      await this.ffmpegLock;
-    }
-
-    let releaseLock;
-    this.ffmpegLock = new Promise(resolve => {
-      releaseLock = resolve;
-    });
-
     try {
-      console.log(`Job ${job.id.substring(0, 8)}: Acquired FFmpeg lock, starting processing`);
       ffmpeg = await this.getSharedFFmpegInstance();
 
+      console.log(`Job ${job.id.substring(0, 8)}: Preparing files (outside lock)`);
       const imageFile = await fetchFile(job.imagePath);
       const audioFile = await fetchFile(job.audioPath);
 
       await ffmpeg.writeFile(job.inputImageName, imageFile);
       await ffmpeg.writeFile(job.inputAudioName, audioFile);
+
+      if (cancelFlag.cancelled) {
+        console.log(`Job ${job.id.substring(0, 8)} cancelled during file prep`);
+        await this.cleanupTempFiles(ffmpeg, job);
+        return;
+      }
+
+      while (this.ffmpegLock) {
+        console.log(`Job ${job.id.substring(0, 8)}: Waiting for FFmpeg lock...`);
+        await this.ffmpegLock;
+      }
+
+      let releaseLock;
+      this.ffmpegLock = new Promise(resolve => {
+        releaseLock = resolve;
+      });
+
+      console.log(`Job ${job.id.substring(0, 8)}: Acquired FFmpeg lock, starting execution`);
 
       let lastProgress = 0;
 
@@ -353,6 +362,10 @@ class JobManager {
         console.log(`Job ${job.id.substring(0, 8)} cancelled before exec`);
         if (ffmpeg && progressHandler) {
           ffmpeg.off('progress', progressHandler);
+        }
+        if (releaseLock) {
+          releaseLock();
+          this.ffmpegLock = null;
         }
         await this.cleanupTempFiles(ffmpeg, job);
         return;
@@ -377,6 +390,10 @@ class JobManager {
         if (ffmpeg && progressHandler) {
           ffmpeg.off('progress', progressHandler);
         }
+        if (releaseLock) {
+          releaseLock();
+          this.ffmpegLock = null;
+        }
         await this.cleanupTempFiles(ffmpeg, job);
         return;
       }
@@ -396,6 +413,13 @@ class JobManager {
         ffmpeg.off('progress', progressHandler);
       }
 
+      if (releaseLock) {
+        console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock`);
+        releaseLock();
+        this.ffmpegLock = null;
+      }
+
+      console.log(`Job ${job.id.substring(0, 8)}: Cleaning up files (outside lock)`);
       await this.cleanupTempFiles(ffmpeg, job);
 
       if (!cancelFlag.cancelled) {
@@ -417,11 +441,6 @@ class JobManager {
       }
     } finally {
       this.activeCancelFlags.delete(job.id);
-      if (releaseLock) {
-        console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock`);
-        releaseLock();
-        this.ffmpegLock = null;
-      }
     }
   }
 
