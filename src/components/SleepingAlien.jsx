@@ -28,28 +28,29 @@ const SleepingAlien = () => {
   const shouldShow = isGenerating && hasCompletePairs;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {shouldShow && (
         <motion.div
           key="sleeping-alien-container" 
           className="pointer-events-none"
           style={{
-            // Perfect center positioning - moved 200px higher and 30px to the right (10px left from previous), 220px lower (30px up from previous)
             position: 'fixed',
             left: 'calc(50% + 30px)',
             top: 'calc(50% + 220px)',
-            transform: 'translate(-50%, -50%)',
-            width: '1200px', // 2x bigger (600px * 2)
-            height: '800px', // 2x bigger (400px * 2)
-            zIndex: 9998, // Below modals and settings window
+            width: '1200px',
+            height: '800px',
+            zIndex: 9998,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
+          initial={{ opacity: 0, scale: 0.95, x: '-50%', y: '-50%' }}
+          animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+          exit={{ opacity: 0, scale: 0.95, x: '-50%', y: '-50%' }}
+          transition={{ 
+            duration: 0.8, 
+            ease: [0.4, 0.0, 0.2, 1]
+          }}
         >
           <motion.img
             src={sleepingAlienImg}
@@ -60,9 +61,10 @@ const SleepingAlien = () => {
               height: '100%',
               objectFit: 'contain',
             }}
-            initial={{ opacity: 0, filter: 'brightness(0)' }}
-            animate={{ opacity: 1, filter: 'brightness(1)' }}
-            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           />
         </motion.div>
       )}
