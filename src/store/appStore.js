@@ -483,14 +483,26 @@ export const useAppStore = create((set, get) => ({
     const newPreparedAssets = { ...state.preparedAssets };
     delete newPreparedAssets[pairId];
     
-    return { preparedAssets: newPreparedAssets };
+    // Also clear the preparation state to ensure consistency
+    const newPairPreparationStates = { ...state.pairPreparationStates };
+    delete newPairPreparationStates[pairId];
+    
+    console.log(`Cleared prepared assets and preparation state for pair ${pairId}`);
+    
+    return { 
+      preparedAssets: newPreparedAssets,
+      pairPreparationStates: newPairPreparationStates
+    };
   }),
 
-  clearAllPreparedAssets: () => set({
-    preparedAssets: {},
-    pairPreparationStates: {},
-    preparationQueue: []
-  }),
+  clearAllPreparedAssets: () => {
+    console.log('Clearing all prepared assets and preparation states');
+    return set({
+      preparedAssets: {},
+      pairPreparationStates: {},
+      preparationQueue: []
+    });
+  },
 
   addToPreparationQueue: (pairId) => set(state => {
     if (state.preparationQueue.includes(pairId)) {

@@ -9,14 +9,17 @@ export const usePairPreparation = () => {
     setPairPreparationState,
     setPreparedAssets,
     getPreparationMemoryUsage,
+    getPreparedAssets,
     clearPreparedAssets,
     assignDisplayIndex,
     isPreparingPairs,
-    setIsPreparingPairs
+    setIsPreparingPairs,
+    preparedAssets
   } = useAppStore();
 
   const preparingRef = useRef(false);
   const lastPreparedSignatures = useRef(new Set());
+  const previousPreparedAssets = useRef({});
 
   /**
    * Check if a pair needs preparation
@@ -25,8 +28,15 @@ export const usePairPreparation = () => {
     if (!pair.audio || !pair.image) return false;
     
     const signature = `${pair.audio.name}_${pair.audio.size}_${pair.image.name}_${pair.image.size}`;
-    return !lastPreparedSignatures.current.has(signature);
-  }, []);
+    
+    // Check if signature is not in cache OR if prepared assets don't actually exist in store
+    // This ensures we re-prepare even if we have the signature but assets were cleared
+    const hasSignature = lastPreparedSignatures.current.has(signature);
+    const assetsExist = getPreparedAssets(pair.id) !== null;
+    
+    // Need preparation if: no signature OR signature exists but assets are gone
+    return !hasSignature || !assetsExist;
+  }, [getPreparedAssets]);
 
   /**
    * Prepare complete pairs automatically
@@ -185,6 +195,43 @@ export const usePairPreparation = () => {
     lastPreparedSignatures.current.clear();
     preparingRef.current = false;
   }, []);
+
+  // Monitor preparedAssets changes to detect when assets are cleared, replaced, or modified
+  useEffect(() => {
+    const prevAssets = previousPreparedAssets.current;
+    const currentAssets = preparedAssets || {};
+    
+    // Check for removed, nullified, or changed assets at the INDIVIDUAL PAIR level
+    Object.keys(prevAssets).forEach(pairId => {
+      const prevAsset = prevAssets[pairId];
+      const currentAsset = currentAssets[pairId];
+      
+      // Case 1: Asset was deleted (not in current)
+      if (!currentAsset) {
+        if (prevAsset?.fileSignature) {
+          console.log(`Asset cleared for pair ${pairId}, removing signature:`, prevAsset.fileSignature);
+          lastPreparedSignatures.current.delete(prevAsset.fileSignature);
+        }
+      }
+      // Case 2: Asset became null/undefined (even though key exists)
+      else if (currentAsset === null || currentAsset === undefined) {
+        if (prevAsset?.fileSignature) {
+          console.log(`Asset became null for pair ${pairId}, removing signature:`, prevAsset.fileSignature);
+          lastPreparedSignatures.current.delete(prevAsset.fileSignature);
+        }
+      }
+      // Case 3: Asset was replaced (different fileSignature)
+      else if (prevAsset?.fileSignature && currentAsset?.fileSignature && 
+               prevAsset.fileSignature !== currentAsset.fileSignature) {
+        console.log(`Asset replaced for pair ${pairId}, old signature: ${prevAsset.fileSignature}, new signature: ${currentAsset.fileSignature}`);
+        lastPreparedSignatures.current.delete(prevAsset.fileSignature);
+        // Note: new signature is added by onPairComplete when preparation finishes
+      }
+    });
+    
+    // Update previous assets reference (shallow copy to ensure clean comparison on next run)
+    previousPreparedAssets.current = { ...currentAssets };
+  }, [preparedAssets]);
 
   // Auto-prepare when pairs are added or modified
   useEffect(() => {
