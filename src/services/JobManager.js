@@ -315,6 +315,7 @@ class JobManager {
     this.activeCancelFlags.set(job.id, cancelFlag);
     let ffmpeg = null;
     let progressHandler = null;
+    let releaseLock = null;
 
     try {
       ffmpeg = await this.getSharedFFmpegInstance();
@@ -337,7 +338,6 @@ class JobManager {
         await this.ffmpegLock;
       }
 
-      let releaseLock;
       this.ffmpegLock = new Promise(resolve => {
         releaseLock = resolve;
       });
@@ -360,12 +360,8 @@ class JobManager {
 
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled before exec`);
-        if (ffmpeg && progressHandler) {
+        if (progressHandler) {
           ffmpeg.off('progress', progressHandler);
-        }
-        if (releaseLock) {
-          releaseLock();
-          this.ffmpegLock = null;
         }
         await this.cleanupTempFiles(ffmpeg, job);
         return;
@@ -387,12 +383,8 @@ class JobManager {
 
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled after exec`);
-        if (ffmpeg && progressHandler) {
+        if (progressHandler) {
           ffmpeg.off('progress', progressHandler);
-        }
-        if (releaseLock) {
-          releaseLock();
-          this.ffmpegLock = null;
         }
         await this.cleanupTempFiles(ffmpeg, job);
         return;
@@ -402,21 +394,20 @@ class JobManager {
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
       const blobURL = URL.createObjectURL(blob);
 
+      if (progressHandler) {
+        ffmpeg.off('progress', progressHandler);
+      }
+
+      console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock (success path)`);
+      releaseLock();
+      this.ffmpegLock = null;
+      releaseLock = null;
+
       const updatedJob = this.jobs.get(job.id);
       if (updatedJob) {
         updatedJob.videoBlob = blob;
         updatedJob.videoBlobURL = blobURL;
         this.jobs.set(job.id, updatedJob);
-      }
-
-      if (progressHandler) {
-        ffmpeg.off('progress', progressHandler);
-      }
-
-      if (releaseLock) {
-        console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock`);
-        releaseLock();
-        this.ffmpegLock = null;
       }
 
       console.log(`Job ${job.id.substring(0, 8)}: Cleaning up files (outside lock)`);
@@ -441,6 +432,11 @@ class JobManager {
       }
     } finally {
       this.activeCancelFlags.delete(job.id);
+      if (releaseLock) {
+        console.log(`Job ${job.id.substring(0, 8)}: Releasing FFmpeg lock in finally`);
+        releaseLock();
+        this.ffmpegLock = null;
+      }
     }
   }
 
