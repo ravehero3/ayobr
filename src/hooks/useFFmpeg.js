@@ -232,10 +232,11 @@ export const useFFmpeg = () => {
         // Update overall progress
         await updateBatchProgress();
 
-        // Add breathing room between batches for stability
+        // Cleanup delay: Allow FFmpeg to fully release resources and state to settle
+        // This prevents race conditions and ensures Video 2 starts cleanly
         if (batchIndex < batches.length - 1 && !isCancelling) {
-          console.log(`Taking a ${1000}ms break before next batch...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log(`Taking a ${1500}ms break before next batch...`);
+          await new Promise(resolve => setTimeout(resolve, 1500));
         }
       }
 
@@ -396,9 +397,17 @@ export const useFFmpeg = () => {
       try {
         // Process video without timeout racing - let FFmpeg handle its own timeouts
         videoData = await processVideoWithFFmpeg(
+          pair.id,
           pair.audio, 
           pair.image, 
           (progress) => {
+            // Validate this update belongs to the currently generating pair
+            const currentState = useAppStore.getState().videoGenerationStates[pair.id];
+            if (!currentState || !currentState.isGenerating) {
+              console.warn(`Stale progress update for pair ${pair.id} - ignoring`);
+              return;
+            }
+            
             const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
             console.log(`Setting video generation state for pair ${pair.id}:`, {
               isGenerating: true,
@@ -430,6 +439,11 @@ export const useFFmpeg = () => {
           console.log(`Clearing prepared assets for pair ${pair.id} to free memory`);
           clearPreparedAssets(pair.id);
         }
+        
+        // Brief pause to ensure FFmpeg fully releases resources
+        await new Promise(resolve => setTimeout(resolve, 100));
+        console.log(`FFmpeg resources released for pair ${pair.id}`);
+        
         console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
       } catch (processingError) {
         console.error(`Error during video processing for pair ${pair.id}:`, processingError);

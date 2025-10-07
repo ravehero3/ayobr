@@ -7,6 +7,7 @@ let isInitializing = false;
 let initPromise = null;
 let activeProcesses = new Set(); // Track active FFmpeg processes for immediate cancellation
 let isForceStopped = false; // Track if processes were force stopped
+let currentProcessingPairId = null; // Track which pair is currently being processed
 
 // Reduced concurrency for memory stability
 const getOptimalConcurrency = (totalFiles) => {
@@ -289,7 +290,7 @@ export const initializeFFmpeg = async () => {
   return initPromise;
 };
 
-export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, shouldCancel, videoSettings = null, preparedAssets = null) => {
+export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onProgress, shouldCancel, videoSettings = null, preparedAssets = null) => {
   // Validate input files (skip if we have prepared assets)
   if (!preparedAssets) {
     if (!audioFile || !audioFile.name) {
@@ -327,13 +328,28 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
 
+    // Wait for any lingering callbacks to clear before starting new video
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Set the current processing pair for callback isolation
+    currentProcessingPairId = pairId;
+    const capturedPairId = pairId; // Capture for closure comparison
+    console.log('Starting FFmpeg for pair:', pairId);
+
     // Set up progress callback with better completion handling
     let lastProgressTime = 0;
     let hasCompleted = false;
     let progressCallbackActive = true;
     let isNearCompletion = false;
+    const processingPairId = pairId;
 
     ffmpeg.on('progress', ({ progress }) => {
+      // Guard: Prevent progress bleeding from previous videos
+      if (!capturedPairId || capturedPairId !== currentProcessingPairId) {
+        console.warn(`Progress callback mismatch: expected ${currentProcessingPairId}, got ${capturedPairId} - ignoring stale update`);
+        return;
+      }
+      
       const now = Date.now();
       // Throttle progress updates to every 100ms for faster updates
       if (onProgress && progressCallbackActive && (now - lastProgressTime > 100) && !hasCompleted) {
@@ -342,7 +358,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
         // Handle near-completion differently to prevent stuck at 99%
         if (normalizedProgress >= 99) {
           if (!isNearCompletion) {
-            console.log('FFmpeg approaching completion (99%+), preparing for file output...');
+            console.log(`[Pair ${capturedPairId}] FFmpeg approaching completion (99%+), preparing for file output...`);
             isNearCompletion = true;
             // Report 99% but don't mark as fully completed yet
             onProgress(99);
@@ -354,9 +370,9 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           onProgress(normalizedProgress);
           lastProgressTime = now;
 
-          // Log progress for better user feedback
+          // Log progress for better user feedback with pairId tracking
           if (normalizedProgress % 10 === 0 || normalizedProgress > 90) {
-            console.log(`FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
+            console.log(`[Pair ${capturedPairId}] FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
           }
         }
       }
@@ -670,6 +686,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
           if (onProgress && !hasCompleted) {
             onProgress(100);
             hasCompleted = true;
+            console.log(`Deactivating progress callback for pair ${pairId}`);
             progressCallbackActive = false;
             console.log('Progress set to 100% after successful file read');
           }
@@ -741,6 +758,7 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     cleanupMemory();
 
     // Clear progress callback to prevent interference with next video
+    console.log(`Deactivating progress callback for pair ${pairId}`);
     progressCallbackActive = false;
     ffmpeg.off('progress');
 
@@ -748,6 +766,15 @@ export const processVideoWithFFmpeg = async (audioFile, imageFile, onProgress, s
     if (window.gc) {
       try { window.gc(); } catch(e) { /* ignore */ }
     }
+
+    // Cleanup for next video in sequence
+    console.log(`Cleaning up FFmpeg resources for pair ${pairId}`);
+    ffmpeg.off('progress'); // Remove this specific video's progress listener
+    await new Promise(resolve => setTimeout(resolve, 50)); // 50ms cooldown for next video
+
+    // Clear the current processing pair tracker
+    currentProcessingPairId = null;
+    console.log('Cleared current processing pair');
 
     // Return a new Uint8Array to ensure data integrity
     return new Uint8Array(data);

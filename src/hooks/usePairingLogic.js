@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useAppStore } from '../store/appStore';
 
 export const usePairingLogic = () => {
-  const { pairs, setPairs, setCurrentPage, setIsFilesBeingDropped, assignDisplayIndex } = useAppStore();
+  const { pairs, setPairs, setCurrentPage, setIsFilesBeingDropped, assignDisplayIndex, reassignDisplayIndices } = useAppStore();
 
   // Cache to track processed files and prevent immediate re-processing
   const processedFilesCache = new Set();
@@ -137,11 +137,7 @@ export const usePairingLogic = () => {
 
       console.log('Final pairs after processing:', newPairs.length);
       setPairs(newPairs);
-
-      // Assign display indices to all pairs that don't have one
-      newPairs.forEach(pair => {
-        assignDisplayIndex(pair.id);
-      });
+      reassignDisplayIndices();
 
       // Navigate to file management page
       setCurrentPage('fileManagement');
