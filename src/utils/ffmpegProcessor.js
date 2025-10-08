@@ -329,11 +329,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
 
-    // Wait for any lingering callbacks to clear before starting new video
-    // Increased from 100ms to 250ms to ensure callbacks fully drain
-    await new Promise(resolve => setTimeout(resolve, 250));
-
-    // Increment session counter and capture for this processing session
+    // Increment session counter BEFORE waiting to ensure it's updated for the check
     processingSessionCounter++;
     const currentSessionId = processingSessionCounter;
     
@@ -341,6 +337,11 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     currentProcessingPairId = pairId;
     const capturedPairId = pairId; // Capture for closure comparison
     console.log(`Starting FFmpeg for pair: ${pairId}, session: ${currentSessionId}`);
+
+    // Wait for any lingering callbacks to clear AFTER updating session counter
+    // This ensures old callbacks see the new session ID and get rejected
+    // Increased to 500ms to ensure all callbacks from previous session drain completely
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Set up progress callback with better completion handling
     let lastProgressTime = 0;
@@ -353,7 +354,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       // Enhanced Guard: Prevent progress bleeding from previous videos
       // Check BOTH pairId AND session ID to ensure this callback belongs to current processing
       if (!capturedPairId || capturedPairId !== currentProcessingPairId || currentSessionId !== processingSessionCounter) {
-        console.warn(`Progress callback rejected - pairId: ${capturedPairId}, currentPair: ${currentProcessingPairId}, session: ${currentSessionId}, currentSession: ${processingSessionCounter} - ignoring stale update`);
+        // Don't log warnings anymore - just silently reject stale updates
         return;
       }
       
@@ -740,6 +741,10 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     console.log('FFmpeg execution completed successfully');
 
+    // Deactivate progress callback FIRST to stop any more updates
+    console.log(`Deactivating progress callback for pair ${pairId}`);
+    progressCallbackActive = false;
+    
     // Final progress update to 100%
     if (onProgress && !hasCompleted) {
       onProgress(100);
@@ -764,24 +769,22 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // Call memory cleanup after successful video generation
     cleanupMemory();
 
-    // Clear progress callback to prevent interference with next video
-    console.log(`Deactivating progress callback for pair ${pairId}`);
-    progressCallbackActive = false;
+    // Remove progress listener for this video
+    console.log(`Removing progress listener for pair ${pairId}`);
     ffmpeg.off('progress');
+
+    // Clear the current processing pair tracker
+    currentProcessingPairId = null;
+    console.log('Cleared current processing pair');
+
+    // Wait for any remaining callbacks to fully drain before returning
+    // This prevents callbacks from bleeding into the next video
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // Force garbage collection between videos for memory stability
     if (window.gc) {
       try { window.gc(); } catch(e) { /* ignore */ }
     }
-
-    // Cleanup for next video in sequence
-    console.log(`Cleaning up FFmpeg resources for pair ${pairId}`);
-    ffmpeg.off('progress'); // Remove this specific video's progress listener
-    await new Promise(resolve => setTimeout(resolve, 50)); // 50ms cooldown for next video
-
-    // Clear the current processing pair tracker
-    currentProcessingPairId = null;
-    console.log('Cleared current processing pair');
 
     // Return a new Uint8Array to ensure data integrity
     return new Uint8Array(data);

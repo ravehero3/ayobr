@@ -167,7 +167,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   };
 
   const pairIndex = pairs.findIndex(p => p.id === pair.id);
-  const calculatedIndex = displayIndex || (pairIndex >= 0 ? pairIndex + 1 : 1);
+  const calculatedIndex = displayIndex ?? (pairIndex >= 0 ? pairIndex + 1 : 1);
 
   return (
     <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ 

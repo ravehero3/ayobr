@@ -547,12 +547,12 @@ export const useAppStore = create((set, get) => ({
   // Pair preparation actions
   getDisplayIndex: (pairId) => {
     const { displayIndices } = get();
-    return displayIndices[pairId] || null;
+    return displayIndices[pairId] ?? null;
   },
 
   assignDisplayIndex: (pairId) => set(state => {
     // If already has an index, return unchanged
-    if (state.displayIndices[pairId]) {
+    if (state.displayIndices[pairId] !== undefined) {
       return state;
     }
     
