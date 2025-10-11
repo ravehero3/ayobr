@@ -915,9 +915,46 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       console.log(`[Job Cleanup] Cleared current processing pair: ${pairId}`);
     }
 
+    // CRITICAL FIX: Ensure FFmpeg filesystem is ACTUALLY clean before signaling completion
+    // This prevents video 2 from having to clean up video 1's leftover files
+    if (ffmpeg && isLoaded) {
+      try {
+        const files = await ffmpeg.listDir('/');
+        const tempFiles = files.filter(f => 
+          !f.isDir && (
+            f.name.startsWith('logo_') || 
+            f.name.startsWith('audio_') || 
+            f.name.startsWith('image_') || 
+            f.name.startsWith('output_') ||
+            f.name.startsWith('bg_')
+          )
+        );
+        
+        if (tempFiles.length > 0) {
+          console.log(`[Job Cleanup] Found ${tempFiles.length} leftover temp files from pair ${pairId}, cleaning...`);
+          // Use Promise.allSettled to ensure all deletions attempt to complete
+          await Promise.allSettled(
+            tempFiles.map(async (tempFile) => {
+              try {
+                await ffmpeg.deleteFile(tempFile.name);
+                console.log(`[Job Cleanup] Deleted leftover file: ${tempFile.name}`);
+              } catch (e) {
+                console.warn(`[Job Cleanup] Failed to delete ${tempFile.name}:`, e.message);
+              }
+            })
+          );
+          console.log(`[Job Cleanup] All leftover files cleaned for pair ${pairId}`);
+        } else {
+          console.log(`[Job Cleanup] FFmpeg filesystem is clean for pair ${pairId}`);
+        }
+      } catch (e) {
+        console.warn(`[Job Cleanup] Could not verify filesystem state:`, e.message);
+      }
+    }
+
     // Wait for any remaining callbacks to fully drain before returning
     // This prevents callbacks from bleeding into the next video
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Force garbage collection between videos for memory stability
     if (window.gc) {
@@ -926,7 +963,8 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     console.log(`[Job Cleanup] Cleanup complete for pair ${pairId}, ready for next job`);
 
-    // CRITICAL FIX: Signal that cleanup is complete so next video can start
+    // CRITICAL FIX: Signal cleanup completion ONLY after filesystem is verified clean
+    // This ensures next video starts with a clean FFmpeg instance
     if (cleanupCompletionResolver) {
       console.log(`[Job Cleanup] Signaling cleanup completion for pair ${pairId}`);
       cleanupCompletionResolver();
