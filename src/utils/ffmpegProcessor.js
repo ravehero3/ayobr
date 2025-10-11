@@ -9,6 +9,8 @@ let activeProcesses = new Set(); // Track active FFmpeg processes for immediate 
 let isForceStopped = false; // Track if processes were force stopped
 let currentProcessingPairId = null; // Track which pair is currently being processed
 let processingSessionCounter = 0; // Session counter to track unique processing sessions
+let cleanupCompletionPromise = Promise.resolve(); // Track when cleanup is fully done
+let cleanupCompletionResolver = null; // Resolver for the current cleanup
 
 // Reduced concurrency for memory stability
 const getOptimalConcurrency = (totalFiles) => {
@@ -34,6 +36,13 @@ const audioBufferCache = new Map(); // Cache for audio file buffers
 export const forceStopAllProcesses = async () => {
   console.log('Force stopping all FFmpeg processes...');
   isForceStopped = true;
+
+  // CRITICAL: Resolve any outstanding cleanup promise to prevent deadlock
+  if (cleanupCompletionResolver) {
+    console.log('Force stop: Resolving outstanding cleanup promise to prevent deadlock');
+    cleanupCompletionResolver();
+    cleanupCompletionResolver = null;
+  }
 
   if (ffmpeg) {
     try {
@@ -330,19 +339,57 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
 
-    // Increment session counter BEFORE waiting to ensure it's updated for the check
+    // CRITICAL FIX: Wait for previous cleanup to complete BEFORE setting new currentProcessingPairId
+    // This prevents the race condition where previous cleanup is skipped
+    console.log(`[${pairId}] Waiting for previous video cleanup to complete...`);
+    await cleanupCompletionPromise;
+    console.log(`[${pairId}] Previous cleanup confirmed complete`);
+
+    // Create a NEW cleanup promise for this session
+    let resolveCleanup;
+    cleanupCompletionPromise = new Promise(resolve => {
+      resolveCleanup = resolve;
+    });
+    cleanupCompletionResolver = resolveCleanup;
+
+    // Increment session counter
     processingSessionCounter++;
     const currentSessionId = processingSessionCounter;
     
-    // Set the current processing pair for callback isolation
+    // NOW it's safe to set the current processing pair (cleanup is done)
     currentProcessingPairId = pairId;
     const capturedPairId = pairId; // Capture for closure comparison
-    console.log(`Starting FFmpeg for pair: ${pairId}, session: ${currentSessionId}`);
+    console.log(`[${pairId}] Starting FFmpeg, session: ${currentSessionId}`);
 
-    // Wait for any lingering callbacks to clear AFTER updating session counter
-    // This ensures old callbacks see the new session ID and get rejected
-    // Increased to 500ms to ensure all callbacks from previous session drain completely
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Verify FFmpeg filesystem is clean before starting
+    try {
+      const files = await ffmpeg.listDir('/');
+      const tempFiles = files.filter(f => 
+        !f.isDir && (
+          f.name.startsWith('logo_') || 
+          f.name.startsWith('audio_') || 
+          f.name.startsWith('image_') || 
+          f.name.startsWith('output_') ||
+          f.name.startsWith('bg_')
+        )
+      );
+      
+      if (tempFiles.length > 0) {
+        console.warn(`[${pairId}] Found ${tempFiles.length} leftover temp files, cleaning...`);
+        for (const tempFile of tempFiles) {
+          try {
+            await ffmpeg.deleteFile(tempFile.name);
+            console.log(`[${pairId}] Cleaned leftover file: ${tempFile.name}`);
+          } catch (e) {
+            console.warn(`[${pairId}] Failed to clean ${tempFile.name}:`, e.message);
+          }
+        }
+      } else {
+        console.log(`[${pairId}] FFmpeg filesystem is clean, ready to start`);
+      }
+    } catch (e) {
+      console.warn(`[${pairId}] Could not verify FFmpeg state:`, e.message);
+    }
 
     // Set up progress callback with better completion handling
     let lastProgressTime = 0;
@@ -834,6 +881,14 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     if (shouldCancel && shouldCancel()) {
       const cancellationError = new Error('Generation cancelled by user');
       cancellationError.isCancellation = true;
+      
+      // CRITICAL: Ensure cleanup promise is resolved on cancellation
+      if (cleanupCompletionResolver) {
+        console.log('Cancellation: Resolving cleanup promise to prevent deadlock');
+        cleanupCompletionResolver();
+        cleanupCompletionResolver = null;
+      }
+      
       throw cancellationError;
     }
 
@@ -870,6 +925,13 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     }
 
     console.log(`[Job Cleanup] Cleanup complete for pair ${pairId}, ready for next job`);
+
+    // CRITICAL FIX: Signal that cleanup is complete so next video can start
+    if (cleanupCompletionResolver) {
+      console.log(`[Job Cleanup] Signaling cleanup completion for pair ${pairId}`);
+      cleanupCompletionResolver();
+      cleanupCompletionResolver = null;
+    }
   }
 };
 
