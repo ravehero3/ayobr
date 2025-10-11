@@ -321,6 +321,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
   let outputFileName = null;
   let logoFileName = null; // Declare logoFileName here
   const timestamp = Date.now(); // Generate a timestamp for temporary files
+  let progressHandler = null; // Declare handler outside try block for finally cleanup
 
   try {
     const ffmpeg = await initializeFFmpeg();
@@ -350,7 +351,8 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     let isNearCompletion = false;
     const processingPairId = pairId;
 
-    ffmpeg.on('progress', ({ progress }) => {
+    // Store handler reference for proper cleanup (assign to outer scope variable)
+    progressHandler = ({ progress }) => {
       // Enhanced Guard: Prevent progress bleeding from previous videos
       // Check BOTH pairId AND session ID to ensure this callback belongs to current processing
       if (!capturedPairId || capturedPairId !== currentProcessingPairId || currentSessionId !== processingSessionCounter) {
@@ -384,7 +386,11 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
           }
         }
       }
-    });
+    };
+
+    // Add handler with logging
+    ffmpeg.on('progress', progressHandler);
+    console.log(`[Handler Registry] Added progress handler for pair ${pairId}, session ${currentSessionId}`);
 
     // Enhanced file reading with proper error handling
     const getCachedFileData = async (file, type) => {
@@ -769,23 +775,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // Call memory cleanup after successful video generation
     cleanupMemory();
 
-    // Remove progress listener for this video
-    console.log(`Removing progress listener for pair ${pairId}`);
-    ffmpeg.off('progress');
-
-    // Clear the current processing pair tracker
-    currentProcessingPairId = null;
-    console.log('Cleared current processing pair');
-
-    // Wait for any remaining callbacks to fully drain before returning
-    // This prevents callbacks from bleeding into the next video
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // Force garbage collection between videos for memory stability
-    if (window.gc) {
-      try { window.gc(); } catch(e) { /* ignore */ }
-    }
-
     // Return a new Uint8Array to ensure data integrity
     return new Uint8Array(data);
 
@@ -853,6 +842,34 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     console.error(`Error during video generation for unknown pair: ${errorMessage}`);
 
     throw error;
+  } finally {
+    // CRITICAL: Clean up event handlers and state to prevent leaks into next job
+    if (ffmpeg && progressHandler) {
+      try {
+        console.log(`[Job Cleanup] Removing specific progress handler for pair ${pairId}`);
+        ffmpeg.off('progress', progressHandler);
+        console.log(`[Job Cleanup] Progress handler removed successfully`);
+      } catch (cleanupError) {
+        console.warn(`[Job Cleanup] Error removing progress handler:`, cleanupError);
+      }
+    }
+
+    // Clear the current processing pair tracker
+    if (currentProcessingPairId === pairId) {
+      currentProcessingPairId = null;
+      console.log(`[Job Cleanup] Cleared current processing pair: ${pairId}`);
+    }
+
+    // Wait for any remaining callbacks to fully drain before returning
+    // This prevents callbacks from bleeding into the next video
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Force garbage collection between videos for memory stability
+    if (window.gc) {
+      try { window.gc(); } catch(e) { /* ignore */ }
+    }
+
+    console.log(`[Job Cleanup] Cleanup complete for pair ${pairId}, ready for next job`);
   }
 };
 

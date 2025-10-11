@@ -69,9 +69,9 @@ const Footer = ({ onGenerateVideos }) => {
               // Handle going back to previous step with proper state cleanup
               const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates, clearGeneratedVideos, resetGenerationState } = useAppStore.getState();
 
-              // If generating, clean up FFmpeg temporary files and do a fresh start
+              // If generating, cancel generation and return to container pairs
               if (isGenerating) {
-                console.log('Cleaning up temporary files and resetting app for fresh start...');
+                console.log('Cancelling video generation and returning to container pairs...');
                 
                 // Import forceStopAllProcesses dynamically
                 const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
@@ -79,15 +79,14 @@ const Footer = ({ onGenerateVideos }) => {
                 // Stop all FFmpeg processes and clean up temporary files
                 await forceStopAllProcesses();
                 
-                // Complete reset of the app state
+                // Reset generation state but keep the pairs intact
                 resetGenerationState();
-                clearGeneratedVideos();
-                clearAllPairs();
+                clearAllVideoGenerationStates();
                 
-                // Go back to upload page for fresh start
-                setCurrentPage('upload');
+                // Go back to file management page to see container pairs
+                setCurrentPage('fileManagement');
                 
-                console.log('Fresh start complete - all temporary files cleaned up');
+                console.log('Generation cancelled - returning to container pairs');
               } else {
                 // Normal back navigation without generation
                 setIsGenerating(false);
