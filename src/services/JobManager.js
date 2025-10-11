@@ -405,13 +405,20 @@ class JobManager {
     this.activeCancelFlags.set(job.id, cancelFlag);
     let ffmpeg = null;
     let progressHandler = null;
+    let sessionToken = null;
 
     try {
       console.log(`Job ${job.id.substring(0, 8)}: Acquiring FFmpeg instance from pool`);
       ffmpeg = await this.acquireFFmpegInstance(job.id);
 
+      // Create a unique session token for this job to prevent progress callback contamination
+      sessionToken = Symbol(`session-${job.id}`);
+      ffmpeg.__activeSessionToken = sessionToken;
+      console.log(`Job ${job.id.substring(0, 8)}: Set session token for progress isolation`);
+
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled while waiting for FFmpeg`);
+        ffmpeg.__activeSessionToken = null;
         await this.releaseFFmpegInstance(job.id);
         return;
       }
@@ -443,6 +450,7 @@ class JobManager {
       if (cancelFlag.cancelled) {
         console.log(`Job ${job.id.substring(0, 8)} cancelled during file prep`);
         await this.cleanupTempFiles(ffmpeg, job);
+        ffmpeg.__activeSessionToken = null;
         await this.releaseFFmpegInstance(job.id);
         return;
       }
@@ -452,6 +460,12 @@ class JobManager {
       let lastProgress = 0;
 
       progressHandler = ({ progress, time }) => {
+        // Critical: Only process progress if session token matches
+        if (ffmpeg.__activeSessionToken !== sessionToken) {
+          console.log(`⚠️ Ignoring stale progress callback for job ${job.id.substring(0, 8)} (token mismatch)`);
+          return;
+        }
+        
         if (cancelFlag.cancelled) return;
 
         const currentProgress = Math.min(Math.round(progress * 100), 100);
@@ -469,6 +483,7 @@ class JobManager {
           ffmpeg.off('progress', progressHandler);
         }
         await this.cleanupTempFiles(ffmpeg, job);
+        ffmpeg.__activeSessionToken = null;
         await this.releaseFFmpegInstance(job.id);
         return;
       }
@@ -493,6 +508,7 @@ class JobManager {
           ffmpeg.off('progress', progressHandler);
         }
         await this.cleanupTempFiles(ffmpeg, job);
+        ffmpeg.__activeSessionToken = null;
         await this.releaseFFmpegInstance(job.id);
         return;
       }
@@ -514,6 +530,9 @@ class JobManager {
 
       console.log(`Job ${job.id.substring(0, 8)}: Cleaning up files and releasing instance`);
       await this.cleanupTempFiles(ffmpeg, job);
+      
+      // Clear session token before releasing instance back to pool
+      ffmpeg.__activeSessionToken = null;
       await this.releaseFFmpegInstance(job.id);
 
       if (!cancelFlag.cancelled) {
@@ -530,6 +549,7 @@ class JobManager {
         }
         if (ffmpeg) {
           await this.cleanupTempFiles(ffmpeg, job);
+          ffmpeg.__activeSessionToken = null;
         }
         await this.releaseFFmpegInstance(job.id);
         await this.markFailed(job.id, error.message);
