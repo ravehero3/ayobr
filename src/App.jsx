@@ -539,7 +539,7 @@ function App() {
       <Header />
 
       {/* Footer */}
-      <Footer onGenerateVideos={handleGenerateVideos} />
+      <Footer onGenerateVideos={handleGenerateVideos} onStop={stopGeneration} />
 
       {/* Spacing Slider */}
       <SpacingSlider />

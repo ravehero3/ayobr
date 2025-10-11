@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import SettingsPanel from './SettingsPanel';
 
-const Footer = ({ onGenerateVideos }) => {
-  const { pairs, generatedVideos, isGenerating, videoGenerationStates } = useAppStore();
+const Footer = ({ onGenerateVideos, onStop }) => {
+  const { pairs, generatedVideos, isGenerating, videoGenerationStates, popPage, resetApp } = useAppStore();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
@@ -62,8 +62,8 @@ const Footer = ({ onGenerateVideos }) => {
           borderRight: 'none',
         }}
       >
-        {/* Left side - Back Arrow */}
-        <div className="flex items-center" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 292px)' }}>
+        {/* Left side - Back Arrow and Action Buttons */}
+        <div className="flex items-center gap-4" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 292px)' }}>
           <button
             onClick={async () => {
               // Handle going back to previous step with proper state cleanup
@@ -120,6 +120,55 @@ const Footer = ({ onGenerateVideos }) => {
               Back
             </span>
           </button>
+
+          {/* Back to Edit Button - Only show when generating or videos exist */}
+          {(isGenerating || generatedVideos.length > 0) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Back to Edit button clicked - preserving files and returning to fileManagement');
+                popPage('fileManagement');
+              }}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
+            >
+              <svg
+                className="w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+              </svg>
+              <span className="text-sm text-blue-300 group-hover:text-blue-200 transition-colors duration-200">
+                Back to Edit
+              </span>
+            </button>
+          )}
+
+          {/* Start Over Button - Only show when generating or videos exist */}
+          {(isGenerating || generatedVideos.length > 0) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Start Over button clicked - initiating complete app reset');
+                if (onStop) onStop();
+                resetApp();
+              }}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
+            >
+              <svg
+                className="w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span className="text-sm text-red-300 group-hover:text-red-200 transition-colors duration-200">
+                Start Over
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Center - Ready Status or Progress */}
