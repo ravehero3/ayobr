@@ -168,6 +168,18 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
   const pairIndex = pairs.findIndex(p => p.id === pair.id);
   const calculatedIndex = displayIndex ?? (pairIndex >= 0 ? pairIndex + 1 : 1);
+  
+  // Debug logging for display index tracking
+  if (!displayIndex && pairIndex >= 0) {
+    console.log(`⚠️ Pair ${pair.id} missing displayIndex, using fallback index ${pairIndex + 1}`, {
+      pairId: pair.id,
+      displayIndex,
+      pairIndex,
+      calculatedIndex,
+      hasAudio: !!pair.audio,
+      hasImage: !!pair.image
+    });
+  }
 
   return (
     <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ 
