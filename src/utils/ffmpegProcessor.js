@@ -361,6 +361,13 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     processingSessionCounter++;
     const currentSessionId = processingSessionCounter;
     
+    // CRITICAL TOKEN FIX: Generate unique token to prevent stale progress callbacks
+    // This ensures Video 2's progress handler NEVER accepts Video 1's progress events
+    currentProgressToken = null; // Invalidate any previous token immediately
+    const progressToken = crypto.randomUUID(); // Generate fresh unique token
+    currentProgressToken = progressToken; // Set as current valid token
+    console.log(`[${pairId}] 🔐 Generated progress token: ${progressToken.substring(0, 8)}...`);
+    
     // NOW it's safe to set the current processing pair (cleanup is done)
     currentProcessingPairId = pairId;
     const capturedPairId = pairId; // Capture for closure comparison
