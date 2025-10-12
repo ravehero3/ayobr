@@ -412,6 +412,13 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     // Store handler reference for proper cleanup (assign to outer scope variable)
     progressHandler = ({ progress }) => {
+      // CRITICAL TOKEN GUARD: Primary defense against stale progress callbacks
+      // If this callback's token doesn't match the current valid token, it's from a previous video - REJECT IT
+      if (progressToken !== currentProgressToken) {
+        // Stale callback from previous video detected and blocked - no logging to avoid spam
+        return;
+      }
+      
       // Enhanced Guard: Prevent progress bleeding from previous videos
       // Check BOTH pairId AND session ID to ensure this callback belongs to current processing
       if (!capturedPairId || capturedPairId !== currentProcessingPairId || currentSessionId !== processingSessionCounter) {
