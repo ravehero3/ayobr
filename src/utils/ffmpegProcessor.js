@@ -514,10 +514,10 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       ]);
     }
 
-    // Use unique filenames to avoid conflicts
-    audioFileName = `audio_${timestamp}.mp3`;
-    imageFileName = `image_${timestamp}.jpg`;
-    outputFileName = `output_${timestamp}.mp4`;
+    // Use unique filenames to avoid conflicts (includes pairId for concurrent processing)
+    audioFileName = `audio_${pairId}_${timestamp}.mp3`;
+    imageFileName = `image_${pairId}_${timestamp}.jpg`;
+    outputFileName = `output_${pairId}_${timestamp}.mp4`;
 
     try {
       console.log('Writing files to FFmpeg FS:', {
@@ -615,7 +615,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     if (useCustomBackground && customBackgroundFile) {
       try {
         console.log('Processing custom background...');
-        customBackgroundFileName = `bg_${timestamp}.jpg`;
+        customBackgroundFileName = `bg_${pairId}_${timestamp}.jpg`;
 
         let backgroundData;
         if (typeof customBackgroundFile === 'string') {
