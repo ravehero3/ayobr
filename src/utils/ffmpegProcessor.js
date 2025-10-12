@@ -90,6 +90,9 @@ export const forceStopAllProcesses = async () => {
       isInitializing = false;
       initPromise = null;
       activeProcesses.clear();
+      
+      // Invalidate progress token to block any lingering callbacks
+      currentProgressToken = null;
 
       // Clean up caches
       fileCache.clear();
@@ -108,6 +111,7 @@ export const forceStopAllProcesses = async () => {
       isLoaded = false;
       isInitializing = false;
       initPromise = null;
+      currentProgressToken = null; // Invalidate token even on error
     }
   }
 
@@ -933,6 +937,11 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       currentProcessingPairId = null;
       console.log(`[Job Cleanup] Cleared current processing pair: ${pairId}`);
     }
+    
+    // CRITICAL TOKEN CLEANUP: Invalidate progress token to block any lingering callbacks
+    // This ensures callbacks from this video can never fire during the next video
+    currentProgressToken = null;
+    console.log(`[Job Cleanup] 🔒 Invalidated progress token for ${pairId}`);
 
     // CRITICAL FIX: Ensure FFmpeg filesystem is ACTUALLY clean before signaling completion
     // This prevents video 2 from having to clean up video 1's leftover files
