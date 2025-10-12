@@ -187,53 +187,6 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
       marginBottom: `${4 + Math.abs(containerSpacing)}px`,
       marginTop: pairs.findIndex(p => p.id === pair.id) === 0 ? '281px' : '0px'
     }}>
-      {/* Container Header - Number and Status */}
-      <div className="absolute -top-10 left-0 flex items-center gap-3 z-20">
-        {/* Container Number */}
-        <div className="text-white/60 font-medium text-sm">
-          Pair #{calculatedIndex}
-        </div>
-        
-        {/* Preparation Status Indicator */}
-        <div className="flex items-center gap-2">
-          {isComplete && preparationState.status === 'ready' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 border border-green-400/40 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-green-400"></div>
-              <span className="text-green-400 text-xs font-medium">Ready</span>
-            </div>
-          )}
-          {isComplete && preparationState.status === 'preparing' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-500/20 border border-yellow-400/40 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-              <span className="text-yellow-400 text-xs font-medium">Preparing {preparationState.progress}%</span>
-            </div>
-          )}
-          {isComplete && preparationState.status === 'queued' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-              <span className="text-blue-400 text-xs font-medium">Queued</span>
-            </div>
-          )}
-          {isComplete && preparationState.status === 'failed' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/20 border border-red-400/40 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-red-400"></div>
-              <span className="text-red-400 text-xs font-medium">Failed</span>
-            </div>
-          )}
-          {isComplete && preparationState.status === 'idle' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-500/20 border border-gray-400/40 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-              <span className="text-gray-400 text-xs font-medium">Pending</span>
-            </div>
-          )}
-          {!isComplete && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 border border-green-400/40 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-green-400"></div>
-              <span className="text-green-400 text-xs font-medium">Ready</span>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Delete button - positioned at top right of container */}
       {!generatedVideo && (
