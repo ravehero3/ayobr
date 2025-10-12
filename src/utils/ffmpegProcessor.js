@@ -341,9 +341,12 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     // CRITICAL FIX: Wait for previous cleanup to complete BEFORE setting new currentProcessingPairId
     // This prevents the race condition where previous cleanup is skipped
+    console.log(`\n========== VIDEO ${pairId} STARTING ==========`);
     console.log(`[${pairId}] Waiting for previous video cleanup to complete...`);
+    const cleanupWaitStart = Date.now();
     await cleanupCompletionPromise;
-    console.log(`[${pairId}] Previous cleanup confirmed complete`);
+    const cleanupWaitDuration = Date.now() - cleanupWaitStart;
+    console.log(`[${pairId}] Previous cleanup confirmed complete (waited ${cleanupWaitDuration}ms)`);
 
     // Create a NEW cleanup promise for this session
     let resolveCleanup;
@@ -351,6 +354,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       resolveCleanup = resolve;
     });
     cleanupCompletionResolver = resolveCleanup;
+    console.log(`[${pairId}] 📝 Created NEW cleanup promise for this session`);
 
     // Increment session counter
     processingSessionCounter++;
@@ -437,7 +441,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     // Add handler with logging
     ffmpeg.on('progress', progressHandler);
-    console.log(`[Handler Registry] Added progress handler for pair ${pairId}, session ${currentSessionId}`);
+    console.log(`[${pairId}] ✅ ADDED progress handler (session ${currentSessionId})`);
 
     // Enhanced file reading with proper error handling
     const getCachedFileData = async (file, type) => {
@@ -901,11 +905,11 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // CRITICAL: Clean up event handlers and state to prevent leaks into next job
     if (ffmpeg && progressHandler) {
       try {
-        console.log(`[Job Cleanup] Removing specific progress handler for pair ${pairId}`);
+        console.log(`[${pairId}] 🧹 REMOVING progress handler...`);
         ffmpeg.off('progress', progressHandler);
-        console.log(`[Job Cleanup] Progress handler removed successfully`);
+        console.log(`[${pairId}] ✅ Progress handler REMOVED successfully`);
       } catch (cleanupError) {
-        console.warn(`[Job Cleanup] Error removing progress handler:`, cleanupError);
+        console.warn(`[${pairId}] ❌ Error removing progress handler:`, cleanupError);
       }
     }
 
@@ -931,21 +935,22 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
         );
         
         if (tempFiles.length > 0) {
-          console.log(`[Job Cleanup] Found ${tempFiles.length} leftover temp files from pair ${pairId}, cleaning...`);
+          console.log(`[${pairId}] 🧹 Found ${tempFiles.length} leftover temp files, cleaning...`);
+          console.log(`[${pairId}] Files to clean:`, tempFiles.map(f => f.name));
           // Use Promise.allSettled to ensure all deletions attempt to complete
           await Promise.allSettled(
             tempFiles.map(async (tempFile) => {
               try {
                 await ffmpeg.deleteFile(tempFile.name);
-                console.log(`[Job Cleanup] Deleted leftover file: ${tempFile.name}`);
+                console.log(`[${pairId}] ✅ Deleted: ${tempFile.name}`);
               } catch (e) {
-                console.warn(`[Job Cleanup] Failed to delete ${tempFile.name}:`, e.message);
+                console.warn(`[${pairId}] ❌ Failed to delete ${tempFile.name}:`, e.message);
               }
             })
           );
-          console.log(`[Job Cleanup] All leftover files cleaned for pair ${pairId}`);
+          console.log(`[${pairId}] ✅ All leftover files cleaned`);
         } else {
-          console.log(`[Job Cleanup] FFmpeg filesystem is clean for pair ${pairId}`);
+          console.log(`[${pairId}] ✅ FFmpeg filesystem is CLEAN (no temp files)`);
         }
       } catch (e) {
         console.warn(`[Job Cleanup] Could not verify filesystem state:`, e.message);
@@ -961,14 +966,15 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       try { window.gc(); } catch(e) { /* ignore */ }
     }
 
-    console.log(`[Job Cleanup] Cleanup complete for pair ${pairId}, ready for next job`);
+    console.log(`[${pairId}] ✅ Cleanup complete, ready for next job`);
 
     // CRITICAL FIX: Signal cleanup completion ONLY after filesystem is verified clean
     // This ensures next video starts with a clean FFmpeg instance
     if (cleanupCompletionResolver) {
-      console.log(`[Job Cleanup] Signaling cleanup completion for pair ${pairId}`);
+      console.log(`[${pairId}] 🚀 RESOLVING cleanup promise - next video can start`);
       cleanupCompletionResolver();
       cleanupCompletionResolver = null;
+      console.log(`[${pairId}] ========== VIDEO ${pairId} CLEANUP COMPLETE ==========\n`);
     }
   }
 };
