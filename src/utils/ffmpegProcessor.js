@@ -11,6 +11,7 @@ let currentProcessingPairId = null; // Track which pair is currently being proce
 let processingSessionCounter = 0; // Session counter to track unique processing sessions
 let cleanupCompletionPromise = Promise.resolve(); // Track when cleanup is fully done
 let cleanupCompletionResolver = null; // Resolver for the current cleanup
+let currentProgressToken = null; // CRITICAL: Unique token for current video to prevent stale progress callbacks
 
 // Reduced concurrency for memory stability
 const getOptimalConcurrency = (totalFiles) => {
