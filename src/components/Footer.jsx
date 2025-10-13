@@ -97,7 +97,8 @@ const Footer = ({ onGenerateVideos, onStop }) => {
                 clearAllVideoGenerationStates();
 
                 if (generatedVideos.length > 0) {
-                  // From download page, go back to file management
+                  // From download page, go back to file management with complete cleanup
+                  clearGeneratedVideos(); // Clear generated videos to return to pre-generation state
                   setCurrentPage('fileManagement');
                 } else if (completePairs.length > 0 || hasFiles) {
                   // From generation page or file management, go back to upload and clear everything
