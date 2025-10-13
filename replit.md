@@ -39,9 +39,10 @@ Key features include:
 -   **Video Generation**: Outputs 1920x1080 videos with white background, high-quality audio (AAC 320k), and optional user logo overlay. Includes real-time progress and cancellation. Processes videos with controlled concurrency (2 at a time) for optimal performance while maintaining stability across 1-100 video batches.
 -   **Download Page**: For video preview, bulk download, and options to create more videos.
 -   **Smart Page Management**: Automatic page detection based on application state.
--   **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images.
+-   **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images with automatic image resizing (>5MB images are automatically compressed to 1920px max dimension at 85% quality to prevent video generation failures).
 -   **User Profile System**: Glassmorphism modal for user profiles with custom profile pictures (JPG/PNG, max 5MB) stored as base64, and a monochrome image icon placeholder.
 -   **Logo Integration System**: Settings panel allows logo uploads (PNG, JPG, HEIC, SVG) for video overlay, stored as base64, and automatically resized to 200px width while maintaining aspect ratio.
+-   **Enhanced Navigation Flow** (October 13, 2025): Implemented smart page-aware footer that adapts to user context. On pages 1-2 (upload/editing), the settings icon appears on the right for configuration. On page 3 (generation/download), the Start Over button replaces the settings icon on the right side. The Back button provides complete state cleanup: when navigating from page 3 to page 2 (during or after generation), it stops all FFmpeg processes, clears all generation states, and removes all generated videos, returning users to their exact pre-generation editing state with pairs intact. This enables seamless iteration on video configurations without losing work.
 
 ### System Design Choices
 -   **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.
