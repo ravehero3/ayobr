@@ -1637,6 +1637,124 @@ input[type="file"] {
   box-shadow: none !important;
 }
 
+/* Magical Particle System for Settings Icon */
+.settings-icon-magical {
+  position: relative;
+  overflow: visible;
+}
+
+.settings-icon-magical:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.settings-particle-system {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.settings-icon-magical:hover .settings-particle-system,
+.settings-icon-magical:active .settings-particle-system {
+  opacity: 1;
+  animation: particleSystemFade 2s ease forwards;
+}
+
+@keyframes particleSystemFade {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.settings-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.9), rgba(147, 51, 234, 0.7));
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+}
+
+.settings-icon-magical:hover .settings-particle,
+.settings-icon-magical:active .settings-particle {
+  animation: magicalFloat 2s ease-out forwards;
+}
+
+@keyframes magicalFloat {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0.5);
+  }
+}
+
+/* Individual particle animations with different directions */
+.settings-particle-1 {
+  --tx: -30px;
+  --ty: -30px;
+  animation-delay: 0s;
+}
+
+.settings-particle-2 {
+  --tx: 30px;
+  --ty: -30px;
+  animation-delay: 0.1s;
+}
+
+.settings-particle-3 {
+  --tx: -35px;
+  --ty: 0px;
+  animation-delay: 0.2s;
+}
+
+.settings-particle-4 {
+  --tx: 35px;
+  --ty: 0px;
+  animation-delay: 0.15s;
+}
+
+.settings-particle-5 {
+  --tx: -30px;
+  --ty: 30px;
+  animation-delay: 0.25s;
+}
+
+.settings-particle-6 {
+  --tx: 30px;
+  --ty: 30px;
+  animation-delay: 0.05s;
+}
+
+.settings-particle-7 {
+  --tx: 0px;
+  --ty: -35px;
+  animation-delay: 0.3s;
+}
+
+.settings-particle-8 {
+  --tx: 0px;
+  --ty: 35px;
+  animation-delay: 0.2s;
+}
+
 @keyframes fastSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(180deg); }

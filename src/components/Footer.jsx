@@ -254,7 +254,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 286px)' }}> {/* Moved 1px to the right (287 - 1) */}
           <motion.button
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0 active:shadow-[0_0_15px_rgba(59,130,246,0.8)]"
+            className="settings-icon-magical relative flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0"
             style={{ transition: 'all 0.15s ease-out' }}
             whileHover={{ 
               scale: 1.05,
@@ -273,6 +273,17 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
+            {/* Magical Particle System */}
+            <div className="settings-particle-system">
+              <div className="settings-particle settings-particle-1"></div>
+              <div className="settings-particle settings-particle-2"></div>
+              <div className="settings-particle settings-particle-3"></div>
+              <div className="settings-particle settings-particle-4"></div>
+              <div className="settings-particle settings-particle-5"></div>
+              <div className="settings-particle settings-particle-6"></div>
+              <div className="settings-particle settings-particle-7"></div>
+              <div className="settings-particle settings-particle-8"></div>
+            </div>
           </motion.button>
         </div>
       </div>

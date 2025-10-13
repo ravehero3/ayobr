@@ -64,7 +64,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
         >
           {/* Enhanced Gaussian blur backdrop matching AppInfoWindow */}
           <div 
@@ -81,6 +80,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
           {/* Settings Window */}
           <motion.div
             className="relative"
+            onClick={(e) => e.stopPropagation()}
             style={{
               width: '480px',
               height: '520px',
