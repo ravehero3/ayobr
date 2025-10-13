@@ -9,6 +9,9 @@ const Footer = ({ onGenerateVideos, onStop }) => {
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
+  // Page detection: Page 3 = generating or has generated videos
+  const isOnPage3 = isGenerating || generatedVideos.length > 0;
+
   // Helper function to get the video generation state for a given pair ID
   const getVideoGenerationState = (pairId) => {
     return videoGenerationStates[pairId];
@@ -82,6 +85,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
                 // Reset generation state but keep the pairs intact
                 resetGenerationState();
                 clearAllVideoGenerationStates();
+                clearGeneratedVideos(); // Clear any already-generated videos
                 
                 // Go back to file management page to see container pairs
                 setCurrentPage('fileManagement');
@@ -145,8 +149,8 @@ const Footer = ({ onGenerateVideos, onStop }) => {
             </button>
           )}
 
-          {/* Start Over Button - Only show when generating or videos exist */}
-          {(isGenerating || generatedVideos.length > 0) && (
+          {/* Start Over Button - Only show on pages 1-2 (left side) */}
+          {!isOnPage3 && (isGenerating || generatedVideos.length > 0) && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -250,41 +254,69 @@ const Footer = ({ onGenerateVideos, onStop }) => {
           )}
         </div>
 
-        {/* Right side - Settings Button */}
+        {/* Right side - Settings Button (Pages 1-2) OR Start Over Button (Page 3) */}
         <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 286px)' }}> {/* Moved 1px to the right (287 - 1) */}
-          <motion.button
-            onClick={() => setIsSettingsOpen(true)}
-            className="settings-icon-magical relative flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0"
-            style={{ transition: 'all 0.15s ease-out' }}
-            whileHover={{ 
-              scale: 1.05,
-              rotate: 360
-            }}
-            whileTap={{ 
-              scale: 0.95,
-              filter: 'brightness(1.5)'
-            }}
-            transition={{
-              rotate: { duration: 2, ease: "linear" },
-              filter: { duration: 0.15, ease: "easeOut" }
-            }}
-          >
-            <svg className="w-6 h-6 text-gray-400 hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {/* Magical Particle System */}
-            <div className="settings-particle-system">
-              <div className="settings-particle settings-particle-1"></div>
-              <div className="settings-particle settings-particle-2"></div>
-              <div className="settings-particle settings-particle-3"></div>
-              <div className="settings-particle settings-particle-4"></div>
-              <div className="settings-particle settings-particle-5"></div>
-              <div className="settings-particle settings-particle-6"></div>
-              <div className="settings-particle settings-particle-7"></div>
-              <div className="settings-particle settings-particle-8"></div>
-            </div>
-          </motion.button>
+          {/* Settings Icon - Only show on pages 1-2 */}
+          {!isOnPage3 && (
+            <motion.button
+              onClick={() => setIsSettingsOpen(true)}
+              className="settings-icon-magical relative flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0"
+              style={{ transition: 'all 0.15s ease-out' }}
+              whileHover={{ 
+                scale: 1.05,
+                rotate: 360
+              }}
+              whileTap={{ 
+                scale: 0.95,
+                filter: 'brightness(1.5)'
+              }}
+              transition={{
+                rotate: { duration: 2, ease: "linear" },
+                filter: { duration: 0.15, ease: "easeOut" }
+              }}
+            >
+              <svg className="w-6 h-6 text-gray-400 hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {/* Magical Particle System */}
+              <div className="settings-particle-system">
+                <div className="settings-particle settings-particle-1"></div>
+                <div className="settings-particle settings-particle-2"></div>
+                <div className="settings-particle settings-particle-3"></div>
+                <div className="settings-particle settings-particle-4"></div>
+                <div className="settings-particle settings-particle-5"></div>
+                <div className="settings-particle settings-particle-6"></div>
+                <div className="settings-particle settings-particle-7"></div>
+                <div className="settings-particle settings-particle-8"></div>
+              </div>
+            </motion.button>
+          )}
+
+          {/* Start Over Button - Only show on page 3 (right side) */}
+          {isOnPage3 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Start Over button clicked - initiating complete app reset');
+                if (onStop) onStop();
+                resetApp();
+              }}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
+            >
+              <svg
+                className="w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span className="text-sm text-red-300 group-hover:text-red-200 transition-colors duration-200">
+                Start Over
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
