@@ -55,6 +55,14 @@ async function setupAuth(app) {
   const config = await getOidcConfig();
   const registeredStrategies = new Set();
 
+  // Use the real public domain for callbacks, not localhost
+  const getPublicDomain = (reqHostname) => {
+    // In Replit dev environment, REPLIT_DEV_DOMAIN is the public-facing domain
+    if (process.env.REPLIT_DEV_DOMAIN) return process.env.REPLIT_DEV_DOMAIN;
+    if (process.env.REPLIT_DOMAINS) return process.env.REPLIT_DOMAINS.split(',')[0].trim();
+    return reqHostname;
+  };
+
   const ensureStrategy = (domain) => {
     const strategyName = `replitauth:${domain}`;
     if (!registeredStrategies.has(strategyName)) {
@@ -88,16 +96,18 @@ async function setupAuth(app) {
   passport.deserializeUser((user, cb) => cb(null, user));
 
   app.get('/api/login', (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const domain = getPublicDomain(req.hostname);
+    ensureStrategy(domain);
+    passport.authenticate(`replitauth:${domain}`, {
       prompt: 'login consent',
       scope: ['openid', 'email', 'profile', 'offline_access']
     })(req, res, next);
   });
 
   app.get('/api/callback', (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const domain = getPublicDomain(req.hostname);
+    ensureStrategy(domain);
+    passport.authenticate(`replitauth:${domain}`, {
       successRedirect: '/app',
       failureRedirect: '/login'
     })(req, res, next);
@@ -107,9 +117,10 @@ async function setupAuth(app) {
     req.logout(async () => {
       try {
         const config = await getOidcConfig();
+        const domain = getPublicDomain(req.hostname);
         const endSessionUrl = client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`
+          post_logout_redirect_uri: `https://${domain}`
         });
         res.redirect(endSessionUrl.href);
       } catch {

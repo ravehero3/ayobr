@@ -6,7 +6,7 @@ import UpgradeBanner from '../components/UpgradeBanner';
 import VideoApp from '../VideoApp';
 
 export default function AppPage() {
-  const { user, loading, refreshUser } = useAuth();
+  const { user, loading, refreshUser, deductCredit } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
@@ -56,6 +56,18 @@ export default function AppPage() {
   const isPro = user.role === 'pro' || user.role === 'admin';
   const creditsLeft = user?.credits?.credits_remaining;
 
+  const handleBeforeGenerate = async () => {
+    if (isPro) return true;
+    const result = await deductCredit();
+    if (!result.success) {
+      if (result.message) {
+        alert(result.message);
+      }
+      return false;
+    }
+    return true;
+  };
+
   return (
     <div className="relative">
       <Navbar />
@@ -66,14 +78,14 @@ export default function AppPage() {
         <div className="fixed top-14 left-0 right-0 z-[9999] flex items-center justify-center py-2 px-6"
           style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))', borderBottom: '1px solid rgba(59,130,246,0.4)' }}>
           <span className="text-blue-300 text-sm font-medium">
-            🎉 Welcome to PRO! You now have unlimited video generation.
+            Welcome to PRO! You now have unlimited video generation.
           </span>
         </div>
       )}
 
       {/* The existing video app — offset for navbar */}
-      <div style={{ paddingTop: isPro || creditsLeft > 2 ? 56 : 88 }}>
-        <VideoApp />
+      <div style={{ paddingTop: isPro || (creditsLeft !== undefined && creditsLeft > 2) ? 56 : 88 }}>
+        <VideoApp onBeforeGenerate={handleBeforeGenerate} />
       </div>
     </div>
   );

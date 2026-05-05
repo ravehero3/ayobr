@@ -1,164 +1,148 @@
-# TypeBeatz — Type Beat Video Generator
+# TypeBeatz — Type Beat Video Generator Platform
 
-## What This App Is (Plain Language)
+## What This App Is
 
-TypeBeatz is a web-based tool built for music producers who create "type beat" videos and upload them to YouTube. The core problem it solves: a producer finishes a batch of 50 beats and needs to turn each one into a YouTube video (audio + image = MP4). Doing this manually in a video editor takes hours of repetitive, boring work. TypeBeatz eliminates all of that.
+TypeBeatz is a full SaaS platform for music producers who create "type beat" videos for YouTube. Producers drag and drop up to 100 files (50 audio + 50 images), the app auto-pairs them, and generates all MP4 videos in-browser using FFmpeg WebAssembly. No server needed for video processing — it's entirely client-side.
 
-The producer drags and drops up to 100 files at once (e.g. 50 audio files + 50 cover images), the app automatically pairs them up (each beat gets matched with an image), then generates all 50 MP4 videos one by one in the browser using FFmpeg WebAssembly — entirely client-side, no server needed for processing. The producer can literally walk away or go to sleep while the app works. This is the core brand identity: the sleeping alien mascot (ZZZ) represents "you sleep, we work."
-
-The app is called **TypeBeatz** and is being developed by a Czech music producer with 18 years of experience, 9,750 Instagram followers, and a working music eshop at voodoo808.com (selling beats and sound kits to rappers and music producers). TypeBeatz is planned to be deployed at **typebeatz.app**.
+**Brand identity**: "You sleep, we work." The sleeping alien mascot (ZZZ) animates during video generation.
 
 ---
 
-## Business Context
+## Architecture
 
-- **Owner/Creator**: Czech music producer, voodoo808.com
-- **Target audience**: Music producers worldwide who upload type beat videos to YouTube
-- **Planned domain**: typebeatz.app
-- **Deployment platform**: Vercel (free tier, static deployment)
-- **Related business**: voodoo808.com — eshop selling beats ("Beaty") and sound kits ("Zvuky") with CZK and EUR payments
-- **Strategy**: TypeBeatz serves as a standalone global tool that cross-promotes voodoo808.com (producers using TypeBeatz need beats → buy from voodoo808)
+### Frontend (port 5000)
+- React 19, Zustand, Framer Motion, TailwindCSS v4
+- Webpack 5 + Babel dev server
+- react-router-dom for routing: `/` (landing), `/login`, `/app` (protected), `/admin` (admin-only)
+- Webpack proxy: all `/api/*` requests forwarded to backend on port 3001
 
----
+### Backend (port 3001)
+- Express.js server (`npm run server` → `server/index.js`)
+- Replit Auth (openid-client + passport) for OIDC login
+- PostgreSQL (Replit DB) via `pg` pool
+- Sessions stored in DB via `connect-pg-simple`
+- Stripe integration for PRO subscriptions
 
-## Future Roadmap — Full SaaS Web App
-
-The current state is a functional client-side React app. The planned evolution is a full SaaS platform with the following features:
-
-### Authentication & User System
-- User registration and login (email/password + optionally Google/social)
-- Two user tiers: **Free** and **PRO**
-- Free users: **5 video generation credits per month**, resetting on the 1st of each month
-- PRO users: **unlimited video generation**
-- Upgrade flow: free users can purchase PRO subscription from within the app
-- Payment integration needed for PRO upgrades (Stripe or similar)
-
-### Legal & Compliance
-- On registration or first use, users must agree to **Terms of Service** confirming:
-  - They own the rights to all audio files they upload
-  - They own the rights to all images they upload
-  - They will not use the app to create content from copyrighted material they do not own
-- This agreement protects the platform legally from copyright liability
-
-### Admin Panel
-- Separate admin dashboard (protected route, admin role only)
-- Admin can view: list of all free users, list of all PRO users, usage statistics
-- Admin can manage: which features are available to free vs PRO users (feature flags)
-- Admin can: manually upgrade/downgrade users, see credit usage, see video generation counts
-- Admin can: set monthly credit limits for free users globally
-
-### Landing / Marketing Homepage
-- Public-facing homepage at typebeatz.app
-- Explains what the app does in plain language (the "you sleep, we work" pitch)
-- Screenshots or screen recordings showing the drag-and-drop workflow
-- Comparison: Free vs PRO features table
-- CTA to sign up (free) or go PRO
-- Link back to voodoo808.com for beats and sound kits
-
-### Core App (Post-Login)
-- The current drag-and-drop video generator interface (already built)
-- Credit counter visible in UI for free users (e.g. "3/5 credits remaining this month")
-- Credit is consumed when a video is successfully generated
-- PRO badge visible in UI for pro users
-- Settings: user profile, logo upload for video overlay, account management
-
-### Nice-to-Have / Future Features
-- Video history (list of previously generated videos, re-download)
-- Preset templates (different video styles/layouts)
-- Batch naming conventions (auto-name output files)
-- YouTube upload integration (direct upload from app to YouTube)
-- Offline/desktop version (Electron) — sold as one-time purchase on voodoo808.com
+### Database (Replit PostgreSQL)
+Tables: `sessions`, `users`, `credits`, `subscriptions`, `feature_flags`
 
 ---
 
-## Current Technical State
+## Routes
 
-### Tech Stack
-- **Frontend**: React 19, Zustand (state), Framer Motion (animations), TailwindCSS v4
-- **Video Processing**: FFmpeg WebAssembly (@ffmpeg/ffmpeg 0.12.x) — 100% client-side
-- **Build System**: Webpack 5, Babel
-- **Dev Server**: webpack-dev-server on port 5000
-- **No backend currently** — all processing happens in the browser
+### Frontend Routes
+- `/` — Landing page (public)
+- `/login` — Login page with rights agreement modal
+- `/app` — Video generator app (protected, redirects to /login if not authed)
+- `/admin` — Admin panel (protected, admin role only)
 
-### Critical Headers Required
-FFmpeg WebAssembly requires SharedArrayBuffer which requires these HTTP headers on every response:
+### Backend API Routes
+- `GET /api/health` — Health check
+- `GET /api/login` — Initiates Replit OIDC auth flow
+- `GET /api/callback` — OIDC callback, creates session
+- `GET /api/logout` — Ends session, redirects to Replit logout
+- `GET /api/user/me` — Current user profile + credits
+- `POST /api/user/agree-rights` — Mark rights agreement accepted
+- `POST /api/user/deduct-credit` — Deduct 1 credit (called before video generation)
+- `GET /api/user/features` — Feature flags for current user's plan
+- `GET /api/admin/users` — All users (admin only)
+- `PATCH /api/admin/users/:id/role` — Change user role (admin only)
+- `GET /api/admin/features` — All feature flags (admin only)
+- `PATCH /api/admin/features` — Toggle a feature flag (admin only)
+- `POST /api/admin/reset-credits` — Manually reset monthly credits (admin only)
+- `POST /api/stripe/create-checkout` — Create Stripe checkout session
+- `POST /api/stripe/portal` — Create customer portal session
+- `GET /api/stripe/subscription` — Get current subscription status
+- `POST /api/stripe/webhook` — Stripe webhook handler
+
+---
+
+## Key Files
+
+### Backend
+- `server/index.js` — Express entry, CORS, middleware, scheduler
+- `server/auth.js` — Replit Auth OIDC setup, session management, isAuthenticated/isAdmin middleware
+- `server/db.js` — PostgreSQL pool
+- `server/storage.js` — All DB CRUD operations
+- `server/schema.sql` — DB schema (applied on server start)
+- `server/routes/user.js` — User API routes
+- `server/routes/admin.js` — Admin API routes
+- `server/routes/stripe.js` — Stripe routes + webhook
+
+### Frontend
+- `src/App.jsx` — BrowserRouter + all route definitions
+- `src/context/AuthContext.jsx` — Auth state, login/logout, deductCredit, agreeToRights
+- `src/VideoApp.jsx` — Original video generator (accepts `onBeforeGenerate` prop for credit gating)
+- `src/pages/LandingPage.jsx` — Public marketing page
+- `src/pages/LoginPage.jsx` — Login + rights agreement
+- `src/pages/AppPage.jsx` — Protected app wrapper, credit/upgrade UI
+- `src/pages/AdminPage.jsx` — Admin panel
+- `src/components/Navbar.jsx` — App navbar with credits/PRO badge
+- `src/components/UpgradeBanner.jsx` — Low-credit warning banner
+- `webpack.config.js` — Build config, dev server, COOP/COEP headers, `/api` proxy
+
+---
+
+## User Roles
+- `free` — 5 credits/month, reset on the 1st
+- `pro` — Unlimited video generation ($9.99/month via Stripe)
+- `admin` — Full access + admin panel
+
+## Setting First Admin
+To make the first user an admin, run in the DB:
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
+```
+
+---
+
+## Environment Variables / Secrets
+- `DATABASE_URL` — PostgreSQL connection string (auto-set by Replit DB blueprint)
+- `SESSION_SECRET` — Random string for session signing
+- `REPL_ID` — Auto-set by Replit (used as OIDC client_id)
+- `REPLIT_DEV_DOMAIN` — Auto-set by Replit (used for auth callback URL)
+- `STRIPE_SECRET_KEY` — Stripe secret key (set when ready for payments)
+- `STRIPE_PRO_PRICE_ID` — Stripe price ID for the $9.99/month PRO plan
+- `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret
+
+---
+
+## Credit System
+- Free users start with 5 credits, each video generation costs 1 credit
+- `POST /api/user/deduct-credit` is called by `AppPage` via `onBeforeGenerate` prop before generation starts
+- Returns 402 if no credits remaining
+- Monthly reset scheduler runs every hour, resets on the 1st of each month
+- Admin can manually trigger reset via admin panel
+
+---
+
+## Workflows
+- **Start application** — `npm run dev` (webpack on port 5000, webview)
+- **API Server** — `npm run server` (Express on port 3001, console)
+- Both start automatically via the **Project** parallel workflow
+
+---
+
+## Tech Stack
+- React 19, Zustand, Framer Motion, TailwindCSS v4
+- FFmpeg WebAssembly (@ffmpeg/ffmpeg 0.12.x) — client-side video processing
+- Express 5, Passport, openid-client (Replit Auth OIDC)
+- pg (PostgreSQL), connect-pg-simple (session store)
+- Stripe (payments)
+- Webpack 5, Babel
+
+## Critical Headers (FFmpeg SharedArrayBuffer)
 ```
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
-These are set in webpack devServer config and must be set in `vercel.json` for production deployment.
+Set in webpack devServer config (dev) and must be set in hosting config for production.
 
-### Key Files
-- `src/App.jsx` — main application, orchestrates all hooks and pages
-- `src/store/appStore.js` — central Zustand state
-- `src/hooks/usePairingLogic.js` — file drop, audio/image detection, pairing
-- `src/hooks/usePairPreparation.js` — background pre-processing of file pairs
-- `src/hooks/useFFmpeg.js` — video generation orchestration, progress, cancellation
-- `src/utils/ffmpegProcessor.js` — low-level FFmpeg WASM execution
-- `src/services/JobManager.js` — FFmpeg instance pooling, job queue
-- `src/services/PreparationService.js` — reads buffers, extracts metadata, caches
-- `src/components/DropZone.jsx` — file drop UI
-- `src/components/VideoPreviewCard.jsx` — generated video preview + download
-- `webpack.config.js` — build config, dev server, CORS/COOP/COEP headers
+---
 
-### UI/UX Design Language
-- Dark theme: deep navy + matte black backgrounds
-- Neon blue accents
-- Glassmorphism containers: 4px thick stroke, semi-transparent backgrounds, 16px backdrop blur, noise texture overlay
-- Rounded corners: 24–32px
+## UI/UX Design Language
+- Dark theme: deep navy (#050a13) + matte black backgrounds
+- Blue-purple gradient accents (#3b82f6 → #8b5cf6)
+- Glassmorphism containers: semi-transparent, backdrop blur, border
 - Framer Motion animations throughout
-- Sleeping alien mascot (ZZZ) appears during video generation
-- 4-page navigation: Upload → File Management → Generation → Download
-
-### Video Output Specs
-- Resolution: 1920x1080
-- Audio: AAC 320kbps
-- Optional logo overlay (user-uploaded, stored as base64)
-- Sequential processing (1 at a time) for stability
-- Pre-processing cache (40–60% faster generation due to background buffering)
-
-### Performance Architecture
-- **PreparationService**: Background pre-processes all pairs before generation starts. Loads audio/image into ArrayBuffers, extracts duration, sanitizes filenames. 450MB memory cap with LRU eviction.
-- **JobManager**: FFmpeg instance pool (max 3 instances), job queueing, event-based progress forwarding
-- **Token-based progress isolation**: Each video generation session gets a unique UUID token preventing cross-contamination of progress callbacks between sequential videos
-- **Sequential cleanup**: Each video waits for verified filesystem cleanup before the next begins
-
-### Known Architecture Limitation
-The current `ffmpegProcessor.js` uses shared module-level state (`currentProgressToken`, `cleanupCompletionPromise`, etc.) designed for sequential processing only (maxConcurrent = 1). Enabling true parallel video generation would require full refactor to per-job isolated state containers.
-
----
-
-## User Preferences (for AI agents building UI)
-- Communication style: simple, everyday language (non-technical)
-- Container styling: 4px thick glassmorphism stroke, semitransparent shadows
-- Video container width: 200px fixed during generation
-- Sleeping alien: in front of background, behind footer during generation
-- "We are generating your videos" text: positioned 80px higher than default
-- FFmpeg: use hardware acceleration when available, ultrafast/superfast presets, parallel CPU cores
-
----
-
-## Deployment Plan
-1. Buy `typebeatz.app` domain (Cloudflare Registrar recommended — cheapest .app renewals)
-2. Push code to GitHub
-3. Connect to Vercel (free hobby plan)
-4. Add `vercel.json` with required COOP/COEP headers and build config
-5. Point DNS from Cloudflare → Vercel
-6. SSL is automatic via Vercel/Let's Encrypt (required for .app domains)
-
-### vercel.json needed:
-```json
-{
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
-      ]
-    }
-  ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist"
-}
-```
+- Sleeping alien mascot during video generation

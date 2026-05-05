@@ -20,7 +20,7 @@ import SpacingSlider from './components/SpacingSlider';
 import SleepingAlien from './components/SleepingAlien';
 
 
-function App() {
+function App({ onBeforeGenerate }) {
   const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, selectCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped, ensureAutoNavigation } = useAppStore();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { prepareCompletePairs } = usePairPreparation(); // Activate automatic pair preparation
@@ -296,6 +296,12 @@ function App() {
     if (isGenerating) {
       console.log('Generation already in progress');
       return;
+    }
+
+    // Credit check — called from AppPage which knows about auth
+    if (onBeforeGenerate) {
+      const allowed = await onBeforeGenerate();
+      if (!allowed) return;
     }
 
     console.log('Starting video generation for pairs:', completePairs);
