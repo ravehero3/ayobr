@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function UpgradeBanner({ creditsLeft, onUpgrade }) {
+export default function UpgradeBanner({ creditsLeft, onUpgrade, checkoutLoading }) {
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed || creditsLeft === null || creditsLeft === undefined) return null;
-  if (creditsLeft > 2) return null; // Only show when running low
+  if (creditsLeft > 2) return null;
 
   const isExhausted = creditsLeft === 0;
 
@@ -26,15 +26,22 @@ export default function UpgradeBanner({ creditsLeft, onUpgrade }) {
           <span>{isExhausted ? '🚫' : '⚠️'}</span>
           <span className={isExhausted ? 'text-red-300' : 'text-yellow-300'}>
             {isExhausted
-              ? 'You\'ve used all 5 free credits this month. Upgrade to PRO for unlimited videos.'
+              ? "You've used all 5 free credits this month. Upgrade to PRO for unlimited videos."
               : `Only ${creditsLeft} free credit${creditsLeft !== 1 ? 's' : ''} left this month.`}
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={onUpgrade}
-            className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+          <button
+            onClick={onUpgrade}
+            disabled={checkoutLoading}
+            className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
             style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
-            Go PRO — $9.99/mo
+            {checkoutLoading ? (
+              <>
+                <span className="inline-block w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />
+                Opening...
+              </>
+            ) : 'Go PRO — $9.99/mo'}
           </button>
           {!isExhausted && (
             <button onClick={() => setDismissed(true)} className="text-gray-500 hover:text-white text-xs transition-colors">

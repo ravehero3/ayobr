@@ -19,6 +19,16 @@ function getPaddle() {
 
 const PRO_PRICE_ID = process.env.PADDLE_PRO_PRICE_ID;
 
+// Public config for Paddle.js client-side initialization
+// PADDLE_CLIENT_TOKEN is a public token — safe to expose to frontend
+router.get('/config', (req, res) => {
+  res.json({
+    clientToken: process.env.PADDLE_CLIENT_TOKEN || null,
+    priceId: PRO_PRICE_ID || null,
+    environment: process.env.PADDLE_ENV === 'production' ? 'production' : 'sandbox'
+  });
+});
+
 // Create Paddle checkout — returns a checkout URL
 router.post('/create-checkout', isAuthenticated, async (req, res) => {
   const p = getPaddle();

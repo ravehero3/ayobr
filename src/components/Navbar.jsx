@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
-export default function Navbar() {
+export default function Navbar({ onUpgrade, checkoutLoading }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isPro = user?.role === 'pro' || user?.role === 'admin';
@@ -21,23 +20,35 @@ export default function Navbar() {
         borderBottom: '1px solid rgba(255,255,255,0.06)'
       }}>
 
-      {/* Logo */}
       <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 18 }} />
       </button>
 
-      {/* Right side */}
-      <div className="flex items-center gap-4">
-        {/* Credit badge for free users */}
+      <div className="flex items-center gap-3">
         {user && !isPro && (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 text-xs text-gray-300"
-            style={{ background: 'rgba(255,255,255,0.04)' }}>
-            <span>🎟️</span>
-            <span>{creditsLeft ?? 5} credits left</span>
-          </div>
+          <>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 text-xs text-gray-300"
+              style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <span>🎟️</span>
+              <span>{creditsLeft ?? 5} credits left</span>
+            </div>
+            {onUpgrade && (
+              <button
+                onClick={onUpgrade}
+                disabled={checkoutLoading}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+                {checkoutLoading ? (
+                  <>
+                    <span className="inline-block w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />
+                    Opening...
+                  </>
+                ) : 'Go PRO'}
+              </button>
+            )}
+          </>
         )}
 
-        {/* PRO badge */}
         {user && isPro && (
           <span className="px-3 py-1 rounded-full text-xs font-bold border border-blue-500/40 text-blue-300"
             style={{ background: 'rgba(59,130,246,0.1)' }}>
@@ -45,7 +56,6 @@ export default function Navbar() {
           </span>
         )}
 
-        {/* Admin link */}
         {user?.role === 'admin' && (
           <button onClick={() => navigate('/admin')}
             className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
@@ -53,11 +63,9 @@ export default function Navbar() {
           </button>
         )}
 
-        {/* User menu */}
         {user ? (
           <div className="relative">
-            <button onClick={() => setMenuOpen(v => !v)}
-              className="flex items-center gap-2 group">
+            <button onClick={() => setMenuOpen(v => !v)} className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 group-hover:border-blue-400/50 transition-colors">
                 {user.profile_image_url ? (
                   <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
@@ -72,18 +80,22 @@ export default function Navbar() {
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-10 z-50 w-48 rounded-xl border border-white/10 py-1 shadow-2xl"
+                <div className="absolute right-0 top-10 z-50 w-52 rounded-xl border border-white/10 py-1 shadow-2xl"
                   style={{ background: 'rgba(10,15,30,0.97)', backdropFilter: 'blur(16px)' }}>
                   <div className="px-4 py-2 border-b border-white/10">
-                    <p className="text-sm font-medium text-white truncate">
-                      {user.first_name || 'User'}
-                    </p>
+                    <p className="text-sm font-medium text-white truncate">{user.first_name || 'User'}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email || ''}</p>
                   </div>
                   <button onClick={() => { navigate('/app'); setMenuOpen(false); }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
                     🎬 App
                   </button>
+                  {!isPro && onUpgrade && (
+                    <button onClick={() => { onUpgrade(); setMenuOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-blue-400 hover:text-blue-300 hover:bg-white/5 transition-colors">
+                      ⭐ Upgrade to PRO
+                    </button>
+                  )}
                   {user.role === 'admin' && (
                     <button onClick={() => { navigate('/admin'); setMenuOpen(false); }}
                       className="w-full text-left px-4 py-2 text-sm text-orange-400 hover:text-orange-300 hover:bg-white/5 transition-colors">
@@ -91,7 +103,7 @@ export default function Navbar() {
                     </button>
                   )}
                   <button onClick={logout}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                    className="w-full text-left px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors border-t border-white/5 mt-1">
                     Sign out
                   </button>
                 </div>

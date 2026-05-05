@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePaddle } from '../hooks/usePaddle';
 import Navbar from '../components/Navbar';
 import UpgradeBanner from '../components/UpgradeBanner';
 import VideoApp from '../VideoApp';
@@ -10,42 +11,38 @@ export default function AppPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const { openCheckout } = usePaddle({
+    onCheckoutCompleted: () => {
+      setShowUpgradeSuccess(true);
+      refreshUser();
+      setTimeout(() => setShowUpgradeSuccess(false), 6000);
+    }
+  });
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
-    }
-    if (!loading && user && !user.rights_agreed) {
-      navigate('/login');
-    }
+    if (!loading && !user) navigate('/login');
+    if (!loading && user && !user.rights_agreed) navigate('/login');
   }, [user, loading, navigate]);
 
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') {
       setShowUpgradeSuccess(true);
       refreshUser();
-      setTimeout(() => setShowUpgradeSuccess(false), 5000);
+      setTimeout(() => setShowUpgradeSuccess(false), 6000);
     }
   }, [searchParams]);
 
   const handleUpgrade = async () => {
+    setCheckoutLoading(true);
     try {
-      const res = await fetch('/api/paddle/create-checkout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      if (res.ok) {
-        const { url } = await res.json();
-        if (url) {
-          window.location.href = url;
-        } else {
-          alert('Checkout is not fully configured yet. Please check back soon!');
-        }
-      } else {
-        alert('Paddle is not configured yet. Please check back soon!');
+      const opened = await openCheckout(user?.email);
+      if (!opened) {
+        alert('Paddle checkout is not fully configured yet. Please check back soon!');
       }
-    } catch {
-      alert('Could not start checkout. Please try again.');
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -64,9 +61,7 @@ export default function AppPage() {
     if (isPro) return true;
     const result = await deductCredit();
     if (!result.success) {
-      if (result.message) {
-        alert(result.message);
-      }
+      if (result.message) alert(result.message);
       return false;
     }
     return true;
@@ -74,10 +69,9 @@ export default function AppPage() {
 
   return (
     <div className="relative">
-      <Navbar />
-      <UpgradeBanner creditsLeft={isPro ? null : creditsLeft} onUpgrade={handleUpgrade} />
+      <Navbar onUpgrade={handleUpgrade} checkoutLoading={checkoutLoading} />
+      <UpgradeBanner creditsLeft={isPro ? null : creditsLeft} onUpgrade={handleUpgrade} checkoutLoading={checkoutLoading} />
 
-      {/* PRO upgrade success banner */}
       {showUpgradeSuccess && (
         <div className="fixed top-14 left-0 right-0 z-[9999] flex items-center justify-center py-2 px-6"
           style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))', borderBottom: '1px solid rgba(59,130,246,0.4)' }}>
@@ -87,7 +81,6 @@ export default function AppPage() {
         </div>
       )}
 
-      {/* The existing video app — offset for navbar */}
       <div style={{ paddingTop: isPro || (creditsLeft !== undefined && creditsLeft > 2) ? 56 : 88 }}>
         <VideoApp onBeforeGenerate={handleBeforeGenerate} />
       </div>
