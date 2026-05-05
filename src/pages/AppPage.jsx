@@ -30,15 +30,19 @@ export default function AppPage() {
 
   const handleUpgrade = async () => {
     try {
-      const res = await fetch('/api/stripe/create-checkout', {
+      const res = await fetch('/api/paddle/create-checkout', {
         method: 'POST',
         credentials: 'include'
       });
       if (res.ok) {
         const { url } = await res.json();
-        window.location.href = url;
+        if (url) {
+          window.location.href = url;
+        } else {
+          alert('Checkout is not fully configured yet. Please check back soon!');
+        }
       } else {
-        alert('Stripe is not configured yet. Please check back soon!');
+        alert('Paddle is not configured yet. Please check back soon!');
       }
     } catch {
       alert('Could not start checkout. Please try again.');

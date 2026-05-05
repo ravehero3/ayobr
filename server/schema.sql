@@ -33,12 +33,12 @@ CREATE TABLE IF NOT EXISTS credits (
   UNIQUE(user_id)
 );
 
--- Subscriptions table
+-- Subscriptions table (Paddle)
 CREATE TABLE IF NOT EXISTS subscriptions (
   id SERIAL PRIMARY KEY,
   user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  stripe_customer_id VARCHAR UNIQUE,
-  stripe_subscription_id VARCHAR UNIQUE,
+  paddle_customer_id VARCHAR,
+  paddle_subscription_id VARCHAR UNIQUE,
   status VARCHAR NOT NULL DEFAULT 'inactive',  -- 'active', 'inactive', 'cancelled', 'past_due'
   current_period_end TIMESTAMP,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),

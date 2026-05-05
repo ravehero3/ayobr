@@ -5,7 +5,7 @@ const path = require('path');
 const { setupAuth } = require('./auth');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
-const stripeRoutes = require('./routes/stripe');
+const paddleRoutes = require('./routes/paddle');
 const { pool } = require('./db');
 const fs = require('fs');
 const { resetMonthlyCredits } = require('./storage');
@@ -13,8 +13,8 @@ const { resetMonthlyCredits } = require('./storage');
 const app = express();
 const PORT = process.env.API_PORT || 3001;
 
-// Stripe webhook needs raw body — mount BEFORE json middleware
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+// Paddle webhook needs raw body — mount BEFORE json middleware
+app.use('/api/paddle/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 const allowedOrigins = [
@@ -27,12 +27,11 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.some(o => origin.startsWith(o))) return cb(null, true);
-    cb(null, true); // permissive in dev
+    cb(null, true);
   },
   credentials: true
 }));
 
-// Initialize DB schema
 async function initDb() {
   try {
     const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
@@ -43,7 +42,6 @@ async function initDb() {
   }
 }
 
-// Monthly credit reset — check every hour
 function startCreditResetScheduler() {
   const ONE_HOUR = 60 * 60 * 1000;
   setInterval(async () => {
@@ -62,15 +60,12 @@ function startCreditResetScheduler() {
 async function start() {
   await initDb();
 
-  // Setup Replit Auth
   await setupAuth(app);
 
-  // API Routes
   app.use('/api/user', userRoutes);
   app.use('/api/admin', adminRoutes);
-  app.use('/api/stripe', stripeRoutes);
+  app.use('/api/paddle', paddleRoutes);
 
-  // Health check
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 
   startCreditResetScheduler();

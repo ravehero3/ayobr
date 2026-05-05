@@ -110,18 +110,18 @@ async function getSubscription(userId) {
 }
 
 async function upsertSubscription(data) {
-  const { userId, stripeCustomerId, stripeSubscriptionId, status, currentPeriodEnd } = data;
+  const { userId, paddleCustomerId, paddleSubscriptionId, status, currentPeriodEnd } = data;
   const result = await pool.query(
-    `INSERT INTO subscriptions (user_id, stripe_customer_id, stripe_subscription_id, status, current_period_end, updated_at)
+    `INSERT INTO subscriptions (user_id, paddle_customer_id, paddle_subscription_id, status, current_period_end, updated_at)
      VALUES ($1, $2, $3, $4, $5, NOW())
      ON CONFLICT (user_id) DO UPDATE SET
-       stripe_customer_id = EXCLUDED.stripe_customer_id,
-       stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+       paddle_customer_id = EXCLUDED.paddle_customer_id,
+       paddle_subscription_id = EXCLUDED.paddle_subscription_id,
        status = EXCLUDED.status,
        current_period_end = EXCLUDED.current_period_end,
        updated_at = NOW()
      RETURNING *`,
-    [userId, stripeCustomerId, stripeSubscriptionId, status, currentPeriodEnd]
+    [userId, paddleCustomerId, paddleSubscriptionId, status, currentPeriodEnd]
   );
   return result.rows[0];
 }
