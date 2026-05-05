@@ -1,0 +1,76 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const { setupAuth } = require('./auth');
+const userRoutes = require('./routes/user');
+const adminRoutes = require('./routes/admin');
+const stripeRoutes = require('./routes/stripe');
+const { pool } = require('./db');
+const fs = require('fs');
+const { resetMonthlyCredits } = require('./storage');
+
+const app = express();
+const PORT = process.env.API_PORT || 3001;
+
+// Stripe webhook needs raw body — mount BEFORE json middleware
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
+app.use(express.json());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5000',
+  credentials: true
+}));
+
+// Initialize DB schema
+async function initDb() {
+  try {
+    const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+    await pool.query(schema);
+    console.log('Database schema initialized');
+  } catch (err) {
+    console.error('DB schema init error:', err.message);
+  }
+}
+
+// Monthly credit reset — check every hour
+function startCreditResetScheduler() {
+  const ONE_HOUR = 60 * 60 * 1000;
+  setInterval(async () => {
+    const now = new Date();
+    if (now.getDate() === 1 && now.getHours() === 0) {
+      try {
+        const count = await resetMonthlyCredits();
+        console.log(`Monthly credit reset: ${count} users reset`);
+      } catch (err) {
+        console.error('Credit reset error:', err);
+      }
+    }
+  }, ONE_HOUR);
+}
+
+async function start() {
+  await initDb();
+
+  // Setup Replit Auth
+  await setupAuth(app);
+
+  // API Routes
+  app.use('/api/user', userRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/stripe', stripeRoutes);
+
+  // Health check
+  app.get('/api/health', (req, res) => res.json({ ok: true }));
+
+  startCreditResetScheduler();
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`TypeBeatz API server running on port ${PORT}`);
+  });
+}
+
+start().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});

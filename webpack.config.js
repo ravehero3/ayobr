@@ -119,6 +119,14 @@ module.exports = {
     open: false,
     historyApiFallback: true,
     allowedHosts: 'all',
+    proxy: [
+      {
+        context: ['/api'],
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false
+      }
+    ],
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
