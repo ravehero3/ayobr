@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
-export default function Navbar({ onUpgrade, checkoutLoading, onManageSubscription }) {
+export default function Navbar({ onUpgrade, checkoutLoading, onManageSubscription, onInvite }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -123,6 +123,10 @@ export default function Navbar({ onUpgrade, checkoutLoading, onManageSubscriptio
                       ⚙️ Admin Panel
                     </button>
                   )}
+                  <button onClick={() => { onInvite && onInvite(); setMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-green-400 hover:text-green-300 hover:bg-white/5 transition-colors">
+                    🎁 Invite friends (+1 credit)
+                  </button>
                   <button onClick={logout}
                     className="w-full text-left px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors border-t border-white/5 mt-1">
                     Sign out

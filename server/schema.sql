@@ -18,8 +18,25 @@ CREATE TABLE IF NOT EXISTS users (
   role VARCHAR NOT NULL DEFAULT 'free',  -- 'free', 'pro', 'admin'
   rights_agreed BOOLEAN NOT NULL DEFAULT FALSE,
   rights_agreed_at TIMESTAMP,
+  referral_code VARCHAR(8) UNIQUE,
+  referred_by VARCHAR(8),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+-- Add referral columns to existing users table (safe if already present)
+DO $$ BEGIN
+  BEGIN ALTER TABLE users ADD COLUMN referral_code VARCHAR(8) UNIQUE; EXCEPTION WHEN duplicate_column THEN NULL; END;
+  BEGIN ALTER TABLE users ADD COLUMN referred_by VARCHAR(8); EXCEPTION WHEN duplicate_column THEN NULL; END;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code);
+
+-- Referral uses table
+CREATE TABLE IF NOT EXISTS referral_uses (
+  id SERIAL PRIMARY KEY,
+  referrer_user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  new_user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(new_user_id)
 );
 
 -- Credits table

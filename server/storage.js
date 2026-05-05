@@ -140,11 +140,95 @@ async function resetMonthlyCredits() {
   return result.rowCount;
 }
 
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+async function ensureReferralCode(userId) {
+  const existing = await pool.query('SELECT referral_code FROM users WHERE id = $1', [userId]);
+  if (existing.rows[0]?.referral_code) return existing.rows[0].referral_code;
+
+  let code, attempts = 0;
+  while (attempts < 10) {
+    code = generateCode();
+    try {
+      const r = await pool.query(
+        'UPDATE users SET referral_code = $1 WHERE id = $2 AND referral_code IS NULL RETURNING referral_code',
+        [code, userId]
+      );
+      if (r.rows[0]) return r.rows[0].referral_code;
+    } catch (e) {
+      if (e.code !== '23505') throw e;
+    }
+    attempts++;
+  }
+  const final = await pool.query('SELECT referral_code FROM users WHERE id = $1', [userId]);
+  return final.rows[0]?.referral_code;
+}
+
+async function applyReferralCode(newUserId, code) {
+  const normalizedCode = code.trim().toUpperCase();
+
+  const alreadyReferred = await pool.query(
+    'SELECT referred_by FROM users WHERE id = $1', [newUserId]
+  );
+  if (alreadyReferred.rows[0]?.referred_by) {
+    return { success: false, reason: 'already_referred' };
+  }
+
+  const referrer = await pool.query(
+    'SELECT id FROM users WHERE referral_code = $1', [normalizedCode]
+  );
+  if (!referrer.rows[0]) return { success: false, reason: 'invalid_code' };
+  const referrerId = referrer.rows[0].id;
+  if (referrerId === newUserId) return { success: false, reason: 'self_referral' };
+
+  await pool.query('BEGIN');
+  try {
+    await pool.query(
+      'UPDATE users SET referred_by = $1 WHERE id = $2',
+      [normalizedCode, newUserId]
+    );
+    await pool.query(
+      `INSERT INTO referral_uses (referrer_user_id, new_user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [referrerId, newUserId]
+    );
+    await pool.query(
+      `UPDATE credits SET credits_remaining = credits_remaining + 1, updated_at = NOW() WHERE user_id = $1`,
+      [newUserId]
+    );
+    await pool.query(
+      `UPDATE credits SET credits_remaining = credits_remaining + 1, updated_at = NOW() WHERE user_id = $1`,
+      [referrerId]
+    );
+    await pool.query('COMMIT');
+    return { success: true, referrerId };
+  } catch (e) {
+    await pool.query('ROLLBACK');
+    throw e;
+  }
+}
+
+async function getReferralStats(userId) {
+  const code = await ensureReferralCode(userId);
+  const uses = await pool.query(
+    'SELECT COUNT(*) as count FROM referral_uses WHERE referrer_user_id = $1',
+    [userId]
+  );
+  return { code, uses: parseInt(uses.rows[0].count, 10) };
+}
+
 module.exports = {
   upsertUser, getUserById, getAllUsers,
   getUserCredits, deductCredit,
   setUserRole, agreeToRights,
   getFeatureFlags, updateFeatureFlag,
   getSubscription, upsertSubscription,
-  resetMonthlyCredits
+  resetMonthlyCredits,
+  ensureReferralCode, applyReferralCode, getReferralStats
 };

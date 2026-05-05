@@ -45,6 +45,8 @@ Tables: `sessions`, `users`, `credits`, `subscriptions`, `feature_flags`
 - `POST /api/user/agree-rights` — Mark rights agreement accepted
 - `POST /api/user/deduct-credit` — Deduct 1 credit (called before video generation)
 - `GET /api/user/features` — Feature flags for current user's plan
+- `GET /api/user/referral` — Get current user's referral code + stats
+- `POST /api/user/referral/apply` — Apply a referral code (awarded once per user)
 - `GET /api/admin/users` — All users (admin only)
 - `PATCH /api/admin/users/:id/role` — Change user role (admin only)
 - `GET /api/admin/features` — All feature flags (admin only)

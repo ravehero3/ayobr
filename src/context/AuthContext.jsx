@@ -4,9 +4,35 @@ const AuthContext = createContext(null);
 
 const API_BASE = '/api';
 
+function captureReferralCode() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('ref');
+  if (code) {
+    localStorage.setItem('tb_referral_code', code.trim().toUpperCase());
+  }
+}
+
+async function applyStoredReferralCode() {
+  const code = localStorage.getItem('tb_referral_code');
+  if (!code) return;
+  try {
+    await fetch(`${API_BASE}/user/referral/apply`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+  } catch {}
+  localStorage.removeItem('tb_referral_code');
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    captureReferralCode();
+  }, []);
 
   async function fetchUser() {
     try {
@@ -44,6 +70,8 @@ export function AuthProvider({ children }) {
     if (res.ok) {
       const updated = await res.json();
       setUser(prev => ({ ...prev, ...updated }));
+      await applyStoredReferralCode();
+      await fetchUser();
       return true;
     }
     return false;

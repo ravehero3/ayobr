@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePaddle } from '../hooks/usePaddle';
 import Navbar from '../components/Navbar';
 import UpgradeBanner from '../components/UpgradeBanner';
+import ReferralPanel from '../components/ReferralPanel';
 import VideoApp from '../VideoApp';
 
 export default function AppPage() {
@@ -14,6 +15,7 @@ export default function AppPage() {
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showManageSubscription, setShowManageSubscription] = useState(false);
+  const [showReferral, setShowReferral] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
 
   const { openCheckout } = usePaddle({
@@ -107,6 +109,7 @@ export default function AppPage() {
         onUpgrade={handleUpgrade}
         checkoutLoading={checkoutLoading}
         onManageSubscription={() => setShowManageSubscription(true)}
+        onInvite={() => setShowReferral(true)}
       />
       <UpgradeBanner
         creditsLeft={isPro ? null : creditsLeft}
@@ -170,6 +173,8 @@ export default function AppPage() {
           </div>
         </div>
       )}
+
+      {showReferral && <ReferralPanel onClose={() => setShowReferral(false)} />}
 
       <div style={{ paddingTop }}>
         <VideoApp onBeforeGenerate={handleBeforeGenerate} />
