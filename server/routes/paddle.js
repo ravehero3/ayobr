@@ -41,7 +41,7 @@ router.post('/create-checkout', isAuthenticated, async (req, res) => {
   if (!priceId) return res.status(503).json({ message: 'Paddle price not configured yet' });
 
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const user = await getUserById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -69,7 +69,7 @@ router.post('/create-checkout', isAuthenticated, async (req, res) => {
 // Get subscription status for current user
 router.get('/subscription', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const sub = await getSubscription(userId);
     res.json(sub || { status: 'inactive' });
   } catch (err) {
@@ -83,7 +83,7 @@ router.post('/cancel', isAuthenticated, async (req, res) => {
   if (!p) return res.status(503).json({ message: 'Paddle not configured yet' });
 
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const sub = await getSubscription(userId);
     if (!sub?.paddle_subscription_id) {
       return res.status(404).json({ message: 'No active subscription found' });

@@ -6,7 +6,7 @@ const { getUserById, getUserCredits, deductCredit, agreeToRights, getFeatureFlag
 // Get current user profile + credits
 router.get('/me', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const [user, credits] = await Promise.all([
       getUserById(userId),
       getUserCredits(userId)
@@ -22,7 +22,7 @@ router.get('/me', isAuthenticated, async (req, res) => {
 // Agree to rights (called at signup)
 router.post('/agree-rights', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const user = await agreeToRights(userId);
     res.json(user);
   } catch (err) {
@@ -34,7 +34,7 @@ router.post('/agree-rights', isAuthenticated, async (req, res) => {
 // Deduct a credit (called before video generation)
 router.post('/deduct-credit', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const user = await getUserById(userId);
 
     // PRO and admin users skip credit check
@@ -56,7 +56,7 @@ router.post('/deduct-credit', isAuthenticated, async (req, res) => {
 // Get feature flags for current user plan
 router.get('/features', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const user = await getUserById(userId);
     const flags = await getFeatureFlags();
     const plan = user?.role === 'pro' || user?.role === 'admin' ? 'pro' : 'free';
@@ -73,7 +73,7 @@ router.get('/features', isAuthenticated, async (req, res) => {
 // Get referral code + stats
 router.get('/referral', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const stats = await getReferralStats(userId);
     res.json(stats);
   } catch (err) {
@@ -85,7 +85,7 @@ router.get('/referral', isAuthenticated, async (req, res) => {
 // Apply a referral code (called once after sign-up)
 router.post('/referral/apply', isAuthenticated, async (req, res) => {
   try {
-    const userId = req.user.claims.sub;
+    const userId = req.user.id;
     const { code } = req.body;
     if (!code || typeof code !== 'string') {
       return res.status(400).json({ message: 'Missing referral code' });
