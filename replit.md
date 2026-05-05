@@ -1,71 +1,164 @@
-# Type Beat Video Generator
+# TypeBeatz — Type Beat Video Generator
 
-## Overview
-The Type Beat Video Generator is a desktop application designed for music producers to create visually appealing type beat videos. It efficiently pairs audio files (MP3/WAV) with images (PNG/JPG) to generate unique visual content for musical tracks. The project aims to be an intuitive, efficient tool that caters to the market demand for high-quality visual accompaniments for music.
+## What This App Is (Plain Language)
 
-## User Preferences
-Preferred communication style: Simple, everyday language.
-Container styling preferences: 4px thick glassmorphism stroke around all containers with semitransparent shadows below and beneath.
-FFmpeg optimization preferences: Use hardware acceleration when available, faster encoding presets (ultrafast/superfast), lower frame rates for processing speed, parallel processing with all CPU cores.
-UI positioning preferences: "We are generating your videos" text positioned 80px higher, sleeping alien positioned at bottom of screen during video generation.
-Z-index preferences: Sleeping alien should appear in front of background but behind footer during video generation.
-Video container width: Generating video containers should be 200px wide (fixed size, no responsive resizing).
+TypeBeatz is a web-based tool built for music producers who create "type beat" videos and upload them to YouTube. The core problem it solves: a producer finishes a batch of 50 beats and needs to turn each one into a YouTube video (audio + image = MP4). Doing this manually in a video editor takes hours of repetitive, boring work. TypeBeatz eliminates all of that.
 
-## System Architecture
+The producer drags and drops up to 100 files at once (e.g. 50 audio files + 50 cover images), the app automatically pairs them up (each beat gets matched with an image), then generates all 50 MP4 videos one by one in the browser using FFmpeg WebAssembly — entirely client-side, no server needed for processing. The producer can literally walk away or go to sleep while the app works. This is the core brand identity: the sleeping alien mascot (ZZZ) represents "you sleep, we work."
 
-### UI/UX Decisions
-The application features a futuristic dark theme with deep navy and matte black backgrounds, neon blue accents, and a 4-layer progressive background system. Containers utilize rounded corners (24-32px) and a glassmorphism effect with semi-transparent dark backgrounds, 16px backdrop blur, and a noise texture overlay. UI elements include circular play buttons and clean audio waveform visualizations. Framer Motion provides smooth animations for merges, ambient border pulses, flare flickers, and enhanced drag-and-drop feedback. Button styling uses spotlight effects with color variants.
+The app is called **TypeBeatz** and is being developed by a Czech music producer with 18 years of experience, 9,750 Instagram followers, and a working music eshop at voodoo808.com (selling beats and sound kits to rappers and music producers). TypeBeatz is planned to be deployed at **typebeatz.app**.
 
-### Technical Implementations
-The application is a cross-platform desktop application built with Electron, a React (19.1.0) frontend, and TailwindCSS (4.1.11). State management is handled by Zustand (5.0.6). Client-side video generation uses FFmpeg.wasm (0.12.15), and audio analysis for waveforms uses WaveSurfer.js (7.9.9). The build system relies on Webpack (5.99.9) and Babel. The application is deployed via a web-based webpack dev server, ensuring client-side processing for privacy and performance.
+---
 
-**Video Processing Optimizations**: JobManager implements FFmpeg instance pooling with a maximum of 3 concurrent instances to prevent memory exhaustion. Each video job uses a dedicated FFmpeg instance from the pool, eliminating lock contention and enabling true parallel processing. Intelligent prefetching prepares files for upcoming jobs while current ones process, with automatic buffer cleanup on cancellation to prevent memory leaks. The system supports up to 3 concurrent video generations with robust cancellation handling and terminal state guards to prevent race conditions.
+## Business Context
 
-**Pre-Processing Optimization System** (October 2025): Implemented comprehensive background pre-processing that prepares file data while users review pairs on page 2, accelerating video generation on page 3 by 40-60%. The PreparationService automatically loads audio/image files into ArrayBuffers, extracts audio duration, and sanitizes filenames in the background with intelligent concurrency control (2 concurrent preparations). Features 450MB memory cap with LRU eviction to handle large batches safely. The usePairPreparation hook monitors pairs and triggers preparation automatically when complete, storing cached assets in Zustand with stable display indices for container numbering (Pair #1, Pair #2, etc.). Preparation status indicators (Queued→Preparing→Ready) provide user feedback. JobManager, VideoGenerationService, and FFmpeg processor utilize cached data when available, falling back gracefully to on-demand processing if preparation fails. Advanced cache invalidation system ensures prepared assets are properly tracked and re-prepared after clearing, replacement, or eviction, preventing stale cache states. Memory is automatically freed after video generation to maintain optimal performance across multiple batch runs.
+- **Owner/Creator**: Czech music producer, voodoo808.com
+- **Target audience**: Music producers worldwide who upload type beat videos to YouTube
+- **Planned domain**: typebeatz.app
+- **Deployment platform**: Vercel (free tier, static deployment)
+- **Related business**: voodoo808.com — eshop selling beats ("Beaty") and sound kits ("Zvuky") with CZK and EUR payments
+- **Strategy**: TypeBeatz serves as a standalone global tool that cross-promotes voodoo808.com (producers using TypeBeatz need beats → buy from voodoo808)
 
-**Progress Callback Isolation System - Token-Based Guard** (October 12, 2025): Implemented aggressive token-based isolation to completely prevent cross-contamination between sequential video generations. Each video processing session now generates a unique crypto.randomUUID() token that acts as the primary gatekeeper for progress callbacks. The system uses a module-level `currentProgressToken` variable with multi-layered validation: (1) **Primary Token Guard**: Progress callbacks check if their captured token matches the current valid token as the first validation step - any mismatch causes immediate rejection, (2) **Session ID matching**: Ensures callbacks belong to the current processing session via `processingSessionCounter`, (3) **PairId verification**: Prevents progress updates from applying to wrong pairs, and (4) **Timing-based stale detection**: Rejects suspicious high-progress updates from just-started videos. Token invalidation occurs at multiple critical points: when a new video starts (set to null before generating new token), in the finally cleanup block, during force-stop operations, and on error. This bulletproof approach eliminates the bug where Video 2 would briefly show 99% progress from Video 1's late callbacks, ensuring smooth 0→100% progress visualization for all sequential videos even when JavaScript event loop timing causes stale callbacks to fire after a new video's handler is added.
+---
 
-**Sequential Video Cleanup Fix** (October 2025): Fixed critical race condition where the second video would fail or experience extreme slowness due to incomplete cleanup from the first video. The issue occurred because the cleanup completion promise was resolved before file deletions were verified complete, causing the second video to find and re-clean leftover files from the first video. Implemented a comprehensive cleanup system where: (1) each video waits for the previous cleanup promise before starting, (2) the finally block verifies FFmpeg filesystem is actually clean using Promise.allSettled before resolving the cleanup promise, (3) filesystem verification happens at both cleanup (proactive) and startup (defensive) to ensure clean state. This eliminates the "video 2 slowness" issue where video 1 generates fast, video 2 is extremely slow (cleaning video 1's files), then videos 3+ are fast again. All sequential videos now generate at consistent speeds with proper resource cleanup.
+## Future Roadmap — Full SaaS Web App
 
-**Concurrent Processing Limitation** (October 12, 2025): The video processor architecture (`ffmpegProcessor.js`) currently uses shared global state including `currentProgressToken`, `currentProcessingPairId`, `cleanupCompletionPromise`, and module-level session counters. This design was explicitly built for sequential video processing (maxConcurrent = 1) and cannot safely handle parallel video generation. Attempting concurrent processing causes race conditions where jobs overwrite each other's tokens, progress handlers become orphaned, and cleanup promises resolve prematurely. To enable concurrent processing in the future would require refactoring to: (1) use separate FFmpeg instances per job with isolated state containers, (2) eliminate all module-level mutable state, (3) implement per-job cleanup coordination, and (4) scope progress tracking to individual job instances. Current architecture prioritizes reliability and consistent performance for sequential batch processing.
+The current state is a functional client-side React app. The planned evolution is a full SaaS platform with the following features:
 
-### Feature Specifications
-Key features include:
--   **4-Page Navigation System**: Smart transitions between Upload, File Management, Generation, and Download pages.
--   **Drag & Drop File Management**: Full-window drop zone with automatic audio-image pairing, visual feedback, and intelligent pairing logic.
--   **Modular Pair Containers**: Glassmorphism-designed containers for audio and images with drag-and-drop swapping and hover effects.
--   **Media Previews**: Waveform visualization for audio and image display.
--   **Enhanced Merge Animation**: Visual merging of audio and image containers into a "Video Loading Container" during generation using Framer Motion.
--   **Video Generation**: Outputs 1920x1080 videos with white background, high-quality audio (AAC 320k), and optional user logo overlay. Includes real-time progress and cancellation. Processes videos with controlled concurrency (2 at a time) for optimal performance while maintaining stability across 1-100 video batches.
--   **Download Page**: For video preview, bulk download, and options to create more videos.
--   **Smart Page Management**: Automatic page detection based on application state.
--   **File Validation**: Supports MP3/WAV audio and PNG/JPG/HEIC images with automatic image resizing (>5MB images are automatically compressed to 1920px max dimension at 85% quality to prevent video generation failures).
--   **User Profile System**: Glassmorphism modal for user profiles with custom profile pictures (JPG/PNG, max 5MB) stored as base64, and a monochrome image icon placeholder.
--   **Logo Integration System**: Settings panel allows logo uploads (PNG, JPG, HEIC, SVG) for video overlay, stored as base64, and automatically resized to 200px width while maintaining aspect ratio.
--   **Enhanced Navigation Flow** (October 13, 2025): Implemented smart page-aware footer that adapts to user context. On pages 1-2 (upload/editing), the settings icon appears on the right for configuration. On page 3 (generation/download), the Start Over button replaces the settings icon on the right side. The Back button provides complete state cleanup: when navigating from page 3 to page 2 (during or after generation), it stops all FFmpeg processes, clears all generation states, and removes all generated videos, returning users to their exact pre-generation editing state with pairs intact. This enables seamless iteration on video configurations without losing work.
+### Authentication & User System
+- User registration and login (email/password + optionally Google/social)
+- Two user tiers: **Free** and **PRO**
+- Free users: **5 video generation credits per month**, resetting on the 1st of each month
+- PRO users: **unlimited video generation**
+- Upgrade flow: free users can purchase PRO subscription from within the app
+- Payment integration needed for PRO upgrades (Stripe or similar)
 
-### System Design Choices
--   **Frontend/Backend Separation**: Clear distinction between React renderer and Electron's main process.
--   **Secure IPC**: Context isolation with secure Inter-Process Communication via preload scripts.
--   **Client-Side Processing**: FFmpeg.wasm ensures all video generation is local.
--   **Optimized Layout**: Designed for wide desktop displays (1800x1000 default), using a single-column vertical stack.
+### Legal & Compliance
+- On registration or first use, users must agree to **Terms of Service** confirming:
+  - They own the rights to all audio files they upload
+  - They own the rights to all images they upload
+  - They will not use the app to create content from copyrighted material they do not own
+- This agreement protects the platform legally from copyright liability
 
-## External Dependencies
+### Admin Panel
+- Separate admin dashboard (protected route, admin role only)
+- Admin can view: list of all free users, list of all PRO users, usage statistics
+- Admin can manage: which features are available to free vs PRO users (feature flags)
+- Admin can: manually upgrade/downgrade users, see credit usage, see video generation counts
+- Admin can: set monthly credit limits for free users globally
 
-### Core Libraries
--   **@ffmpeg/ffmpeg**: Client-side video processing.
--   **@ffmpeg/util**: Utilities for FFmpeg operations.
--   **wavesurfer.js**: Audio waveform visualization and playback.
--   **framer-motion**: UI animations and transitions.
--   **uuid**: Generating unique identifiers.
+### Landing / Marketing Homepage
+- Public-facing homepage at typebeatz.app
+- Explains what the app does in plain language (the "you sleep, we work" pitch)
+- Screenshots or screen recordings showing the drag-and-drop workflow
+- Comparison: Free vs PRO features table
+- CTA to sign up (free) or go PRO
+- Link back to voodoo808.com for beats and sound kits
 
-### Development Tools
--   **Webpack**: Module bundling and development server.
--   **Babel**: JavaScript transpilation.
--   **PostCSS**: CSS processing, including TailwindCSS integration.
--   **Electron**: Desktop application framework.
+### Core App (Post-Login)
+- The current drag-and-drop video generator interface (already built)
+- Credit counter visible in UI for free users (e.g. "3/5 credits remaining this month")
+- Credit is consumed when a video is successfully generated
+- PRO badge visible in UI for pro users
+- Settings: user profile, logo upload for video overlay, account management
 
-### File Processing
--   **Native File API**: File input and drag-and-drop.
--   **Array Buffer Processing**: Binary file data handling.
--   **Blob URL Management**: Efficient media preview and download.
+### Nice-to-Have / Future Features
+- Video history (list of previously generated videos, re-download)
+- Preset templates (different video styles/layouts)
+- Batch naming conventions (auto-name output files)
+- YouTube upload integration (direct upload from app to YouTube)
+- Offline/desktop version (Electron) — sold as one-time purchase on voodoo808.com
+
+---
+
+## Current Technical State
+
+### Tech Stack
+- **Frontend**: React 19, Zustand (state), Framer Motion (animations), TailwindCSS v4
+- **Video Processing**: FFmpeg WebAssembly (@ffmpeg/ffmpeg 0.12.x) — 100% client-side
+- **Build System**: Webpack 5, Babel
+- **Dev Server**: webpack-dev-server on port 5000
+- **No backend currently** — all processing happens in the browser
+
+### Critical Headers Required
+FFmpeg WebAssembly requires SharedArrayBuffer which requires these HTTP headers on every response:
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+These are set in webpack devServer config and must be set in `vercel.json` for production deployment.
+
+### Key Files
+- `src/App.jsx` — main application, orchestrates all hooks and pages
+- `src/store/appStore.js` — central Zustand state
+- `src/hooks/usePairingLogic.js` — file drop, audio/image detection, pairing
+- `src/hooks/usePairPreparation.js` — background pre-processing of file pairs
+- `src/hooks/useFFmpeg.js` — video generation orchestration, progress, cancellation
+- `src/utils/ffmpegProcessor.js` — low-level FFmpeg WASM execution
+- `src/services/JobManager.js` — FFmpeg instance pooling, job queue
+- `src/services/PreparationService.js` — reads buffers, extracts metadata, caches
+- `src/components/DropZone.jsx` — file drop UI
+- `src/components/VideoPreviewCard.jsx` — generated video preview + download
+- `webpack.config.js` — build config, dev server, CORS/COOP/COEP headers
+
+### UI/UX Design Language
+- Dark theme: deep navy + matte black backgrounds
+- Neon blue accents
+- Glassmorphism containers: 4px thick stroke, semi-transparent backgrounds, 16px backdrop blur, noise texture overlay
+- Rounded corners: 24–32px
+- Framer Motion animations throughout
+- Sleeping alien mascot (ZZZ) appears during video generation
+- 4-page navigation: Upload → File Management → Generation → Download
+
+### Video Output Specs
+- Resolution: 1920x1080
+- Audio: AAC 320kbps
+- Optional logo overlay (user-uploaded, stored as base64)
+- Sequential processing (1 at a time) for stability
+- Pre-processing cache (40–60% faster generation due to background buffering)
+
+### Performance Architecture
+- **PreparationService**: Background pre-processes all pairs before generation starts. Loads audio/image into ArrayBuffers, extracts duration, sanitizes filenames. 450MB memory cap with LRU eviction.
+- **JobManager**: FFmpeg instance pool (max 3 instances), job queueing, event-based progress forwarding
+- **Token-based progress isolation**: Each video generation session gets a unique UUID token preventing cross-contamination of progress callbacks between sequential videos
+- **Sequential cleanup**: Each video waits for verified filesystem cleanup before the next begins
+
+### Known Architecture Limitation
+The current `ffmpegProcessor.js` uses shared module-level state (`currentProgressToken`, `cleanupCompletionPromise`, etc.) designed for sequential processing only (maxConcurrent = 1). Enabling true parallel video generation would require full refactor to per-job isolated state containers.
+
+---
+
+## User Preferences (for AI agents building UI)
+- Communication style: simple, everyday language (non-technical)
+- Container styling: 4px thick glassmorphism stroke, semitransparent shadows
+- Video container width: 200px fixed during generation
+- Sleeping alien: in front of background, behind footer during generation
+- "We are generating your videos" text: positioned 80px higher than default
+- FFmpeg: use hardware acceleration when available, ultrafast/superfast presets, parallel CPU cores
+
+---
+
+## Deployment Plan
+1. Buy `typebeatz.app` domain (Cloudflare Registrar recommended — cheapest .app renewals)
+2. Push code to GitHub
+3. Connect to Vercel (free hobby plan)
+4. Add `vercel.json` with required COOP/COEP headers and build config
+5. Point DNS from Cloudflare → Vercel
+6. SSL is automatic via Vercel/Let's Encrypt (required for .app domains)
+
+### vercel.json needed:
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
+      ]
+    }
+  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
+}
+```
