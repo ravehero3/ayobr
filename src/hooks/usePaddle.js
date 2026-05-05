@@ -1,36 +1,68 @@
 import { useEffect, useRef, useCallback } from 'react';
 
 let paddleInitialized = false;
+let cachedPriceId = null;
+let initPromise = null;
+
+async function initializePaddle(onCheckoutCompleted) {
+  if (paddleInitialized) return true;
+  if (typeof window.Paddle === 'undefined') return false;
+
+  // Deduplicate concurrent init calls
+  if (initPromise) return initPromise;
+
+  initPromise = fetch('/api/paddle/config')
+    .then(r => r.ok ? r.json() : null)
+    .then(config => {
+      if (!config?.clientToken) {
+        initPromise = null;
+        return false;
+      }
+
+      cachedPriceId = config.priceId;
+
+      if (config.environment === 'sandbox') {
+        window.Paddle.Environment.set('sandbox');
+      }
+
+      window.Paddle.Initialize({
+        token: config.clientToken,
+        eventCallback: (event) => {
+          if (event.name === 'checkout.completed') {
+            if (window.__paddleCheckoutCompleted) {
+              window.__paddleCheckoutCompleted(event.data);
+            }
+          }
+        }
+      });
+
+      paddleInitialized = true;
+      initPromise = null;
+      return true;
+    })
+    .catch(() => {
+      initPromise = null;
+      return false;
+    });
+
+  return initPromise;
+}
 
 export function usePaddle({ onCheckoutCompleted } = {}) {
   const callbackRef = useRef(onCheckoutCompleted);
   callbackRef.current = onCheckoutCompleted;
 
+  // Register global callback so Paddle's eventCallback can reach it
   useEffect(() => {
-    if (paddleInitialized) return;
-    if (typeof window.Paddle === 'undefined') return;
+    window.__paddleCheckoutCompleted = (data) => {
+      if (callbackRef.current) callbackRef.current(data);
+    };
+    return () => { window.__paddleCheckoutCompleted = null; };
+  }, []);
 
-    fetch('/api/paddle/config')
-      .then(r => r.ok ? r.json() : null)
-      .then(config => {
-        if (!config?.clientToken) return;
-
-        window.Paddle.Initialize({
-          token: config.clientToken,
-          eventCallback: (event) => {
-            if (event.name === 'checkout.completed') {
-              if (callbackRef.current) callbackRef.current(event.data);
-            }
-          }
-        });
-
-        if (config.environment === 'sandbox') {
-          window.Paddle.Environment.set('sandbox');
-        }
-
-        paddleInitialized = true;
-      })
-      .catch(() => {});
+  // Eagerly initialize Paddle.js on mount
+  useEffect(() => {
+    initializePaddle(onCheckoutCompleted);
   }, []);
 
   const openCheckout = useCallback(async (userEmail) => {
@@ -38,17 +70,20 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
       console.warn('Paddle.js not loaded yet');
       return false;
     }
-    if (!paddleInitialized) {
+
+    const ready = await initializePaddle();
+    if (!ready) {
       console.warn('Paddle not initialized — check PADDLE_CLIENT_TOKEN secret');
       return false;
     }
 
-    try {
-      const configRes = await fetch('/api/paddle/config');
-      if (!configRes.ok) return false;
-      const { priceId } = await configRes.json();
-      if (!priceId) return false;
+    const priceId = cachedPriceId;
+    if (!priceId) {
+      console.warn('No Paddle priceId configured — check PADDLE_PRO_PRICE_ID secret');
+      return false;
+    }
 
+    try {
       window.Paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
         customer: userEmail ? { email: userEmail } : undefined,

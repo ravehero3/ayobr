@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const cron = require('node-cron');
 const { setupAuth } = require('./auth');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
@@ -17,6 +18,7 @@ const PORT = process.env.API_PORT || 3001;
 app.use('/api/paddle/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
+
 const allowedOrigins = [
   'http://localhost:5000',
   process.env.FRONTEND_URL,
@@ -42,24 +44,21 @@ async function initDb() {
   }
 }
 
+// Runs at midnight on the 1st of every month — reliable with node-cron
 function startCreditResetScheduler() {
-  const ONE_HOUR = 60 * 60 * 1000;
-  setInterval(async () => {
-    const now = new Date();
-    if (now.getDate() === 1 && now.getHours() === 0) {
-      try {
-        const count = await resetMonthlyCredits();
-        console.log(`Monthly credit reset: ${count} users reset`);
-      } catch (err) {
-        console.error('Credit reset error:', err);
-      }
+  cron.schedule('0 0 1 * *', async () => {
+    try {
+      const count = await resetMonthlyCredits();
+      console.log(`Monthly credit reset: ${count} free users reset to 5 credits`);
+    } catch (err) {
+      console.error('Credit reset error:', err);
     }
-  }, ONE_HOUR);
+  }, { timezone: 'UTC' });
+  console.log('Monthly credit reset scheduled (runs 00:00 UTC on the 1st)');
 }
 
 async function start() {
   await initDb();
-
   await setupAuth(app);
 
   app.use('/api/user', userRoutes);

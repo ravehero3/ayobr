@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
-export default function Navbar({ onUpgrade, checkoutLoading }) {
+export default function Navbar({ onUpgrade, checkoutLoading, onManageSubscription }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -25,6 +25,7 @@ export default function Navbar({ onUpgrade, checkoutLoading }) {
       </button>
 
       <div className="flex items-center gap-3">
+        {/* Free user: credit badge + upgrade button */}
         {user && !isPro && (
           <>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 text-xs text-gray-300"
@@ -49,20 +50,34 @@ export default function Navbar({ onUpgrade, checkoutLoading }) {
           </>
         )}
 
-        {user && isPro && (
-          <span className="px-3 py-1 rounded-full text-xs font-bold border border-blue-500/40 text-blue-300"
-            style={{ background: 'rgba(59,130,246,0.1)' }}>
+        {/* PRO badge — clickable to manage subscription */}
+        {user && isPro && user.role !== 'admin' && (
+          <button
+            onClick={onManageSubscription}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-blue-500/40 text-blue-300 hover:border-blue-400/70 transition-colors text-xs font-bold"
+            style={{ background: 'rgba(59,130,246,0.1)' }}
+            title="Manage subscription">
             ⭐ PRO
-          </span>
-        )}
-
-        {user?.role === 'admin' && (
-          <button onClick={() => navigate('/admin')}
-            className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
-            Admin
           </button>
         )}
 
+        {/* Admin badge */}
+        {user?.role === 'admin' && (
+          <span className="px-3 py-1 rounded-full text-xs font-bold border border-orange-500/40 text-orange-300"
+            style={{ background: 'rgba(249,115,22,0.1)' }}>
+            ⚙️ Admin
+          </span>
+        )}
+
+        {/* Admin panel link */}
+        {user?.role === 'admin' && (
+          <button onClick={() => navigate('/admin')}
+            className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
+            Panel
+          </button>
+        )}
+
+        {/* User avatar + dropdown menu */}
         {user ? (
           <div className="relative">
             <button onClick={() => setMenuOpen(v => !v)} className="flex items-center gap-2 group">
@@ -94,6 +109,12 @@ export default function Navbar({ onUpgrade, checkoutLoading }) {
                     <button onClick={() => { onUpgrade(); setMenuOpen(false); }}
                       className="w-full text-left px-4 py-2 text-sm text-blue-400 hover:text-blue-300 hover:bg-white/5 transition-colors">
                       ⭐ Upgrade to PRO
+                    </button>
+                  )}
+                  {isPro && user.role !== 'admin' && onManageSubscription && (
+                    <button onClick={() => { onManageSubscription(); setMenuOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-blue-400 hover:text-blue-300 hover:bg-white/5 transition-colors">
+                      ⭐ Manage subscription
                     </button>
                   )}
                   {user.role === 'admin' && (

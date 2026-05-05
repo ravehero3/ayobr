@@ -17,22 +17,28 @@ function getPaddle() {
   return paddle;
 }
 
-const PRO_PRICE_ID = process.env.PADDLE_PRO_PRICE_ID;
+// Read price ID lazily so env vars set after startup are picked up
+function getPriceId() {
+  return process.env.PADDLE_PRO_PRICE_ID || null;
+}
 
 // Public config for Paddle.js client-side initialization
 // PADDLE_CLIENT_TOKEN is a public token — safe to expose to frontend
 router.get('/config', (req, res) => {
   res.json({
     clientToken: process.env.PADDLE_CLIENT_TOKEN || null,
-    priceId: PRO_PRICE_ID || null,
+    priceId: getPriceId(),
     environment: process.env.PADDLE_ENV === 'production' ? 'production' : 'sandbox'
   });
 });
 
-// Create Paddle checkout — returns a checkout URL
+// Create Paddle checkout — returns a checkout URL (fallback if overlay unavailable)
 router.post('/create-checkout', isAuthenticated, async (req, res) => {
   const p = getPaddle();
   if (!p) return res.status(503).json({ message: 'Paddle not configured yet' });
+
+  const priceId = getPriceId();
+  if (!priceId) return res.status(503).json({ message: 'Paddle price not configured yet' });
 
   try {
     const userId = req.user.claims.sub;
@@ -46,7 +52,7 @@ router.post('/create-checkout', isAuthenticated, async (req, res) => {
         : 'http://localhost:5000');
 
     const transaction = await p.transactions.create({
-      items: [{ priceId: PRO_PRICE_ID, quantity: 1 }],
+      items: [{ priceId, quantity: 1 }],
       customer: { email: user.email },
       customData: { userId },
       successUrl: `${domain}/app?upgraded=true`,
@@ -71,7 +77,7 @@ router.get('/subscription', isAuthenticated, async (req, res) => {
   }
 });
 
-// Cancel subscription — opens Paddle cancel URL
+// Cancel subscription — schedules cancellation at end of billing period
 router.post('/cancel', isAuthenticated, async (req, res) => {
   const p = getPaddle();
   if (!p) return res.status(503).json({ message: 'Paddle not configured yet' });
@@ -83,11 +89,20 @@ router.post('/cancel', isAuthenticated, async (req, res) => {
       return res.status(404).json({ message: 'No active subscription found' });
     }
 
-    const subscription = await p.subscriptions.cancel(sub.paddle_subscription_id, {
+    await p.subscriptions.cancel(sub.paddle_subscription_id, {
       effectiveFrom: 'next_billing_period'
     });
 
-    res.json({ message: 'Subscription will cancel at end of billing period', subscription });
+    // Update local status to cancelling (not yet cancelled — still active until period ends)
+    await upsertSubscription({
+      userId,
+      paddleCustomerId: sub.paddle_customer_id,
+      paddleSubscriptionId: sub.paddle_subscription_id,
+      status: 'cancelling',
+      currentPeriodEnd: sub.current_period_end
+    });
+
+    res.json({ message: 'Subscription will cancel at end of billing period' });
   } catch (err) {
     console.error('Paddle cancel error:', err);
     res.status(500).json({ message: 'Failed to cancel subscription' });
@@ -121,13 +136,39 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     const eventType = event.eventType || event.event_type;
     const data = event.data;
 
+    // Helper: find userId from customData OR by looking up paddle_customer_id in subscriptions
+    async function resolveUserId(customData, customerId, subscriptionId) {
+      // 1. Direct customData (set during checkout)
+      const fromCustom = customData?.userId || customData?.user_id;
+      if (fromCustom) return fromCustom;
+      // 2. Look up by subscription ID
+      if (subscriptionId) {
+        const r = await pool.query(
+          'SELECT user_id FROM subscriptions WHERE paddle_subscription_id = $1',
+          [subscriptionId]
+        );
+        if (r.rows[0]) return r.rows[0].user_id;
+      }
+      // 3. Look up by customer ID
+      if (customerId) {
+        const r = await pool.query(
+          'SELECT user_id FROM subscriptions WHERE paddle_customer_id = $1 ORDER BY updated_at DESC LIMIT 1',
+          [customerId]
+        );
+        if (r.rows[0]) return r.rows[0].user_id;
+      }
+      return null;
+    }
+
     switch (eventType) {
       case 'transaction.completed':
       case EventName?.TransactionCompleted: {
-        const userId = data?.customData?.userId || data?.custom_data?.user_id;
-        const subscriptionId = data?.subscriptionId || data?.subscription_id;
+        const customData = data?.customData || data?.custom_data;
         const customerId = data?.customerId || data?.customer_id;
-        if (!userId) break;
+        const subscriptionId = data?.subscriptionId || data?.subscription_id;
+
+        const userId = await resolveUserId(customData, customerId, subscriptionId);
+        if (!userId) { console.warn('transaction.completed: could not resolve userId'); break; }
 
         await upsertSubscription({
           userId,
@@ -137,15 +178,17 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           currentPeriodEnd: null
         });
         await setUserRole(userId, 'pro');
-        console.log(`User ${userId} upgraded to PRO via Paddle`);
+        console.log(`User ${userId} upgraded to PRO via transaction.completed`);
         break;
       }
 
       case 'subscription.activated':
       case EventName?.SubscriptionActivated: {
-        const userId = data?.customData?.userId || data?.custom_data?.user_id;
+        const customData = data?.customData || data?.custom_data;
         const customerId = data?.customerId || data?.customer_id;
-        if (!userId) break;
+
+        const userId = await resolveUserId(customData, customerId, data?.id);
+        if (!userId) { console.warn('subscription.activated: could not resolve userId'); break; }
 
         await upsertSubscription({
           userId,
@@ -161,45 +204,40 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
       case 'subscription.updated':
       case EventName?.SubscriptionUpdated: {
-        const result = await pool.query(
-          'SELECT user_id FROM subscriptions WHERE paddle_subscription_id = $1',
-          [data.id]
-        );
-        if (result.rows[0]) {
-          const userId = result.rows[0].user_id;
-          const status = data.status === 'active' ? 'active' : data.status;
-          await upsertSubscription({
-            userId,
-            paddleCustomerId: data.customerId || data.customer_id,
-            paddleSubscriptionId: data.id,
-            status,
-            currentPeriodEnd: data?.nextBilledAt ? new Date(data.nextBilledAt) : null
-          });
-          if (data.status !== 'active') {
-            await setUserRole(userId, 'free');
-          }
+        const customerId = data?.customerId || data?.customer_id;
+        const userId = await resolveUserId(null, customerId, data?.id);
+        if (!userId) { console.warn('subscription.updated: could not resolve userId'); break; }
+
+        const status = data.status === 'active' ? 'active' : data.status;
+        await upsertSubscription({
+          userId,
+          paddleCustomerId: customerId,
+          paddleSubscriptionId: data.id,
+          status,
+          currentPeriodEnd: data?.nextBilledAt ? new Date(data.nextBilledAt) : null
+        });
+        // Only revoke PRO if subscription is genuinely not active/trialing
+        if (!['active', 'trialing'].includes(data.status)) {
+          await setUserRole(userId, 'free');
         }
         break;
       }
 
       case 'subscription.canceled':
       case EventName?.SubscriptionCanceled: {
-        const result = await pool.query(
-          'SELECT user_id FROM subscriptions WHERE paddle_subscription_id = $1',
-          [data.id]
-        );
-        if (result.rows[0]) {
-          const userId = result.rows[0].user_id;
-          await upsertSubscription({
-            userId,
-            paddleCustomerId: data.customerId || data.customer_id,
-            paddleSubscriptionId: data.id,
-            status: 'cancelled',
-            currentPeriodEnd: data?.canceledAt ? new Date(data.canceledAt) : null
-          });
-          await setUserRole(userId, 'free');
-          console.log(`Subscription cancelled for user ${userId}`);
-        }
+        const customerId = data?.customerId || data?.customer_id;
+        const userId = await resolveUserId(null, customerId, data?.id);
+        if (!userId) { console.warn('subscription.canceled: could not resolve userId'); break; }
+
+        await upsertSubscription({
+          userId,
+          paddleCustomerId: customerId,
+          paddleSubscriptionId: data.id,
+          status: 'cancelled',
+          currentPeriodEnd: data?.canceledAt ? new Date(data.canceledAt) : null
+        });
+        await setUserRole(userId, 'free');
+        console.log(`Subscription cancelled for user ${userId}`);
         break;
       }
 

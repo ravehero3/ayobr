@@ -26,6 +26,13 @@ function getSession() {
     ttl: sessionTtl / 1000,
     tableName: 'sessions'
   });
+
+  // In Replit, all traffic comes through HTTPS proxy even in dev.
+  // trust proxy + sameSite:none + secure:true is required for cookies to work
+  // across the Replit proxy iframe in both dev and production.
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isReplit = !!(process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS);
+
   return session({
     secret: process.env.SESSION_SECRET || 'typebeatz-dev-secret-change-in-prod',
     store: sessionStore,
@@ -33,7 +40,8 @@ function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction || isReplit,
+      sameSite: isProduction || isReplit ? 'none' : 'lax',
       maxAge: sessionTtl
     }
   });
@@ -57,7 +65,6 @@ async function setupAuth(app) {
 
   // Use the real public domain for callbacks, not localhost
   const getPublicDomain = (reqHostname) => {
-    // In Replit dev environment, REPLIT_DEV_DOMAIN is the public-facing domain
     if (process.env.REPLIT_DEV_DOMAIN) return process.env.REPLIT_DEV_DOMAIN;
     if (process.env.REPLIT_DOMAINS) return process.env.REPLIT_DOMAINS.split(',')[0].trim();
     return reqHostname;
