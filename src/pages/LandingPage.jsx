@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const NM     = "'Neue Montreal', 'Inter', sans-serif";
 const SCRIPT = "'Satisfy', cursive";
@@ -166,10 +167,19 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden' }}>
 
-        {/* Central glow */}
+        {/* Stars background image */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          zIndex: 0,
+          backgroundImage: `url(${starsBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }} />
+
+        {/* Subtle blue glow over stars */}
         <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.13) 0%, transparent 65%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 65%)' }} />
         </div>
 
         {/* Vignette */}
@@ -223,9 +233,9 @@ export default function LandingPage() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
           className="relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20" style={{ zIndex: 2 }}>
           <Stat prefix="up to" val="100" label="videos per batch" />
-          <Stat prefix="auto"  val="50"  label="pairs matched" />
+          <Stat prefix="create" val="∞" label="videos" />
           <Stat prefix="up to" val="4K"  label="video quality" />
-          <Stat prefix={null}  val="Custom" label="background" />
+          <Stat prefix={null}  val="Custom" label="backgrounds" />
         </motion.div>
       </section>
 
