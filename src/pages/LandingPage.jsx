@@ -56,6 +56,16 @@ export default function LandingPage() {
     }
   };
 
+  const handleUpgradeCTA = () => {
+    if (!user) {
+      login();
+    } else if (user.role === 'pro' || user.role === 'admin') {
+      navigate('/app');
+    } else {
+      navigate('/app?upgrade=true');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#050a13] text-white overflow-x-hidden">
 
@@ -235,10 +245,10 @@ export default function LandingPage() {
                 <li key={i} className="flex items-center gap-2"><span className="text-blue-400">✓</span>{i}</li>
               ))}
             </ul>
-            <button onClick={handleCTA}
+            <button onClick={handleUpgradeCTA}
               className="w-full py-3 rounded-xl font-medium transition-all hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
-              {user?.role === 'pro' ? 'You\'re on PRO ⭐' : 'Upgrade to PRO'}
+              {user?.role === 'pro' || user?.role === 'admin' ? 'You\'re on PRO ⭐' : 'Upgrade to PRO'}
             </button>
           </div>
         </div>
@@ -264,8 +274,8 @@ export default function LandingPage() {
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.6 }} />
           <p>© {new Date().getFullYear()} TypeBeatz. All rights reserved.</p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
           </div>
         </div>
       </footer>

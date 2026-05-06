@@ -43,6 +43,11 @@ export default function AppPage() {
       setTimeout(() => setShowCancelledNotice(false), 5000);
       setSearchParams({}, { replace: true });
     }
+    if (searchParams.get('upgrade') === 'true') {
+      setSearchParams({}, { replace: true });
+      // Small delay so Paddle.js has time to load
+      setTimeout(() => handleUpgrade(), 800);
+    }
   }, [searchParams]);
 
   const handleUpgrade = async () => {
