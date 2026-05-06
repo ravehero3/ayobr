@@ -1,8 +1,79 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+
+const PARTICLE_CSS = `
+@keyframes particleFloat {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0); }
+  15%  { opacity: 1; transform: translate(var(--dx), -6px) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), -32px) scale(0.4); }
+}
+`;
+
+function ParticleButton({ onClick, children, style, className }) {
+  const [particles, setParticles] = useState([]);
+  const [hovered, setHovered] = useState(false);
+  const idRef = useRef(0);
+  const intervalRef = useRef(null);
+
+  const spawn = () => {
+    const id = idRef.current++;
+    const dur = 700 + Math.random() * 700;
+    const dx = (Math.random() - 0.5) * 50;
+    setParticles(p => [...p, {
+      id,
+      left: 5 + Math.random() * 90,
+      top: 5 + Math.random() * 90,
+      size: 1.5 + Math.random() * 2.5,
+      dur,
+      dx,
+    }]);
+    setTimeout(() => setParticles(p => p.filter(x => x.id !== id)), dur);
+  };
+
+  useEffect(() => {
+    if (hovered) {
+      spawn();
+      intervalRef.current = setInterval(spawn, 130);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [hovered]);
+
+  return (
+    <>
+      <style>{PARTICLE_CSS}</style>
+      <button
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={className}
+        style={{ ...style, position: 'relative', overflow: 'visible' }}
+      >
+        {particles.map(p => (
+          <span key={p.id} style={{
+            position: 'absolute',
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: p.size,
+            height: p.size,
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.95)',
+            pointerEvents: 'none',
+            boxShadow: '0 0 5px rgba(255,255,255,0.7)',
+            animation: `particleFloat ${p.dur}ms ease-out forwards`,
+            '--dx': `${p.dx}px`,
+            zIndex: 20,
+          }} />
+        ))}
+        <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
+      </button>
+    </>
+  );
+}
 
 const features = [
   {
@@ -13,7 +84,7 @@ const features = [
   {
     icon: '🎬',
     title: 'Get 50 YouTube-ready videos',
-    desc: 'Every audio + image pair becomes a full 1080p video with 320kbps audio. Perfect for YouTube type beat uploads.'
+    desc: 'Every audio + image pair becomes a full 1080p or 4K video with 320kbps audio. Perfect for YouTube type beat uploads.'
   },
   {
     icon: '😴',
@@ -98,16 +169,16 @@ export default function LandingPage() {
         </div>
 
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-sm mb-6">
-            <span>😴</span> <span>Set it. Forget it. Wake up to 50 videos.</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-sm mb-8">
+            <span>🎬</span> <span>The fastest way to fill your YouTube channel.</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Turn your beats into<br />
+          <h1 className="font-black tracking-tight mb-8" style={{ fontSize: 'clamp(3rem, 10vw, 7.5rem)', lineHeight: 0.88, letterSpacing: '-0.04em' }}>
+            Make 100<br />
             <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
-              YouTube videos
+              type beat videos
             </span><br />
-            while you sleep
+            in one click
           </h1>
 
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -117,11 +188,12 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button onClick={handleCTA}
+            <ParticleButton
+              onClick={handleCTA}
               className="px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', boxShadow: '0 0 40px rgba(59,130,246,0.3)' }}>
               {user ? 'Open the App' : 'Get Started Free'}
-            </button>
+            </ParticleButton>
             <a href="#how-it-works"
               className="px-8 py-4 rounded-xl font-semibold text-lg border border-white/10 hover:border-white/30 transition-colors">
               See how it works
@@ -135,14 +207,14 @@ export default function LandingPage() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
           className="flex flex-wrap justify-center gap-12 mt-20">
           {[
-            { val: '100', label: 'Files per batch' },
-            { val: '50', label: 'Videos generated' },
-            { val: '1080p', label: 'Video quality' },
-            { val: '320kbps', label: 'Audio quality' }
+            { val: 'up to 100', label: 'videos per one batch' },
+            { val: '50', label: 'pairs auto-matched' },
+            { val: 'Up to 4K', label: 'video quality' },
+            { val: '320kbps', label: 'audio quality' }
           ].map(s => (
             <div key={s.label} className="text-center">
-              <div className="text-3xl font-bold text-white">{s.val}</div>
-              <div className="text-sm text-gray-400 mt-1">{s.label}</div>
+              <div className="text-2xl font-bold text-white tracking-tight">{s.val}</div>
+              <div className="text-sm text-gray-500 mt-1">{s.label}</div>
             </div>
           ))}
         </motion.div>
@@ -150,7 +222,9 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="py-24 px-6 max-w-6xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Everything you need to scale your YouTube channel</h2>
+        <h2 className="font-black text-center mb-4 tracking-tight" style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
+          Everything you need to scale<br />your YouTube channel
+        </h2>
         <p className="text-gray-400 text-center mb-16 max-w-xl mx-auto">
           Built specifically for type beat producers who want to upload more without spending hours editing.
         </p>
@@ -162,7 +236,7 @@ export default function LandingPage() {
               className="rounded-2xl p-6 border border-white/[0.06]"
               style={{ background: 'rgba(255,255,255,0.03)' }}>
               <div className="text-3xl mb-4">{f.icon}</div>
-              <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
+              <h3 className="text-lg font-bold mb-2 tracking-tight">{f.title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
             </motion.div>
           ))}
@@ -171,19 +245,21 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section id="how-it-works" className="py-24 px-6 max-w-4xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">How it works</h2>
+        <h2 className="font-black text-center mb-16 tracking-tight" style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
+          How it works
+        </h2>
         <div className="space-y-12">
           {steps.map((s, i) => (
             <motion.div key={i}
               initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }} transition={{ delay: i * 0.1 }}
               className="flex items-start gap-8">
-              <div className="text-4xl font-bold text-transparent bg-clip-text flex-shrink-0"
-                style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
+              <div className="font-black text-transparent bg-clip-text flex-shrink-0 tracking-tight"
+                style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 0.9, letterSpacing: '-0.04em' }}>
                 {s.num}
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">{s.title}</h3>
+                <h3 className="text-xl font-bold mb-2 tracking-tight" style={{ letterSpacing: '-0.02em' }}>{s.title}</h3>
                 <p className="text-gray-400 leading-relaxed">{s.desc}</p>
               </div>
             </motion.div>
@@ -193,7 +269,9 @@ export default function LandingPage() {
 
       {/* App screenshot preview */}
       <section className="py-24 px-6 max-w-5xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-4">Clean, focused, powerful</h2>
+        <h2 className="font-black mb-4 tracking-tight" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
+          Clean, focused, powerful
+        </h2>
         <p className="text-gray-400 mb-10">The whole workflow in one screen. Drop files, review pairs, generate.</p>
         <div className="rounded-2xl border border-white/10 overflow-hidden"
           style={{ background: 'rgba(255,255,255,0.02)', padding: 2 }}>
@@ -204,7 +282,7 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <p className="text-2xl font-bold text-white mb-2">Drop Your Files</p>
+              <p className="text-2xl font-bold text-white mb-2 tracking-tight" style={{ letterSpacing: '-0.02em' }}>Drop Your Files</p>
               <p className="text-gray-500">Drag and drop your audio and image files here</p>
               <div className="flex items-center justify-center gap-3 mt-6">
                 <span className="px-3 py-1 rounded-full border border-white/10 text-xs text-gray-400">🎵 MP3, WAV</span>
@@ -217,13 +295,15 @@ export default function LandingPage() {
 
       {/* Pricing */}
       <section id="pricing" className="py-24 px-6 max-w-5xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Simple pricing</h2>
+        <h2 className="font-black text-center mb-4 tracking-tight" style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
+          Simple pricing
+        </h2>
         <p className="text-gray-400 text-center mb-16">Start free. Go unlimited when you're ready.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {/* Free */}
           <div className="rounded-2xl p-8 border border-white/10" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <h3 className="text-xl font-bold mb-2">Free</h3>
-            <div className="text-4xl font-bold mb-6">$0<span className="text-lg text-gray-400 font-normal">/mo</span></div>
+            <h3 className="text-xl font-bold mb-2 tracking-tight">Free</h3>
+            <div className="text-4xl font-black mb-6 tracking-tight" style={{ letterSpacing: '-0.04em' }}>$0<span className="text-lg text-gray-400 font-normal">/mo</span></div>
             <ul className="space-y-3 text-sm text-gray-300 mb-8">
               {['5 videos per month', 'Credits reset on the 1st', 'All core features', 'Browser-based processing', 'HD video output'].map(i => (
                 <li key={i} className="flex items-center gap-2"><span className="text-green-400">✓</span>{i}</li>
@@ -238,10 +318,10 @@ export default function LandingPage() {
           <div className="rounded-2xl p-8 border border-blue-500/40 relative overflow-hidden"
             style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(14,165,233,0.1))' }}>
             <div className="absolute top-4 right-4 px-2 py-1 rounded-full bg-blue-500 text-xs font-bold">POPULAR</div>
-            <h3 className="text-xl font-bold mb-2">PRO</h3>
-            <div className="text-4xl font-bold mb-6">$9.99<span className="text-lg text-gray-400 font-normal">/mo</span></div>
+            <h3 className="text-xl font-bold mb-2 tracking-tight">PRO</h3>
+            <div className="text-4xl font-black mb-6 tracking-tight" style={{ letterSpacing: '-0.04em' }}>$9.99<span className="text-lg text-gray-400 font-normal">/mo</span></div>
             <ul className="space-y-3 text-sm text-gray-300 mb-8">
-              {['Unlimited video generation', 'No monthly limits ever', 'Priority support', 'All current & future features', 'Cancel anytime'].map(i => (
+              {['Unlimited video generation', 'No monthly limits ever', 'Up to 4K video quality', 'All current & future features', 'Cancel anytime'].map(i => (
                 <li key={i} className="flex items-center gap-2"><span className="text-blue-400">✓</span>{i}</li>
               ))}
             </ul>
@@ -258,13 +338,16 @@ export default function LandingPage() {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center rounded-2xl p-12 border border-white/10"
           style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))' }}>
-          <h2 className="text-3xl font-bold mb-4">Ready to automate your YouTube workflow?</h2>
+          <h2 className="font-black mb-4 tracking-tight" style={{ fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
+            Ready to automate your<br />YouTube workflow?
+          </h2>
           <p className="text-gray-400 mb-8">Join producers who are uploading more beats while doing less work.</p>
-          <button onClick={handleCTA}
+          <ParticleButton
+            onClick={handleCTA}
             className="px-10 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105"
             style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', boxShadow: '0 0 40px rgba(59,130,246,0.3)' }}>
             {user ? 'Open the App' : 'Start Free — No Credit Card'}
-          </button>
+          </ParticleButton>
         </div>
       </section>
 

@@ -658,12 +658,17 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       backgroundIndex
     });
 
+    // Determine output resolution from settings
+    const is4K = videoSettings && videoSettings.quality === '4k';
+    const RW = is4K ? 3840 : 1920;
+    const RH = is4K ? 2160 : 1080;
+
     if (useCustomBackground && customBackgroundFileName) {
       // Custom background video filter - overlay image on background
-      videoFilter = `[${backgroundIndex}:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg];[0:v]scale=1920:1080:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`;
+      videoFilter = `[${backgroundIndex}:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`;
     } else {
       // Standard solid color background - center image on solid background
-      videoFilter = `scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+      videoFilter = `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
     }
 
     // Ultra-optimized parameters for maximum speed
