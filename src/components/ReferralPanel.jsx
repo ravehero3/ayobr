@@ -56,7 +56,7 @@ export default function ReferralPanel({ onClose }) {
               style={{
                 background: copied
                   ? 'rgba(34,197,94,0.15)'
-                  : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                  : 'linear-gradient(135deg, #3b82f6, #0ea5e9)',
                 border: copied ? '1px solid rgba(34,197,94,0.4)' : 'none',
                 color: copied ? '#4ade80' : 'white'
               }}>

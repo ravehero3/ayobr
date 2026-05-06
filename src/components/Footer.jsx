@@ -188,7 +188,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               </div>
               <div className="w-48 bg-gray-700 rounded-full h-1">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-1 rounded-full transition-all duration-300 ease-out"
+                  className="bg-gradient-to-r from-blue-500 to-sky-400 h-1 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${completePairs.length > 0 ? Math.floor((completedVideosCount / completePairs.length) * 100) : 0}%` }}
                 />
               </div>

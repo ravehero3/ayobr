@@ -18,8 +18,8 @@ export default function UpgradeBanner({ creditsLeft, onUpgrade, checkoutLoading 
         className="fixed top-14 left-0 right-0 z-[9999] flex items-center justify-between px-6 py-2"
         style={{
           background: isExhausted
-            ? 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(139,92,246,0.15))'
-            : 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(139,92,246,0.12))',
+            ? 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(14,165,233,0.15))'
+            : 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(14,165,233,0.12))',
           borderBottom: `1px solid ${isExhausted ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'}`
         }}>
         <div className="flex items-center gap-2 text-sm">
@@ -35,7 +35,7 @@ export default function UpgradeBanner({ creditsLeft, onUpgrade, checkoutLoading 
             onClick={onUpgrade}
             disabled={checkoutLoading}
             className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
             {checkoutLoading ? (
               <>
                 <span className="inline-block w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />

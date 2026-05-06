@@ -13,7 +13,7 @@ TypeBeatz is a full SaaS platform for music producers who create "type beat" vid
 ### Frontend (port 5000)
 - React 19, Zustand, Framer Motion, TailwindCSS v4
 - Webpack 5 + Babel dev server
-- react-router-dom for routing: `/` (landing), `/login`, `/app` (protected), `/admin` (admin-only)
+- react-router-dom for routing: `/` (landing), `/login`, `/app` (protected), `/admin` (admin-only), `/account` (user settings)
 - Webpack proxy: all `/api/*` requests forwarded to backend on port 3001
 
 ### Backend (port 3001)
@@ -35,6 +35,7 @@ Tables: `sessions`, `users`, `credits`, `subscriptions`, `feature_flags`
 - `/login` — Login page with rights agreement modal
 - `/app` — Video generator app (protected, redirects to /login if not authed)
 - `/admin` — Admin panel (protected, admin role only)
+- `/account` — Account settings (profile, usage history, subscription, referrals)
 
 ### Backend API Routes
 - `GET /api/health` — Health check
@@ -81,6 +82,7 @@ Tables: `sessions`, `users`, `credits`, `subscriptions`, `feature_flags`
 - `src/pages/AppPage.jsx` — Protected app wrapper, credit/upgrade UI
 - `src/pages/AdminPage.jsx` — Admin panel
 - `src/components/Navbar.jsx` — App navbar with credits/PRO badge
+- `src/pages/AccountPage.jsx` — Account settings page (profile, usage, subscription, referrals)
 - `src/components/UpgradeBanner.jsx` — Low-credit warning banner
 - `webpack.config.js` — Build config, dev server, COOP/COEP headers, `/api` proxy
 
@@ -147,7 +149,7 @@ Set in webpack devServer config (dev) and must be set in hosting config for prod
 
 ## UI/UX Design Language
 - Dark theme: deep navy (#050a13) + matte black backgrounds
-- Blue-purple gradient accents (#3b82f6 → #8b5cf6)
+- Dark blue to sky blue gradient accents (#3b82f6 → #0ea5e9)
 - Glassmorphism containers: semi-transparent, backdrop blur, border
 - Framer Motion animations throughout
 - Sleeping alien mascot during video generation

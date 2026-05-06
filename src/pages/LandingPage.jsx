@@ -104,7 +104,7 @@ export default function LandingPage() {
 
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             Turn your beats into<br />
-            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
               YouTube videos
             </span><br />
             while you sleep
@@ -119,7 +119,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button onClick={handleCTA}
               className="px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', boxShadow: '0 0 40px rgba(59,130,246,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', boxShadow: '0 0 40px rgba(59,130,246,0.3)' }}>
               {user ? 'Open the App' : 'Get Started Free'}
             </button>
             <a href="#how-it-works"
@@ -179,7 +179,7 @@ export default function LandingPage() {
               viewport={{ once: true }} transition={{ delay: i * 0.1 }}
               className="flex items-start gap-8">
               <div className="text-4xl font-bold text-transparent bg-clip-text flex-shrink-0"
-                style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+                style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
                 {s.num}
               </div>
               <div>
@@ -236,7 +236,7 @@ export default function LandingPage() {
           </div>
           {/* PRO */}
           <div className="rounded-2xl p-8 border border-blue-500/40 relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1))' }}>
+            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(14,165,233,0.1))' }}>
             <div className="absolute top-4 right-4 px-2 py-1 rounded-full bg-blue-500 text-xs font-bold">POPULAR</div>
             <h3 className="text-xl font-bold mb-2">PRO</h3>
             <div className="text-4xl font-bold mb-6">$9.99<span className="text-lg text-gray-400 font-normal">/mo</span></div>
@@ -247,7 +247,7 @@ export default function LandingPage() {
             </ul>
             <button onClick={handleUpgradeCTA}
               className="w-full py-3 rounded-xl font-medium transition-all hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
               {user?.role === 'pro' || user?.role === 'admin' ? 'You\'re on PRO ⭐' : 'Upgrade to PRO'}
             </button>
           </div>
@@ -257,12 +257,12 @@ export default function LandingPage() {
       {/* CTA banner */}
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center rounded-2xl p-12 border border-white/10"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08))' }}>
+          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))' }}>
           <h2 className="text-3xl font-bold mb-4">Ready to automate your YouTube workflow?</h2>
           <p className="text-gray-400 mb-8">Join producers who are uploading more beats while doing less work.</p>
           <button onClick={handleCTA}
             className="px-10 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', boxShadow: '0 0 40px rgba(59,130,246,0.3)' }}>
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', boxShadow: '0 0 40px rgba(59,130,246,0.3)' }}>
             {user ? 'Open the App' : 'Start Free — No Credit Card'}
           </button>
         </div>

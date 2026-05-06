@@ -18,7 +18,7 @@ export default function NotFoundPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="relative mb-8 select-none">
             <div className="text-[120px] font-black text-transparent bg-clip-text leading-none"
-              style={{ backgroundImage: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(139,92,246,0.3))' }}>
+              style={{ backgroundImage: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(14,165,233,0.3))' }}>
               404
             </div>
             <div className="absolute inset-0 flex items-center justify-center text-6xl pointer-events-none">
@@ -34,7 +34,7 @@ export default function NotFoundPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button onClick={() => navigate('/')}
               className="px-8 py-3 rounded-xl font-semibold transition-all hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
               Go Home
             </button>
             <button onClick={() => navigate('/app')}

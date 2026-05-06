@@ -105,9 +105,9 @@ export default function SubscriptionPanel({ onClose, onUpgrade, checkoutLoading 
           <div className="rounded-xl p-4 border"
             style={{
               background: isPro
-                ? 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08))'
+                ? 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))'
                 : 'rgba(255,255,255,0.03)',
-              borderColor: isPro ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.08)'
+              borderColor: isPro ? 'rgba(14,165,233,0.3)' : 'rgba(255,255,255,0.08)'
             }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export default function SubscriptionPanel({ onClose, onUpgrade, checkoutLoading 
                   <div className="h-full rounded-full transition-all"
                     style={{
                       width: `${Math.min(100, (creditsUsed / 5) * 100)}%`,
-                      background: creditsLeft === 0 ? '#ef4444' : creditsLeft <= 1 ? '#f59e0b' : 'linear-gradient(90deg, #3b82f6, #8b5cf6)'
+                      background: creditsLeft === 0 ? '#ef4444' : creditsLeft <= 1 ? '#f59e0b' : 'linear-gradient(90deg, #3b82f6, #0ea5e9)'
                     }} />
                 </div>
                 <p className="text-xs text-gray-600 mt-1.5">Resets on the 1st of each month</p>
@@ -205,7 +205,7 @@ export default function SubscriptionPanel({ onClose, onUpgrade, checkoutLoading 
           {!isPro && (
             <button onClick={onUpgrade} disabled={checkoutLoading}
               className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
               {checkoutLoading
                 ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Opening checkout...</>
                 : '⭐ Upgrade to PRO — $9.99/month'}

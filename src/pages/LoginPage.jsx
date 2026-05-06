@@ -71,7 +71,7 @@ export default function LoginPage() {
           <button onClick={handleAgreeAndContinue} disabled={!agreed}
             className="w-full py-3 rounded-xl font-semibold transition-all"
             style={{
-              background: agreed ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : 'rgba(255,255,255,0.05)',
+              background: agreed ? 'linear-gradient(135deg, #3b82f6, #0ea5e9)' : 'rgba(255,255,255,0.05)',
               color: agreed ? 'white' : 'rgba(255,255,255,0.3)',
               cursor: agreed ? 'pointer' : 'not-allowed'
             }}>
