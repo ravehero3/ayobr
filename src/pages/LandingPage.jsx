@@ -4,11 +4,10 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
-const DRUK      = "'Druk-Bold', 'Anton', Impact, sans-serif";
-const DRUK_WIDE = "'Druk-WideMedium', 'Anton', Impact, sans-serif";
-const SCRIPT    = "'Satisfy', cursive";
-const BTN_BG    = 'linear-gradient(135deg, #3b82f6, #0ea5e9)';
-const BTN_GLOW  = '0 0 40px rgba(59,130,246,0.35)';
+const NM     = "'Neue Montreal', 'Inter', sans-serif";
+const SCRIPT = "'Satisfy', cursive";
+const BTN_BG  = 'linear-gradient(135deg, #3b82f6, #0ea5e9)';
+const BTN_GLOW = '0 0 40px rgba(59,130,246,0.35)';
 
 const PARTICLE_CSS = `
 @keyframes particleFloat {
@@ -59,19 +58,19 @@ function ParticleButton({ onClick, children, style, className }) {
   );
 }
 
-/* Stat block: "up to" in script above number, all left-aligned */
+/* Stat block: script prefix left-aligned above the number */
 function Stat({ prefix, val, label }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
       {prefix && (
-        <div style={{ fontFamily: SCRIPT, fontSize: '0.82rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1, marginBottom: 4 }}>
+        <div style={{ fontFamily: SCRIPT, fontSize: '0.85rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1, marginBottom: 4 }}>
           {prefix}
         </div>
       )}
-      <div style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: 'clamp(1.9rem, 3vw, 2.6rem)', lineHeight: 1, letterSpacing: '-0.01em', color: '#fff' }}>
+      <div style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.9rem, 3vw, 2.6rem)', lineHeight: 1, letterSpacing: '-0.04em', color: '#fff' }}>
         {val}
       </div>
-      <div style={{ fontFamily: DRUK_WIDE, fontSize: '11px', lineHeight: '14px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginTop: 6, letterSpacing: '0.06em' }}>
+      <div style={{ fontFamily: NM, fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: 5, letterSpacing: '0.02em' }}>
         {label}
       </div>
     </div>
@@ -106,7 +105,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000' }}>
+    <div className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000', fontFamily: NM }}>
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4"
@@ -114,18 +113,18 @@ export default function LandingPage() {
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         <div className="flex items-center gap-6">
           <a href="#pricing"
-            style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.05em', textDecoration: 'none' }}
+            style={{ fontFamily: NM, fontSize: '0.875rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}
             className="hover:text-white transition-colors">
             Pricing
           </a>
           {user ? (
             <button onClick={() => navigate('/app')}
-              style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.05em', background: BTN_BG, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', background: BTN_BG, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}>
               Open App
             </button>
           ) : (
             <button onClick={login}
-              style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.05em', background: BTN_BG, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', background: BTN_BG, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}>
               Sign In
             </button>
           )}
@@ -157,7 +156,7 @@ export default function LandingPage() {
           </div>
 
           {/* Hero headline */}
-          <h1 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: 'clamp(3rem, 10vw, 7.5rem)', lineHeight: 1.1, letterSpacing: '0.01em', marginBottom: '2rem' }}>
+          <h1 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(3rem, 10vw, 7.5rem)', lineHeight: 0.88, letterSpacing: '-0.04em', marginBottom: '2rem' }}>
             Make 100<br />
             <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
               type beat videos
@@ -165,29 +164,30 @@ export default function LandingPage() {
             in one click
           </h1>
 
-          <p style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '22px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.45)', maxWidth: '34rem', margin: '0 auto 2.5rem' }}>
-            Drop your audio files and artwork — TypeBeatz automatically generates professional type beat videos ready to upload to YouTube. No editing. No manual work.
+          <p style={{ fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem', lineHeight: 1.65 }}>
+            Drop your audio files and artwork — TypeBeatz automatically generates professional
+            type beat videos ready to upload to YouTube. No editing. No manual work.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <ParticleButton onClick={handleCTA}
               className="transition-all duration-200 hover:scale-105"
-              style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500, background: BTN_BG, boxShadow: BTN_GLOW, border: 'none', color: '#fff', padding: '14px 32px', borderRadius: 12, cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.05rem', background: BTN_BG, boxShadow: BTN_GLOW, border: 'none', color: '#fff', padding: '14px 32px', borderRadius: 12, cursor: 'pointer' }}>
               {user ? 'Open the App' : 'Get Started Free'}
             </ParticleButton>
             <a href="#how-it-works"
-              style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fff', textDecoration: 'none', padding: '14px 32px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.15)' }}
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '1.05rem', color: '#fff', textDecoration: 'none', padding: '14px 32px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.15)' }}
               className="hover:border-white/40 transition-colors">
               See how it works
             </a>
           </div>
 
-          <p style={{ fontFamily: DRUK_WIDE, fontSize: 11, lineHeight: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.22)', marginTop: '1rem' }}>
-            Free — 5 videos/month &nbsp;·&nbsp; PRO — unlimited for $9.99/month
+          <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.25)', marginTop: '1rem' }}>
+            Free — 5 videos/month · PRO — unlimited for $9.99/month
           </p>
         </motion.div>
 
-        {/* Stats — left-aligned internally, centered as a group */}
+        {/* Stats */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
           className="relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20" style={{ zIndex: 2 }}>
           <Stat prefix="up to" val="100" label="videos per batch" />
@@ -199,10 +199,10 @@ export default function LandingPage() {
 
       {/* ── Features ── */}
       <section className="py-24 px-6 max-w-6xl mx-auto">
-        <h2 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 1.1, letterSpacing: '0.01em' }}>
+        <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
           Everything you need to scale<br />your YouTube channel
         </h2>
-        <p style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '22px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginBottom: '4rem', maxWidth: '36rem', margin: '0 auto 4rem' }}>
+        <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', textAlign: 'center', maxWidth: '36rem', margin: '0 auto 4rem' }}>
           Built for type beat producers who want to upload more without spending hours editing.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -213,8 +213,8 @@ export default function LandingPage() {
               className="rounded-2xl p-6 border border-white/[0.06]"
               style={{ background: 'rgba(255,255,255,0.03)' }}>
               <div className="text-3xl mb-4">{f.icon}</div>
-              <h3 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.95rem', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>{f.title}</h3>
-              <p style={{ fontFamily: DRUK_WIDE, fontSize: 13, lineHeight: '20px', textTransform: 'uppercase', letterSpacing: '0.03em', color: 'rgba(255,255,255,0.4)' }}>{f.desc}</p>
+              <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>{f.title}</h3>
+              <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', fontSize: '0.875rem', lineHeight: 1.65 }}>{f.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -222,7 +222,7 @@ export default function LandingPage() {
 
       {/* ── How it works ── */}
       <section id="how-it-works" className="py-24 px-6 max-w-4xl mx-auto">
-        <h2 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', marginBottom: '4rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 1.1, letterSpacing: '0.01em' }}>
+        <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '4rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
           How it works
         </h2>
         <div className="space-y-12">
@@ -231,12 +231,12 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }} transition={{ delay: i * 0.1 }}
               className="flex items-start gap-8">
-              <div style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 1.1, letterSpacing: '0.01em', flexShrink: 0, backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <div style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 0.88, letterSpacing: '-0.05em', flexShrink: 0, backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 {s.num}
               </div>
               <div>
-                <h3 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: '1rem', letterSpacing: '0.02em', marginBottom: '0.4rem' }}>{s.title}</h3>
-                <p style={{ fontFamily: DRUK_WIDE, fontSize: 13, lineHeight: '20px', textTransform: 'uppercase', letterSpacing: '0.03em', color: 'rgba(255,255,255,0.4)' }}>{s.desc}</p>
+                <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.15rem', letterSpacing: '-0.02em', marginBottom: '0.4rem' }}>{s.title}</h3>
+                <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65 }}>{s.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -245,12 +245,10 @@ export default function LandingPage() {
 
       {/* ── Drop zone preview ── */}
       <section className="py-24 px-6 max-w-5xl mx-auto text-center">
-        <h2 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: 1.1, letterSpacing: '0.01em' }}>
+        <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
           Clean, focused, powerful
         </h2>
-        <p style={{ fontFamily: DRUK_WIDE, fontSize: 13, lineHeight: '20px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.4)', marginBottom: '2.5rem' }}>
-          The whole workflow in one screen. Drop files, review pairs, generate.
-        </p>
+        <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', marginBottom: '2.5rem' }}>The whole workflow in one screen. Drop files, review pairs, generate.</p>
         <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', padding: 2 }}>
           <div className="rounded-xl overflow-hidden" style={{ background: '#000', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="text-center p-12">
@@ -259,11 +257,11 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <p style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: '1.4rem', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>Drop Your Files</p>
-              <p style={{ fontFamily: DRUK_WIDE, fontSize: 13, lineHeight: '20px', textTransform: 'uppercase', letterSpacing: '0.03em', color: 'rgba(255,255,255,0.3)' }}>Drag and drop your audio and image files here</p>
+              <p style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.4rem', letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>Drop Your Files</p>
+              <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.35)' }}>Drag and drop your audio and image files here</p>
               <div className="flex items-center justify-center gap-3 mt-6">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: DRUK_WIDE, fontSize: 11, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>🎵 MP3 / WAV</span>
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: DRUK_WIDE, fontSize: 11, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>🖼️ PNG / JPG</span>
+                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, color: 'rgba(255,255,255,0.4)' }}>🎵 MP3, WAV</span>
+                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, color: 'rgba(255,255,255,0.4)' }}>🖼️ PNG, JPG</span>
               </div>
             </div>
           </div>
@@ -272,37 +270,29 @@ export default function LandingPage() {
 
       {/* ── Pricing ── */}
       <section id="pricing" className="py-24 px-6 max-w-5xl mx-auto">
-        <h2 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 1.1, letterSpacing: '0.01em' }}>
+        <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
           Simple pricing
         </h2>
-        <p style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '22px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginBottom: '4rem' }}>
-          Start free. Go unlimited when you're ready.
-        </p>
+        <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', textAlign: 'center', marginBottom: '4rem' }}>Start free. Go unlimited when you're ready.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
 
           {/* Free */}
           <div className="rounded-2xl p-8 border border-white/10" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <h3 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: '1.4rem', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>Free</h3>
-            <div style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: '2.8rem', letterSpacing: '-0.02em', marginBottom: '1.5rem', lineHeight: 1 }}>
-              $0<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.35)', letterSpacing: 0 }}>/mo</span>
+            <h3 style={{ fontFamily: NM, fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>Free</h3>
+            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '2.6rem', letterSpacing: '-0.05em', marginBottom: '1.5rem', lineHeight: 1 }}>
+              $0<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.35)' }}>/mo</span>
             </div>
             <ul className="space-y-3 mb-8">
-              {[
-                '5 videos per month',
-                'Credits reset on the 1st',
-                'All core features',
-                'Black & white backgrounds',
-                'HD 1080p output',
-              ].map(item => (
+              {['5 videos per month', 'Credits reset on the 1st', 'All core features', 'Black & white backgrounds', 'HD 1080p output'].map(item => (
                 <li key={item} className="flex items-center gap-2"
-                  style={{ fontFamily: DRUK_WIDE, fontSize: 13, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.7)' }}>
+                  style={{ fontFamily: NM, fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)' }}>
                   <span style={{ color: '#4ade80' }}>✓</span>{item}
                 </li>
               ))}
             </ul>
             <button onClick={handleCTA}
               className="w-full py-3 rounded-xl border border-white/20 hover:border-white/40 transition-colors"
-              style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fff', background: 'transparent', cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 600, color: '#fff', background: 'transparent', cursor: 'pointer' }}>
               {user ? "You're on Free" : 'Get Started'}
             </button>
           </div>
@@ -311,30 +301,24 @@ export default function LandingPage() {
           <div className="rounded-2xl p-8 border border-blue-500/40 relative overflow-hidden"
             style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(14,165,233,0.1))' }}>
             <div className="absolute top-4 right-4 px-2 py-1 rounded-full bg-blue-500"
-              style={{ fontFamily: DRUK_WIDE, fontSize: 11, lineHeight: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fff' }}>
-              Popular
+              style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.7rem', color: '#fff' }}>
+              POPULAR
             </div>
-            <h3 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: '1.4rem', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>PRO</h3>
-            <div style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', fontSize: '2.8rem', letterSpacing: '-0.02em', marginBottom: '1.5rem', lineHeight: 1 }}>
-              $9.99<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.35)', letterSpacing: 0 }}>/mo</span>
+            <h3 style={{ fontFamily: NM, fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>PRO</h3>
+            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '2.6rem', letterSpacing: '-0.05em', marginBottom: '1.5rem', lineHeight: 1 }}>
+              $9.99<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.35)' }}>/mo</span>
             </div>
             <ul className="space-y-3 mb-8">
-              {[
-                'Unlimited video generation',
-                'No monthly limits ever',
-                'Up to 4K video quality',
-                'Custom photo backgrounds',
-                'Cancel anytime',
-              ].map(item => (
+              {['Unlimited video generation', 'No monthly limits ever', 'Up to 4K video quality', 'Custom photo backgrounds', 'Cancel anytime'].map(item => (
                 <li key={item} className="flex items-center gap-2"
-                  style={{ fontFamily: DRUK_WIDE, fontSize: 13, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.7)' }}>
+                  style={{ fontFamily: NM, fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)' }}>
                   <span style={{ color: '#38bdf8' }}>✓</span>{item}
                 </li>
               ))}
             </ul>
             <button onClick={handleUpgradeCTA}
               className="w-full py-3 rounded-xl transition-all hover:scale-105"
-              style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.05em', background: BTN_BG, border: 'none', color: '#fff', cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 700, background: BTN_BG, border: 'none', color: '#fff', cursor: 'pointer' }}>
               {user?.role === 'pro' || user?.role === 'admin' ? "You're on PRO ⭐" : 'Upgrade to PRO'}
             </button>
           </div>
@@ -345,18 +329,18 @@ export default function LandingPage() {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center rounded-2xl p-12 border border-white/10"
           style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))' }}>
-          <h2 style={{ fontFamily: DRUK, fontWeight: 700, textTransform: 'uppercase', marginBottom: '1rem', fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', lineHeight: 1.1, letterSpacing: '0.01em' }}>
+          <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '0.5rem', fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', lineHeight: 0.95, letterSpacing: '-0.03em' }}>
             Ready to make type beats<br />in batches and save hours
           </h2>
-          <p style={{ fontFamily: SCRIPT, fontSize: '1.6rem', color: 'rgba(255,255,255,0.55)', marginBottom: '0.75rem', lineHeight: 1.2 }}>
+          <p style={{ fontFamily: SCRIPT, fontSize: '1.7rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.75rem', lineHeight: 1.3 }}>
             of your life?
           </p>
-          <p style={{ fontFamily: DRUK_WIDE, fontSize: 13, lineHeight: '20px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'rgba(255,255,255,0.4)', marginBottom: '2rem' }}>
+          <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', marginBottom: '2rem' }}>
             Join producers who are uploading more beats while doing less work.
           </p>
           <ParticleButton onClick={handleCTA}
             className="transition-all hover:scale-105"
-            style={{ fontFamily: DRUK_WIDE, fontSize: 14, lineHeight: '17px', textTransform: 'uppercase', letterSpacing: '0.05em', background: BTN_BG, boxShadow: BTN_GLOW, border: 'none', color: '#fff', padding: '16px 40px', borderRadius: 12, cursor: 'pointer' }}>
+            style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.05rem', background: BTN_BG, boxShadow: BTN_GLOW, border: 'none', color: '#fff', padding: '16px 40px', borderRadius: 12, cursor: 'pointer' }}>
             {user ? 'Open the App' : 'Start Free — No Credit Card'}
           </ParticleButton>
         </div>
@@ -366,13 +350,13 @@ export default function LandingPage() {
       <footer className="py-8 px-6 border-t border-white/[0.06]">
         <div className="flex flex-col md:flex-row items-center justify-between max-w-5xl mx-auto gap-4">
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.5 }} />
-          <p style={{ fontFamily: DRUK_WIDE, fontSize: 11, lineHeight: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.3)' }}>
+          <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>
             © {new Date().getFullYear()} TypeBeatz. All rights reserved.
           </p>
           <div className="flex gap-4">
             {['Terms', 'Privacy'].map(l => (
               <a key={l} href={`/${l.toLowerCase()}`}
-                style={{ fontFamily: DRUK_WIDE, fontSize: 11, lineHeight: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
+                style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
                 className="hover:text-white transition-colors">{l}</a>
             ))}
           </div>
