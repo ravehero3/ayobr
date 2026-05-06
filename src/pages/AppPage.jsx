@@ -64,7 +64,7 @@ export default function AppPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#050a13] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent" />
       </div>
     );

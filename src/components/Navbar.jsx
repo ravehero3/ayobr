@@ -14,7 +14,7 @@ export default function Navbar({ onUpgrade, checkoutLoading, onManageSubscriptio
   return (
     <div className="fixed top-0 left-0 right-0 z-[10000] flex items-center justify-between px-6 h-14"
       style={{
-        background: 'rgba(5,10,19,0.85)',
+        background: 'rgba(0,0,0,0.9)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)'
