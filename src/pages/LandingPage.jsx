@@ -73,10 +73,12 @@ function Stat({ prefix, val, label }) {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
       {/* Fixed-height prefix row — hidden when no prefix so numbers stay aligned */}
       <div style={{
-        fontFamily: SCRIPT,
-        fontSize: '0.85rem',
+        fontFamily: NM,
+        fontSize: '0.72rem',
+        fontWeight: 500,
         color: 'rgba(255,255,255,0.38)',
         lineHeight: LH_LABEL,
+        letterSpacing: '0.04em',
         marginBottom: 4,
         visibility: prefix ? 'visible' : 'hidden',
         userSelect: 'none',
