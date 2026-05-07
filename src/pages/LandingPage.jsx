@@ -221,47 +221,45 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
   );
 }
 
-/* How It Works — compact scroll-pinned section */
-const HOW_SCROLL_PER_STEP = 200; /* px of scroll per step */
+/* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
+const NAV_H           = 60;  /* navbar height in px          */
+const HOW_SCROLL_STEP = 220; /* px of scroll per chapter     */
 
 function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const [animKey, setAnimKey]       = useState(0);
-  const wrapperRef   = useRef(null);
-  const activeRef    = useRef(0);
-  const clickLockRef = useRef(false);
+  const stickyWrapRef = useRef(null); /* the scroll-zone that drives pinning */
+  const activeRef     = useRef(0);
+  const clickLockRef  = useRef(false);
 
   const goToStep = useCallback((i) => {
     if (i === activeRef.current) return;
     activeRef.current = i;
     setActiveStep(i);
     setAnimKey(k => k + 1);
-    /* temporarily ignore scroll updates so click doesn't get overridden */
     clickLockRef.current = true;
     setTimeout(() => { clickLockRef.current = false; }, 600);
   }, []);
 
-  /* Scroll-driven step advancement */
+  /* rAF scroll tracker — progress measured inside the sticky wrapper */
   useEffect(() => {
     let rafId = null;
     const update = () => {
-      if (clickLockRef.current) { rafId = null; return; }
-      const el = wrapperRef.current;
-      if (!el) { rafId = null; return; }
-      const rect = el.getBoundingClientRect();
-      /* scrolled = how many px we've scrolled past the top of the wrapper */
-      const scrolled = Math.max(0, -rect.top);
-      const totalScroll = el.offsetHeight - window.innerHeight;
-      if (totalScroll <= 0) { rafId = null; return; }
-      const progress = Math.min(scrolled / totalScroll, 1);
-      const newStep  = Math.min(
-        Math.floor(progress * steps.length),
-        steps.length - 1
-      );
-      if (newStep !== activeRef.current) {
-        activeRef.current = newStep;
-        setActiveStep(newStep);
-        setAnimKey(k => k + 1);
+      if (!clickLockRef.current) {
+        const el = stickyWrapRef.current;
+        if (el) {
+          const rect       = el.getBoundingClientRect();
+          const stickyH    = window.innerHeight - NAV_H;
+          const totalScroll = el.offsetHeight - stickyH;
+          const scrolled   = Math.max(0, NAV_H - rect.top);
+          const progress   = totalScroll > 0 ? Math.min(scrolled / totalScroll, 1) : 0;
+          const newStep    = Math.min(Math.floor(progress * steps.length), steps.length - 1);
+          if (newStep !== activeRef.current) {
+            activeRef.current = newStep;
+            setActiveStep(newStep);
+            setAnimKey(k => k + 1);
+          }
+        }
       }
       rafId = null;
     };
@@ -271,150 +269,125 @@ function HowItWorksSection() {
     return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
   }, []);
 
-  const s = steps[activeStep];
-
-  /* Total wrapper height = viewport + scroll distance for all steps */
-  const wrapperH = `calc(100vh + ${steps.length * HOW_SCROLL_PER_STEP}px)`;
-
-  /* Screenshot placeholder icons per step */
+  const s         = steps[activeStep];
+  const stickyH   = `calc(100vh - ${NAV_H}px)`;
+  /* wrapper height: the sticky height + scroll space for all steps */
+  const wrapperH  = `calc(100vh - ${NAV_H}px + ${steps.length * HOW_SCROLL_STEP}px)`;
   const stepIcons = ['🎵', '🔀', '⚙️', '📥'];
 
   return (
-    <div ref={wrapperRef} id="how-it-works" style={{ height: wrapperH, background: '#000' }}>
-      {/* Sticky inner panel */}
-      <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-        <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto', paddingLeft: 'clamp(24px, 5vw, 80px)', paddingRight: 'clamp(24px, 5vw, 80px)' }}>
+    <div id="how-it-works" style={{ background: '#000' }}>
 
-          {/* Section label + heading row */}
-          <div style={{ marginBottom: 40 }}>
-            <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 10 }}>Process</div>
-            <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.6rem, 3.5vw, 2.6rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
-              How it works
-            </h2>
-          </div>
+      {/* ── Title — normal flow, scrolls away before the pin starts ── */}
+      <div style={{ paddingLeft: 424, paddingRight: 40, paddingTop: 96, paddingBottom: 56 }}>
+        <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>
+          Process
+        </div>
+        <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
+          How it works
+        </h2>
+      </div>
 
-          {/* Two-column: menu left, screenshot right */}
-          <div style={{ display: 'flex', gap: 'clamp(32px, 6vw, 80px)', alignItems: 'stretch' }}>
+      {/* ── Scroll zone: sticky panel lives inside here ── */}
+      <div ref={stickyWrapRef} style={{ height: wrapperH }}>
+        <div style={{
+          position: 'sticky',
+          top: NAV_H,
+          height: stickyH,
+          display: 'flex',
+          alignItems: 'center',
+          overflow: 'hidden',
+          background: '#000',
+        }}>
+          {/* Inner layout — left-aligned at 424 px, matching logo */}
+          <div style={{ width: '100%', paddingLeft: 424, paddingRight: 60 }}>
+            <div style={{ display: 'flex', gap: 64, alignItems: 'stretch' }}>
 
-            {/* Left: chapter menu */}
-            <div style={{ width: 'clamp(160px, 22vw, 240px)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-              {steps.map((step, i) => (
-                <button
-                  key={i}
-                  onClick={() => goToStep(i)}
-                  style={{
-                    width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                    borderTop: '1px solid rgba(255,255,255,0.11)',
-                    padding: '14px 0', cursor: 'pointer', display: 'block',
-                  }}>
-                  <div style={{
-                    fontFamily: NM, fontWeight: 600, fontSize: '0.88rem', lineHeight: 1.35,
-                    color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.28)',
-                    transition: 'color 0.3s ease',
-                  }}>
-                    {step.title}
-                  </div>
-                  {/* Description slides open only for active chapter */}
-                  <div style={{
-                    fontFamily: NM, fontSize: '0.78rem', lineHeight: 1.6,
-                    color: 'rgba(255,255,255,0.38)',
-                    maxHeight: i === activeStep ? '80px' : '0px',
-                    overflow: 'hidden',
-                    opacity: i === activeStep ? 1 : 0,
-                    marginTop: i === activeStep ? 6 : 0,
-                    transition: 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease',
-                  }}>
-                    {step.desc}
-                  </div>
-                </button>
-              ))}
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.11)' }} />
-
-              {/* Step indicator dots */}
-              <div style={{ display: 'flex', gap: 5, marginTop: 20 }}>
-                {steps.map((_, j) => (
+              {/* Left: chapter menu */}
+              <div style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+                {steps.map((step, i) => (
                   <button
-                    key={j}
-                    onClick={() => goToStep(j)}
+                    key={i}
+                    onClick={() => goToStep(i)}
                     style={{
-                      height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
-                      flex: j === activeStep ? 3 : 1,
-                      background: j === activeStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.1)',
-                      transition: 'flex 0.4s ease, background 0.35s ease',
-                    }}
-                  />
+                      width: '100%', textAlign: 'left', background: 'none', border: 'none',
+                      borderTop: '1px solid rgba(255,255,255,0.11)',
+                      padding: '14px 0', cursor: 'pointer', display: 'block',
+                    }}>
+                    <div style={{
+                      fontFamily: NM, fontWeight: 600, fontSize: '0.88rem', lineHeight: 1.35,
+                      color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.28)',
+                      transition: 'color 0.3s ease',
+                    }}>
+                      {step.title}
+                    </div>
+                    <div style={{
+                      fontFamily: NM, fontSize: '0.78rem', lineHeight: 1.6,
+                      color: 'rgba(255,255,255,0.38)',
+                      maxHeight: i === activeStep ? '80px' : '0px',
+                      overflow: 'hidden',
+                      opacity: i === activeStep ? 1 : 0,
+                      marginTop: i === activeStep ? 6 : 0,
+                      transition: 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease',
+                    }}>
+                      {step.desc}
+                    </div>
+                  </button>
                 ))}
-              </div>
-            </div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.11)' }} />
 
-            {/* Right: screenshot panel */}
-            <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-              <div
-                key={animKey}
-                style={{
-                  width: '100%', height: 'clamp(300px, 42vh, 480px)',
-                  background: 'linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 16,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  animation: 'howCardIn 0.38s ease forwards',
-                }}>
-                <style>{`
-                  @keyframes howCardIn {
-                    from { opacity: 0; transform: translateX(14px); }
-                    to   { opacity: 1; transform: translateX(0); }
-                  }
-                `}</style>
-
-                {/* Faux browser chrome */}
-                <div style={{
-                  height: 36, borderBottom: '1px solid rgba(255,255,255,0.07)',
-                  display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px',
-                  background: 'rgba(255,255,255,0.025)',
-                }}>
-                  {['#ff5f56','#ffbd2e','#27c93f'].map((c, ci) => (
-                    <div key={ci} style={{ width: 9, height: 9, borderRadius: '50%', background: c, opacity: 0.6 }} />
+                {/* Progress dots */}
+                <div style={{ display: 'flex', gap: 5, marginTop: 18 }}>
+                  {steps.map((_, j) => (
+                    <button
+                      key={j}
+                      onClick={() => goToStep(j)}
+                      style={{
+                        height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
+                        flex: j === activeStep ? 3 : 1,
+                        background: j === activeStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.1)',
+                        transition: 'flex 0.4s ease, background 0.35s ease',
+                      }}
+                    />
                   ))}
-                  <div style={{
-                    flex: 1, height: 18, borderRadius: 4,
-                    background: 'rgba(255,255,255,0.05)',
-                    marginLeft: 8,
-                  }} />
-                </div>
-
-                {/* Screenshot content area */}
-                <div style={{
-                  height: 'calc(100% - 36px)',
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center',
-                  gap: 14, padding: 32,
-                }}>
-                  <div style={{
-                    fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-                    lineHeight: 1,
-                    filter: 'grayscale(0.3)',
-                  }}>
-                    {stepIcons[activeStep]}
-                  </div>
-                  <div style={{
-                    fontFamily: NM, fontWeight: 700,
-                    fontSize: '0.72rem', letterSpacing: '0.1em',
-                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)',
-                  }}>
-                    Step {activeStep + 1} — {s.title}
-                  </div>
-                  {/* Ghost number watermark */}
-                  <div style={{
-                    position: 'absolute', bottom: 12, right: 20,
-                    fontFamily: NM, fontWeight: 900,
-                    fontSize: 'clamp(5rem, 10vw, 9rem)',
-                    lineHeight: 1, letterSpacing: '-0.06em',
-                    color: 'rgba(255,255,255,0.03)',
-                    userSelect: 'none', pointerEvents: 'none',
-                  }}>{s.num}</div>
                 </div>
               </div>
+
+              {/* Right: screenshot panel — animates in on step change */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  key={animKey}
+                  style={{
+                    width: '100%',
+                    height: 'clamp(280px, 44vh, 460px)',
+                    background: 'linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    animation: 'howCardIn 0.36s ease forwards',
+                  }}>
+                  <style>{`@keyframes howCardIn { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }`}</style>
+
+                  {/* Faux browser chrome */}
+                  <div style={{ height: 34, borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', background: 'rgba(255,255,255,0.025)' }}>
+                    {['#ff5f56','#ffbd2e','#27c93f'].map((c, ci) => (
+                      <div key={ci} style={{ width: 9, height: 9, borderRadius: '50%', background: c, opacity: 0.55 }} />
+                    ))}
+                    <div style={{ flex: 1, height: 16, borderRadius: 4, background: 'rgba(255,255,255,0.05)', marginLeft: 8 }} />
+                  </div>
+
+                  {/* Content area */}
+                  <div style={{ height: 'calc(100% - 34px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 28 }}>
+                    <div style={{ fontSize: 'clamp(2.2rem, 4vw, 3rem)', lineHeight: 1 }}>{stepIcons[activeStep]}</div>
+                    <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>
+                      Step {activeStep + 1} — {s.title}
+                    </div>
+                    <div style={{ position: 'absolute', bottom: 10, right: 18, fontFamily: NM, fontWeight: 900, fontSize: 'clamp(4rem, 9vw, 8rem)', lineHeight: 1, letterSpacing: '-0.06em', color: 'rgba(255,255,255,0.03)', userSelect: 'none', pointerEvents: 'none' }}>{s.num}</div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -623,7 +596,7 @@ export default function LandingPage() {
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-4"
-        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 'clamp(24px, 8vw, 424px)', paddingRight: 'clamp(24px, 8vw, 424px)' }}>
+        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 424, paddingRight: 424 }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/login')}
