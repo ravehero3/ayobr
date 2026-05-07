@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
@@ -262,6 +262,190 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
           </motion.div>
 
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── How It Works — two-column with hover card ── */
+function HowItWorksSection() {
+  const [active, setActive] = useState(0);
+  const scaleRef = useRef(null);
+
+  /* Scroll-linked scale: 0.85→1.0, opacity 0.5→1 over first 300px */
+  useEffect(() => {
+    let raf = null;
+    const tick = () => {
+      const el = scaleRef.current;
+      if (!el) return;
+      const p = Math.min(window.scrollY / 300, 1);
+      el.style.transform = `scale(${0.85 + p * 0.15})`;
+      el.style.opacity   = String(0.5 + p * 0.5);
+      raf = null;
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    tick();
+    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+
+  const GT = '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif';
+
+  return (
+    <section data-bg-color="#02020a" id="how-it-works" style={{ padding: '96px 24px' }}>
+      <div style={{
+        maxWidth: 1080, margin: '0 auto',
+        display: 'flex', gap: 72, alignItems: 'flex-start',
+        flexWrap: 'wrap',
+      }}>
+
+        {/* ── Left column: title + step list ── */}
+        <div style={{ width: 304, flexShrink: 0 }}>
+          <h2 style={{
+            fontFamily: GT, fontWeight: 500, fontSize: '62px',
+            lineHeight: '62px', letterSpacing: '-3.1px',
+            color: '#fff', textTransform: 'none', fontStyle: 'normal',
+            margin: 0, marginBottom: 48,
+          }}>
+            How it<br />works
+          </h2>
+
+          <div>
+            {steps.map((s, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                onHoverStart={() => setActive(i)}
+                style={{
+                  padding: '18px 0',
+                  borderTop: '1px solid rgba(255,255,255,0.08)',
+                  cursor: 'default',
+                  display: 'flex', alignItems: 'center', gap: 18,
+                  transition: 'opacity 0.25s ease',
+                  opacity: active === i ? 1 : 0.38,
+                }}>
+                {/* Step number */}
+                <span style={{
+                  fontFamily: "'Neue Montreal','Inter',sans-serif",
+                  fontWeight: 900, fontSize: '0.85rem',
+                  letterSpacing: '0.04em',
+                  ...(active === i
+                    ? { backgroundImage: BTN_BG, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
+                    : { color: 'rgba(255,255,255,0.3)' }),
+                  flexShrink: 0, minWidth: 28,
+                }}>{s.num}</span>
+                {/* Step title */}
+                <span style={{
+                  fontFamily: "'Neue Montreal','Inter',sans-serif",
+                  fontWeight: 600, fontSize: '0.9rem',
+                  color: active === i ? '#fff' : 'rgba(255,255,255,0.5)',
+                  transition: 'color 0.25s ease',
+                }}>{s.title}</span>
+                {/* Arrow indicator */}
+                {active === i && (
+                  <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem' }}>→</span>
+                )}
+              </motion.div>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+          </div>
+        </div>
+
+        {/* ── Right column: animated detail card ── */}
+        <div
+          ref={scaleRef}
+          style={{
+            flex: 1, minWidth: 280,
+            opacity: 0.5,
+            transform: 'scale(0.85)',
+            willChange: 'transform, opacity',
+          }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, x: 48 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.38, ease: 'easeOut' }}
+              style={{
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.02) 100%)',
+                border: '1px solid rgba(255,255,255,0.09)',
+                borderRadius: 24,
+                padding: '52px 48px',
+                minHeight: 360,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+
+              {/* Subtle corner glow */}
+              <div style={{
+                position: 'absolute', top: -80, right: -80,
+                width: 240, height: 240, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)',
+                pointerEvents: 'none',
+              }} />
+
+              {/* Card body */}
+              <div>
+                <div style={{
+                  fontFamily: "'Neue Montreal','Inter',sans-serif",
+                  fontWeight: 900,
+                  fontSize: 'clamp(4rem, 8vw, 7rem)',
+                  lineHeight: 1, letterSpacing: '-0.06em',
+                  backgroundImage: BTN_BG,
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                  marginBottom: 32,
+                  userSelect: 'none',
+                }}>{steps[active].num}</div>
+
+                <h3 style={{
+                  fontFamily: "'Neue Montreal','Inter',sans-serif",
+                  fontWeight: 800,
+                  fontSize: 'clamp(1.6rem, 3vw, 2.1rem)',
+                  lineHeight: 1.1, letterSpacing: '-0.03em',
+                  color: '#fff', marginBottom: 16,
+                }}>{steps[active].title}</h3>
+
+                <p style={{
+                  fontFamily: "'Neue Montreal','Inter',sans-serif",
+                  fontSize: '1rem', lineHeight: 1.65,
+                  color: 'rgba(255,255,255,0.45)',
+                  maxWidth: 400,
+                }}>{steps[active].desc}</p>
+              </div>
+
+              {/* Progress footer */}
+              <div style={{
+                marginTop: 40, paddingTop: 24,
+                borderTop: '1px solid rgba(255,255,255,0.07)',
+                display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <span style={{ fontFamily: "'Neue Montreal','Inter',sans-serif", fontSize: '0.72rem', color: 'rgba(255,255,255,0.22)', letterSpacing: '0.04em' }}>
+                  {active + 1} / {steps.length}
+                </span>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+                <div style={{ display: 'flex', gap: 5 }}>
+                  {steps.map((_, i) => (
+                    <div key={i} style={{
+                      height: 4, borderRadius: 2,
+                      width: i === active ? 22 : 5,
+                      background: i === active ? BTN_BG : 'rgba(255,255,255,0.14)',
+                      backgroundImage: i === active ? BTN_BG : 'none',
+                      transition: 'width 0.35s ease',
+                    }} />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
       </div>
     </section>
   );
@@ -530,38 +714,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section data-bg-color="#02020a" id="how-it-works" className="py-24 px-6 max-w-4xl mx-auto">
-        <h2 style={{
-          fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
-          fontWeight: 500,
-          fontSize: '62px',
-          lineHeight: '62px',
-          letterSpacing: '-3.1px',
-          color: '#ffffff',
-          textTransform: 'none',
-          fontStyle: 'normal',
-          textAlign: 'left',
-          marginBottom: '4rem',
-        }}>
-          How it works
-        </h2>
-        <div className="space-y-12">
-          {steps.map((s, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-              className="flex items-start gap-8">
-              <div style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: LH_HERO, letterSpacing: '-0.05em', flexShrink: 0, backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                {s.num}
-              </div>
-              <div>
-                <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.15rem', lineHeight: LH_HEAD, letterSpacing: '-0.02em', marginBottom: '0.4rem' }}>{s.title}</h3>
-                <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)' }}>{s.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      <HowItWorksSection />
 
       {/* ── Drop zone preview ── */}
       <section data-bg-color="#05050a" className="py-24 px-6 max-w-5xl mx-auto text-center">
