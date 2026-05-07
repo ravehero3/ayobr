@@ -146,27 +146,35 @@ function BlurReveal({ children, delay = 0, style = {} }) {
 
 /* Pricing Section */
 function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
-  const isPro = user?.role === 'pro' || user?.role === 'admin';
+  const isPro      = user?.role === 'pro' || user?.role === 'admin';
+  const checkFree  = { bg: 'rgba(74,222,128,0.12)',  border: 'rgba(74,222,128,0.35)',  color: '#4ade80' };
+  const checkBlue  = { bg: 'rgba(56,189,248,0.12)',  border: 'rgba(56,189,248,0.35)',  color: '#38bdf8' };
+  const checkGold  = { bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.35)',  color: '#fbbf24' };
+
+  const Check = ({ c }) => (
+    <span style={{ width: 16, height: 16, borderRadius: '50%', background: c.bg, border: `1px solid ${c.border}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: c.color, flexShrink: 0 }}>✓</span>
+  );
+
   return (
     <section id="pricing" style={{ padding: '112px 0', background: '#000' }}>
-      <div style={{ paddingLeft: 'clamp(40px, 8vw, 424px)', paddingRight: 40 }}>
+      <div style={{ paddingLeft: 424, paddingRight: 40 }}>
         <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.55 }}
           style={{ marginBottom: 64 }}>
-          <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 14 }}>Pricing</div>
           <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(2rem, 4.5vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', marginBottom: 14, color: '#fff' }}>
-            Simple pricing.
+            Pricing
           </h2>
           <p style={{ fontFamily: NM, fontSize: '1rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 400 }}>
-            Start free, upgrade when you're ready to go unlimited. No hidden fees, no surprises.
+            Start free, upgrade when you're ready. No hidden fees, no surprises.
           </p>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, maxWidth: 740 }}>
-          {/* Free card */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 300px))', gap: 20 }}>
+
+          {/* FREE card */}
           <motion.div initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.05 }}
-            style={{ background: '#0c0c0c', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column' }}>
+            style={{ background: '#000', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 20 }}>Free</div>
             <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6, color: '#fff' }}>
               $0<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.28)', letterSpacing: 0 }}>/mo</span>
@@ -176,19 +184,18 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
               {['5 videos per month', 'Credits reset on the 1st', 'All core features', 'Black & white backgrounds', 'HD 1080p output'].map(item => (
                 <li key={item} style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#4ade80', flexShrink: 0 }}>✓</span>
-                  {item}
+                  <Check c={checkFree} />{item}
                 </li>
               ))}
             </ul>
-            <button onClick={handleCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.8)', background: 'transparent', border: '1px solid rgba(255,255,255,0.16)', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%' }}>
+            <button onClick={handleCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.8)', background: 'transparent', border: '1px solid rgba(255,255,255,0.16)', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', outline: 'none' }}>
               {user ? "You're on Free" : 'Get Started — Free'}
             </button>
           </motion.div>
 
-          {/* PRO card */}
+          {/* PRO card — $9.99, 1080p, 31 videos */}
           <motion.div initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.18 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.15 }}
             style={{ background: 'linear-gradient(160deg, rgba(59,130,246,0.14) 0%, rgba(14,165,233,0.07) 100%)', border: '1px solid rgba(59,130,246,0.38)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -198,23 +205,45 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
             <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6, color: '#fff' }}>
               $9.99<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.28)', letterSpacing: 0 }}>/mo</span>
             </div>
-            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>For producers who want to scale</p>
+            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>For producers scaling their channel</p>
             <div style={{ width: '100%', height: 1, background: 'rgba(59,130,246,0.2)', marginBottom: 24 }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
-              {['Unlimited video generation', 'No monthly limits ever', 'Up to 4K video quality', 'Custom photo backgrounds', 'Cancel anytime'].map(item => (
+              {['31 videos per month', 'HD 1080p output', 'Custom photo backgrounds', 'All core features', 'Cancel anytime'].map(item => (
                 <li key={item} style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#38bdf8', flexShrink: 0 }}>✓</span>
-                  {item}
+                  <Check c={checkBlue} />{item}
                 </li>
               ))}
             </ul>
-            <button onClick={handleUpgradeCTA} style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.875rem', lineHeight: LH_LABEL, background: BTN_BG, border: 'none', color: '#fff', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', boxShadow: '0 0 28px rgba(59,130,246,0.28)' }}>
+            <button onClick={handleUpgradeCTA} style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.875rem', lineHeight: LH_LABEL, background: BTN_BG, border: 'none', color: '#fff', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', boxShadow: '0 0 28px rgba(59,130,246,0.28)', outline: 'none' }}>
               {isPro ? "You're on PRO ⭐" : 'Upgrade to PRO'}
             </button>
-            <p style={{ fontFamily: NM, fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 14 }}>
-              Cancel anytime · No commitment
-            </p>
+            <p style={{ fontFamily: NM, fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 14 }}>Cancel anytime · No commitment</p>
           </motion.div>
+
+          {/* UNLIMITED card — $18.99, 4K, unlimited */}
+          <motion.div initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.27 }}
+            style={{ background: 'linear-gradient(160deg, rgba(251,191,36,0.1) 0%, rgba(245,158,11,0.04) 100%)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 20 }}>Unlimited</div>
+            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6, color: '#fff' }}>
+              $18.99<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.28)', letterSpacing: 0 }}>/mo</span>
+            </div>
+            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>For serious producers going all in</p>
+            <div style={{ width: '100%', height: 1, background: 'rgba(251,191,36,0.18)', marginBottom: 24 }} />
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
+              {['Unlimited video generation', '4K video output', 'Custom photo backgrounds', 'All core features', 'Cancel anytime'].map(item => (
+                <li key={item} style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Check c={checkGold} />{item}
+                </li>
+              ))}
+            </ul>
+            <button onClick={handleUpgradeCTA} style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.875rem', lineHeight: LH_LABEL, background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', border: 'none', color: '#000', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', boxShadow: '0 0 28px rgba(251,191,36,0.22)', outline: 'none' }}>
+              Go Unlimited
+            </button>
+            <p style={{ fontFamily: NM, fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 14 }}>Cancel anytime · No commitment</p>
+          </motion.div>
+
         </div>
       </div>
     </section>
@@ -223,7 +252,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
 
 /* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
 const NAV_H           = 60;  /* navbar height in px          */
-const HOW_SCROLL_STEP = 220; /* px of scroll per chapter     */
+const HOW_SCROLL_STEP = 500; /* px of scroll per chapter — generous so content is readable */
 
 function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
@@ -279,10 +308,7 @@ function HowItWorksSection() {
     <div id="how-it-works" style={{ background: '#000' }}>
 
       {/* ── Title — normal flow, scrolls away before the pin starts ── */}
-      <div style={{ paddingLeft: 424, paddingRight: 40, paddingTop: 96, paddingBottom: 56 }}>
-        <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>
-          Process
-        </div>
+      <div style={{ paddingLeft: 424, paddingRight: 40, paddingTop: 80, paddingBottom: 28 }}>
         <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
           How it works
         </h2>
@@ -313,6 +339,7 @@ function HowItWorksSection() {
                       width: '100%', textAlign: 'left', background: 'none', border: 'none',
                       borderTop: '1px solid rgba(255,255,255,0.11)',
                       padding: '14px 0', cursor: 'pointer', display: 'block',
+                      outline: 'none',
                     }}>
                     <div style={{
                       fontFamily: NM, fontWeight: 600, fontSize: '0.88rem', lineHeight: 1.35,
