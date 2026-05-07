@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -86,28 +86,83 @@ function Stat({ prefix, val, label }) {
       }}>
         {prefix ?? 'up to'}
       </div>
-      <div style={{
+      <WordReveal text={val} style={{
         fontFamily: NM,
         fontWeight: 900,
         fontSize: 'clamp(1.9rem, 3vw, 2.6rem)',
         lineHeight: 1,
         letterSpacing: '-0.04em',
         color: '#fff',
-      }}>
-        {val}
-      </div>
-      <div style={{
+        display: 'block',
+      }} />
+      <WordReveal text={label} style={{
         fontFamily: NM,
         fontSize: '0.78rem',
         color: 'rgba(255,255,255,0.35)',
         marginTop: 5,
         letterSpacing: '0.02em',
         lineHeight: LH_LABEL,
-      }}>
-        {label}
-      </div>
+        display: 'block',
+      }} />
     </div>
   );
+}
+
+/* ── Word-by-word reveal via Intersection Observer ── */
+function WordReveal({ text, style, className }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.2 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const words = String(text).split(' ');
+  return (
+    <span ref={ref} className={className} style={style}>
+      {words.map((word, i) => (
+        <span key={i} style={{
+          display: 'inline-block',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(10px)',
+          transition: `opacity 0.5s ease ${i * 60}ms, transform 0.5s ease ${i * 60}ms`,
+          marginRight: i < words.length - 1 ? '0.2em' : 0,
+        }}>
+          {word}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/* ── Scroll-driven background transitions ── */
+function useScrollBg(wrapperRef) {
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    el.style.transition = 'background-color 0.6s ease';
+
+    const onScroll = () => {
+      const sections = Array.from(el.querySelectorAll('[data-bg-color]'));
+      let best = null, bestVis = 0;
+      sections.forEach(sec => {
+        const r = sec.getBoundingClientRect();
+        const vis = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+        if (vis > bestVis) { bestVis = vis; best = sec; }
+      });
+      if (best) el.style.backgroundColor = best.dataset.bgColor;
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 }
 
 const features = [
@@ -129,6 +184,8 @@ const steps = [
 export default function LandingPage() {
   const navigate = useNavigate();
   const { user, login } = useAuth();
+  const wrapperRef = useRef(null);
+  useScrollBg(wrapperRef);
 
   const handleCTA = () => { user ? navigate('/app') : login(); };
   const handleUpgradeCTA = () => {
@@ -138,7 +195,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000', fontFamily: NM }}>
+    <div ref={wrapperRef} className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000', fontFamily: NM }}>
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4"
@@ -165,7 +222,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden' }}>
+      <section data-bg-color="#000000" className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden' }}>
 
         {/* Stars background image */}
         <div className="absolute inset-0 pointer-events-none" style={{
@@ -249,7 +306,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section className="py-24 px-6 max-w-6xl mx-auto">
+      <section data-bg-color="#05050a" className="py-24 px-6 max-w-6xl mx-auto">
         <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
           Everything you need to scale<br />your YouTube channel
         </h2>
@@ -272,7 +329,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section id="how-it-works" className="py-24 px-6 max-w-4xl mx-auto">
+      <section data-bg-color="#02020a" id="how-it-works" className="py-24 px-6 max-w-4xl mx-auto">
         <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '4rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
           How it works
         </h2>
@@ -295,7 +352,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Drop zone preview ── */}
-      <section className="py-24 px-6 max-w-5xl mx-auto text-center">
+      <section data-bg-color="#05050a" className="py-24 px-6 max-w-5xl mx-auto text-center">
         <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
           Clean, focused, powerful
         </h2>
@@ -322,7 +379,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="py-24 px-6 max-w-5xl mx-auto">
+      <section data-bg-color="#000000" id="pricing" className="py-24 px-6 max-w-5xl mx-auto">
         <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
           Simple pricing
         </h2>
@@ -381,7 +438,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA banner ── */}
-      <section className="py-24 px-6">
+      <section data-bg-color="#02020a" className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center rounded-2xl p-12 border border-white/10"
           style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))' }}>
           <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '0.5rem', fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
