@@ -169,158 +169,101 @@ function BlurReveal({ children, delay = 0, style = {} }) {
 }
 
 /* ── Scroll-Stacked Pricing Cards ── */
-function StackedPricingSection({ handleCTA, handleUpgradeCTA, user }) {
-  const outerRef = useRef(null);
-  const cardRefs = useRef([]);
-  const rafRef  = useRef(null);
-  const N = 4;
-
-  useEffect(() => {
-    const tick = () => {
-      const outer = outerRef.current;
-      if (!outer) return;
-      const scrolled  = Math.max(0, -outer.getBoundingClientRect().top);
-      const maxScroll = outer.offsetHeight - window.innerHeight;
-      const p = maxScroll > 0 ? Math.min(1, scrolled / maxScroll) : 0;
-      const cp = p * (N - 1); // card-progress: 0 → N-1
-
-      cardRefs.current.forEach((el, i) => {
-        if (!el) return;
-        // fwd: how much card i has "come to the front" (0 = still at offset, 1 = fully at top:0,left:0)
-        const fwd = Math.max(0, Math.min(1, cp - (i - 1)));
-
-        if (fwd >= 1) {
-          // Already fully activated — sit at (0,0), scale down as later cards pile on
-          const behind = Math.max(0, cp - i);
-          el.style.top       = '0px';
-          el.style.left      = '0px';
-          el.style.zIndex    = String(10 + i - Math.round(behind));
-          el.style.transform = `scale(${Math.max(0.88, 1 - behind * 0.04)})`;
-          el.style.opacity   = String(Math.max(0.25, 1 - behind * 0.22));
-        } else {
-          // Still in stack or currently animating in
-          const rem = 1 - fwd;
-          el.style.top       = `${i * 12 * rem}px`;
-          el.style.left      = `${i * 8  * rem}px`;
-          el.style.zIndex    = fwd > 0 ? String(20 + i) : String(N - i);
-          el.style.transform = 'scale(1)';
-          el.style.opacity   = '1';
-        }
-      });
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    tick(); // initial paint
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  const BASE_CARD = {
-    position: 'absolute', inset: 0,
-    borderRadius: 20,
-    padding: '40px',
-    willChange: 'transform, top, left, opacity',
-    boxSizing: 'border-box',
-  };
-
+function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
+  const isPro = user?.role === 'pro' || user?.role === 'admin';
   return (
-    <div ref={outerRef} data-bg-color="#000000" id="pricing" style={{ height: '400vh', position: 'relative' }}>
-      <div style={{ position: 'sticky', top: '10vh', height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Card stack wrapper */}
-        <div style={{ position: 'relative', width: 'min(500px, 90vw)', height: 'min(500px, 72vh)' }}>
+    <section data-bg-color="#030308" id="pricing" style={{ padding: '112px 24px' }}>
+      <div style={{ maxWidth: 1080, margin: '0 auto' }}>
 
-          {/* Card 0 — Intro */}
-          <div ref={el => cardRefs.current[0] = el} style={{ ...BASE_CARD, background: '#0a0a14', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 24 }}>Pricing</div>
-            <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', marginBottom: 14 }}>
-              Simple pricing.
-            </h2>
-            <p style={{ fontFamily: NM, fontSize: '1rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.42)', marginBottom: 40, maxWidth: 360 }}>
-              Start free, upgrade when you're ready to go unlimited. No hidden fees.
+        {/* Section header */}
+        <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.55 }}
+          style={{ marginBottom: 64 }}>
+          <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 14 }}>Pricing</div>
+          <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(2rem, 4.5vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', marginBottom: 14, color: '#fff' }}>
+            Simple pricing.
+          </h2>
+          <p style={{ fontFamily: NM, fontSize: '1rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 400 }}>
+            Start free, upgrade when you're ready to go unlimited. No hidden fees, no surprises.
+          </p>
+        </motion.div>
+
+        {/* Card grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, maxWidth: 740 }}>
+
+          {/* Free card */}
+          <motion.div initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.05 }}
+            style={{ background: '#0c0c0c', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 20 }}>Free</div>
+            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6, color: '#fff' }}>
+              $0<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.28)', letterSpacing: 0 }}>/mo</span>
+            </div>
+            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>
+              Perfect for getting started
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-              <div>
-                <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '2rem', lineHeight: 1, letterSpacing: '-0.04em' }}>$0</div>
-                <div style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.32)', marginTop: 5 }}>Free forever</div>
-              </div>
-              <div style={{ width: 1, height: 40, background: 'rgba(255,255,255,0.1)' }} />
-              <div>
-                <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '2rem', lineHeight: 1, letterSpacing: '-0.04em', backgroundImage: BTN_BG, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>$9.99</div>
-                <div style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.32)', marginTop: 5 }}>PRO / month</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 1 — Free plan */}
-          <div ref={el => cardRefs.current[1] = el} style={{ ...BASE_CARD, background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.1)', top: 12, left: 8 }}>
-            <div style={{ fontFamily: NM, fontWeight: 800, fontSize: '1.1rem', lineHeight: LH_HEAD, letterSpacing: '-0.02em', marginBottom: 8 }}>Free</div>
-            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6 }}>
-              $0<span style={{ fontSize: '0.95rem', fontWeight: 400, color: 'rgba(255,255,255,0.32)' }}>/mo</span>
-            </div>
-            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.38)', lineHeight: LH_BODY, marginBottom: 24 }}>Perfect for getting started</p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 9 }}>
-              {['5 videos per month', 'Credits reset on the 1st', 'All core features', 'Black & white backgrounds', 'HD 1080p output'].map(item => (
-                <li key={item} style={{ fontFamily: NM, fontSize: '0.86rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.68)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ color: '#4ade80', fontSize: '0.75rem' }}>✓</span>{item}
+            <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 24 }} />
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
+              {[
+                ['5 videos per month', true],
+                ['Credits reset on the 1st', true],
+                ['All core features', true],
+                ['Black & white backgrounds', true],
+                ['HD 1080p output', true],
+              ].map(([item]) => (
+                <li key={item} style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#4ade80', flexShrink: 0 }}>✓</span>
+                  {item}
                 </li>
               ))}
             </ul>
-            <button onClick={handleCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.86rem', lineHeight: LH_LABEL, color: '#fff', background: 'transparent', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 10, padding: '11px 0', cursor: 'pointer', width: '100%' }}>
-              {user ? "You're on Free" : 'Get Started'}
+            <button onClick={handleCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.8)', background: 'transparent', border: '1px solid rgba(255,255,255,0.16)', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', transition: 'border-color 0.2s, color 0.2s' }}>
+              {user ? "You're on Free" : 'Get Started — Free'}
             </button>
-          </div>
+          </motion.div>
 
-          {/* Card 2 — PRO plan */}
-          <div ref={el => cardRefs.current[2] = el} style={{ ...BASE_CARD, background: 'linear-gradient(135deg, rgba(59,130,246,0.13), rgba(14,165,233,0.13))', border: '1px solid rgba(59,130,246,0.32)', top: 24, left: 16, overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 18, right: 18, background: BTN_BG, borderRadius: 999, padding: '3px 10px', fontFamily: NM, fontSize: '0.62rem', fontWeight: 700, color: '#fff', letterSpacing: '0.06em' }}>POPULAR</div>
-            <div style={{ fontFamily: NM, fontWeight: 800, fontSize: '1.1rem', lineHeight: LH_HEAD, letterSpacing: '-0.02em', marginBottom: 8 }}>PRO</div>
-            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '2.6rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6 }}>
-              $9.99<span style={{ fontSize: '0.95rem', fontWeight: 400, color: 'rgba(255,255,255,0.32)' }}>/mo</span>
+          {/* PRO card */}
+          <motion.div initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.18 }}
+            style={{ background: 'linear-gradient(160deg, rgba(59,130,246,0.14) 0%, rgba(14,165,233,0.07) 100%)', border: '1px solid rgba(59,130,246,0.38)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+            {/* Glow accent */}
+            <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)' }}>PRO</div>
+              <div style={{ background: BTN_BG, borderRadius: 999, padding: '4px 10px', fontFamily: NM, fontSize: '0.58rem', fontWeight: 700, color: '#fff', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Most Popular</div>
             </div>
-            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.38)', lineHeight: LH_BODY, marginBottom: 24 }}>For producers who want to scale</p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 9 }}>
-              {['Unlimited video generation', 'No monthly limits ever', 'Up to 4K video quality', 'Custom photo backgrounds', 'Cancel anytime'].map(item => (
-                <li key={item} style={{ fontFamily: NM, fontSize: '0.86rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.68)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ color: '#38bdf8', fontSize: '0.75rem' }}>✓</span>{item}
+            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6, color: '#fff' }}>
+              $9.99<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.28)', letterSpacing: 0 }}>/mo</span>
+            </div>
+            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>
+              For producers who want to scale
+            </p>
+            <div style={{ width: '100%', height: 1, background: 'rgba(59,130,246,0.2)', marginBottom: 24 }} />
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
+              {[
+                'Unlimited video generation',
+                'No monthly limits ever',
+                'Up to 4K video quality',
+                'Custom photo backgrounds',
+                'Cancel anytime',
+              ].map(item => (
+                <li key={item} style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#38bdf8', flexShrink: 0 }}>✓</span>
+                  {item}
                 </li>
               ))}
             </ul>
-            <button onClick={handleUpgradeCTA} style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.86rem', lineHeight: LH_LABEL, background: BTN_BG, border: 'none', color: '#fff', borderRadius: 10, padding: '11px 0', cursor: 'pointer', width: '100%' }}>
-              {user?.role === 'pro' || user?.role === 'admin' ? "You're on PRO ⭐" : 'Upgrade to PRO'}
+            <button onClick={handleUpgradeCTA} style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.875rem', lineHeight: LH_LABEL, background: BTN_BG, border: 'none', color: '#fff', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', boxShadow: '0 0 28px rgba(59,130,246,0.28)' }}>
+              {isPro ? "You're on PRO ⭐" : 'Upgrade to PRO'}
             </button>
-          </div>
-
-          {/* Card 3 — CTA */}
-          <div ref={el => cardRefs.current[3] = el} style={{ ...BASE_CARD, background: '#060610', border: '1px solid rgba(255,255,255,0.07)', top: 36, left: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-            <div style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.7rem, 4vw, 2.3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', marginBottom: 14 }}>
-              Ready to start?
-            </div>
-            <p style={{ fontFamily: NM, fontSize: '0.95rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.42)', marginBottom: 36, maxWidth: 320 }}>
-              Join producers uploading more beats while doing less work.
+            <p style={{ fontFamily: NM, fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 14 }}>
+              Cancel anytime · No commitment
             </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <button onClick={handleCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 18px', borderRadius: 9999, cursor: 'pointer' }}>
-                Start for free
-              </button>
-              <button onClick={handleUpgradeCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', lineHeight: LH_LABEL, background: '#2a2a2a', border: 'none', color: '#fff', padding: '8px 18px', borderRadius: 9999, cursor: 'pointer' }}>
-                Go unlimited
-              </button>
-            </div>
-            <p style={{ fontFamily: NM, fontSize: '0.7rem', color: 'rgba(255,255,255,0.18)', marginTop: 20 }}>
-              Free plan: 5 videos/month · PRO: $9.99/month, cancel anytime
-            </p>
-          </div>
+          </motion.div>
 
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -448,8 +391,8 @@ export default function LandingPage() {
     <div ref={wrapperRef} className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000', fontFamily: NM }}>
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4"
-        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-4"
+        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 'clamp(32px, 16vw, 218px)', paddingRight: 'clamp(32px, 16vw, 218px)' }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/login')}
@@ -588,7 +531,18 @@ export default function LandingPage() {
 
       {/* ── How it works ── */}
       <section data-bg-color="#02020a" id="how-it-works" className="py-24 px-6 max-w-4xl mx-auto">
-        <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '4rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
+        <h2 style={{
+          fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
+          fontWeight: 500,
+          fontSize: '62px',
+          lineHeight: '62px',
+          letterSpacing: '-3.1px',
+          color: '#ffffff',
+          textTransform: 'none',
+          fontStyle: 'normal',
+          textAlign: 'left',
+          marginBottom: '4rem',
+        }}>
           How it works
         </h2>
         <div className="space-y-12">
@@ -636,8 +590,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pricing (scroll-stacked cards) ── */}
-      <StackedPricingSection
+      {/* ── Pricing ── */}
+      <PricingSection
         handleCTA={handleCTA}
         handleUpgradeCTA={handleUpgradeCTA}
         user={user}
