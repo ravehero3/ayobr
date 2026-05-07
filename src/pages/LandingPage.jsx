@@ -10,11 +10,9 @@ const SCRIPT = "'Satisfy', cursive";
 const BTN_BG  = 'linear-gradient(135deg, #3b82f6, #0ea5e9)';
 const BTN_GLOW = '0 0 40px rgba(59,130,246,0.35)';
 
-/* Line height tokens */
-const LH_BODY  = 1.6;   /* body text, descriptions */
-const LH_LABEL = 1.5;   /* small labels, nav, badges */
-const LH_HEAD  = 1.05;  /* section h2 headings */
-const LH_HERO  = 0.9;   /* large display hero h1 */
+const LH_BODY  = 1.6;
+const LH_LABEL = 1.5;
+const LH_HEAD  = 1.05;
 
 const PARTICLE_CSS = `
 @keyframes particleFloat {
@@ -65,50 +63,28 @@ function ParticleButton({ onClick, children, style, className }) {
   );
 }
 
-/*
-  Stat block — prefix row is ALWAYS rendered (visibility: hidden when absent)
-  so all big numbers sit on the exact same baseline regardless of prefix.
-*/
 function Stat({ prefix, val, label }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-      {/* Fixed-height prefix row — hidden when no prefix so numbers stay aligned */}
       <div style={{
-        fontFamily: NM,
-        fontSize: '0.72rem',
-        fontWeight: 500,
-        color: 'rgba(255,255,255,0.38)',
-        lineHeight: LH_LABEL,
-        letterSpacing: '0.04em',
-        marginBottom: 4,
-        visibility: prefix ? 'visible' : 'hidden',
-        userSelect: 'none',
+        fontFamily: NM, fontSize: '0.72rem', fontWeight: 500,
+        color: 'rgba(255,255,255,0.38)', lineHeight: LH_LABEL, letterSpacing: '0.04em',
+        marginBottom: 4, visibility: prefix ? 'visible' : 'hidden', userSelect: 'none',
       }}>
         {prefix ?? 'up to'}
       </div>
       <WordReveal text={val} style={{
-        fontFamily: NM,
-        fontWeight: 900,
-        fontSize: 'clamp(1.9rem, 3vw, 2.6rem)',
-        lineHeight: 1,
-        letterSpacing: '-0.04em',
-        color: '#fff',
-        display: 'block',
+        fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.9rem, 3vw, 2.6rem)',
+        lineHeight: 1, letterSpacing: '-0.04em', color: '#fff', display: 'block',
       }} />
       <WordReveal text={label} style={{
-        fontFamily: NM,
-        fontSize: '0.78rem',
-        color: 'rgba(255,255,255,0.35)',
-        marginTop: 5,
-        letterSpacing: '0.02em',
-        lineHeight: LH_LABEL,
-        display: 'block',
+        fontFamily: NM, fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)',
+        marginTop: 5, letterSpacing: '0.02em', lineHeight: LH_LABEL, display: 'block',
       }} />
     </div>
   );
 }
 
-/* ── Word-by-word reveal via Intersection Observer ── */
 function WordReveal({ text, style, className }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -141,7 +117,7 @@ function WordReveal({ text, style, className }) {
   );
 }
 
-/* ── Blur-to-focus reveal (Intersection Observer) ── */
+/* Blur-to-focus reveal triggered by IntersectionObserver */
 function BlurReveal({ children, delay = 0, style = {} }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -151,7 +127,7 @@ function BlurReveal({ children, delay = 0, style = {} }) {
     if (!el) return;
     const obs = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.3, rootMargin: '0px 0px -6% 0px' });
+    }, { threshold: 0.15, rootMargin: '0px 0px -5% 0px' });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -159,8 +135,8 @@ function BlurReveal({ children, delay = 0, style = {} }) {
   return (
     <div ref={ref} style={{
       filter:     visible ? 'blur(0px)'   : 'blur(12px)',
-      opacity:    visible ? 1             : 0.2,
-      transition: `filter 0.8s ease-out ${delay}ms, opacity 0.8s ease-out ${delay}ms`,
+      opacity:    visible ? 1             : 0.15,
+      transition: `filter 0.9s ease-out ${delay}ms, opacity 0.9s ease-out ${delay}ms`,
       ...style,
     }}>
       {children}
@@ -168,14 +144,12 @@ function BlurReveal({ children, delay = 0, style = {} }) {
   );
 }
 
-/* ── Scroll-Stacked Pricing Cards ── */
+/* Pricing Section */
 function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
   const isPro = user?.role === 'pro' || user?.role === 'admin';
   return (
-    <section data-bg-color="#030308" id="pricing" style={{ padding: '112px 0' }}>
-      <div style={{ paddingLeft: 424, paddingRight: 40 }}>
-
-        {/* Section header */}
+    <section id="pricing" style={{ padding: '112px 0', background: '#000' }}>
+      <div style={{ paddingLeft: 'clamp(40px, 8vw, 424px)', paddingRight: 40 }}>
         <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.55 }}
           style={{ marginBottom: 64 }}>
@@ -188,36 +162,26 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
           </p>
         </motion.div>
 
-        {/* Card grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, maxWidth: 740 }}>
-
           {/* Free card */}
           <motion.div initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.05 }}
-            style={{ background: '#0c0c0c', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+            style={{ background: '#0c0c0c', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 20 }}>Free</div>
             <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6, color: '#fff' }}>
               $0<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.28)', letterSpacing: 0 }}>/mo</span>
             </div>
-            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>
-              Perfect for getting started
-            </p>
+            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>Perfect for getting started</p>
             <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 24 }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
-              {[
-                ['5 videos per month', true],
-                ['Credits reset on the 1st', true],
-                ['All core features', true],
-                ['Black & white backgrounds', true],
-                ['HD 1080p output', true],
-              ].map(([item]) => (
+              {['5 videos per month', 'Credits reset on the 1st', 'All core features', 'Black & white backgrounds', 'HD 1080p output'].map(item => (
                 <li key={item} style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#4ade80', flexShrink: 0 }}>✓</span>
                   {item}
                 </li>
               ))}
             </ul>
-            <button onClick={handleCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.8)', background: 'transparent', border: '1px solid rgba(255,255,255,0.16)', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', transition: 'border-color 0.2s, color 0.2s' }}>
+            <button onClick={handleCTA} style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.8)', background: 'transparent', border: '1px solid rgba(255,255,255,0.16)', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%' }}>
               {user ? "You're on Free" : 'Get Started — Free'}
             </button>
           </motion.div>
@@ -226,7 +190,6 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
           <motion.div initial={{ opacity: 0, y: 44 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.18 }}
             style={{ background: 'linear-gradient(160deg, rgba(59,130,246,0.14) 0%, rgba(14,165,233,0.07) 100%)', border: '1px solid rgba(59,130,246,0.38)', borderRadius: 20, padding: '36px 32px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-            {/* Glow accent */}
             <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)' }}>PRO</div>
@@ -235,18 +198,10 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
             <div style={{ fontFamily: NM, fontWeight: 900, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.05em', marginBottom: 6, color: '#fff' }}>
               $9.99<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.28)', letterSpacing: 0 }}>/mo</span>
             </div>
-            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>
-              For producers who want to scale
-            </p>
+            <p style={{ fontFamily: NM, fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', lineHeight: LH_BODY, marginBottom: 28 }}>For producers who want to scale</p>
             <div style={{ width: '100%', height: 1, background: 'rgba(59,130,246,0.2)', marginBottom: 24 }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
-              {[
-                'Unlimited video generation',
-                'No monthly limits ever',
-                'Up to 4K video quality',
-                'Custom photo backgrounds',
-                'Cancel anytime',
-              ].map(item => (
+              {['Unlimited video generation', 'No monthly limits ever', 'Up to 4K video quality', 'Custom photo backgrounds', 'Cancel anytime'].map(item => (
                 <li key={item} style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.35)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#38bdf8', flexShrink: 0 }}>✓</span>
                   {item}
@@ -260,49 +215,27 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
               Cancel anytime · No commitment
             </p>
           </motion.div>
-
         </div>
       </div>
     </section>
   );
 }
 
-/* ── How It Works — per-step scroll-driven rows ── */
-const GT_FONT = '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif';
-
+/* How It Works — sticky left chapter menu + scroll-driven active step */
 function HowItWorksSection() {
-  const rowRefs   = useRef([]);
-  const cardRefs  = useRef([]);
-  const [revealed, setRevealed] = useState(new Set());
+  const [activeStep, setActiveStep] = useState(0);
+  const sentinelRefs = useRef([]);
 
-  /* Single rAF scroll loop — updates all cards' scale + slide */
   useEffect(() => {
-    let raf = null;
-    const tick = () => {
-      const wh = window.innerHeight;
-      rowRefs.current.forEach((row, i) => {
-        const card = cardRefs.current[i];
-        if (!row || !card) return;
-        const rect = row.getBoundingClientRect();
-        const p = Math.min(Math.max((wh - rect.top) / 300, 0), 1);
-        card.style.transform = `scale(${0.85 + p * 0.15}) translateX(${(1 - p) * 64}px)`;
-        card.style.opacity   = String(0.5 + p * 0.5);
-      });
-      raf = null;
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    tick();
-    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
-  }, []);
-
-  /* IntersectionObserver — reveals left-side text one by one */
-  useEffect(() => {
-    const observers = rowRefs.current.map((el, i) => {
+    const observers = steps.map((_, i) => {
+      const el = sentinelRefs.current[i];
       if (!el) return null;
       const obs = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) setRevealed(prev => new Set([...prev, i]));
-      }, { threshold: 0.25 });
+        if (entry.isIntersecting) setActiveStep(i);
+      }, {
+        rootMargin: '-35% 0px -50% 0px',
+        threshold: 0,
+      });
       obs.observe(el);
       return obs;
     });
@@ -310,147 +243,133 @@ function HowItWorksSection() {
   }, []);
 
   return (
-    <section data-bg-color="#02020a" id="how-it-works" style={{ paddingTop: 96, paddingBottom: 0 }}>
+    <section id="how-it-works" style={{ background: '#000', paddingTop: 112, paddingBottom: 112 }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', paddingLeft: 'clamp(24px, 5vw, 80px)', paddingRight: 'clamp(24px, 5vw, 80px)' }}>
 
-      {/* Section heading — left edge at 424 px */}
-      <div style={{ paddingLeft: 424, paddingRight: 40, marginBottom: 72 }}>
-        <h2 style={{
-          fontFamily: GT_FONT, fontWeight: 500,
-          fontSize: '62px', lineHeight: '62px', letterSpacing: '-3.1px',
-          color: '#fff', margin: 0, width: 304,
-        }}>
-          How it<br />works
-        </h2>
-      </div>
+        {/* Section heading */}
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
+          style={{ marginBottom: 72 }}>
+          <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 14 }}>Process</div>
+          <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
+            How it works
+          </h2>
+        </motion.div>
 
-      {/* One full-viewport row per step */}
-      {steps.map((s, i) => (
-        <div
-          key={i}
-          ref={el => { rowRefs.current[i] = el; }}
-          style={{
-            minHeight: '80vh',
-            paddingLeft: 424,
-            paddingRight: 40,
-            paddingTop: 48,
-            paddingBottom: 48,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 64,
-            borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.05)',
-          }}>
+        {/* Two-column layout */}
+        <div style={{ display: 'flex', gap: 'clamp(40px, 8vw, 120px)', alignItems: 'flex-start' }}>
 
-          {/* ── Left: step info (304 px, matches heading width) ── */}
-          <div style={{
-            width: 304, flexShrink: 0,
-            opacity:    revealed.has(i) ? 1 : 0,
-            transform:  revealed.has(i) ? 'translateY(0)' : 'translateY(24px)',
-            transition: 'opacity 0.65s ease, transform 0.65s ease',
-          }}>
-            <span style={{
-              fontFamily: NM, fontWeight: 900,
-              fontSize: '0.78rem', letterSpacing: '0.1em',
-              color: '#fff', display: 'block', marginBottom: 16,
-            }}>{s.num}</span>
-            <h3 style={{
-              fontFamily: NM, fontWeight: 700,
-              fontSize: '1.3rem', lineHeight: 1.2, letterSpacing: '-0.025em',
-              color: '#fff', marginBottom: 14,
-            }}>{s.title}</h3>
-            <p style={{
-              fontFamily: NM, fontSize: '0.9rem',
-              lineHeight: 1.7, color: 'rgba(255,255,255,0.42)',
-            }}>{s.desc}</p>
+          {/* Left: sticky chapter menu */}
+          <div style={{ width: 'clamp(180px, 25vw, 280px)', flexShrink: 0, position: 'sticky', top: 120 }}>
+            {steps.map((s, i) => (
+              <div key={i}>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.13)', padding: '18px 0' }}>
+                  <div style={{
+                    fontFamily: NM, fontWeight: 600,
+                    fontSize: '0.92rem', lineHeight: 1.3,
+                    color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.3)',
+                    transition: 'color 0.4s ease',
+                    cursor: 'default',
+                  }}>
+                    {s.title}
+                  </div>
+                  <div style={{
+                    fontFamily: NM, fontSize: '0.82rem', lineHeight: 1.6,
+                    color: 'rgba(255,255,255,0.35)',
+                    maxHeight: i === activeStep ? '120px' : '0px',
+                    overflow: 'hidden',
+                    opacity: i === activeStep ? 1 : 0,
+                    marginTop: i === activeStep ? 8 : 0,
+                    transition: 'max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s ease',
+                  }}>
+                    {s.desc}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.13)' }} />
           </div>
 
-          {/* ── Right: detail card (scroll-linked scale + slide from right) ── */}
-          <div
-            ref={el => { cardRefs.current[i] = el; }}
-            style={{
-              flex: 1, minWidth: 0,
-              opacity: 0.5,
-              transform: 'scale(0.85) translateX(64px)',
-              willChange: 'transform, opacity',
-            }}>
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015))',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 24,
-              padding: '52px 48px',
-              minHeight: 300,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden',
-            }}>
+          {/* Right: scroll zones — one per step */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {steps.map((s, i) => (
+              <div
+                key={i}
+                ref={el => { sentinelRefs.current[i] = el; }}
+                style={{
+                  minHeight: '55vh',
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingTop: i === 0 ? 0 : 48,
+                  paddingBottom: 48,
+                }}>
+                {/* Step card — fades/slides in when active */}
+                <div style={{
+                  width: '100%',
+                  background: i === activeStep
+                    ? 'linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02))'
+                    : 'rgba(255,255,255,0.015)',
+                  border: i === activeStep
+                    ? '1px solid rgba(255,255,255,0.12)'
+                    : '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: 20,
+                  padding: 'clamp(28px, 5vw, 52px)',
+                  opacity: i === activeStep ? 1 : 0.35,
+                  transform: i === activeStep ? 'translateX(0)' : 'translateX(20px)',
+                  transition: 'all 0.5s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}>
+                  {/* Ghost step number */}
+                  <div style={{
+                    position: 'absolute', bottom: 16, right: 24,
+                    fontFamily: NM, fontWeight: 900,
+                    fontSize: 'clamp(4rem, 8vw, 7rem)',
+                    lineHeight: 1, letterSpacing: '-0.06em',
+                    color: 'rgba(255,255,255,0.04)',
+                    userSelect: 'none', pointerEvents: 'none',
+                  }}>{s.num}</div>
 
-              {/* Decorative corner glow */}
-              <div style={{
-                position: 'absolute', top: -60, right: -60,
-                width: 200, height: 200, borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)',
-                pointerEvents: 'none',
-              }} />
+                  <span style={{
+                    fontFamily: NM, fontWeight: 700, fontSize: '0.68rem',
+                    letterSpacing: '0.14em', textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.22)', display: 'block', marginBottom: 20,
+                  }}>Step {i + 1} of {steps.length}</span>
 
-              {/* Ghost step number watermark */}
-              <div style={{
-                position: 'absolute', bottom: 24, right: 36,
-                fontFamily: NM, fontWeight: 900,
-                fontSize: 'clamp(5rem, 9vw, 8rem)',
-                lineHeight: 1, letterSpacing: '-0.06em',
-                color: 'rgba(255,255,255,0.04)',
-                userSelect: 'none', pointerEvents: 'none',
-              }}>{s.num}</div>
+                  <h3 style={{
+                    fontFamily: NM, fontWeight: 800,
+                    fontSize: 'clamp(1.4rem, 3vw, 2rem)',
+                    lineHeight: 1.15, letterSpacing: '-0.03em',
+                    color: '#fff', marginBottom: 12,
+                  }}>{s.title}</h3>
 
-              {/* Card content */}
-              <div>
-                <span style={{
-                  fontFamily: NM, fontWeight: 900,
-                  fontSize: '0.72rem', letterSpacing: '0.12em',
-                  color: 'rgba(255,255,255,0.25)',
-                  textTransform: 'uppercase', display: 'block', marginBottom: 28,
-                }}>Step {i + 1} of {steps.length}</span>
+                  <p style={{
+                    fontFamily: NM, fontSize: '0.95rem',
+                    lineHeight: 1.75, color: 'rgba(255,255,255,0.42)',
+                    maxWidth: 400,
+                  }}>{s.longDesc || s.desc}</p>
 
-                <h3 style={{
-                  fontFamily: NM, fontWeight: 800,
-                  fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
-                  lineHeight: 1.1, letterSpacing: '-0.035em',
-                  color: '#fff', marginBottom: 16,
-                }}>{s.title}</h3>
-
-                <p style={{
-                  fontFamily: NM, fontSize: '1rem',
-                  lineHeight: 1.7, color: 'rgba(255,255,255,0.42)',
-                  maxWidth: 420,
-                }}>{s.desc}</p>
+                  {/* Progress bar */}
+                  <div style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 6 }}>
+                    {steps.map((_, j) => (
+                      <div key={j} style={{
+                        height: 3, borderRadius: 2,
+                        flex: j === i ? 3 : 1,
+                        background: j === i ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.08)',
+                        transition: 'flex 0.4s ease, background 0.4s ease',
+                      }} />
+                    ))}
+                  </div>
+                </div>
               </div>
-
-              {/* Progress bar footer */}
-              <div style={{
-                marginTop: 48, paddingTop: 24,
-                borderTop: '1px solid rgba(255,255,255,0.07)',
-                display: 'flex', alignItems: 'center', gap: 6,
-              }}>
-                {steps.map((_, j) => (
-                  <div key={j} style={{
-                    height: 3, borderRadius: 2,
-                    flex: j === i ? 3 : 1,
-                    background: j === i ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.1)',
-                    transition: 'flex 0.3s ease',
-                  }} />
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
-
         </div>
-      ))}
+      </div>
     </section>
   );
 }
 
-/* ── Multi-layer parallax (rAF-throttled) ── */
+/* Multi-layer parallax */
 function useParallax(layers) {
   useEffect(() => {
     let rafId = null;
@@ -460,7 +379,7 @@ function useParallax(layers) {
         const el = ref.current;
         if (!el) return;
         if (mode === 'bgY') {
-          el.style.backgroundPositionY = `calc(82% + ${sy * speed}px)`;
+          el.style.backgroundPositionY = `calc(50% + ${sy * speed}px)`;
         } else {
           el.style.transform = `translateY(${sy * speed}px)`;
         }
@@ -474,7 +393,26 @@ function useParallax(layers) {
   }, []);
 }
 
-/* ── Word-by-word heading reveal (Intersection Observer) ── */
+/* Stars fade-in on scroll */
+function useStarsScrollReveal(starsRef) {
+  useEffect(() => {
+    const el = starsRef.current;
+    if (!el) return;
+    let rafId = null;
+    const update = () => {
+      const sy = window.scrollY;
+      /* Start fading in after 40px of scroll, fully visible by 320px */
+      const opacity = Math.min(1, Math.max(0, (sy - 40) / 280));
+      el.style.opacity = String(opacity);
+      rafId = null;
+    };
+    const onScroll = () => { if (!rafId) rafId = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
+  }, []);
+}
+
 function HeadingReveal({ lines, style, className }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -511,30 +449,6 @@ function HeadingReveal({ lines, style, className }) {
   );
 }
 
-/* ── Scroll-driven background transitions ── */
-function useScrollBg(wrapperRef) {
-  useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    el.style.transition = 'background-color 0.6s ease';
-
-    const onScroll = () => {
-      const sections = Array.from(el.querySelectorAll('[data-bg-color]'));
-      let best = null, bestVis = 0;
-      sections.forEach(sec => {
-        const r = sec.getBoundingClientRect();
-        const vis = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
-        if (vis > bestVis) { bestVis = vis; best = sec; }
-      });
-      if (best) el.style.backgroundColor = best.dataset.bgColor;
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-}
-
 const features = [
   { icon: '🎵', title: 'Drop 100 files at once', desc: 'Drag in up to 50 audio files and 50 images in one go. TypeBeatz pairs them up automatically — no manual work needed.' },
   { icon: '🎬', title: 'Get 50 YouTube-ready videos', desc: 'Every audio + image pair becomes a full 1080p or 4K video with 320kbps audio. Perfect for YouTube type beat uploads.' },
@@ -545,23 +459,43 @@ const features = [
 ];
 
 const steps = [
-  { num: '01', title: 'Upload your files', desc: 'Drag and drop your beat MP3s and artwork PNGs — up to 100 files at a time.' },
-  { num: '02', title: 'Review your pairs', desc: 'TypeBeatz auto-pairs audio with images. Swap anything around if needed.' },
-  { num: '03', title: 'Hit Generate', desc: 'Sit back. The app processes every video in the background while you do other things.' },
-  { num: '04', title: 'Download & upload', desc: 'Your videos are ready. Download them all and upload directly to YouTube.' },
+  {
+    num: '01',
+    title: 'Upload your files',
+    desc: 'Drag and drop your beat MP3s and artwork PNGs — up to 100 files at a time.',
+    longDesc: 'Drag and drop your beat MP3s and artwork PNGs — up to 100 files at a time. TypeBeatz accepts all common audio and image formats and processes them instantly in your browser.',
+  },
+  {
+    num: '02',
+    title: 'Review your pairs',
+    desc: 'TypeBeatz auto-pairs audio with images. Swap anything around if needed.',
+    longDesc: 'TypeBeatz automatically pairs each audio file with an image. Review all pairs in a clean grid — drag to reorder or swap any combination before you generate.',
+  },
+  {
+    num: '03',
+    title: 'Hit Generate',
+    desc: 'Sit back. The app processes every video in the background while you do other things.',
+    longDesc: 'Sit back and relax. TypeBeatz processes every video pair in the background using FFmpeg directly in your browser — no uploads, no servers, no waiting in queues.',
+  },
+  {
+    num: '04',
+    title: 'Download & upload',
+    desc: 'Your videos are ready. Download them all and upload directly to YouTube.',
+    longDesc: 'Your videos are ready when you are. Download all of them in a single click, then upload straight to YouTube. Your channel fills itself.',
+  },
 ];
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const { user, login } = useAuth();
-  const wrapperRef = useRef(null);
-  const starsRef   = useRef(null);
-  const glowRef    = useRef(null);
-  useScrollBg(wrapperRef);
+  const starsRef = useRef(null);
+  const glowRef  = useRef(null);
+
   useParallax([
-    { ref: starsRef, speed: 0.3, mode: 'bgY' },
-    { ref: glowRef,  speed: 0.6, mode: 'translateY' },
+    { ref: starsRef, speed: 0.25, mode: 'bgY' },
+    { ref: glowRef,  speed: 0.5,  mode: 'translateY' },
   ]);
+  useStarsScrollReveal(starsRef);
 
   const handleCTA = () => { user ? navigate('/app') : login(); };
   const handleUpgradeCTA = () => {
@@ -571,11 +505,11 @@ export default function LandingPage() {
   };
 
   return (
-    <div ref={wrapperRef} className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000', fontFamily: NM }}>
+    <div className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000', fontFamily: NM }}>
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-4"
-        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 424, paddingRight: 424 }}>
+        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 'clamp(24px, 8vw, 424px)', paddingRight: 'clamp(24px, 8vw, 424px)' }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/login')}
@@ -598,40 +532,39 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section data-bg-color="#000000" className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden' }}>
+      <section className="relative flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden', minHeight: '100vh', background: '#000' }}>
 
-        {/* Stars background image — always visible, centered on the stats row */}
+        {/* Stars background — starts invisible, reveals on scroll, sits behind stats */}
         <div ref={starsRef} className="absolute inset-0 pointer-events-none" style={{
           zIndex: 0,
-          opacity: 1,
+          opacity: 0,
           backgroundImage: `url(${starsBg})`,
-          backgroundSize: '120%',
-          backgroundPosition: 'center 82%',
+          backgroundSize: '130%',
+          backgroundPosition: 'center 50%',
           backgroundRepeat: 'no-repeat',
+          transition: 'opacity 0.3s ease',
         }} />
 
-        {/* Subtle blue glow over stars — mid-layer parallax 0.6x */}
-        <div ref={glowRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, willChange: 'transform' }}>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 65%)' }} />
+        {/* Subtle blue glow — mid-layer */}
+        <div ref={glowRef} className="absolute pointer-events-none" style={{ zIndex: 0, willChange: 'transform', bottom: '20%', left: '50%', transform: 'translateX(-50%)' }}>
+          <div style={{ width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 65%)' }} />
         </div>
 
-        {/* Vignette — strong fade to black on all edges */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'radial-gradient(ellipse 70% 65% at 50% 50%, transparent 20%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.88) 72%, #000 90%)' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to right, #000 0%, rgba(0,0,0,0.7) 8%, transparent 22%, transparent 78%, rgba(0,0,0,0.7) 92%, #000 100%)' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.6) 8%, transparent 20%, transparent 72%, rgba(0,0,0,0.8) 88%, #000 100%)' }} />
+        {/* Vignette — fades stars toward edges */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'radial-gradient(ellipse 80% 60% at 50% 70%, transparent 20%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.9) 75%, #000 92%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to right, #000 0%, rgba(0,0,0,0.65) 10%, transparent 25%, transparent 75%, rgba(0,0,0,0.65) 90%, #000 100%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.5) 6%, transparent 18%, transparent 65%, rgba(0,0,0,0.7) 82%, #000 100%)' }} />
 
+        {/* Hero content */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="relative" style={{ zIndex: 2 }}>
 
-          {/* Badge — Neue Montreal small */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 mb-8"
             style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em' }}>
             <span>🎬</span>
             <span>The fastest way to fill your YouTube channel.</span>
           </div>
 
-          {/* Hero headline — GT Walsheim Framer Medium */}
           <h1 style={{
             fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
             fontWeight: 500,
@@ -641,11 +574,10 @@ export default function LandingPage() {
             fontStyle: 'normal',
             textTransform: 'none',
             marginBottom: '2rem',
+            color: '#ffffff',
           }}>
             Make 100<br />
-            <span style={{ color: '#ffffff' }}>
-              type beat videos
-            </span><br />
+            type beat videos<br />
             in one click
           </h1>
 
@@ -672,25 +604,25 @@ export default function LandingPage() {
           </p>
         </motion.div>
 
-        {/* Stats — blur-to-focus reveal with stagger */}
+        {/* Stats row — blur-to-focus reveal, positioned over the stars */}
         <div className="relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20" style={{ zIndex: 2 }}>
           <BlurReveal delay={0}>
             <Stat prefix="up to" val="100" label="videos per batch" />
           </BlurReveal>
-          <BlurReveal delay={150}>
+          <BlurReveal delay={200}>
             <Stat prefix="create" val="∞" label="videos" />
           </BlurReveal>
-          <BlurReveal delay={300}>
+          <BlurReveal delay={400}>
             <Stat prefix="up to" val="4K" label="video quality" />
           </BlurReveal>
-          <BlurReveal delay={450}>
+          <BlurReveal delay={600}>
             <Stat prefix={null} val="Custom" label="backgrounds" />
           </BlurReveal>
         </div>
       </section>
 
       {/* ── Features ── */}
-      <section data-bg-color="#05050a" className="py-24 px-6 max-w-6xl mx-auto">
+      <section className="py-24 px-6 max-w-6xl mx-auto" style={{ background: '#000' }}>
         <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
           <HeadingReveal lines={['Everything you need to scale', 'your YouTube channel']} />
         </h2>
@@ -716,7 +648,7 @@ export default function LandingPage() {
       <HowItWorksSection />
 
       {/* ── Drop zone preview ── */}
-      <section data-bg-color="#05050a" className="py-24 px-6 max-w-5xl mx-auto text-center">
+      <section className="py-24 px-6 max-w-5xl mx-auto text-center" style={{ background: '#000' }}>
         <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
           Clean, focused, powerful
         </h2>
@@ -743,14 +675,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <PricingSection
-        handleCTA={handleCTA}
-        handleUpgradeCTA={handleUpgradeCTA}
-        user={user}
-      />
+      <PricingSection handleCTA={handleCTA} handleUpgradeCTA={handleUpgradeCTA} user={user} />
 
       {/* ── CTA banner ── */}
-      <section data-bg-color="#02020a" className="py-24 px-6">
+      <section className="py-24 px-6" style={{ background: '#000' }}>
         <div className="max-w-3xl mx-auto text-center rounded-2xl p-12 border border-white/10"
           style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))' }}>
           <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '0.5rem', fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
@@ -771,7 +699,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="py-8 px-6 border-t border-white/[0.06]">
+      <footer className="py-8 px-6 border-t border-white/[0.06]" style={{ background: '#000' }}>
         <div className="flex flex-col md:flex-row items-center justify-between max-w-5xl mx-auto gap-4">
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.5 }} />
           <p style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.3)' }}>

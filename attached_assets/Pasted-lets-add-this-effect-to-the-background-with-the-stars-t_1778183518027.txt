@@ -1,0 +1,19 @@
+lets add this effect to the background with the stars that appears on the home page of the landing page:
+
+the background should slowly appear our of black as soon as the user starts scrolling:Add scroll-driven background color transitions between sections. Give each section a data-bg-color attribute (e.g. "#0a0a0a", "#ffffff"). On scroll, detect which section is most visible using getBoundingClientRect(). When a new section becomes dominant, transition the document.body background-color using a CSS transition of 0.6s ease. Update the text color similarly to maintain contrast.
+
+also the information "up to 100
+videosperbatch
+∞
+videos
+4K
+videoquality
+Custom background" should appear also after the background loads with this effect: Add a blur-to-focus reveal animation to section headlines. Start each headline with filter: blur(12px) and opacity: 0.2. When it enters the viewport (Intersection Observer), transition to filter: blur(0px) and opacity: 1 over 0.8s ease-out. For a continuous scroll-linked version, map scroll progress to blur: blur = Math.max(0, 12 - progress * 12) + 'px' and apply it via element.style.filter each frame.
+
+also move the background with the stars that appears on the home page behind the main title on the page, move this background with stars down so it appears behind the "up to 100 videos per batch, create infinite videos, etc.." make sure its aligned properly so it appears behind the text when we scroll and when the centre of the screen is on the section
+
+also change "type beat videos" in the title to be white as the rest of the text  also the background color should always be black  also the how it works section should have a „menu“ with „Upload your files
+“ And Review your pairs
+And „Hit Generate
+“ And „Download & upload
+“ And they should be separated by a 1px grey line. They should be grey but the „chapter“ that is currently showing should show white text. User scrolls and automatically browses the chapters by scrolling. Each chapter when active, shows the additional information such as „Drag and drop your beat MP3s and artwork PNGs — up to 100 files at a time.“ But the additional information is shown in grey and it disappears when another chapter is being viewed caused by user scrolling.   also the chapters dont need to have numbers  
