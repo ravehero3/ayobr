@@ -324,6 +324,67 @@ function StackedPricingSection({ handleCTA, handleUpgradeCTA, user }) {
   );
 }
 
+/* ── Multi-layer parallax (rAF-throttled) ── */
+function useParallax(layers) {
+  useEffect(() => {
+    let rafId = null;
+    const update = () => {
+      const sy = window.scrollY;
+      layers.forEach(({ ref, speed, mode }) => {
+        const el = ref.current;
+        if (!el) return;
+        if (mode === 'bgY') {
+          el.style.backgroundPositionY = `calc(82% + ${sy * speed}px)`;
+        } else {
+          el.style.transform = `translateY(${sy * speed}px)`;
+        }
+      });
+      rafId = null;
+    };
+    const onScroll = () => { if (!rafId) rafId = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
+  }, []);
+}
+
+/* ── Word-by-word heading reveal (Intersection Observer) ── */
+function HeadingReveal({ lines, style, className }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.2 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  let globalIdx = 0;
+  return (
+    <span ref={ref} className={className} style={style}>
+      {lines.map((line, li) => (
+        <span key={li} style={{ display: 'block' }}>
+          {line.split(' ').map((word, wi) => {
+            const idx = globalIdx++;
+            return (
+              <span key={wi} style={{
+                display: 'inline-block',
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'translateY(0)' : 'translateY(12px)',
+                transition: `opacity 0.55s ease ${idx * 65}ms, transform 0.55s ease ${idx * 65}ms`,
+                marginRight: wi < line.split(' ').length - 1 ? '0.28em' : 0,
+              }}>{word}</span>
+            );
+          })}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 /* ── Scroll-driven background transitions ── */
 function useScrollBg(wrapperRef) {
   useEffect(() => {
@@ -369,14 +430,12 @@ export default function LandingPage() {
   const { user, login } = useAuth();
   const wrapperRef = useRef(null);
   const starsRef   = useRef(null);
+  const glowRef    = useRef(null);
   useScrollBg(wrapperRef);
-
-  /* Stars always visible from page load */
-  useEffect(() => {
-    const el = starsRef.current;
-    if (!el) return;
-    el.style.opacity = '1';
-  }, []);
+  useParallax([
+    { ref: starsRef, speed: 0.3, mode: 'bgY' },
+    { ref: glowRef,  speed: 0.6, mode: 'translateY' },
+  ]);
 
   const handleCTA = () => { user ? navigate('/app') : login(); };
   const handleUpgradeCTA = () => {
@@ -425,8 +484,8 @@ export default function LandingPage() {
           backgroundRepeat: 'no-repeat',
         }} />
 
-        {/* Subtle blue glow over stars */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+        {/* Subtle blue glow over stars — mid-layer parallax 0.6x */}
+        <div ref={glowRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, willChange: 'transform' }}>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
             style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 65%)' }} />
         </div>
@@ -507,8 +566,7 @@ export default function LandingPage() {
       {/* ── Features ── */}
       <section data-bg-color="#05050a" className="py-24 px-6 max-w-6xl mx-auto">
         <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
-          <WordReveal text="Everything you need to scale" /><br />
-          <WordReveal text="your YouTube channel" style={{ display: 'inline' }} />
+          <HeadingReveal lines={['Everything you need to scale', 'your YouTube channel']} />
         </h2>
         <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', textAlign: 'center', maxWidth: '36rem', margin: '0 auto 4rem' }}>
           Built for type beat producers who want to upload more without spending hours editing.
