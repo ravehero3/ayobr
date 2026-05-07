@@ -221,181 +221,205 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
   );
 }
 
-/* How It Works — sticky left chapter menu + scroll-driven active step, clickable */
+/* How It Works — compact scroll-pinned section */
+const HOW_SCROLL_PER_STEP = 200; /* px of scroll per step */
+
 function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
-  const [prevStep, setPrevStep]     = useState(null);
   const [animKey, setAnimKey]       = useState(0);
-  const sentinelRefs  = useRef([]);
-  const clickLockRef  = useRef(false);
+  const wrapperRef   = useRef(null);
+  const activeRef    = useRef(0);
+  const clickLockRef = useRef(false);
 
-  const goToStep = (i) => {
-    if (i === activeStep) return;
-    setPrevStep(activeStep);
+  const goToStep = useCallback((i) => {
+    if (i === activeRef.current) return;
+    activeRef.current = i;
     setActiveStep(i);
     setAnimKey(k => k + 1);
-    /* suppress scroll-driven updates for 1 s after a click */
+    /* temporarily ignore scroll updates so click doesn't get overridden */
     clickLockRef.current = true;
-    setTimeout(() => { clickLockRef.current = false; }, 1000);
-    /* scroll sentinel into view so scroll position stays consistent */
-    sentinelRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
+    setTimeout(() => { clickLockRef.current = false; }, 600);
+  }, []);
 
+  /* Scroll-driven step advancement */
   useEffect(() => {
-    const observers = steps.map((_, i) => {
-      const el = sentinelRefs.current[i];
-      if (!el) return null;
-      const obs = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting && !clickLockRef.current) {
-          setPrevStep(p => p !== i ? activeStep : p);
-          setActiveStep(i);
-          setAnimKey(k => k + 1);
-        }
-      }, { rootMargin: '-35% 0px -50% 0px', threshold: 0 });
-      obs.observe(el);
-      return obs;
-    });
-    return () => observers.forEach(o => o?.disconnect());
+    let rafId = null;
+    const update = () => {
+      if (clickLockRef.current) { rafId = null; return; }
+      const el = wrapperRef.current;
+      if (!el) { rafId = null; return; }
+      const rect = el.getBoundingClientRect();
+      /* scrolled = how many px we've scrolled past the top of the wrapper */
+      const scrolled = Math.max(0, -rect.top);
+      const totalScroll = el.offsetHeight - window.innerHeight;
+      if (totalScroll <= 0) { rafId = null; return; }
+      const progress = Math.min(scrolled / totalScroll, 1);
+      const newStep  = Math.min(
+        Math.floor(progress * steps.length),
+        steps.length - 1
+      );
+      if (newStep !== activeRef.current) {
+        activeRef.current = newStep;
+        setActiveStep(newStep);
+        setAnimKey(k => k + 1);
+      }
+      rafId = null;
+    };
+    const onScroll = () => { if (!rafId) rafId = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
   }, []);
 
   const s = steps[activeStep];
 
+  /* Total wrapper height = viewport + scroll distance for all steps */
+  const wrapperH = `calc(100vh + ${steps.length * HOW_SCROLL_PER_STEP}px)`;
+
+  /* Screenshot placeholder icons per step */
+  const stepIcons = ['🎵', '🔀', '⚙️', '📥'];
+
   return (
-    <section id="how-it-works" style={{ background: '#000', paddingTop: 112, paddingBottom: 112 }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', paddingLeft: 'clamp(24px, 5vw, 80px)', paddingRight: 'clamp(24px, 5vw, 80px)' }}>
+    <div ref={wrapperRef} id="how-it-works" style={{ height: wrapperH, background: '#000' }}>
+      {/* Sticky inner panel */}
+      <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+        <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto', paddingLeft: 'clamp(24px, 5vw, 80px)', paddingRight: 'clamp(24px, 5vw, 80px)' }}>
 
-        {/* Section heading */}
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
-          style={{ marginBottom: 72 }}>
-          <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 14 }}>Process</div>
-          <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
-            How it works
-          </h2>
-        </motion.div>
+          {/* Section label + heading row */}
+          <div style={{ marginBottom: 40 }}>
+            <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 10 }}>Process</div>
+            <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.6rem, 3.5vw, 2.6rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
+              How it works
+            </h2>
+          </div>
 
-        {/* Two-column layout */}
-        <div style={{ display: 'flex', gap: 'clamp(40px, 8vw, 100px)', alignItems: 'flex-start' }}>
+          {/* Two-column: menu left, screenshot right */}
+          <div style={{ display: 'flex', gap: 'clamp(32px, 6vw, 80px)', alignItems: 'stretch' }}>
 
-          {/* Left: sticky chapter menu */}
-          <div style={{ width: 'clamp(180px, 25vw, 260px)', flexShrink: 0, position: 'sticky', top: 120 }}>
-            {steps.map((step, i) => (
-              <div key={i}>
+            {/* Left: chapter menu */}
+            <div style={{ width: 'clamp(160px, 22vw, 240px)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+              {steps.map((step, i) => (
                 <button
+                  key={i}
                   onClick={() => goToStep(i)}
                   style={{
                     width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                    borderTop: '1px solid rgba(255,255,255,0.13)',
-                    padding: '18px 0', cursor: 'pointer',
+                    borderTop: '1px solid rgba(255,255,255,0.11)',
+                    padding: '14px 0', cursor: 'pointer', display: 'block',
                   }}>
                   <div style={{
-                    fontFamily: NM, fontWeight: 600, fontSize: '0.92rem', lineHeight: 1.3,
-                    color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.3)',
-                    transition: 'color 0.35s ease',
+                    fontFamily: NM, fontWeight: 600, fontSize: '0.88rem', lineHeight: 1.35,
+                    color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.28)',
+                    transition: 'color 0.3s ease',
                   }}>
                     {step.title}
                   </div>
+                  {/* Description slides open only for active chapter */}
                   <div style={{
-                    fontFamily: NM, fontSize: '0.82rem', lineHeight: 1.6,
-                    color: 'rgba(255,255,255,0.35)',
-                    maxHeight: i === activeStep ? '120px' : '0px',
+                    fontFamily: NM, fontSize: '0.78rem', lineHeight: 1.6,
+                    color: 'rgba(255,255,255,0.38)',
+                    maxHeight: i === activeStep ? '80px' : '0px',
                     overflow: 'hidden',
                     opacity: i === activeStep ? 1 : 0,
-                    marginTop: i === activeStep ? 8 : 0,
-                    transition: 'max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s ease',
+                    marginTop: i === activeStep ? 6 : 0,
+                    transition: 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease',
                   }}>
                     {step.desc}
                   </div>
                 </button>
+              ))}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.11)' }} />
+
+              {/* Step indicator dots */}
+              <div style={{ display: 'flex', gap: 5, marginTop: 20 }}>
+                {steps.map((_, j) => (
+                  <button
+                    key={j}
+                    onClick={() => goToStep(j)}
+                    style={{
+                      height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
+                      flex: j === activeStep ? 3 : 1,
+                      background: j === activeStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.1)',
+                      transition: 'flex 0.4s ease, background 0.35s ease',
+                    }}
+                  />
+                ))}
               </div>
-            ))}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.13)' }} />
-          </div>
+            </div>
 
-          {/* Right: single active card + invisible scroll sentinels */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-
-            {/* Active card — re-animates on step change */}
-            <div style={{ position: 'sticky', top: 120 }}>
+            {/* Right: screenshot panel */}
+            <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
               <div
                 key={animKey}
                 style={{
-                  width: '100%',
-                  background: 'linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02))',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 20,
-                  padding: 'clamp(28px, 5vw, 52px)',
-                  position: 'relative',
+                  width: '100%', height: 'clamp(300px, 42vh, 480px)',
+                  background: 'linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 16,
                   overflow: 'hidden',
-                  animation: 'stepCardIn 0.42s ease forwards',
+                  position: 'relative',
+                  animation: 'howCardIn 0.38s ease forwards',
                 }}>
                 <style>{`
-                  @keyframes stepCardIn {
-                    from { opacity: 0; transform: translateX(18px); }
+                  @keyframes howCardIn {
+                    from { opacity: 0; transform: translateX(14px); }
                     to   { opacity: 1; transform: translateX(0); }
                   }
                 `}</style>
 
-                {/* Ghost step number */}
+                {/* Faux browser chrome */}
                 <div style={{
-                  position: 'absolute', bottom: 16, right: 24,
-                  fontFamily: NM, fontWeight: 900,
-                  fontSize: 'clamp(4rem, 8vw, 7rem)',
-                  lineHeight: 1, letterSpacing: '-0.06em',
-                  color: 'rgba(255,255,255,0.04)',
-                  userSelect: 'none', pointerEvents: 'none',
-                }}>{s.num}</div>
-
-                <span style={{
-                  fontFamily: NM, fontWeight: 700, fontSize: '0.68rem',
-                  letterSpacing: '0.14em', textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.22)', display: 'block', marginBottom: 20,
-                }}>Step {activeStep + 1} of {steps.length}</span>
-
-                <h3 style={{
-                  fontFamily: NM, fontWeight: 800,
-                  fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                  lineHeight: 1.15, letterSpacing: '-0.03em',
-                  color: '#fff', marginBottom: 12,
-                }}>{s.title}</h3>
-
-                <p style={{
-                  fontFamily: NM, fontSize: '0.95rem',
-                  lineHeight: 1.75, color: 'rgba(255,255,255,0.42)',
-                  maxWidth: 420,
-                }}>{s.longDesc || s.desc}</p>
-
-                {/* Progress bar / step dots */}
-                <div style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 6 }}>
-                  {steps.map((_, j) => (
-                    <button
-                      key={j}
-                      onClick={() => goToStep(j)}
-                      style={{
-                        height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
-                        flex: j === activeStep ? 3 : 1,
-                        background: j === activeStep ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.1)',
-                        transition: 'flex 0.4s ease, background 0.4s ease',
-                      }}
-                    />
+                  height: 36, borderBottom: '1px solid rgba(255,255,255,0.07)',
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px',
+                  background: 'rgba(255,255,255,0.025)',
+                }}>
+                  {['#ff5f56','#ffbd2e','#27c93f'].map((c, ci) => (
+                    <div key={ci} style={{ width: 9, height: 9, borderRadius: '50%', background: c, opacity: 0.6 }} />
                   ))}
+                  <div style={{
+                    flex: 1, height: 18, borderRadius: 4,
+                    background: 'rgba(255,255,255,0.05)',
+                    marginLeft: 8,
+                  }} />
+                </div>
+
+                {/* Screenshot content area */}
+                <div style={{
+                  height: 'calc(100% - 36px)',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  gap: 14, padding: 32,
+                }}>
+                  <div style={{
+                    fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+                    lineHeight: 1,
+                    filter: 'grayscale(0.3)',
+                  }}>
+                    {stepIcons[activeStep]}
+                  </div>
+                  <div style={{
+                    fontFamily: NM, fontWeight: 700,
+                    fontSize: '0.72rem', letterSpacing: '0.1em',
+                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)',
+                  }}>
+                    Step {activeStep + 1} — {s.title}
+                  </div>
+                  {/* Ghost number watermark */}
+                  <div style={{
+                    position: 'absolute', bottom: 12, right: 20,
+                    fontFamily: NM, fontWeight: 900,
+                    fontSize: 'clamp(5rem, 10vw, 9rem)',
+                    lineHeight: 1, letterSpacing: '-0.06em',
+                    color: 'rgba(255,255,255,0.03)',
+                    userSelect: 'none', pointerEvents: 'none',
+                  }}>{s.num}</div>
                 </div>
               </div>
-            </div>
-
-            {/* Invisible scroll sentinels — one per step, drive activeStep on scroll */}
-            <div style={{ position: 'relative', marginTop: 40 }}>
-              {steps.map((_, i) => (
-                <div
-                  key={i}
-                  ref={el => { sentinelRefs.current[i] = el; }}
-                  style={{ height: '55vh', pointerEvents: 'none' }}
-                />
-              ))}
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
