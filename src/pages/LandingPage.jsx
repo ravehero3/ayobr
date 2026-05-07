@@ -141,6 +141,33 @@ function WordReveal({ text, style, className }) {
   );
 }
 
+/* ── Blur-to-focus reveal (Intersection Observer) ── */
+function BlurReveal({ children, delay = 0, style = {} }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} style={{
+      filter:     visible ? 'blur(0px)'   : 'blur(12px)',
+      opacity:    visible ? 1             : 0.2,
+      transition: `filter 0.8s ease-out ${delay}ms, opacity 0.8s ease-out ${delay}ms`,
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
 /* ── Scroll-Stacked Pricing Cards ── */
 function StackedPricingSection({ handleCTA, handleUpgradeCTA, user }) {
   const outerRef = useRef(null);
@@ -341,7 +368,20 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const wrapperRef = useRef(null);
+  const starsRef   = useRef(null);
   useScrollBg(wrapperRef);
+
+  /* Stars fade-in: opacity 0 at scroll=0, fully visible at scroll=500px */
+  useEffect(() => {
+    const el = starsRef.current;
+    if (!el) return;
+    el.style.opacity = '0';
+    const onScroll = () => {
+      el.style.opacity = String(Math.min(1, window.scrollY / 500));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleCTA = () => { user ? navigate('/app') : login(); };
   const handleUpgradeCTA = () => {
@@ -380,9 +420,10 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section data-bg-color="#000000" className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden' }}>
 
-        {/* Stars background image */}
-        <div className="absolute inset-0 pointer-events-none" style={{
+        {/* Stars background image — fades in from black as user scrolls */}
+        <div ref={starsRef} className="absolute inset-0 pointer-events-none" style={{
           zIndex: 0,
+          opacity: 0,
           backgroundImage: `url(${starsBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -451,14 +492,21 @@ export default function LandingPage() {
           </p>
         </motion.div>
 
-        {/* Stats — numbers baseline-aligned via hidden prefix spacer */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20" style={{ zIndex: 2 }}>
-          <Stat prefix="up to" val="100" label="videos per batch" />
-          <Stat prefix="create" val="∞" label="videos" />
-          <Stat prefix="up to" val="4K"  label="video quality" />
-          <Stat prefix={null}  val="Custom" label="backgrounds" />
-        </motion.div>
+        {/* Stats — blur-to-focus reveal with stagger */}
+        <div className="relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20" style={{ zIndex: 2 }}>
+          <BlurReveal delay={0}>
+            <Stat prefix="up to" val="100" label="videos per batch" />
+          </BlurReveal>
+          <BlurReveal delay={150}>
+            <Stat prefix="create" val="∞" label="videos" />
+          </BlurReveal>
+          <BlurReveal delay={300}>
+            <Stat prefix="up to" val="4K" label="video quality" />
+          </BlurReveal>
+          <BlurReveal delay={450}>
+            <Stat prefix={null} val="Custom" label="backgrounds" />
+          </BlurReveal>
+        </div>
       </section>
 
       {/* ── Features ── */}
