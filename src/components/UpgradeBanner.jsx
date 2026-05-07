@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function UpgradeBanner({ creditsLeft, onUpgrade, checkoutLoading }) {
+export default function UpgradeBanner({ user, onUpgradePro, onUpgradeUnlimited, checkoutLoading }) {
   const [dismissed, setDismissed] = useState(false);
 
-  if (dismissed || creditsLeft === null || creditsLeft === undefined) return null;
-  if (creditsLeft > 2) return null;
+  const role       = user?.role;
+  const creditsLeft = user?.credits?.credits_remaining;
 
-  const isExhausted = creditsLeft === 0;
+  // PRO users who hit their 31 limit
+  const proExhausted = role === 'pro' && creditsLeft === 0;
+  const proLow       = role === 'pro' && creditsLeft !== undefined && creditsLeft > 0 && creditsLeft <= 3;
+
+  // Free users running low or out
+  const freeExhausted = (!role || role === 'free') && creditsLeft === 0;
+  const freeLow       = (!role || role === 'free') && creditsLeft !== undefined && creditsLeft > 0 && creditsLeft <= 2;
+
+  const show = !dismissed && (proExhausted || proLow || freeExhausted || freeLow);
+  if (!show) return null;
+
+  const isExhausted = proExhausted || freeExhausted;
 
   return (
     <AnimatePresence>
@@ -25,24 +36,26 @@ export default function UpgradeBanner({ creditsLeft, onUpgrade, checkoutLoading 
         <div className="flex items-center gap-2 text-sm">
           <span>{isExhausted ? '🚫' : '⚠️'}</span>
           <span className={isExhausted ? 'text-red-300' : 'text-yellow-300'}>
-            {isExhausted
-              ? "You've used all 5 free credits this month. Upgrade to PRO for unlimited videos."
-              : `Only ${creditsLeft} free credit${creditsLeft !== 1 ? 's' : ''} left this month.`}
+            {proExhausted && 'You have used all 31 PRO videos this month. Go Unlimited for no limits.'}
+            {proLow && `Only ${creditsLeft} PRO video${creditsLeft !== 1 ? 's' : ''} left this month.`}
+            {freeExhausted && "You've used all 5 free credits this month. Upgrade to PRO for 31 videos/month."}
+            {freeLow && `Only ${creditsLeft} free credit${creditsLeft !== 1 ? 's' : ''} left this month.`}
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onUpgrade}
-            disabled={checkoutLoading}
-            className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
-            {checkoutLoading ? (
-              <>
-                <span className="inline-block w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />
-                Opening...
-              </>
-            ) : 'Go PRO — $9.99/mo'}
-          </button>
+        <div className="flex items-center gap-2">
+          {proExhausted || proLow ? (
+            <button onClick={onUpgradeUnlimited} disabled={checkoutLoading}
+              className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
+              style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', color: '#000' }}>
+              {checkoutLoading ? <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />Opening...</> : '🌟 Go Unlimited — $18.99/mo'}
+            </button>
+          ) : (
+            <button onClick={onUpgradePro} disabled={checkoutLoading}
+              className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
+              {checkoutLoading ? <><span className="inline-block w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />Opening...</> : 'Go PRO — $9.99/mo'}
+            </button>
+          )}
           {!isExhausted && (
             <button onClick={() => setDismissed(true)} className="text-gray-500 hover:text-white text-xs transition-colors">
               Dismiss

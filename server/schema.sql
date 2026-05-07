@@ -76,10 +76,29 @@ CREATE TABLE IF NOT EXISTS feature_flags (
 
 -- Insert default feature flags
 INSERT INTO feature_flags (feature_key, plan, enabled, description) VALUES
-  ('video_generation', 'free', TRUE, 'Allow free users to generate videos'),
-  ('video_generation', 'pro', TRUE, 'Allow pro users to generate videos'),
-  ('batch_download', 'free', TRUE, 'Allow free users to download all videos at once'),
-  ('batch_download', 'pro', TRUE, 'Allow pro users to download all videos at once'),
-  ('high_quality', 'free', FALSE, 'High quality video output (1080p AAC 320kbps)'),
-  ('high_quality', 'pro', TRUE, 'High quality video output (1080p AAC 320kbps)')
+  ('video_generation', 'free',      TRUE,  'Allow free users to generate videos'),
+  ('video_generation', 'pro',       TRUE,  'Allow pro users to generate videos'),
+  ('video_generation', 'unlimited', TRUE,  'Allow unlimited users to generate videos'),
+  ('batch_download',   'free',      TRUE,  'Allow free users to download all videos at once'),
+  ('batch_download',   'pro',       TRUE,  'Allow pro users to download all videos at once'),
+  ('batch_download',   'unlimited', TRUE,  'Allow unlimited users to download all videos at once'),
+  ('high_quality',     'free',      FALSE, 'High quality video output (1080p AAC 320kbps)'),
+  ('high_quality',     'pro',       TRUE,  'High quality video output (1080p AAC 320kbps)'),
+  ('high_quality',     'unlimited', TRUE,  'High quality video output (1080p AAC 320kbps)'),
+  ('ultra_quality',    'free',      FALSE, '4K video output'),
+  ('ultra_quality',    'pro',       FALSE, '4K video output (PRO is 1080p only)'),
+  ('ultra_quality',    'unlimited', TRUE,  '4K video output for unlimited users')
 ON CONFLICT (feature_key, plan) DO NOTHING;
+
+-- Safely add unlimited rows for existing databases
+DO $$ BEGIN
+  INSERT INTO feature_flags (feature_key, plan, enabled, description) VALUES
+    ('video_generation', 'unlimited', TRUE,  'Allow unlimited users to generate videos'),
+    ('batch_download',   'unlimited', TRUE,  'Allow unlimited users to download all videos at once'),
+    ('high_quality',     'unlimited', TRUE,  'High quality video output for unlimited users'),
+    ('ultra_quality',    'free',      FALSE, '4K video output'),
+    ('ultra_quality',    'pro',       FALSE, '4K video output (PRO is 1080p only)'),
+    ('ultra_quality',    'unlimited', TRUE,  '4K video output for unlimited users')
+  ON CONFLICT (feature_key, plan) DO NOTHING;
+EXCEPTION WHEN others THEN NULL;
+END $$;

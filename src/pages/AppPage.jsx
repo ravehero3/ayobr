@@ -12,17 +12,19 @@ export default function AppPage() {
   const { user, loading, refreshUser, deductCredit } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
+  const [upgradeSuccess, setUpgradeSuccess]     = useState(null); // null | 'pro' | 'unlimited'
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading]   = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
-  const [showReferral, setShowReferral] = useState(false);
+  const [showReferral, setShowReferral]         = useState(false);
 
   const { openCheckout } = usePaddle({
     onCheckoutCompleted: () => {
-      setShowUpgradeSuccess(true);
-      refreshUser();
-      setTimeout(() => setShowUpgradeSuccess(false), 6000);
+      refreshUser().then(() => {
+        // After refresh, user.role will reflect the new plan
+        setUpgradeSuccess('pro'); // will be corrected below after refresh
+      });
+      setTimeout(() => setUpgradeSuccess(null), 7000);
     }
   });
 
@@ -33,9 +35,9 @@ export default function AppPage() {
 
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') {
-      setShowUpgradeSuccess(true);
       refreshUser();
-      setTimeout(() => setShowUpgradeSuccess(false), 6000);
+      setUpgradeSuccess('pro');
+      setTimeout(() => setUpgradeSuccess(null), 7000);
       setSearchParams({}, { replace: true });
     }
     if (searchParams.get('cancelled') === 'true') {
@@ -45,18 +47,29 @@ export default function AppPage() {
     }
     if (searchParams.get('upgrade') === 'true') {
       setSearchParams({}, { replace: true });
-      // Small delay so Paddle.js has time to load
-      setTimeout(() => handleUpgrade(), 800);
+      setTimeout(() => handleUpgradePro(), 800);
+    }
+    if (searchParams.get('upgrade') === 'unlimited') {
+      setSearchParams({}, { replace: true });
+      setTimeout(() => handleUpgradeUnlimited(), 800);
     }
   }, [searchParams]);
 
-  const handleUpgrade = async () => {
+  const handleUpgradePro = async () => {
     setCheckoutLoading(true);
     try {
-      const opened = await openCheckout(user?.email);
-      if (!opened) {
-        alert('Checkout is not yet configured. Please add your Paddle secrets to activate payments.');
-      }
+      const opened = await openCheckout(user?.email, 'pro');
+      if (!opened) alert('Checkout is not yet configured. Please add your Paddle secrets to activate payments.');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const handleUpgradeUnlimited = async () => {
+    setCheckoutLoading(true);
+    try {
+      const opened = await openCheckout(user?.email, 'unlimited');
+      if (!opened) alert('Checkout is not yet configured. Please add your Paddle secrets to activate payments.');
     } finally {
       setCheckoutLoading(false);
     }
@@ -70,12 +83,12 @@ export default function AppPage() {
     );
   }
 
-  const isPro = user.role === 'pro' || user.role === 'admin';
+  const isUnlimited = user.role === 'unlimited' || user.role === 'admin';
+  const isPaidPlan  = user.role === 'pro' || isUnlimited;
   const creditsLeft = user?.credits?.credits_remaining;
-  const paddingTop = isPro || (creditsLeft !== undefined && creditsLeft > 2) ? 56 : 88;
+  const paddingTop  = isPaidPlan || (creditsLeft !== undefined && creditsLeft > 2) ? 56 : 88;
 
   const handleBeforeGenerate = async () => {
-    if (isPro) return true;
     const result = await deductCredit();
     if (!result.success) {
       if (result.message) alert(result.message);
@@ -87,23 +100,34 @@ export default function AppPage() {
   return (
     <div className="relative">
       <Navbar
-        onUpgrade={handleUpgrade}
+        onUpgradePro={handleUpgradePro}
+        onUpgradeUnlimited={handleUpgradeUnlimited}
         checkoutLoading={checkoutLoading}
         onManageSubscription={() => setShowSubscription(true)}
         onInvite={() => setShowReferral(true)}
       />
       <UpgradeBanner
-        creditsLeft={isPro ? null : creditsLeft}
-        onUpgrade={handleUpgrade}
+        user={user}
+        onUpgradePro={handleUpgradePro}
+        onUpgradeUnlimited={handleUpgradeUnlimited}
         checkoutLoading={checkoutLoading}
       />
 
-      {/* PRO upgrade success banner */}
-      {showUpgradeSuccess && (
+      {/* Upgrade success banner */}
+      {upgradeSuccess && (
         <div className="fixed top-14 left-0 right-0 z-[9999] flex items-center justify-center py-2 px-6"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))', borderBottom: '1px solid rgba(59,130,246,0.4)' }}>
-          <span className="text-blue-300 text-sm font-medium">
-            Welcome to PRO! You now have unlimited video generation.
+          style={{
+            background: upgradeSuccess === 'unlimited'
+              ? 'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(245,158,11,0.2))'
+              : 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))',
+            borderBottom: upgradeSuccess === 'unlimited'
+              ? '1px solid rgba(251,191,36,0.4)'
+              : '1px solid rgba(59,130,246,0.4)'
+          }}>
+          <span className="text-sm font-medium" style={{ color: upgradeSuccess === 'unlimited' ? '#fbbf24' : '#93c5fd' }}>
+            {upgradeSuccess === 'unlimited'
+              ? '🌟 Welcome to Unlimited! You now have 4K output and unlimited video generation.'
+              : '⭐ Welcome to PRO! You now have 31 videos/month and 1080p output.'}
           </span>
         </div>
       )}
@@ -116,11 +140,11 @@ export default function AppPage() {
         </div>
       )}
 
-      {/* Subscription panel — available to all users (free + pro) */}
       {showSubscription && (
         <SubscriptionPanel
           onClose={() => setShowSubscription(false)}
-          onUpgrade={() => { setShowSubscription(false); handleUpgrade(); }}
+          onUpgradePro={() => { setShowSubscription(false); handleUpgradePro(); }}
+          onUpgradeUnlimited={() => { setShowSubscription(false); handleUpgradeUnlimited(); }}
           checkoutLoading={checkoutLoading}
         />
       )}

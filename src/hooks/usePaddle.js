@@ -1,25 +1,22 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-let paddleInitialized = false;
-let cachedPriceId = null;
-let initPromise = null;
+let paddleInitialized    = false;
+let cachedPriceId        = null;
+let cachedUnlimitedPriceId = null;
+let initPromise          = null;
 
-async function initializePaddle(onCheckoutCompleted) {
+async function initializePaddle() {
   if (paddleInitialized) return true;
   if (typeof window.Paddle === 'undefined') return false;
-
-  // Deduplicate concurrent init calls
   if (initPromise) return initPromise;
 
   initPromise = fetch('/api/paddle/config')
     .then(r => r.ok ? r.json() : null)
     .then(config => {
-      if (!config?.clientToken) {
-        initPromise = null;
-        return false;
-      }
+      if (!config?.clientToken) { initPromise = null; return false; }
 
-      cachedPriceId = config.priceId;
+      cachedPriceId          = config.priceId;
+      cachedUnlimitedPriceId = config.unlimitedPriceId;
 
       if (config.environment === 'sandbox') {
         window.Paddle.Environment.set('sandbox');
@@ -40,10 +37,7 @@ async function initializePaddle(onCheckoutCompleted) {
       initPromise = null;
       return true;
     })
-    .catch(() => {
-      initPromise = null;
-      return false;
-    });
+    .catch(() => { initPromise = null; return false; });
 
   return initPromise;
 }
@@ -52,7 +46,6 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
   const callbackRef = useRef(onCheckoutCompleted);
   callbackRef.current = onCheckoutCompleted;
 
-  // Register global callback so Paddle's eventCallback can reach it
   useEffect(() => {
     window.__paddleCheckoutCompleted = (data) => {
       if (callbackRef.current) callbackRef.current(data);
@@ -60,12 +53,10 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
     return () => { window.__paddleCheckoutCompleted = null; };
   }, []);
 
-  // Eagerly initialize Paddle.js on mount
-  useEffect(() => {
-    initializePaddle(onCheckoutCompleted);
-  }, []);
+  useEffect(() => { initializePaddle(); }, []);
 
-  const openCheckout = useCallback(async (userEmail) => {
+  /* plan: 'pro' | 'unlimited' */
+  const openCheckout = useCallback(async (userEmail, plan = 'pro') => {
     if (typeof window.Paddle === 'undefined') {
       console.warn('Paddle.js not loaded yet');
       return false;
@@ -77,9 +68,9 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
       return false;
     }
 
-    const priceId = cachedPriceId;
+    const priceId = plan === 'unlimited' ? cachedUnlimitedPriceId : cachedPriceId;
     if (!priceId) {
-      console.warn('No Paddle priceId configured — check PADDLE_PRO_PRICE_ID secret');
+      console.warn(`No Paddle priceId configured for plan "${plan}"`);
       return false;
     }
 

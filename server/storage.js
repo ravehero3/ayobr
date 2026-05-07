@@ -127,17 +127,40 @@ async function upsertSubscription(data) {
 }
 
 async function resetMonthlyCredits() {
-  const result = await pool.query(
+  // Free users → 5 credits
+  const freeResult = await pool.query(
     `UPDATE credits
      SET credits_remaining = 5,
          credits_used_this_month = 0,
          last_reset_at = NOW(),
          updated_at = NOW()
-     WHERE user_id IN (
-       SELECT id FROM users WHERE role = 'free'
-     )`
+     WHERE user_id IN (SELECT id FROM users WHERE role = 'free')`
   );
-  return result.rowCount;
+  // PRO users → 31 credits
+  const proResult = await pool.query(
+    `UPDATE credits
+     SET credits_remaining = 31,
+         credits_used_this_month = 0,
+         last_reset_at = NOW(),
+         updated_at = NOW()
+     WHERE user_id IN (SELECT id FROM users WHERE role = 'pro')`
+  );
+  return freeResult.rowCount + proResult.rowCount;
+}
+
+/* Set credits when a user's role changes (e.g. on subscription activation) */
+async function setCreditsForRole(userId, role) {
+  const limit = role === 'pro' ? 31 : role === 'free' ? 5 : null;
+  if (limit === null) return; // unlimited/admin don't use credits
+  await pool.query(
+    `INSERT INTO credits (user_id, credits_remaining, credits_used_this_month)
+     VALUES ($1, $2, 0)
+     ON CONFLICT (user_id) DO UPDATE SET
+       credits_remaining = GREATEST(EXCLUDED.credits_remaining, 0),
+       credits_used_this_month = 0,
+       updated_at = NOW()`,
+    [userId, limit]
+  );
 }
 
 function generateCode() {
@@ -229,6 +252,6 @@ module.exports = {
   setUserRole, agreeToRights,
   getFeatureFlags, updateFeatureFlag,
   getSubscription, upsertSubscription,
-  resetMonthlyCredits,
+  resetMonthlyCredits, setCreditsForRole,
   ensureReferralCode, applyReferralCode, getReferralStats
 };

@@ -19,7 +19,7 @@ router.patch('/users/:userId/role', isAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
     const { role } = req.body;
-    if (!['free', 'pro', 'admin'].includes(role)) {
+    if (!['free', 'pro', 'unlimited', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
     const user = await setUserRole(userId, role);

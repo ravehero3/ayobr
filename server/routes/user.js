@@ -3,6 +3,8 @@ const router = express.Router();
 const { isAuthenticated } = require('../auth');
 const { getUserById, getUserCredits, deductCredit, agreeToRights, getFeatureFlags, applyReferralCode, getReferralStats } = require('../storage');
 
+const UNLIMITED_ROLES = ['unlimited', 'admin'];
+
 // Get current user profile + credits
 router.get('/me', isAuthenticated, async (req, res) => {
   try {
@@ -37,14 +39,18 @@ router.post('/deduct-credit', isAuthenticated, async (req, res) => {
     const userId = req.user.id;
     const user = await getUserById(userId);
 
-    // PRO and admin users skip credit check
-    if (user.role === 'pro' || user.role === 'admin') {
-      return res.json({ success: true, creditsRemaining: null, isPro: true });
+    // Unlimited and admin bypass all credit checks
+    if (UNLIMITED_ROLES.includes(user.role)) {
+      return res.json({ success: true, creditsRemaining: null, isUnlimited: true });
     }
 
+    // Free and PRO users go through the credits table
     const result = await deductCredit(userId);
     if (!result) {
-      return res.status(402).json({ message: 'No credits remaining. Upgrade to PRO for unlimited videos.' });
+      const msg = user.role === 'pro'
+        ? 'You have used all 31 videos this month. Upgrade to Unlimited for unlimited video generation.'
+        : 'No credits remaining. Upgrade to PRO for 31 videos/month, or Unlimited for no limits.';
+      return res.status(402).json({ message: msg });
     }
     res.json({ success: true, creditsRemaining: result.credits_remaining });
   } catch (err) {
@@ -59,7 +65,9 @@ router.get('/features', isAuthenticated, async (req, res) => {
     const userId = req.user.id;
     const user = await getUserById(userId);
     const flags = await getFeatureFlags();
-    const plan = user?.role === 'pro' || user?.role === 'admin' ? 'pro' : 'free';
+    let plan = 'free';
+    if (user?.role === 'unlimited' || user?.role === 'admin') plan = 'unlimited';
+    else if (user?.role === 'pro') plan = 'pro';
     const userFlags = flags
       .filter(f => f.plan === plan || f.plan === 'all')
       .reduce((acc, f) => ({ ...acc, [f.feature_key]: f.enabled }), {});

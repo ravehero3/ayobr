@@ -613,9 +613,14 @@ export default function LandingPage() {
 
   const handleCTA = () => { user ? navigate('/app') : login(); };
   const handleUpgradeCTA = () => {
-    if (!user) login();
-    else if (user.role === 'pro' || user.role === 'admin') navigate('/app');
+    if (!user) { login(); return; }
+    if (user.role === 'pro' || user.role === 'unlimited' || user.role === 'admin') navigate('/app');
     else navigate('/app?upgrade=true');
+  };
+  const handleUnlimitedCTA = () => {
+    if (!user) { login(); return; }
+    if (user.role === 'unlimited' || user.role === 'admin') navigate('/app');
+    else navigate('/app?upgrade=unlimited');
   };
 
   return (

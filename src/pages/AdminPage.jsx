@@ -7,9 +7,10 @@ const API = '/api/admin';
 
 function Badge({ role }) {
   const styles = {
-    admin: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-    pro: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    free: 'bg-gray-500/20 text-gray-300 border-gray-500/30'
+    admin:     'bg-orange-500/20 text-orange-300 border-orange-500/30',
+    unlimited: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    pro:       'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    free:      'bg-gray-500/20 text-gray-300 border-gray-500/30'
   };
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs border font-medium ${styles[role] || styles.free}`}>
@@ -93,9 +94,10 @@ export default function AdminPage() {
     }
   }
 
-  const freeUsers = users.filter(u => u.role === 'free').length;
-  const proUsers = users.filter(u => u.role === 'pro').length;
-  const adminUsers = users.filter(u => u.role === 'admin').length;
+  const freeUsers      = users.filter(u => u.role === 'free').length;
+  const proUsers       = users.filter(u => u.role === 'pro').length;
+  const unlimitedUsers = users.filter(u => u.role === 'unlimited').length;
+  const adminUsers     = users.filter(u => u.role === 'admin').length;
 
   if (loading || !user) {
     return <div className="min-h-screen bg-[#050a13] flex items-center justify-center">
@@ -119,12 +121,13 @@ export default function AdminPage() {
 
       <div className="pt-20 p-6 max-w-6xl mx-auto">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           {[
-            { label: 'Total Users', val: users.length, color: 'text-white' },
-            { label: 'Free Users', val: freeUsers, color: 'text-gray-300' },
-            { label: 'PRO Users', val: proUsers, color: 'text-blue-400' },
-            { label: 'Admins', val: adminUsers, color: 'text-orange-400' }
+            { label: 'Total Users',     val: users.length,   color: 'text-white' },
+            { label: 'Free Users',      val: freeUsers,      color: 'text-gray-300' },
+            { label: 'PRO Users',       val: proUsers,       color: 'text-blue-400' },
+            { label: 'Unlimited Users', val: unlimitedUsers, color: 'text-yellow-400' },
+            { label: 'Admins',          val: adminUsers,     color: 'text-orange-400' }
           ].map(s => (
             <div key={s.label} className="rounded-xl p-5 border border-white/10" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <div className={`text-3xl font-bold ${s.color}`}>{s.val}</div>
@@ -195,8 +198,13 @@ export default function AdminPage() {
                           </td>
                           <td className="px-4 py-3"><Badge role={u.role} /></td>
                           <td className="px-4 py-3">
-                            <span className={u.role === 'pro' || u.role === 'admin' ? 'text-blue-400' : 'text-white'}>
-                              {u.role === 'pro' || u.role === 'admin' ? '∞' : (u.credits_remaining ?? '—')}
+                            <span className={
+                              u.role === 'unlimited' || u.role === 'admin' ? 'text-yellow-400' :
+                              u.role === 'pro' ? 'text-blue-400' : 'text-white'
+                            }>
+                              {u.role === 'unlimited' || u.role === 'admin' ? '∞'
+                               : u.role === 'pro' ? `${u.credits_remaining ?? '—'} / 31`
+                               : (u.credits_remaining ?? '—')}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-gray-400">{u.credits_used_this_month ?? '—'}</td>
@@ -211,6 +219,7 @@ export default function AdminPage() {
                               style={{ background: 'rgba(255,255,255,0.05)' }}>
                               <option value="free">Free</option>
                               <option value="pro">PRO</option>
+                              <option value="unlimited">Unlimited</option>
                               <option value="admin">Admin</option>
                             </select>
                           </td>

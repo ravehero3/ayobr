@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../auth');
-const { getUserById, upsertSubscription, setUserRole, getSubscription } = require('../storage');
+const { getUserById, upsertSubscription, setUserRole, setCreditsForRole, getSubscription } = require('../storage');
 const { pool } = require('../db');
 
 // Lazy-init Paddle client so missing env vars don't crash server startup
@@ -17,27 +17,36 @@ function getPaddle() {
   return paddle;
 }
 
-// Read price ID lazily so env vars set after startup are picked up
-function getPriceId() {
-  return process.env.PADDLE_PRO_PRICE_ID || null;
+// Read price IDs lazily so env vars set after startup are picked up
+function getPriceId()           { return process.env.PADDLE_PRO_PRICE_ID       || null; }
+function getUnlimitedPriceId()  { return process.env.PADDLE_UNLIMITED_PRICE_ID || null; }
+
+// Determine which role a completed purchase should grant based on price ID
+function roleForPriceId(purchasedPriceId) {
+  const unlimitedId = getUnlimitedPriceId();
+  if (unlimitedId && purchasedPriceId === unlimitedId) return 'unlimited';
+  return 'pro';
 }
 
 // Public config for Paddle.js client-side initialization
 // PADDLE_CLIENT_TOKEN is a public token — safe to expose to frontend
 router.get('/config', (req, res) => {
   res.json({
-    clientToken: process.env.PADDLE_CLIENT_TOKEN || null,
-    priceId: getPriceId(),
-    environment: process.env.PADDLE_ENV === 'production' ? 'production' : 'sandbox'
+    clientToken:      process.env.PADDLE_CLIENT_TOKEN || null,
+    priceId:          getPriceId(),
+    unlimitedPriceId: getUnlimitedPriceId(),
+    environment:      process.env.PADDLE_ENV === 'production' ? 'production' : 'sandbox'
   });
 });
 
 // Create Paddle checkout — returns a checkout URL (fallback if overlay unavailable)
+// Accepts optional { plan: 'unlimited' } body to use the unlimited price
 router.post('/create-checkout', isAuthenticated, async (req, res) => {
   const p = getPaddle();
   if (!p) return res.status(503).json({ message: 'Paddle not configured yet' });
 
-  const priceId = getPriceId();
+  const { plan } = req.body || {};
+  const priceId = plan === 'unlimited' ? getUnlimitedPriceId() : getPriceId();
   if (!priceId) return res.status(503).json({ message: 'Paddle price not configured yet' });
 
   try {
@@ -163,62 +172,56 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     switch (eventType) {
       case 'transaction.completed':
       case EventName?.TransactionCompleted: {
-        const customData = data?.customData || data?.custom_data;
-        const customerId = data?.customerId || data?.customer_id;
+        const customData    = data?.customData || data?.custom_data;
+        const customerId    = data?.customerId || data?.customer_id;
         const subscriptionId = data?.subscriptionId || data?.subscription_id;
+        const itemPriceId   = data?.items?.[0]?.price?.id || data?.items?.[0]?.priceId;
+        const newRole       = roleForPriceId(itemPriceId);
 
         const userId = await resolveUserId(customData, customerId, subscriptionId);
         if (!userId) { console.warn('transaction.completed: could not resolve userId'); break; }
 
-        await upsertSubscription({
-          userId,
-          paddleCustomerId: customerId,
-          paddleSubscriptionId: subscriptionId,
-          status: 'active',
-          currentPeriodEnd: null
-        });
-        await setUserRole(userId, 'pro');
-        console.log(`User ${userId} upgraded to PRO via transaction.completed`);
+        await upsertSubscription({ userId, paddleCustomerId: customerId, paddleSubscriptionId: subscriptionId, status: 'active', currentPeriodEnd: null });
+        await setUserRole(userId, newRole);
+        await setCreditsForRole(userId, newRole);
+        console.log(`User ${userId} upgraded to ${newRole.toUpperCase()} via transaction.completed`);
         break;
       }
 
       case 'subscription.activated':
       case EventName?.SubscriptionActivated: {
-        const customData = data?.customData || data?.custom_data;
-        const customerId = data?.customerId || data?.customer_id;
+        const customData  = data?.customData || data?.custom_data;
+        const customerId  = data?.customerId || data?.customer_id;
+        const itemPriceId = data?.items?.[0]?.price?.id || data?.items?.[0]?.priceId;
+        const newRole     = roleForPriceId(itemPriceId);
 
         const userId = await resolveUserId(customData, customerId, data?.id);
         if (!userId) { console.warn('subscription.activated: could not resolve userId'); break; }
 
-        await upsertSubscription({
-          userId,
-          paddleCustomerId: customerId,
-          paddleSubscriptionId: data.id,
-          status: 'active',
-          currentPeriodEnd: data?.nextBilledAt ? new Date(data.nextBilledAt) : null
-        });
-        await setUserRole(userId, 'pro');
-        console.log(`Subscription activated for user ${userId}`);
+        await upsertSubscription({ userId, paddleCustomerId: customerId, paddleSubscriptionId: data.id, status: 'active', currentPeriodEnd: data?.nextBilledAt ? new Date(data.nextBilledAt) : null });
+        await setUserRole(userId, newRole);
+        await setCreditsForRole(userId, newRole);
+        console.log(`Subscription activated for user ${userId} — role: ${newRole}`);
         break;
       }
 
       case 'subscription.updated':
       case EventName?.SubscriptionUpdated: {
-        const customerId = data?.customerId || data?.customer_id;
+        const customerId  = data?.customerId || data?.customer_id;
+        const itemPriceId = data?.items?.[0]?.price?.id || data?.items?.[0]?.priceId;
         const userId = await resolveUserId(null, customerId, data?.id);
         if (!userId) { console.warn('subscription.updated: could not resolve userId'); break; }
 
         const status = data.status === 'active' ? 'active' : data.status;
-        await upsertSubscription({
-          userId,
-          paddleCustomerId: customerId,
-          paddleSubscriptionId: data.id,
-          status,
-          currentPeriodEnd: data?.nextBilledAt ? new Date(data.nextBilledAt) : null
-        });
-        // Only revoke PRO if subscription is genuinely not active/trialing
+        await upsertSubscription({ userId, paddleCustomerId: customerId, paddleSubscriptionId: data.id, status, currentPeriodEnd: data?.nextBilledAt ? new Date(data.nextBilledAt) : null });
         if (!['active', 'trialing'].includes(data.status)) {
           await setUserRole(userId, 'free');
+          await setCreditsForRole(userId, 'free');
+        } else {
+          // Re-apply the correct role in case it was a plan upgrade/downgrade
+          const updatedRole = roleForPriceId(itemPriceId);
+          await setUserRole(userId, updatedRole);
+          await setCreditsForRole(userId, updatedRole);
         }
         break;
       }
@@ -229,15 +232,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         const userId = await resolveUserId(null, customerId, data?.id);
         if (!userId) { console.warn('subscription.canceled: could not resolve userId'); break; }
 
-        await upsertSubscription({
-          userId,
-          paddleCustomerId: customerId,
-          paddleSubscriptionId: data.id,
-          status: 'cancelled',
-          currentPeriodEnd: data?.canceledAt ? new Date(data.canceledAt) : null
-        });
+        await upsertSubscription({ userId, paddleCustomerId: customerId, paddleSubscriptionId: data.id, status: 'cancelled', currentPeriodEnd: data?.canceledAt ? new Date(data.canceledAt) : null });
         await setUserRole(userId, 'free');
-        console.log(`Subscription cancelled for user ${userId}`);
+        await setCreditsForRole(userId, 'free');
+        console.log(`Subscription cancelled for user ${userId} — reverted to free`);
         break;
       }
 
