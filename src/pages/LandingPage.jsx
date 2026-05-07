@@ -209,12 +209,12 @@ export default function LandingPage() {
           </button>
           {user ? (
             <button onClick={() => navigate('/app')}
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 20px', borderRadius: 9999, cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
               Open App
             </button>
           ) : (
             <button onClick={login}
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 20px', borderRadius: 9999, cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
               Sign Up
             </button>
           )}
@@ -258,8 +258,8 @@ export default function LandingPage() {
           <h1 style={{
             fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
             fontWeight: 500,
-            fontSize: '54px',
-            lineHeight: '45.9px',
+            fontSize: '110px',
+            lineHeight: '93.5px',
             letterSpacing: '-2px',
             fontStyle: 'normal',
             textTransform: 'none',
@@ -277,16 +277,16 @@ export default function LandingPage() {
             type beat videos ready to upload to YouTube. No editing. No manual work.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <ParticleButton onClick={handleCTA}
               className="transition-all duration-200 hover:scale-105"
-              style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.05rem', lineHeight: LH_LABEL, background: BTN_BG, boxShadow: BTN_GLOW, border: 'none', color: '#fff', padding: '14px 32px', borderRadius: 12, cursor: 'pointer' }}>
-              {user ? 'Open the App' : 'Get Started Free'}
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+              {user ? 'Open the App' : 'Start for free'}
             </ParticleButton>
             <a href="#how-it-works"
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '1.05rem', lineHeight: LH_LABEL, color: '#fff', textDecoration: 'none', padding: '14px 32px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.15)' }}
-              className="hover:border-white/40 transition-colors">
-              See how it works
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, color: '#fff', textDecoration: 'none', padding: '6px 14px', borderRadius: 9999, background: '#2a2a2a', border: 'none', display: 'inline-block' }}
+              className="hover:bg-[#333] transition-colors">
+              Go unlimited
             </a>
           </div>
 
