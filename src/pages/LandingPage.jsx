@@ -182,10 +182,10 @@ export default function LandingPage() {
             style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 65%)' }} />
         </div>
 
-        {/* Vignette */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 38%, rgba(0,0,0,0.5) 62%, rgba(0,0,0,0.9) 83%, #000 100%)' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to right, #000 0%, transparent 12%, transparent 88%, #000 100%)' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, #000 0%, transparent 10%, transparent 80%, #000 100%)' }} />
+        {/* Vignette — strong fade to black on all edges */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'radial-gradient(ellipse 70% 65% at 50% 50%, transparent 20%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.88) 72%, #000 90%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to right, #000 0%, rgba(0,0,0,0.7) 8%, transparent 22%, transparent 78%, rgba(0,0,0,0.7) 92%, #000 100%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.6) 8%, transparent 20%, transparent 72%, rgba(0,0,0,0.8) 88%, #000 100%)' }} />
 
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="relative" style={{ zIndex: 2 }}>
