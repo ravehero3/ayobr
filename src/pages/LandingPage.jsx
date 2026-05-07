@@ -221,26 +221,44 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
   );
 }
 
-/* How It Works — sticky left chapter menu + scroll-driven active step */
+/* How It Works — sticky left chapter menu + scroll-driven active step, clickable */
 function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
-  const sentinelRefs = useRef([]);
+  const [prevStep, setPrevStep]     = useState(null);
+  const [animKey, setAnimKey]       = useState(0);
+  const sentinelRefs  = useRef([]);
+  const clickLockRef  = useRef(false);
+
+  const goToStep = (i) => {
+    if (i === activeStep) return;
+    setPrevStep(activeStep);
+    setActiveStep(i);
+    setAnimKey(k => k + 1);
+    /* suppress scroll-driven updates for 1 s after a click */
+    clickLockRef.current = true;
+    setTimeout(() => { clickLockRef.current = false; }, 1000);
+    /* scroll sentinel into view so scroll position stays consistent */
+    sentinelRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   useEffect(() => {
     const observers = steps.map((_, i) => {
       const el = sentinelRefs.current[i];
       if (!el) return null;
       const obs = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) setActiveStep(i);
-      }, {
-        rootMargin: '-35% 0px -50% 0px',
-        threshold: 0,
-      });
+        if (entry.isIntersecting && !clickLockRef.current) {
+          setPrevStep(p => p !== i ? activeStep : p);
+          setActiveStep(i);
+          setAnimKey(k => k + 1);
+        }
+      }, { rootMargin: '-35% 0px -50% 0px', threshold: 0 });
       obs.observe(el);
       return obs;
     });
     return () => observers.forEach(o => o?.disconnect());
   }, []);
+
+  const s = steps[activeStep];
 
   return (
     <section id="how-it-works" style={{ background: '#000', paddingTop: 112, paddingBottom: 112 }}>
@@ -256,21 +274,25 @@ function HowItWorksSection() {
         </motion.div>
 
         {/* Two-column layout */}
-        <div style={{ display: 'flex', gap: 'clamp(40px, 8vw, 120px)', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: 'clamp(40px, 8vw, 100px)', alignItems: 'flex-start' }}>
 
           {/* Left: sticky chapter menu */}
-          <div style={{ width: 'clamp(180px, 25vw, 280px)', flexShrink: 0, position: 'sticky', top: 120 }}>
-            {steps.map((s, i) => (
+          <div style={{ width: 'clamp(180px, 25vw, 260px)', flexShrink: 0, position: 'sticky', top: 120 }}>
+            {steps.map((step, i) => (
               <div key={i}>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.13)', padding: '18px 0' }}>
-                  <div style={{
-                    fontFamily: NM, fontWeight: 600,
-                    fontSize: '0.92rem', lineHeight: 1.3,
-                    color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.3)',
-                    transition: 'color 0.4s ease',
-                    cursor: 'default',
+                <button
+                  onClick={() => goToStep(i)}
+                  style={{
+                    width: '100%', textAlign: 'left', background: 'none', border: 'none',
+                    borderTop: '1px solid rgba(255,255,255,0.13)',
+                    padding: '18px 0', cursor: 'pointer',
                   }}>
-                    {s.title}
+                  <div style={{
+                    fontFamily: NM, fontWeight: 600, fontSize: '0.92rem', lineHeight: 1.3,
+                    color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.3)',
+                    transition: 'color 0.35s ease',
+                  }}>
+                    {step.title}
                   </div>
                   <div style={{
                     fontFamily: NM, fontSize: '0.82rem', lineHeight: 1.6,
@@ -281,87 +303,95 @@ function HowItWorksSection() {
                     marginTop: i === activeStep ? 8 : 0,
                     transition: 'max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s ease',
                   }}>
-                    {s.desc}
+                    {step.desc}
                   </div>
-                </div>
+                </button>
               </div>
             ))}
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.13)' }} />
           </div>
 
-          {/* Right: scroll zones — one per step */}
+          {/* Right: single active card + invisible scroll sentinels */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            {steps.map((s, i) => (
+
+            {/* Active card — re-animates on step change */}
+            <div style={{ position: 'sticky', top: 120 }}>
               <div
-                key={i}
-                ref={el => { sentinelRefs.current[i] = el; }}
+                key={animKey}
                 style={{
-                  minHeight: '55vh',
-                  display: 'flex',
-                  alignItems: 'center',
-                  paddingTop: i === 0 ? 0 : 48,
-                  paddingBottom: 48,
-                }}>
-                {/* Step card — fades/slides in when active */}
-                <div style={{
                   width: '100%',
-                  background: i === activeStep
-                    ? 'linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02))'
-                    : 'rgba(255,255,255,0.015)',
-                  border: i === activeStep
-                    ? '1px solid rgba(255,255,255,0.12)'
-                    : '1px solid rgba(255,255,255,0.05)',
+                  background: 'linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02))',
+                  border: '1px solid rgba(255,255,255,0.12)',
                   borderRadius: 20,
                   padding: 'clamp(28px, 5vw, 52px)',
-                  opacity: i === activeStep ? 1 : 0.35,
-                  transform: i === activeStep ? 'translateX(0)' : 'translateX(20px)',
-                  transition: 'all 0.5s ease',
                   position: 'relative',
                   overflow: 'hidden',
+                  animation: 'stepCardIn 0.42s ease forwards',
                 }}>
-                  {/* Ghost step number */}
-                  <div style={{
-                    position: 'absolute', bottom: 16, right: 24,
-                    fontFamily: NM, fontWeight: 900,
-                    fontSize: 'clamp(4rem, 8vw, 7rem)',
-                    lineHeight: 1, letterSpacing: '-0.06em',
-                    color: 'rgba(255,255,255,0.04)',
-                    userSelect: 'none', pointerEvents: 'none',
-                  }}>{s.num}</div>
+                <style>{`
+                  @keyframes stepCardIn {
+                    from { opacity: 0; transform: translateX(18px); }
+                    to   { opacity: 1; transform: translateX(0); }
+                  }
+                `}</style>
 
-                  <span style={{
-                    fontFamily: NM, fontWeight: 700, fontSize: '0.68rem',
-                    letterSpacing: '0.14em', textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.22)', display: 'block', marginBottom: 20,
-                  }}>Step {i + 1} of {steps.length}</span>
+                {/* Ghost step number */}
+                <div style={{
+                  position: 'absolute', bottom: 16, right: 24,
+                  fontFamily: NM, fontWeight: 900,
+                  fontSize: 'clamp(4rem, 8vw, 7rem)',
+                  lineHeight: 1, letterSpacing: '-0.06em',
+                  color: 'rgba(255,255,255,0.04)',
+                  userSelect: 'none', pointerEvents: 'none',
+                }}>{s.num}</div>
 
-                  <h3 style={{
-                    fontFamily: NM, fontWeight: 800,
-                    fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                    lineHeight: 1.15, letterSpacing: '-0.03em',
-                    color: '#fff', marginBottom: 12,
-                  }}>{s.title}</h3>
+                <span style={{
+                  fontFamily: NM, fontWeight: 700, fontSize: '0.68rem',
+                  letterSpacing: '0.14em', textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.22)', display: 'block', marginBottom: 20,
+                }}>Step {activeStep + 1} of {steps.length}</span>
 
-                  <p style={{
-                    fontFamily: NM, fontSize: '0.95rem',
-                    lineHeight: 1.75, color: 'rgba(255,255,255,0.42)',
-                    maxWidth: 400,
-                  }}>{s.longDesc || s.desc}</p>
+                <h3 style={{
+                  fontFamily: NM, fontWeight: 800,
+                  fontSize: 'clamp(1.4rem, 3vw, 2rem)',
+                  lineHeight: 1.15, letterSpacing: '-0.03em',
+                  color: '#fff', marginBottom: 12,
+                }}>{s.title}</h3>
 
-                  {/* Progress bar */}
-                  <div style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 6 }}>
-                    {steps.map((_, j) => (
-                      <div key={j} style={{
-                        height: 3, borderRadius: 2,
-                        flex: j === i ? 3 : 1,
-                        background: j === i ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.08)',
+                <p style={{
+                  fontFamily: NM, fontSize: '0.95rem',
+                  lineHeight: 1.75, color: 'rgba(255,255,255,0.42)',
+                  maxWidth: 420,
+                }}>{s.longDesc || s.desc}</p>
+
+                {/* Progress bar / step dots */}
+                <div style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 6 }}>
+                  {steps.map((_, j) => (
+                    <button
+                      key={j}
+                      onClick={() => goToStep(j)}
+                      style={{
+                        height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
+                        flex: j === activeStep ? 3 : 1,
+                        background: j === activeStep ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.1)',
                         transition: 'flex 0.4s ease, background 0.4s ease',
-                      }} />
-                    ))}
-                  </div>
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Invisible scroll sentinels — one per step, drive activeStep on scroll */}
+            <div style={{ position: 'relative', marginTop: 40 }}>
+              {steps.map((_, i) => (
+                <div
+                  key={i}
+                  ref={el => { sentinelRefs.current[i] = el; }}
+                  style={{ height: '55vh', pointerEvents: 'none' }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -446,6 +476,66 @@ function HeadingReveal({ lines, style, className }) {
         </span>
       ))}
     </span>
+  );
+}
+
+/* Drop zone preview — scroll-linked scale + opacity on the card */
+function DropZonePreview() {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    let rafId = null;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      /* progress: 0 when element top reaches viewport bottom, 1 after 300px of scroll */
+      const progress = Math.min(Math.max((window.innerHeight - rect.top) / 300, 0), 1);
+      el.style.transform = `scale(${0.85 + progress * 0.15})`;
+      el.style.opacity   = String(0.5 + progress * 0.5);
+      rafId = null;
+    };
+    const onScroll = () => { if (!rafId) rafId = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
+  }, []);
+
+  return (
+    <section className="py-24 px-6 max-w-5xl mx-auto text-center" style={{ background: '#000' }}>
+      <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
+        Clean, focused, powerful
+      </h2>
+      <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', marginBottom: '2.5rem' }}>
+        The whole workflow in one screen. Drop files, review pairs, generate.
+      </p>
+      <div
+        ref={cardRef}
+        style={{
+          opacity: 0.5,
+          transform: 'scale(0.85)',
+          willChange: 'transform, opacity',
+          transformOrigin: 'center top',
+        }}>
+        <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', padding: 2 }}>
+          <div className="rounded-xl overflow-hidden" style={{ background: '#000', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="text-center p-12">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-white/20 mb-6">
+                <svg className="w-10 h-10 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <p style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.4rem', lineHeight: LH_HEAD, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>Drop Your Files</p>
+              <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.35)' }}>Drag and drop your audio and image files here</p>
+              <div className="flex items-center justify-center gap-3 mt-6">
+                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.4)' }}>🎵 MP3, WAV</span>
+                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.4)' }}>🖼️ PNG, JPG</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -647,32 +737,8 @@ export default function LandingPage() {
       {/* ── How it works ── */}
       <HowItWorksSection />
 
-      {/* ── Drop zone preview ── */}
-      <section className="py-24 px-6 max-w-5xl mx-auto text-center" style={{ background: '#000' }}>
-        <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
-          Clean, focused, powerful
-        </h2>
-        <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', marginBottom: '2.5rem' }}>
-          The whole workflow in one screen. Drop files, review pairs, generate.
-        </p>
-        <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', padding: 2 }}>
-          <div className="rounded-xl overflow-hidden" style={{ background: '#000', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="text-center p-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-white/20 mb-6">
-                <svg className="w-10 h-10 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-              </div>
-              <p style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.4rem', lineHeight: LH_HEAD, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>Drop Your Files</p>
-              <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.35)' }}>Drag and drop your audio and image files here</p>
-              <div className="flex items-center justify-center gap-3 mt-6">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.4)' }}>🎵 MP3, WAV</span>
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.4)' }}>🖼️ PNG, JPG</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── Drop zone preview — scroll-scale reveal ── */}
+      <DropZonePreview />
 
       {/* ── Pricing ── */}
       <PricingSection handleCTA={handleCTA} handleUpgradeCTA={handleUpgradeCTA} user={user} />
