@@ -371,16 +371,11 @@ export default function LandingPage() {
   const starsRef   = useRef(null);
   useScrollBg(wrapperRef);
 
-  /* Stars fade-in: opacity 0 at scroll=0, fully visible at scroll=500px */
+  /* Stars always visible from page load */
   useEffect(() => {
     const el = starsRef.current;
     if (!el) return;
-    el.style.opacity = '0';
-    const onScroll = () => {
-      el.style.opacity = String(Math.min(1, window.scrollY / 500));
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    el.style.opacity = '1';
   }, []);
 
   const handleCTA = () => { user ? navigate('/app') : login(); };
@@ -420,10 +415,10 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section data-bg-color="#000000" className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden' }}>
 
-        {/* Stars background image — fades in from black as user scrolls, centered on the stats row */}
+        {/* Stars background image — always visible, centered on the stats row */}
         <div ref={starsRef} className="absolute inset-0 pointer-events-none" style={{
           zIndex: 0,
-          opacity: 0,
+          opacity: 1,
           backgroundImage: `url(${starsBg})`,
           backgroundSize: '120%',
           backgroundPosition: 'center 82%',
@@ -512,7 +507,8 @@ export default function LandingPage() {
       {/* ── Features ── */}
       <section data-bg-color="#05050a" className="py-24 px-6 max-w-6xl mx-auto">
         <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
-          Everything you need to scale<br />your YouTube channel
+          <WordReveal text="Everything you need to scale" /><br />
+          <WordReveal text="your YouTube channel" style={{ display: 'inline' }} />
         </h2>
         <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', textAlign: 'center', maxWidth: '36rem', margin: '0 auto 4rem' }}>
           Built for type beat producers who want to upload more without spending hours editing.
