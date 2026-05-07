@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
@@ -172,8 +172,8 @@ function BlurReveal({ children, delay = 0, style = {} }) {
 function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
   const isPro = user?.role === 'pro' || user?.role === 'admin';
   return (
-    <section data-bg-color="#030308" id="pricing" style={{ padding: '112px 24px' }}>
-      <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+    <section data-bg-color="#030308" id="pricing" style={{ padding: '112px 0' }}>
+      <div style={{ paddingLeft: 424, paddingRight: 40 }}>
 
         {/* Section header */}
         <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
@@ -267,20 +267,27 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
   );
 }
 
-/* ── How It Works — two-column with hover card ── */
-function HowItWorksSection() {
-  const [active, setActive] = useState(0);
-  const scaleRef = useRef(null);
+/* ── How It Works — per-step scroll-driven rows ── */
+const GT_FONT = '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif';
 
-  /* Scroll-linked scale: 0.85→1.0, opacity 0.5→1 over first 300px */
+function HowItWorksSection() {
+  const rowRefs   = useRef([]);
+  const cardRefs  = useRef([]);
+  const [revealed, setRevealed] = useState(new Set());
+
+  /* Single rAF scroll loop — updates all cards' scale + slide */
   useEffect(() => {
     let raf = null;
     const tick = () => {
-      const el = scaleRef.current;
-      if (!el) return;
-      const p = Math.min(window.scrollY / 300, 1);
-      el.style.transform = `scale(${0.85 + p * 0.15})`;
-      el.style.opacity   = String(0.5 + p * 0.5);
+      const wh = window.innerHeight;
+      rowRefs.current.forEach((row, i) => {
+        const card = cardRefs.current[i];
+        if (!row || !card) return;
+        const rect = row.getBoundingClientRect();
+        const p = Math.min(Math.max((wh - rect.top) / 300, 0), 1);
+        card.style.transform = `scale(${0.85 + p * 0.15}) translateX(${(1 - p) * 64}px)`;
+        card.style.opacity   = String(0.5 + p * 0.5);
+      });
       raf = null;
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
@@ -289,164 +296,156 @@ function HowItWorksSection() {
     return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
   }, []);
 
-  const GT = '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif';
+  /* IntersectionObserver — reveals left-side text one by one */
+  useEffect(() => {
+    const observers = rowRefs.current.map((el, i) => {
+      if (!el) return null;
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) setRevealed(prev => new Set([...prev, i]));
+      }, { threshold: 0.25 });
+      obs.observe(el);
+      return obs;
+    });
+    return () => observers.forEach(o => o?.disconnect());
+  }, []);
 
   return (
-    <section data-bg-color="#02020a" id="how-it-works" style={{ padding: '96px 24px' }}>
-      <div style={{
-        maxWidth: 1080, margin: '0 auto',
-        display: 'flex', gap: 72, alignItems: 'flex-start',
-        flexWrap: 'wrap',
-      }}>
+    <section data-bg-color="#02020a" id="how-it-works" style={{ paddingTop: 96, paddingBottom: 0 }}>
 
-        {/* ── Left column: title + step list ── */}
-        <div style={{ width: 304, flexShrink: 0 }}>
-          <h2 style={{
-            fontFamily: GT, fontWeight: 500, fontSize: '62px',
-            lineHeight: '62px', letterSpacing: '-3.1px',
-            color: '#fff', textTransform: 'none', fontStyle: 'normal',
-            margin: 0, marginBottom: 48,
-          }}>
-            How it<br />works
-          </h2>
+      {/* Section heading — left edge at 424 px */}
+      <div style={{ paddingLeft: 424, paddingRight: 40, marginBottom: 72 }}>
+        <h2 style={{
+          fontFamily: GT_FONT, fontWeight: 500,
+          fontSize: '62px', lineHeight: '62px', letterSpacing: '-3.1px',
+          color: '#fff', margin: 0, width: 304,
+        }}>
+          How it<br />works
+        </h2>
+      </div>
 
-          <div>
-            {steps.map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                onHoverStart={() => setActive(i)}
-                style={{
-                  padding: '18px 0',
-                  borderTop: '1px solid rgba(255,255,255,0.08)',
-                  cursor: 'default',
-                  display: 'flex', alignItems: 'center', gap: 18,
-                  transition: 'opacity 0.25s ease',
-                  opacity: active === i ? 1 : 0.38,
-                }}>
-                {/* Step number */}
-                <span style={{
-                  fontFamily: "'Neue Montreal','Inter',sans-serif",
-                  fontWeight: 900, fontSize: '0.85rem',
-                  letterSpacing: '0.04em',
-                  ...(active === i
-                    ? { backgroundImage: BTN_BG, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
-                    : { color: 'rgba(255,255,255,0.3)' }),
-                  flexShrink: 0, minWidth: 28,
-                }}>{s.num}</span>
-                {/* Step title */}
-                <span style={{
-                  fontFamily: "'Neue Montreal','Inter',sans-serif",
-                  fontWeight: 600, fontSize: '0.9rem',
-                  color: active === i ? '#fff' : 'rgba(255,255,255,0.5)',
-                  transition: 'color 0.25s ease',
-                }}>{s.title}</span>
-                {/* Arrow indicator */}
-                {active === i && (
-                  <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem' }}>→</span>
-                )}
-              </motion.div>
-            ))}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
-          </div>
-        </div>
-
-        {/* ── Right column: animated detail card ── */}
+      {/* One full-viewport row per step */}
+      {steps.map((s, i) => (
         <div
-          ref={scaleRef}
+          key={i}
+          ref={el => { rowRefs.current[i] = el; }}
           style={{
-            flex: 1, minWidth: 280,
-            opacity: 0.5,
-            transform: 'scale(0.85)',
-            willChange: 'transform, opacity',
+            minHeight: '80vh',
+            paddingLeft: 424,
+            paddingRight: 40,
+            paddingTop: 48,
+            paddingBottom: 48,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 64,
+            borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.05)',
           }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, x: 48 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: 0.38, ease: 'easeOut' }}
-              style={{
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.09)',
-                borderRadius: 24,
-                padding: '52px 48px',
-                minHeight: 360,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                position: 'relative',
-                overflow: 'hidden',
-              }}>
 
-              {/* Subtle corner glow */}
+          {/* ── Left: step info (304 px, matches heading width) ── */}
+          <div style={{
+            width: 304, flexShrink: 0,
+            opacity:    revealed.has(i) ? 1 : 0,
+            transform:  revealed.has(i) ? 'translateY(0)' : 'translateY(24px)',
+            transition: 'opacity 0.65s ease, transform 0.65s ease',
+          }}>
+            <span style={{
+              fontFamily: NM, fontWeight: 900,
+              fontSize: '0.78rem', letterSpacing: '0.1em',
+              color: '#fff', display: 'block', marginBottom: 16,
+            }}>{s.num}</span>
+            <h3 style={{
+              fontFamily: NM, fontWeight: 700,
+              fontSize: '1.3rem', lineHeight: 1.2, letterSpacing: '-0.025em',
+              color: '#fff', marginBottom: 14,
+            }}>{s.title}</h3>
+            <p style={{
+              fontFamily: NM, fontSize: '0.9rem',
+              lineHeight: 1.7, color: 'rgba(255,255,255,0.42)',
+            }}>{s.desc}</p>
+          </div>
+
+          {/* ── Right: detail card (scroll-linked scale + slide from right) ── */}
+          <div
+            ref={el => { cardRefs.current[i] = el; }}
+            style={{
+              flex: 1, minWidth: 0,
+              opacity: 0.5,
+              transform: 'scale(0.85) translateX(64px)',
+              willChange: 'transform, opacity',
+            }}>
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015))',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 24,
+              padding: '52px 48px',
+              minHeight: 300,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+
+              {/* Decorative corner glow */}
               <div style={{
-                position: 'absolute', top: -80, right: -80,
-                width: 240, height: 240, borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)',
+                position: 'absolute', top: -60, right: -60,
+                width: 200, height: 200, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)',
                 pointerEvents: 'none',
               }} />
 
-              {/* Card body */}
+              {/* Ghost step number watermark */}
+              <div style={{
+                position: 'absolute', bottom: 24, right: 36,
+                fontFamily: NM, fontWeight: 900,
+                fontSize: 'clamp(5rem, 9vw, 8rem)',
+                lineHeight: 1, letterSpacing: '-0.06em',
+                color: 'rgba(255,255,255,0.04)',
+                userSelect: 'none', pointerEvents: 'none',
+              }}>{s.num}</div>
+
+              {/* Card content */}
               <div>
-                <div style={{
-                  fontFamily: "'Neue Montreal','Inter',sans-serif",
-                  fontWeight: 900,
-                  fontSize: 'clamp(4rem, 8vw, 7rem)',
-                  lineHeight: 1, letterSpacing: '-0.06em',
-                  backgroundImage: BTN_BG,
-                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-                  marginBottom: 32,
-                  userSelect: 'none',
-                }}>{steps[active].num}</div>
+                <span style={{
+                  fontFamily: NM, fontWeight: 900,
+                  fontSize: '0.72rem', letterSpacing: '0.12em',
+                  color: 'rgba(255,255,255,0.25)',
+                  textTransform: 'uppercase', display: 'block', marginBottom: 28,
+                }}>Step {i + 1} of {steps.length}</span>
 
                 <h3 style={{
-                  fontFamily: "'Neue Montreal','Inter',sans-serif",
-                  fontWeight: 800,
-                  fontSize: 'clamp(1.6rem, 3vw, 2.1rem)',
-                  lineHeight: 1.1, letterSpacing: '-0.03em',
+                  fontFamily: NM, fontWeight: 800,
+                  fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                  lineHeight: 1.1, letterSpacing: '-0.035em',
                   color: '#fff', marginBottom: 16,
-                }}>{steps[active].title}</h3>
+                }}>{s.title}</h3>
 
                 <p style={{
-                  fontFamily: "'Neue Montreal','Inter',sans-serif",
-                  fontSize: '1rem', lineHeight: 1.65,
-                  color: 'rgba(255,255,255,0.45)',
-                  maxWidth: 400,
-                }}>{steps[active].desc}</p>
+                  fontFamily: NM, fontSize: '1rem',
+                  lineHeight: 1.7, color: 'rgba(255,255,255,0.42)',
+                  maxWidth: 420,
+                }}>{s.desc}</p>
               </div>
 
-              {/* Progress footer */}
+              {/* Progress bar footer */}
               <div style={{
-                marginTop: 40, paddingTop: 24,
+                marginTop: 48, paddingTop: 24,
                 borderTop: '1px solid rgba(255,255,255,0.07)',
-                display: 'flex', alignItems: 'center', gap: 12,
+                display: 'flex', alignItems: 'center', gap: 6,
               }}>
-                <span style={{ fontFamily: "'Neue Montreal','Inter',sans-serif", fontSize: '0.72rem', color: 'rgba(255,255,255,0.22)', letterSpacing: '0.04em' }}>
-                  {active + 1} / {steps.length}
-                </span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-                <div style={{ display: 'flex', gap: 5 }}>
-                  {steps.map((_, i) => (
-                    <div key={i} style={{
-                      height: 4, borderRadius: 2,
-                      width: i === active ? 22 : 5,
-                      background: i === active ? BTN_BG : 'rgba(255,255,255,0.14)',
-                      backgroundImage: i === active ? BTN_BG : 'none',
-                      transition: 'width 0.35s ease',
-                    }} />
-                  ))}
-                </div>
+                {steps.map((_, j) => (
+                  <div key={j} style={{
+                    height: 3, borderRadius: 2,
+                    flex: j === i ? 3 : 1,
+                    background: j === i ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.1)',
+                    transition: 'flex 0.3s ease',
+                  }} />
+                ))}
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+            </div>
+          </div>
 
-      </div>
+        </div>
+      ))}
     </section>
   );
 }
@@ -576,7 +575,7 @@ export default function LandingPage() {
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-4"
-        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 'clamp(32px, 16vw, 218px)', paddingRight: 'clamp(32px, 16vw, 218px)' }}>
+        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 424, paddingRight: 424 }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/login')}
