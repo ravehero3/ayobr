@@ -151,7 +151,7 @@ function BlurReveal({ children, delay = 0, style = {} }) {
     if (!el) return;
     const obs = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.15 });
+    }, { threshold: 0.3, rootMargin: '0px 0px -6% 0px' });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -420,13 +420,13 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section data-bg-color="#000000" className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden' }}>
 
-        {/* Stars background image — fades in from black as user scrolls */}
+        {/* Stars background image — fades in from black as user scrolls, centered on the stats row */}
         <div ref={starsRef} className="absolute inset-0 pointer-events-none" style={{
           zIndex: 0,
           opacity: 0,
           backgroundImage: `url(${starsBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: '120%',
+          backgroundPosition: 'center 82%',
           backgroundRepeat: 'no-repeat',
         }} />
 
@@ -463,7 +463,7 @@ export default function LandingPage() {
             marginBottom: '2rem',
           }}>
             Make 100<br />
-            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
+            <span style={{ color: '#ffffff' }}>
               type beat videos
             </span><br />
             in one click
