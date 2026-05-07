@@ -145,20 +145,20 @@ export default function LandingPage() {
         style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         <div className="flex items-center gap-6">
-          <a href="#pricing"
-            style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}
+          <button onClick={() => navigate('/login')}
+            style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             className="hover:text-white transition-colors">
-            Pricing
-          </a>
+            Log in
+          </button>
           {user ? (
             <button onClick={() => navigate('/app')}
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, background: BTN_BG, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}>
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 20px', borderRadius: 9999, cursor: 'pointer' }}>
               Open App
             </button>
           ) : (
             <button onClick={login}
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, background: BTN_BG, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}>
-              Sign In
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.875rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 20px', borderRadius: 9999, cursor: 'pointer' }}>
+              Sign Up
             </button>
           )}
         </div>
@@ -197,8 +197,17 @@ export default function LandingPage() {
             <span>The fastest way to fill your YouTube channel.</span>
           </div>
 
-          {/* Hero headline — tight display leading */}
-          <h1 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(3rem, 10vw, 7.5rem)', lineHeight: LH_HERO, letterSpacing: '-0.04em', marginBottom: '2rem' }}>
+          {/* Hero headline — GT Walsheim Framer Medium */}
+          <h1 style={{
+            fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
+            fontWeight: 500,
+            fontSize: '54px',
+            lineHeight: '45.9px',
+            letterSpacing: '-2px',
+            fontStyle: 'normal',
+            textTransform: 'none',
+            marginBottom: '2rem',
+          }}>
             Make 100<br />
             <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
               type beat videos
