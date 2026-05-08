@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
@@ -498,6 +498,7 @@ const STEP_CONTENTS = [
 function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const [animKey, setAnimKey]       = useState(0);
+  const [scrollDir, setScrollDir]   = useState(1); /* 1=down (enter from bottom), -1=up (enter from top) */
   const stickyWrapRef = useRef(null);
   const cardInnerRef  = useRef(null);
   const activeRef     = useRef(0);
@@ -505,6 +506,7 @@ function HowItWorksSection() {
 
   const goToStep = useCallback((i) => {
     if (i === activeRef.current) return;
+    setScrollDir(i > activeRef.current ? 1 : -1);
     activeRef.current = i;
     setActiveStep(i);
     setAnimKey(k => k + 1);
@@ -532,6 +534,7 @@ function HowItWorksSection() {
         if (!clickLockRef.current) {
           const newStep = Math.min(Math.floor(progress * steps.length), steps.length - 1);
           if (newStep !== activeRef.current) {
+            setScrollDir(newStep > activeRef.current ? 1 : -1);
             activeRef.current = newStep;
             setActiveStep(newStep);
             setAnimKey(k => k + 1);
@@ -650,33 +653,41 @@ function HowItWorksSection() {
           alignItems: 'center',
           zIndex: 2,
         }}>
-          <style>{`
-            @keyframes howCardSlideIn {
-              from { opacity: 0; transform: translateX(28px); }
-              to   { opacity: 1; transform: translateX(0); }
-            }
-          `}</style>
+          {/* Outer wrapper: carries the scroll-parallax drift */}
           <div
             ref={cardInnerRef}
             style={{ flexShrink: 0, width: CARD_W_CSS, willChange: 'transform' }}
           >
-            <div
-              key={animKey}
-              style={{
-                width: '100%',
-                height: CARD_H,
-                borderRadius: 14,
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                background: '#1e1e1e',
-                boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
-                animation: 'howCardSlideIn 0.38s ease forwards',
-              }}>
-              <SafariChrome />
-              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <StepContent />
-              </div>
+            {/* Inner wrapper: clips entering/exiting cards top & bottom */}
+            <div style={{
+              position: 'relative',
+              height: CARD_H,
+              borderRadius: 14,
+              overflow: 'hidden',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
+            }}>
+              <AnimatePresence mode="popLayout" custom={scrollDir}>
+                <motion.div
+                  key={animKey}
+                  custom={scrollDir}
+                  initial={dir => ({ y: dir * CARD_H })}
+                  animate={{ y: 0 }}
+                  exit={dir => ({ y: -dir * CARD_H })}
+                  transition={{ duration: 0.52, ease: [0.32, 0.72, 0, 1] }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    background: '#1e1e1e',
+                  }}
+                >
+                  <SafariChrome />
+                  <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                    <StepContent />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </div>
