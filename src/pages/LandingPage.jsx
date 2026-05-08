@@ -252,7 +252,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user 
 
 /* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
 const NAV_H           = 60;
-const HOW_SCROLL_STEP = 500;
+const HOW_SCROLL_STEP = 1200;
 const CARD_H          = 784;
 const CARD_W          = 1209;
 const CHAPTER_NAV_LEFT = 80;
