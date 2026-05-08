@@ -289,14 +289,18 @@ function SafariChrome() {
   const sys = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
   return (
     <div style={{ width: '100%', flexShrink: 0 }}>
-      {/* Tab bar */}
+      {/* Single unified toolbar — macOS Sonoma/Sequoia Safari style */}
       <div style={{
-        height: 40, background: '#323232',
-        borderBottom: '1px solid rgba(0,0,0,0.55)',
-        display: 'flex', alignItems: 'center', padding: '0 14px', gap: 0,
+        height: 52,
+        background: '#2c2c2c',
+        borderBottom: '1px solid rgba(0,0,0,0.65)',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 16px',
+        gap: 0,
       }}>
         {/* Traffic lights */}
-        <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginRight: 20 }}>
+        <div style={{ display: 'flex', gap: 7, alignItems: 'center', flexShrink: 0 }}>
           {[['#ff5f57','#e0443e'],['#ffbd2e','#dea123'],['#28c840','#1aab29']].map(([bg, shadow], ci) => (
             <div key={ci} style={{
               width: 12, height: 12, borderRadius: '50%', background: bg, flexShrink: 0,
@@ -304,68 +308,56 @@ function SafariChrome() {
             }} />
           ))}
         </div>
-        {/* Active tab */}
-        <div style={{
-          height: 30, background: '#1e1e1e', borderRadius: '6px 6px 0 0',
-          display: 'flex', alignItems: 'center', padding: '0 12px', gap: 7,
-          minWidth: 180, maxWidth: 220,
-          borderTop: '1px solid rgba(255,255,255,0.07)',
-          borderLeft: '1px solid rgba(255,255,255,0.06)',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
-        }}>
-          {/* Favicon */}
-          <div style={{
-            width: 14, height: 14, borderRadius: 3, flexShrink: 0,
-            background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)',
-          }} />
-          <span style={{ color: 'rgba(255,255,255,0.78)', fontSize: 12, fontFamily: sys, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            TypeBeatz — Beat Video Generator
-          </span>
-        </div>
-        {/* New tab + */}
-        <div style={{ marginLeft: 6, width: 24, height: 24, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 17, lineHeight: 1 }}>+</div>
-      </div>
 
-      {/* Toolbar */}
-      <div style={{
-        height: 48, background: '#282828',
-        borderBottom: '1px solid rgba(0,0,0,0.6)',
-        display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10,
-      }}>
         {/* Back / Forward */}
-        <div style={{ display: 'flex', gap: 2, marginRight: 4 }}>
+        <div style={{ display: 'flex', gap: 0, marginLeft: 18, flexShrink: 0 }}>
           {['‹', '›'].map((ch, i) => (
             <div key={i} style={{
-              width: 26, height: 26, borderRadius: 5, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', color: i === 0 ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.55)',
-              fontSize: 20, lineHeight: 1, cursor: 'default',
+              width: 26, height: 26, display: 'flex', alignItems: 'center',
+              justifyContent: 'center',
+              color: i === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.48)',
+              fontSize: 22, lineHeight: 1, cursor: 'default', userSelect: 'none',
             }}>{ch}</div>
           ))}
         </div>
-        {/* Reload */}
-        <div style={{ width: 26, height: 26, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 14, marginRight: 6 }}>↻</div>
-        {/* URL bar */}
-        <div style={{
-          flex: 1, height: 30,
-          background: 'rgba(0,0,0,0.35)',
-          borderRadius: 8,
-          border: '1px solid rgba(255,255,255,0.09)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        }}>
-          {/* Lock */}
-          <svg width="11" height="12" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.45, flexShrink: 0 }}>
-            <rect x="3" y="11" width="18" height="11" rx="2" stroke="white" strokeWidth="2.2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
-          </svg>
-          <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: 13, fontFamily: sys, letterSpacing: '-0.01em' }}>
-            typebeatz.app
-          </span>
+
+        {/* URL pill — centred, fully pill-shaped, macOS style */}
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', margin: '0 10px' }}>
+          <div style={{
+            height: 30,
+            width: '100%',
+            maxWidth: 400,
+            background: 'rgba(0,0,0,0.28)',
+            borderRadius: 9999,
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+            padding: '0 14px',
+          }}>
+            {/* Lock */}
+            <svg width="10" height="11" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.38, flexShrink: 0 }}>
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke="white" strokeWidth="2.3"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="white" strokeWidth="2.3" strokeLinecap="round"/>
+            </svg>
+            <span style={{ color: 'rgba(255,255,255,0.68)', fontSize: 12.5, fontFamily: sys, letterSpacing: '-0.01em', userSelect: 'none' }}>
+              typebeatz.app
+            </span>
+          </div>
         </div>
-        {/* Right actions */}
-        <div style={{ display: 'flex', gap: 4, marginLeft: 6 }}>
-          {['⊕', '↑'].map((ic, i) => (
-            <div key={i} style={{ width: 26, height: 26, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>{ic}</div>
-          ))}
+
+        {/* Right actions — share + sidebar/tabs */}
+        <div style={{ display: 'flex', gap: 1, flexShrink: 0 }}>
+          {/* Share */}
+          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', fontSize: 14, userSelect: 'none' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+          </div>
+          {/* Tab overview */}
+          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', fontSize: 13, userSelect: 'none' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
