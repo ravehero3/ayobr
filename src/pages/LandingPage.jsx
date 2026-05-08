@@ -277,7 +277,6 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user 
 /* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
 const NAV_H           = 60;
 const HOW_SCROLL_STEP = 1200;
-const CARD_H          = 780;
 const CHAPTER_NAV_LEFT = 424;
 const CHAPTER_NAV_W   = 220;
 const CARD_GAP        = 48;
@@ -658,10 +657,10 @@ function HowItWorksSection() {
             ref={cardInnerRef}
             style={{ flexShrink: 0, width: CARD_W_CSS, willChange: 'transform' }}
           >
-            {/* Inner wrapper: clips entering/exiting cards top & bottom */}
+            {/* Inner wrapper: 16:9 aspect ratio = real computer screen proportions */}
             <div style={{
               position: 'relative',
-              height: CARD_H,
+              aspectRatio: '16 / 9',
               borderRadius: 14,
               overflow: 'hidden',
               boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
@@ -670,9 +669,9 @@ function HowItWorksSection() {
                 <motion.div
                   key={animKey}
                   custom={scrollDir}
-                  initial={dir => ({ y: dir * CARD_H })}
-                  animate={{ y: 0 }}
-                  exit={dir => ({ y: -dir * CARD_H })}
+                  initial={dir => ({ y: `${dir * 100}%` })}
+                  animate={{ y: '0%' }}
+                  exit={dir => ({ y: `${-dir * 100}%` })}
                   transition={{ duration: 0.52, ease: [0.32, 0.72, 0, 1] }}
                   style={{
                     position: 'absolute',
