@@ -699,23 +699,16 @@ function useParallax(layers) {
   }, []);
 }
 
-/* Stars fade-in on scroll */
+/* Stars fade-in on mount — visible from start, fades in as the page loads */
 function useStarsScrollReveal(starsRef) {
   useEffect(() => {
     const el = starsRef.current;
     if (!el) return;
-    let rafId = null;
-    const update = () => {
-      const sy = window.scrollY;
-      /* Start fading in after 40px of scroll, fully visible by 320px */
-      const opacity = Math.min(1, Math.max(0, (sy - 40) / 280));
-      el.style.opacity = String(opacity);
-      rafId = null;
-    };
-    const onScroll = () => { if (!rafId) rafId = requestAnimationFrame(update); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    update();
-    return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
+    /* Small rAF delay so the browser has painted the initial black bg first */
+    const raf = requestAnimationFrame(() => {
+      el.style.opacity = '1';
+    });
+    return () => cancelAnimationFrame(raf);
   }, []);
 }
 
@@ -876,7 +869,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen text-white overflow-x-hidden" style={{ background: '#000', fontFamily: NM }}>
+    <div className="min-h-screen text-white" style={{ background: '#000', fontFamily: NM, overflowX: 'clip' }}>
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-4"
@@ -905,7 +898,7 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section className="relative flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden', minHeight: '100vh', background: '#000' }}>
 
-        {/* Stars background — starts invisible, reveals on scroll, sits behind stats */}
+        {/* Stars background — starts invisible, fades in on mount as text loads */}
         <div ref={starsRef} className="absolute inset-0 pointer-events-none" style={{
           zIndex: 0,
           opacity: 0,
@@ -913,7 +906,7 @@ export default function LandingPage() {
           backgroundSize: '130%',
           backgroundPosition: 'center calc(50% - 200px)',
           backgroundRepeat: 'no-repeat',
-          transition: 'opacity 0.3s ease',
+          transition: 'opacity 1.8s ease',
         }} />
 
         {/* Subtle blue glow — mid-layer */}
@@ -975,18 +968,18 @@ export default function LandingPage() {
           </p>
         </motion.div>
 
-        {/* Stats row — hidden until user scrolls 100px, then blur-to-focus reveal */}
+        {/* Stats row — hidden until user scrolls 10px, then blur-to-focus reveal */}
         <div className="relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20" style={{ zIndex: 2 }}>
-          <BlurReveal delay={0} minScroll={100}>
+          <BlurReveal delay={0} minScroll={10}>
             <Stat prefix="up to" val="100" label="videos per batch" />
           </BlurReveal>
-          <BlurReveal delay={200} minScroll={100}>
+          <BlurReveal delay={200} minScroll={10}>
             <Stat prefix="create" val="∞" label="videos" />
           </BlurReveal>
-          <BlurReveal delay={400} minScroll={100}>
+          <BlurReveal delay={400} minScroll={10}>
             <Stat prefix="up to" val="4K" label="video quality" />
           </BlurReveal>
-          <BlurReveal delay={600} minScroll={100}>
+          <BlurReveal delay={600} minScroll={10}>
             <Stat prefix={null} val="Custom" label="backgrounds" />
           </BlurReveal>
         </div>
