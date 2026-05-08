@@ -277,12 +277,13 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user 
 /* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
 const NAV_H           = 60;
 const HOW_SCROLL_STEP = 1200;
-const CARD_H          = 700;
-const CARD_W          = 880;
+const CARD_H          = 780;
 const CHAPTER_NAV_LEFT = 424;
 const CHAPTER_NAV_W   = 220;
 const CARD_GAP        = 48;
 const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP; /* 692 */
+/* Card width is derived from container so exactly 25% bleeds off the right edge */
+const CARD_W_CSS      = `calc((100vw - ${CARD_LEFT}px) / 0.75)`;
 
 /* ── Safari-style browser chrome ── */
 function SafariChrome() {
@@ -498,6 +499,7 @@ function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const [animKey, setAnimKey]       = useState(0);
   const stickyWrapRef = useRef(null);
+  const cardInnerRef  = useRef(null);
   const activeRef     = useRef(0);
   const clickLockRef  = useRef(false);
 
@@ -513,15 +515,22 @@ function HowItWorksSection() {
   useEffect(() => {
     let rafId = null;
     const update = () => {
-      if (!clickLockRef.current) {
-        const el = stickyWrapRef.current;
-        if (el) {
-          const rect        = el.getBoundingClientRect();
-          const totalScroll = steps.length * HOW_SCROLL_STEP;
-          /* scrolled = how far the flex container top has travelled above the viewport top */
-          const scrolled    = Math.max(0, -rect.top);
-          const progress    = totalScroll > 0 ? Math.min(scrolled / totalScroll, 1) : 0;
-          const newStep     = Math.min(Math.floor(progress * steps.length), steps.length - 1);
+      const el = stickyWrapRef.current;
+      if (el) {
+        const rect        = el.getBoundingClientRect();
+        const totalScroll = steps.length * HOW_SCROLL_STEP;
+        const scrolled    = Math.max(0, -rect.top);
+        const progress    = totalScroll > 0 ? Math.min(scrolled / totalScroll, 1) : 0;
+
+        /* Card parallax drift: glides from +40px → -40px as user scrolls through section */
+        const cardEl = cardInnerRef.current;
+        if (cardEl) {
+          const drift = (progress - 0.5) * -80;
+          cardEl.style.transform = `translateY(${drift}px)`;
+        }
+
+        if (!clickLockRef.current) {
+          const newStep = Math.min(Math.floor(progress * steps.length), steps.length - 1);
           if (newStep !== activeRef.current) {
             activeRef.current = newStep;
             setActiveStep(newStep);
@@ -590,20 +599,26 @@ function HowItWorksSection() {
                   width: '100%', textAlign: 'left', background: 'none', border: 'none',
                   borderTop: '1px solid rgba(255,255,255,0.09)',
                   padding: '20px 0', cursor: 'pointer', display: 'flex',
-                  flexDirection: 'column', gap: 9, outline: 'none',
+                  flexDirection: 'column', gap: 0, outline: 'none',
                 }}>
                 <span style={{
                   fontFamily: NM, fontWeight: 700, fontSize: 11,
                   letterSpacing: '0.1em', textTransform: 'uppercase',
                   color: active ? '#fff' : 'rgba(255,255,255,0.22)',
                   transition: 'color 0.35s ease', lineHeight: 1.3,
+                  marginBottom: active ? 9 : 0,
+                  transition: 'color 0.35s ease, margin-bottom 0.35s ease',
                 }}>
                   {step.title}
                 </span>
                 <span style={{
                   fontFamily: NM, fontSize: 14, lineHeight: 1.6,
-                  color: active ? 'rgba(255,255,255,0.58)' : 'rgba(255,255,255,0.14)',
-                  transition: 'color 0.35s ease', display: 'block', maxWidth: CHAPTER_NAV_W,
+                  color: 'rgba(255,255,255,0.58)',
+                  display: 'block', maxWidth: CHAPTER_NAV_W,
+                  maxHeight: active ? '120px' : '0px',
+                  opacity: active ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'max-height 0.4s ease, opacity 0.3s ease',
                 }}>
                   {step.desc}
                 </span>
@@ -642,22 +657,26 @@ function HowItWorksSection() {
             }
           `}</style>
           <div
-            key={animKey}
-            style={{
-              flexShrink: 0,
-              width: CARD_W,
-              height: CARD_H,
-              borderRadius: 14,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              background: '#1e1e1e',
-              boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
-              animation: 'howCardSlideIn 0.38s ease forwards',
-            }}>
-            <SafariChrome />
-            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-              <StepContent />
+            ref={cardInnerRef}
+            style={{ flexShrink: 0, width: CARD_W_CSS, willChange: 'transform' }}
+          >
+            <div
+              key={animKey}
+              style={{
+                width: '100%',
+                height: CARD_H,
+                borderRadius: 14,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                background: '#1e1e1e',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
+                animation: 'howCardSlideIn 0.38s ease forwards',
+              }}>
+              <SafariChrome />
+              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <StepContent />
+              </div>
             </div>
           </div>
         </div>
