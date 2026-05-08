@@ -117,25 +117,49 @@ function WordReveal({ text, style, className }) {
   );
 }
 
-/* Blur-to-focus reveal triggered by IntersectionObserver */
-function BlurReveal({ children, delay = 0, style = {} }) {
+/* Blur-to-focus reveal triggered by IntersectionObserver.
+   minScroll: if set, the reveal will only fire once window.scrollY >= minScroll */
+function BlurReveal({ children, delay = 0, style = {}, minScroll = 0 }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
+  const intersecting = useRef(false);
+  const revealed = useRef(false);
 
   useEffect(() => {
+    const tryReveal = () => {
+      if (revealed.current) return;
+      if (intersecting.current && window.scrollY >= minScroll) {
+        revealed.current = true;
+        setVisible(true);
+      }
+    };
+
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+      intersecting.current = entry.isIntersecting;
+      if (entry.isIntersecting) tryReveal();
     }, { threshold: 0.15, rootMargin: '0px 0px -5% 0px' });
     obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+
+    let rafId = null;
+    const onScroll = () => {
+      if (revealed.current) { window.removeEventListener('scroll', onScroll); return; }
+      if (!rafId) rafId = requestAnimationFrame(() => { rafId = null; tryReveal(); });
+    };
+    if (minScroll > 0) window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      obs.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [minScroll]);
 
   return (
     <div ref={ref} style={{
       filter:     visible ? 'blur(0px)'   : 'blur(12px)',
-      opacity:    visible ? 1             : 0.15,
+      opacity:    visible ? 1             : 0,
       transition: `filter 0.9s ease-out ${delay}ms, opacity 0.9s ease-out ${delay}ms`,
       ...style,
     }}>
@@ -253,12 +277,12 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user 
 /* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
 const NAV_H           = 60;
 const HOW_SCROLL_STEP = 1200;
-const CARD_H          = 784;
-const CARD_W          = 1209;
-const CHAPTER_NAV_LEFT = 80;
-const CHAPTER_NAV_W   = 272;
-const CARD_GAP        = 52;
-const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP; /* 404 */
+const CARD_H          = 700;
+const CARD_W          = 880;
+const CHAPTER_NAV_LEFT = 424;
+const CHAPTER_NAV_W   = 220;
+const CARD_GAP        = 48;
+const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP; /* 692 */
 
 /* ── Safari-style browser chrome ── */
 function SafariChrome() {
@@ -532,8 +556,8 @@ function HowItWorksSection() {
   return (
     <div id="how-it-works" style={{ background: '#000' }}>
 
-      {/* Title — normal flow, scrolls away */}
-      <div style={{ paddingLeft: CARD_LEFT, paddingRight: 40, paddingTop: 80, paddingBottom: 48 }}>
+      {/* Title — normal flow, scrolls away, aligned with chapter nav left edge */}
+      <div style={{ paddingLeft: CHAPTER_NAV_LEFT, paddingRight: 40, paddingTop: 80, paddingBottom: 48 }}>
         <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
           How it works
         </h2>
@@ -651,17 +675,17 @@ function HowItWorksSection() {
   );
 }
 
-/* Multi-layer parallax */
+/* Multi-layer parallax — each layer may have an optional yOffset (px) applied to bgY base */
 function useParallax(layers) {
   useEffect(() => {
     let rafId = null;
     const update = () => {
       const sy = window.scrollY;
-      layers.forEach(({ ref, speed, mode }) => {
+      layers.forEach(({ ref, speed, mode, yOffset = 0 }) => {
         const el = ref.current;
         if (!el) return;
         if (mode === 'bgY') {
-          el.style.backgroundPositionY = `calc(50% + ${sy * speed}px)`;
+          el.style.backgroundPositionY = `calc(50% + ${yOffset}px + ${sy * speed}px)`;
         } else {
           el.style.transform = `translateY(${sy * speed}px)`;
         }
@@ -834,7 +858,7 @@ export default function LandingPage() {
   const glowRef  = useRef(null);
 
   useParallax([
-    { ref: starsRef, speed: 0.25, mode: 'bgY' },
+    { ref: starsRef, speed: 0.25, mode: 'bgY', yOffset: -200 },
     { ref: glowRef,  speed: 0.5,  mode: 'translateY' },
   ]);
   useStarsScrollReveal(starsRef);
@@ -887,7 +911,7 @@ export default function LandingPage() {
           opacity: 0,
           backgroundImage: `url(${starsBg})`,
           backgroundSize: '130%',
-          backgroundPosition: 'center 50%',
+          backgroundPosition: 'center calc(50% - 200px)',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 0.3s ease',
         }} />
@@ -951,18 +975,18 @@ export default function LandingPage() {
           </p>
         </motion.div>
 
-        {/* Stats row — blur-to-focus reveal, positioned over the stars */}
+        {/* Stats row — hidden until user scrolls 100px, then blur-to-focus reveal */}
         <div className="relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20" style={{ zIndex: 2 }}>
-          <BlurReveal delay={0}>
+          <BlurReveal delay={0} minScroll={100}>
             <Stat prefix="up to" val="100" label="videos per batch" />
           </BlurReveal>
-          <BlurReveal delay={200}>
+          <BlurReveal delay={200} minScroll={100}>
             <Stat prefix="create" val="∞" label="videos" />
           </BlurReveal>
-          <BlurReveal delay={400}>
+          <BlurReveal delay={400} minScroll={100}>
             <Stat prefix="up to" val="4K" label="video quality" />
           </BlurReveal>
-          <BlurReveal delay={600}>
+          <BlurReveal delay={600} minScroll={100}>
             <Stat prefix={null} val="Custom" label="backgrounds" />
           </BlurReveal>
         </div>
