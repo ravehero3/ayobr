@@ -501,9 +501,9 @@ function HowItWorksSection() {
         const el = stickyWrapRef.current;
         if (el) {
           const rect        = el.getBoundingClientRect();
-          const stickyH     = window.innerHeight - NAV_H;
-          const totalScroll = el.offsetHeight - stickyH;
-          const scrolled    = Math.max(0, NAV_H - rect.top);
+          const totalScroll = steps.length * HOW_SCROLL_STEP;
+          /* scrolled = how far the flex container top has travelled above the viewport top */
+          const scrolled    = Math.max(0, -rect.top);
           const progress    = totalScroll > 0 ? Math.min(scrolled / totalScroll, 1) : 0;
           const newStep     = Math.min(Math.floor(progress * steps.length), steps.length - 1);
           if (newStep !== activeRef.current) {
@@ -521,114 +521,131 @@ function HowItWorksSection() {
     return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
   }, []);
 
-  const stickyH  = `calc(100vh - ${NAV_H}px)`;
-  const wrapperH = `calc(100vh - ${NAV_H}px + ${steps.length * HOW_SCROLL_STEP}px)`;
-  const StepContent = STEP_CONTENTS[activeStep];
+  const StepContent   = STEP_CONTENTS[activeStep];
+  /* Nav approximate height: 4 items × ~145px each + 1px bottom border */
+  const NAV_APPROX_H  = 580;
+  /* Stick the nav when it is vertically centred in the viewport */
+  const navStickyTop  = `calc(50vh - ${NAV_APPROX_H / 2}px)`;
+  /* Scroll zone tall enough for all steps + lead-in + lead-out */
+  const scrollZoneH   = `calc(${steps.length * HOW_SCROLL_STEP}px + 200vh)`;
 
   return (
     <div id="how-it-works" style={{ background: '#000' }}>
 
       {/* Title — normal flow, scrolls away */}
-      <div style={{ paddingLeft: 424, paddingRight: 40, paddingTop: 80, paddingBottom: 28 }}>
+      <div style={{ paddingLeft: CARD_LEFT, paddingRight: 40, paddingTop: 80, paddingBottom: 48 }}>
         <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
           How it works
         </h2>
       </div>
 
-      {/* Scroll zone */}
-      <div ref={stickyWrapRef} style={{ height: wrapperH }}>
+      {/*
+        Two-column flex scroll zone.
+        — No overflow:hidden here so both sticky children can stick to the viewport.
+        — The card sticky div has its own overflow:hidden to clip the right-bleeding card.
+      */}
+      <div
+        ref={stickyWrapRef}
+        style={{
+          position: 'relative',
+          height: scrollZoneH,
+          display: 'flex',
+          alignItems: 'flex-start',
+          background: '#000',
+        }}
+      >
+        {/* Left margin spacer */}
+        <div style={{ flexShrink: 0, width: CHAPTER_NAV_LEFT }} />
+
+        {/* ── Chapter nav: independently sticky, sticks when vertically centred ── */}
         <div style={{
-          position: 'sticky', top: NAV_H, height: stickyH,
-          overflow: 'hidden', background: '#000',
+          flexShrink: 0,
+          width: CHAPTER_NAV_W,
+          position: 'sticky',
+          top: navStickyTop,
+          alignSelf: 'flex-start',
+          zIndex: 3,
         }}>
+          {steps.map((step, i) => {
+            const active = i === activeStep;
+            return (
+              <button key={i} onClick={() => goToStep(i)}
+                style={{
+                  width: '100%', textAlign: 'left', background: 'none', border: 'none',
+                  borderTop: '1px solid rgba(255,255,255,0.09)',
+                  padding: '20px 0', cursor: 'pointer', display: 'flex',
+                  flexDirection: 'column', gap: 9, outline: 'none',
+                }}>
+                <span style={{
+                  fontFamily: NM, fontWeight: 700, fontSize: 11,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.22)',
+                  transition: 'color 0.35s ease', lineHeight: 1.3,
+                }}>
+                  {step.title}
+                </span>
+                <span style={{
+                  fontFamily: NM, fontSize: 14, lineHeight: 1.6,
+                  color: active ? 'rgba(255,255,255,0.58)' : 'rgba(255,255,255,0.14)',
+                  transition: 'color 0.35s ease', display: 'block', maxWidth: CHAPTER_NAV_W,
+                }}>
+                  {step.desc}
+                </span>
+              </button>
+            );
+          })}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.09)' }} />
+        </div>
 
-          {/* Chapter nav — Feature Block style */}
-          <div style={{
-            position: 'absolute',
-            left: CHAPTER_NAV_LEFT,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: CHAPTER_NAV_W,
-            zIndex: 3,
-          }}>
-            {steps.map((step, i) => {
-              const active = i === activeStep;
-              return (
-                <button key={i} onClick={() => goToStep(i)}
-                  style={{
-                    width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                    borderTop: '1px solid rgba(255,255,255,0.09)',
-                    padding: '20px 0', cursor: 'pointer', display: 'flex',
-                    flexDirection: 'column', gap: 9, outline: 'none',
-                  }}>
-                  {/* Label tag — 11px uppercase, like the Framer "AI" label */}
-                  <span style={{
-                    fontFamily: NM,
-                    fontWeight: 700,
-                    fontSize: 11,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    color: active ? '#fff' : 'rgba(255,255,255,0.22)',
-                    transition: 'color 0.35s ease',
-                    lineHeight: 1.3,
-                  }}>
-                    {step.title}
-                  </span>
-                  {/* Description paragraph — 14px, muted, always visible */}
-                  <span style={{
-                    fontFamily: NM,
-                    fontSize: 14,
-                    lineHeight: 1.6,
-                    color: active ? 'rgba(255,255,255,0.58)' : 'rgba(255,255,255,0.14)',
-                    transition: 'color 0.35s ease',
-                    display: 'block',
-                    maxWidth: 272,
-                  }}>
-                    {step.desc}
-                  </span>
-                </button>
-              );
-            })}
-            {/* Bottom border */}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.09)' }} />
-          </div>
+        {/* Gap between nav and card */}
+        <div style={{ flexShrink: 0, width: CARD_GAP }} />
 
-          {/* Safari browser card — positioned so it bleeds past the right edge */}
+        {/*
+          ── Card area: independently sticky, sticks just below the navbar ──
+          Height fills the viewport below the navbar so the card can be centred inside.
+          overflow:hidden on this div clips the card that bleeds off the right edge.
+          The div itself is exactly (100vw - CARD_LEFT) wide so it never causes
+          horizontal scroll, but the 1209px-wide card inside is clipped at the right.
+        */}
+        <div style={{
+          flexShrink: 0,
+          position: 'sticky',
+          top: NAV_H,
+          alignSelf: 'flex-start',
+          width: `calc(100vw - ${CARD_LEFT}px)`,
+          height: `calc(100vh - ${NAV_H}px)`,
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          zIndex: 2,
+        }}>
           <style>{`
             @keyframes howCardSlideIn {
               from { opacity: 0; transform: translateX(28px); }
               to   { opacity: 1; transform: translateX(0); }
             }
           `}</style>
-          <div style={{
-            position: 'absolute',
-            left: CARD_LEFT,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: CARD_W,
-            height: CARD_H,
-            /* right side bleeds past viewport — parent overflow:hidden clips it */
-          }}>
-            <div
-              key={animKey}
-              style={{
-                width: '100%', height: '100%',
-                borderRadius: 14,
-                overflow: 'hidden',
-                display: 'flex', flexDirection: 'column',
-                background: '#1e1e1e',
-                boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
-                animation: 'howCardSlideIn 0.38s ease forwards',
-              }}>
-              <SafariChrome />
-              {/* Content area — fills remaining height (784 - 88px chrome) */}
-              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <StepContent />
-              </div>
+          <div
+            key={animKey}
+            style={{
+              flexShrink: 0,
+              width: CARD_W,
+              height: CARD_H,
+              borderRadius: 14,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              background: '#1e1e1e',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
+              animation: 'howCardSlideIn 0.38s ease forwards',
+            }}>
+            <SafariChrome />
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <StepContent />
             </div>
           </div>
-
         </div>
+
       </div>
     </div>
   );
