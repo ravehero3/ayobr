@@ -285,15 +285,19 @@ const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP; /* 692 */
 const CARD_W_CSS      = `calc((100vw - ${CARD_LEFT}px) / 0.75)`;
 
 /* ── Safari-style browser chrome ── */
-function SafariChrome() {
-  const sys = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+/* dark=true → card 4 (Download) uses #0d0d0d bar + #1a1a1a pill */
+function SafariChrome({ dark = false }) {
+  const sys   = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const barBg  = dark ? '#0d0d0d' : '#2c2c2c';
+  const pillBg = dark ? '#1a1a1a' : 'rgba(0,0,0,0.28)';
+  const border = dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.65)';
   return (
     <div style={{ width: '100%', flexShrink: 0 }}>
       {/* Single unified toolbar — macOS Sonoma/Sequoia Safari style */}
       <div style={{
         height: 52,
-        background: '#2c2c2c',
-        borderBottom: '1px solid rgba(0,0,0,0.65)',
+        background: barBg,
+        borderBottom: border,
         display: 'flex',
         alignItems: 'center',
         padding: '0 16px',
@@ -309,35 +313,18 @@ function SafariChrome() {
           ))}
         </div>
 
-        {/* Back / Forward */}
-        <div style={{ display: 'flex', gap: 0, marginLeft: 18, flexShrink: 0 }}>
-          {['‹', '›'].map((ch, i) => (
-            <div key={i} style={{
-              width: 26, height: 26, display: 'flex', alignItems: 'center',
-              justifyContent: 'center',
-              color: i === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.48)',
-              fontSize: 22, lineHeight: 1, cursor: 'default', userSelect: 'none',
-            }}>{ch}</div>
-          ))}
-        </div>
-
         {/* URL pill — centred, fully pill-shaped, macOS style */}
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', margin: '0 10px' }}>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', margin: '0 16px' }}>
           <div style={{
             height: 30,
             width: '100%',
             maxWidth: 400,
-            background: 'rgba(0,0,0,0.28)',
+            background: pillBg,
             borderRadius: 9999,
             border: '1px solid rgba(255,255,255,0.1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '0 14px',
           }}>
-            {/* Lock */}
-            <svg width="10" height="11" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.38, flexShrink: 0 }}>
-              <rect x="3" y="11" width="18" height="11" rx="2" stroke="white" strokeWidth="2.3"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="white" strokeWidth="2.3" strokeLinecap="round"/>
-            </svg>
             <span style={{ color: 'rgba(255,255,255,0.68)', fontSize: 12.5, fontFamily: sys, letterSpacing: '-0.01em', userSelect: 'none' }}>
               typebeatz.app
             </span>
@@ -346,14 +333,12 @@ function SafariChrome() {
 
         {/* Right actions — share + sidebar/tabs */}
         <div style={{ display: 'flex', gap: 1, flexShrink: 0 }}>
-          {/* Share */}
-          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', fontSize: 14, userSelect: 'none' }}>
+          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', userSelect: 'none' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
             </svg>
           </div>
-          {/* Tab overview */}
-          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', fontSize: 13, userSelect: 'none' }}>
+          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', userSelect: 'none' }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
             </svg>
@@ -595,19 +580,20 @@ function HowItWorksSection() {
         }}>
           {steps.map((step, i) => {
             const active = i === activeStep;
+            const isFirst = i === 0;
             return (
               <button key={i} onClick={() => goToStep(i)}
                 style={{
                   width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                  borderTop: '1px solid rgba(255,255,255,0.09)',
+                  borderTop: isFirst ? 'none' : '1px solid rgba(255,255,255,0.09)',
                   padding: '20px 0', cursor: 'pointer', display: 'flex',
                   flexDirection: 'column', gap: 0, outline: 'none',
                 }}>
                 <span style={{
-                  fontFamily: NM, fontWeight: 700, fontSize: 11,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  fontFamily: NM, fontWeight: 700, fontSize: 14,
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
                   color: active ? '#fff' : 'rgba(255,255,255,0.22)',
-                  transition: 'color 0.35s ease', lineHeight: 1.3,
+                  lineHeight: 1.3,
                   marginBottom: active ? 9 : 0,
                   transition: 'color 0.35s ease, margin-bottom 0.35s ease',
                 }}>
@@ -627,7 +613,6 @@ function HowItWorksSection() {
               </button>
             );
           })}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.09)' }} />
         </div>
 
         {/* Gap between nav and card */}
@@ -652,10 +637,19 @@ function HowItWorksSection() {
           alignItems: 'center',
           zIndex: 2,
         }}>
-          {/* Outer wrapper: carries the scroll-parallax drift */}
+          {/* Outer wrapper: carries the scroll-parallax drift.
+              Steps 0-2: card right edge sits 232px from viewport right.
+              Step 3 (Download): 25% bleeds off the right for an oversized feel. */}
           <div
             ref={cardInnerRef}
-            style={{ flexShrink: 0, width: CARD_W_CSS, willChange: 'transform' }}
+            style={{
+              flexShrink: 0,
+              width: activeStep < 3
+                ? `calc(100vw - ${CARD_LEFT + 232}px)`
+                : CARD_W_CSS,
+              willChange: 'transform',
+              transition: 'width 0.52s cubic-bezier(0.32,0.72,0,1)',
+            }}
           >
             {/* Inner wrapper: 16:9 aspect ratio = real computer screen proportions */}
             <div style={{
@@ -681,7 +675,7 @@ function HowItWorksSection() {
                     background: '#1e1e1e',
                   }}
                 >
-                  <SafariChrome />
+                  <SafariChrome dark={activeStep === 3} />
                   <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                     <StepContent />
                   </div>
@@ -894,7 +888,7 @@ export default function LandingPage() {
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-4"
-        style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 424, paddingRight: 424 }}>
+        style={{ background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(6px)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingLeft: 424, paddingRight: 424 }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/login')}
