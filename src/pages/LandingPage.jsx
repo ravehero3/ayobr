@@ -256,9 +256,9 @@ const HOW_SCROLL_STEP = 500;
 const CARD_H          = 784;
 const CARD_W          = 1209;
 const CHAPTER_NAV_LEFT = 80;
-const CHAPTER_NAV_W   = 210;
-const CARD_GAP        = 48;
-const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP; /* 338 */
+const CHAPTER_NAV_W   = 272;
+const CARD_GAP        = 52;
+const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP; /* 404 */
 
 /* ── Safari-style browser chrome ── */
 function SafariChrome() {
@@ -542,7 +542,7 @@ function HowItWorksSection() {
           overflow: 'hidden', background: '#000',
         }}>
 
-          {/* Chapter nav — absolute, left-aligned */}
+          {/* Chapter nav — Feature Block style */}
           <div style={{
             position: 'absolute',
             left: CHAPTER_NAV_LEFT,
@@ -551,47 +551,46 @@ function HowItWorksSection() {
             width: CHAPTER_NAV_W,
             zIndex: 3,
           }}>
-            {steps.map((step, i) => (
-              <button key={i} onClick={() => goToStep(i)}
-                style={{
-                  width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                  borderTop: '1px solid rgba(255,255,255,0.11)',
-                  padding: '14px 0', cursor: 'pointer', display: 'block', outline: 'none',
-                }}>
-                <div style={{
-                  fontFamily: NM, fontWeight: 600, fontSize: '0.88rem', lineHeight: 1.35,
-                  color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.28)',
-                  transition: 'color 0.3s ease',
-                }}>
-                  {step.title}
-                </div>
-                <div style={{
-                  fontFamily: NM, fontSize: '0.78rem', lineHeight: 1.6,
-                  color: 'rgba(255,255,255,0.38)',
-                  maxHeight: i === activeStep ? '80px' : '0px',
-                  overflow: 'hidden',
-                  opacity: i === activeStep ? 1 : 0,
-                  marginTop: i === activeStep ? 6 : 0,
-                  transition: 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease',
-                }}>
-                  {step.desc}
-                </div>
-              </button>
-            ))}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.11)' }} />
-            {/* Progress dots */}
-            <div style={{ display: 'flex', gap: 5, marginTop: 18 }}>
-              {steps.map((_, j) => (
-                <button key={j} onClick={() => goToStep(j)}
+            {steps.map((step, i) => {
+              const active = i === activeStep;
+              return (
+                <button key={i} onClick={() => goToStep(i)}
                   style={{
-                    height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
-                    flex: j === activeStep ? 3 : 1,
-                    background: j === activeStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.1)',
-                    transition: 'flex 0.4s ease, background 0.35s ease',
-                  }}
-                />
-              ))}
-            </div>
+                    width: '100%', textAlign: 'left', background: 'none', border: 'none',
+                    borderTop: '1px solid rgba(255,255,255,0.09)',
+                    padding: '20px 0', cursor: 'pointer', display: 'flex',
+                    flexDirection: 'column', gap: 9, outline: 'none',
+                  }}>
+                  {/* Label tag — 11px uppercase, like the Framer "AI" label */}
+                  <span style={{
+                    fontFamily: NM,
+                    fontWeight: 700,
+                    fontSize: 11,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.22)',
+                    transition: 'color 0.35s ease',
+                    lineHeight: 1.3,
+                  }}>
+                    {step.title}
+                  </span>
+                  {/* Description paragraph — 14px, muted, always visible */}
+                  <span style={{
+                    fontFamily: NM,
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: active ? 'rgba(255,255,255,0.58)' : 'rgba(255,255,255,0.14)',
+                    transition: 'color 0.35s ease',
+                    display: 'block',
+                    maxWidth: 272,
+                  }}>
+                    {step.desc}
+                  </span>
+                </button>
+              );
+            })}
+            {/* Bottom border */}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.09)' }} />
           </div>
 
           {/* Safari browser card — positioned so it bleeds past the right edge */}
