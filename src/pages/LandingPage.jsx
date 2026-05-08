@@ -145,7 +145,7 @@ function BlurReveal({ children, delay = 0, style = {} }) {
 }
 
 /* Pricing Section */
-function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
+function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user }) {
   const isPro      = user?.role === 'pro' || user?.role === 'admin';
   const checkFree  = { bg: 'rgba(74,222,128,0.12)',  border: 'rgba(74,222,128,0.35)',  color: '#4ade80' };
   const checkBlue  = { bg: 'rgba(56,189,248,0.12)',  border: 'rgba(56,189,248,0.35)',  color: '#38bdf8' };
@@ -238,7 +238,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
                 </li>
               ))}
             </ul>
-            <button onClick={handleUpgradeCTA} style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.875rem', lineHeight: LH_LABEL, background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', border: 'none', color: '#000', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', boxShadow: '0 0 28px rgba(251,191,36,0.22)', outline: 'none' }}>
+            <button onClick={handleUnlimitedCTA} style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.875rem', lineHeight: LH_LABEL, background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', border: 'none', color: '#000', borderRadius: 12, padding: '14px 0', cursor: 'pointer', width: '100%', boxShadow: '0 0 28px rgba(251,191,36,0.22)', outline: 'none' }}>
               Go Unlimited
             </button>
             <p style={{ fontFamily: NM, fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 14 }}>Cancel anytime · No commitment</p>
@@ -251,13 +251,237 @@ function PricingSection({ handleCTA, handleUpgradeCTA, user }) {
 }
 
 /* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
-const NAV_H           = 60;  /* navbar height in px          */
-const HOW_SCROLL_STEP = 500; /* px of scroll per chapter — generous so content is readable */
+const NAV_H           = 60;
+const HOW_SCROLL_STEP = 500;
+const CARD_H          = 784;
+const CARD_W          = 1209;
+const CHAPTER_NAV_LEFT = 80;
+const CHAPTER_NAV_W   = 210;
+const CARD_GAP        = 48;
+const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP; /* 338 */
+
+/* ── Safari-style browser chrome ── */
+function SafariChrome() {
+  const sys = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  return (
+    <div style={{ width: '100%', flexShrink: 0 }}>
+      {/* Tab bar */}
+      <div style={{
+        height: 40, background: '#323232',
+        borderBottom: '1px solid rgba(0,0,0,0.55)',
+        display: 'flex', alignItems: 'center', padding: '0 14px', gap: 0,
+      }}>
+        {/* Traffic lights */}
+        <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginRight: 20 }}>
+          {[['#ff5f57','#e0443e'],['#ffbd2e','#dea123'],['#28c840','#1aab29']].map(([bg, shadow], ci) => (
+            <div key={ci} style={{
+              width: 12, height: 12, borderRadius: '50%', background: bg, flexShrink: 0,
+              boxShadow: `inset 0 -0.5px 0 ${shadow}`,
+            }} />
+          ))}
+        </div>
+        {/* Active tab */}
+        <div style={{
+          height: 30, background: '#1e1e1e', borderRadius: '6px 6px 0 0',
+          display: 'flex', alignItems: 'center', padding: '0 12px', gap: 7,
+          minWidth: 180, maxWidth: 220,
+          borderTop: '1px solid rgba(255,255,255,0.07)',
+          borderLeft: '1px solid rgba(255,255,255,0.06)',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+        }}>
+          {/* Favicon */}
+          <div style={{
+            width: 14, height: 14, borderRadius: 3, flexShrink: 0,
+            background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)',
+          }} />
+          <span style={{ color: 'rgba(255,255,255,0.78)', fontSize: 12, fontFamily: sys, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            TypeBeatz — Beat Video Generator
+          </span>
+        </div>
+        {/* New tab + */}
+        <div style={{ marginLeft: 6, width: 24, height: 24, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 17, lineHeight: 1 }}>+</div>
+      </div>
+
+      {/* Toolbar */}
+      <div style={{
+        height: 48, background: '#282828',
+        borderBottom: '1px solid rgba(0,0,0,0.6)',
+        display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10,
+      }}>
+        {/* Back / Forward */}
+        <div style={{ display: 'flex', gap: 2, marginRight: 4 }}>
+          {['‹', '›'].map((ch, i) => (
+            <div key={i} style={{
+              width: 26, height: 26, borderRadius: 5, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', color: i === 0 ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.55)',
+              fontSize: 20, lineHeight: 1, cursor: 'default',
+            }}>{ch}</div>
+          ))}
+        </div>
+        {/* Reload */}
+        <div style={{ width: 26, height: 26, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 14, marginRight: 6 }}>↻</div>
+        {/* URL bar */}
+        <div style={{
+          flex: 1, height: 30,
+          background: 'rgba(0,0,0,0.35)',
+          borderRadius: 8,
+          border: '1px solid rgba(255,255,255,0.09)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        }}>
+          {/* Lock */}
+          <svg width="11" height="12" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.45, flexShrink: 0 }}>
+            <rect x="3" y="11" width="18" height="11" rx="2" stroke="white" strokeWidth="2.2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
+          </svg>
+          <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: 13, fontFamily: sys, letterSpacing: '-0.01em' }}>
+            typebeatz.app
+          </span>
+        </div>
+        {/* Right actions */}
+        <div style={{ display: 'flex', gap: 4, marginLeft: 6 }}>
+          {['⊕', '↑'].map((ic, i) => (
+            <div key={i} style={{ width: 26, height: 26, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>{ic}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Step content mockups ── */
+const STEP_CONTENTS = [
+  /* Step 0: Upload */
+  () => (
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0f1e', padding: 40 }}>
+      <div style={{ width: '100%', maxWidth: 680 }}>
+        {/* Drop zone */}
+        <div style={{
+          border: '2px dashed rgba(59,130,246,0.4)', borderRadius: 18,
+          padding: '40px 28px', textAlign: 'center', marginBottom: 28,
+          background: 'rgba(59,130,246,0.04)',
+        }}>
+          <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.9 }}>🎵</div>
+          <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 15, fontWeight: 600, marginBottom: 6, fontFamily: NM }}>
+            Drop your files here
+          </div>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12.5, fontFamily: NM }}>
+            MP3 beats + PNG artwork — up to 100 files
+          </div>
+        </div>
+        {/* File list preview */}
+        {[['🎵', 'travis_drip_type_beat.mp3', '5.2 MB'],['🖼️', 'artwork_drip_01.png', '1.8 MB'],['🎵', 'metro_vibes_type_beat.mp3', '4.7 MB']].map(([ic, name, size], i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+            borderRadius: 10, marginBottom: 6,
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            <span style={{ fontSize: 16 }}>{ic}</span>
+            <span style={{ color: 'rgba(255,255,255,0.68)', fontSize: 12.5, fontFamily: NM, flex: 1 }}>{name}</span>
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11.5, fontFamily: NM }}>{size}</span>
+            <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(40,200,64,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#28c840', fontSize: 10 }}>✓</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+  /* Step 1: Review Pairs */
+  () => (
+    <div style={{ width: '100%', height: '100%', background: '#0a0f1e', padding: '32px 40px', overflowY: 'hidden' }}>
+      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: NM, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 18 }}>3 pairs ready</div>
+      <div style={{ display: 'grid', gap: 14 }}>
+        {[
+          ['travis_drip_type_beat.mp3', 'artwork_drip_01.png', '#3b82f6'],
+          ['metro_vibes_type_beat.mp3', 'cover_metro_dark.png', '#8b5cf6'],
+          ['lil_wave_type_beat.mp3',    'wave_bg_artwork.png',  '#0ea5e9'],
+        ].map(([audio, img, accent], i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px',
+            borderRadius: 14, background: 'rgba(255,255,255,0.04)',
+            border: `1px solid rgba(255,255,255,0.07)`,
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.2)', fontFamily: NM, width: 20, textAlign: 'center' }}>{i + 1}</div>
+            {/* Artwork thumbnail */}
+            <div style={{ width: 48, height: 48, borderRadius: 8, background: `linear-gradient(135deg, ${accent}55, ${accent}22)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🖼️</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: 'rgba(255,255,255,0.78)', fontSize: 13, fontFamily: NM, fontWeight: 600, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{audio}</div>
+              <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11.5, fontFamily: NM }}>{img}</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.25)', fontSize: 12, fontFamily: NM }}>
+              <span style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11 }}>swap</span>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(40,200,64,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#28c840', fontSize: 14 }}>✓</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+  /* Step 2: Generate */
+  () => (
+    <div style={{ width: '100%', height: '100%', background: '#0a0f1e', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 28, padding: 48 }}>
+      <div style={{ fontSize: 56, lineHeight: 1 }}>😴</div>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#fff', fontSize: 18, fontWeight: 700, fontFamily: NM, marginBottom: 6 }}>Generating your videos…</div>
+        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, fontFamily: NM }}>You sleep, we work. 3 of 4 complete.</div>
+      </div>
+      {/* Progress bars */}
+      <div style={{ width: '100%', maxWidth: 540, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {[
+          ['travis_drip_type_beat', 100, '#28c840'],
+          ['metro_vibes_type_beat', 100, '#28c840'],
+          ['lil_wave_type_beat',    100, '#28c840'],
+          ['dark_vibes_type_beat',  62,  '#3b82f6'],
+        ].map(([name, pct, color], i) => (
+          <div key={i}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontFamily: NM }}>{name}</span>
+              <span style={{ color: pct === 100 ? '#28c840' : 'rgba(255,255,255,0.4)', fontSize: 12, fontFamily: NM }}>{pct === 100 ? '✓ Done' : `${pct}%`}</span>
+            </div>
+            <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2, background: color, transition: 'width 0.6s ease' }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+  /* Step 3: Download */
+  () => (
+    <div style={{ width: '100%', height: '100%', background: '#0a0f1e', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24, padding: 48 }}>
+      <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(40,200,64,0.12)', border: '2px solid rgba(40,200,64,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>✅</div>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#fff', fontSize: 20, fontWeight: 800, fontFamily: NM, marginBottom: 6 }}>All 4 videos ready!</div>
+        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13.5, fontFamily: NM }}>Ready to upload straight to YouTube</div>
+      </div>
+      {/* Download button */}
+      <div style={{
+        padding: '14px 36px', borderRadius: 12, cursor: 'pointer',
+        background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)',
+        color: '#fff', fontFamily: NM, fontWeight: 700, fontSize: 15,
+        boxShadow: '0 8px 32px rgba(59,130,246,0.35)',
+        display: 'flex', alignItems: 'center', gap: 10,
+      }}>
+        <span style={{ fontSize: 18 }}>📥</span> Download All (4 MP4s)
+      </div>
+      {/* File list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 480 }}>
+        {['travis_drip_type_beat.mp4','metro_vibes_type_beat.mp4','lil_wave_type_beat.mp4','dark_vibes_type_beat.mp4'].map((f, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <span style={{ color: '#28c840', fontSize: 13 }}>✓</span>
+            <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12.5, fontFamily: NM, flex: 1 }}>{f}</span>
+            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, fontFamily: NM }}>MP4</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+];
 
 function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const [animKey, setAnimKey]       = useState(0);
-  const stickyWrapRef = useRef(null); /* the scroll-zone that drives pinning */
+  const stickyWrapRef = useRef(null);
   const activeRef     = useRef(0);
   const clickLockRef  = useRef(false);
 
@@ -270,19 +494,18 @@ function HowItWorksSection() {
     setTimeout(() => { clickLockRef.current = false; }, 600);
   }, []);
 
-  /* rAF scroll tracker — progress measured inside the sticky wrapper */
   useEffect(() => {
     let rafId = null;
     const update = () => {
       if (!clickLockRef.current) {
         const el = stickyWrapRef.current;
         if (el) {
-          const rect       = el.getBoundingClientRect();
-          const stickyH    = window.innerHeight - NAV_H;
+          const rect        = el.getBoundingClientRect();
+          const stickyH     = window.innerHeight - NAV_H;
           const totalScroll = el.offsetHeight - stickyH;
-          const scrolled   = Math.max(0, NAV_H - rect.top);
-          const progress   = totalScroll > 0 ? Math.min(scrolled / totalScroll, 1) : 0;
-          const newStep    = Math.min(Math.floor(progress * steps.length), steps.length - 1);
+          const scrolled    = Math.max(0, NAV_H - rect.top);
+          const progress    = totalScroll > 0 ? Math.min(scrolled / totalScroll, 1) : 0;
+          const newStep     = Math.min(Math.floor(progress * steps.length), steps.length - 1);
           if (newStep !== activeRef.current) {
             activeRef.current = newStep;
             setActiveStep(newStep);
@@ -298,125 +521,114 @@ function HowItWorksSection() {
     return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
   }, []);
 
-  const s         = steps[activeStep];
-  const stickyH   = `calc(100vh - ${NAV_H}px)`;
-  /* wrapper height: the sticky height + scroll space for all steps */
-  const wrapperH  = `calc(100vh - ${NAV_H}px + ${steps.length * HOW_SCROLL_STEP}px)`;
-  const stepIcons = ['🎵', '🔀', '⚙️', '📥'];
+  const stickyH  = `calc(100vh - ${NAV_H}px)`;
+  const wrapperH = `calc(100vh - ${NAV_H}px + ${steps.length * HOW_SCROLL_STEP}px)`;
+  const StepContent = STEP_CONTENTS[activeStep];
 
   return (
     <div id="how-it-works" style={{ background: '#000' }}>
 
-      {/* ── Title — normal flow, scrolls away before the pin starts ── */}
+      {/* Title — normal flow, scrolls away */}
       <div style={{ paddingLeft: 424, paddingRight: 40, paddingTop: 80, paddingBottom: 28 }}>
         <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
           How it works
         </h2>
       </div>
 
-      {/* ── Scroll zone: sticky panel lives inside here ── */}
+      {/* Scroll zone */}
       <div ref={stickyWrapRef} style={{ height: wrapperH }}>
         <div style={{
-          position: 'sticky',
-          top: NAV_H,
-          height: stickyH,
-          display: 'flex',
-          alignItems: 'center',
-          overflow: 'hidden',
-          background: '#000',
+          position: 'sticky', top: NAV_H, height: stickyH,
+          overflow: 'hidden', background: '#000',
         }}>
-          {/* Inner layout — left-aligned at 424 px, matching logo */}
-          <div style={{ width: '100%', paddingLeft: 424, paddingRight: 60 }}>
-            <div style={{ display: 'flex', gap: 64, alignItems: 'stretch' }}>
 
-              {/* Left: chapter menu */}
-              <div style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-                {steps.map((step, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goToStep(i)}
-                    style={{
-                      width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                      borderTop: '1px solid rgba(255,255,255,0.11)',
-                      padding: '14px 0', cursor: 'pointer', display: 'block',
-                      outline: 'none',
-                    }}>
-                    <div style={{
-                      fontFamily: NM, fontWeight: 600, fontSize: '0.88rem', lineHeight: 1.35,
-                      color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.28)',
-                      transition: 'color 0.3s ease',
-                    }}>
-                      {step.title}
-                    </div>
-                    <div style={{
-                      fontFamily: NM, fontSize: '0.78rem', lineHeight: 1.6,
-                      color: 'rgba(255,255,255,0.38)',
-                      maxHeight: i === activeStep ? '80px' : '0px',
-                      overflow: 'hidden',
-                      opacity: i === activeStep ? 1 : 0,
-                      marginTop: i === activeStep ? 6 : 0,
-                      transition: 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease',
-                    }}>
-                      {step.desc}
-                    </div>
-                  </button>
-                ))}
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.11)' }} />
-
-                {/* Progress dots */}
-                <div style={{ display: 'flex', gap: 5, marginTop: 18 }}>
-                  {steps.map((_, j) => (
-                    <button
-                      key={j}
-                      onClick={() => goToStep(j)}
-                      style={{
-                        height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
-                        flex: j === activeStep ? 3 : 1,
-                        background: j === activeStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.1)',
-                        transition: 'flex 0.4s ease, background 0.35s ease',
-                      }}
-                    />
-                  ))}
+          {/* Chapter nav — absolute, left-aligned */}
+          <div style={{
+            position: 'absolute',
+            left: CHAPTER_NAV_LEFT,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: CHAPTER_NAV_W,
+            zIndex: 3,
+          }}>
+            {steps.map((step, i) => (
+              <button key={i} onClick={() => goToStep(i)}
+                style={{
+                  width: '100%', textAlign: 'left', background: 'none', border: 'none',
+                  borderTop: '1px solid rgba(255,255,255,0.11)',
+                  padding: '14px 0', cursor: 'pointer', display: 'block', outline: 'none',
+                }}>
+                <div style={{
+                  fontFamily: NM, fontWeight: 600, fontSize: '0.88rem', lineHeight: 1.35,
+                  color: i === activeStep ? '#fff' : 'rgba(255,255,255,0.28)',
+                  transition: 'color 0.3s ease',
+                }}>
+                  {step.title}
                 </div>
-              </div>
-
-              {/* Right: screenshot panel — animates in on step change */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  key={animKey}
+                <div style={{
+                  fontFamily: NM, fontSize: '0.78rem', lineHeight: 1.6,
+                  color: 'rgba(255,255,255,0.38)',
+                  maxHeight: i === activeStep ? '80px' : '0px',
+                  overflow: 'hidden',
+                  opacity: i === activeStep ? 1 : 0,
+                  marginTop: i === activeStep ? 6 : 0,
+                  transition: 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease',
+                }}>
+                  {step.desc}
+                </div>
+              </button>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.11)' }} />
+            {/* Progress dots */}
+            <div style={{ display: 'flex', gap: 5, marginTop: 18 }}>
+              {steps.map((_, j) => (
+                <button key={j} onClick={() => goToStep(j)}
                   style={{
-                    width: '100%',
-                    height: 'clamp(280px, 44vh, 460px)',
-                    background: 'linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    position: 'relative',
-                    animation: 'howCardIn 0.36s ease forwards',
-                  }}>
-                  <style>{`@keyframes howCardIn { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }`}</style>
-
-                  {/* Faux browser chrome */}
-                  <div style={{ height: 34, borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', background: 'rgba(255,255,255,0.025)' }}>
-                    {['#ff5f56','#ffbd2e','#27c93f'].map((c, ci) => (
-                      <div key={ci} style={{ width: 9, height: 9, borderRadius: '50%', background: c, opacity: 0.55 }} />
-                    ))}
-                    <div style={{ flex: 1, height: 16, borderRadius: 4, background: 'rgba(255,255,255,0.05)', marginLeft: 8 }} />
-                  </div>
-
-                  {/* Content area */}
-                  <div style={{ height: 'calc(100% - 34px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 28 }}>
-                    <div style={{ fontSize: 'clamp(2.2rem, 4vw, 3rem)', lineHeight: 1 }}>{stepIcons[activeStep]}</div>
-                    <div style={{ fontFamily: NM, fontWeight: 700, fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>
-                      Step {activeStep + 1} — {s.title}
-                    </div>
-                    <div style={{ position: 'absolute', bottom: 10, right: 18, fontFamily: NM, fontWeight: 900, fontSize: 'clamp(4rem, 9vw, 8rem)', lineHeight: 1, letterSpacing: '-0.06em', color: 'rgba(255,255,255,0.03)', userSelect: 'none', pointerEvents: 'none' }}>{s.num}</div>
-                  </div>
-                </div>
-              </div>
-
+                    height: 3, borderRadius: 2, border: 'none', padding: 0, cursor: 'pointer',
+                    flex: j === activeStep ? 3 : 1,
+                    background: j === activeStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.1)',
+                    transition: 'flex 0.4s ease, background 0.35s ease',
+                  }}
+                />
+              ))}
             </div>
           </div>
+
+          {/* Safari browser card — positioned so it bleeds past the right edge */}
+          <style>{`
+            @keyframes howCardSlideIn {
+              from { opacity: 0; transform: translateX(28px); }
+              to   { opacity: 1; transform: translateX(0); }
+            }
+          `}</style>
+          <div style={{
+            position: 'absolute',
+            left: CARD_LEFT,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: CARD_W,
+            height: CARD_H,
+            /* right side bleeds past viewport — parent overflow:hidden clips it */
+          }}>
+            <div
+              key={animKey}
+              style={{
+                width: '100%', height: '100%',
+                borderRadius: 14,
+                overflow: 'hidden',
+                display: 'flex', flexDirection: 'column',
+                background: '#1e1e1e',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
+                animation: 'howCardSlideIn 0.38s ease forwards',
+              }}>
+              <SafariChrome />
+              {/* Content area — fills remaining height (784 - 88px chrome) */}
+              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <StepContent />
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -770,7 +982,7 @@ export default function LandingPage() {
       <DropZonePreview />
 
       {/* ── Pricing ── */}
-      <PricingSection handleCTA={handleCTA} handleUpgradeCTA={handleUpgradeCTA} user={user} />
+      <PricingSection handleCTA={handleCTA} handleUpgradeCTA={handleUpgradeCTA} handleUnlimitedCTA={handleUnlimitedCTA} user={user} />
 
       {/* ── CTA banner ── */}
       <section className="py-24 px-6" style={{ background: '#000' }}>
