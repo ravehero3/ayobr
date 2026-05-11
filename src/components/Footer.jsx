@@ -54,180 +54,86 @@ const Footer = ({ onGenerateVideos, onStop }) => {
       style={{ zIndex: 99999 }}
     >
       <div
-        className="w-full h-full flex items-center justify-between px-8"
+        className="w-full h-full flex items-center justify-between px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto"
         style={{
           background: 'rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderBottom: 'none',
-          borderLeft: 'none',
-          borderRight: 'none',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
         {/* Left side - Back Arrow and Action Buttons */}
-        <div className="flex items-center gap-4" style={{ marginLeft: 'calc((100vw - 500px) / 2 - 292px)' }}>
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={async () => {
-              // Handle going back to previous step with proper state cleanup
               const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates, clearGeneratedVideos, resetGenerationState } = useAppStore.getState();
 
-              // If generating, cancel generation and return to container pairs
               if (isGenerating) {
-                console.log('Cancelling video generation and returning to container pairs...');
-                
-                // Import forceStopAllProcesses dynamically
                 const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
-                
-                // Stop all FFmpeg processes and clean up temporary files
                 await forceStopAllProcesses();
-                
-                // Reset generation state but keep the pairs intact
                 resetGenerationState();
                 clearAllVideoGenerationStates();
-                clearGeneratedVideos(); // Clear any already-generated videos
-                
-                // Go back to file management page to see container pairs
+                clearGeneratedVideos();
                 setCurrentPage('fileManagement');
-                
-                console.log('Generation cancelled - returning to container pairs');
               } else {
-                // Normal back navigation without generation
                 setIsGenerating(false);
                 clearAllVideoGenerationStates();
-
                 if (generatedVideos.length > 0) {
-                  // From download page, go back to file management with complete cleanup
-                  clearGeneratedVideos(); // Clear generated videos to return to pre-generation state
+                  clearGeneratedVideos();
                   setCurrentPage('fileManagement');
-                } else if (completePairs.length > 0 || hasFiles) {
-                  // From generation page or file management, go back to upload and clear everything
-                  clearAllPairs();
-                  setCurrentPage('upload');
                 } else {
-                  // Fallback: ensure we go to upload page
                   clearAllPairs();
                   setCurrentPage('upload');
                 }
               }
             }}
-            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
+            className="flex items-center space-x-1 sm:space-x-2 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
           >
-            <svg
-              className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors duration-200"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-5 h-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="text-sm text-gray-300 group-hover:text-white transition-colors duration-200">
-              Back
-            </span>
+            <span className="hidden xs:inline text-sm text-gray-300 group-hover:text-white">Back</span>
           </button>
 
-          {/* Back to Edit Button - Only show when generating or videos exist */}
           {(isGenerating || generatedVideos.length > 0) && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('Back to Edit button clicked - preserving files and returning to fileManagement');
                 popPage('fileManagement');
               }}
-              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
+              className="flex items-center space-x-1 sm:space-x-2 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
             >
-              <svg
-                className="w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors duration-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5 text-blue-400 group-hover:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
               </svg>
-              <span className="text-sm text-blue-300 group-hover:text-blue-200 transition-colors duration-200">
-                Back to Edit
-              </span>
-            </button>
-          )}
-
-          {/* Start Over Button - Only show on pages 1-2 (left side) */}
-          {!isOnPage3 && (isGenerating || generatedVideos.length > 0) && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log('Start Over button clicked - initiating complete app reset');
-                if (onStop) onStop();
-                resetApp();
-              }}
-              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
-            >
-              <svg
-                className="w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors duration-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              <span className="text-sm text-red-300 group-hover:text-red-200 transition-colors duration-200">
-                Start Over
-              </span>
+              <span className="hidden xs:inline text-sm text-blue-300 group-hover:text-blue-200">Edit</span>
             </button>
           )}
         </div>
 
-        {/* Center - Ready Status or Progress */}
-        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2" style={{ marginTop: '-2px' }}>
+        {/* Center - Status or Action Button */}
+        <div className="flex-1 flex items-center justify-center">
           {isGenerating ? (
-            <div className="flex flex-col items-center space-y-1">
-              <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
-                <span className="text-sm text-blue-300 font-medium">
-                  {completedVideosCount} of {completePairs.length} completed
-                </span>
-              </div>
-              <div className="w-48 bg-gray-700 rounded-full h-1">
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-blue-300 font-medium mb-1">
+                {completedVideosCount} / {completePairs.length}
+              </span>
+              <div className="w-24 sm:w-48 bg-gray-700 rounded-full h-1">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-sky-400 h-1 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${completePairs.length > 0 ? Math.floor((completedVideosCount / completePairs.length) * 100) : 0}%` }}
+                  className="bg-gradient-to-r from-blue-500 to-sky-400 h-1 rounded-full transition-all duration-300"
+                  style={{ width: `${completePairs.length > 0 ? (completedVideosCount / completePairs.length) * 100 : 0}%` }}
                 />
               </div>
             </div>
-          ) : (
-            <div className="flex items-center space-x-2" style={{ marginLeft: '-140px' }}>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span className="text-sm text-gray-300">
-                {completePairs.length} Video{completePairs.length !== 1 ? 's' : ''} Ready
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Generate Videos Button or Download All Videos Button - centered with footer */}
-        <div className="absolute" style={{ left: 'calc(50% + 92px + 8px - 100px + 27px)', top: 'calc(50% + 1px)', transform: 'translateY(-50%)' }}>
-          {generatedVideos.length === 0 && !isGenerating && (
+          ) : generatedVideos.length === 0 ? (
             <button
               onClick={onGenerateVideos}
               disabled={isGenerating || completePairs.length === 0}
-              className="generate-btn-subtle-particles"
+              className="generate-btn-subtle-particles scale-90 sm:scale-100"
             >
               Generate Videos
-              <div className="particle-system">
-                <div className="particle particle-1"></div>
-                <div className="particle particle-2"></div>
-                <div className="particle particle-3"></div>
-                <div className="particle particle-4"></div>
-                <div className="particle particle-5"></div>
-                <div className="particle particle-6"></div>
-                <div className="particle particle-7"></div>
-              </div>
             </button>
-          )}
-
-          {/* Download All Videos Button - matching Generate Videos styling */}
-          {generatedVideos.length > 0 && generatedVideos.length === completePairs.length && !isGenerating && (
+          ) : (
             <button
               onClick={() => {
                 generatedVideos.forEach(video => {
@@ -239,83 +145,38 @@ const Footer = ({ onGenerateVideos, onStop }) => {
                   document.body.removeChild(link);
                 });
               }}
-              className="generate-btn-subtle-particles"
+              className="generate-btn-subtle-particles scale-90 sm:scale-100"
             >
-              Download All Videos
-              <div className="particle-system">
-                <div className="particle particle-1"></div>
-                <div className="particle particle-2"></div>
-                <div className="particle particle-3"></div>
-                <div className="particle particle-4"></div>
-                <div className="particle particle-5"></div>
-                <div className="particle particle-6"></div>
-                <div className="particle particle-7"></div>
-              </div>
+              Download All
             </button>
           )}
         </div>
 
-        {/* Right side - Settings Button (Pages 1-2) OR Start Over Button (Page 3) */}
-        <div className="flex items-center" style={{ marginRight: 'calc((100vw - 500px) / 2 - 286px)' }}> {/* Moved 1px to the right (287 - 1) */}
-          {/* Settings Icon - Only show on pages 1-2 */}
-          {!isOnPage3 && (
+        {/* Right side - Settings or Start Over */}
+        <div className="flex items-center gap-2">
+          {!isOnPage3 ? (
             <motion.button
               onClick={() => setIsSettingsOpen(true)}
-              className="settings-icon-magical relative flex items-center justify-center p-2 transition-all duration-300 hover:scale-105 flex-shrink-0"
-              style={{ transition: 'all 0.15s ease-out' }}
-              whileHover={{ 
-                scale: 1.05,
-                rotate: 360
-              }}
-              whileTap={{ 
-                scale: 0.95,
-                filter: 'brightness(1.5)'
-              }}
-              transition={{
-                rotate: { duration: 2, ease: "linear" },
-                filter: { duration: 0.15, ease: "easeOut" }
-              }}
+              className="relative p-2 rounded-lg hover:bg-white/5 transition-all"
+              whileHover={{ rotate: 90 }}
             >
-              <svg className="w-6 h-6 text-gray-400 hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <svg className="w-6 h-6 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              {/* Magical Particle System */}
-              <div className="settings-particle-system">
-                <div className="settings-particle settings-particle-1"></div>
-                <div className="settings-particle settings-particle-2"></div>
-                <div className="settings-particle settings-particle-3"></div>
-                <div className="settings-particle settings-particle-4"></div>
-                <div className="settings-particle settings-particle-5"></div>
-                <div className="settings-particle settings-particle-6"></div>
-                <div className="settings-particle settings-particle-7"></div>
-                <div className="settings-particle settings-particle-8"></div>
-              </div>
             </motion.button>
-          )}
-
-          {/* Start Over Button - Only show on page 3 (right side) */}
-          {isOnPage3 && (
+          ) : (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log('Start Over button clicked - initiating complete app reset');
+              onClick={() => {
                 if (onStop) onStop();
                 resetApp();
               }}
-              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
+              className="flex items-center space-x-1 sm:space-x-2 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors group"
             >
-              <svg
-                className="w-5 h-5 text-red-400 group-hover:text-red-300 transition-colors duration-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5 text-red-400 group-hover:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span className="text-sm text-red-300 group-hover:text-red-200 transition-colors duration-200">
-                Start Over
-              </span>
+              <span className="hidden xs:inline text-sm text-red-300 group-hover:text-red-200">Reset</span>
             </button>
           )}
         </div>

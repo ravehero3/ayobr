@@ -1,14 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import WaveSurfer from 'wavesurfer.js';
+import { useAppStore } from '../store/appStore';
 import DotLoader from './DotLoader';
 
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
 const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap, onStartAudioDrag, onUpdateDragPosition, onEndDrag }) => {
-  // Import updatePair from store
-  const { updatePair } = require('../store/appStore').useAppStore();
+  const { updatePair } = useAppStore();
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);

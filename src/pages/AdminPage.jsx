@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const API = '/api/admin';
 
@@ -22,6 +23,7 @@ function Badge({ role }) {
 export default function AdminPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  useDocumentTitle("Admin Panel");
   const [users, setUsers] = useState([]);
   const [flags, setFlags] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
@@ -108,7 +110,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#050a13] text-white">
       {/* Top bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
+      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-4"
         style={{ background: 'rgba(5,10,19,0.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,165,0,0.2)' }}>
         <div className="flex items-center gap-3">
           <span className="text-orange-400 font-bold">⚙️ Admin Panel</span>
@@ -168,8 +170,8 @@ export default function AdminPage() {
                     🔄 Reset Monthly Credits
                   </button>
                 </div>
-                <div className="rounded-xl border border-white/10 overflow-hidden">
-                  <table className="w-full text-sm">
+                <div className="rounded-xl border border-white/10 overflow-hidden overflow-x-auto">
+                  <table className="w-full text-sm min-w-[800px]">
                     <thead>
                       <tr style={{ background: 'rgba(255,255,255,0.03)' }} className="text-gray-400 text-left">
                         <th className="px-4 py-3">User</th>
@@ -238,8 +240,8 @@ export default function AdminPage() {
             {activeTab === 'features' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <h2 className="text-lg font-semibold mb-4">Feature Flags</h2>
-                <div className="rounded-xl border border-white/10 overflow-hidden">
-                  <table className="w-full text-sm">
+                <div className="rounded-xl border border-white/10 overflow-hidden overflow-x-auto">
+                  <table className="w-full text-sm min-w-[800px]">
                     <thead>
                       <tr style={{ background: 'rgba(255,255,255,0.03)' }} className="text-gray-400 text-left">
                         <th className="px-4 py-3">Feature</th>

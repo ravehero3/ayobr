@@ -28,6 +28,7 @@ async function applyStoredReferralCode() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [featureFlags, setFeatureFlags] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,11 +41,20 @@ export function AuthProvider({ children }) {
       if (res.ok) {
         const data = await res.json();
         setUser(data);
+        
+        // Fetch feature flags once user is identified
+        const flagsRes = await fetch(`${API_BASE}/user/features`, { credentials: 'include' });
+        if (flagsRes.ok) {
+          const flagsData = await flagsRes.json();
+          setFeatureFlags(flagsData);
+        }
       } else {
         setUser(null);
+        setFeatureFlags({});
       }
     } catch {
       setUser(null);
+      setFeatureFlags({});
     } finally {
       setLoading(false);
     }
@@ -77,10 +87,12 @@ export function AuthProvider({ children }) {
     return false;
   };
 
-  const deductCredit = async () => {
+  const deductCredit = async (count = 1) => {
     const res = await fetch(`${API_BASE}/user/deduct-credit`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ count })
     });
     if (res.status === 402) {
       const data = await res.json();
@@ -88,7 +100,7 @@ export function AuthProvider({ children }) {
     }
     if (res.ok) {
       const data = await res.json();
-      if (!data.isPro && data.creditsRemaining !== null) {
+      if (!data.isUnlimited && data.creditsRemaining !== null) {
         setUser(prev => ({
           ...prev,
           credits: { ...prev?.credits, credits_remaining: data.creditsRemaining }
@@ -102,7 +114,7 @@ export function AuthProvider({ children }) {
   const refreshUser = fetchUser;
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, agreeToRights, deductCredit, refreshUser }}>
+    <AuthContext.Provider value={{ user, featureFlags, loading, login, logout, agreeToRights, deductCredit, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

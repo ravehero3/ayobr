@@ -61,17 +61,21 @@ async function getUserCredits(userId) {
   return result.rows[0];
 }
 
-async function deductCredit(userId) {
+async function deductCredits(userId, count = 1) {
   const result = await pool.query(
     `UPDATE credits
-     SET credits_remaining = credits_remaining - 1,
-         credits_used_this_month = credits_used_this_month + 1,
+     SET credits_remaining = credits_remaining - $2,
+         credits_used_this_month = credits_used_this_month + $2,
          updated_at = NOW()
-     WHERE user_id = $1 AND credits_remaining > 0
+     WHERE user_id = $1 AND credits_remaining >= $2
      RETURNING *`,
-    [userId]
+    [userId, count]
   );
   return result.rows[0] || null;
+}
+
+async function deductCredit(userId) {
+  return deductCredits(userId, 1);
 }
 
 async function setUserRole(userId, role) {

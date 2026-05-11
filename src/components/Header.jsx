@@ -35,67 +35,44 @@ const Header = () => {
       style={{ zIndex: 10000 }}
     >
       <div
-        className="w-full h-full flex items-center justify-between"
+        className="w-full h-full flex items-center justify-between px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto"
         style={{
           background: 'rgba(0, 0, 0, 0.3)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(64, 64, 64, 0.8)',
-          paddingLeft: 'calc((100vw - 500px) / 2 - 247px)', // Restore original logo position
-          paddingRight: '0px', // No right padding needed
         }}
       >
-        {/* TypeBeatz Logo - Clickable */}
+        {/* TypeBeatz Logo */}
         <div className="flex items-center">
           <button
             onClick={() => setIsAppInfoOpen(true)}
-            className="hover:scale-105 transition-all duration-200 active:shadow-[0_0_15px_rgba(59,130,246,0.8)] active:brightness-150"
-            style={{ transition: 'all 0.15s ease-out' }}
+            className="hover:scale-105 transition-all duration-200"
           >
             <img
               src={typebeatLogo}
               alt="TypeBeatz"
-              className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200"
-              style={{
-                height: '20px' // Much smaller logo
-              }}
+              className="object-contain opacity-90 hover:opacity-100 transition-opacity duration-200 h-5"
             />
           </button>
         </div>
 
-        {/* Status Indicator - Center - Removed */}
-        <div className="flex items-center space-x-4" style={{ marginLeft: '-30px' }}>
-          {/* Green video ready indicator removed */}
+        {/* Right side: Username and Profile */}
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline text-white text-sm opacity-90 font-medium">
+            {username}
+          </span>
+          <button
+            onClick={() => setIsProfileOpen(true)}
+            className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105"
+          >
+            <img
+              src={userProfileImage || userIcon}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          </button>
         </div>
-
-        {/* Profile Icon - Fixed position */}
-        <button
-          onClick={() => setIsProfileOpen(true)}
-          className="absolute top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105 active:shadow-[0_0_15px_rgba(59,130,246,0.8)] active:brightness-150"
-          style={{ 
-            left: 'calc((100vw - 500px) / 2 + 715px)',
-            transition: 'all 0.15s ease-out'
-          }}
-        >
-          <img
-            src={userProfileImage || userIcon}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
-        </button>
-
-        {/* Username - Positioned to the left of user icon with 20px gap */}
-        <span 
-          className="absolute top-1/2 transform -translate-y-1/2 text-white text-sm opacity-90"
-          style={{ 
-            right: 'calc(100vw - ((100vw - 500px) / 2 + 715px) + 20px)',
-            fontWeight: 'normal'
-          }}
-        >
-          {username}
-        </span>
-
-        
 
         {/* User Profile Modal */}
         <UserProfile

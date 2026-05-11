@@ -14,13 +14,13 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
       animate={{ opacity: 1, y: 0 }}
       className="w-full mb-6"
     >
-      <div className="bg-gradient-to-r from-space-navy/80 to-space-dark/80 backdrop-blur-lg rounded-2xl p-6 border border-neon-cyan/20">
+      <div className="glass-container p-6 bg-white/[0.02]">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center border border-sky-500/20 shadow-[0_0_15px_rgba(14,165,233,0.1)]">
+                <svg className="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -38,10 +38,10 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-neon-cyan">
+            <div className="text-2xl font-bold text-sky-400">
               {progress}%
             </div>
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-gray-500 font-medium">
               {completedPairs}/{totalPairs} complete
             </div>
           </div>
@@ -49,15 +49,15 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
 
         {/* Progress Bar */}
         <div className="relative">
-          <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden border border-white/5">
             <motion.div
-              className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full relative"
+              className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full relative"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
               {/* Animated shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[pulse_2s_infinite]"></div>
             </motion.div>
           </div>
 

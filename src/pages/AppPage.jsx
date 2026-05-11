@@ -7,10 +7,12 @@ import UpgradeBanner from '../components/UpgradeBanner';
 import ReferralPanel from '../components/ReferralPanel';
 import SubscriptionPanel from '../components/SubscriptionPanel';
 import VideoApp from '../VideoApp';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function AppPage() {
   const { user, loading, refreshUser, deductCredit } = useAuth();
   const navigate = useNavigate();
+  useDocumentTitle("App");
   const [searchParams, setSearchParams] = useSearchParams();
   const [upgradeSuccess, setUpgradeSuccess]     = useState(null); // null | 'pro' | 'unlimited'
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
@@ -77,8 +79,17 @@ export default function AppPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#050a13] p-6">
+        <div className="relative">
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-20 h-20 rounded-full border-4 border-white/5 border-t-sky-500 shadow-[0_0_30px_rgba(14,165,233,0.2)]"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -88,8 +99,8 @@ export default function AppPage() {
   const creditsLeft = user?.credits?.credits_remaining;
   const paddingTop  = isPaidPlan || (creditsLeft !== undefined && creditsLeft > 2) ? 56 : 88;
 
-  const handleBeforeGenerate = async () => {
-    const result = await deductCredit();
+  const handleBeforeGenerate = async (count = 1) => {
+    const result = await deductCredit(count);
     if (!result.success) {
       if (result.message) alert(result.message);
       return false;

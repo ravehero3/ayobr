@@ -659,9 +659,14 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     });
 
     // Determine output resolution from settings
-    const is4K = videoSettings && videoSettings.quality === '4k';
-    const RW = is4K ? 3840 : 1920;
-    const RH = is4K ? 2160 : 1080;
+    const quality = videoSettings && videoSettings.quality;
+    const is4K = quality === '4k';
+    const isHD = quality === 'hd';
+    
+    // RW = Render Width, RH = Render Height
+    let RW = 1920, RH = 1080; // Default: Full HD
+    if (is4K) { RW = 3840; RH = 2160; }
+    else if (isHD) { RW = 1280; RH = 720; }
 
     if (useCustomBackground && customBackgroundFileName) {
       // Custom background video filter - overlay image on background

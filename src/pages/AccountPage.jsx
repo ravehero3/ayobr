@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function StatCard({ label, value, sub }) {
   return (
-    <div className="rounded-xl p-4 border border-white/[0.06]" style={{ background: 'rgba(255,255,255,0.03)' }}>
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      {sub && <p className="text-xs text-gray-500 mt-1">{sub}</p>}
+    <div className="stat-card">
+      <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1 font-semibold">{label}</p>
+      <p className="text-2xl font-bold text-white tracking-tight">{value}</p>
+      {sub && <p className="text-[11px] text-sky-400/50 mt-1 font-medium">{sub}</p>}
     </div>
   );
 }
@@ -24,12 +25,15 @@ function formatDate(dateStr) {
 export default function AccountPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  useDocumentTitle("Account Settings");
   const [sub, setSub] = useState(null);
   const [referral, setReferral] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
-  const isPro = user?.role === 'pro' || user?.role === 'admin';
+  const isUnlimited = user?.role === 'unlimited' || user?.role === 'admin';
+  const isPro       = user?.role === 'pro';
+  const isPaid      = isPro || isUnlimited;
 
   useEffect(() => {
     if (!user) return;
@@ -41,7 +45,7 @@ export default function AccountPage() {
         .catch(() => {})
     ];
 
-    if (isPro) {
+    if (isPaid) {
       fetches.push(
         fetch('/api/paddle/subscription', { credentials: 'include' })
           .then(r => r.ok ? r.json() : null)
@@ -51,7 +55,7 @@ export default function AccountPage() {
     }
 
     Promise.all(fetches).finally(() => setLoading(false));
-  }, [user, isPro]);
+  }, [user, isPaid]);
 
   const referralLink = referral?.code ? `${window.location.origin}/?ref=${referral.code}` : null;
 
@@ -63,10 +67,27 @@ export default function AccountPage() {
     });
   };
 
-  if (!user) {
+  if (!user || loading) {
     return (
-      <div className="min-h-screen bg-[#050a13] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent" />
+      <div className="min-h-screen bg-[#050a13] flex flex-col items-center justify-center p-6">
+        <div className="relative">
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-20 h-20 rounded-full border-4 border-white/5 border-t-sky-500 shadow-[0_0_30px_rgba(14,165,233,0.2)]"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
+          </div>
+        </div>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 text-sky-400/60 text-sm font-medium tracking-widest uppercase"
+        >
+          Securing session...
+        </motion.p>
       </div>
     );
   }
@@ -79,7 +100,7 @@ export default function AccountPage() {
     <div className="min-h-screen bg-[#050a13] text-white">
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 h-14"
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 h-14"
         style={{ background: 'rgba(5,10,19,0.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 18 }} />
@@ -111,16 +132,23 @@ export default function AccountPage() {
             <h1 className="text-2xl font-bold text-white">
               {user.first_name}{user.last_name ? ` ${user.last_name}` : ''}
             </h1>
+            {user.created_at && (
+              <p className="text-gray-500 text-xs mt-2 font-medium">
+                Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </p>
+            )}
             <p className="text-gray-400 text-sm">{user.email}</p>
             <div className="flex items-center gap-2 mt-1.5">
-              {isPro ? (
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold border border-sky-500/40 text-sky-300"
-                  style={{ background: 'rgba(14,165,233,0.1)' }}>
+              {isUnlimited ? (
+                <span className="premium-badge border border-yellow-500/40 text-yellow-300 bg-yellow-500/10">
+                  🌟 UNLIMITED
+                </span>
+              ) : isPro ? (
+                <span className="premium-badge border border-sky-500/40 text-sky-300 bg-sky-500/10">
                   ⭐ PRO
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold border border-white/10 text-gray-400"
-                  style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <span className="premium-badge border border-white/10 text-gray-400 bg-white/5">
                   Free
                 </span>
               )}
@@ -140,32 +168,37 @@ export default function AccountPage() {
           className="mb-6">
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">This Month</h2>
           <div className="grid grid-cols-2 gap-3">
-            {isPro ? (
+            {isUnlimited ? (
               <>
-                <StatCard label="Videos Generated" value="∞" sub="Unlimited on PRO" />
+                <StatCard label="Videos Generated" value="∞" sub="Unlimited" />
+                <StatCard label="Plan" value="Unlimited" sub="$18.99 / month" />
+              </>
+            ) : isPro ? (
+              <>
+                <StatCard label="Videos Remaining" value={creditsRemaining} sub="of 31 PRO credits" />
                 <StatCard label="Plan" value="PRO" sub="$9.99 / month" />
               </>
             ) : (
               <>
-                <StatCard label="Videos Generated" value={creditsUsed} sub={`of 5 free credits`} />
-                <StatCard label="Credits Remaining" value={creditsRemaining} sub={lastReset ? `Reset: ${formatDate(lastReset)}` : 'Resets on the 1st'} />
+                <StatCard label="Videos Remaining" value={creditsRemaining} sub={`of 5 free credits`} />
+                <StatCard label="Credits Used" value={creditsUsed} sub={lastReset ? `Reset: ${formatDate(lastReset)}` : 'Resets on the 1st'} />
               </>
             )}
           </div>
 
-          {!isPro && (
+          {!isUnlimited && (
             <div className="mt-3 rounded-xl p-4 border border-white/[0.06]" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <div className="flex items-center justify-between text-xs mb-2">
                 <span className="text-gray-500">Monthly usage</span>
-                <span className="text-gray-400">{creditsUsed} / 5 used</span>
+                <span className="text-gray-400">{creditsUsed} / {isPro ? 31 : 5} used</span>
               </div>
               <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
                 <div className="h-full rounded-full transition-all"
                   style={{
-                    width: `${Math.min(100, (creditsUsed / 5) * 100)}%`,
+                    width: `${Math.min(100, (creditsUsed / (isPro ? 31 : 5)) * 100)}%`,
                     background: creditsRemaining === 0
                       ? '#ef4444'
-                      : creditsRemaining <= 1
+                      : creditsRemaining <= (isPro ? 3 : 1)
                       ? '#f59e0b'
                       : 'linear-gradient(90deg, #3b82f6, #0ea5e9)'
                   }} />
@@ -180,14 +213,14 @@ export default function AccountPage() {
           className="mb-6">
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Subscription</h2>
           <div className="rounded-xl p-5 border border-white/[0.06]" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            {isPro ? (
+            {isUnlimited ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">⭐</span>
+                    <span className="text-lg">🌟</span>
                     <div>
-                      <p className="text-white font-semibold text-sm">PRO Plan</p>
-                      <p className="text-gray-500 text-xs">$9.99 / month — unlimited video generation</p>
+                      <p className="text-white font-semibold text-sm">Unlimited Plan</p>
+                      <p className="text-gray-500 text-xs">$18.99 / month — no limits, 4K rendering</p>
                     </div>
                   </div>
                   {sub && (
@@ -209,11 +242,46 @@ export default function AccountPage() {
                   Manage subscription →
                 </button>
               </div>
+            ) : isPro ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">⭐</span>
+                    <div>
+                      <p className="text-white font-semibold text-sm">PRO Plan</p>
+                      <p className="text-gray-500 text-xs">$9.99 / month — 31 videos/month, 1080p rendering</p>
+                    </div>
+                  </div>
+                  {sub && (
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
+                      sub.status === 'active' ? 'text-green-400 border-green-500/25' : 'text-yellow-400 border-yellow-500/25'
+                    }`} style={{ background: sub.status === 'active' ? 'rgba(34,197,94,0.1)' : 'rgba(234,179,8,0.1)' }}>
+                      {sub.status === 'active' ? 'Active' : sub.status === 'cancelling' ? 'Cancelling' : sub.status}
+                    </span>
+                  )}
+                </div>
+                {sub?.current_period_end && (
+                  <p className="text-xs text-gray-500">
+                    {sub.status === 'cancelling' ? 'Access until' : 'Next billing date'}:{' '}
+                    <span className="text-gray-300">{formatDate(sub.current_period_end)}</span>
+                  </p>
+                )}
+                <div className="flex gap-4">
+                  <button onClick={() => navigate('/app?manage=true')}
+                    className="text-xs text-sky-400 hover:text-sky-300 transition-colors">
+                    Manage subscription →
+                  </button>
+                  <button onClick={() => navigate('/app?upgrade=unlimited')}
+                    className="text-xs text-yellow-400 hover:text-yellow-300 transition-colors">
+                    Upgrade to Unlimited →
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white font-semibold text-sm">Free Plan</p>
-                  <p className="text-gray-500 text-xs">5 videos per month</p>
+                  <p className="text-gray-500 text-xs">5 videos per month, 720p rendering</p>
                 </div>
                 <button
                   onClick={() => navigate('/app?upgrade=true')}

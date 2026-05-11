@@ -90,7 +90,7 @@ export default function SubscriptionPanel({ onClose, onUpgradePro, onUpgradeUnli
         exit={{ opacity: 0, scale: 0.95, y: 12 }}
         transition={{ duration: 0.2 }}
         className="w-full max-w-md mx-4 rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
-        style={{ background: 'rgba(8,12,24,0.99)' }}
+        style={{ background: 'rgba(5, 10, 19, 0.98)', backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}

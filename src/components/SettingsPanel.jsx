@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useAuth } from '../context/AuthContext';
 
 const SettingsPanel = ({ isOpen, onClose }) => {
+  const { user, featureFlags } = useAuth();
   const { 
     concurrencySettings, 
     setConcurrencySettings,
@@ -15,11 +17,16 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
   const [selectedResolution, setSelectedResolution] = useState(videoSettings.quality || 'fullhd');
 
+  const canUse4K = featureFlags?.ultra_quality;
+  const canUseFullHD = featureFlags?.high_quality;
+
   const handleBackgroundChange = (background) => {
     setSelectedBackground(background);
   };
 
   const handleResolutionChange = (resolution) => {
+    if (resolution === '4k' && !canUse4K) return;
+    if (resolution === 'fullhd' && !canUseFullHD) return;
     setSelectedResolution(resolution);
   };
 
@@ -235,14 +242,52 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               </div>
               <div style={{
                 display: 'flex',
-                gap: '16px'
+                gap: '12px'
               }}>
-                {/* Full HD */}
+                {/* 720p HD */}
                 <motion.div
                   className="cursor-pointer text-center"
                   style={{
                     flex: '1',
-                    padding: '20px',
+                    padding: '16px 8px',
+                    background: selectedResolution === 'hd' 
+                      ? 'rgba(59, 130, 246, 0.05)' 
+                      : 'rgba(15, 15, 25, 0.6)',
+                    border: selectedResolution === 'hd' 
+                      ? '2px solid rgba(59, 130, 246, 0.8)' 
+                      : '2px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleResolutionChange('hd')}
+                >
+                  <div style={{
+                    width: '50px',
+                    height: '28px',
+                    margin: '0 auto 8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '9px',
+                    borderRadius: '4px',
+                    background: 'linear-gradient(135deg, #4b5563, #1f2937)',
+                    color: 'white',
+                  }}>
+                    720p
+                  </div>
+                  <div style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: '600' }}>HD</div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '11px' }}>1280×720</div>
+                </motion.div>
+
+                {/* Full HD */}
+                <motion.div
+                  className={`text-center ${canUseFullHD ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                  style={{
+                    flex: '1',
+                    padding: '16px 8px',
                     background: selectedResolution === 'fullhd' 
                       ? 'rgba(59, 130, 246, 0.05)' 
                       : 'rgba(15, 15, 25, 0.6)',
@@ -250,58 +295,41 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       ? '2px solid rgba(59, 130, 246, 0.8)' 
                       : '2px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '12px',
-                    boxShadow: selectedResolution === 'fullhd' 
-                      ? '0 0 20px rgba(59, 130, 246, 0.2), inset 0 0 10px rgba(59, 130, 246, 0.1)'
-                      : 'none',
+                    position: 'relative',
                     transition: 'all 0.3s ease'
                   }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={canUseFullHD ? { scale: 1.02 } : {}}
+                  whileTap={canUseFullHD ? { scale: 0.98 } : {}}
                   onClick={() => handleResolutionChange('fullhd')}
                 >
+                  {!canUseFullHD && (
+                    <div style={{ position: 'absolute', top: -8, right: -4, fontSize: '14px' }}>🔒</div>
+                  )}
                   <div style={{
-                    width: '60px',
-                    height: '32px',
+                    width: '50px',
+                    height: '28px',
                     margin: '0 auto 8px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 'bold',
-                    fontSize: '10px',
+                    fontSize: '9px',
                     borderRadius: '4px',
                     background: 'linear-gradient(135deg, #1e40af, #1e3a8a)',
                     color: 'white',
-                    position: 'relative'
                   }}>
-                    <div style={{ position: 'absolute', top: '4px', fontSize: '8px', fontWeight: '600' }}>
-                      FULL HD
-                    </div>
-                    <div style={{ position: 'absolute', bottom: '4px', fontSize: '10px', fontWeight: '700' }}>
-                      1080p
-                    </div>
+                    1080p
                   </div>
-                  <div style={{
-                    color: '#e0e0e0',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '4px'
-                  }}>
-                    Full HD
-                  </div>
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '12px'
-                  }}>
-                    1920×1080
-                  </div>
+                  <div style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: '600' }}>Full HD</div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '11px' }}>1920×1080</div>
                 </motion.div>
 
                 {/* 4K Ultra HD */}
                 <motion.div
-                  className="cursor-pointer text-center"
+                  className={`text-center ${canUse4K ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                   style={{
                     flex: '1',
-                    padding: '20px',
+                    padding: '16px 8px',
                     background: selectedResolution === '4k' 
                       ? 'rgba(59, 130, 246, 0.05)' 
                       : 'rgba(15, 15, 25, 0.6)',
@@ -309,18 +337,19 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       ? '2px solid rgba(59, 130, 246, 0.8)' 
                       : '2px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '12px',
-                    boxShadow: selectedResolution === '4k' 
-                      ? '0 0 20px rgba(59, 130, 246, 0.2), inset 0 0 10px rgba(59, 130, 246, 0.1)'
-                      : 'none',
+                    position: 'relative',
                     transition: 'all 0.3s ease'
                   }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={canUse4K ? { scale: 1.02 } : {}}
+                  whileTap={canUse4K ? { scale: 0.98 } : {}}
                   onClick={() => handleResolutionChange('4k')}
                 >
+                  {!canUse4K && (
+                    <div style={{ position: 'absolute', top: -8, right: -4, fontSize: '14px' }}>🔒</div>
+                  )}
                   <div style={{
-                    width: '60px',
-                    height: '32px',
+                    width: '50px',
+                    height: '28px',
                     margin: '0 auto 8px',
                     display: 'flex',
                     alignItems: 'center',
@@ -329,35 +358,11 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                     borderRadius: '4px',
                     background: 'linear-gradient(135deg, #1e40af, #111827)',
                     color: 'white',
-                    position: 'relative'
                   }}>
-                    <div style={{ position: 'absolute', fontSize: '16px', fontWeight: '900', top: '2px' }}>
-                      4K
-                    </div>
-                    <div style={{ 
-                      position: 'absolute', 
-                      bottom: '2px', 
-                      fontSize: '6px', 
-                      fontWeight: '500',
-                      letterSpacing: '0.5px'
-                    }}>
-                      ULTRA HD
-                    </div>
+                    4K
                   </div>
-                  <div style={{
-                    color: '#e0e0e0',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '4px'
-                  }}>
-                    4K Ultra HD
-                  </div>
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '12px'
-                  }}>
-                    3840×2160
-                  </div>
+                  <div style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: '600' }}>4K Ultra</div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '11px' }}>3840×2160</div>
                 </motion.div>
               </div>
             </div>

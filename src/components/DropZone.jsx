@@ -121,6 +121,16 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           </div>
         </motion.div>
 
+        {/* Pro Tip */}
+        <motion.p
+          className="text-[10px] uppercase tracking-widest text-gray-500 mb-6 font-medium"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          💡 Pro Tip: We recommend up to 100 files per batch for maximum stability.
+        </motion.p>
+
         {/* Browse Button */}
         <motion.button
           onClick={(e) => {

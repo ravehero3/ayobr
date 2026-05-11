@@ -6,7 +6,7 @@ export default function TermsPage() {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#050a13] text-white">
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4"
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-4"
         style={{ background: 'rgba(5,10,19,0.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
@@ -48,7 +48,8 @@ export default function TermsPage() {
             <p className="mb-3">TypeBeatz offers a free tier and a paid PRO subscription:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong className="text-white">Free tier:</strong> 5 video credits per month, reset on the 1st of each month.</li>
-              <li><strong className="text-white">PRO subscription:</strong> Unlimited video generation for $9.99/month, billed monthly through Paddle.</li>
+              <li><strong className="text-white">PRO subscription:</strong> 31 video credits per month for $9.99/month, billed through Paddle.</li>
+              <li><strong className="text-white">Unlimited subscription:</strong> Unlimited video generation for $18.99/month, billed through Paddle.</li>
             </ul>
             <p className="mt-3">You may cancel your PRO subscription at any time. Cancellation takes effect at the end of your current billing period, after which you will revert to the free tier. We do not offer refunds for partial billing periods.</p>
           </section>

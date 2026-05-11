@@ -256,11 +256,12 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         <div 
           className="flex flex-col lg:flex-row items-center relative z-10 group/pair"
           style={{ 
-            gap: '0px',
+            gap: '12px',
             paddingLeft: '15px',
             paddingRight: '15px',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            width: '100%'
           }}
         >
           {/* Audio Container */}  
@@ -275,11 +276,10 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             <div
               className="relative group/container audio-container"
               style={{
-                height: '200px',
-                minHeight: '200px',
-                maxHeight: '200px',
-                width: '500px',
-                minWidth: '500px',
+                height: '180px',
+                minHeight: '180px',
+                maxHeight: '180px',
+                width: '100%',
                 maxWidth: '500px',
                 overflow: 'visible',
               }}
@@ -371,16 +371,15 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
             onDragOver={handleContainerDragOver}
             onDragLeave={handleContainerDragLeave}
             onDrop={handleContainerDrop}
-            style={{ marginLeft: '7px' }}
+            style={{ marginLeft: '0px' }}
           >
             <div
               className="relative overflow-hidden group/container image-container"
               style={{
-                height: '200px',
-                minHeight: '200px',
-                maxHeight: '200px',
-                width: '500px',
-                minWidth: '500px',
+                height: '180px',
+                minHeight: '180px',
+                maxHeight: '180px',
+                width: '100%',
                 maxWidth: '500px',
                 overflow: 'visible',
               }}

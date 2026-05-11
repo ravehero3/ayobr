@@ -14,6 +14,7 @@ function buildApp() {
 
   const allowedOrigins = [
     'http://localhost:5000',
+    'http://localhost:5001',
     process.env.FRONTEND_URL,
     ...(process.env.REPLIT_DOMAINS
       ? process.env.REPLIT_DOMAINS.split(',').map(d => `https://${d.trim()}`)
@@ -37,8 +38,19 @@ function buildApp() {
 
 async function initDb(app) {
   const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-  await pool.query(schema);
-  console.log('Database schema initialized');
+  let retries = 5;
+  while (retries > 0) {
+    try {
+      await pool.query(schema);
+      console.log('Database schema initialized');
+      return;
+    } catch (err) {
+      console.warn(`Database connection failed (${retries} retries left):`, err.message);
+      retries -= 1;
+      if (retries === 0) throw err;
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+  }
 }
 
 async function mountRoutes(app) {

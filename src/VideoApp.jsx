@@ -298,9 +298,9 @@ function App({ onBeforeGenerate }) {
       return;
     }
 
-    // Credit check — called from AppPage which knows about auth
+    // Before generating, check credits/permissions via callback
     if (onBeforeGenerate) {
-      const allowed = await onBeforeGenerate();
+      const allowed = await onBeforeGenerate(completePairs.length);
       if (!allowed) return;
     }
 
@@ -420,7 +420,7 @@ function App({ onBeforeGenerate }) {
 
       <div className="fixed inset-0 flex flex-col bg-overlay" style={{ zIndex: 2 }}>
         {/* Main Content with conditional header/footer spacing */}
-        <main className={`flex-1 flex flex-col ${hasFiles ? 'pt-20 px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
+        <main className={`flex-1 flex flex-col ${hasFiles ? 'pt-24 px-4 sm:px-6 pb-24' : 'p-6'} overflow-y-auto transition-all duration-500 ${isGenerating ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
           <div className="w-full space-y-6">
 
             {/* Page 2: File Management - Pairs Grid */}
@@ -430,8 +430,8 @@ function App({ onBeforeGenerate }) {
                   className="w-full flex flex-col items-center mb-8"
                 >
                   <motion.div
-                    className="flex flex-col max-w-[1200px] w-full px-6"
-                    style={{ gap: `${containerSpacing}px`, marginTop: '-300px' }} // Moved 15px higher (from -285px to -300px)
+                    className="flex flex-col max-w-[1200px] w-full px-4 sm:px-6 mx-auto"
+                    style={{ gap: `${containerSpacing}px` }}
                   >
                     <AnimatePresence>
                       {pairs

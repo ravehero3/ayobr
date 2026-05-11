@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../auth');
-const { getUserById, getUserCredits, deductCredit, agreeToRights, getFeatureFlags, applyReferralCode, getReferralStats } = require('../storage');
+const { getUserById, getUserCredits, deductCredits, agreeToRights, getFeatureFlags, applyReferralCode, getReferralStats } = require('../storage');
 
 const UNLIMITED_ROLES = ['unlimited', 'admin'];
 
@@ -37,6 +37,7 @@ router.post('/agree-rights', isAuthenticated, async (req, res) => {
 router.post('/deduct-credit', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user.id;
+    const { count = 1 } = req.body || {};
     const user = await getUserById(userId);
 
     // Unlimited and admin bypass all credit checks
@@ -45,14 +46,22 @@ router.post('/deduct-credit', isAuthenticated, async (req, res) => {
     }
 
     // Free and PRO users go through the credits table
-    const result = await deductCredit(userId);
-    if (!result) {
+    // If multiple credits, we need to check if they have enough first
+    const credits = await getUserCredits(userId);
+    if (credits.credits_remaining < count) {
       const msg = user.role === 'pro'
-        ? 'You have used all 31 videos this month. Upgrade to Unlimited for unlimited video generation.'
-        : 'No credits remaining. Upgrade to PRO for 31 videos/month, or Unlimited for no limits.';
+        ? `You need ${count} credits but only have ${credits.credits_remaining}. Upgrade to Unlimited for unlimited video generation.`
+        : `No credits remaining. You need ${count} credits but only have ${credits.credits_remaining}. Upgrade to PRO for 31 videos/month, or Unlimited for no limits.`;
       return res.status(402).json({ message: msg });
     }
-    res.json({ success: true, creditsRemaining: result.credits_remaining });
+
+    // Deduct multiple credits in a single transaction
+    const lastResult = await deductCredits(userId, count);
+    if (!lastResult) {
+      return res.status(402).json({ message: 'Failed to deduct credits. Not enough balance.' });
+    }
+
+    res.json({ success: true, creditsRemaining: lastResult.credits_remaining });
   } catch (err) {
     console.error('POST /api/user/deduct-credit error:', err);
     res.status(500).json({ message: 'Server error' });
