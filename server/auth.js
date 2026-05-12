@@ -34,8 +34,8 @@ function getSession() {
 
 /* ── Google OAuth Strategy ───────────────────────────────── */
 function getCallbackURL() {
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}/api/callback`;
   if (process.env.APP_URL)    return `${process.env.APP_URL}/api/callback`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}/api/callback`;
   return 'http://localhost:3001/api/callback';
 }
 
