@@ -252,7 +252,7 @@ async function getReferralStats(userId) {
 
 module.exports = {
   upsertUser, getUserById, getAllUsers,
-  getUserCredits, deductCredit,
+  getUserCredits, deductCredit, deductCredits,
   setUserRole, agreeToRights,
   getFeatureFlags, updateFeatureFlag,
   getSubscription, upsertSubscription,
