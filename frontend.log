@@ -5975,3 +5975,219 @@ Critical dependency: the request of a dependency is an expression
 Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
 
 webpack 5.106.2 compiled with 2 warnings in 3088 ms
+assets by status 9.29 MiB [cached] 14 assets
+assets by path . 3.77 MiB
+  assets by path *.js 3.77 MiB
+    assets by info 1.71 KiB [immutable]
+      asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.8532f8d7929666ef50dd.hot-update.js 898 bytes [emitted] [immutable] [hmr]
+      asset main.8532f8d7929666ef50dd.hot-update.js 852 bytes [emitted] [immutable] [hmr] (name: main)
+    assets by status 3.72 MiB [big]
+      asset vendors.bundle.js 2.55 MiB [emitted] [big] (name: vendors) (id hint: vendor)
+      asset main.bundle.js 1.17 MiB [emitted] [big] (name: main)
+    asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.bundle.js 45 KiB [emitted]
+  assets by path *.json 102 bytes
+    asset dbc2bcbc9ace16e3e901.8532f8d7929666ef50dd.hot-update.json 74 bytes [emitted] [immutable] [hmr]
+    asset main.8532f8d7929666ef50dd.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main [big] 3.72 MiB (9.29 MiB) = vendors.bundle.js 2.55 MiB main.bundle.js 1.17 MiB main.8532f8d7929666ef50dd.hot-update.js 852 bytes 13 auxiliary assets
+orphan modules 354 KiB [orphan] 154 modules
+runtime modules 58.5 KiB 33 modules
+modules by path ./node_modules/ 2.09 MiB 321 modules
+modules by path ./src/ 958 KiB
+  modules by path ./src/components/*.jsx 319 KiB 29 modules
+  modules by path ./src/assets/ 816 bytes 12 modules
+  modules by path ./src/pages/*.jsx 171 KiB 8 modules
+  modules by path ./src/hooks/*.js 98 KiB 5 modules
+  modules by path ./src/*.jsx 39.4 KiB 2 modules
+  modules by path ./src/styles/*.css 195 KiB
+    ./src/styles/globals.css 2.48 KiB [built] [code generated]
+    ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[1].use[2]!./src/styles/globals.css 193 KiB [built] [code generated]
+  + 5 modules
+./noise.png 68 bytes (asset) 42 bytes (javascript) [built] [code generated]
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 105:27-67
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js 19:39-20:36
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 110:16-112:18
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+2 warnings have detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+
+webpack 5.106.2 compiled with 2 warnings in 2857 ms
+assets by status 9.29 MiB [cached] 14 assets
+assets by path . 3.81 MiB
+  assets by path *.js 3.81 MiB
+    assets by info 64.4 KiB [immutable]
+      asset main.2508d7c4d6b0d8d5741c.hot-update.js 63.5 KiB [emitted] [immutable] [hmr] (name: main)
+      asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.2508d7c4d6b0d8d5741c.hot-update.js 898 bytes [emitted] [immutable] [hmr]
+    assets by status 3.7 MiB [big]
+      asset vendors.bundle.js 2.55 MiB [emitted] [big] (name: vendors) (id hint: vendor)
+      asset main.bundle.js 1.16 MiB [emitted] [big] (name: main)
+    asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.bundle.js 45 KiB [emitted]
+  assets by path *.json 102 bytes
+    asset dbc2bcbc9ace16e3e901.2508d7c4d6b0d8d5741c.hot-update.json 74 bytes [emitted] [immutable] [hmr]
+    asset main.2508d7c4d6b0d8d5741c.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main [big] 3.77 MiB (9.29 MiB) = vendors.bundle.js 2.55 MiB main.bundle.js 1.16 MiB main.2508d7c4d6b0d8d5741c.hot-update.js 63.5 KiB 13 auxiliary assets
+orphan modules 354 KiB [orphan] 154 modules
+runtime modules 58.5 KiB 33 modules
+modules by path ./node_modules/ 2.09 MiB 321 modules
+modules by path ./src/ 944 KiB
+  modules by path ./src/components/*.jsx 319 KiB 29 modules
+  modules by path ./src/assets/ 816 bytes 12 modules
+  modules by path ./src/pages/*.jsx 157 KiB 8 modules
+  modules by path ./src/hooks/*.js 98 KiB 5 modules
+  modules by path ./src/*.jsx 39.4 KiB 2 modules
+  modules by path ./src/styles/*.css 195 KiB
+    ./src/styles/globals.css 2.48 KiB [built] [code generated]
+    ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[1].use[2]!./src/styles/globals.css 193 KiB [built] [code generated]
+  + 5 modules
+./noise.png 68 bytes (asset) 42 bytes (javascript) [built] [code generated]
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 105:27-67
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js 19:39-20:36
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 110:16-112:18
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+2 warnings have detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+
+webpack 5.106.2 compiled with 2 warnings in 3138 ms
+assets by status 9.29 MiB [cached] 14 assets
+assets by path . 3.78 MiB
+  assets by path *.js 3.78 MiB
+    assets by info 32.8 KiB [immutable]
+      asset main.1094c64698bfbc2c78c5.hot-update.js 32 KiB [emitted] [immutable] [hmr] (name: main)
+      asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.1094c64698bfbc2c78c5.hot-update.js 898 bytes [emitted] [immutable] [hmr]
+    assets by status 3.7 MiB [big]
+      asset vendors.bundle.js 2.55 MiB [emitted] [big] (name: vendors) (id hint: vendor)
+      asset main.bundle.js 1.16 MiB [emitted] [big] (name: main)
+    asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.bundle.js 45 KiB [emitted]
+  assets by path *.json 102 bytes
+    asset dbc2bcbc9ace16e3e901.1094c64698bfbc2c78c5.hot-update.json 74 bytes [emitted] [immutable] [hmr]
+    asset main.1094c64698bfbc2c78c5.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main [big] 3.74 MiB (9.29 MiB) = vendors.bundle.js 2.55 MiB main.bundle.js 1.16 MiB main.1094c64698bfbc2c78c5.hot-update.js 32 KiB 13 auxiliary assets
+orphan modules 354 KiB [orphan] 154 modules
+runtime modules 58.5 KiB 33 modules
+modules by path ./node_modules/ 2.09 MiB 321 modules
+modules by path ./src/ 944 KiB
+  modules by path ./src/components/*.jsx 319 KiB 29 modules
+  modules by path ./src/assets/ 816 bytes 12 modules
+  modules by path ./src/pages/*.jsx 157 KiB 8 modules
+  modules by path ./src/hooks/*.js 98 KiB 5 modules
+  modules by path ./src/*.jsx 39.4 KiB 2 modules
+  modules by path ./src/styles/*.css 195 KiB
+    ./src/styles/globals.css 2.48 KiB [built] [code generated]
+    ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[1].use[2]!./src/styles/globals.css 193 KiB [built] [code generated]
+  + 5 modules
+./noise.png 68 bytes (asset) 42 bytes (javascript) [built] [code generated]
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 105:27-67
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js 19:39-20:36
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 110:16-112:18
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+2 warnings have detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+
+webpack 5.106.2 compiled with 2 warnings in 6242 ms
+assets by status 9.29 MiB [cached] 14 assets
+assets by path . 3.77 MiB
+  assets by path *.js 3.77 MiB
+    assets by info 19.3 KiB [immutable]
+      asset main.bb46dca47c2661048a64.hot-update.js 18.4 KiB [emitted] [immutable] [hmr] (name: main)
+      asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.bb46dca47c2661048a64.hot-update.js 898 bytes [emitted] [immutable] [hmr]
+    assets by status 3.7 MiB [big]
+      asset vendors.bundle.js 2.55 MiB [emitted] [big] (name: vendors) (id hint: vendor)
+      asset main.bundle.js 1.16 MiB [emitted] [big] (name: main)
+    asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.bundle.js 45 KiB [emitted]
+  assets by path *.json 102 bytes
+    asset dbc2bcbc9ace16e3e901.bb46dca47c2661048a64.hot-update.json 74 bytes [emitted] [immutable] [hmr]
+    asset main.bb46dca47c2661048a64.hot-update.json 28 bytes [emitted] [immutable] [hmr]
+Entrypoint main [big] 3.72 MiB (9.29 MiB) = vendors.bundle.js 2.55 MiB main.bundle.js 1.16 MiB main.bb46dca47c2661048a64.hot-update.js 18.4 KiB 13 auxiliary assets
+orphan modules 354 KiB [orphan] 154 modules
+runtime modules 58.5 KiB 33 modules
+modules by path ./node_modules/ 2.09 MiB 321 modules
+modules by path ./src/ 944 KiB
+  modules by path ./src/components/*.jsx 319 KiB 29 modules
+  modules by path ./src/assets/ 816 bytes 12 modules
+  modules by path ./src/pages/*.jsx 157 KiB 8 modules
+  modules by path ./src/hooks/*.js 98 KiB 5 modules
+  modules by path ./src/*.jsx 39.4 KiB 2 modules
+  modules by path ./src/styles/*.css 195 KiB
+    ./src/styles/globals.css 2.48 KiB [built] [code generated]
+    ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[1].use[2]!./src/styles/globals.css 193 KiB [built] [code generated]
+  + 5 modules
+./noise.png 68 bytes (asset) 42 bytes (javascript) [built] [code generated]
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 105:27-67
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js 19:39-20:36
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 110:16-112:18
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 6:0-38 29:42-49
+ @ ./src/index.js 3:0-24 12:32-35
+
+2 warnings have detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+
+webpack 5.106.2 compiled with 2 warnings in 4444 ms

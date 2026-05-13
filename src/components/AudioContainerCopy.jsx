@@ -70,7 +70,7 @@ const AudioContainerCopy = ({ audio, isVisible, mousePosition, shouldReturnToOri
         position: 'fixed',
         left: `${mousePosition.x - 16}px`,
         top: `${mousePosition.y - 16}px`,
-        width: '500px',
+        width: '560px',
         height: '160px',
         padding: '16px',
         zIndex: 999999,

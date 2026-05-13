@@ -279,8 +279,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 height: '180px',
                 minHeight: '180px',
                 maxHeight: '180px',
-                width: '100%',
-                maxWidth: '500px',
+                width: '560px',
+                minWidth: '560px',
                 overflow: 'visible',
               }}
             >
@@ -379,8 +379,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 height: '180px',
                 minHeight: '180px',
                 maxHeight: '180px',
-                width: '100%',
-                maxWidth: '500px',
+                width: '560px',
+                minWidth: '560px',
                 overflow: 'visible',
               }}
             >
