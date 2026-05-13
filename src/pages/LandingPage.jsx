@@ -647,110 +647,9 @@ function useStarsScrollReveal(starsRef) {
   }, []);
 }
 
-function HeadingReveal({ lines, style, className }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.2 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  let globalIdx = 0;
-  return (
-    <span ref={ref} className={className} style={style}>
-      {lines.map((line, li) => (
-        <span key={li} style={{ display: 'block' }}>
-          {line.split(' ').map((word, wi) => {
-            const idx = globalIdx++;
-            return (
-              <span key={wi} style={{
-                display: 'inline-block',
-                opacity: visible ? 1 : 0,
-                transform: visible ? 'translateY(0)' : 'translateY(12px)',
-                transition: `opacity 0.55s ease ${idx * 65}ms, transform 0.55s ease ${idx * 65}ms`,
-                marginRight: wi < line.split(' ').length - 1 ? '0.28em' : 0,
-              }}>{word}</span>
-            );
-          })}
-        </span>
-      ))}
-    </span>
-  );
-}
 
 /* Drop zone preview — scroll-linked scale + opacity on the card */
-function DropZonePreview() {
-  const cardRef = useRef(null);
 
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
-    let rafId = null;
-    const update = () => {
-      const rect = el.getBoundingClientRect();
-      /* progress: 0 when element top reaches viewport bottom, 1 after 300px of scroll */
-      const progress = Math.min(Math.max((window.innerHeight - rect.top) / 300, 0), 1);
-      el.style.transform = `scale(${0.85 + progress * 0.15})`;
-      el.style.opacity   = String(0.5 + progress * 0.5);
-      rafId = null;
-    };
-    const onScroll = () => { if (!rafId) rafId = requestAnimationFrame(update); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    update();
-    return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
-  }, []);
-
-  return (
-    <section className="py-24 px-6 max-w-5xl mx-auto text-center" style={{ background: '#000' }}>
-      <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
-        Clean, focused, powerful
-      </h2>
-      <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', marginBottom: '2.5rem' }}>
-        The whole workflow in one screen. Drop files, review pairs, generate.
-      </p>
-      <div
-        ref={cardRef}
-        style={{
-          opacity: 0.5,
-          transform: 'scale(0.85)',
-          willChange: 'transform, opacity',
-          transformOrigin: 'center top',
-        }}>
-        <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', padding: 2 }}>
-          <div className="rounded-xl overflow-hidden" style={{ background: '#000', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="text-center p-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-white/20 mb-6">
-                <svg className="w-10 h-10 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-              </div>
-              <p style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.4rem', lineHeight: LH_HEAD, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>Drop Your Files</p>
-              <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.35)' }}>Drag and drop your audio and image files here</p>
-              <div className="flex items-center justify-center gap-3 mt-6">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.4)' }}>🎵 MP3, WAV</span>
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs" style={{ fontFamily: NM, lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.4)' }}>🖼️ PNG, JPG</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-const features = [
-  { icon: '🎵', title: 'Drop files in batches', desc: 'Drag in audio files and images in one go. TypeBeatz pairs them up automatically — no manual work needed.' },
-  { icon: '🎬', title: 'YouTube-ready videos', desc: 'Every audio + image pair becomes a high-quality video with 320kbps audio. Perfect for YouTube type beat uploads.' },
-  { icon: '🖼️', title: 'Custom video backgrounds', desc: 'PRO users can upload any photo as a custom background. Free plan includes clean black & white backgrounds only.' },
-  { icon: '😴', title: 'Sleep while it works', desc: 'Hit generate, close your eyes. TypeBeatz runs everything in the background. Wake up to a folder full of finished videos.' },
-  { icon: '🖥️', title: 'Runs entirely in your browser', desc: 'No upload limits, no server wait times. All video processing happens locally on your machine.' },
-  { icon: '📦', title: 'Download everything at once', desc: 'When all videos are done, grab them all in one click. Ready to upload straight to YouTube.' },
-];
 
 const steps = [
   {
@@ -936,82 +835,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Features ── */}
-      <section className="py-24 px-6 max-w-6xl mx-auto" style={{ background: '#000' }}>
-        <h2 style={{ fontFamily: NM, fontWeight: 900, textAlign: 'center', marginBottom: '1rem', fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em' }}>
-          <HeadingReveal lines={['Everything you need to scale', 'your YouTube channel']} />
-        </h2>
-        <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', textAlign: 'center', maxWidth: '36rem', margin: '0 auto 4rem' }}>
-          Built for type beat producers who want to upload more without spending hours editing.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((f, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-              className="rounded-2xl p-6 border border-white/[0.06]"
-              style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="text-3xl mb-4">{f.icon}</div>
-              <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: '1rem', lineHeight: LH_HEAD, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>{f.title}</h3>
-              <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', fontSize: '0.875rem' }}>{f.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* ── How it works ── */}
       <div id="how-it-works">
         <HowItWorksSection isMobile={isMobile} />
       </div>
 
-      {/* ── Drop zone preview — scroll-scale reveal ── */}
-      <DropZonePreview />
 
       {/* ── Pricing ── */}
       <PricingSection handleCTA={handleCTA} handleUpgradeCTA={handleUpgradeCTA} handleUnlimitedCTA={handleUnlimitedCTA} user={user} isMobile={isMobile} />
 
-      {/* ── CTA banner ── */}
-      <section className="py-24 px-6" style={{ background: '#000' }}>
-        <div className={`max-w-3xl mx-auto text-center rounded-2xl border border-white/10 ${isMobile ? 'p-8 px-5' : 'p-12'}`}
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))' }}>
-          <h2 style={{ fontFamily: NM, fontWeight: 900, marginBottom: '0.5rem', fontSize: isMobile ? '24px' : 'clamp(1.6rem, 4vw, 2.5rem)', lineHeight: isMobile ? 1.2 : LH_HEAD, letterSpacing: '-0.03em' }}>
-            Ready to make type beats {isMobile ? '' : <br />}in batches and save hours
-          </h2>
-          <p style={{ fontFamily: SCRIPT, fontSize: '1.7rem', lineHeight: 1.4, color: 'rgba(255,255,255,0.5)', marginBottom: '0.75rem' }}>
-            of your life?
-          </p>
-          <p style={{ fontFamily: NM, lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', marginBottom: '2rem' }}>
-            Join producers who are uploading more beats while doing less work.
-          </p>
-          <ParticleButton onClick={handleCTA}
-            className="transition-all hover:scale-105"
-            style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.05rem', lineHeight: LH_LABEL, background: BTN_BG, boxShadow: BTN_GLOW, border: 'none', color: '#fff', padding: '16px 40px', borderRadius: 12, cursor: 'pointer' }}>
-            {user ? 'Open the App' : 'Start Free — No Credit Card'}
-          </ParticleButton>
-        </div>
-      </section>
 
-      {/* ── FAQ Section ── */}
-      <section className="py-24 px-6 border-t border-white/[0.06]" style={{ background: '#000' }}>
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-center mb-16" style={{ fontFamily: NM, fontWeight: 800, fontSize: isMobile ? '28px' : '36px', letterSpacing: '-0.02em' }}>
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-8">
-            {[
-              { q: "Is it really free?", a: "Yes! Free users get 5 videos every month. No credit card required to start." },
-              { q: "Where are my files stored?", a: "Nowhere. TypeBeatz processes everything locally in your browser. Your beats and images never touch our servers." },
-              { q: "What is the resolution?", a: "Free users get standard quality. PRO users get 1080p Full HD, and Unlimited users get stunning 4K output." },
-              { q: "Can I use it for YouTube?", a: "Absolutely. The videos are optimized for YouTube's compression, using high bitrate AAC audio at 320kbps." }
-            ].map((faq, i) => (
-              <div key={i} className="group">
-                <h3 className="text-white font-bold mb-2 group-hover:text-blue-400 transition-colors" style={{ fontFamily: NM }}>{faq.q}</h3>
-                <p className="text-gray-500 leading-relaxed text-sm" style={{ fontFamily: NM }}>{faq.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Footer ── */}
       <footer className="py-8 px-6 border-t border-white/[0.06]" style={{ background: '#000' }}>
@@ -1027,8 +861,8 @@ export default function LandingPage() {
             <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>
               © {new Date().getFullYear()} TypeBeatz. All rights reserved.
             </p>
-            <a href="mailto:support@typebeatz.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: NM }}>
-              support@typebeatz.com
+            <a href="mailto:www@voodoo808.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: NM }}>
+              www@voodoo808.com
             </a>
           </div>
 
