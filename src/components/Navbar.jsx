@@ -18,7 +18,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
   const creditsLeft = user?.credits?.credits_remaining;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[10000] flex items-center justify-between px-4 sm:px-6 py-4"
+    <nav className="fixed top-0 left-0 right-0 z-[10000] flex items-center justify-between px-4 md:px-[64px] py-4"
       style={{ 
         background: 'rgba(0,0,0,0.38)', 
         backdropFilter: 'blur(16px)', 
