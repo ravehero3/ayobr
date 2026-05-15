@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
@@ -173,7 +173,19 @@ function BlurReveal({ children, delay = 0, style = {}, minScroll = 0 }) {
 }
 
 /* Pricing Section — Framer-style minimal dark cards */
+const PricingIcons = {
+  Video: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>,
+  Infinity: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/></svg>,
+  Calendar: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>,
+  Star: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
+  Image: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>,
+  Monitor: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>,
+  Cancel: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>,
+  Present: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+};
+
 function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user, isMobile }) {
+  const [isAnnual, setIsAnnual] = useState(true);
   const isPro = user?.role === 'pro' || user?.role === 'admin';
 
   const plans = [
@@ -183,11 +195,11 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
       period: '/month',
       desc: 'Perfect for getting started.',
       features: [
-        '5 videos per month',
-        'Credits reset on the 1st',
-        'All core features',
-        'Black & white backgrounds',
-        '720p output quality',
+        { text: '5 videos per month', icon: PricingIcons.Video },
+        { text: 'Credits reset on the 1st', icon: PricingIcons.Present },
+        { text: 'All core features', icon: PricingIcons.Star },
+        { text: 'Black & white backgrounds', icon: PricingIcons.Image },
+        { text: '720p output quality', icon: PricingIcons.Monitor },
       ],
       cta: user ? "You're on Free" : 'Get started for free',
       onCta: handleCTA,
@@ -195,17 +207,16 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
       ctaStyle: 'ghost',
     },
     {
-      name: 'PRO',
-      price: '$9.99',
+      name: 'Pro',
+      price: isAnnual ? '$7.99' : '$9.99',
       period: '/month',
       desc: 'For producers scaling their channel.',
-      badge: 'Most popular',
       features: [
-        '31 videos per month',
-        'HD 1080p output quality',
-        'Custom photo backgrounds',
-        'All core features included',
-        'Cancel anytime',
+        { text: '31 videos per month', icon: PricingIcons.Video },
+        { text: 'HD 1080p output quality', icon: PricingIcons.Monitor },
+        { text: 'Custom photo backgrounds', icon: PricingIcons.Image },
+        { text: 'All core features included', icon: PricingIcons.Star },
+        { text: 'Cancel anytime', icon: PricingIcons.Cancel },
       ],
       cta: isPro ? "You're on PRO" : 'Start with PRO',
       onCta: handleUpgradeCTA,
@@ -214,15 +225,15 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
     },
     {
       name: 'Unlimited',
-      price: '$18.99',
+      price: isAnnual ? '$14.99' : '$18.99',
       period: '/month',
       desc: 'For serious producers going all in.',
       features: [
-        'Unlimited video generation',
-        '4K video output quality',
-        'Custom photo backgrounds',
-        'All core features included',
-        'Cancel anytime',
+        { text: 'Unlimited video generation', icon: PricingIcons.Infinity },
+        { text: '4K video output quality', icon: PricingIcons.Monitor },
+        { text: 'Custom photo backgrounds', icon: PricingIcons.Image },
+        { text: 'All core features included', icon: PricingIcons.Star },
+        { text: 'Cancel anytime', icon: PricingIcons.Cancel },
       ],
       cta: 'Go Unlimited',
       onCta: handleUnlimitedCTA,
@@ -236,145 +247,226 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
       <div style={{ maxWidth: 1100, margin: '0 auto', paddingLeft: isMobile ? '1.5rem' : 64, paddingRight: isMobile ? '1.5rem' : 64 }}>
 
         {/* Heading */}
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.5 }}
-          style={{ marginBottom: 72 }}>
-          <h2 style={{
-            fontFamily: NM, fontWeight: 900,
-            fontSize: 'clamp(2rem, 4vw, 2.75rem)',
-            lineHeight: LH_HEAD, letterSpacing: '-0.03em',
-            color: '#fff', marginBottom: 12,
-          }}>
-            Simple pricing.
-          </h2>
-          <p style={{ fontFamily: NM, fontSize: '0.95rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.38)', maxWidth: 360 }}>
-            Start free. Upgrade when you're ready. No hidden fees.
-          </p>
-        </motion.div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 80 }}>
+          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5 }}>
+            <h2 style={{
+              fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif', fontWeight: 500,
+              fontSize: 'clamp(3rem, 6vw, 4.5rem)',
+              lineHeight: LH_HEAD, letterSpacing: '-0.04em',
+              color: '#fff', marginBottom: 16,
+            }}>
+              Pricing
+            </h2>
+            <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
+              Start free. Upgrade when you're ready.<br />No hidden fees.
+            </p>
+          </motion.div>
+        </div>
 
         {/* Cards */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 320px))',
-          gap: 16,
+          gap: 32,
           alignItems: 'stretch',
         }}>
           {plans.map((plan, idx) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: idx * 0.1 }}
-              style={{
-                position: 'relative',
-                borderRadius: 16,
-                padding: '32px 28px 28px',
-                display: 'flex',
-                flexDirection: 'column',
-                background: plan.highlight
-                  ? 'rgba(255,255,255,0.04)'
-                  : 'transparent',
-                border: plan.highlight
-                  ? '1px solid rgba(255,255,255,0.18)'
-                  : '1px solid rgba(255,255,255,0.08)',
-                boxShadow: plan.highlight
-                  ? '0 0 0 1px rgba(255,255,255,0.06) inset'
-                  : 'none',
-              }}
-            >
-              {/* Plan name + badge */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
-                <span style={{
-                  fontFamily: NM, fontWeight: 600, fontSize: '0.68rem',
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.35)',
-                }}>
-                  {plan.name}
-                </span>
-                {plan.badge && (
+            <div key={plan.name} style={{ position: 'relative' }}>
+              {/* Background blue glow for the highlighted card */}
+              {plan.highlight && (
+                <>
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '120%',
+                    height: '120%',
+                    background: 'rgba(59,130,246,0.3)',
+                    filter: 'blur(90px)',
+                    zIndex: 0,
+                    pointerEvents: 'none',
+                    borderRadius: '50%'
+                  }} />
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '120%',
+                    height: '120%',
+                    backgroundImage: `url(${starsBg})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center calc(50% - 200px)',
+                    opacity: 0.8,
+                    zIndex: 0,
+                    pointerEvents: 'none',
+                    borderRadius: '50%',
+                    maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 65%)',
+                    WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 65%)',
+                  }} />
+                </>
+              )}
+              <motion.div
+                initial={{ opacity: 0, y: 32 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: idx * 0.1 }}
+                style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  borderRadius: 16,
+                  padding: '32px 28px 28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  background: plan.highlight ? 'linear-gradient(to bottom, rgba(1,5,10,0.8), rgba(7,30,87,0.8))' : '#0a0a0a',
+                  backdropFilter: 'blur(32px)',
+                  WebkitBackdropFilter: 'blur(32px)',
+                  border: '1px solid #333',
+                  boxShadow: plan.highlight
+                    ? '0 30px 60px -12px rgba(0,0,0,0.6)'
+                    : '0 10px 30px -10px rgba(0,0,0,0.3)',
+                  height: '100%',
+                }}
+              >
+                {/* Plan name + Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, minHeight: 28 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{
-                    fontFamily: NM, fontWeight: 600, fontSize: '0.6rem',
-                    letterSpacing: '0.06em', textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.55)',
-                    background: 'rgba(255,255,255,0.09)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    borderRadius: 999, padding: '3px 9px',
+                    fontFamily: '"Inter", sans-serif',
+                    fontSize: '24px',
+                    fontWeight: 400,
+                    lineHeight: '28.8px',
+                    letterSpacing: '-0.01px',
+                    color: '#ffffff',
+                    fontStyle: 'normal',
+                    textTransform: 'none',
                   }}>
-                    {plan.badge}
+                    {plan.name}
                   </span>
-                )}
-              </div>
+                </div>
 
-              {/* Price */}
-              <div style={{ marginBottom: 8 }}>
-                <span style={{
-                  fontFamily: NM, fontWeight: 800,
-                  fontSize: '2.6rem', lineHeight: 1,
-                  letterSpacing: '-0.05em', color: '#fff',
-                }}>
-                  {plan.price}
-                </span>
-                <span style={{
-                  fontFamily: NM, fontWeight: 400, fontSize: '0.85rem',
-                  color: 'rgba(255,255,255,0.3)', marginLeft: 4,
-                }}>
-                  {plan.period}
-                </span>
+                {/* Small Toggle for PRO and Unlimited */}
+                {(plan.name === 'Pro' || plan.name === 'Unlimited') && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontFamily: NM, fontSize: '0.6rem', color: isAnnual ? '#fff' : 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>ANNUAL</span>
+                    <button 
+                      onClick={() => setIsAnnual(!isAnnual)}
+                      style={{
+                        width: 22, height: 11, borderRadius: 99, background: isAnnual ? '#0099fe' : 'rgba(0,0,0,0.6)',
+                        position: 'relative', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0,
+                        transition: 'background 0.3s ease'
+                      }}
+                    >
+                      <motion.div 
+                        animate={{ x: isAnnual ? 11 : 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        style={{
+                          width: 7, height: 7, borderRadius: '50%', background: '#fff',
+                          position: 'absolute', top: 1, left: 1,
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.4)'
+                        }}
+                      />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Description */}
               <p style={{
                 fontFamily: NM, fontSize: '0.82rem',
                 color: 'rgba(255,255,255,0.32)',
-                lineHeight: LH_BODY, marginBottom: 32,
+                lineHeight: LH_BODY, marginBottom: 24,
               }}>
                 {plan.desc}
               </p>
 
-              {/* Divider */}
-              <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 24 }} />
+              {/* Top Divider */}
+              <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 16 }} />
+
+              {/* Price */}
+              <div style={{ marginBottom: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                  <AnimatePresence mode="popLayout">
+                    <motion.span
+                      key={plan.price}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        fontFamily: NM, fontWeight: 600,
+                        fontSize: '2rem', lineHeight: 1,
+                        letterSpacing: '-0.03em', color: '#fff',
+                        display: 'inline-block'
+                      }}
+                    >
+                      {plan.price}
+                    </motion.span>
+                  </AnimatePresence>
+                  <span style={{
+                    fontFamily: NM, fontWeight: 400, fontSize: '0.85rem',
+                    color: 'rgba(255,255,255,0.3)', marginLeft: 4,
+                  }}>
+                    {plan.period}
+                  </span>
+                </div>
+              </div>
+
+              {/* Bottom Divider */}
+              <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 24, marginTop: 16 }} />
 
               {/* Feature list */}
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
-                {plan.features.map(f => (
-                  <li key={f} style={{
+                {plan.features.map((f, i) => (
+                  <li key={i} style={{
                     fontFamily: NM, fontSize: '0.85rem',
                     color: 'rgba(255,255,255,0.55)',
                     lineHeight: LH_BODY,
                     display: 'flex', alignItems: 'center', gap: 10,
                   }}>
-                    <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem', flexShrink: 0 }}>✓</span>
-                    {f}
+                    <span style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {f.icon}
+                    </span>
+                    {f.text}
                   </li>
                 ))}
               </ul>
 
               {/* CTA */}
-              <button
-                onClick={plan.onCta}
-                style={{
-                  fontFamily: NM, fontWeight: 600, fontSize: '0.85rem',
-                  lineHeight: LH_LABEL,
-                  padding: '13px 0', width: '100%',
-                  borderRadius: 10, cursor: 'pointer', outline: 'none',
-                  transition: 'opacity 0.2s ease',
-                  ...(plan.ctaStyle === 'solid' ? {
-                    background: '#fff',
-                    color: '#000',
-                    border: 'none',
-                  } : {
-                    background: 'transparent',
-                    color: 'rgba(255,255,255,0.65)',
-                    border: '1px solid rgba(255,255,255,0.14)',
-                  }),
-                }}
-                onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
-                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-              >
-                {plan.cta}
-              </button>
+              {plan.ctaStyle === 'solid' ? (
+                <ParticleButton
+                  onClick={plan.onCta}
+                  className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
+                  style={{
+                    fontFamily: NM, fontWeight: 600, fontSize: '0.85rem',
+                    lineHeight: LH_LABEL, padding: '0 16px', height: 34, width: '100%',
+                    borderRadius: 9999, cursor: 'pointer', outline: 'none',
+                    background: plan.highlight ? '#0099ff' : '#fff', color: plan.highlight ? '#fff' : '#000', border: 'none'
+                  }}
+                >
+                  {plan.cta}
+                </ParticleButton>
+              ) : (
+                <button
+                  onClick={plan.onCta}
+                  style={{
+                    fontFamily: NM, fontWeight: 600, fontSize: '0.85rem',
+                    lineHeight: LH_LABEL, padding: '0 16px', height: 34, width: '100%',
+                    borderRadius: 9999, cursor: 'pointer', outline: 'none',
+                    transition: 'opacity 0.2s ease',
+                    background: 'transparent', color: 'rgba(255,255,255,0.65)',
+                    border: '1px solid rgba(255,255,255,0.14)'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                >
+                  {plan.cta}
+                </button>
+              )}
             </motion.div>
+            </div>
           ))}
         </div>
 
@@ -461,6 +553,34 @@ function SafariChrome({ dark = false }) {
   );
 }
 
+function MobileStepNumber({ num }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
+  
+  return (
+    <motion.div 
+      ref={ref} 
+      style={{ 
+        y, 
+        position: 'absolute', 
+        top: -60, 
+        right: -10, 
+        fontSize: '200px', 
+        fontWeight: 900, 
+        color: '#111', 
+        zIndex: 0, 
+        lineHeight: 1, 
+        userSelect: 'none', 
+        pointerEvents: 'none',
+        letterSpacing: '-0.05em'
+      }}
+    >
+      {num}
+    </motion.div>
+  );
+}
+
 /* ── Step content mockups ── */
 const STEP_CONTENTS = [
   () => <img src={screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
@@ -513,13 +633,13 @@ function HowItWorksSection({ isMobile }) {
   return (
     <div id="how-it-works" style={{ background: '#000' }}>
       {isMobile ? (
-        <div style={{ padding: '0 1.5rem 80px', display: 'flex', flexDirection: 'column', gap: 60 }}>
+        <div style={{ padding: '0 1.5rem 80px', display: 'flex', flexDirection: 'column', gap: 60, overflow: 'hidden' }}>
           {steps.map((step, i) => {
             const Content = STEP_CONTENTS[i];
             return (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 20 }}>
-                  <span style={{ fontFamily: NM, fontWeight: 700, fontSize: 12, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Step {step.num}</span>
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'relative' }}>
+                <MobileStepNumber num={parseInt(step.num, 10)} />
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 20, position: 'relative', zIndex: 1 }}>
                   <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 8 }}>{step.title}</h3>
                   <p style={{ fontFamily: NM, fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: 1.6 }}>{step.desc}</p>
                 </div>
@@ -800,22 +920,24 @@ export default function LandingPage() {
             type beat videos ready to upload to YouTube. No editing. No manual work.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex flex-row items-center justify-center gap-3">
             <ParticleButton onClick={handleCTA}
-              className="transition-all duration-200 hover:scale-105"
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+              className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 0', width: 116, borderRadius: 9999, cursor: 'pointer' }}>
               {user ? 'Open the App' : 'Start for free'}
             </ParticleButton>
             <a href="#pricing"
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, color: '#fff', textDecoration: 'none', padding: '6px 14px', borderRadius: 9999, background: '#2a2a2a', border: 'none', display: 'inline-block' }}
-              className="hover:bg-[#333] transition-colors">
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+              className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
               Go unlimited
             </a>
           </div>
 
-          <p style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1rem' }}>
-            Free — 5 videos/month · PRO — 31 videos/month · Unlimited — Always Unlimited
-          </p>
+          <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem' }}>
+            <span className="block sm:inline">Free — 5 videos/month · PRO — 31 videos/month</span>
+            <span className="hidden sm:inline"> · </span>
+            <span className="block sm:inline mt-1 sm:mt-0">Unlimited — Always Unlimited</span>
+          </div>
         </motion.div>
 
         {/* Stats row — hidden until user scrolls 10px, then blur-to-focus reveal */}
