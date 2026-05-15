@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LanguageToggle from './LanguageToggle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -88,6 +89,8 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           </>
         )}
 
+        <LanguageToggle />
+
         {/* User avatar + dropdown */}
         {user ? (
           <div className="relative">
@@ -157,10 +160,6 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                         Admin Panel
                       </button>
                     )}
-                    <button onClick={() => { onInvite && onInvite(); setMenuOpen(false); }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                      Invite friends (+1 credit)
-                    </button>
                   </div>
                   
                   <div className="py-1 border-t border-white/5">

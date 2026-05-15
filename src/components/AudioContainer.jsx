@@ -7,7 +7,7 @@ import DotLoader from './DotLoader';
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
-const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap, onStartAudioDrag, onUpdateDragPosition, onEndDrag }) => {
+const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap, onStartAudioDrag, onUpdateDragPosition, onEndDrag, shouldShowGlow }) => {
   const { updatePair } = useAppStore();
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
@@ -154,24 +154,22 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       ref={containerRef}
       className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
       style={{
-        background: 'rgba(0, 0, 0, 0.3)',
+        background: 'rgba(10, 10, 10, 0.7)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderRadius: '24px',
+        borderRadius: '16px',
         backgroundImage: 'none', // Clean container without texture
         padding: audio ? '16px' : '20px',
         height: '160px',
         minHeight: '160px',
         maxHeight: '160px',
         overflow: 'visible',
-        border: '1px solid rgba(128, 128, 128, 0.5)',
-        boxShadow: `
-          0 0 20px rgba(0, 0, 0, 0.15)
-        `,
+        border: shouldShowGlow ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.06)',
+        boxShadow: shouldShowGlow ? '0 0 15px rgba(255, 255, 255, 0.2), 0 8px 32px 0 rgba(0, 0, 0, 0.37)' : '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
       }}
       data-pair-id={pairId}
       data-audio-container="true"
-      whileHover={{ scale: 1.005 }}
+      whileHover={{ scale: 1.02 }}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

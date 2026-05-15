@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import LanguageToggle from '../components/LanguageToggle';
+import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import screenshotUpload from '../assets/screenshot_upload.png';
@@ -469,11 +471,6 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
             </div>
           ))}
         </div>
-
-        {/* Footer note */}
-        <p style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)', marginTop: 40 }}>
-          All plans include unlimited background music support. Cancel anytime.
-        </p>
       </div>
     </section>
   );
@@ -846,6 +843,7 @@ export default function LandingPage() {
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         </button>
         <div className="flex items-center gap-6">
+          <LanguageToggle />
           <button onClick={() => navigate('/login')}
             style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             className="hover:text-white transition-colors">
@@ -975,7 +973,7 @@ export default function LandingPage() {
           <div className="flex flex-col items-center md:items-start gap-2">
             <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.5 }} />
             <p style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>
-              Professional Batch Generator for Producers.
+              Make type beats while you sleep
             </p>
           </div>
           

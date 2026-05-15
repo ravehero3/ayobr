@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import AppPage from './pages/AppPage';
@@ -15,9 +16,10 @@ import ErrorBoundary from './components/ErrorBoundary';
 export default function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <LanguageProvider>
+        <AuthProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           
@@ -44,7 +46,8 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   );
 }

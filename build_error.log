@@ -1,0 +1,112 @@
+assets by status 6.74 MiB [cached] 8 assets
+assets by path . 3.5 MiB
+  assets by status 3.49 MiB [big]
+    asset vendors.bundle.js 2.41 MiB [compared for emit] [big] (name: vendors) (id hint: vendor)
+    asset main.bundle.js 1.08 MiB [compared for emit] [big] (name: main)
+  asset node_modules_ffmpeg_ffmpeg_dist_esm_lazy_recursive.bundle.js 10.9 KiB [compared for emit]
+  asset index.html 1.98 KiB [compared for emit]
+Entrypoint main [big] 3.49 MiB (6.74 MiB) = vendors.bundle.js 2.41 MiB main.bundle.js 1.08 MiB 8 auxiliary assets
+orphan modules 354 KiB [orphan] 154 modules
+runtime modules 9.44 KiB 23 modules
+modules by path ./node_modules/ 1.98 MiB 307 modules
+modules by path ./src/ 908 KiB
+  modules by path ./src/components/*.jsx 323 KiB 30 modules
+  modules by path ./src/pages/*.jsx 99.3 KiB 8 modules
+  modules by path ./src/assets/*.png 476 bytes 7 modules
+  modules by path ./src/hooks/*.js 98 KiB 5 modules
+  modules by path ./src/*.js 14.1 KiB 2 modules
+  modules by path ./src/*.jsx 39.6 KiB 2 modules
+  modules by path ./src/styles/*.css 197 KiB 2 modules
+  modules by path ./src/context/*.jsx 17.7 KiB 2 modules
+  + 3 modules
+./noise.png 68 bytes (asset) 42 bytes (javascript) [built] [code generated]
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 105:27-67
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 7:0-38 31:44-51
+ @ ./src/index.js 3:0-24 12:32-35
+
+WARNING in ./node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js 19:39-20:36
+Critical dependency: the request of a dependency is an expression
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/classes.js 110:16-112:18
+ @ ./node_modules/@ffmpeg/ffmpeg/dist/esm/index.js 1:0-29 1:0-29
+ @ ./src/utils/ffmpegProcessor.js 14:0-40 370:33-39
+ @ ./src/hooks/useFFmpeg.js 20:0-89 155:20-41 452:12-33 538:19-41 601:14-35 999:4-25 1051:4-25
+ @ ./src/VideoApp.jsx 27:0-46 70:19-28
+ @ ./src/pages/AppPage.jsx 19:0-35 277:34-42
+ @ ./src/App.jsx 7:0-38 31:44-51
+ @ ./src/index.js 3:0-24 12:32-35
+
+2 warnings have detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+
+ERROR in ./src/pages/LandingPage.jsx
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /Users/macbook/Desktop/ayobr/src/pages/LandingPage.jsx: Expected corresponding JSX closing tag for <div>. (472:4)
+
+  470 |           ))}
+  471 |         </div>
+> 472 |     </section>
+      |     ^
+  473 |   );
+  474 | }
+  475 |
+    at constructor (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:365:19)
+    at JSXParserMixin.raise (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:6616:19)
+    at JSXParserMixin.jsxParseElementAt (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:4739:16)
+    at JSXParserMixin.jsxParseElementAt (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:4710:32)
+    at JSXParserMixin.jsxParseElement (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:4761:17)
+    at JSXParserMixin.parseExprAtom (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:4771:19)
+    at JSXParserMixin.parseExprSubscripts (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11098:23)
+    at JSXParserMixin.parseUpdate (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11083:21)
+    at JSXParserMixin.parseMaybeUnary (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11063:23)
+    at JSXParserMixin.parseMaybeUnaryOrPrivate (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10916:61)
+    at JSXParserMixin.parseExprOps (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10921:23)
+    at JSXParserMixin.parseMaybeConditional (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10898:23)
+    at JSXParserMixin.parseMaybeAssign (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10848:21)
+    at /Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10817:39
+    at JSXParserMixin.allowInAnd (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12443:12)
+    at JSXParserMixin.parseMaybeAssignAllowIn (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10817:17)
+    at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12510:17)
+    at JSXParserMixin.parseParenAndDistinguishExpression (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11692:28)
+    at JSXParserMixin.parseExprAtom (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11348:23)
+    at JSXParserMixin.parseExprAtom (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:4776:20)
+    at JSXParserMixin.parseExprSubscripts (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11098:23)
+    at JSXParserMixin.parseUpdate (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11083:21)
+    at JSXParserMixin.parseMaybeUnary (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:11063:23)
+    at JSXParserMixin.parseMaybeUnaryOrPrivate (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10916:61)
+    at JSXParserMixin.parseExprOps (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10921:23)
+    at JSXParserMixin.parseMaybeConditional (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10898:23)
+    at JSXParserMixin.parseMaybeAssign (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10848:21)
+    at JSXParserMixin.parseExpressionBase (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10801:23)
+    at /Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10797:39
+    at JSXParserMixin.allowInAnd (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12438:16)
+    at JSXParserMixin.parseExpression (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:10797:17)
+    at JSXParserMixin.parseReturnStatement (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13159:28)
+    at JSXParserMixin.parseStatementContent (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12815:21)
+    at JSXParserMixin.parseStatementLike (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12784:17)
+    at JSXParserMixin.parseStatementListItem (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12764:17)
+    at JSXParserMixin.parseBlockOrModuleBlockBody (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13333:61)
+    at JSXParserMixin.parseBlockBody (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13326:10)
+    at JSXParserMixin.parseBlock (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13314:10)
+    at JSXParserMixin.parseFunctionBody (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12117:24)
+    at JSXParserMixin.parseFunctionBodyAndFinish (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12103:10)
+    at /Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13462:12
+    at JSXParserMixin.withSmartMixTopicForbiddingContext (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12420:14)
+    at JSXParserMixin.parseFunction (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13461:10)
+    at JSXParserMixin.parseFunctionStatement (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13142:17)
+    at JSXParserMixin.parseStatementContent (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12808:21)
+    at JSXParserMixin.parseStatementLike (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12784:17)
+    at JSXParserMixin.parseModuleItem (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12761:17)
+    at JSXParserMixin.parseBlockOrModuleBlockBody (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13333:36)
+    at JSXParserMixin.parseBlockBody (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:13326:10)
+    at JSXParserMixin.parseProgram (/Users/macbook/Desktop/ayobr/node_modules/@babel/parser/lib/index.js:12639:10)
+ @ ./src/App.jsx 5:0-46 24:41-52
+ @ ./src/index.js 3:0-24 12:32-35
+
+webpack 5.106.2 compiled with 1 error and 2 warnings in 4141 ms

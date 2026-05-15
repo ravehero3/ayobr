@@ -215,8 +215,9 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
               height: '450px',
               minHeight: '450px',
               maxHeight: '450px',
-              borderColor: '#10B981', // Green border for completed video
+              borderColor: 'rgba(255, 255, 255, 0.4)', // Subtle white border for completed video
               borderWidth: '2px',
+              borderRadius: '16px' // Reduced radius
             }}
           >
             {/* Clean video display - just the video */}
@@ -338,11 +339,11 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
-            width: '32px', 
-            height: '48px',
-            marginTop: '-12px',
-            marginLeft: '-3px',
-            marginRight: '-10px'
+            width: '40px', 
+            height: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
             <div className="relative flex items-center justify-center" style={{ width: '32px', height: '48px' }}>
               {/* Plus icon using SVG for crisp rendering */}
