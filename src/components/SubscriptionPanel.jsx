@@ -40,6 +40,7 @@ export default function SubscriptionPanel({ onClose, onUpgradePro, onUpgradeUnli
   const [subLoading, setSubLoading] = useState(true);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelDone, setCancelDone]       = useState(false);
+  const [isAnnual, setIsAnnual]           = useState(true);
 
   const isUnlimited = user?.role === 'unlimited';
   const isPro       = user?.role === 'pro';
@@ -75,7 +76,7 @@ export default function SubscriptionPanel({ onClose, onUpgradePro, onUpgradeUnli
   };
 
   const planLabel = isAdmin ? 'Admin' : isUnlimited ? 'Unlimited' : isPro ? 'PRO' : 'Free';
-  const planPrice = isUnlimited ? '$18.99 / month' : isPro ? '$9.99 / month' : 'Up to 5 videos/month';
+  const planPrice = isUnlimited ? 'Unlimited Access' : isPro ? 'PRO Access' : 'Up to 5 videos/month';
   const planIcon  = isAdmin ? '⚙️' : isUnlimited ? '🌟' : isPro ? '⭐' : '🎟️';
   const planBg    = isUnlimited ? 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.08))'
                   : isPro       ? 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(14,165,233,0.08))'
@@ -208,27 +209,41 @@ export default function SubscriptionPanel({ onClose, onUpgradePro, onUpgradeUnli
 
           {/* CTA buttons */}
           {!isPaid && (
-            <div className="space-y-2">
-              <button onClick={onUpgradePro} disabled={checkoutLoading}
-                className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
-                {checkoutLoading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Opening...</> : '⭐ Upgrade to PRO — $9.99/month'}
-              </button>
-              <button onClick={onUpgradeUnlimited} disabled={checkoutLoading}
-                className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', color: '#000' }}>
-                {checkoutLoading ? <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />Opening...</> : '🌟 Go Unlimited — $18.99/month'}
-              </button>
+            <div className="space-y-4 pt-2">
+              {/* Toggle */}
+              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: 9999, padding: 4, width: 'fit-content', margin: '0 auto' }}>
+                <button onClick={() => setIsAnnual(false)} className={`px-4 py-1.5 text-xs rounded-full font-medium transition-colors ${!isAnnual ? 'bg-white/10 text-white' : 'text-white/50'}`}>Monthly</button>
+                <button onClick={() => setIsAnnual(true)} className={`px-4 py-1.5 text-xs rounded-full font-medium transition-colors flex items-center gap-1.5 ${isAnnual ? 'bg-white/10 text-white' : 'text-white/50'}`}>Yearly <span className="text-blue-400 text-[10px] bg-blue-500/20 px-1.5 rounded">-20%</span></button>
+              </div>
+              
+              <div className="space-y-2">
+                <button onClick={() => onUpgradePro(isAnnual ? 'yearly' : 'monthly')} disabled={checkoutLoading}
+                  className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' }}>
+                  {checkoutLoading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Opening...</> : `⭐ Upgrade to PRO — ${isAnnual ? '$95.88/yr' : '$9.99/mo'}`}
+                </button>
+                <button onClick={() => onUpgradeUnlimited(isAnnual ? 'yearly' : 'monthly')} disabled={checkoutLoading}
+                  className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', color: '#000' }}>
+                  {checkoutLoading ? <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />Opening...</> : `🌟 Go Unlimited — ${isAnnual ? '$179.88/yr' : '$18.99/mo'}`}
+                </button>
+              </div>
             </div>
           )}
 
           {isPro && !isAdmin && (
-            <div className="space-y-2">
-              <button onClick={onUpgradeUnlimited} disabled={checkoutLoading}
-                className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', color: '#000' }}>
-                {checkoutLoading ? <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />Opening...</> : '🌟 Upgrade to Unlimited — $18.99/month'}
-              </button>
+            <div className="space-y-4 pt-2">
+              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: 9999, padding: 4, width: 'fit-content', margin: '0 auto' }}>
+                <button onClick={() => setIsAnnual(false)} className={`px-4 py-1.5 text-xs rounded-full font-medium transition-colors ${!isAnnual ? 'bg-white/10 text-white' : 'text-white/50'}`}>Monthly</button>
+                <button onClick={() => setIsAnnual(true)} className={`px-4 py-1.5 text-xs rounded-full font-medium transition-colors flex items-center gap-1.5 ${isAnnual ? 'bg-white/10 text-white' : 'text-white/50'}`}>Yearly <span className="text-blue-400 text-[10px] bg-blue-500/20 px-1.5 rounded">-20%</span></button>
+              </div>
+              
+              <div className="space-y-2">
+                <button onClick={() => onUpgradeUnlimited(isAnnual ? 'yearly' : 'monthly')} disabled={checkoutLoading}
+                  className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', color: '#000' }}>
+                  {checkoutLoading ? <><span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />Opening...</> : `🌟 Upgrade to Unlimited — ${isAnnual ? '$179.88/yr' : '$18.99/mo'}`}
+                </button>
               {sub && sub.status === 'active' && !cancelDone && (
                 <button onClick={handleCancel} disabled={cancelLoading}
                   className="w-full py-2.5 rounded-xl text-sm text-red-400 border border-red-500/20 hover:bg-red-500/8 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">

@@ -47,30 +47,31 @@ export default function AppPage() {
       setTimeout(() => setShowCancelledNotice(false), 5000);
       setSearchParams({}, { replace: true });
     }
-    if (searchParams.get('upgrade') === 'true') {
+    const interval = searchParams.get('interval') || 'yearly';
+    if (searchParams.get('upgrade') === 'true' || searchParams.get('upgrade') === 'pro') {
       setSearchParams({}, { replace: true });
-      setTimeout(() => handleUpgradePro(), 800);
+      setTimeout(() => handleUpgradePro(interval), 800);
     }
     if (searchParams.get('upgrade') === 'unlimited') {
       setSearchParams({}, { replace: true });
-      setTimeout(() => handleUpgradeUnlimited(), 800);
+      setTimeout(() => handleUpgradeUnlimited(interval), 800);
     }
   }, [searchParams]);
 
-  const handleUpgradePro = async () => {
+  const handleUpgradePro = async (interval = 'yearly') => {
     setCheckoutLoading(true);
     try {
-      const opened = await openCheckout(user?.email, 'pro');
+      const opened = await openCheckout(user?.email, 'pro', interval);
       if (!opened) alert('Checkout is not yet configured. Please add your Paddle secrets to activate payments.');
     } finally {
       setCheckoutLoading(false);
     }
   };
 
-  const handleUpgradeUnlimited = async () => {
+  const handleUpgradeUnlimited = async (interval = 'yearly') => {
     setCheckoutLoading(true);
     try {
-      const opened = await openCheckout(user?.email, 'unlimited');
+      const opened = await openCheckout(user?.email, 'unlimited', interval);
       if (!opened) alert('Checkout is not yet configured. Please add your Paddle secrets to activate payments.');
     } finally {
       setCheckoutLoading(false);

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 
 let paddleInitialized    = false;
-let cachedPriceId        = null;
-let cachedUnlimitedPriceId = null;
+let cachedProMonthlyId = null;
+let cachedProYearlyId = null;
+let cachedUnlimitedMonthlyId = null;
+let cachedUnlimitedYearlyId = null;
 let initPromise          = null;
 
 async function initializePaddle() {
@@ -15,8 +17,10 @@ async function initializePaddle() {
     .then(config => {
       if (!config?.clientToken) { initPromise = null; return false; }
 
-      cachedPriceId          = config.priceId;
-      cachedUnlimitedPriceId = config.unlimitedPriceId;
+      cachedProMonthlyId       = config.proMonthlyPriceId;
+      cachedProYearlyId        = config.proYearlyPriceId;
+      cachedUnlimitedMonthlyId = config.unlimitedMonthlyPriceId;
+      cachedUnlimitedYearlyId  = config.unlimitedYearlyPriceId;
 
       if (config.environment === 'sandbox') {
         window.Paddle.Environment.set('sandbox');
@@ -55,8 +59,8 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
 
   useEffect(() => { initializePaddle(); }, []);
 
-  /* plan: 'pro' | 'unlimited' */
-  const openCheckout = useCallback(async (userEmail, plan = 'pro') => {
+  /* plan: 'pro' | 'unlimited', interval: 'monthly' | 'yearly' */
+  const openCheckout = useCallback(async (userEmail, plan = 'pro', interval = 'yearly') => {
     if (typeof window.Paddle === 'undefined') {
       console.warn('Paddle.js not loaded yet');
       return false;
@@ -68,9 +72,15 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
       return false;
     }
 
-    const priceId = plan === 'unlimited' ? cachedUnlimitedPriceId : cachedPriceId;
+    let priceId = null;
+    if (plan === 'unlimited') {
+      priceId = interval === 'yearly' ? cachedUnlimitedYearlyId : cachedUnlimitedMonthlyId;
+    } else {
+      priceId = interval === 'yearly' ? cachedProYearlyId : cachedProMonthlyId;
+    }
+
     if (!priceId) {
-      console.warn(`No Paddle priceId configured for plan "${plan}"`);
+      console.warn(`No Paddle priceId configured for plan "${plan}" and interval "${interval}"`);
       return false;
     }
 

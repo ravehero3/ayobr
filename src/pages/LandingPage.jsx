@@ -221,7 +221,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: 'Cancel anytime', icon: PricingIcons.Cancel },
       ],
       cta: isPro ? "You're on PRO" : 'Start with PRO',
-      onCta: handleUpgradeCTA,
+      onCta: () => handleUpgradeCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: true,
       ctaStyle: 'solid',
     },
@@ -238,7 +238,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: 'Cancel anytime', icon: PricingIcons.Cancel },
       ],
       cta: 'Go Unlimited',
-      onCta: handleUnlimitedCTA,
+      onCta: () => handleUnlimitedCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: false,
       ctaStyle: 'ghost',
     },
@@ -260,9 +260,64 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
             }}>
               Pricing
             </h2>
-            <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
+            <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto', marginBottom: 32 }}>
               Start free. Upgrade when you're ready.<br />No hidden fees.
             </p>
+
+            {/* Monthly / Yearly Toggle */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '9999px',
+              padding: '6px',
+              width: 'fit-content',
+              margin: '0 auto',
+              position: 'relative'
+            }}>
+              {/* Animated background pill */}
+              <motion.div
+                layout
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                style={{
+                  position: 'absolute',
+                  top: '6px',
+                  bottom: '6px',
+                  width: 'calc(50% - 6px)',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '9999px',
+                  left: isAnnual ? 'calc(50%)' : '6px',
+                  zIndex: 0
+                }}
+              />
+              
+              <button
+                onClick={() => setIsAnnual(false)}
+                style={{
+                  position: 'relative', zIndex: 1,
+                  padding: '8px 24px', background: 'transparent', border: 'none',
+                  color: !isAnnual ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: NM, fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer',
+                  transition: 'color 0.3s ease'
+                }}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setIsAnnual(true)}
+                style={{
+                  position: 'relative', zIndex: 1,
+                  padding: '8px 24px', background: 'transparent', border: 'none',
+                  color: isAnnual ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: NM, fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer',
+                  transition: 'color 0.3s ease', display: 'flex', alignItems: 'center', gap: '6px'
+                }}
+              >
+                Yearly <span style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px' }}>-20%</span>
+              </button>
+            </div>
           </motion.div>
         </div>
 
@@ -816,15 +871,15 @@ export default function LandingPage() {
   useStarsScrollReveal(starsRef);
 
   const handleCTA = () => { user ? navigate('/app') : login(); };
-  const handleUpgradeCTA = () => {
+  const handleUpgradeCTA = (interval = 'yearly') => {
     if (!user) { login(); return; }
     if (user.role === 'pro' || user.role === 'unlimited' || user.role === 'admin') navigate('/app');
-    else navigate('/app?upgrade=true');
+    else navigate(`/app?upgrade=true&interval=${interval}`);
   };
-  const handleUnlimitedCTA = () => {
+  const handleUnlimitedCTA = (interval = 'yearly') => {
     if (!user) { login(); return; }
     if (user.role === 'unlimited' || user.role === 'admin') navigate('/app');
-    else navigate('/app?upgrade=unlimited');
+    else navigate(`/app?upgrade=unlimited&interval=${interval}`);
   };
 
   return (

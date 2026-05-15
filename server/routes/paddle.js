@@ -18,13 +18,15 @@ function getPaddle() {
 }
 
 // Read price IDs lazily so env vars set after startup are picked up
-function getPriceId()           { return process.env.PADDLE_PRO_PRICE_ID       || null; }
-function getUnlimitedPriceId()  { return process.env.PADDLE_UNLIMITED_PRICE_ID || null; }
+function getProMonthlyPriceId()       { return process.env.PADDLE_PRO_MONTHLY_PRICE_ID       || null; }
+function getProYearlyPriceId()        { return process.env.PADDLE_PRO_YEARLY_PRICE_ID        || null; }
+function getUnlimitedMonthlyPriceId() { return process.env.PADDLE_UNLIMITED_MONTHLY_PRICE_ID || null; }
+function getUnlimitedYearlyPriceId()  { return process.env.PADDLE_UNLIMITED_YEARLY_PRICE_ID  || null; }
 
 // Determine which role a completed purchase should grant based on price ID
 function roleForPriceId(purchasedPriceId) {
-  const unlimitedId = getUnlimitedPriceId();
-  if (unlimitedId && purchasedPriceId === unlimitedId) return 'unlimited';
+  const unlimitedIds = [getUnlimitedMonthlyPriceId(), getUnlimitedYearlyPriceId()].filter(Boolean);
+  if (unlimitedIds.includes(purchasedPriceId)) return 'unlimited';
   return 'pro';
 }
 
@@ -32,21 +34,28 @@ function roleForPriceId(purchasedPriceId) {
 // PADDLE_CLIENT_TOKEN is a public token — safe to expose to frontend
 router.get('/config', (req, res) => {
   res.json({
-    clientToken:      process.env.PADDLE_CLIENT_TOKEN || null,
-    priceId:          getPriceId(),
-    unlimitedPriceId: getUnlimitedPriceId(),
-    environment:      process.env.PADDLE_ENV === 'production' ? 'production' : 'sandbox'
+    clientToken:             process.env.PADDLE_CLIENT_TOKEN || null,
+    proMonthlyPriceId:       getProMonthlyPriceId(),
+    proYearlyPriceId:        getProYearlyPriceId(),
+    unlimitedMonthlyPriceId: getUnlimitedMonthlyPriceId(),
+    unlimitedYearlyPriceId:  getUnlimitedYearlyPriceId(),
+    environment:             process.env.PADDLE_ENV === 'production' ? 'production' : 'sandbox'
   });
 });
 
 // Create Paddle checkout — returns a checkout URL (fallback if overlay unavailable)
-// Accepts optional { plan: 'unlimited' } body to use the unlimited price
+// Accepts optional { plan: 'unlimited', interval: 'yearly' } body to use the correct price
 router.post('/create-checkout', isAuthenticated, async (req, res) => {
   const p = getPaddle();
   if (!p) return res.status(503).json({ message: 'Paddle not configured yet' });
 
-  const { plan } = req.body || {};
-  const priceId = plan === 'unlimited' ? getUnlimitedPriceId() : getPriceId();
+  const { plan, interval } = req.body || {};
+  let priceId = null;
+  if (plan === 'unlimited') {
+    priceId = interval === 'yearly' ? getUnlimitedYearlyPriceId() : getUnlimitedMonthlyPriceId();
+  } else {
+    priceId = interval === 'yearly' ? getProYearlyPriceId() : getProMonthlyPriceId();
+  }
   if (!priceId) return res.status(503).json({ message: 'Paddle price not configured yet' });
 
   try {
