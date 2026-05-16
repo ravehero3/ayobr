@@ -1042,7 +1042,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex gap-6">
-            {['Terms', 'Privacy'].map(l => (
+            {['Terms', 'Privacy', 'Refund'].map(l => (
               <a key={l} href={`/${l.toLowerCase()}`}
                 style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
                 className="hover:text-white transition-colors">{l}</a>

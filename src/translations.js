@@ -90,7 +90,18 @@ export const translations = {
     "privacy.s6.title": "6. Cookies and Tracking",
     "privacy.s6.desc": "We use essential cookies to manage your session and authentication state. We may use anonymous analytics tools to understand how our website is used. You can configure your browser to reject non-essential cookies, but this may affect certain features of the site.",
     "privacy.s7.title": "7. Contact Us",
-    "privacy.s7.desc": "If you have any questions or concerns about this Privacy Policy or our data practices, please contact us through the TypeBeatz platform."
+    "privacy.s7.desc": "If you have any questions or concerns about this Privacy Policy or our data practices, please contact us through the TypeBeatz platform.",
+
+    // Refund Page
+    "refund.title": "Refund Policy",
+    "refund.s1.title": "1. All Sales Are Final",
+    "refund.s1.desc": "Because TypeBeatz offers a Free tier that allows you to test the core features of the service before purchasing, all sales for PRO and Unlimited subscriptions are final. We do not offer refunds or credits for any partial subscription periods or unused videos.",
+    "refund.s2.title": "2. Subscription Cancellations",
+    "refund.s2.desc": "You may cancel your subscription at any time. When you cancel, you will continue to have access to your paid features until the end of your current billing cycle. After your billing cycle ends, your account will revert to the Free tier.",
+    "refund.s3.title": "3. Exceptional Circumstances",
+    "refund.s3.desc": "If you believe you have been charged in error (e.g., duplicate billing or fraudulent charges), please contact us within 7 days of the charge. We will review such requests on a case-by-case basis.",
+    "refund.s4.title": "4. Contact Us",
+    "refund.s4.desc": "For any billing questions or issues, please contact us at www@voodoo808.com."
   },
   cs: {
     // Shared / Navbar
@@ -183,14 +194,17 @@ export const translations = {
     "privacy.s6.title": "6. Soubory cookie a sledování",
     "privacy.s6.desc": "Základní soubory cookie používáme ke správě vaší relace a stavu ověřování. Můžeme používat anonymní analytické nástroje k pochopení toho, jak je náš web používán. Ve svém prohlížeči můžete nastavit odmítnutí nepodstatných souborů cookie, ale to může ovlivnit některé funkce webu.",
     "privacy.s7.title": "7. Kontaktujte nás",
-    "privacy.s7.desc": "Pokud máte jakékoli dotazy nebo obavy týkající se těchto Zásad ochrany osobních údajů nebo našich postupů s daty, kontaktujte nás prostřednictvím platformy TypeBeatz."
-  }
-};dání vaše osobní údaje vymažeme do 30 dnů, s výjimkou případů, kdy uchovávání vyžaduje zákon.",
-    
-    "privacy.s6.title": "6. Soubory cookie a sledování",
-    "privacy.s6.desc": "Základní soubory cookie používáme ke správě vaší relace a stavu ověřování. Můžeme používat anonymní analytické nástroje k pochopení toho, jak je náš web používán. Ve svém prohlížeči můžete nastavit odmítnutí nepodstatných souborů cookie, ale to může ovlivnit některé funkce webu.",
-    
-    "privacy.s7.title": "7. Kontaktujte nás",
-    "privacy.s7.desc": "Pokud máte jakékoli dotazy nebo obavy týkající se těchto Zásad ochrany osobních údajů nebo našich postupů s daty, kontaktujte nás prostřednictvím platformy TypeBeatz."
+    "privacy.s7.desc": "Pokud máte jakékoli dotazy nebo obavy týkající se těchto Zásad ochrany osobních údajů nebo našich postupů s daty, kontaktujte nás prostřednictvím platformy TypeBeatz.",
+
+    // Refund Page
+    "refund.title": "Pravidla pro vracení peněz",
+    "refund.s1.title": "1. Všechny prodeje jsou konečné",
+    "refund.s1.desc": "Protože TypeBeatz nabízí bezplatnou úroveň, která vám umožňuje otestovat základní funkce služby před nákupem, všechny prodeje předplatného PRO a Neomezeného předplatného jsou konečné. Nenabízíme náhrady ani kredity za žádná částečná období předplatného nebo nevyužitá videa.",
+    "refund.s2.title": "2. Zrušení předplatného",
+    "refund.s2.desc": "Své předplatné můžete kdykoli zrušit. Po zrušení budete mít i nadále přístup ke svým placeným funkcím až do konce aktuálního zúčtovacího cyklu. Po skončení zúčtovacího cyklu se váš účet vrátí na bezplatnou úroveň.",
+    "refund.s3.title": "3. Výjimečné okolnosti",
+    "refund.s3.desc": "Pokud se domníváte, že vám byly účtovány poplatky omylem (např. duplicitní fakturace nebo podvodné poplatky), kontaktujte nás do 7 dnů od naúčtování poplatku. Takové žádosti budeme posuzovat případ od případu.",
+    "refund.s4.title": "4. Kontaktujte nás",
+    "refund.s4.desc": "V případě jakýchkoli dotazů nebo problémů s fakturací nás kontaktujte na adrese www@voodoo808.com."
   }
 };
