@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   first_name VARCHAR,
   last_name VARCHAR,
   profile_image_url VARCHAR,
+  producer_name VARCHAR,
   role VARCHAR NOT NULL DEFAULT 'free',  -- 'free', 'pro', 'admin'
   rights_agreed BOOLEAN NOT NULL DEFAULT FALSE,
   rights_agreed_at TIMESTAMP,

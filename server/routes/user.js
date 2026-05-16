@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../auth');
-const { getUserById, getUserCredits, deductCredits, agreeToRights, getFeatureFlags, applyReferralCode, getReferralStats } = require('../storage');
+const { getUserById, getUserCredits, deductCredits, agreeToRights, getFeatureFlags, applyReferralCode, getReferralStats, updateUserProfile } = require('../storage');
 
 const UNLIMITED_ROLES = ['unlimited', 'admin'];
 
@@ -17,6 +17,19 @@ router.get('/me', isAuthenticated, async (req, res) => {
     res.json({ ...user, credits });
   } catch (err) {
     console.error('GET /api/user/me error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+ 
+// Update user profile
+router.post('/profile', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { first_name, last_name, producer_name } = req.body;
+    const updated = await updateUserProfile(userId, { first_name, last_name, producer_name });
+    res.json(updated);
+  } catch (err) {
+    console.error('POST /api/user/profile error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

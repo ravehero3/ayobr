@@ -95,6 +95,12 @@ export const translations = {
     "account.signOut": "Sign out",
     "account.backToApp": "Back to App",
     "account.securingSession": "Securing session...",
+    "account.firstName": "First name",
+    "account.lastName": "Last name",
+    "account.producerName": "Music producer name",
+    "account.saveChanges": "Save changes",
+    "account.saving": "Saving...",
+    "account.profileUpdated": "Profile updated successfully!",
 
     // Landing Page
     "landing.title": "TypeBeatz",
@@ -348,6 +354,12 @@ export const translations = {
     "account.signOut": "Odhlásit se",
     "account.backToApp": "Zpět do Aplikace",
     "account.securingSession": "Zabezpečování relace...",
+    "account.firstName": "Jméno",
+    "account.lastName": "Příjmení",
+    "account.producerName": "Producentské jméno",
+    "account.saveChanges": "Uložit změny",
+    "account.saving": "Ukládám...",
+    "account.profileUpdated": "Profil byl úspěšně aktualizován!",
 
     // Landing Page
     "landing.title": "TypeBeatz",

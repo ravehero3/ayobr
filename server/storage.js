@@ -26,6 +26,20 @@ async function upsertUser(userData) {
 
   return user;
 }
+ 
+async function updateUserProfile(userId, { first_name, last_name, producer_name }) {
+  const result = await pool.query(
+    `UPDATE users
+     SET first_name = $1,
+         last_name = $2,
+         producer_name = $3,
+         updated_at = NOW()
+     WHERE id = $4
+     RETURNING *`,
+    [first_name, last_name, producer_name, userId]
+  );
+  return result.rows[0];
+}
 
 async function getUserById(id) {
   const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
@@ -254,8 +268,8 @@ module.exports = {
   upsertUser, getUserById, getAllUsers,
   getUserCredits, deductCredit, deductCredits,
   setUserRole, agreeToRights,
-  getFeatureFlags, updateFeatureFlag,
   getSubscription, upsertSubscription,
   resetMonthlyCredits, setCreditsForRole,
-  ensureReferralCode, applyReferralCode, getReferralStats
+  ensureReferralCode, applyReferralCode, getReferralStats,
+  updateUserProfile
 };
