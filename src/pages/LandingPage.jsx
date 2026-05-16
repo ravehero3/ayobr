@@ -188,56 +188,57 @@ const PricingIcons = {
 
 function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user, isMobile }) {
   const [isAnnual, setIsAnnual] = useState(true);
+  const { t } = useLanguage();
   const isPro = user?.role === 'pro' || user?.role === 'admin';
 
   const plans = [
     {
-      name: 'Free',
+      name: t('landing.pricing.free.name'),
       price: '$0',
-      period: '/month',
-      desc: 'Perfect for getting started.',
+      period: t('landing.pricing.period'),
+      desc: t('landing.pricing.free.desc'),
       features: [
-        { text: '5 videos per month', icon: PricingIcons.Video },
-        { text: 'Credits reset on the 1st', icon: PricingIcons.Present },
-        { text: 'All core features', icon: PricingIcons.Star },
-        { text: 'Black & white backgrounds', icon: PricingIcons.Image },
-        { text: '720p output quality', icon: PricingIcons.Monitor },
+        { text: t('landing.pricing.free.f1'), icon: PricingIcons.Video },
+        { text: t('landing.pricing.free.f2'), icon: PricingIcons.Present },
+        { text: t('landing.pricing.free.f3'), icon: PricingIcons.Star },
+        { text: t('landing.pricing.free.f4'), icon: PricingIcons.Image },
+        { text: t('landing.pricing.free.f5'), icon: PricingIcons.Monitor },
       ],
-      cta: user ? "You're on Free" : 'Get started for free',
+      cta: user ? t('landing.pricing.free.cta.current') : t('landing.pricing.free.cta'),
       onCta: handleCTA,
       highlight: false,
       ctaStyle: 'ghost',
     },
     {
-      name: 'Pro',
+      name: t('landing.pricing.pro.name'),
       price: isAnnual ? '$7.99' : '$9.99',
-      period: '/month',
-      desc: 'For producers scaling their channel.',
+      period: t('landing.pricing.period'),
+      desc: t('landing.pricing.pro.desc'),
       features: [
-        { text: '31 videos per month', icon: PricingIcons.Video },
-        { text: 'HD 1080p output quality', icon: PricingIcons.Monitor },
-        { text: 'Custom photo backgrounds', icon: PricingIcons.Image },
-        { text: 'All core features included', icon: PricingIcons.Star },
-        { text: 'Cancel anytime', icon: PricingIcons.Cancel },
+        { text: t('landing.pricing.pro.f1'), icon: PricingIcons.Video },
+        { text: t('landing.pricing.pro.f2'), icon: PricingIcons.Monitor },
+        { text: t('landing.pricing.pro.f3'), icon: PricingIcons.Image },
+        { text: t('landing.pricing.pro.f4'), icon: PricingIcons.Star },
+        { text: t('landing.pricing.pro.f5'), icon: PricingIcons.Cancel },
       ],
-      cta: isPro ? "You're on PRO" : 'Start with PRO',
+      cta: isPro ? t('landing.pricing.pro.cta.current') : t('landing.pricing.pro.cta'),
       onCta: () => handleUpgradeCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: true,
       ctaStyle: 'solid',
     },
     {
-      name: 'Unlimited',
+      name: t('landing.pricing.unlimited.name'),
       price: isAnnual ? '$14.99' : '$18.99',
-      period: '/month',
-      desc: 'For serious producers going all in.',
+      period: t('landing.pricing.period'),
+      desc: t('landing.pricing.unlimited.desc'),
       features: [
-        { text: 'Unlimited video generation', icon: PricingIcons.Infinity },
-        { text: '4K video output quality', icon: PricingIcons.Monitor },
-        { text: 'Custom photo backgrounds', icon: PricingIcons.Image },
-        { text: 'All core features included', icon: PricingIcons.Star },
-        { text: 'Cancel anytime', icon: PricingIcons.Cancel },
+        { text: t('landing.pricing.unlimited.f1'), icon: PricingIcons.Infinity },
+        { text: t('landing.pricing.unlimited.f2'), icon: PricingIcons.Monitor },
+        { text: t('landing.pricing.unlimited.f3'), icon: PricingIcons.Image },
+        { text: t('landing.pricing.unlimited.f4'), icon: PricingIcons.Star },
+        { text: t('landing.pricing.unlimited.f5'), icon: PricingIcons.Cancel },
       ],
-      cta: 'Go Unlimited',
+      cta: t('landing.pricing.unlimited.cta'),
       onCta: () => handleUnlimitedCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: false,
       ctaStyle: 'ghost',
@@ -258,10 +259,10 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
               lineHeight: LH_HEAD, letterSpacing: '-0.04em',
               color: '#fff', marginBottom: 16,
             }}>
-              Pricing
+              {t('landing.pricing.title')}
             </h2>
             <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
-              Start free. Upgrade when you're ready.<br />No hidden fees.
+              {t('landing.pricing.subtitle').split('\n').map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}
             </p>
           </motion.div>
         </div>
@@ -587,10 +588,18 @@ const STEP_CONTENTS = [
 ];
 
 function HowItWorksSection({ isMobile }) {
+  const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
   const activeRef    = useRef(0);
   const clickLockRef = useRef(false);
   const cardRefs     = useRef([]);
+
+  const steps = [
+    { num: '01', title: t('landing.how.s1.title'), desc: t('landing.how.s1.desc') },
+    { num: '02', title: t('landing.how.s2.title'), desc: t('landing.how.s2.desc') },
+    { num: '03', title: t('landing.how.s3.title'), desc: t('landing.how.s3.desc') },
+    { num: '04', title: t('landing.how.s4.title'), desc: t('landing.how.s4.desc') },
+  ];
 
   const goToStep = useCallback((i) => {
     const el = cardRefs.current[i];
@@ -661,7 +670,7 @@ function HowItWorksSection({ isMobile }) {
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
               <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
-                How it works
+                {t('landing.how.title')}
               </h2>
             </div>
             {steps.map((step, i) => {
@@ -768,32 +777,8 @@ function useStarsScrollReveal(starsRef) {
 /* Drop zone preview — scroll-linked scale + opacity on the card */
 
 
-const steps = [
-  {
-    num: '01',
-    title: 'Upload your files',
-    desc: 'Drag and drop your beat MP3s and artwork PNGs — up to 100 files at a time.',
-    longDesc: 'Drag and drop your beat MP3s and artwork PNGs — up to 100 files at a time. TypeBeatz accepts all common audio and image formats and processes them instantly in your browser.',
-  },
-  {
-    num: '02',
-    title: 'Review your pairs',
-    desc: 'TypeBeatz auto-pairs audio with images. Swap anything around if needed.',
-    longDesc: 'TypeBeatz automatically pairs each audio file with an image. Review all pairs in a clean grid — drag to reorder or swap any combination before you generate.',
-  },
-  {
-    num: '03',
-    title: 'Hit Generate',
-    desc: 'Sit back. The app processes every video in the background while you do other things.',
-    longDesc: 'Sit back and relax. TypeBeatz processes every video pair in the background using FFmpeg directly in your browser — no uploads, no servers, no waiting in queues.',
-  },
-  {
-    num: '04',
-    title: 'Download & upload',
-    desc: 'Your videos are ready. Download them all and upload directly to YouTube.',
-    longDesc: 'Your videos are ready when you are. Download all of them in a single click, then upload straight to YouTube. Your channel fills itself.',
-  },
-];
+// static steps array removed — now built dynamically inside HowItWorksSection using t()
+
 
 /* ── Sub-components that use useLanguage (must be inside the tree) ── */
 function LandingNavButtons({ user, navigate, login }) {
@@ -827,7 +812,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 mb-8"
         style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em' }}>
         <span>🎬</span>
-        <span>The fastest way to fill your YouTube channel.</span>
+        <span>{t('landing.hero.badge')}</span>
       </div>
 
       <h1 style={{
@@ -858,14 +843,12 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         <a href="#pricing"
           style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
-          Go unlimited
+          {t('landing.hero.goUnlimited')}
         </a>
       </div>
 
       <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem' }}>
-        <span className="block sm:inline">Free — 5 videos/month · PRO — 31 videos/month</span>
-        <span className="hidden sm:inline"> · </span>
-        <span className="block sm:inline mt-1 sm:mt-0">Unlimited — Always Unlimited</span>
+        {t('landing.hero.statsBar')}
       </div>
     </>
   );
