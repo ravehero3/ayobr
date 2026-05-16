@@ -250,6 +250,7 @@ export default function SubscriptionPanel({ onClose, onUpgradePro, onUpgradeUnli
                   {cancelLoading ? 'Cancelling...' : 'Cancel subscription'}
                 </button>
               )}
+              </div>
             </div>
           )}
 
