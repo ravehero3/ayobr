@@ -11,8 +11,9 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function AppPage() {
   const { user, loading, refreshUser, deductCredit } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
-  useDocumentTitle("App");
+  useDocumentTitle(t('nav.app'));
   const [searchParams, setSearchParams] = useSearchParams();
   const [upgradeSuccess, setUpgradeSuccess]     = useState(null); // null | 'pro' | 'unlimited'
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
@@ -62,7 +63,7 @@ export default function AppPage() {
     setCheckoutLoading(true);
     try {
       const opened = await openCheckout(user?.email, 'pro', interval);
-      if (!opened) alert('Checkout is not yet configured. Please add your Paddle secrets to activate payments.');
+      if (!opened) alert(t('app.checkoutNotConfigured'));
     } finally {
       setCheckoutLoading(false);
     }
@@ -72,7 +73,7 @@ export default function AppPage() {
     setCheckoutLoading(true);
     try {
       const opened = await openCheckout(user?.email, 'unlimited', interval);
-      if (!opened) alert('Checkout is not yet configured. Please add your Paddle secrets to activate payments.');
+      if (!opened) alert(t('app.checkoutNotConfigured'));
     } finally {
       setCheckoutLoading(false);
     }
@@ -138,8 +139,8 @@ export default function AppPage() {
           }}>
           <span className="text-sm font-medium" style={{ color: upgradeSuccess === 'unlimited' ? '#fbbf24' : '#93c5fd' }}>
             {upgradeSuccess === 'unlimited'
-              ? '🌟 Welcome to Unlimited! You now have 4K output and unlimited video generation.'
-              : '⭐ Welcome to PRO! You now have 31 videos/month and 1080p output.'}
+              ? t('app.upgradedToUnlimited')
+              : t('app.upgradedToPro')}
           </span>
         </div>
       )}
@@ -148,7 +149,7 @@ export default function AppPage() {
       {showCancelledNotice && (
         <div className="fixed top-14 left-0 right-0 z-[9999] flex items-center justify-center py-2 px-6"
           style={{ background: 'rgba(100,100,100,0.15)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <span className="text-gray-400 text-sm">Checkout cancelled. You can upgrade any time.</span>
+          <span className="text-gray-400 text-sm">{t('app.checkoutCancelled')}</span>
         </div>
       )}
 

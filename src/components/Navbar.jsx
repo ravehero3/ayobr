@@ -148,17 +148,26 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                   </div>
                   
                   <div className="py-1 border-t border-white/5">
-                    {!isPaidPlan && onUpgradePro && (
+                    {!isPaidPlan && language === 'cs' ? (
                       <button onClick={() => { onUpgradePro(); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
-                        {t('nav.upgradePro')}
+                        {t('nav.chciVic')}
                       </button>
-                    )}
-                    {!isPaidPlan && onUpgradeUnlimited && (
-                      <button onClick={() => { onUpgradeUnlimited(); setMenuOpen(false); }}
-                        className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
-                        {t('landing.hero.goUnlimited')}
-                      </button>
+                    ) : (
+                      <>
+                        {!isPaidPlan && onUpgradePro && (
+                          <button onClick={() => { onUpgradePro(); setMenuOpen(false); }}
+                            className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
+                            {t('nav.upgradePro')}
+                          </button>
+                        )}
+                        {!isPaidPlan && onUpgradeUnlimited && (
+                          <button onClick={() => { onUpgradeUnlimited(); setMenuOpen(false); }}
+                            className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
+                            {t('landing.hero.goUnlimited')}
+                          </button>
+                        )}
+                      </>
                     )}
                     {isPro && onManageSubscription && (
                       <button onClick={() => { onManageSubscription(); setMenuOpen(false); }}

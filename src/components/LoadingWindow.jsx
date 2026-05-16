@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useLanguage } from '../context/LanguageContext';
 import mrakyBackground from '../assets/mraky-a-zzz.png';
 
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
   const { getVideoGenerationState, generatedVideos, videoSettings, removePair, popPage, resetApp } = useAppStore();
+  const { t } = useLanguage();
 
   // Function to download a single video
   const handleDownloadSingle = async (video, event) => {
@@ -468,7 +470,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                       top: '40px'
                                     }}
                                   >
-                                    Video Ready! Click to Play
+                                    {t('app.videoReady')}
                                   </div>
 
                                   {/* Play button overlay with highest z-index */}

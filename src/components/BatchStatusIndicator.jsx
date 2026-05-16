@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false }) => {
+  const { t } = useLanguage();
   const progress = totalPairs > 0 ? Math.floor((completedPairs / totalPairs) * 100) : 0;
   const remaining = totalPairs - completedPairs;
 
@@ -37,10 +39,10 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
             </div>
             <div>
               <h3 className="text-white text-lg font-semibold">
-                Batch Processing Status
+                {t('app.batchStatus')}
               </h3>
               <p className="text-gray-400 text-sm">
-                Processing {totalPairs} video pairs {totalPairs >= 20 ? '• Large batch mode' : ''}
+                {t('app.processingPairs').replace('{count}', totalPairs)} {totalPairs >= 20 ? t('app.largeBatchMode') : ''}
               </p>
             </div>
           </div>
@@ -49,7 +51,7 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
               {progress}%
             </div>
             <div className="text-xs text-gray-500 font-medium">
-              {completedPairs}/{totalPairs} complete
+              {completedPairs}/{totalPairs} {t('app.complete')}
             </div>
           </div>
         </div>
@@ -84,23 +86,23 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/5 rounded-lg p-3 text-center">
             <div className="text-lg font-semibold text-white">{completedPairs}</div>
-            <div className="text-xs text-gray-400">Completed</div>
+            <div className="text-xs text-gray-400">{t('app.completed')}</div>
           </div>
           <div className="bg-white/5 rounded-lg p-3 text-center">
             <div className="text-lg font-semibold text-white/60">{remaining}</div>
-            <div className="text-xs text-gray-400">Remaining</div>
+            <div className="text-xs text-gray-400">{t('app.remaining')}</div>
           </div>
           <div className="bg-white/5 rounded-lg p-3 text-center">
             <div className="text-lg font-semibold text-white">
               {totalPairs <= 5 ? '4' : totalPairs <= 20 ? '6' : totalPairs <= 50 ? '8' : totalPairs <= 75 ? '10' : '12'}
             </div>
-            <div className="text-xs text-gray-400">Concurrent</div>
+            <div className="text-xs text-gray-400">{t('app.concurrent')}</div>
           </div>
           <div className="bg-white/5 rounded-lg p-3 text-center">
             <div className="text-lg font-semibold text-white">
-              {totalPairs >= 100 ? 'Maximum' : totalPairs >= 50 ? 'High' : totalPairs >= 20 ? 'Medium' : 'Standard'}
+              {totalPairs >= 100 ? t('app.batchSize.max') : totalPairs >= 50 ? t('app.batchSize.high') : totalPairs >= 20 ? t('app.batchSize.medium') : t('app.batchSize.standard')}
             </div>
-            <div className="text-xs text-gray-400">Batch Size</div>
+            <div className="text-xs text-gray-400">{t('app.batchSize')}</div>
           </div>
         </div>
 
@@ -113,10 +115,10 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
               </svg>
               <div className="text-sm">
                 <div className="text-white font-medium">
-                  Large Batch Optimizations Active
+                  {t('app.largeBatchOptimized')}
                 </div>
                 <div className="text-gray-400">
-                  Enhanced concurrency, memory management, and progress tracking for {totalPairs} files
+                  {t('app.largeBatchOptimizedDesc').replace('{count}', totalPairs)}
                 </div>
               </div>
             </div>
@@ -127,7 +129,7 @@ const BatchStatusIndicator = ({ totalPairs, completedPairs, isProcessing = false
         {totalPairs >= 50 && isProcessing && completedPairs > 0 && (
           <div className="mt-4 text-center">
             <div className="text-sm text-gray-400">
-              Estimated completion time based on current processing speed
+              {t('app.eta')}
             </div>
             <div className="text-lg font-semibold text-white">
               {(() => {

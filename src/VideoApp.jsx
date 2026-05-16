@@ -4,6 +4,7 @@ import { useAppStore } from './store/appStore';
 import { usePairingLogic } from './hooks/usePairingLogic';
 import { usePairPreparation } from './hooks/usePairPreparation';
 import { useFFmpeg } from './hooks/useFFmpeg';
+import { useLanguage } from './context/LanguageContext';
 import Pairs from './components/Pairs';
 import VideoPreviewCard from './components/VideoPreviewCard';
 import BatchStatusIndicator from './components/BatchStatusIndicator';
@@ -22,6 +23,7 @@ import SleepingAlien from './components/SleepingAlien';
 
 function App({ onBeforeGenerate }) {
   const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, selectCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped, ensureAutoNavigation } = useAppStore();
+  const { t } = useLanguage();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { prepareCompletePairs } = usePairPreparation(); // Activate automatic pair preparation
   const { generateVideos, stopGeneration } = useFFmpeg();
@@ -288,7 +290,7 @@ function App({ onBeforeGenerate }) {
 
     if (completePairs.length === 0) {
       console.log('No complete pairs found - showing alert');
-      alert('Please add audio and image files first.');
+      alert(t('app.noFiles'));
       return;
     }
 
@@ -318,14 +320,14 @@ function App({ onBeforeGenerate }) {
         console.log('Video generation was cancelled by user');
         // Don't show error alert for cancellation
       } else {
-        alert('Failed to generate videos. Please try again.');
+        alert(t('app.failedToGenerate'));
       }
     }
   };
 
   const handleDownloadVideos = async () => {
     if (generatedVideos.length === 0) {
-      alert('No videos to download. Generate some videos first!');
+      alert(t('app.noVideosToDownload'));
       return;
     }
 
@@ -394,8 +396,8 @@ function App({ onBeforeGenerate }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </motion.div>
-              <h2 className="text-section-title text-white mb-2">Drop Files Anywhere</h2>
-              <p className="text-lg text-gray-300">Audio and images will be automatically paired</p>
+              <h2 className="text-section-title text-white mb-2">{t('app.dropFilesAnywhere')}</h2>
+              <p className="text-lg text-gray-300">{t('app.audioImagesAutoPaired')}</p>
             </div>
           </motion.div>
         )}
@@ -494,7 +496,7 @@ function App({ onBeforeGenerate }) {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="wrapper">
-                      <span>STOP!</span>
+                      <span>{t('app.stop')}</span>
                       <div className="circle circle-1"></div>
                       <div className="circle circle-2"></div>
                       <div className="circle circle-3"></div>
@@ -522,7 +524,7 @@ function App({ onBeforeGenerate }) {
                   >
                     <div className="flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Stopping Generation...</span>
+                      <span>{t('app.stoppingGeneration')}</span>
                     </div>
                   </motion.div>
                 )}

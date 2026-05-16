@@ -1,7 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 const DropZone = ({ onFileDrop, hasFiles = false }) => {
+  const { t } = useLanguage();
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDrop = useCallback((e) => {
@@ -84,7 +86,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          Drop Your Files
+          {t('app.dropTitle')}
         </motion.h2>
 
         {/* Description */}
@@ -94,7 +96,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          Drag and drop your audio and image files here, or click to browse
+          {t('app.dropDesc')}
         </motion.p>
 
         {/* Supported Formats */}
@@ -128,7 +130,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          💡 Pro Tip: We recommend up to 100 files per batch for maximum stability.
+          {t('app.proTip')}
         </motion.p>
 
         {/* Browse Button */}
@@ -149,7 +151,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
         >
-          Browse Files
+          {t('app.browseFiles')}
         </motion.button>
       </div>
     </motion.div>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useLanguage } from '../context/LanguageContext';
 import SettingsPanel from './SettingsPanel';
 
 const Footer = ({ onGenerateVideos, onStop }) => {
   const { pairs, generatedVideos, isGenerating, videoGenerationStates, popPage, resetApp } = useAppStore();
+  const { t } = useLanguage();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
@@ -92,7 +94,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
             <svg className="w-5 h-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="hidden xs:inline text-sm text-gray-300 group-hover:text-white">Back</span>
+            <span className="hidden xs:inline text-sm text-gray-300 group-hover:text-white">{t('app.back')}</span>
           </button>
 
           {(isGenerating || generatedVideos.length > 0) && (
@@ -106,7 +108,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               <svg className="w-5 h-5 text-blue-400 group-hover:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
               </svg>
-              <span className="hidden xs:inline text-sm text-blue-300 group-hover:text-blue-200">Edit</span>
+              <span className="hidden xs:inline text-sm text-blue-300 group-hover:text-blue-200">{t('app.edit')}</span>
             </button>
           )}
         </div>
@@ -131,7 +133,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               disabled={isGenerating || completePairs.length === 0}
               className="generate-btn-subtle-particles scale-90 sm:scale-100"
             >
-              Generate Videos
+              {t('app.generateVideos')}
             </button>
           ) : (
             <button
@@ -147,7 +149,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               }}
               className="generate-btn-subtle-particles scale-90 sm:scale-100"
             >
-              Download All
+              {t('app.downloadAll')}
             </button>
           )}
         </div>
@@ -176,7 +178,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               <svg className="w-5 h-5 text-red-400 group-hover:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span className="hidden xs:inline text-sm text-red-300 group-hover:text-red-200">Reset</span>
+              <span className="hidden xs:inline text-sm text-red-300 group-hover:text-red-200">{t('app.reset')}</span>
             </button>
           )}
         </div>
