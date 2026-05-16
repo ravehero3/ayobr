@@ -12,10 +12,11 @@ export const translations = {
 
     // Landing Page
     "landing.title": "TypeBeatz",
-    "landing.hero.title": "Batch generate type beat videos",
-    "landing.hero.titleHighlight": "in minutes.",
+    "landing.hero.title": "Batch generate\ntype beat videos\nin one click",
+    "landing.hero.titleHighlight": "in one click",
     "landing.hero.subtitle": "Upload your audio and images, and let TypeBeatz handle the rest.",
     "landing.hero.cta": "Start for free",
+    "landing.hero.openApp": "Open the App",
     "landing.hero.ctaNote": "No credit card required.",
     
     "landing.stats.creators": "Active Creators",
@@ -77,9 +78,27 @@ export const translations = {
     "landing.pricing.unlimited.f5": "Cancel anytime",
     "landing.pricing.period": "/month",
 
+    "landing.pricing.free.price": "$0",
+    "landing.pricing.pro.price.annual": "$7.99",
+    "landing.pricing.pro.price.monthly": "$9.99",
+    "landing.pricing.unlimited.price.annual": "$14.99",
+    "landing.pricing.unlimited.price.monthly": "$18.99",
+
     "landing.hero.badge": "The fastest way to fill your YouTube channel.",
     "landing.hero.goUnlimited": "Go unlimited",
     "landing.hero.statsBar": "Free — 5 videos/month · PRO — 31 videos/month · Unlimited — Always Unlimited",
+
+    "landing.stats.s1.prefix": "create",
+    "landing.stats.s1.val": "Batches",
+    "landing.stats.s1.label": "of videos",
+    "landing.stats.s2.prefix": "create",
+    "landing.stats.s2.val": "\u221e",
+    "landing.stats.s2.label": "videos",
+    "landing.stats.s3.prefix": "up to",
+    "landing.stats.s3.val": "4K",
+    "landing.stats.s3.label": "video quality",
+    "landing.stats.s4.val": "Custom",
+    "landing.stats.s4.label": "backgrounds",
 
     "landing.how.title": "How it works",
     "landing.how.s1.title": "Upload your files",
@@ -160,10 +179,11 @@ export const translations = {
 
     // Landing Page
     "landing.title": "TypeBeatz",
-    "landing.hero.title": "Generujte type beat videa hromadně",
-    "landing.hero.titleHighlight": "během minut.",
-    "landing.hero.subtitle": "Nahrajte svá audia a obrázky a nechte TypeBeatz, ať se postará o zbytek.",
-    "landing.hero.cta": "Začněte zdarma",
+    "landing.hero.title": "Generujte\ntype beat videa\njedním clickem",
+    "landing.hero.titleHighlight": "jedním clickem",
+    "landing.hero.subtitle": "Nahrajte beaty a obrázky a my se postaráme o zbytek.",
+    "landing.hero.cta": "Ještě uvidim bro",
+    "landing.hero.openApp": "Ještě uvidim bro",
     "landing.hero.ctaNote": "Bez nutnosti kreditní karty.",
     
     "landing.stats.creators": "Aktivních tvůrců",
@@ -202,7 +222,7 @@ export const translations = {
     "landing.pricing.free.f1": "5 videí měsíčně",
     "landing.pricing.free.f2": "Kredity se obnovují 1. dne v měsíci",
     "landing.pricing.free.f3": "Všechny základní funkce",
-    "landing.pricing.free.f4": "Černobílá pozadí",
+    "landing.pricing.free.f4": "černé nebo bílé pozadí",
     "landing.pricing.free.f5": "Výstupní kvalita 720p",
 
     "landing.pricing.pro.name": "Pro",
@@ -225,9 +245,27 @@ export const translations = {
     "landing.pricing.unlimited.f5": "Zrušení kdykoli",
     "landing.pricing.period": "/měsíc",
 
+    "landing.pricing.free.price": "0 Kč",
+    "landing.pricing.pro.price.annual": "cca 185 Kč",
+    "landing.pricing.pro.price.monthly": "cca 230 Kč",
+    "landing.pricing.unlimited.price.annual": "cca 345 Kč",
+    "landing.pricing.unlimited.price.monthly": "cca 435 Kč",
+
     "landing.hero.badge": "Nejrychlejší způsob, jak naplnit váš YouTube kanál.",
-    "landing.hero.goUnlimited": "Jít na Neomezený",
+    "landing.hero.goUnlimited": "Letsgo!",
     "landing.hero.statsBar": "Zdarma — 5 videí/měsíc · PRO — 31 videí/měsíc · Neomezený — vždy neomezeno",
+
+    "landing.stats.s1.prefix": "vytvoř",
+    "landing.stats.s1.val": "Dávky",
+    "landing.stats.s1.label": "videí",
+    "landing.stats.s2.prefix": "vytvoř",
+    "landing.stats.s2.val": "\u221e",
+    "landing.stats.s2.label": "videí",
+    "landing.stats.s3.prefix": "až",
+    "landing.stats.s3.val": "4K",
+    "landing.stats.s3.label": "kvalita videa",
+    "landing.stats.s4.val": "Vlastní",
+    "landing.stats.s4.label": "pozadí",
 
     "landing.how.title": "Jak to funguje",
     "landing.how.s1.title": "Nahrajte soubory",

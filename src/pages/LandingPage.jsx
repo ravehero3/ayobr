@@ -194,7 +194,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
   const plans = [
     {
       name: t('landing.pricing.free.name'),
-      price: '$0',
+      price: t('landing.pricing.free.price'),
       period: t('landing.pricing.period'),
       desc: t('landing.pricing.free.desc'),
       features: [
@@ -211,7 +211,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
     },
     {
       name: t('landing.pricing.pro.name'),
-      price: isAnnual ? '$7.99' : '$9.99',
+      price: isAnnual ? t('landing.pricing.pro.price.annual') : t('landing.pricing.pro.price.monthly'),
       period: t('landing.pricing.period'),
       desc: t('landing.pricing.pro.desc'),
       features: [
@@ -228,7 +228,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
     },
     {
       name: t('landing.pricing.unlimited.name'),
-      price: isAnnual ? '$14.99' : '$18.99',
+      price: isAnnual ? t('landing.pricing.unlimited.price.annual') : t('landing.pricing.unlimited.price.monthly'),
       period: t('landing.pricing.period'),
       desc: t('landing.pricing.unlimited.desc'),
       features: [
@@ -826,8 +826,9 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         marginBottom: '2rem',
         color: '#ffffff',
       }}>
-        {t('landing.hero.title')}<br />
-        {t('landing.hero.titleHighlight')}
+        {t('landing.hero.title').split('\n').map((line, i, arr) => (
+          <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
+        ))}
       </h1>
 
       <p style={{ fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
@@ -838,7 +839,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         <ParticleButton onClick={handleCTA}
           className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
           style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 0', width: 116, borderRadius: 9999, cursor: 'pointer' }}>
-          {user ? 'Open the App' : t('landing.hero.cta')}
+          {user ? t('landing.hero.openApp') : t('landing.hero.cta')}
         </ParticleButton>
         <a href="#pricing"
           style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
@@ -974,16 +975,16 @@ export default function LandingPage() {
         {/* Stats row — hidden until user scrolls 10px, then blur-to-focus reveal */}
         <div className={`relative flex flex-wrap justify-center gap-x-14 gap-y-8 mt-20 ${isMobile ? 'grid grid-cols-2 gap-8 px-4' : 'flex'}`} style={{ zIndex: 2 }}>
           <BlurReveal delay={0} minScroll={10}>
-            <Stat prefix="create" val="Batches" label="of videos" />
+            <Stat prefix={t('landing.stats.s1.prefix')} val={t('landing.stats.s1.val')} label={t('landing.stats.s1.label')} />
           </BlurReveal>
           <BlurReveal delay={200} minScroll={10}>
-            <Stat prefix="create" val="∞" label="videos" />
+            <Stat prefix={t('landing.stats.s2.prefix')} val={t('landing.stats.s2.val')} label={t('landing.stats.s2.label')} />
           </BlurReveal>
           <BlurReveal delay={400} minScroll={10}>
-            <Stat prefix="up to" val="4K" label="video quality" />
+            <Stat prefix={t('landing.stats.s3.prefix')} val={t('landing.stats.s3.val')} label={t('landing.stats.s3.label')} />
           </BlurReveal>
           <BlurReveal delay={600} minScroll={10}>
-            <Stat prefix={null} val="Custom" label="backgrounds" />
+            <Stat prefix={null} val={t('landing.stats.s4.val')} label={t('landing.stats.s4.label')} />
           </BlurReveal>
         </div>
       </section>
