@@ -352,7 +352,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                 {/* Small Toggle for PRO and Unlimited */}
                 {(plan.name === 'Pro' || plan.name === 'Unlimited') && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontFamily: NM, fontSize: '0.6rem', color: isAnnual ? '#fff' : 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.05em', transition: 'color 0.2s', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>ANNUAL</span>
+                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>ANNUAL</span>
                     <button 
                       onClick={() => setIsAnnual(!isAnnual)}
                       style={{
@@ -985,46 +985,7 @@ export default function LandingPage() {
         {/* Hero content */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="relative" style={{ zIndex: 2 }}>
-
-          <h1 style={{
-            fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
-            fontWeight: 500,
-            fontSize: isMobile ? '48px' : '110px',
-            lineHeight: isMobile ? '52px' : '93.5px',
-            letterSpacing: isMobile ? '-1px' : '-2px',
-            fontStyle: 'normal',
-            textTransform: 'none',
-            marginBottom: '2rem',
-            color: '#ffffff',
-          }}>
-            Batch generate<br />
-            type beat videos<br />
-            in one click
-          </h1>
-
-          <p style={{ fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
-            Drop your audio files and artwork — TypeBeatz automatically generates professional
-            type beat videos ready to upload to YouTube. No editing. No manual work.
-          </p>
-
-          <div className="flex flex-row items-center justify-center gap-3">
-            <ParticleButton onClick={handleCTA}
-              className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 0', width: 116, borderRadius: 9999, cursor: 'pointer' }}>
-              {user ? 'Open the App' : 'Start for free'}
-            </ParticleButton>
-            <a href="#pricing"
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-              className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
-              Go unlimited
-            </a>
-          </div>
-
-          <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem' }}>
-            <span className="block sm:inline">Free — 5 videos/month · PRO — 31 videos/month</span>
-            <span className="hidden sm:inline"> · </span>
-            <span className="block sm:inline mt-1 sm:mt-0">Unlimited — Always Unlimited</span>
-          </div>
+          <LandingHeroContent user={user} handleCTA={handleCTA} isMobile={isMobile} />
         </motion.div>
 
         {/* Stats row — hidden until user scrolls 10px, then blur-to-focus reveal */}
@@ -1057,33 +1018,7 @@ export default function LandingPage() {
 
 
       {/* ── Footer ── */}
-      <footer className="py-8 border-t border-white/[0.06]" style={{ background: '#000', paddingLeft: isMobile ? '1rem' : '4rem', paddingRight: isMobile ? '1rem' : '4rem' }}>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center md:items-start gap-2">
-            <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.5 }} />
-            <p style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>
-              Make type beats while you sleep
-            </p>
-          </div>
-          
-          <div className="flex flex-col items-center gap-2">
-            <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>
-              © {new Date().getFullYear()} TypeBeatz. All rights reserved.
-            </p>
-            <a href="mailto:www@voodoo808.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: NM }}>
-              www@voodoo808.com
-            </a>
-          </div>
-
-          <div className="flex gap-6">
-            {['Terms', 'Privacy', 'Refund'].map(l => (
-              <a key={l} href={`/${l.toLowerCase()}`}
-                style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
-                className="hover:text-white transition-colors">{l}</a>
-            ))}
-          </div>
-        </div>
-      </footer>
+      <LandingFooter isMobile={isMobile} />
     </div>
   );
 }
