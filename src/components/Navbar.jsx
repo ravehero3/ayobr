@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import LanguageToggle from './LanguageToggle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
@@ -8,6 +9,7 @@ const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoading, onManageSubscription, onInvite }) {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -37,7 +39,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           <>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-xs text-gray-300"
               style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM }}>
-              <span>{creditsLeft ?? 5} credits left</span>
+              <span>{creditsLeft ?? 5} {t('creditsLeft')}</span>
             </div>
             {onUpgradePro && (
               <button onClick={onUpgradePro} disabled={checkoutLoading}
@@ -45,7 +47,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                 style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.5, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
                 {checkoutLoading ? (
                   <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />Opening...</>
-                ) : 'Go PRO'}
+                ) : t('goPro')}
               </button>
             )}
           </>
@@ -97,12 +99,23 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
             <button onClick={() => setMenuOpen(v => !v)} className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 group-hover:border-white/50 transition-colors">
                 {user.profile_image_url ? (
-                  <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-white/10 text-white text-sm font-bold" style={{ fontFamily: NM }}>
-                    {(user.first_name?.[0] || user.email?.[0] || '?').toUpperCase()}
-                  </div>
-                )}
+                  <img
+                    src={user.profile_image_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={e => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
+                  />
+                ) : null}
+                <div
+                  className="w-full h-full items-center justify-center bg-white/10"
+                  style={{ display: user.profile_image_url ? 'none' : 'flex' }}
+                >
+                  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                    <rect width="40" height="40" fill="rgba(255,255,255,0.06)"/>
+                    <circle cx="20" cy="15" r="7" fill="rgba(255,255,255,0.25)"/>
+                    <path d="M4 38c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.18)"/>
+                  </svg>
+                </div>
               </div>
             </button>
 

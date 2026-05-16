@@ -260,64 +260,9 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
             }}>
               Pricing
             </h2>
-            <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto', marginBottom: 32 }}>
+            <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
               Start free. Upgrade when you're ready.<br />No hidden fees.
             </p>
-
-            {/* Monthly / Yearly Toggle */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '9999px',
-              padding: '6px',
-              width: 'fit-content',
-              margin: '0 auto',
-              position: 'relative'
-            }}>
-              {/* Animated background pill */}
-              <motion.div
-                layout
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                style={{
-                  position: 'absolute',
-                  top: '6px',
-                  bottom: '6px',
-                  width: 'calc(50% - 6px)',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  borderRadius: '9999px',
-                  left: isAnnual ? 'calc(50%)' : '6px',
-                  zIndex: 0
-                }}
-              />
-              
-              <button
-                onClick={() => setIsAnnual(false)}
-                style={{
-                  position: 'relative', zIndex: 1,
-                  padding: '8px 24px', background: 'transparent', border: 'none',
-                  color: !isAnnual ? '#fff' : 'rgba(255, 255, 255, 0.5)',
-                  fontFamily: NM, fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer',
-                  transition: 'color 0.3s ease'
-                }}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setIsAnnual(true)}
-                style={{
-                  position: 'relative', zIndex: 1,
-                  padding: '8px 24px', background: 'transparent', border: 'none',
-                  color: isAnnual ? '#fff' : 'rgba(255, 255, 255, 0.5)',
-                  fontFamily: NM, fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer',
-                  transition: 'color 0.3s ease', display: 'flex', alignItems: 'center', gap: '6px'
-                }}
-              >
-                Yearly <span style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px' }}>-20%</span>
-              </button>
-            </div>
           </motion.div>
         </div>
 
@@ -850,7 +795,117 @@ const steps = [
   },
 ];
 
+/* ── Sub-components that use useLanguage (must be inside the tree) ── */
+function LandingNavButtons({ user, navigate, login }) {
+  const { t } = useLanguage();
+  return (
+    <>
+      <button onClick={() => navigate('/login')}
+        style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        className="hover:text-white transition-colors">
+        {t('login')}
+      </button>
+      {user ? (
+        <button onClick={() => navigate('/app')}
+          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+          Open App
+        </button>
+      ) : (
+        <button onClick={login}
+          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+          {t('landing.hero.cta')}
+        </button>
+      )}
+    </>
+  );
+}
+
+function LandingHeroContent({ user, handleCTA, isMobile }) {
+  const { t } = useLanguage();
+  return (
+    <>
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 mb-8"
+        style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em' }}>
+        <span>🎬</span>
+        <span>The fastest way to fill your YouTube channel.</span>
+      </div>
+
+      <h1 style={{
+        fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
+        fontWeight: 500,
+        fontSize: isMobile ? '48px' : '110px',
+        lineHeight: isMobile ? '52px' : '93.5px',
+        letterSpacing: isMobile ? '-1px' : '-2px',
+        fontStyle: 'normal',
+        textTransform: 'none',
+        marginBottom: '2rem',
+        color: '#ffffff',
+      }}>
+        {t('landing.hero.title')}<br />
+        {t('landing.hero.titleHighlight')}
+      </h1>
+
+      <p style={{ fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
+        {t('landing.hero.subtitle')}
+      </p>
+
+      <div className="flex flex-row items-center justify-center gap-3">
+        <ParticleButton onClick={handleCTA}
+          className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
+          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 0', width: 116, borderRadius: 9999, cursor: 'pointer' }}>
+          {user ? 'Open the App' : t('landing.hero.cta')}
+        </ParticleButton>
+        <a href="#pricing"
+          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
+          Go unlimited
+        </a>
+      </div>
+
+      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem' }}>
+        <span className="block sm:inline">Free — 5 videos/month · PRO — 31 videos/month</span>
+        <span className="hidden sm:inline"> · </span>
+        <span className="block sm:inline mt-1 sm:mt-0">Unlimited — Always Unlimited</span>
+      </div>
+    </>
+  );
+}
+
+function LandingFooter({ isMobile }) {
+  const { t } = useLanguage();
+  return (
+    <footer className="py-8 border-t border-white/[0.06]" style={{ background: '#000', paddingLeft: isMobile ? '1rem' : '4rem', paddingRight: isMobile ? '1rem' : '4rem' }}>
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col items-center md:items-start gap-2">
+          <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.5 }} />
+          <p style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>
+            {t('landing.pricing.footer')}
+          </p>
+        </div>
+        
+        <div className="flex flex-col items-center gap-2">
+          <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>
+            © {new Date().getFullYear()} TypeBeatz. {t('landing.footer.rights')}
+          </p>
+          <a href="mailto:www@voodoo808.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: NM }}>
+            www@voodoo808.com
+          </a>
+        </div>
+
+        <div className="flex gap-6">
+          {['Terms', 'Privacy', 'Refund'].map(l => (
+            <a key={l} href={`/${l.toLowerCase()}`}
+              style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
+              className="hover:text-white transition-colors">{l}</a>
+          ))}
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 export default function LandingPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
@@ -891,30 +946,15 @@ export default function LandingPage() {
           background: 'rgba(0,0,0,0.38)', 
           backdropFilter: 'blur(16px)', 
           borderBottom: '1px solid rgba(255,255,255,0.06)', 
-          paddingLeft: isMobile ? '1.5rem' : 242, 
-          paddingRight: isMobile ? '1.5rem' : 64 
+          paddingLeft: isMobile ? '1rem' : '4rem', 
+          paddingRight: isMobile ? '1rem' : '4rem' 
         }}>
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         </button>
         <div className="flex items-center gap-6">
           <LanguageToggle />
-          <button onClick={() => navigate('/login')}
-            style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-            className="hover:text-white transition-colors">
-            Log in
-          </button>
-          {user ? (
-            <button onClick={() => navigate('/app')}
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
-              Open App
-            </button>
-          ) : (
-            <button onClick={login}
-              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
-              Sign Up
-            </button>
-          )}
+          <LandingNavButtons user={user} navigate={navigate} login={login} />
         </div>
       </nav>
 
@@ -945,12 +985,6 @@ export default function LandingPage() {
         {/* Hero content */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="relative" style={{ zIndex: 2 }}>
-
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 mb-8"
-            style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em' }}>
-            <span>🎬</span>
-            <span>The fastest way to fill your YouTube channel.</span>
-          </div>
 
           <h1 style={{
             fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
@@ -1023,8 +1057,8 @@ export default function LandingPage() {
 
 
       {/* ── Footer ── */}
-      <footer className="py-8 px-6 border-t border-white/[0.06]" style={{ background: '#000' }}>
-        <div className="flex flex-col md:flex-row items-center justify-between max-w-5xl mx-auto gap-6">
+      <footer className="py-8 border-t border-white/[0.06]" style={{ background: '#000', paddingLeft: isMobile ? '1rem' : '4rem', paddingRight: isMobile ? '1rem' : '4rem' }}>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col items-center md:items-start gap-2">
             <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.5 }} />
             <p style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>
