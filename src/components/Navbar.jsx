@@ -9,7 +9,7 @@ const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoading, onManageSubscription, onInvite }) {
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -39,14 +39,18 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           <>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-xs text-gray-300"
               style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM }}>
-              <span>{creditsLeft ?? 5} {t('creditsLeft')}</span>
+              <span>
+                {language === 'cs' 
+                  ? `${t('creditsLeft')} ${creditsLeft ?? 5} kreditů` 
+                  : `${creditsLeft ?? 5} ${t('creditsLeft')}`}
+              </span>
             </div>
             {onUpgradePro && (
               <button onClick={onUpgradePro} disabled={checkoutLoading}
                 className="transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                 style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.5, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
                 {checkoutLoading ? (
-                  <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />Opening...</>
+                  <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />{t('nav.opening')}</>
                 ) : t('goPro')}
               </button>
             )}
@@ -58,7 +62,11 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           <>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-xs text-gray-300"
               style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM }}>
-              <span>{creditsLeft ?? 31} / 31 left</span>
+              <span>
+                {language === 'cs' 
+                  ? `${t('left')} ještě ${creditsLeft ?? 31} / 31` 
+                  : `${creditsLeft ?? 31} / 31 left`}
+              </span>
             </div>
             <button onClick={onManageSubscription}
               className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/20 text-white hover:border-white/50 transition-colors text-xs font-bold"
@@ -125,17 +133,17 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                 <div className="absolute right-0 top-12 z-50 w-52 rounded-xl border border-white/10 py-1 shadow-2xl"
                   style={{ background: 'rgba(10,10,10,0.97)', backdropFilter: 'blur(16px)', fontFamily: NM }}>
                   <div className="px-4 py-3 border-b border-white/10">
-                    <p className="text-sm font-medium text-white truncate">{user.first_name || 'User'}</p>
+                    <p className="text-sm font-medium text-white truncate">{user.first_name || t('nav.userDefault')}</p>
                     <p className="text-xs text-gray-400 truncate">{user.email || ''}</p>
                   </div>
                   <div className="py-1">
                     <button onClick={() => { navigate('/app'); setMenuOpen(false); }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                      App
+                      {t('nav.app')}
                     </button>
                     <button onClick={() => { navigate('/account'); setMenuOpen(false); }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                      Account settings
+                      {t('nav.account')}
                     </button>
                   </div>
                   
@@ -143,25 +151,25 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                     {!isPaidPlan && onUpgradePro && (
                       <button onClick={() => { onUpgradePro(); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
-                        Upgrade to PRO
+                        {t('nav.upgradePro')}
                       </button>
                     )}
                     {!isPaidPlan && onUpgradeUnlimited && (
                       <button onClick={() => { onUpgradeUnlimited(); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
-                        Go Unlimited
+                        {t('landing.hero.goUnlimited')}
                       </button>
                     )}
                     {isPro && onManageSubscription && (
                       <button onClick={() => { onManageSubscription(); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors">
-                        Manage subscription
+                        {t('nav.manage')}
                       </button>
                     )}
                     {isUnlimited && onManageSubscription && (
                       <button onClick={() => { onManageSubscription(); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors">
-                        Manage subscription
+                        {t('nav.manage')}
                       </button>
                     )}
                   </div>
@@ -170,7 +178,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                     {isAdmin && (
                       <button onClick={() => { navigate('/admin'); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors">
-                        Admin Panel
+                        {t('adminPanel')}
                       </button>
                     )}
                   </div>
@@ -178,7 +186,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                   <div className="py-1 border-t border-white/5">
                     <button onClick={logout}
                       className="w-full text-left px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
-                      Sign out
+                      {t('nav.signOut')}
                     </button>
                   </div>
                 </div>
@@ -189,7 +197,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           <button onClick={() => navigate('/login')}
             className="px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:opacity-80"
             style={{ background: '#fff', color: '#000', fontFamily: NM }}>
-            Sign In
+            {t('nav.signIn')}
           </button>
         )}
       </div>
