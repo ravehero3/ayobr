@@ -103,7 +103,7 @@ const UserProfile = ({ isOpen, onClose }) => {
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center text-white text-2xl rounded-lg transition-all duration-300 hover:bg-blue-500/10 hover:rotate-90"
+              className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center text-white text-2xl rounded-lg transition-all duration-300 hover:bg-white/10 hover:rotate-90"
             >
               ×
             </button>
@@ -185,10 +185,10 @@ const UserProfile = ({ isOpen, onClose }) => {
                   value={localUsername}
                   onChange={(e) => setLocalUsername(e.target.value)}
                   placeholder="Enter your username"
-                  className="w-full px-4 py-4 rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-blue-400/60 focus:shadow-lg focus:shadow-blue-500/10"
+                  className="w-full px-4 py-4 rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-white/30 focus:shadow-lg focus:shadow-white/5"
                   style={{
                     background: 'rgba(0, 0, 0, 0.85)',
-                    border: '1px solid rgba(59, 130, 246, 0.35)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     backdropFilter: 'blur(10px)',
                   }}
                 />
@@ -206,13 +206,13 @@ const UserProfile = ({ isOpen, onClose }) => {
                 style={{
                   background: 'linear-gradient(145deg, #0a0a0a 0%, #000000 100%)',
                   boxShadow: `
-                    inset 0 1px 0 rgba(59, 130, 246, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05),
                     0 4px 15px rgba(0, 0, 0, 0.5)
                   `,
                 }}
                 whileHover={{
                   boxShadow: `
-                    inset 0 1px 0 rgba(59, 130, 246, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
                     0 8px 25px rgba(0, 0, 0, 0.6)
                   `
                 }}
@@ -221,14 +221,14 @@ const UserProfile = ({ isOpen, onClose }) => {
                 <div 
                   className="absolute inset-0 rounded-xl opacity-50"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.4) 0%, transparent 30%, transparent 70%, rgba(135, 206, 250, 0.4) 100%)',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 30%, transparent 70%, rgba(255, 255, 255, 0.15) 100%)',
                     padding: '1px',
                   }}
                 />
                 <div 
                   className="absolute top-0 left-0 right-0 h-1/2 rounded-t-xl opacity-20"
                   style={{
-                    background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%)',
+                    background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%)',
                   }}
                 />
                 <span className="relative z-10">Save Profile</span>

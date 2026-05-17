@@ -13,8 +13,8 @@ import screenshotDownload from '../assets/screenshot_download.png';
 
 const NM     = "'Neue Montreal', 'Inter', sans-serif";
 const SCRIPT = "'Satisfy', cursive";
-const BTN_BG  = 'linear-gradient(135deg, #3b82f6, #0ea5e9)';
-const BTN_GLOW = '0 0 40px rgba(59,130,246,0.35)';
+const BTN_BG  = '#ffffff';
+const BTN_GLOW = '0 0 40px rgba(255,255,255,0.15)';
 
 const LH_BODY  = 1.6;
 const LH_LABEL = 1.5;
@@ -241,6 +241,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
       cta: t('landing.pricing.unlimited.cta'),
       onCta: () => handleUnlimitedCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: false,
+      topTier: true,
       ctaStyle: 'ghost',
     },
   ];
@@ -311,6 +312,20 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                   }} />
                 </>
               )}
+              {plan.topTier && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '130%',
+                  height: '130%',
+                  background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+                  filter: 'blur(60px)',
+                  zIndex: 0,
+                  pointerEvents: 'none',
+                }} />
+              )}
               <motion.div
                 initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -323,16 +338,48 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                   padding: '32px 28px 28px',
                   display: 'flex',
                   flexDirection: 'column',
-                  background: plan.highlight ? 'linear-gradient(to bottom, rgba(1,5,10,0.8), rgba(7,30,87,0.8))' : '#0a0a0a',
+                  background: plan.highlight 
+                    ? 'linear-gradient(to bottom, rgba(1,5,10,0.8), rgba(7,30,87,0.8))' 
+                    : plan.topTier 
+                      ? 'rgba(0,0,0,0.85)' 
+                      : '#0a0a0a',
                   backdropFilter: 'blur(32px)',
                   WebkitBackdropFilter: 'blur(32px)',
-                  border: '1px solid #333',
+                  border: plan.topTier ? '1px solid rgba(255,255,255,0.25)' : '1px solid #333',
                   boxShadow: plan.highlight
                     ? '0 30px 60px -12px rgba(0,0,0,0.6)'
-                    : '0 10px 30px -10px rgba(0,0,0,0.3)',
+                    : plan.topTier
+                      ? '0 20px 50px -10px rgba(255,255,255,0.08)'
+                      : '0 10px 30px -10px rgba(0,0,0,0.3)',
                   height: '100%',
+                  overflow: 'hidden'
                 }}
               >
+                {/* Shiny overlay for top tier */}
+                {plan.topTier && (
+                  <motion.div
+                    animate={{
+                      x: ['-100%', '200%'],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      repeatDelay: 4,
+                      ease: "linear"
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '50%',
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+                      transform: 'skewX(-20deg)',
+                      zIndex: 2,
+                      pointerEvents: 'none'
+                    }}
+                  />
+                )}
                 {/* Plan name + Toggle */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, minHeight: 28 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -357,7 +404,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                     <button 
                       onClick={() => setIsAnnual(!isAnnual)}
                       style={{
-                        width: 22, height: 11, borderRadius: 99, background: isAnnual ? '#0099fe' : 'rgba(0,0,0,0.6)',
+                        width: 22, height: 11, borderRadius: 99, background: isAnnual ? '#ffffff' : 'rgba(255,255,255,0.1)',
                         position: 'relative', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0,
                         transition: 'background 0.3s ease'
                       }}
@@ -366,9 +413,9 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                         animate={{ x: isAnnual ? 11 : 0 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                         style={{
-                          width: 7, height: 7, borderRadius: '50%', background: '#fff',
+                          width: 7, height: 7, borderRadius: '50%', background: isAnnual ? '#000' : '#fff',
                           position: 'absolute', top: 1, left: 1,
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.4)'
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
                         }}
                       />
                     </button>
@@ -446,7 +493,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                     fontFamily: NM, fontWeight: 600, fontSize: '0.85rem',
                     lineHeight: LH_LABEL, padding: '0 16px', height: 34, width: '100%',
                     borderRadius: 9999, cursor: 'pointer', outline: 'none',
-                    background: plan.highlight ? '#0099ff' : '#fff', color: plan.highlight ? '#fff' : '#000', border: 'none'
+                    background: plan.highlight ? '#ffffff' : '#1a1a1a', color: plan.highlight ? '#000000' : '#ffffff', border: 'none'
                   }}
                 >
                   {plan.cta}
@@ -809,7 +856,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
   const { t } = useLanguage();
   return (
     <>
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 mb-8"
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400 mb-8"
         style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em' }}>
         <span>🎬</span>
         <span>{t('landing.hero.badge')}</span>

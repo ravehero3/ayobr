@@ -7,21 +7,21 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Space/Dark theme colors
-        'space-black': '#050A13',
-        'space-dark': '#0A0F1C',
-        'space-navy': '#0F1419',
+        // Pure black/dark theme
+        'space-black': '#000000',
+        'space-dark': '#000000',
+        'space-navy': '#050505',
         
-        // Gray accent colors (removed blue)
-        'neon-blue': '#9CA3AF',
-        'neon-cyan': '#9CA3AF',
-        'neon-purple': '#9CA3AF',
-        'neon-pink': '#9CA3AF',
+        // Gray accent colors (monochrome)
+        'neon-blue': '#ffffff',
+        'neon-cyan': '#ffffff',
+        'neon-purple': '#ffffff',
+        'neon-pink': '#ffffff',
         
-        // Grayscale with blue tints
-        'gray-850': '#1a1f2e',
-        'gray-750': '#252d3d',
-        'gray-650': '#374151',
+        // Grayscale (monochrome)
+        'gray-850': '#111111',
+        'gray-750': '#1a1a1a',
+        'gray-650': '#262626',
       },
       
       fontFamily: {
@@ -132,26 +132,26 @@ module.exports = {
     function({ addUtilities }) {
       const newUtilities = {
         '.glass': {
-          background: 'rgba(10, 15, 28, 0.8)',
+          background: 'rgba(10, 10, 10, 0.8)',
           backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(96, 165, 250, 0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
         },
         '.glass-strong': {
-          background: 'rgba(10, 15, 28, 0.9)',
+          background: 'rgba(5, 5, 5, 0.9)',
           backdropFilter: 'blur(15px)',
-          border: '1px solid rgba(96, 165, 250, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
         },
         '.neon-border': {
-          border: '1.5px solid #60A5FA',
-          boxShadow: '0 0 10px rgba(96, 165, 250, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 0 10px rgba(255, 255, 255, 0.1)',
         },
         '.neon-border-cyan': {
-          border: '1.5px solid #60A5FA',
-          boxShadow: '0 0 10px rgba(96, 165, 250, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 0 10px rgba(255, 255, 255, 0.1)',
         },
         '.glass-card': {
           backdropFilter: 'blur(16px)',
-          background: 'linear-gradient(135deg, rgba(107, 114, 128, 0.3) 0%, rgba(96, 165, 250, 0.3) 100%)',
+          background: 'rgba(255, 255, 255, 0.03)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '1rem',
           padding: '1.5rem',

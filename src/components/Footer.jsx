@@ -105,10 +105,10 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               }}
               className="flex items-center space-x-1 sm:space-x-2 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors duration-200 group"
             >
-              <svg className="w-5 h-5 text-blue-400 group-hover:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              <span className="hidden xs:inline text-sm text-blue-300 group-hover:text-blue-200">{t('app.edit')}</span>
+              <span className="hidden xs:inline text-sm text-gray-400 group-hover:text-white">{t('app.edit')}</span>
             </button>
           )}
         </div>
@@ -117,12 +117,12 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         <div className="flex-1 flex items-center justify-center">
           {isGenerating ? (
             <div className="flex flex-col items-center">
-              <span className="text-xs text-blue-300 font-medium mb-1">
+              <span className="text-xs text-white font-medium mb-1">
                 {completedVideosCount} / {completePairs.length}
               </span>
               <div className="w-24 sm:w-48 bg-gray-700 rounded-full h-1">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-sky-400 h-1 rounded-full transition-all duration-300"
+                  className="bg-white h-1 rounded-full transition-all duration-300"
                   style={{ width: `${completePairs.length > 0 ? (completedVideosCount / completePairs.length) * 100 : 0}%` }}
                 />
               </div>

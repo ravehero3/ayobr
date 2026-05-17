@@ -16,7 +16,7 @@ export default function RefundPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050a13] text-white selection:bg-blue-500/30">
+    <div className="min-h-screen bg-black text-white selection:bg-white/20">
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-4"
         style={{ background: 'rgba(5,10,19,0.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">

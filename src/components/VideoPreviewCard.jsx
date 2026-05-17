@@ -83,7 +83,7 @@ const VideoPreviewCard = ({ video }) => {
 
         <button
           onClick={handleDownload}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-button-primary"
+          className="w-full bg-white hover:bg-gray-200 text-black py-2 px-4 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all"
         >
           Download
         </button>

@@ -264,7 +264,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                 animate={{ opacity: 0 }}
                 transition={{ delay: 0.6, duration: 0.3 }}
               >
-                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span className="text-white text-sm font-medium">
@@ -366,8 +366,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
                   <motion.div
                     className="h-full rounded-full relative"
                     style={{
-                      background: 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #93c5fd 100%)',
-                      boxShadow: '0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2)'
+                      background: 'linear-gradient(90deg, #374151 0%, #9ca3af 50%, #ffffff 100%)',
+                      boxShadow: '0 0 20px rgba(255, 255, 255, 0.2), 0 0 40px rgba(255, 255, 255, 0.1)'
                     }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}

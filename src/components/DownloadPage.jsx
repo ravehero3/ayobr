@@ -142,7 +142,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                   }}
                   whileHover={{
                     backgroundColor: 'rgba(0, 0, 0, 0.51)',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(59, 130, 246, 0.4), 0 0 80px rgba(96, 165, 250, 0.3)',
+                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(255, 255, 255, 0.15), 0 0 80px rgba(255, 255, 255, 0.05)',
                     zIndex: 70
                   }}
                 >
@@ -151,7 +151,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       borderRadius: '16px',
-                      background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%)',
+                      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.8) 100%)',
                       zIndex: 0
                     }}
                   />
@@ -187,7 +187,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                           style={{
                             width: '2px',
                             height: '2px',
-                            background: i % 2 === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(179, 229, 252, 0.8)',
+                            background: 'rgba(255, 255, 255, 0.9)',
                             top: `${centerY + radius * Math.sin(angle * Math.PI / 180)}%`,
                             left: `${centerX + radius * Math.cos(angle * Math.PI / 180)}%`,
                             boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
@@ -297,21 +297,21 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                         )}
 
                         {/* Success indicator overlay */}
-                        <div className="absolute top-1 right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center" style={{ zIndex: 10 }}>
-                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        <div className="absolute top-1 right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.5)]" style={{ zIndex: 10 }}>
+                          <svg className="w-2.5 h-2.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
                       </div>
                     </div>
 
-                    {/* Completed Status Bar - Blue to match LoadingWindow */}
+                    {/* Completed Status Bar - Monochromatic */}
                     <div className="w-full bg-white/10 rounded-full h-2 mt-4">
                       <div
                         className="h-full rounded-full w-full"
                         style={{
-                          background: 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)',
-                          boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
+                          background: 'linear-gradient(90deg, #374151 0%, #9ca3af 50%, #ffffff 100%)',
+                          boxShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
                         }}
                       />
                     </div>

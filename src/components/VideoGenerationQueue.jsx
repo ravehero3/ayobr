@@ -98,7 +98,7 @@ function VideoGenerationQueue() {
       case 'queued':
         return 'bg-yellow-500/20 text-yellow-300';
       case 'processing':
-        return 'bg-blue-500/20 text-blue-300';
+        return 'bg-white/10 text-white';
       case 'completed':
         return 'bg-green-500/20 text-green-300';
       case 'failed':
@@ -122,7 +122,7 @@ function VideoGenerationQueue() {
             <div 
               key={job.id} 
               className={`job-item bg-white/5 rounded-lg p-4 border ${
-                job.status === 'processing' ? 'border-blue-500/50' : 'border-white/10'
+                job.status === 'processing' ? 'border-white/30' : 'border-white/10'
               }`}
             >
               <div className="flex items-start gap-4">
@@ -150,7 +150,7 @@ function VideoGenerationQueue() {
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
                         <div 
-                          className="bg-blue-500 h-full transition-all duration-300 ease-out"
+                          className="bg-white h-full transition-all duration-300 ease-out"
                           style={{ width: `${job.progress}%` }}
                         />
                       </div>
@@ -192,7 +192,7 @@ function VideoGenerationQueue() {
                     <>
                       <button 
                         onClick={() => handleRetry(job.id)}
-                        className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg text-sm font-medium transition-colors"
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors"
                       >
                         Retry
                       </button>
@@ -238,7 +238,7 @@ function VideoGenerationQueue() {
             <div className="mt-4 flex justify-end">
               <button 
                 onClick={handleClosePreview}
-                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                className="px-6 py-2 bg-white hover:bg-white/90 text-black rounded-lg font-black uppercase tracking-widest text-xs transition-colors"
               >
                 Close
               </button>

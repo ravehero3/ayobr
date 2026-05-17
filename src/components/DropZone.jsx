@@ -49,13 +49,13 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className={`
           relative w-full max-w-4xl mx-auto p-12 rounded-3xl
-          bg-gradient-to-br from-space-dark/80 to-space-gray/60
+          bg-white/[0.02] border border-white/5
           backdrop-blur-sm
-          hover:bg-gradient-to-br hover:from-space-dark/90 hover:to-space-gray/70
+          hover:bg-white/[0.04] hover:border-white/10
           transition-all duration-300 ease-out
           cursor-pointer group
           min-h-[400px] flex items-center justify-center
-          ${isDragOver ? 'bg-gradient-to-br from-neon-green/10 to-neon-blue/10 scale-[1.02]' : ''}
+          ${isDragOver ? 'bg-white/[0.06] border-white/25 scale-[1.02]' : ''}
         `}
         style={{ zIndex: 50 }}
         onDragOver={handleDragOver}
@@ -64,7 +64,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
         onClick={() => document.getElementById('file-input').click()}
       >
       {/* Glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 rounded-3xl group-hover:from-neon-blue/10 group-hover:to-neon-purple/10 transition-all duration-300" />
+      <div className="absolute inset-0 bg-white/[0.01] rounded-3xl group-hover:bg-white/[0.02] transition-all duration-300" />
 
       {/* Content - Centered */}
       <div className="relative text-center space-y-6 w-full flex flex-col items-center justify-center" style={{ zIndex: 60 }}>
@@ -81,7 +81,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
         {/* Title */}
         <motion.h2
-          className="text-3xl font-semibold text-white mb-2 group-hover:text-neon-blue/90 transition-colors duration-300"
+          className="text-3xl font-semibold text-white mb-2 group-hover:text-white transition-colors duration-300"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
@@ -144,7 +144,7 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             }
           }}
           type="button"
-          className="px-7 py-2 bg-gradient-to-r from-neon-blue/80 to-neon-purple/80 hover:from-neon-blue hover:to-neon-purple text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/25 hover:scale-105 active:scale-95 text-button-secondary font-semibold focus:outline-none"
+          className="px-7 py-2 bg-white text-black hover:bg-white/90 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 text-xs font-black uppercase tracking-widest focus:outline-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}

@@ -13,6 +13,23 @@ router.get('/users', isAdmin, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+ 
+// Export users CSV
+router.get('/users/export', isAdmin, async (req, res) => {
+  try {
+    const users = await getAllUsers();
+    let csv = 'ID,Email,FirstName,LastName,Role,Joined\n';
+    users.forEach(u => {
+      csv += `${u.id},${u.email},${u.first_name || ''},${u.last_name || ''},${u.role},${u.created_at}\n`;
+    });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=users_export.csv');
+    res.status(200).send(csv);
+  } catch (err) {
+    console.error('GET /api/admin/users/export error:', err);
+    res.status(500).send('Server error');
+  }
+});
 
 // Update user role
 router.patch('/users/:userId/role', isAdmin, async (req, res) => {

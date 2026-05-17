@@ -80,10 +80,10 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050a13]">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="relative">
           <div className="w-12 h-12 rounded-full border-2 border-white/5" />
-          <div className="absolute top-0 left-0 w-12 h-12 rounded-full border-2 border-sky-500 border-t-transparent animate-spin" />
+          <div className="absolute top-0 left-0 w-12 h-12 rounded-full border-2 border-white border-t-transparent animate-spin" />
         </div>
       </div>
     );
@@ -116,7 +116,7 @@ export default function LoginPage() {
 
           <label className="flex items-start gap-3 cursor-pointer mb-6">
             <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)}
-              className="mt-0.5 accent-blue-500" />
+              className="mt-0.5 accent-white" />
             <span className="text-sm text-gray-300">
               I confirm that I own the rights to all audio and image files I upload. I understand and accept full responsibility for the content I create.
             </span>
@@ -140,7 +140,7 @@ export default function LoginPage() {
       <div className="min-h-screen text-white flex flex-col items-center justify-center px-6" style={{ background: '#000' }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[120px]"
-          style={{ background: 'rgba(59,130,246,0.3)' }} />
+          style={{ background: 'rgba(255,255,255,0.05)' }} />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}

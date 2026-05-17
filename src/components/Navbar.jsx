@@ -148,26 +148,11 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                   </div>
                   
                   <div className="py-1 border-t border-white/5">
-                    {!isPaidPlan && language === 'cs' ? (
+                    {!isPaidPlan && (
                       <button onClick={() => { onUpgradePro(); setMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
-                        {t('nav.chciVic')}
+                        {language === 'cs' ? 'Chci víc' : 'I want more'}
                       </button>
-                    ) : (
-                      <>
-                        {!isPaidPlan && onUpgradePro && (
-                          <button onClick={() => { onUpgradePro(); setMenuOpen(false); }}
-                            className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
-                            {t('nav.upgradePro')}
-                          </button>
-                        )}
-                        {!isPaidPlan && onUpgradeUnlimited && (
-                          <button onClick={() => { onUpgradeUnlimited(); setMenuOpen(false); }}
-                            className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors font-medium">
-                            {t('landing.hero.goUnlimited')}
-                          </button>
-                        )}
-                      </>
                     )}
                     {isPro && onManageSubscription && (
                       <button onClick={() => { onManageSubscription(); setMenuOpen(false); }}

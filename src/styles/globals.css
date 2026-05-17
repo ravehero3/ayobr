@@ -1,12 +1,12 @@
 @import 'tailwindcss';
 
 :root {
-  --bg-deep-navy: #050a13;
+  --bg-deep-navy: #000000;
   --bg-matte-black: #080808;
-  --accent-blue: #3b82f6;
-  --accent-sky: #0ea5e9;
+  --accent-blue: #ffffff;
+  --accent-sky: #f3f4f6;
   --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 body {
@@ -122,22 +122,12 @@ html {
 
 /* Premium container styles */
 .premium-container {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
+  background: rgba(10, 10, 10, 0.8);
   backdrop-filter: blur(16px);
-
-  /* 4px thick glassmorphism border with enhanced shadows */
-  border: 4px solid transparent;
-  background-clip: padding-box;
-
-  box-shadow: 
-    0 0 0 4px rgba(128, 128, 128, 0.6), /* 4px thick grey outer stroke */
-    inset 0 0 0 4px rgba(128, 128, 128, 0.1), /* 4px thick subtle grey inner border */
-    0 8px 32px rgba(0, 0, 0, 0.4), /* Deep semitransparent shadow below */
-    0 4px 16px rgba(0, 0, 0, 0.3), /* Medium semitransparent shadow beneath */
-    0 2px 8px rgba(0, 0, 0, 0.2); /* Subtle close shadow */
-
-  border-radius: 8px;
-  margin-bottom: 16px; /* Add margin to accommodate shadow */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  margin-bottom: 16px;
 }
 
 /* Removed premium-glow and premium-highlight to eliminate extra rectangles */
@@ -173,29 +163,18 @@ html {
 /* Download Page Styles */
 .download-all-btn {
   position: relative;
-  padding: 18px 36px;
-  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 30%, #0a0a0a 100%) padding-box, 
-             conic-gradient(from 270deg, 
-                 #1e3a8a 0deg, 
-                 #4a6bb8 30deg, 
-                 #87CEEB 90deg, 
-                 #6bb5d0 120deg, 
-                 #333333 180deg, 
-                 #1a1a1a 210deg, 
-                 #000000 270deg, 
-                 #0d1e44 330deg) border-box;
-  border: 2px solid transparent;
+  padding: 16px 32px;
+  background: white;
+  border: none;
   border-radius: 12px;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
+  color: black;
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   cursor: pointer;
   transition: all 0.3s ease;
-  overflow: visible;
-  min-width: 220px;
-  text-align: center;
-  box-shadow: 0 -15px 40px rgba(30, 58, 138, 0.35), 
-             inset 0 2px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
 .download-all-btn .download-icon {
@@ -251,34 +230,25 @@ html {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
-  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  background: #0a0a0a;
   border-radius: 20px;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 0 30px rgba(59, 130, 246, 0.4),
-    0 0 60px rgba(59, 130, 246, 0.2),
-    0 20px 40px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .video-card-glow {
   position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, 
-    rgba(59, 130, 246, 0.8) 0%,
-    rgba(139, 92, 246, 0.6) 25%,
-    rgba(59, 130, 246, 0.8) 50%,
-    rgba(139, 92, 246, 0.6) 75%,
-    rgba(59, 130, 246, 0.8) 100%);
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05), rgba(255,255,255,0.1));
   background-size: 200% 200%;
-  border-radius: 22px;
+  border-radius: 21px;
   z-index: -1;
-  animation: glowRotate 3s linear infinite;
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 @keyframes glowRotate {
@@ -307,7 +277,7 @@ html {
   align-items: center;
   justify-content: center;
   position: relative;
-  background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e40af);
+  background: #050505;
   overflow: hidden;
 }
 
@@ -317,7 +287,7 @@ html {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -330,15 +300,14 @@ html {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #1e40af, #1e3a8a);
+  background: #1a1a1a;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
   color: white;
   font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 1;
   position: relative;
 }
@@ -347,12 +316,12 @@ html {
   position: absolute;
   top: 15px;
   right: 15px;
-  background: rgba(59, 130, 246, 0.9);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 900;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 2;
@@ -421,7 +390,7 @@ html {
 }
 
 .video-resolution {
-  color: #87CEEB;
+  color: #fff;
   font-weight: 600;
 }
 
@@ -718,15 +687,15 @@ html {
 .generate-videos-btn {
   --duration: 7s;
   --easing: linear;
-  --c-color-1: rgba(66, 165, 245, 0.4); /* Subtle blue particles */
-  --c-color-2: rgba(30, 136, 229, 0.6); /* Medium blue particles */
-  --c-color-3: rgba(21, 101, 192, 0.5); /* Darker blue particles */
-  --c-color-4: rgba(144, 202, 249, 0.3); /* Light blue particles */
-  --c-shadow: rgba(66, 165, 245, 0.3);
+  --c-color-1: rgba(120, 120, 120, 0.4); /* Subtle grey particles */
+  --c-color-2: rgba(180, 180, 180, 0.5); /* Medium grey particles */
+  --c-color-3: rgba(240, 240, 240, 0.4); /* Light grey particles */
+  --c-color-4: rgba(255, 255, 255, 0.3); /* White particles */
+  --c-shadow: rgba(255, 255, 255, 0.05);
   --c-shadow-inset-top: rgba(255, 255, 255, 0.15);
-  --c-shadow-inset-bottom: rgba(66, 165, 245, 0.2);
-  --c-radial-inner: rgba(21, 101, 192, 0.95);
-  --c-radial-outer: rgba(13, 71, 161, 0.9);
+  --c-shadow-inset-bottom: rgba(255, 255, 255, 0.05);
+  --c-radial-inner: rgba(20, 20, 20, 0.95);
+  --c-radial-outer: rgba(0, 0, 0, 0.95);
   --c-color: #fff;
 
   /* Base styling */
@@ -1536,14 +1505,14 @@ input[type="file"] {
   background: #000000;
   color: white;
 
-  /* Baby blue glow shadow */
+  /* Monochromatic glow shadow */
   box-shadow: 
-    0 0 20px rgba(173, 216, 230, 0.3),
+    0 0 20px rgba(255, 255, 255, 0.1),
     0 1px 3px rgba(0, 0, 0, 0.1),
     0 1px 2px rgba(0, 0, 0, 0.06);
 
-  /* Baby blue stroke on bottom */
-  border-bottom: 2px solid rgba(173, 216, 230, 0.4);
+  /* White stroke on bottom */
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 
   /* Prevent text selection */
   user-select: none;
@@ -1553,9 +1522,9 @@ input[type="file"] {
 .generate-videos-btn:hover {
   transform: translateY(-1px);
   background: #1a1a1a;
-  /* Enhanced baby blue glow and light from below effect */
+  /* Enhanced monochromatic glow and light from below effect */
   box-shadow: 
-    0 0 30px rgba(173, 216, 230, 0.5),
+    0 0 30px rgba(255, 255, 255, 0.15),
     0 -8px 16px rgba(255, 255, 255, 0.1),
     0 4px 12px rgba(0, 0, 0, 0.15),
     0 2px 4px rgba(0, 0, 0, 0.08);

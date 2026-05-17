@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+
+const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 export default function ReferralPanel({ onClose }) {
+  const { t } = useLanguage();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -28,38 +32,33 @@ export default function ReferralPanel({ onClose }) {
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onClose}>
       <div className="w-full max-w-sm mx-4 rounded-2xl border border-white/10 p-6 shadow-2xl"
-        style={{ background: 'rgba(10,15,30,0.98)' }}
+        style={{ background: 'rgba(5,5,5,0.98)' }}
         onClick={e => e.stopPropagation()}>
 
         <div className="text-center mb-5">
           <div className="text-3xl mb-2">🎁</div>
-          <h2 className="text-white font-bold text-lg mb-1">Invite friends, earn credits</h2>
-          <p className="text-gray-400 text-sm leading-relaxed">
-            Share your link. When a friend signs up, they get <span className="text-green-400 font-medium">+1 bonus credit</span> and so do you.
+          <h2 className="text-white font-black text-lg mb-1 tracking-tighter" style={{ fontFamily: NM }}>Invite friends, earn credits</h2>
+          <p className="text-gray-500 text-sm leading-relaxed" style={{ fontFamily: NM }}>
+            Share your link. When a friend signs up, they get <span className="text-white font-bold">+1 bonus credit</span> and so do you.
           </p>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-6">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent" />
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/10 border-t-white" />
           </div>
         ) : referralLink ? (
           <>
-            <div className="rounded-xl border border-white/10 p-3 mb-3"
+            <div className="rounded-xl border border-white/5 p-3 mb-3"
               style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <p className="text-xs text-gray-500 mb-1">Your referral link</p>
-              <p className="text-sm text-blue-300 font-mono break-all">{referralLink}</p>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Your referral link</p>
+              <p className="text-xs text-white font-mono break-all">{referralLink}</p>
             </div>
 
             <button onClick={handleCopy}
-              className="w-full py-3 rounded-xl font-semibold text-sm transition-all mb-4"
-              style={{
-                background: copied
-                  ? 'rgba(34,197,94,0.15)'
-                  : 'linear-gradient(135deg, #3b82f6, #0ea5e9)',
-                border: copied ? '1px solid rgba(34,197,94,0.4)' : 'none',
-                color: copied ? '#4ade80' : 'white'
-              }}>
+              className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all mb-4 ${copied ? 'bg-white/10 text-white' : 'bg-white text-black hover:scale-[1.02]'}`}
+              style={{ fontFamily: NM }}
+            >
               {copied ? '✓ Copied!' : 'Copy link'}
             </button>
 

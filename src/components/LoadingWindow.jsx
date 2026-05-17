@@ -505,11 +505,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           style={{
                             width: `${progressToDisplay}%`,
                             background: isComplete 
-                              ? 'linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%)'
-                              : 'linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #93c5fd 100%)',
+                              ? 'linear-gradient(90deg, #9ca3af 0%, #ffffff 50%, #ffffff 100%)'
+                              : 'linear-gradient(90deg, #374151 0%, #6b7280 50%, #d1d5db 100%)',
                             boxShadow: isComplete 
-                              ? '0 0 15px rgba(16, 185, 129, 0.4)'
-                              : '0 0 15px rgba(59, 130, 246, 0.4)'
+                              ? '0 0 15px rgba(255, 255, 255, 0.3)'
+                              : '0 0 15px rgba(255, 255, 255, 0.1)'
                           }}
                           initial={{ width: 0 }}
                           animate={{ width: `${progressToDisplay}%` }}
