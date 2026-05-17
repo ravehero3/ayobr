@@ -15,7 +15,7 @@ function startCreditResetScheduler() {
   console.log('Monthly credit reset scheduled (runs 00:00 UTC on the 1st)');
 }
 
-const REQUIRED_ENV = ['DATABASE_URL', 'SESSION_SECRET'];
+const REQUIRED_ENV = ['DATABASE_URL', 'SESSION_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
 
 function validateEnv() {
   const missing = REQUIRED_ENV.filter(key => !process.env[key]);
