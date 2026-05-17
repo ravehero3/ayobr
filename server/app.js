@@ -64,7 +64,7 @@ async function mountRoutes(app) {
   app.use(express.static(path.join(__dirname, '../dist')));
   
   // Wildcard fallback to serve index.html for SPA routing (React Router)
-  app.get('*', (req, res, next) => {
+  app.get(/(.*)/, (req, res, next) => {
     if (req.path.startsWith('/api')) {
       return next();
     }
