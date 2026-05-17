@@ -1,7 +1,7 @@
 const { getApp, resetMonthlyCredits } = require('./app');
 const cron = require('node-cron');
 
-const PORT = process.env.API_PORT || 3001;
+const PORT = process.env.PORT || process.env.API_PORT || 3001;
 
 function startCreditResetScheduler() {
   cron.schedule('0 0 1 * *', async () => {
