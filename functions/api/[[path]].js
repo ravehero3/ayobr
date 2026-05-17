@@ -4,7 +4,7 @@ export async function onRequest(context) {
   
   // 1. Get backend API URL from Cloudflare environment variables
   // Configure BACKEND_URL (e.g., 'https://ayobr-backend.onrender.com') in the Cloudflare Pages dashboard.
-  const BACKEND_URL = context.env.BACKEND_URL || "https://ayobr-backend.onrender.com";
+  const BACKEND_URL = context.env.BACKEND_URL || "https://typebeatz.onrender.com";
   
   // 2. Construct the target backend API URL
   const pathStr = params.path ? params.path.join('/') : '';
