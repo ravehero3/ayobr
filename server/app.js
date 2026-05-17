@@ -59,6 +59,17 @@ async function mountRoutes(app) {
   app.use('/api/admin', adminRoutes);
   app.use('/api/paddle', paddleRoutes);
   app.get('/api/health', (req, res) => res.json({ ok: true }));
+
+  // Serve static files from the built dist directory
+  app.use(express.static(path.join(__dirname, '../dist')));
+  
+  // Wildcard fallback to serve index.html for SPA routing (React Router)
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  });
 }
 
 let _initPromise = null;
