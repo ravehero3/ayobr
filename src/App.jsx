@@ -11,6 +11,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import RefundPage from './pages/RefundPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AccountPage from './pages/AccountPage';
+import UpgradePage from './pages/UpgradePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -27,6 +28,12 @@ export default function App() {
           <Route path="/app" element={
             <ProtectedRoute>
               <AppPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/upgrade" element={
+            <ProtectedRoute>
+              <UpgradePage />
             </ProtectedRoute>
           } />
           

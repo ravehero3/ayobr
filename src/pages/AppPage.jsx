@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { usePaddle } from '../hooks/usePaddle';
 import Navbar from '../components/Navbar';
 import UpgradeBanner from '../components/UpgradeBanner';
 import ReferralPanel from '../components/ReferralPanel';
-import SubscriptionPanel from '../components/SubscriptionPanel';
 import VideoApp from '../VideoApp';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useLanguage } from '../context/LanguageContext';
@@ -19,18 +17,7 @@ export default function AppPage() {
   const [upgradeSuccess, setUpgradeSuccess]     = useState(null); // null | 'pro' | 'unlimited'
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
   const [checkoutLoading, setCheckoutLoading]   = useState(false);
-  const [showSubscription, setShowSubscription] = useState(false);
   const [showReferral, setShowReferral]         = useState(false);
-
-  const { openCheckout } = usePaddle({
-    onCheckoutCompleted: () => {
-      refreshUser().then(() => {
-        // After refresh, user.role will reflect the new plan
-        setUpgradeSuccess('pro'); // will be corrected below after refresh
-      });
-      setTimeout(() => setUpgradeSuccess(null), 7000);
-    }
-  });
 
   useEffect(() => {
     if (!loading && !user) navigate('/login');
@@ -49,36 +36,14 @@ export default function AppPage() {
       setTimeout(() => setShowCancelledNotice(false), 5000);
       setSearchParams({}, { replace: true });
     }
-    const interval = searchParams.get('interval') || 'yearly';
-    if (searchParams.get('upgrade') === 'true' || searchParams.get('upgrade') === 'pro') {
+    if (searchParams.get('upgrade') === 'true' || searchParams.get('upgrade') === 'pro' || searchParams.get('upgrade') === 'unlimited') {
       setSearchParams({}, { replace: true });
-      setTimeout(() => handleUpgradePro(interval), 800);
+      navigate('/upgrade');
     }
-    if (searchParams.get('upgrade') === 'unlimited') {
-      setSearchParams({}, { replace: true });
-      setTimeout(() => handleUpgradeUnlimited(interval), 800);
-    }
-  }, [searchParams]);
+  }, [searchParams, navigate, refreshUser]);
 
-  const handleUpgradePro = async (interval = 'yearly') => {
-    setCheckoutLoading(true);
-    try {
-      const opened = await openCheckout(user?.email, 'pro', interval);
-      if (!opened) alert(t('app.checkoutNotConfigured'));
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
-  const handleUpgradeUnlimited = async (interval = 'yearly') => {
-    setCheckoutLoading(true);
-    try {
-      const opened = await openCheckout(user?.email, 'unlimited', interval);
-      if (!opened) alert(t('app.checkoutNotConfigured'));
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
+  const handleUpgradePro = () => navigate('/upgrade');
+  const handleUpgradeUnlimited = () => navigate('/upgrade');
 
   if (loading || !user) {
     return (
@@ -154,14 +119,7 @@ export default function AppPage() {
         </div>
       )}
 
-      {showSubscription && (
-        <SubscriptionPanel
-          onClose={() => setShowSubscription(false)}
-          onUpgradePro={() => { setShowSubscription(false); handleUpgradePro(); }}
-          onUpgradeUnlimited={() => { setShowSubscription(false); handleUpgradeUnlimited(); }}
-          checkoutLoading={checkoutLoading}
-        />
-      )}
+
 
       {showReferral && <ReferralPanel onClose={() => setShowReferral(false)} />}
 

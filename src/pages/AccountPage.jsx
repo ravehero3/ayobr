@@ -65,6 +65,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -75,6 +76,14 @@ export default function AccountPage() {
   const isPro       = user?.role === 'pro';
   const isPaid      = isPro || isUnlimited;
 
+  const fetchSubscription = () => {
+    fetch('/api/paddle/subscription', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setSub(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     if (!user) return;
     
@@ -84,11 +93,7 @@ export default function AccountPage() {
     setProducerName(user.producer_name || '');
 
     if (isPaid) {
-      fetch('/api/paddle/subscription', { credentials: 'include' })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => setSub(data))
-        .catch(() => {})
-        .finally(() => setLoading(false));
+      fetchSubscription();
     } else {
       setLoading(false);
     }
@@ -117,6 +122,33 @@ export default function AccountPage() {
       console.error('Save profile error:', err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCancelSub = async () => {
+    const isCzech = language === 'cs';
+    const confirmMsg = isCzech
+      ? 'Opravdu chcete zrušit své předplatné? Ztratíte přístup ke všem výhodám na konci aktuálního fakturačního období.'
+      : 'Are you sure you want to cancel your subscription? You will lose access to premium features at the end of the current billing period.';
+    if (!window.confirm(confirmMsg)) return;
+
+    setCancelLoading(true);
+    try {
+      const res = await fetch('/api/paddle/cancel', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        await refreshUser();
+        fetchSubscription();
+        alert(isCzech ? 'Předplatné bylo úspěšně zrušeno.' : 'Subscription cancelled successfully.');
+      } else {
+        alert(isCzech ? 'Chyba při rušení předplatného.' : 'Failed to cancel subscription.');
+      }
+    } catch (err) {
+      console.error('Cancel sub error:', err);
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -267,15 +299,28 @@ export default function AccountPage() {
                   </div>
                 )}
 
-                <div className="mt-auto pt-6">
+                <div className="mt-auto pt-6 space-y-3">
                   {isPaid ? (
-                    <button onClick={() => navigate('/app?manage=true')}
-                      className="w-full py-4 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all"
-                      style={{ fontFamily: NM }}>
-                      {t('account.manageSub')}
-                    </button>
+                    <>
+                      {isPro && (
+                        <button onClick={() => navigate('/upgrade')}
+                          className="w-full py-3.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
+                          style={{ fontFamily: NM }}>
+                          {language === 'cs' ? 'Upgradovat na Neomezený' : 'Upgrade to Unlimited'}
+                        </button>
+                      )}
+                      {sub?.status === 'active' && (
+                        <button onClick={handleCancelSub} disabled={cancelLoading}
+                          className="w-full py-3 rounded-xl border border-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all disabled:opacity-50"
+                          style={{ fontFamily: NM }}>
+                          {cancelLoading 
+                            ? (language === 'cs' ? 'Ruším...' : 'Cancelling...') 
+                            : (language === 'cs' ? 'Zrušit předplatné' : 'Cancel Subscription')}
+                        </button>
+                      )}
+                    </>
                   ) : (
-                    <button onClick={() => navigate('/app?upgrade=true')}
+                    <button onClick={() => navigate('/upgrade')}
                       className="w-full py-4 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
                       style={{ fontFamily: NM }}>
                       {t('account.upgradeToPro')}

@@ -107,6 +107,18 @@ router.post('/cancel', isAuthenticated, async (req, res) => {
       return res.status(404).json({ message: 'No active subscription found' });
     }
 
+    if (sub.paddle_subscription_id.startsWith('gopay_')) {
+      // GoPay subscription: set local status to cancelling
+      await upsertSubscription({
+        userId,
+        paddleCustomerId: sub.paddle_customer_id,
+        paddleSubscriptionId: sub.paddle_subscription_id,
+        status: 'cancelling',
+        currentPeriodEnd: sub.current_period_end
+      });
+      return res.json({ message: 'Subscription scheduled for cancellation' });
+    }
+
     await p.subscriptions.cancel(sub.paddle_subscription_id, {
       effectiveFrom: 'next_billing_period'
     });
