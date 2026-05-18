@@ -5,6 +5,7 @@ const { setupAuth } = require('./auth');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const paddleRoutes = require('./routes/paddle');
+const gopayRoutes = require('./routes/gopay');
 const { pool } = require('./db');
 const fs = require('fs');
 const { resetMonthlyCredits } = require('./storage');
@@ -58,6 +59,7 @@ async function mountRoutes(app) {
   app.use('/api/user', userRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/paddle', paddleRoutes);
+  app.use('/api/gopay', gopayRoutes);
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 
   // Serve static files from the built dist directory

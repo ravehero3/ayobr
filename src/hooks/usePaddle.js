@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 let paddleInitialized    = false;
 let cachedProMonthlyId = null;
@@ -47,6 +48,7 @@ async function initializePaddle() {
 }
 
 export function usePaddle({ onCheckoutCompleted } = {}) {
+  const { language } = useLanguage();
   const callbackRef = useRef(onCheckoutCompleted);
   callbackRef.current = onCheckoutCompleted;
 
@@ -61,6 +63,33 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
 
   /* plan: 'pro' | 'unlimited', interval: 'monthly' | 'yearly' */
   const openCheckout = useCallback(async (userEmail, plan = 'pro', interval = 'yearly') => {
+    if (language === 'cs') {
+      try {
+        const res = await fetch('/api/gopay/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan, isAnnual: interval === 'yearly' }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          alert(data.message || 'Failed to initiate GoPay checkout.');
+          return false;
+        }
+        const { gwUrl } = await res.json();
+        if (gwUrl) {
+          window.location.href = gwUrl;
+          return true;
+        } else {
+          alert('Failed to initiate GoPay checkout (missing gwUrl).');
+          return false;
+        }
+      } catch (err) {
+        console.error('GoPay checkout error:', err);
+        alert('Failed to connect to GoPay payment gateway.');
+        return false;
+      }
+    }
+
     if (typeof window.Paddle === 'undefined') {
       console.warn('Paddle.js not loaded yet');
       return false;
@@ -100,7 +129,7 @@ export function usePaddle({ onCheckoutCompleted } = {}) {
       console.error('Paddle checkout error:', err);
       return false;
     }
-  }, []);
+  }, [language]);
 
   return { openCheckout };
 }
