@@ -110,10 +110,10 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
         default_payment_method: 'payment-card',
         allowed_payment_methods: ['payment-card'],
         contact: {
-          first_name: user.first_name || '',
-          last_name: user.last_name || '',
           email: user.email,
-          country_code: 'CZE'
+          country_code: 'CZE',
+          ...(user.first_name ? { first_name: user.first_name } : {}),
+          ...(user.last_name ? { last_name: user.last_name } : {})
         }
       },
       amount: amountHellers,
@@ -132,7 +132,7 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
         notification_url: notificationUrl
       },
       target: {
-        type: 'SOLE_SOLEATE',
+        type: 'ACCOUNT',
         goid: GOPAY_GOID
       },
       lang: 'CS'
