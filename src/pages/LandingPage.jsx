@@ -208,6 +208,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
       onCta: handleCTA,
       highlight: false,
       ctaStyle: 'ghost',
+      hasToggle: false,
     },
     {
       name: t('landing.pricing.pro.name'),
@@ -220,11 +221,13 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: t('landing.pricing.pro.f3'), icon: PricingIcons.Image },
         { text: t('landing.pricing.pro.f4'), icon: PricingIcons.Star },
         { text: t('landing.pricing.pro.f5'), icon: PricingIcons.Cancel },
+        ...(isAnnual ? [{ text: t('landing.pricing.pro.f6.annual'), icon: PricingIcons.Present }] : []),
       ],
       cta: isPro ? t('landing.pricing.pro.cta.current') : t('landing.pricing.pro.cta'),
       onCta: () => handleUpgradeCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: true,
       ctaStyle: 'solid',
+      hasToggle: true,
     },
     {
       name: t('landing.pricing.unlimited.name'),
@@ -237,12 +240,14 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: t('landing.pricing.unlimited.f3'), icon: PricingIcons.Image },
         { text: t('landing.pricing.unlimited.f4'), icon: PricingIcons.Star },
         { text: t('landing.pricing.unlimited.f5'), icon: PricingIcons.Cancel },
+        ...(isAnnual ? [{ text: t('landing.pricing.unlimited.f6.annual'), icon: PricingIcons.Present }] : []),
       ],
       cta: t('landing.pricing.unlimited.cta'),
       onCta: () => handleUnlimitedCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: false,
       topTier: true,
       ctaStyle: 'ghost',
+      hasToggle: true,
     },
   ];
 
@@ -398,7 +403,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                 </div>
 
                 {/* Small Toggle for PRO and Unlimited */}
-                {(plan.name === 'Pro' || plan.name === 'Unlimited') && (
+                {plan.hasToggle && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>ANNUAL</span>
                     <button 
