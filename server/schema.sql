@@ -24,10 +24,11 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
--- Add referral columns to existing users table (safe if already present)
+-- Add referral and details columns to existing users table (safe if already present)
 DO $$ BEGIN
   BEGIN ALTER TABLE users ADD COLUMN referral_code VARCHAR(8) UNIQUE; EXCEPTION WHEN duplicate_column THEN NULL; END;
   BEGIN ALTER TABLE users ADD COLUMN referred_by VARCHAR(8); EXCEPTION WHEN duplicate_column THEN NULL; END;
+  BEGIN ALTER TABLE users ADD COLUMN producer_name VARCHAR; EXCEPTION WHEN duplicate_column THEN NULL; END;
 END $$;
 CREATE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code);
 

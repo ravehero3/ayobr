@@ -271,5 +271,5 @@ module.exports = {
   getSubscription, upsertSubscription,
   resetMonthlyCredits, setCreditsForRole,
   ensureReferralCode, applyReferralCode, getReferralStats,
-  updateUserProfile
+  updateUserProfile, getFeatureFlags, updateFeatureFlag
 };
