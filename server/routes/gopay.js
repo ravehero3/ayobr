@@ -107,8 +107,8 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
     // Prepare GoPay payment creation body
     const payload = {
       payer: {
-        default_payment_method: 'payment-card',
-        allowed_payment_methods: ['payment-card'],
+        default_payment_instrument: 'PAYMENT_CARD',
+        allowed_payment_instruments: ['PAYMENT_CARD'],
         contact: {
           email: user.email,
           country_code: 'CZE',
