@@ -52,18 +52,35 @@ CREATE TABLE IF NOT EXISTS credits (
   UNIQUE(user_id)
 );
 
--- Subscriptions table (Paddle)
+-- Subscriptions table (Lemon Squeezy, GoPay, etc.)
 CREATE TABLE IF NOT EXISTS subscriptions (
   id SERIAL PRIMARY KEY,
   user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  paddle_customer_id VARCHAR,
-  paddle_subscription_id VARCHAR UNIQUE,
+  provider_customer_id VARCHAR,
+  provider_subscription_id VARCHAR UNIQUE,
   status VARCHAR NOT NULL DEFAULT 'inactive',  -- 'active', 'inactive', 'cancelled', 'past_due'
   current_period_end TIMESTAMP,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   UNIQUE(user_id)
 );
+
+-- Migrate legacy Paddle column names (no-op on fresh installs)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'subscriptions' AND column_name = 'paddle_customer_id'
+  ) THEN
+    ALTER TABLE subscriptions RENAME COLUMN paddle_customer_id TO provider_customer_id;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'subscriptions' AND column_name = 'paddle_subscription_id'
+  ) THEN
+    ALTER TABLE subscriptions RENAME COLUMN paddle_subscription_id TO provider_subscription_id;
+  END IF;
+END $$;
 
 -- Feature flags table (admin can toggle per plan)
 CREATE TABLE IF NOT EXISTS feature_flags (

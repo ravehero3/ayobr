@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { usePaddle } from '../hooks/usePaddle';
+import { useLemonSqueezy } from '../hooks/useLemonSqueezy';
 import Navbar from '../components/Navbar';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -114,15 +114,27 @@ export default function UpgradePage() {
   const { user, refreshUser } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isCzech = language === 'cs';
   const [isAnnual, setIsAnnual] = useState(true);
   const [pending, setPending] = useState(null); // { plan, interval }
   const [loading, setLoading] = useState(false);
   useDocumentTitle(isCzech ? 'Upgrade plánu' : 'Upgrade Plan');
 
-  const { openCheckout } = usePaddle({
-    onCheckoutCompleted: () => { refreshUser(); navigate('/app?upgraded=true'); }
-  });
+  const { openCheckout } = useLemonSqueezy();
+
+  useEffect(() => {
+    const plan = searchParams.get('plan');
+    const interval = searchParams.get('interval');
+    if (interval === 'monthly') setIsAnnual(false);
+    else if (interval === 'yearly') setIsAnnual(true);
+    if (plan === 'pro' || plan === 'unlimited') {
+      setPending({
+        plan,
+        interval: interval === 'monthly' ? 'monthly' : 'yearly',
+      });
+    }
+  }, [searchParams]);
 
   const plans = [
     {
@@ -170,6 +182,7 @@ export default function UpgradePage() {
       await fetch('/api/user/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ first_name: firstName, last_name: lastName, producer_name: producerName || undefined }),
       });
       await refreshUser();
@@ -240,8 +253,8 @@ export default function UpgradePage() {
                   <span style={{ fontFamily: NM, fontSize: 22, fontWeight: 400, color: '#fff' }}>{plan.name}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(v => !v)}>ANNUAL</span>
-                    <button onClick={() => setIsAnnual(v => !v)} style={{ width: 22, height: 11, borderRadius: 99, background: isAnnual ? '#fff' : 'rgba(255,255,255,0.1)', position: 'relative', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0, transition: 'background 0.3s' }}>
-                      <motion.div animate={{ x: isAnnual ? 11 : 0 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }} style={{ width: 7, height: 7, borderRadius: '50%', background: isAnnual ? '#000' : '#fff', position: 'absolute', top: 1, left: 1 }} />
+                    <button onClick={() => setIsAnnual(v => !v)} style={{ width: 26, height: 14, borderRadius: 99, background: isAnnual ? '#3B82F6' : 'rgba(255,255,255,0.1)', position: 'relative', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0, transition: 'background 0.3s' }}>
+                      <motion.div animate={{ x: isAnnual ? 12 : 0 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }} style={{ width: 10, height: 10, borderRadius: '50%', background: '#fff', position: 'absolute', top: 1, left: 1 }} />
                     </button>
                   </div>
                 </div>

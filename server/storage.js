@@ -27,16 +27,17 @@ async function upsertUser(userData) {
   return user;
 }
  
-async function updateUserProfile(userId, { first_name, last_name, producer_name }) {
+async function updateUserProfile(userId, { first_name, last_name, producer_name, profile_image_url }) {
   const result = await pool.query(
     `UPDATE users
-     SET first_name = $1,
-         last_name = $2,
-         producer_name = $3,
+     SET first_name = COALESCE($1, first_name),
+         last_name = COALESCE($2, last_name),
+         producer_name = COALESCE($3, producer_name),
+         profile_image_url = COALESCE($4, profile_image_url),
          updated_at = NOW()
-     WHERE id = $4
+     WHERE id = $5
      RETURNING *`,
-    [first_name, last_name, producer_name, userId]
+    [first_name ?? null, last_name ?? null, producer_name ?? null, profile_image_url ?? null, userId]
   );
   return result.rows[0];
 }
@@ -128,18 +129,18 @@ async function getSubscription(userId) {
 }
 
 async function upsertSubscription(data) {
-  const { userId, paddleCustomerId, paddleSubscriptionId, status, currentPeriodEnd } = data;
+  const { userId, providerCustomerId, providerSubscriptionId, status, currentPeriodEnd } = data;
   const result = await pool.query(
-    `INSERT INTO subscriptions (user_id, paddle_customer_id, paddle_subscription_id, status, current_period_end, updated_at)
+    `INSERT INTO subscriptions (user_id, provider_customer_id, provider_subscription_id, status, current_period_end, updated_at)
      VALUES ($1, $2, $3, $4, $5, NOW())
      ON CONFLICT (user_id) DO UPDATE SET
-       paddle_customer_id = EXCLUDED.paddle_customer_id,
-       paddle_subscription_id = EXCLUDED.paddle_subscription_id,
+       provider_customer_id = EXCLUDED.provider_customer_id,
+       provider_subscription_id = EXCLUDED.provider_subscription_id,
        status = EXCLUDED.status,
        current_period_end = EXCLUDED.current_period_end,
        updated_at = NOW()
      RETURNING *`,
-    [userId, paddleCustomerId, paddleSubscriptionId, status, currentPeriodEnd]
+    [userId, providerCustomerId, providerSubscriptionId, status, currentPeriodEnd]
   );
   return result.rows[0];
 }

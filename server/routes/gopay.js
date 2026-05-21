@@ -181,8 +181,8 @@ async function upgradeUserFromPayment(userId, plan, isAnnual, paymentId) {
 
   await upsertSubscription({
     userId,
-    paddleCustomerId: `gopay_cust_${userId}`,
-    paddleSubscriptionId: `gopay_sub_${paymentId}`,
+    providerCustomerId: `gopay_cust_${userId}`,
+    providerSubscriptionId: `gopay_sub_${paymentId}`,
     status: 'active',
     currentPeriodEnd
   });

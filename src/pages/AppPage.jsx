@@ -26,21 +26,48 @@ export default function AppPage() {
 
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') {
-      refreshUser();
-      setUpgradeSuccess('pro');
-      setTimeout(() => setUpgradeSuccess(null), 7000);
       setSearchParams({}, { replace: true });
+      let cancelled = false;
+      (async () => {
+        let activated = false;
+        for (let i = 0; i < 15 && !cancelled; i++) {
+          await refreshUser();
+          try {
+            const res = await fetch('/api/user/me', { credentials: 'include' });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.role === 'unlimited' || data.role === 'admin') {
+                setUpgradeSuccess('unlimited');
+                activated = true;
+                break;
+              }
+              if (data.role === 'pro') {
+                setUpgradeSuccess('pro');
+                activated = true;
+                break;
+              }
+            }
+          } catch { /* retry */ }
+          if (i < 14) await new Promise(r => setTimeout(r, 2000));
+        }
+        if (!activated && !cancelled) setUpgradeSuccess('pro');
+      })();
+      const hideTimer = setTimeout(() => setUpgradeSuccess(null), 7000);
+      return () => { cancelled = true; clearTimeout(hideTimer); };
     }
     if (searchParams.get('cancelled') === 'true') {
       setShowCancelledNotice(true);
       setTimeout(() => setShowCancelledNotice(false), 5000);
       setSearchParams({}, { replace: true });
     }
-    if (searchParams.get('upgrade') === 'true' || searchParams.get('upgrade') === 'pro' || searchParams.get('upgrade') === 'unlimited') {
+    const upgradeParam = searchParams.get('upgrade');
+    if (upgradeParam === 'true' || upgradeParam === 'pro' || upgradeParam === 'unlimited') {
+      const plan = upgradeParam === 'unlimited' ? 'unlimited' : 'pro';
+      const interval = searchParams.get('interval') === 'monthly' ? 'monthly' : 'yearly';
       setSearchParams({}, { replace: true });
-      navigate('/upgrade');
+      navigate(`/upgrade?plan=${plan}&interval=${interval}`);
     }
-  }, [searchParams, navigate, refreshUser]);
+  }, [searchParams, navigate, refreshUser, setSearchParams]);
 
   const handleUpgradePro = () => navigate('/upgrade');
   const handleUpgradeUnlimited = () => navigate('/upgrade');
@@ -49,11 +76,7 @@ export default function AppPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black p-6">
         <div className="relative">
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-20 h-20 rounded-full border-4 border-white/5 border-t-white shadow-[0_0_30px_rgba(255,255,255,0.1)]"
-          />
+          <div className="w-20 h-20 rounded-full border-4 border-white/5 border-t-white animate-spin shadow-[0_0_30px_rgba(255,255,255,0.1)]" />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-white animate-ping" />
           </div>
@@ -82,7 +105,7 @@ export default function AppPage() {
         onUpgradePro={handleUpgradePro}
         onUpgradeUnlimited={handleUpgradeUnlimited}
         checkoutLoading={checkoutLoading}
-        onManageSubscription={() => setShowSubscription(true)}
+        onManageSubscription={() => navigate('/account')}
         onInvite={() => setShowReferral(true)}
       />
       <UpgradeBanner

@@ -409,16 +409,16 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                     <button 
                       onClick={() => setIsAnnual(!isAnnual)}
                       style={{
-                        width: 22, height: 11, borderRadius: 99, background: isAnnual ? '#ffffff' : 'rgba(255,255,255,0.1)',
+                        width: 26, height: 14, borderRadius: 99, background: isAnnual ? '#3B82F6' : 'rgba(255,255,255,0.1)',
                         position: 'relative', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0,
                         transition: 'background 0.3s ease'
                       }}
                     >
                       <motion.div 
-                        animate={{ x: isAnnual ? 11 : 0 }}
+                        animate={{ x: isAnnual ? 12 : 0 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                         style={{
-                          width: 7, height: 7, borderRadius: '50%', background: isAnnual ? '#000' : '#fff',
+                          width: 10, height: 10, borderRadius: '50%', background: '#fff',
                           position: 'absolute', top: 1, left: 1,
                           boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
                         }}

@@ -24,14 +24,28 @@ function validateEnv() {
     console.error('The server cannot start without these. Check your Vercel/Replit environment settings.\n');
     process.exit(1);
   }
+
+  const lsKeys = [
+    'LEMONSQUEEZY_API_KEY',
+    'LEMONSQUEEZY_STORE_ID',
+    'LEMONSQUEEZY_WEBHOOK_SECRET',
+    'LEMONSQUEEZY_PRO_MONTHLY_VARIANT_ID',
+    'LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID',
+    'LEMONSQUEEZY_UNLIMITED_MONTHLY_VARIANT_ID',
+    'LEMONSQUEEZY_UNLIMITED_YEARLY_VARIANT_ID',
+  ];
+  const lsMissing = lsKeys.filter(key => !process.env[key]);
+  if (lsMissing.length > 0) {
+    console.warn(`[payments] Lemon Squeezy incomplete — checkout/webhooks may fail: ${lsMissing.join(', ')}`);
+  }
+  if (!process.env.FRONTEND_URL && !process.env.REPLIT_DEV_DOMAIN && !process.env.REPLIT_DOMAINS) {
+    console.warn('[payments] FRONTEND_URL not set — post-checkout redirect may use localhost');
+  }
 }
 
 async function start() {
   validateEnv();
   const app = await getApp();
-  
-  // Basic health check for deployment monitors
-  app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
   startCreditResetScheduler();
   app.listen(PORT, '0.0.0.0', () => {

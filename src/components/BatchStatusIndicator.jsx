@@ -72,7 +72,7 @@ const BatchStatusIndicator = ({
           </div>
           <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-center">
             <div className="text-xl font-black text-white" style={{ fontFamily: NM }}>
-              {totalPairs >= 50 ? 5 : totalPairs >= 20 ? 3 : 2}
+              {Math.min(totalPairs, totalPairs >= 50 ? 5 : totalPairs >= 20 ? 3 : 2)}
             </div>
             <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{t('app.concurrent')}</div>
           </div>

@@ -7,6 +7,17 @@ import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
+function getCzechCreditsPhrase(credits, isPro) {
+  const count = credits ?? (isPro ? 31 : 5);
+  const verbAndJeste = (count === 2 || count === 3 || count === 4) ? "Zbývají ještě" : "Zbývá ještě";
+  if (isPro) {
+    return `${verbAndJeste} ${count} / 31`;
+  } else {
+    const word = count === 1 ? "kredit" : (count >= 2 && count <= 4) ? "kredity" : "kreditů";
+    return `${verbAndJeste} ${count} ${word}`;
+  }
+}
+
 export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoading, onManageSubscription, onInvite }) {
   const { user, logout } = useAuth();
   const { t, language } = useLanguage();
@@ -41,7 +52,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
               style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM }}>
               <span>
                 {language === 'cs' 
-                  ? `${t('creditsLeft')} ${creditsLeft ?? 5} kreditů` 
+                  ? getCzechCreditsPhrase(creditsLeft, false) 
                   : `${creditsLeft ?? 5} ${t('creditsLeft')}`}
               </span>
             </div>
@@ -64,7 +75,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
               style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM }}>
               <span>
                 {language === 'cs' 
-                  ? `${t('left')} ještě ${creditsLeft ?? 31} / 31` 
+                  ? getCzechCreditsPhrase(creditsLeft, true)
                   : `${creditsLeft ?? 31} / 31 left`}
               </span>
             </div>

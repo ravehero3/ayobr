@@ -128,4 +128,20 @@ router.post('/referral/apply', isAuthenticated, async (req, res) => {
   }
 });
 
+// Update user profile picture
+router.post('/profile-picture', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { image } = req.body;
+    if (!image) {
+      return res.status(400).json({ message: 'Missing image' });
+    }
+    const updated = await updateUserProfile(userId, { profile_image_url: image });
+    res.json(updated);
+  } catch (err) {
+    console.error('POST /api/user/profile-picture error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

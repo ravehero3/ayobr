@@ -71,15 +71,37 @@ export default function AccountPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [producerName, setProducerName] = useState('');
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleSaveProfilePicture = async (base64Image) => {
+    setUploadingImage(true);
+    setShowCropModal(false);
+    try {
+      const res = await fetch('/api/user/profile-picture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ image: base64Image })
+      });
+      if (res.ok) {
+        await refreshUser();
+      }
+    } catch (err) {
+      console.error('Save profile picture error:', err);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const isUnlimited = user?.role === 'unlimited' || user?.role === 'admin';
   const isPro       = user?.role === 'pro';
   const isPaid      = isPro || isUnlimited;
 
   const fetchSubscription = () => {
-    fetch('/api/paddle/subscription', { credentials: 'include' })
+    fetch('/api/ls/subscription', { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
-      .then(data => setSub(data))
+      .then(data => setSub(data || { status: 'inactive' }))
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -134,7 +156,7 @@ export default function AccountPage() {
 
     setCancelLoading(true);
     try {
-      const res = await fetch('/api/paddle/cancel', {
+      const res = await fetch('/api/ls/cancel', {
         method: 'POST',
         credentials: 'include'
       });
@@ -195,16 +217,24 @@ export default function AccountPage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <GlassCard>
                 <div className="flex items-center gap-6 mb-10">
-                  <div className="w-20 h-20 rounded-full overflow-hidden border border-white/10 bg-white/5">
+                  <div 
+                    onClick={() => setShowCropModal(true)}
+                    className="w-20 h-20 rounded-full overflow-hidden border border-white/10 bg-white/5 cursor-pointer relative group hover:border-white/30 transition-all duration-300"
+                  >
                     {user.profile_image_url ? (
                       <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <img src={userIcon} alt="" className="w-full h-full object-cover opacity-50 p-4" />
                     )}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                      <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </div>
                   </div>
                   <div>
                     <h1 className="text-3xl font-black text-white tracking-tighter" style={{ fontFamily: NM }}>
-                      {user.first_name || 'User'}{user.last_name ? ` ${user.last_name}` : ''}
+                      {user.producer_name || `${user.first_name || 'User'}${user.last_name ? ` ${user.last_name}` : ''}`}
                     </h1>
                     <p className="text-gray-500 text-sm font-medium mt-1" style={{ fontFamily: NM }}>{user.email}</p>
                     <div className="flex items-center gap-2 mt-3">
@@ -366,6 +396,187 @@ export default function AccountPage() {
 
           </div>
 
+        </div>
+      </div>
+      {showCropModal && (
+        <ProfilePictureModal
+          userIcon={userIcon}
+          onClose={() => setShowCropModal(false)}
+          onSave={handleSaveProfilePicture}
+        />
+      )}
+    </div>
+  );
+}
+
+function ProfilePictureModal({ onClose, onSave, userIcon }) {
+  const [imgSrc, setImgSrc] = React.useState(null);
+  const [zoom, setZoom] = React.useState(1);
+  const [offset, setOffset] = React.useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+  const canvasRef = React.useRef(null);
+  const imgRef = React.useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImgSrc(reader.result);
+      setZoom(1);
+      setOffset({ x: 0, y: 0 });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  React.useEffect(() => {
+    if (!imgSrc) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    const img = new Image();
+    img.src = imgSrc;
+    img.onload = () => {
+      imgRef.current = img;
+      draw();
+    };
+  }, [imgSrc, zoom, offset]);
+
+  const draw = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    const img = imgRef.current;
+    if (!canvas || !ctx || !img) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw image with scale and offset
+    const size = Math.min(img.width, img.height);
+    const scale = (canvas.width / size) * zoom;
+    const dx = (canvas.width - img.width * scale) / 2 + offset.x;
+    const dy = (canvas.height - img.height * scale) / 2 + offset.y;
+
+    ctx.drawImage(img, dx, dy, img.width * scale, img.height * scale);
+
+    // Circular overlay
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, 0, Math.PI * 2, true);
+    ctx.fill();
+
+    // Circle border
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, 0, Math.PI * 2);
+    ctx.stroke();
+  };
+
+  const handleMouseDown = (e) => {
+    if (!imgSrc) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !imgSrc) return;
+    setOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleSave = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 250;
+    canvas.height = 250;
+    const ctx = canvas.getContext('2d');
+    const img = imgRef.current;
+    if (!img || !ctx) return;
+
+    // Draw the exact cropped region
+    const size = Math.min(img.width, img.height);
+    const scale = (250 / size) * zoom;
+    const dx = (250 - img.width * scale) / 2 + offset.x;
+    const dy = (250 - img.height * scale) / 2 + offset.y;
+
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, 250, 250);
+    ctx.drawImage(img, dx, dy, img.width * scale, img.height * scale);
+
+    const base64 = canvas.toDataURL('image/jpeg', 0.85);
+    onSave(base64);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[20000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 relative overflow-hidden" style={{ backdropFilter: 'blur(20px)' }}>
+        <h3 className="text-xl font-bold text-white mb-4" style={{ fontFamily: NM }}>Upravit profilový obrázek</h3>
+        
+        {!imgSrc ? (
+          <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-4 bg-white/5">
+            <img src={userIcon} className="w-16 h-16 opacity-30 object-cover rounded-full" />
+            <p className="text-sm text-gray-400">Vyberte soubor JPG nebo PNG</p>
+            <label className="px-4 py-2 bg-white text-black font-semibold rounded-lg cursor-pointer hover:bg-gray-200 transition-colors text-sm">
+              Vybrat soubor
+              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            </label>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative overflow-hidden rounded-xl bg-black border border-white/10">
+              <canvas
+                ref={canvasRef}
+                width={300}
+                height={300}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                className="cursor-move"
+              />
+            </div>
+            
+            <div className="w-full flex items-center gap-3">
+              <span className="text-xs text-gray-500 font-bold">ZOOM</span>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.05"
+                value={zoom}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                className="flex-1 accent-blue-500"
+              />
+            </div>
+
+            <div className="w-full flex justify-between mt-2">
+              <label className="text-xs text-blue-500 font-bold hover:underline cursor-pointer">
+                Změnit obrázek
+                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              </label>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3 mt-6 border-t border-white/10 pt-4">
+          <button onClick={onClose} className="px-4 py-2 border border-white/10 rounded-lg text-sm text-gray-400 hover:text-white transition-colors">
+            Zrušit
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!imgSrc}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm text-white font-semibold transition-colors"
+          >
+            Uložit
+          </button>
         </div>
       </div>
     </div>

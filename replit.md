@@ -53,11 +53,11 @@ Tables: `sessions`, `users`, `credits`, `subscriptions`, `feature_flags`
 - `GET /api/admin/features` — All feature flags (admin only)
 - `PATCH /api/admin/features` — Toggle a feature flag (admin only)
 - `POST /api/admin/reset-credits` — Manually reset monthly credits (admin only)
-- `GET /api/paddle/config` — Public Paddle client token + price ID
-- `POST /api/paddle/create-checkout` — Create Paddle checkout
-- `GET /api/paddle/subscription` — Get current subscription status
-- `POST /api/paddle/cancel` — Cancel subscription
-- `POST /api/paddle/webhook` — Paddle webhook handler
+- `GET /api/ls/config` — Lemon Squeezy store + variant IDs
+- `POST /api/ls/create-checkout` — Create Lemon Squeezy checkout
+- `GET /api/ls/subscription` — Get current subscription status
+- `POST /api/ls/cancel` — Cancel subscription
+- `POST /api/ls/webhook` — Lemon Squeezy webhook handler
 
 ---
 
@@ -71,7 +71,7 @@ Tables: `sessions`, `users`, `credits`, `subscriptions`, `feature_flags`
 - `server/schema.sql` — DB schema (applied on server start)
 - `server/routes/user.js` — User API routes
 - `server/routes/admin.js` — Admin API routes
-- `server/routes/paddle.js` — Paddle routes + webhook
+- `server/routes/lemonsqueezy.js` — Lemon Squeezy routes + webhook
 
 ### Frontend
 - `src/App.jsx` — BrowserRouter + all route definitions
@@ -106,11 +106,11 @@ UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
 - `SESSION_SECRET` — Random string for session signing
 - `REPL_ID` — Auto-set by Replit (used as OIDC client_id)
 - `REPLIT_DEV_DOMAIN` — Auto-set by Replit (used for auth callback URL)
-- `PADDLE_API_KEY` — Paddle secret API key (set when ready for payments)
-- `PADDLE_CLIENT_TOKEN` — Paddle public client token (safe for frontend)
-- `PADDLE_PRO_PRICE_ID` — Paddle price ID for the $9.99/month PRO plan
-- `PADDLE_WEBHOOK_SECRET` — Paddle webhook signing secret
-- `PADDLE_ENV` — Set to `production` for live payments, otherwise uses sandbox
+- `LEMONSQUEEZY_API_KEY` — Lemon Squeezy API key
+- `LEMONSQUEEZY_STORE_ID` — Lemon Squeezy store ID
+- `LEMONSQUEEZY_WEBHOOK_SECRET` — Lemon Squeezy webhook signing secret
+- `LEMONSQUEEZY_PRO_MONTHLY_VARIANT_ID` / `LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID` — PRO plan variants
+- `LEMONSQUEEZY_UNLIMITED_MONTHLY_VARIANT_ID` / `LEMONSQUEEZY_UNLIMITED_YEARLY_VARIANT_ID` — Unlimited plan variants
 
 ---
 
