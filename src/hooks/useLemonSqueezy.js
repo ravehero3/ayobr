@@ -10,8 +10,9 @@ export function useLemonSqueezy() {
         body: JSON.stringify({ plan, interval }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        alert(data.message || 'Failed to initiate checkout.');
+        const data = await res.json().catch(() => ({}));
+        const detail = data.envKey ? `\n\n(Config: ${data.envKey})` : '';
+        alert((data.message || 'Failed to initiate checkout.') + detail);
         return false;
       }
       const { url } = await res.json();

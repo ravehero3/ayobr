@@ -50,6 +50,19 @@ async function start() {
   startCreditResetScheduler();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`TypeBeatz API server running on port ${PORT}`);
+    const { validateAllVariants } = require('./routes/lemonsqueezy');
+    validateAllVariants()
+      .then((report) => {
+        if (!report.ready) {
+          console.warn('[payments] Lemon Squeezy variant validation failed:');
+          (report.variants || []).forEach((v) => {
+            if (!v.valid) console.warn(`  - ${v.envKey}: ${v.error || 'invalid'} (value: ${v.variantId || 'unset'})`);
+          });
+        } else {
+          console.log('[payments] Lemon Squeezy variant IDs validated OK');
+        }
+      })
+      .catch((err) => console.warn('[payments] Lemon Squeezy validation error:', err.message));
   });
 }
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const { isAuthenticated } = require('../auth');
+const { isAuthenticated, isAdmin } = require('../auth');
 const { getUserById, upsertSubscription, setUserRole, setCreditsForRole, getSubscription } = require('../storage');
 const { pool } = require('../db');
 
@@ -10,10 +10,100 @@ const getApiKey = () => process.env.LEMONSQUEEZY_API_KEY || null;
 const getStoreId = () => process.env.LEMONSQUEEZY_STORE_ID || null;
 const getWebhookSecret = () => process.env.LEMONSQUEEZY_WEBHOOK_SECRET || null;
 
-const getProMonthlyVariantId = () => process.env.LEMONSQUEEZY_PRO_MONTHLY_VARIANT_ID || null;
-const getProYearlyVariantId = () => process.env.LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID || null;
-const getUnlimitedMonthlyVariantId = () => process.env.LEMONSQUEEZY_UNLIMITED_MONTHLY_VARIANT_ID || null;
-const getUnlimitedYearlyVariantId = () => process.env.LEMONSQUEEZY_UNLIMITED_YEARLY_VARIANT_ID || null;
+const trimEnv = (key) => (process.env[key] || '').trim() || null;
+const getProMonthlyVariantId = () => trimEnv('LEMONSQUEEZY_PRO_MONTHLY_VARIANT_ID');
+const getProYearlyVariantId = () => trimEnv('LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID');
+const getUnlimitedMonthlyVariantId = () => trimEnv('LEMONSQUEEZY_UNLIMITED_MONTHLY_VARIANT_ID');
+const getUnlimitedYearlyVariantId = () => trimEnv('LEMONSQUEEZY_UNLIMITED_YEARLY_VARIANT_ID');
+
+const VARIANT_SLOTS = [
+  { envKey: 'LEMONSQUEEZY_PRO_MONTHLY_VARIANT_ID', getter: getProMonthlyVariantId, plan: 'pro', interval: 'monthly' },
+  { envKey: 'LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID', getter: getProYearlyVariantId, plan: 'pro', interval: 'yearly' },
+  { envKey: 'LEMONSQUEEZY_UNLIMITED_MONTHLY_VARIANT_ID', getter: getUnlimitedMonthlyVariantId, plan: 'unlimited', interval: 'monthly' },
+  { envKey: 'LEMONSQUEEZY_UNLIMITED_YEARLY_VARIANT_ID', getter: getUnlimitedYearlyVariantId, plan: 'unlimited', interval: 'yearly' },
+];
+
+function variantEnvKey(plan, interval) {
+  const slot = VARIANT_SLOTS.find(s => s.plan === plan && s.interval === interval);
+  return slot?.envKey || 'LEMONSQUEEZY_*_VARIANT_ID';
+}
+
+function resolveVariantId(plan, interval) {
+  const slot = VARIANT_SLOTS.find(s => s.plan === plan && s.interval === interval);
+  return slot?.getter() || null;
+}
+
+function looksLikePaddlePriceId(id) {
+  return /^pri_/i.test(String(id || ''));
+}
+
+async function fetchVariant(apiKey, variantId) {
+  const id = String(variantId).trim();
+  const res = await fetch(`https://api.lemonsqueezy.com/v1/variants/${encodeURIComponent(id)}`, {
+    headers: {
+      Accept: 'application/vnd.api+json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+  if (!res.ok) {
+    return { ok: false, status: res.status, id };
+  }
+  const json = await res.json();
+  const attrs = json?.data?.attributes || {};
+  return {
+    ok: true,
+    id,
+    name: attrs.name,
+    productId: attrs.product_id,
+    status: attrs.status,
+  };
+}
+
+async function validateVariantSlot(apiKey, storeId, slot) {
+  const variantId = slot.getter();
+  if (!variantId) {
+    return { ...slot, configured: false, valid: false, error: 'not set in environment' };
+  }
+  if (looksLikePaddlePriceId(variantId)) {
+    return {
+      ...slot,
+      configured: true,
+      valid: false,
+      variantId,
+      error: 'looks like a Paddle price ID (pri_...) — use Lemon Squeezy variant ID instead',
+    };
+  }
+  const variant = await fetchVariant(apiKey, variantId);
+  if (!variant.ok) {
+    return {
+      ...slot,
+      configured: true,
+      valid: false,
+      variantId,
+      error: variant.status === 404 ? 'variant not found in Lemon Squeezy' : `API error ${variant.status}`,
+    };
+  }
+  return {
+    ...slot,
+    configured: true,
+    valid: true,
+    variantId,
+    variantName: variant.name,
+    productId: variant.productId,
+    storeId,
+  };
+}
+
+async function validateAllVariants() {
+  const apiKey = getApiKey();
+  const storeId = getStoreId();
+  if (!apiKey || !storeId) {
+    return { ready: false, error: 'LEMONSQUEEZY_API_KEY or LEMONSQUEEZY_STORE_ID missing' };
+  }
+  const variants = await Promise.all(VARIANT_SLOTS.map(slot => validateVariantSlot(apiKey, storeId, slot)));
+  const ready = variants.every(v => v.valid);
+  return { ready, storeId, variants };
+}
 
 function roleForVariantId(variantId) {
   const vIdStr = String(variantId);
@@ -44,15 +134,27 @@ function verifyWebhookSignature(rawBody, signature, secret) {
   }
 }
 
-// Config endpoint
+// Config endpoint (public — IDs only, no secrets)
 router.get('/config', (req, res) => {
   res.json({
     storeId: getStoreId(),
     proMonthlyVariantId: getProMonthlyVariantId(),
     proYearlyVariantId: getProYearlyVariantId(),
     unlimitedMonthlyVariantId: getUnlimitedMonthlyVariantId(),
-    unlimitedYearlyVariantId: getUnlimitedYearlyVariantId()
+    unlimitedYearlyVariantId: getUnlimitedYearlyVariantId(),
+    configured: Boolean(getApiKey() && getStoreId()),
   });
+});
+
+// Admin: verify each variant ID against Lemon Squeezy API
+router.get('/validate-config', isAdmin, async (req, res) => {
+  try {
+    const report = await validateAllVariants();
+    res.json(report);
+  } catch (err) {
+    console.error('LS validate-config error:', err);
+    res.status(500).json({ message: 'Validation failed' });
+  }
 });
 
 // Create checkout endpoint
@@ -63,19 +165,42 @@ router.post('/create-checkout', isAuthenticated, async (req, res) => {
     return res.status(503).json({ message: 'Lemon Squeezy not configured' });
   }
 
-  const { plan, interval } = req.body || {};
-  let variantId = null;
-  if (plan === 'unlimited') {
-    variantId = interval === 'yearly' ? getUnlimitedYearlyVariantId() : getUnlimitedMonthlyVariantId();
-  } else {
-    variantId = interval === 'yearly' ? getProYearlyVariantId() : getProMonthlyVariantId();
-  }
+  const plan = req.body?.plan === 'unlimited' ? 'unlimited' : 'pro';
+  const interval = req.body?.interval === 'monthly' ? 'monthly' : 'yearly';
+  const variantId = resolveVariantId(plan, interval);
+  const envKey = variantEnvKey(plan, interval);
 
   if (!variantId) {
-    return res.status(503).json({ message: 'Lemon Squeezy variant ID not configured' });
+    return res.status(503).json({
+      message: `Lemon Squeezy variant not configured for ${plan}/${interval}. Set ${envKey} on Render.`,
+      envKey,
+      plan,
+      interval,
+    });
+  }
+
+  if (looksLikePaddlePriceId(variantId)) {
+    return res.status(503).json({
+      message: `${envKey} contains a Paddle price ID (pri_...). Replace it with the Variant ID from Lemon Squeezy → Products → Variants.`,
+      envKey,
+      plan,
+      interval,
+    });
   }
 
   try {
+    const variantCheck = await fetchVariant(apiKey, variantId);
+    if (!variantCheck.ok) {
+      console.error('Lemon Squeezy variant preflight failed:', {
+        envKey, plan, interval, variantId, storeId, status: variantCheck.status,
+      });
+      return res.status(503).json({
+        message: `Variant not found in Lemon Squeezy for ${plan}/${interval}. Update ${envKey} on Render (use the numeric Variant ID from the dashboard, not a product ID).`,
+        envKey,
+        plan,
+        interval,
+      });
+    }
     const userId = req.user.id;
     const user = await getUserById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -127,8 +252,18 @@ router.post('/create-checkout', isAuthenticated, async (req, res) => {
 
     if (!response.ok) {
       const errBody = await response.text();
-      console.error('Lemon Squeezy API checkout creation error:', errBody);
-      return res.status(502).json({ message: 'Error from Lemon Squeezy API' });
+      console.error('Lemon Squeezy API checkout creation error:', errBody, {
+        envKey, plan, interval, variantId, storeId,
+      });
+      const variantMissing = /variant/i.test(errBody) && /not found|404/i.test(errBody);
+      return res.status(502).json({
+        message: variantMissing
+          ? `Checkout failed: variant ${variantId} is not valid for store ${storeId}. Check ${envKey} and LEMONSQUEEZY_STORE_ID on Render.`
+          : 'Error from Lemon Squeezy API',
+        envKey: variantMissing ? envKey : undefined,
+        plan: variantMissing ? plan : undefined,
+        interval: variantMissing ? interval : undefined,
+      });
     }
 
     const result = await response.json();
@@ -363,3 +498,4 @@ router.post('/webhook', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.validateAllVariants = validateAllVariants;
