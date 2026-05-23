@@ -11,7 +11,6 @@ const BatchStatusIndicator = ({
   isProcessing 
 }) => {
   const { t } = useLanguage();
-  const remaining = totalPairs - completedPairs;
   
   if (totalPairs === 0) return null;
 
@@ -60,28 +59,8 @@ const BatchStatusIndicator = ({
             className="absolute top-0 left-0 h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
           />
-        </div>
-
-        {/* Details Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-center">
-            <div className="text-xl font-black text-white" style={{ fontFamily: NM }}>{remaining}</div>
-            <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{t('app.remaining')}</div>
-          </div>
-          <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-center">
-            <div className="text-xl font-black text-white" style={{ fontFamily: NM }}>
-              {Math.min(totalPairs, totalPairs >= 50 ? 5 : totalPairs >= 20 ? 3 : 2)}
-            </div>
-            <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{t('app.concurrent')}</div>
-          </div>
-          <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-center">
-            <div className="text-sm font-black text-white uppercase tracking-tight" style={{ fontFamily: NM }}>
-              {totalPairs >= 100 ? t('app.batchSize.max') : totalPairs >= 50 ? t('app.batchSize.high') : totalPairs >= 20 ? t('app.batchSize.medium') : t('app.batchSize.standard')}
-            </div>
-            <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{t('app.batchSize')}</div>
-          </div>
         </div>
 
         {/* Large batch optimization notice */}
@@ -99,24 +78,6 @@ const BatchStatusIndicator = ({
                   {t('app.largeBatchOptimizedDesc').replace('{count}', totalPairs)}
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* ETA for very large batches */}
-        {totalPairs >= 50 && isProcessing && completedPairs > 0 && (
-          <div className="text-center pt-2">
-            <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">
-              {t('app.eta')}
-            </div>
-            <div className="text-xl font-black text-white tracking-tighter" style={{ fontFamily: NM }}>
-              {(() => {
-                const avgTimePerVideo = 90; // seconds (estimated)
-                const remainingTime = remaining * avgTimePerVideo;
-                const minutes = Math.floor(remainingTime / 60);
-                const seconds = remainingTime % 60;
-                return `~${minutes}m ${seconds}s`;
-              })()}
             </div>
           </div>
         )}
