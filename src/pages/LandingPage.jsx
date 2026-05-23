@@ -6,7 +6,7 @@ import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
-import screenshotUpload from '../assets/typebeatz_screenshot_upload.png';
+import screenshotUpload from '../assets/screenshot_upload.png';
 import screenshotReview from '../assets/screenshot_review.png';
 import screenshotGenerate from '../assets/screenshot_generate.png';
 import screenshotDownload from '../assets/screenshot_download.png';
@@ -268,8 +268,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
               {t('landing.pricing.title')}
             </h2>
             <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
-              {t('landing.pricing.subtitle').split('
-').map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}
+              {t('landing.pricing.subtitle').split('\n').map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}
             </p>
           </motion.div>
         </div>
@@ -879,8 +878,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         marginBottom: '2rem',
         color: '#ffffff',
       }}>
-        {t('landing.hero.title').split('
-').map((line, i, arr) => (
+        {t('landing.hero.title').split('\n').map((line, i, arr) => (
           <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
         ))}
       </h1>
