@@ -162,10 +162,10 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               }}
               className="flex items-center space-x-1 sm:space-x-2 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors group"
             >
-              <svg className="w-5 h-5 text-red-400 group-hover:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-white group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span className="hidden xs:inline text-sm text-red-300 group-hover:text-red-200">{t('app.reset')}</span>
+              <span className="hidden xs:inline text-sm text-white group-hover:text-gray-200">{t('app.reset')}</span>
             </button>
           )}
         </div>

@@ -6,7 +6,7 @@ import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
-import screenshotUpload from '../assets/screenshot_upload.png';
+import screenshotUpload from '../assets/typebeatz_screenshot_upload.png';
 import screenshotReview from '../assets/screenshot_review.png';
 import screenshotGenerate from '../assets/screenshot_generate.png';
 import screenshotDownload from '../assets/screenshot_download.png';
