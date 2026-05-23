@@ -59,7 +59,7 @@ const BatchStatusIndicator = ({
             className="absolute top-0 left-0 h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           />
         </div>
 

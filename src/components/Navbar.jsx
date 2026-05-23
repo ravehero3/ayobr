@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageToggle from './LanguageToggle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -109,8 +108,6 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
             </button>
           </>
         )}
-
-        <LanguageToggle />
 
         {/* User avatar + dropdown */}
         {user ? (

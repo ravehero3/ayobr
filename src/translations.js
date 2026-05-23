@@ -303,7 +303,7 @@ export const translations = {
     "app.dropDesc": "Přetáhněte sem audio a obrázky, nebo klikněte pro výběr",
     "app.proTip": "💡 Tip: Pro maximální stabilitu doporučujeme maximálně 100 souborů najednou.",
     "app.browseFiles": "Procházet soubory",
-    "app.batchStatus": "Stav zpracování dávky",
+    "app.batchStatus": "STAV ZPRACOVÁNÍ",
     "app.processingPairs": "Zpracovávám {count} párů videí",
     "app.largeBatchMode": "• Režim velké dávky",
     "banner.proExhausted": "Tento měsíc jste již využili všech 31 PRO videí. Přejděte na Unlimited pro neomezené generování.",

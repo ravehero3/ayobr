@@ -532,13 +532,19 @@ function App({ onBeforeGenerate }) {
             )}
 
             {/* Batch Status Indicator */}
-            {hasFiles && (
-              <BatchStatusIndicator 
-                totalPairs={pairs.length} 
-                completedPairs={generatedVideos.length}
-                isProcessing={isGenerating}
-              />
-            )}
+            {hasFiles && (() => {
+              const completePairsCount = getCompletePairs().length;
+              const completedCount = generatedVideos.length;
+              const progress = completePairsCount > 0 ? Math.round((completedCount / completePairsCount) * 100) : 0;
+              return (
+                <BatchStatusIndicator 
+                  totalPairs={completePairsCount}
+                  completedPairs={completedCount}
+                  progress={progress}
+                  isProcessing={isGenerating}
+                />
+              );
+            })()}
           </div>
         </main>
       </div>
