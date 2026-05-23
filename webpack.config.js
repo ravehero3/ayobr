@@ -114,7 +114,7 @@ module.exports = {
       directory: path.join(__dirname, 'dist'),
     },
     host: '0.0.0.0',
-    port: 5001,
+    port: 5000,
     hot: true,
     open: false,
     historyApiFallback: true,

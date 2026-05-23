@@ -1,7 +1,0 @@
-[1G[0K⠙[1G[0K
-> workspace@1.0.0 server
-> node server/index.js
-
-[1G[0K⠙[1G[0KDatabase schema initialized
-Monthly credit reset scheduled (runs 00:00 UTC on the 1st)
-TypeBeatz API server running on port 3001

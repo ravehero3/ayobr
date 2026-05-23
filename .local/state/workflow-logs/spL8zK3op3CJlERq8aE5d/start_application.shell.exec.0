@@ -1,6 +1,0 @@
-
-> workspace@1.0.0 dev
-> node_modules/.bin/webpack serve --config webpack.config.js
-
-[1G[0Ksh: line 1: node_modules/.bin/webpack: No such file or directory
-[1G[0K⠙[1G[0K
