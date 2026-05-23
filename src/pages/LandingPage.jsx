@@ -998,7 +998,6 @@ export default function LandingPage() {
         </button>
         <div className="flex items-center gap-6">
           <LanguageToggle />
-. I have added the preloading logic to the landing page. Now, I will commit the changes and push them to GitHub.
           <LandingNavButtons user={user} navigate={navigate} login={login} />
         </div>
       </nav>
