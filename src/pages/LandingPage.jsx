@@ -279,6 +279,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 394px)',
           gap: 32,
           alignItems: 'stretch',
+          justifyContent: 'center',
         }}>
           {plans.map((plan, idx) => (
             <div key={plan.name} style={{ position: 'relative' }}>
