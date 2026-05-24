@@ -633,10 +633,10 @@ function MobileStepNumber({ num }) {
 
 /* ── Step content mockups ── */
 const STEP_CONTENTS = [
-  () => <img src={screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
-  () => <img src={screenshotReview} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
-  () => <img src={screenshotGenerate} alt="Generate" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
-  () => <img src={screenshotDownload} alt="Download" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
+  () => <img src={screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+  () => <img src={screenshotReview} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+  () => <img src={screenshotGenerate} alt="Generate" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+  () => <img src={screenshotDownload} alt="Download" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
 ];
 
 function HowItWorksSection({ isMobile }) {
@@ -701,9 +701,13 @@ function HowItWorksSection({ isMobile }) {
                   <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 8 }}>{step.title}</h3>
                   <p style={{ fontFamily: NM, fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: 1.6 }}>{step.desc}</p>
                 </div>
-                <div style={{ aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <SafariChrome />
-                  <Content />
+                <div style={{ aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.09)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <SafariChrome />
+                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                      <Content />
+                    </div>
+                  </div>
                 </div>
               </div>
             );
@@ -769,7 +773,8 @@ function HowItWorksSection({ isMobile }) {
                     background: '#1e1e1e',
                     borderRadius: '14px 0 0 14px',
                     overflow: 'hidden', flexShrink: 0,
-                    boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    boxShadow: '0 40px 100px rgba(0,0,0,0.85)',
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
