@@ -276,7 +276,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         {/* Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 320px))',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 394px)',
           gap: 32,
           alignItems: 'stretch',
         }}>
@@ -356,7 +356,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                     : plan.topTier
                       ? '0 20px 50px -10px rgba(255,255,255,0.08)'
                       : '0 10px 30px -10px rgba(0,0,0,0.3)',
-                  height: '100%',
+                  height: isMobile ? 'auto' : 536,
                   overflow: 'hidden'
                 }}
               >
@@ -542,8 +542,8 @@ const CARD_W_CSS      = `calc(100vw - ${CARD_LEFT}px)`;
 /* dark=true → card 4 (Download) uses #0d0d0d bar + #1a1a1a pill */
 function SafariChrome({ dark = false }) {
   const sys   = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  const barBg  = dark ? '#0d0d0d' : '#2c2c2c';
-  const pillBg = dark ? '#1a1a1a' : 'rgba(0,0,0,0.28)';
+  const barBg  = dark ? '#0d0d0d' : '#0c0c0c';
+  const pillBg = dark ? '#1a1a1a' : '#151515';
   const border = dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.65)';
   return (
     <div style={{ width: '100%', flexShrink: 0 }}>
@@ -580,7 +580,7 @@ function SafariChrome({ dark = false }) {
             padding: '0 14px',
           }}>
             <span style={{ color: 'rgba(255,255,255,0.68)', fontSize: 12.5, fontFamily: sys, letterSpacing: '-0.01em', userSelect: 'none' }}>
-              typebeatz.app
+              typebeatz.voodoo808.com
             </span>
           </div>
         </div>
@@ -928,12 +928,15 @@ function LandingFooter({ isMobile }) {
           </a>
         </div>
 
-        <div className="flex gap-6">
-          {['Terms', 'Privacy', 'Refund'].map(l => (
-            <a key={l} href={`/${l.toLowerCase()}`}
-              style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
-              className="hover:text-white transition-colors">{l}</a>
-          ))}
+        <div className="flex items-center gap-6">
+          <div className="flex gap-6">
+            {['Terms', 'Privacy', 'Refund'].map(l => (
+              <a key={l} href={`/${l.toLowerCase()}`}
+                style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
+                className="hover:text-white transition-colors">{l}</a>
+            ))}
+          </div>
+          <LanguageToggle />
         </div>
       </div>
     </footer>
@@ -997,7 +1000,6 @@ export default function LandingPage() {
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         </button>
         <div className="flex items-center gap-6">
-          <LanguageToggle />
           <LandingNavButtons user={user} navigate={navigate} login={login} />
         </div>
       </nav>
