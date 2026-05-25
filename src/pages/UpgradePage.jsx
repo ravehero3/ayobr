@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useLemonSqueezy } from '../hooks/useLemonSqueezy';
 import Navbar from '../components/Navbar';
+import LanguageToggle from '../components/LanguageToggle';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
@@ -303,6 +304,17 @@ export default function UpgradePage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '24px 32px',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        background: '#000',
+      }}>
+        <LanguageToggle />
       </div>
 
       <AnimatePresence>
