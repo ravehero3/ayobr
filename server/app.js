@@ -31,6 +31,13 @@ function buildApp() {
     credentials: true
   }));
 
+  // Required for FFmpeg WebAssembly SharedArrayBuffer support
+  app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+    next();
+  });
+
   app.use('/api/ls/webhook', express.raw({ type: 'application/json' }));
   app.use(express.json({ limit: '10mb' }));
 

@@ -1,7 +1,7 @@
 const { getApp, resetMonthlyCredits } = require('./app');
 const cron = require('node-cron');
 
-const PORT = process.env.PORT || process.env.API_PORT || 3001;
+const PORT = process.env.PORT || process.env.API_PORT || 5000;
 
 function startCreditResetScheduler() {
   cron.schedule('0 0 1 * *', async () => {
@@ -15,14 +15,20 @@ function startCreditResetScheduler() {
   console.log('Monthly credit reset scheduled (runs 00:00 UTC on the 1st)');
 }
 
-const REQUIRED_ENV = ['DATABASE_URL', 'SESSION_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
+const REQUIRED_ENV = ['DATABASE_URL', 'SESSION_SECRET'];
 
 function validateEnv() {
   const missing = REQUIRED_ENV.filter(key => !process.env[key]);
   if (missing.length > 0) {
     console.error(`\n[CRITICAL] Missing required environment variables: ${missing.join(', ')}`);
-    console.error('The server cannot start without these. Check your Vercel/Replit environment settings.\n');
+    console.error('The server cannot start without these. Check your Replit environment settings.\n');
     process.exit(1);
+  }
+
+  const googleKeys = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
+  const googleMissing = googleKeys.filter(key => !process.env[key]);
+  if (googleMissing.length > 0) {
+    console.warn(`[auth] Google OAuth not configured — login will be unavailable: ${googleMissing.join(', ')}`);
   }
 
   const lsKeys = [
