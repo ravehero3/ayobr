@@ -406,7 +406,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                 {/* Small Toggle for PRO and Unlimited */}
                 {plan.hasToggle && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>ANNUAL</span>
+                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>{t('landing.pricing.toggle.annual')}</span>
                     <button 
                       onClick={() => setIsAnnual(!isAnnual)}
                       style={{

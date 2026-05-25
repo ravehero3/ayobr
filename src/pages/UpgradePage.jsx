@@ -253,7 +253,7 @@ export default function UpgradePage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
                   <span style={{ fontFamily: NM, fontSize: 22, fontWeight: 400, color: '#fff' }}>{plan.name}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(v => !v)}>ANNUAL</span>
+                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(v => !v)}>{t('landing.pricing.toggle.annual')}</span>
                     <button onClick={() => setIsAnnual(v => !v)} style={{ width: 26, height: 14, borderRadius: 99, background: isAnnual ? '#3B82F6' : 'rgba(255,255,255,0.1)', position: 'relative', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0, transition: 'background 0.3s' }}>
                       <motion.div animate={{ x: isAnnual ? 12 : 0 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }} style={{ width: 10, height: 10, borderRadius: '50%', background: '#fff', position: 'absolute', top: 1, left: 1 }} />
                     </button>
