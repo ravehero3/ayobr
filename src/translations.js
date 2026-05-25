@@ -382,8 +382,8 @@ export const translations = {
     "landing.hero.title": "Generujte\ntype beat videa\njedním clickem",
     "landing.hero.titleHighlight": "jedním clickem",
     "landing.hero.subtitle": "Nahrajte beaty a obrázky a my se postaráme o zbytek.",
-    "landing.hero.cta": "Ještě uvidim bro",
-    "landing.hero.openApp": "Ještě uvidim bro",
+    "landing.hero.cta": "Začít zdarma",
+    "landing.hero.openApp": "Začít zdarma",
     "landing.hero.ctaNote": "Bez nutnosti kreditní karty.",
     
     "landing.stats.creators": "Aktivních tvůrců",
@@ -454,7 +454,7 @@ export const translations = {
     "landing.pricing.unlimited.price.monthly": "429 Kč",
 
     "landing.hero.badge": "Nejrychlejší způsob, jak naplnit váš YouTube kanál.",
-    "landing.hero.goUnlimited": "Letsgo!",
+    "landing.hero.goUnlimited": "Odemknout vše",
     "landing.hero.statsBar": "Zdarma — 5 videí/měsíc · PRO — 31 videí/měsíc · Neomezený — vždy neomezeno",
 
     "landing.stats.s1.prefix": "vytvoř",
