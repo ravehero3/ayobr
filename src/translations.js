@@ -365,7 +365,7 @@ export const translations = {
     "account.earnedBonus": "Získali jste +{count} bonusový kredit z doporučení!",
     "account.earnedBonusPlural": "Získali jste +{count} bonusových kreditů z doporučení!",
     "account.actions": "Účet",
-    "account.openApp": "Otevřít Aplikaci",
+    "account.openApp": "Spustit aplikaci",
     "account.adminPanel": "Admin Panel",
     "account.signOut": "Odhlásit se",
     "account.backToApp": "Zpět do Aplikace",
