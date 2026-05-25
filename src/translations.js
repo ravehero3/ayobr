@@ -460,7 +460,7 @@ export const translations = {
     "landing.stats.s1.prefix": "vytvoř",
     "landing.stats.s1.val": "Hromady",
     "landing.stats.s1.label": "videí",
-    "landing.stats.s2.prefix": "vytvoř",
+    "landing.stats.s2.prefix": "množství",
     "landing.stats.s2.val": "\u221e",
     "landing.stats.s2.label": "videí",
     "landing.stats.s3.prefix": "až",
