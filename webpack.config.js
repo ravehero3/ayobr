@@ -1,18 +1,25 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const isProd = process.env.NODE_ENV === 'production';
+
 module.exports = {
-  mode: 'development',
+  mode: isProd ? 'production' : 'development',
   entry: './src/index.js',
-  
+
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].bundle.js',
+    filename: isProd ? '[name].[contenthash:8].bundle.js' : '[name].bundle.js',
+    chunkFilename: isProd ? '[name].[contenthash:8].chunk.js' : '[name].chunk.js',
     publicPath: '/',
-    clean: true
+    clean: true,
   },
-  
-  cache: false,
+
+  // Persistent filesystem cache — dramatically speeds up rebuilds
+  cache: {
+    type: 'filesystem',
+    buildDependencies: { config: [__filename] },
+  },
 
   module: {
     rules: [
@@ -22,6 +29,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
+            cacheDirectory: true,
             presets: [
               ['@babel/preset-env', { targets: { browsers: ['last 2 versions'] } }],
               ['@babel/preset-react', { runtime: 'automatic' }]
@@ -51,68 +59,46 @@ module.exports = {
           }
         ]
       },
+      // Webpack 5 native asset modules — faster than file-loader
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              outputPath: 'assets/images/',
-              publicPath: 'assets/images/'
-            }
-          }
-        ]
+        type: 'asset/resource',
+        generator: { filename: 'assets/images/[hash:8][ext]' },
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              outputPath: 'assets/fonts/',
-              publicPath: 'assets/fonts/'
-            }
-          }
-        ]
+        type: 'asset/resource',
+        generator: { filename: 'assets/fonts/[hash:8][ext]' },
       },
       {
         test: /\.(mp3|wav|ogg)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              outputPath: 'assets/audio/',
-              publicPath: 'assets/audio/'
-            }
-          }
-        ]
-      }
+        type: 'asset/resource',
+        generator: { filename: 'assets/audio/[hash:8][ext]' },
+      },
     ]
   },
 
   resolve: {
     extensions: ['.js', '.jsx', '.json'],
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@':           path.resolve(__dirname, 'src'),
       '@components': path.resolve(__dirname, 'src/components'),
-      '@hooks': path.resolve(__dirname, 'src/hooks'),
-      '@utils': path.resolve(__dirname, 'src/utils'),
-      '@store': path.resolve(__dirname, 'src/store'),
-      '@styles': path.resolve(__dirname, 'src/styles')
+      '@hooks':      path.resolve(__dirname, 'src/hooks'),
+      '@utils':      path.resolve(__dirname, 'src/utils'),
+      '@store':      path.resolve(__dirname, 'src/store'),
+      '@styles':     path.resolve(__dirname, 'src/styles'),
     }
   },
 
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html',
-      filename: 'index.html'
-    })
+      filename: 'index.html',
+    }),
   ],
 
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-    },
+    static: { directory: path.join(__dirname, 'dist') },
     host: '0.0.0.0',
     port: 5000,
     hot: true,
@@ -124,22 +110,19 @@ module.exports = {
         context: ['/api'],
         target: 'http://localhost:3001',
         changeOrigin: true,
-        secure: false
+        secure: false,
       }
     ],
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin':  '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp'
+      'Cross-Origin-Opener-Policy':   'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
     },
     client: {
-      overlay: {
-        errors: true,
-        warnings: false
-      }
-    }
+      overlay: { errors: true, warnings: false }
+    },
   },
 
   target: 'web',
@@ -148,25 +131,39 @@ module.exports = {
     splitChunks: {
       chunks: 'all',
       cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-          filename: 'vendors.bundle.js',
-        },
+        // Heavy FFmpeg WASM — isolated so it only loads on /app
         ffmpeg: {
           test: /[\\/]node_modules[\\/]@ffmpeg[\\/]/,
           name: 'ffmpeg',
           chunks: 'all',
-          filename: 'ffmpeg.bundle.js',
-        }
+          priority: 30,
+          filename: isProd ? 'ffmpeg.[contenthash:8].bundle.js' : 'ffmpeg.bundle.js',
+        },
+        // React + ReactDOM — tiny, loads fast, cached forever in prod
+        react: {
+          test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom|scheduler)[\\/]/,
+          name: 'react',
+          chunks: 'all',
+          priority: 20,
+          filename: isProd ? 'react.[contenthash:8].bundle.js' : 'react.bundle.js',
+        },
+        // Everything else from node_modules
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+          priority: 10,
+          filename: isProd ? 'vendors.[contenthash:8].bundle.js' : 'vendors.bundle.js',
+        },
       }
-    }
+    },
+    // In production: minify JS with Terser (default) and deduplicate modules
+    minimize: isProd,
   },
 
   performance: {
-    hints: false,
+    hints: isProd ? 'warning' : false,
     maxEntrypointSize: 512000,
-    maxAssetSize: 512000
-  }
+    maxAssetSize: 2000000,
+  },
 };

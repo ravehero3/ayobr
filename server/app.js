@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
 const { setupAuth } = require('./auth');
@@ -30,6 +31,9 @@ function buildApp() {
     },
     credentials: true
   }));
+
+  // Gzip/brotli compress all responses (API JSON + static HTML/JS/CSS)
+  app.use(compression());
 
   // Required for FFmpeg WebAssembly SharedArrayBuffer support
   app.use((req, res, next) => {
@@ -69,14 +73,21 @@ async function mountRoutes(app) {
   app.use('/api/gopay', gopayRoutes);
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-  // Serve static files from the built dist directory
-  app.use(express.static(path.join(__dirname, '../dist')));
-  
+  // Static assets: hashed filenames → cache 1 year; index.html → no cache
+  app.use(express.static(path.join(__dirname, '../dist'), {
+    maxAge: '1y',
+    etag: true,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }));
+
   // Wildcard fallback to serve index.html for SPA routing (React Router)
   app.get(/(.*)/, (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
+    if (req.path.startsWith('/api')) return next();
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   });
 }
