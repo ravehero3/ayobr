@@ -77,6 +77,24 @@ function buildApp() {
   return app;
 }
 
+function buildLandingImagesRoute(app) {
+  const LANDING_DIR = path.join(__dirname, 'uploads/landing');
+  // Serve uploaded images
+  app.use('/uploads/landing', express.static(LANDING_DIR));
+  // Public API: which slots have custom images
+  app.get('/api/landing-images', (req, res) => {
+    const result = {};
+    if (fs.existsSync(LANDING_DIR)) {
+      const files = fs.readdirSync(LANDING_DIR);
+      for (let slot = 1; slot <= 4; slot++) {
+        const file = files.find(f => f.startsWith(`slot-${slot}.`));
+        if (file) result[`slot${slot}`] = `/uploads/landing/${file}`;
+      }
+    }
+    res.json(result);
+  });
+}
+
 async function initDb(app) {
   const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
   let retries = 5;
@@ -96,6 +114,7 @@ async function initDb(app) {
 
 async function mountRoutes(app) {
   await setupAuth(app);
+  buildLandingImagesRoute(app);
   app.use('/api/user', userRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/ls', lemonsqueezyRoutes);

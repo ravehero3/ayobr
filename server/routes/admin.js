@@ -6,6 +6,33 @@ const {
   resetMonthlyCredits, getEmailOptIns, setEmailOptIn, getAdminStats, getEmailsForSegment
 } = require('../storage');
 const { EMAIL_TEMPLATES, sendEmail, isSmtpConfigured } = require('../email');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const LANDING_DIR = path.join(__dirname, '../uploads/landing');
+if (!fs.existsSync(LANDING_DIR)) fs.mkdirSync(LANDING_DIR, { recursive: true });
+
+const landingStorage = multer.diskStorage({
+  destination: LANDING_DIR,
+  filename: (req, file, cb) => {
+    const slot = req.params.slot;
+    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+    // Remove any existing file for this slot first
+    const existing = fs.readdirSync(LANDING_DIR).filter(f => f.startsWith(`slot-${slot}.`));
+    existing.forEach(f => { try { fs.unlinkSync(path.join(LANDING_DIR, f)); } catch(e) {} });
+    cb(null, `slot-${slot}${ext}`);
+  }
+});
+
+const landingUpload = multer({
+  storage: landingStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) return cb(new Error('Only images allowed'));
+    cb(null, true);
+  }
+});
 
 // Stats for dashboard
 router.get('/stats', isAdmin, async (req, res) => {
@@ -198,6 +225,26 @@ router.get('/newsletter/preview/:templateId', isAdmin, (req, res) => {
   if (!tpl) return res.status(404).send('Template not found');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(tpl.getHTML());
+});
+
+// ── Landing page images ──────────────────────────────────────
+router.post('/landing-images/:slot', isAdmin, (req, res, next) => {
+  const { slot } = req.params;
+  if (!['1','2','3','4'].includes(slot)) return res.status(400).json({ error: 'Invalid slot (1-4)' });
+  next();
+}, landingUpload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+  res.json({ url: `/uploads/landing/${req.file.filename}` });
+});
+
+router.delete('/landing-images/:slot', isAdmin, (req, res) => {
+  const { slot } = req.params;
+  if (!['1','2','3','4'].includes(slot)) return res.status(400).json({ error: 'Invalid slot (1-4)' });
+  const files = fs.existsSync(LANDING_DIR)
+    ? fs.readdirSync(LANDING_DIR).filter(f => f.startsWith(`slot-${slot}.`))
+    : [];
+  files.forEach(f => { try { fs.unlinkSync(path.join(LANDING_DIR, f)); } catch(e) {} });
+  res.json({ ok: true });
 });
 
 module.exports = router;

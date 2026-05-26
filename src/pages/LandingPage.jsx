@@ -634,15 +634,13 @@ function MobileStepNumber({ num }) {
   );
 }
 
-/* ── Step content mockups ── */
-const STEP_CONTENTS = [
-  () => <img src={screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
-  () => <img src={screenshotReview} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
-  () => <img src={screenshotGenerate} alt="Generate" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
-  () => <img src={screenshotDownload} alt="Download" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
-];
-
-function HowItWorksSection({ isMobile }) {
+function HowItWorksSection({ isMobile, customImages = {} }) {
+  const STEP_CONTENTS = [
+    () => <img src={customImages.slot1 || screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+    () => <img src={customImages.slot2 || screenshotReview} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+    () => <img src={customImages.slot3 || screenshotGenerate} alt="Generate" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+    () => <img src={customImages.slot4 || screenshotDownload} alt="Download" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+  ];
   const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
   const activeRef    = useRef(0);
@@ -981,6 +979,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
+  const [customImages, setCustomImages] = useState({});
   const starsRef = useRef(null);
   const glowRef  = useRef(null);
 
@@ -989,6 +988,13 @@ export default function LandingPage() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/landing-images')
+      .then(r => r.json())
+      .then(data => { if (data && typeof data === 'object') setCustomImages(data); })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -1087,7 +1093,7 @@ export default function LandingPage() {
 
       {/* ── How it works ── */}
       <div id="how-it-works">
-        <HowItWorksSection isMobile={isMobile} />
+        <HowItWorksSection isMobile={isMobile} customImages={customImages} />
       </div>
 
 

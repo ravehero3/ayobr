@@ -147,6 +147,118 @@ function SmtpBanner({ configured }) {
 }
 
 /* ════════════════════════════════════════════════════════════
+   How It Works image manager sub-component
+════════════════════════════════════════════════════════════ */
+const SLOT_LABELS = [
+  { slot: '1', title: 'Krok 1 — Nahraj soubory', desc: 'Screenshot stránky s nahráváním' },
+  { slot: '2', title: 'Krok 2 — Zkontroluj páry', desc: 'Screenshot stránky s páry' },
+  { slot: '3', title: 'Krok 3 — Generuj videa', desc: 'Screenshot generování' },
+  { slot: '4', title: 'Krok 4 — Stáhni výsledky', desc: 'Screenshot ke stažení' },
+];
+
+function HowItWorksImageManager({ landingImages, setLandingImages, landingUploading, setLandingUploading, flash }) {
+  const fileRefs = [useRef(), useRef(), useRef(), useRef()];
+
+  // Load images on mount
+  useEffect(() => {
+    fetch('/api/landing-images')
+      .then(r => r.json())
+      .then(data => { if (data && typeof data === 'object') setLandingImages(data); })
+      .catch(() => {});
+  }, []);
+
+  async function handleUpload(slot, file) {
+    if (!file) return;
+    setLandingUploading(prev => ({ ...prev, [slot]: true }));
+    const form = new FormData();
+    form.append('image', file);
+    try {
+      const res = await fetch(`/api/admin/landing-images/${slot}`, {
+        method: 'POST', body: form, credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const { url } = await res.json();
+      setLandingImages(prev => ({ ...prev, [`slot${slot}`]: url + '?t=' + Date.now() }));
+      flash(`Slot ${slot} aktualizován`);
+    } catch (e) {
+      flash('Chyba při nahrávání');
+    } finally {
+      setLandingUploading(prev => ({ ...prev, [slot]: false }));
+    }
+  }
+
+  async function handleReset(slot) {
+    try {
+      await fetch(`/api/admin/landing-images/${slot}`, { method: 'DELETE', credentials: 'include' });
+      setLandingImages(prev => { const n = { ...prev }; delete n[`slot${slot}`]; return n; });
+      flash(`Slot ${slot} resetován na výchozí`);
+    } catch (e) {
+      flash('Chyba při resetování');
+    }
+  }
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+      {SLOT_LABELS.map(({ slot, title, desc }, idx) => {
+        const imgUrl = landingImages[`slot${slot}`];
+        const uploading = landingUploading[slot];
+        return (
+          <div key={slot} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: 'hidden' }}>
+            {/* Image preview */}
+            <div style={{ aspectRatio: '16/10', background: '#0a0a0a', position: 'relative', overflow: 'hidden' }}>
+              {imgUrl ? (
+                <img src={imgUrl} alt={title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  height: '100%', gap: 8, color: 'rgba(255,255,255,0.15)' }}>
+                  <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Výchozí obrázek</span>
+                </div>
+              )}
+              {uploading && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#fff', animation: 'spin 0.8s linear infinite' }} />
+                </div>
+              )}
+            </div>
+            {/* Info + actions */}
+            <div style={{ padding: '16px 18px' }}>
+              <div style={{ fontFamily: NM, fontSize: 12, fontWeight: 900, color: '#fff', marginBottom: 2 }}>{title}</div>
+              <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', marginBottom: 14 }}>{desc}</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => fileRefs[idx].current?.click()}
+                  disabled={uploading}
+                  style={{ flex: 1, fontFamily: NM, fontWeight: 900, fontSize: 10, letterSpacing: '0.08em',
+                    textTransform: 'uppercase', padding: '9px 14px', borderRadius: 9999, cursor: uploading ? 'not-allowed' : 'pointer',
+                    border: 'none', background: '#fff', color: '#000', opacity: uploading ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                  {uploading ? 'Nahrávám…' : imgUrl ? 'Změnit' : 'Nahrát'}
+                </button>
+                {imgUrl && (
+                  <button
+                    onClick={() => handleReset(slot)}
+                    style={{ fontFamily: NM, fontWeight: 700, fontSize: 10, letterSpacing: '0.08em',
+                      textTransform: 'uppercase', padding: '9px 14px', borderRadius: 9999, cursor: 'pointer',
+                      border: `1px solid ${BORDER}`, background: 'transparent', color: 'rgba(255,255,255,0.45)',
+                      transition: 'all 0.2s' }}>
+                    Reset
+                  </button>
+                )}
+                <input ref={fileRefs[idx]} type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={e => { handleUpload(slot, e.target.files[0]); e.target.value = ''; }} />
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
    Main component
 ════════════════════════════════════════════════════════════ */
 export default function AdminPage() {
@@ -166,6 +278,8 @@ export default function AdminPage() {
   const [smtpOk, setSmtpOk] = useState(null);
   const [busy, setBusy] = useState(true);
   const [msg, setMsg] = useState('');
+  const [landingImages, setLandingImages] = useState({});
+  const [landingUploading, setLandingUploading] = useState({});
 
   // Users tab
   const [userFilter, setUserFilter] = useState('all');
@@ -305,6 +419,7 @@ export default function AdminPage() {
     {id:'emails',      label:'EMAILY'},
     {id:'autoEmails',  label:'AUTOMATICKÉ EMAILY'},
     {id:'newsletter',  label:'NEWSLETTER'},
+    {id:'howItWorks',  label:'LANDING PAGE'},
     {id:'settings',    label:'NASTAVENÍ'},
   ];
 
@@ -864,6 +979,23 @@ export default function AdminPage() {
                     )}
                   </div>
                 </div>
+              </motion.div>
+            )}
+
+            {/* ══════════ LANDING PAGE (HOW IT WORKS) ══════════ */}
+            {tab==='howItWorks' && (
+              <motion.div key="howItWorks" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
+                <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:8}}>Landing Page — Jak to funguje</h2>
+                <p style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.4)',marginBottom:28,lineHeight:1.7}}>
+                  Nahraj vlastní screenshoty pro sekci „Jak to funguje" na landing page. Každý slot odpovídá jednomu kroku. Bez nahrání se zobrazí výchozí obrázky.
+                </p>
+                <HowItWorksImageManager
+                  landingImages={landingImages}
+                  setLandingImages={setLandingImages}
+                  landingUploading={landingUploading}
+                  setLandingUploading={setLandingUploading}
+                  flash={flash}
+                />
               </motion.div>
             )}
 

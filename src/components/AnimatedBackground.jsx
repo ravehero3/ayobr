@@ -30,42 +30,16 @@ const AnimatedBackground = () => {
   if (isGenerating || hasVideos) progressLevel = 3; // Video generation started/completed
   if (hasVideos && !isGenerating) progressLevel = 4; // Videos ready for download
 
-  // Debug logging for progress detection
-  console.log('AnimatedBackground: Progress level:', progressLevel);
-  console.log('AnimatedBackground: Has files:', hasFiles);
-  console.log('AnimatedBackground: Pairs:', pairs);
-  console.log('AnimatedBackground: Has complete pairs:', hasCompletePairs);
-  console.log('AnimatedBackground: Has videos:', hasVideos);
-  console.log('AnimatedBackground: Is generating:', isGenerating);
-
-  // Preload background images when needed
+  // Preload background images once on mount
   useEffect(() => {
-    // Preload Page 1 background
-    if (!backgroundLoaded.page1) {
-      const img1 = new Image();
-      img1.onload = () => {
-        console.log('AnimatedBackground: Page 1 background loaded');
-        setBackgroundLoaded(prev => ({
-          ...prev,
-          page1: true
-        }));
-      };
-      img1.src = page1Background;
-    }
+    const img1 = new Image();
+    img1.onload = () => setBackgroundLoaded(prev => ({ ...prev, page1: true }));
+    img1.src = page1Background;
 
-    // Preload Page 2 background (Earth from Space)
-    if (!backgroundLoaded.page2) {
-      const img2 = new Image();
-      img2.onload = () => {
-        console.log('AnimatedBackground: Page 2 Earth background loaded');
-        setBackgroundLoaded(prev => ({
-          ...prev,
-          page2: true
-        }));
-      };
-      img2.src = '/attached_assets/background%20page%202_1754507959583.jpg';
-    }
-  }, [backgroundLoaded]);
+    const img2 = new Image();
+    img2.onload = () => setBackgroundLoaded(prev => ({ ...prev, page2: true }));
+    img2.src = '/attached_assets/background%20page%202_1754507959583.jpg';
+  }, []);
 
   // Background logic:
   // - Always show page 1 background as base
