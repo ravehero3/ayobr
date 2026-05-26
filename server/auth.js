@@ -41,19 +41,27 @@ function getCallbackURL() {
   return 'http://localhost:3001/api/callback';
 }
 
+function detectLanguage(acceptLang) {
+  if (!acceptLang) return 'cs';
+  const primary = acceptLang.split(',')[0].split(';')[0].trim().toLowerCase().split('-')[0];
+  return (primary === 'cs' || primary === 'sk') ? 'cs' : 'en';
+}
+
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy(
     {
-      clientID:     process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL:  getCallbackURL(),
+      clientID:          process.env.GOOGLE_CLIENT_ID,
+      clientSecret:      process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL:       getCallbackURL(),
+      passReqToCallback: true,
     },
-    async (_accessToken, _refreshToken, profile, done) => {
+    async (req, _accessToken, _refreshToken, profile, done) => {
       try {
         const email        = profile.emails?.[0]?.value || '';
         const firstName    = profile.name?.givenName  || '';
         const lastName     = profile.name?.familyName || '';
         const profileImage = profile.photos?.[0]?.value || '';
+        const language     = detectLanguage(req.headers['accept-language']);
 
         const user = await upsertUser({
           id: profile.id,
@@ -61,6 +69,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           first_name:        firstName,
           last_name:         lastName,
           profile_image_url: profileImage,
+          language,
         });
 
         return done(null, user);

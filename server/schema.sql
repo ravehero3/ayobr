@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS feature_flags (
 -- Email opt-in column (auto opt-in on signup)
 DO $$ BEGIN
   BEGIN ALTER TABLE users ADD COLUMN email_opt_in BOOLEAN NOT NULL DEFAULT TRUE; EXCEPTION WHEN duplicate_column THEN NULL; END;
+  BEGIN ALTER TABLE users ADD COLUMN language VARCHAR(5) NOT NULL DEFAULT 'cs'; EXCEPTION WHEN duplicate_column THEN NULL; END;
 END $$;
 
 -- Email logs table

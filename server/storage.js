@@ -6,18 +6,19 @@ const PRE_APPROVED_ADMINS = [
 ];
 
 async function upsertUser(userData) {
-  const { id, email, first_name, last_name, profile_image_url } = userData;
+  const { id, email, first_name, last_name, profile_image_url, language } = userData;
   const result = await pool.query(
-    `INSERT INTO users (id, email, first_name, last_name, profile_image_url, updated_at)
-     VALUES ($1, $2, $3, $4, $5, NOW())
+    `INSERT INTO users (id, email, first_name, last_name, profile_image_url, language, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, NOW())
      ON CONFLICT (id) DO UPDATE SET
        email = EXCLUDED.email,
        first_name = EXCLUDED.first_name,
        last_name = EXCLUDED.last_name,
        profile_image_url = EXCLUDED.profile_image_url,
+       language = COALESCE(NULLIF(users.language, ''), EXCLUDED.language, 'cs'),
        updated_at = NOW()
      RETURNING *, (xmax = 0) AS is_new`,
-    [id, email, first_name, last_name, profile_image_url]
+    [id, email, first_name, last_name, profile_image_url, language || 'cs']
   );
   const user = result.rows[0];
 
