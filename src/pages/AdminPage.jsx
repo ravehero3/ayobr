@@ -156,6 +156,114 @@ const SLOT_LABELS = [
   { slot: '4', title: 'Krok 4 — Stáhni výsledky', desc: 'Screenshot ke stažení' },
 ];
 
+const STEP_KEYS = [
+  { key: 'step1', label: 'Krok 1 — Nahraj soubory' },
+  { key: 'step2', label: 'Krok 2 — Zkontroluj páry' },
+  { key: 'step3', label: 'Krok 3 — Generuj videa' },
+  { key: 'step4', label: 'Krok 4 — Stáhni výsledky' },
+];
+
+function HowItWorksTextEditor({ landingContent, setLandingContent, flash }) {
+  const [draft, setDraft] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const steps = landingContent?.steps || [{}, {}, {}, {}];
+    setDraft(steps.map(s => ({ title: s.title || '', desc: s.desc || '' })));
+  }, [landingContent]);
+
+  if (!draft) return null;
+
+  function updateDraft(idx, field, val) {
+    setDraft(prev => prev.map((s, i) => i === idx ? { ...s, [field]: val } : s));
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/landing-content', {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ steps: draft }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setLandingContent({ steps: draft });
+      flash('Text uložen');
+    } catch (e) {
+      flash('Chyba při ukládání');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleReset(idx) {
+    setDraft(prev => prev.map((s, i) => i === idx ? { title: '', desc: '' } : s));
+  }
+
+  const inputStyle = {
+    width: '100%', fontFamily: NM, fontSize: 13, color: '#fff',
+    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 8, padding: '8px 12px', outline: 'none', boxSizing: 'border-box',
+    transition: 'border-color 0.2s',
+  };
+  const labelStyle = { fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 5, display: 'block' };
+
+  return (
+    <div style={{ marginTop: 36 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div>
+          <div style={{ fontFamily: NM, fontSize: 16, fontWeight: 900, color: '#fff' }}>Texty kroků</div>
+          <div style={{ fontFamily: NM, fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 3 }}>Ponech prázdné = výchozí přeložený text</div>
+        </div>
+        <button onClick={handleSave} disabled={saving} style={{
+          fontFamily: NM, fontWeight: 900, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+          padding: '10px 22px', borderRadius: 9999, cursor: saving ? 'not-allowed' : 'pointer',
+          border: 'none', background: saving ? 'rgba(255,255,255,0.2)' : '#fff', color: '#000',
+          opacity: saving ? 0.6 : 1, transition: 'all 0.2s',
+        }}>
+          {saving ? 'Ukládám…' : 'Uložit texty'}
+        </button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+        {STEP_KEYS.map(({ key, label }, idx) => (
+          <div key={key} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '18px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</span>
+              {(draft[idx].title || draft[idx].desc) && (
+                <button onClick={() => handleReset(idx)} style={{
+                  fontFamily: NM, fontSize: 9, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
+                  padding: '4px 10px', borderRadius: 9999, border: `1px solid ${BORDER}`,
+                  background: 'transparent', color: 'rgba(255,255,255,0.35)', cursor: 'pointer',
+                }}>Reset</button>
+              )}
+            </div>
+            <label style={labelStyle}>Nadpis</label>
+            <input
+              type="text"
+              value={draft[idx].title}
+              onChange={e => updateDraft(idx, 'title', e.target.value)}
+              placeholder="Výchozí nadpis ze systému"
+              style={{ ...inputStyle, marginBottom: 12 }}
+              onFocus={e => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+              onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+            />
+            <label style={labelStyle}>Popis</label>
+            <textarea
+              value={draft[idx].desc}
+              onChange={e => updateDraft(idx, 'desc', e.target.value)}
+              placeholder="Výchozí popis ze systému"
+              rows={3}
+              style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
+              onFocus={e => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+              onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function HowItWorksImageManager({ landingImages, setLandingImages, landingUploading, setLandingUploading, flash }) {
   const fileRefs = [useRef(), useRef(), useRef(), useRef()];
 
@@ -280,6 +388,7 @@ export default function AdminPage() {
   const [msg, setMsg] = useState('');
   const [landingImages, setLandingImages] = useState({});
   const [landingUploading, setLandingUploading] = useState({});
+  const [landingContent, setLandingContent] = useState({ steps: [{}, {}, {}, {}] });
 
   // Users tab
   const [userFilter, setUserFilter] = useState('all');
@@ -326,6 +435,13 @@ export default function AdminPage() {
   }, [user]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
+
+  useEffect(() => {
+    fetch('/api/landing-content')
+      .then(r => r.json())
+      .then(data => { if (data?.steps) setLandingContent(data); })
+      .catch(() => {});
+  }, []);
 
   function flash(m) { setMsg(m); setTimeout(() => setMsg(''), 3500); }
 
@@ -987,13 +1103,18 @@ export default function AdminPage() {
               <motion.div key="howItWorks" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
                 <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:8}}>Landing Page — Jak to funguje</h2>
                 <p style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.4)',marginBottom:28,lineHeight:1.7}}>
-                  Nahraj vlastní screenshoty pro sekci „Jak to funguje" na landing page. Každý slot odpovídá jednomu kroku. Bez nahrání se zobrazí výchozí obrázky.
+                  Nahraj vlastní screenshoty a uprav texty pro sekci „Jak to funguje". Prázdné pole textu = výchozí přeložený text.
                 </p>
                 <HowItWorksImageManager
                   landingImages={landingImages}
                   setLandingImages={setLandingImages}
                   landingUploading={landingUploading}
                   setLandingUploading={setLandingUploading}
+                  flash={flash}
+                />
+                <HowItWorksTextEditor
+                  landingContent={landingContent}
+                  setLandingContent={setLandingContent}
                   flash={flash}
                 />
               </motion.div>

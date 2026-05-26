@@ -13,6 +13,10 @@ const fs = require('fs');
 const LANDING_DIR = path.join(__dirname, '../uploads/landing');
 if (!fs.existsSync(LANDING_DIR)) fs.mkdirSync(LANDING_DIR, { recursive: true });
 
+const LANDING_CONTENT_FILE = path.join(__dirname, '../data/landing-content.json');
+const DATA_DIR = path.join(__dirname, '../data');
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
 const landingStorage = multer.diskStorage({
   destination: LANDING_DIR,
   filename: (req, file, cb) => {
@@ -245,6 +249,24 @@ router.delete('/landing-images/:slot', isAdmin, (req, res) => {
     : [];
   files.forEach(f => { try { fs.unlinkSync(path.join(LANDING_DIR, f)); } catch(e) {} });
   res.json({ ok: true });
+});
+
+router.put('/landing-content', isAdmin, (req, res) => {
+  try {
+    const { steps } = req.body;
+    if (!Array.isArray(steps) || steps.length !== 4) {
+      return res.status(400).json({ error: 'Invalid content — must be array of 4 steps' });
+    }
+    const sanitized = steps.map(s => ({
+      title: typeof s.title === 'string' ? s.title.trim() : '',
+      desc:  typeof s.desc  === 'string' ? s.desc.trim()  : '',
+    }));
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(LANDING_CONTENT_FILE, JSON.stringify({ steps: sanitized }, null, 2));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to save landing content' });
+  }
 });
 
 module.exports = router;

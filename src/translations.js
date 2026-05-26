@@ -467,7 +467,7 @@ export const translations = {
     "landing.pricing.features.priority": "Prioritní rychlost renderování",
     "landing.pricing.features.quality4k": "Výstupní kvalita 4K",
     "landing.pricing.features.support": "Prioritní podpora",
-    "landing.pricing.footer": "Dělejte type beaty, zatímco spíte",
+    "landing.pricing.footer": "Dělejte type beat videa, zatímco spíte",
 
     "landing.pricing.free.name": "Zdarma",
     "landing.pricing.free.desc": "Ideální pro začátek.",
@@ -513,7 +513,7 @@ export const translations = {
     "landing.hero.goUnlimited": "Odemknout vše",
     "landing.hero.statsBar": "Zdarma — 5 videí/měsíc · PRO — 31 videí/měsíc · Neomezený — vždy neomezeno",
 
-    "landing.stats.s1.prefix": "ušetři",
+    "landing.stats.s1.prefix": "Ušetřete",
     "landing.stats.s1.val": "hodiny",
     "landing.stats.s1.label": "každý měsíc",
     "landing.stats.s2.prefix": "množství",

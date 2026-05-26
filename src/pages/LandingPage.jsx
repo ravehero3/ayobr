@@ -609,7 +609,7 @@ function MobileStepNumber({ num }) {
   );
 }
 
-function HowItWorksSection({ isMobile, customImages = {} }) {
+function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) {
   const STEP_CONTENTS = [
     () => <img src={customImages.slot1 || screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
     () => <img src={customImages.slot2 || screenshotReview} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
@@ -622,11 +622,12 @@ function HowItWorksSection({ isMobile, customImages = {} }) {
   const clickLockRef = useRef(false);
   const cardRefs     = useRef([]);
 
+  const customSteps = customContent?.steps || [];
   const steps = [
-    { num: '01', title: t('landing.how.s1.title'), desc: t('landing.how.s1.desc') },
-    { num: '02', title: t('landing.how.s2.title'), desc: t('landing.how.s2.desc') },
-    { num: '03', title: t('landing.how.s3.title'), desc: t('landing.how.s3.desc') },
-    { num: '04', title: t('landing.how.s4.title'), desc: t('landing.how.s4.desc') },
+    { num: '01', title: customSteps[0]?.title || t('landing.how.s1.title'), desc: customSteps[0]?.desc || t('landing.how.s1.desc') },
+    { num: '02', title: customSteps[1]?.title || t('landing.how.s2.title'), desc: customSteps[1]?.desc || t('landing.how.s2.desc') },
+    { num: '03', title: customSteps[2]?.title || t('landing.how.s3.title'), desc: customSteps[2]?.desc || t('landing.how.s3.desc') },
+    { num: '04', title: customSteps[3]?.title || t('landing.how.s4.title'), desc: customSteps[3]?.desc || t('landing.how.s4.desc') },
   ];
 
   const goToStep = useCallback((i) => {
@@ -955,6 +956,7 @@ export default function LandingPage() {
   const { user, login } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [customImages, setCustomImages] = useState({});
+  const [customContent, setCustomContent] = useState({ steps: [{}, {}, {}, {}] });
   const starsRef = useRef(null);
   const glowRef  = useRef(null);
 
@@ -973,10 +975,17 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      import('./AppPage.jsx');
-    }, 3000); // Preload after 3 seconds
+    fetch('/api/landing-content')
+      .then(r => r.json())
+      .then(data => { if (data?.steps) setCustomContent(data); })
+      .catch(() => {});
+  }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      import('./AppPage');
+      import('../VideoApp');
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -1068,7 +1077,7 @@ export default function LandingPage() {
 
       {/* ── How it works ── */}
       <div id="how-it-works">
-        <HowItWorksSection isMobile={isMobile} customImages={customImages} />
+        <HowItWorksSection isMobile={isMobile} customImages={customImages} customContent={customContent} />
       </div>
 
 

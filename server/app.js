@@ -77,6 +77,8 @@ function buildApp() {
   return app;
 }
 
+const LANDING_CONTENT_FILE = path.join(__dirname, 'data/landing-content.json');
+
 function buildLandingImagesRoute(app) {
   const LANDING_DIR = path.join(__dirname, 'uploads/landing');
   // Serve uploaded images
@@ -92,6 +94,15 @@ function buildLandingImagesRoute(app) {
       }
     }
     res.json(result);
+  });
+  // Public API: custom how-it-works step text
+  app.get('/api/landing-content', (req, res) => {
+    try {
+      if (fs.existsSync(LANDING_CONTENT_FILE)) {
+        return res.json(JSON.parse(fs.readFileSync(LANDING_CONTENT_FILE, 'utf8')));
+      }
+    } catch (e) {}
+    res.json({ steps: [{}, {}, {}, {}] });
   });
 }
 
