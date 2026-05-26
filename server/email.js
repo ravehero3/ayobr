@@ -186,4 +186,8 @@ const EMAIL_TEMPLATES = [
   },
 ];
 
-module.exports = { sendWelcomeEmail, sendPurchaseEmail, sendCreditLimitEmail, EMAIL_TEMPLATES };
+function isSmtpConfigured() {
+  return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
+module.exports = { sendEmail, sendWelcomeEmail, sendPurchaseEmail, sendCreditLimitEmail, EMAIL_TEMPLATES, isSmtpConfigured };

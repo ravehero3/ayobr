@@ -299,6 +299,15 @@ async function getReferralStats(userId) {
   return { code, uses: parseInt(uses.rows[0].count, 10) };
 }
 
+async function getEmailsForSegment(segment) {
+  let where = "u.email IS NOT NULL AND u.email != '' AND u.email_opt_in = TRUE";
+  if (segment === 'free')      where += " AND u.role = 'free'";
+  else if (segment === 'pro')  where += " AND u.role = 'pro'";
+  else if (segment === 'unlimited') where += " AND u.role IN ('unlimited','admin')";
+  const result = await pool.query(`SELECT id, email, first_name, last_name, role FROM users u WHERE ${where} ORDER BY created_at DESC`);
+  return result.rows;
+}
+
 async function getEmailOptIns() {
   const result = await pool.query(`
     SELECT u.id, u.email, u.first_name, u.last_name, u.role, u.email_opt_in, u.created_at
@@ -362,5 +371,5 @@ module.exports = {
   resetMonthlyCredits, setCreditsForRole,
   ensureReferralCode, applyReferralCode, getReferralStats,
   updateUserProfile, getFeatureFlags, updateFeatureFlag,
-  getEmailOptIns, setEmailOptIn, getAdminStats, logEmailSent,
+  getEmailOptIns, setEmailOptIn, getAdminStats, logEmailSent, getEmailsForSegment,
 };

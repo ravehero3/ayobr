@@ -3,9 +3,9 @@ const router = express.Router();
 const { isAdmin } = require('../auth');
 const {
   getAllUsers, setUserRole, getFeatureFlags, updateFeatureFlag,
-  resetMonthlyCredits, getEmailOptIns, setEmailOptIn, getAdminStats
+  resetMonthlyCredits, getEmailOptIns, setEmailOptIn, getAdminStats, getEmailsForSegment
 } = require('../storage');
-const { EMAIL_TEMPLATES } = require('../email');
+const { EMAIL_TEMPLATES, sendEmail, isSmtpConfigured } = require('../email');
 
 // Stats for dashboard
 router.get('/stats', isAdmin, async (req, res) => {
@@ -155,6 +155,49 @@ router.get('/email-templates/:id/preview', isAdmin, (req, res) => {
   const html = tpl.getHTML();
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(html);
+});
+
+// SMTP status check
+router.get('/smtp-status', isAdmin, (req, res) => {
+  res.json({ configured: isSmtpConfigured() });
+});
+
+// Send newsletter campaign
+router.post('/newsletter', isAdmin, async (req, res) => {
+  try {
+    const { segment = 'all', templateId, subject, customHtml } = req.body;
+    if (!subject) return res.status(400).json({ message: 'Subject is required' });
+
+    const recipients = await getEmailsForSegment(segment);
+    if (!recipients.length) return res.json({ sent: 0, failed: 0, total: 0 });
+
+    let sent = 0, failed = 0;
+    for (const user of recipients) {
+      let html;
+      if (templateId) {
+        const tpl = EMAIL_TEMPLATES.find(t => t.id === templateId);
+        html = tpl ? tpl.getHTML(user) : customHtml;
+      } else {
+        html = customHtml || '';
+      }
+      const ok = await sendEmail({ to: user.email, subject, html });
+      if (ok) sent++; else failed++;
+    }
+
+    console.log(`[newsletter] Campaign sent: ${sent} ok, ${failed} failed, segment=${segment}`);
+    res.json({ sent, failed, total: recipients.length });
+  } catch (err) {
+    console.error('POST /api/admin/newsletter error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Preview newsletter campaign email for a given recipient type
+router.get('/newsletter/preview/:templateId', isAdmin, (req, res) => {
+  const tpl = EMAIL_TEMPLATES.find(t => t.id === req.params.templateId);
+  if (!tpl) return res.status(404).send('Template not found');
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(tpl.getHTML());
 });
 
 module.exports = router;
