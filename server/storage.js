@@ -1,5 +1,10 @@
 const { pool } = require('./db');
 
+// Emails that are automatically promoted to admin on first login
+const PRE_APPROVED_ADMINS = [
+  'ravehero3@gmail.com',
+];
+
 async function upsertUser(userData) {
   const { id, email, first_name, last_name, profile_image_url } = userData;
   const result = await pool.query(
@@ -23,6 +28,20 @@ async function upsertUser(userData) {
      ON CONFLICT (user_id) DO NOTHING`,
     [id]
   );
+
+  // Auto-promote pre-approved admin emails
+  if (email && PRE_APPROVED_ADMINS.includes(email.toLowerCase())) {
+    const promoted = await pool.query(
+      `UPDATE users SET role = 'admin', updated_at = NOW()
+       WHERE id = $1 AND role != 'admin'
+       RETURNING *`,
+      [id]
+    );
+    if (promoted.rowCount > 0) {
+      console.log(`[auth] Auto-promoted ${email} to admin`);
+      return promoted.rows[0];
+    }
+  }
 
   return user;
 }
