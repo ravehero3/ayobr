@@ -6,7 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function TermsPage() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const sections = [
     { id: 's1', title: t('terms.s1.title'), desc: t('terms.s1.desc') },
@@ -37,7 +37,7 @@ export default function TermsPage() {
           {t('terms.title')}
         </h1>
         <p className="text-white/[0.4] text-sm mb-16" style={{ fontFamily: "'Neue Montreal', 'Inter', sans-serif" }}>
-          {t('lastUpdated')} {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          {t('lastUpdated')} {new Date().toLocaleDateString(language === 'cs' ? 'cs-CZ' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
 
         <div className="border-t border-white/[0.06]">
