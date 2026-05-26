@@ -931,7 +931,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         </a>
       </div>
 
-      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem' }}>
+      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem', textShadow: '0 1px 8px rgba(0,0,0,0.8), 0 0px 20px rgba(0,0,0,0.6)' }}>
         {t('landing.hero.statsBar')}
       </div>
     </>
