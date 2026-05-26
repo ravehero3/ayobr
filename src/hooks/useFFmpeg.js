@@ -23,16 +23,8 @@ export const useFFmpeg = () => {
     clearPreparedAssets 
   } = useAppStore();
 
-  // Concurrency limit based on plan:
-  //   Free / not logged in → 1 (sequential, safest)
-  //   Pro                  → 2 (2 independent FFmpeg instances, ~150MB extra RAM)
-  //   Unlimited / Admin    → 3 (3 instances, max recommended for cross-device stability)
-  const maxConcurrent = (() => {
-    const role = user?.role;
-    if (role === 'unlimited' || role === 'admin') return 3;
-    if (role === 'pro') return 2;
-    return 1;
-  })();
+  // Always process one video at a time for maximum stability and quality
+  const maxConcurrent = 1;
 
   const generateVideos = useCallback(async (pairs) => {
     DEBUG && console.log('generateVideos called with pairs:', pairs);

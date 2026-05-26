@@ -61,11 +61,15 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Right side: Username and Profile */}
-        <div className="flex items-center gap-3">
-          <span className="hidden sm:inline text-white text-sm opacity-90 font-medium">
+        {/* Producer name — absolutely centered in the header */}
+        <div className="absolute left-0 right-0 flex justify-center pointer-events-none" style={{ zIndex: 1 }}>
+          <span className="text-white text-sm font-semibold opacity-90 tracking-wide" style={{ fontFamily: NM }}>
             {username}
           </span>
+        </div>
+
+        {/* Right side: Profile */}
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"

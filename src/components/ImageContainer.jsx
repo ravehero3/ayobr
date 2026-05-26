@@ -30,24 +30,31 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   };
 
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files);
-    const imageFile = files.find(file => file.type.startsWith('image/'));
+    const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) { e.target.value = ''; return; }
 
-    if (imageFile) {
-      updatePair(pairId, { image: imageFile });
+    // First file fills current pair
+    updatePair(pairId, { image: files[0] });
+
+    // Remaining files: fill existing empty image slots or create new pairs
+    if (files.length > 1) {
+      const { pairs, addPair, updatePair: storeUpdatePair } = useAppStore.getState();
+      let remaining = files.slice(1);
+      const emptyPairs = pairs.filter(p => p.id !== pairId && !p.image);
+      emptyPairs.forEach((p, i) => {
+        if (i < remaining.length) storeUpdatePair(p.id, { image: remaining[i] });
+      });
+      remaining = remaining.slice(emptyPairs.length);
+      remaining.forEach(f => addPair({ audio: null, image: f }));
     }
-    
-    // Clear the input so the same file can be selected again
+
     e.target.value = '';
   };
 
   const handleContainerClick = () => {
-    if (!image) {
-      const fileInput = document.getElementById(`image-file-input-${pairId}`);
-      if (fileInput) {
-        fileInput.click();
-      }
-    }
+    // Open file picker on any click (empty or filled — images don't have conflicting sub-controls)
+    const fileInput = document.getElementById(`image-file-input-${pairId}`);
+    if (fileInput) fileInput.click();
   };
 
   const formatFileSize = (bytes) => {
@@ -108,6 +115,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         id={`image-file-input-${pairId}`}
         type="file"
         accept="image/*,.png,.jpg,.jpeg,.heic"
+        multiple
         onChange={handleFileSelect}
         style={{ display: 'none' }}
       />
