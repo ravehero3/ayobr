@@ -77,17 +77,14 @@ export const useFFmpeg = () => {
           console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
         }
 
-        // Memory cleanup every completed video to prevent crashes in browser
-        if (completedCount > 0 && completedCount % 1 === 0) {
+        // Memory cleanup every 10 videos to prevent crashes in browser
+        if (completedCount > 0 && completedCount % 10 === 0) {
           console.log(`Performing memory cleanup after ${completedCount} completed videos`);
 
           // Force browser garbage collection and cleanup
           if (window.gc) {
             try { window.gc(); } catch(e) { /* ignore */ }
           }
-
-          // Brief delay to allow browser memory cleanup
-          await new Promise(resolve => setTimeout(resolve, 200));
         }
       };
 
@@ -148,9 +145,6 @@ export const useFFmpeg = () => {
               error: null,
               isCurrentlyProcessing: false
             });
-
-            // Brief pause for state stabilization
-            await new Promise(resolve => setTimeout(resolve, 100));
 
             // Initialize state for this video to show it's starting
             console.log(`🔄 Starting generation for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
@@ -232,12 +226,10 @@ export const useFFmpeg = () => {
         // Update overall progress
         await updateBatchProgress();
 
-        // Cleanup delay: Allow FFmpeg to fully release resources and state to settle
-        // This prevents race conditions and ensures Video 2 starts cleanly
-        // Extended delay to ensure all progress callbacks drain completely
+        // Brief pause between batches to allow state to settle
+        // Progress token system already blocks stale callbacks, so a short delay is sufficient
         if (batchIndex < batches.length - 1 && !isCancelling) {
-          console.log(`Taking a ${1500}ms break before next batch to allow callbacks to drain...`);
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise(resolve => setTimeout(resolve, 200));
         }
       }
 
@@ -448,10 +440,6 @@ export const useFFmpeg = () => {
           console.log(`Clearing prepared assets for pair ${pair.id} to free memory`);
           clearPreparedAssets(pair.id);
         }
-        
-        // Brief pause to ensure FFmpeg fully releases resources
-        await new Promise(resolve => setTimeout(resolve, 100));
-        console.log(`FFmpeg resources released for pair ${pair.id}`);
         
         console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
       } catch (processingError) {

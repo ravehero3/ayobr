@@ -540,18 +540,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       await ffmpeg.writeFile(imageFileName, imageBuffer);
       await ffmpeg.writeFile(audioFileName, audioBuffer);
 
-      // Verify files were written successfully
-      const imageWritten = await ffmpeg.readFile(imageFileName);
-      const audioWritten = await ffmpeg.readFile(audioFileName);
-
-      if (!imageWritten || imageWritten.length === 0) {
-        throw new Error(`Failed to write image file ${imageFileName} to FFmpeg FS`);
-      }
-
-      if (!audioWritten || audioWritten.length === 0) {
-        throw new Error(`Failed to write audio file ${audioFileName} to FFmpeg FS`);
-      }
-
       console.log('Files written successfully to FFmpeg FS');
     } catch (writeError) {
       console.error('Error writing files to FFmpeg FS:', writeError);
@@ -732,20 +720,8 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     console.log('FFmpeg execution completed successfully');
 
-    // Add delay to ensure filesystem is ready and force garbage collection
-    if (window.gc) {
-      window.gc();
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Optimized file reading with longer stabilization delay
+    // Read output file immediately — exec() is fully awaited above
     console.log('Reading output file...');
-
-    // Force garbage collection and ensure FFmpeg has finished writing
-    if (window.gc) {
-      window.gc();
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Increased delay for stability
 
     let data;
     let retryCount = 0;
@@ -990,10 +966,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
         console.warn(`[Job Cleanup] Could not verify filesystem state:`, e.message);
       }
     }
-
-    // Wait for any remaining callbacks to fully drain before returning
-    // This prevents callbacks from bleeding into the next video
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Force garbage collection between videos for memory stability
     if (window.gc) {
