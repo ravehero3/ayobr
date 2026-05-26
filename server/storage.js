@@ -16,7 +16,7 @@ async function upsertUser(userData) {
        last_name = EXCLUDED.last_name,
        profile_image_url = EXCLUDED.profile_image_url,
        updated_at = NOW()
-     RETURNING *`,
+     RETURNING *, (xmax = 0) AS is_new`,
     [id, email, first_name, last_name, profile_image_url]
   );
   const user = result.rows[0];
@@ -29,6 +29,9 @@ async function upsertUser(userData) {
     [id]
   );
 
+  // Detect if this was a fresh INSERT (new user)
+  const isNew = user.is_new === true;
+
   // Auto-promote pre-approved admin emails
   if (email && PRE_APPROVED_ADMINS.includes(email.toLowerCase())) {
     const promoted = await pool.query(
@@ -39,8 +42,20 @@ async function upsertUser(userData) {
     );
     if (promoted.rowCount > 0) {
       console.log(`[auth] Auto-promoted ${email} to admin`);
-      return promoted.rows[0];
+      const promotedUser = promoted.rows[0];
+      // Send welcome email async (non-blocking)
+      setImmediate(() => {
+        try { require('./email').sendWelcomeEmail(promotedUser); } catch (e) {}
+      });
+      return promotedUser;
     }
+  }
+
+  // Send welcome email to brand new users (async, non-blocking)
+  if (isNew) {
+    setImmediate(() => {
+      try { require('./email').sendWelcomeEmail(user); } catch (e) {}
+    });
   }
 
   return user;
@@ -284,6 +299,61 @@ async function getReferralStats(userId) {
   return { code, uses: parseInt(uses.rows[0].count, 10) };
 }
 
+async function getEmailOptIns() {
+  const result = await pool.query(`
+    SELECT u.id, u.email, u.first_name, u.last_name, u.role, u.email_opt_in, u.created_at
+    FROM users u
+    WHERE u.email IS NOT NULL AND u.email != '' AND u.email_opt_in = TRUE
+    ORDER BY u.created_at DESC
+  `);
+  return result.rows;
+}
+
+async function setEmailOptIn(userId, optIn) {
+  const result = await pool.query(
+    `UPDATE users SET email_opt_in = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+    [optIn, userId]
+  );
+  return result.rows[0];
+}
+
+async function getAdminStats() {
+  const [totals, daily] = await Promise.all([
+    pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE TRUE) AS total_users,
+        COUNT(*) FILTER (WHERE role = 'free') AS free_users,
+        COUNT(*) FILTER (WHERE role IN ('pro','unlimited','admin')) AS paid_users,
+        COUNT(*) FILTER (WHERE email_opt_in = TRUE AND email IS NOT NULL AND email != '') AS email_optins
+      FROM users
+    `),
+    pool.query(`
+      SELECT
+        DATE_TRUNC('day', created_at)::date AS day,
+        COUNT(*) AS count
+      FROM users
+      WHERE created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY day
+      ORDER BY day ASC
+    `)
+  ]);
+  return {
+    totals: totals.rows[0],
+    daily: daily.rows,
+  };
+}
+
+async function logEmailSent(userId, email, template, subject, success = true) {
+  try {
+    await pool.query(
+      `INSERT INTO email_logs (user_id, email, template, subject, success) VALUES ($1, $2, $3, $4, $5)`,
+      [userId || null, email, template, subject, success]
+    );
+  } catch (e) {
+    // non-critical
+  }
+}
+
 module.exports = {
   upsertUser, getUserById, getAllUsers,
   getUserCredits, deductCredit, deductCredits,
@@ -291,5 +361,6 @@ module.exports = {
   getSubscription, upsertSubscription,
   resetMonthlyCredits, setCreditsForRole,
   ensureReferralCode, applyReferralCode, getReferralStats,
-  updateUserProfile, getFeatureFlags, updateFeatureFlag
+  updateUserProfile, getFeatureFlags, updateFeatureFlag,
+  getEmailOptIns, setEmailOptIn, getAdminStats, logEmailSent,
 };

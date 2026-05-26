@@ -72,6 +72,17 @@ router.post('/deduct-credit', isAuthenticated, async (req, res) => {
       return res.status(402).json({ message: 'Failed to deduct credits. Not enough balance.' });
     }
 
+    // Send credit limit email when user reaches 0 credits (async, non-blocking)
+    if (lastResult.credits_remaining === 0) {
+      setImmediate(async () => {
+        try {
+          const { sendCreditLimitEmail } = require('../email');
+          const fullUser = await getUserById(userId);
+          if (fullUser) await sendCreditLimitEmail(fullUser);
+        } catch (e) { console.error('[email] credit limit email error:', e.message); }
+      });
+    }
+
     res.json({ success: true, creditsRemaining: lastResult.credits_remaining });
   } catch (err) {
     console.error('POST /api/user/deduct-credit error:', err);

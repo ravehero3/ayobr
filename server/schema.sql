@@ -93,6 +93,24 @@ CREATE TABLE IF NOT EXISTS feature_flags (
   UNIQUE(feature_key, plan)
 );
 
+-- Email opt-in column (auto opt-in on signup)
+DO $$ BEGIN
+  BEGIN ALTER TABLE users ADD COLUMN email_opt_in BOOLEAN NOT NULL DEFAULT TRUE; EXCEPTION WHEN duplicate_column THEN NULL; END;
+END $$;
+
+-- Email logs table
+CREATE TABLE IF NOT EXISTS email_logs (
+  id SERIAL PRIMARY KEY,
+  user_id VARCHAR REFERENCES users(id) ON DELETE SET NULL,
+  email VARCHAR NOT NULL,
+  template VARCHAR NOT NULL,
+  subject VARCHAR,
+  sent_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  success BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE INDEX IF NOT EXISTS idx_email_logs_user_id ON email_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at ON email_logs(sent_at);
+
 -- Insert default feature flags
 INSERT INTO feature_flags (feature_key, plan, enabled, description) VALUES
   ('video_generation', 'free',      TRUE,  'Allow free users to generate videos'),
