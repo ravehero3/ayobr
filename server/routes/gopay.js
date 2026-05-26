@@ -206,7 +206,8 @@ router.get('/callback', async (req, res) => {
     // Status is 'PAID' or 'PAYMENT_METHOD_CHOSEN' or 'AUTHORIZED'
     if (payment.state === 'PAID') {
       await upgradeUserFromPayment(userId, plan, isAnnual === 'true', paymentId);
-      return res.redirect('/app?upgraded=true');
+      const finalPlan = plan === 'unlimited' ? 'unlimited' : 'pro';
+      return res.redirect(`/success?plan=${finalPlan}`);
     } else {
       console.warn(`GoPay Payment ${paymentId} has status ${payment.state}. Denying upgrade.`);
       return res.redirect('/app?cancelled=true');

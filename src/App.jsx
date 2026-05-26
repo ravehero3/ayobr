@@ -12,6 +12,7 @@ import RefundPage from './pages/RefundPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AccountPage from './pages/AccountPage';
 import UpgradePage from './pages/UpgradePage';
+import SuccessPage from './pages/SuccessPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -34,6 +35,12 @@ export default function App() {
           <Route path="/upgrade" element={
             <ProtectedRoute>
               <UpgradePage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/success" element={
+            <ProtectedRoute>
+              <SuccessPage />
             </ProtectedRoute>
           } />
           
