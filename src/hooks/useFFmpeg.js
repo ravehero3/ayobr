@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
+import { fetchFile } from '@ffmpeg/util';
 import { useAppStore } from '../store/appStore';
-import { processVideoWithFFmpeg, forceStopAllProcesses } from '../utils/ffmpegProcessor';
+import { processVideoWithFFmpeg, forceStopAllProcesses, getAudioDuration } from '../utils/ffmpegProcessor';
 
 export const useFFmpeg = () => {
   const [progress, setProgress] = useState(0);
@@ -97,6 +98,34 @@ export const useFFmpeg = () => {
 
       console.log(`Created ${batches.length} batches from ${pairs.length} videos (${maxConcurrent} per batch)`);
 
+      // Pre-fetch files for upcoming pairs while FFmpeg is encoding the current one.
+      // Reads audio/image buffers + duration into preparedAssets so encoding starts instantly.
+      const prefetchPairs = async (pairsToFetch) => {
+        const { setPreparedAssets, getPreparedAssets } = useAppStore.getState();
+        await Promise.allSettled(pairsToFetch.map(async (pair) => {
+          if (getPreparedAssets(pair.id)) return; // already cached
+          try {
+            const [audioData, imageData] = await Promise.all([
+              fetchFile(pair.audio),
+              fetchFile(pair.image)
+            ]);
+            const audioDuration = await getAudioDuration(pair.audio);
+            setPreparedAssets(pair.id, {
+              audioBuffer: new Uint8Array(audioData),
+              imageBuffer: new Uint8Array(imageData),
+              audioDuration
+            });
+            console.log(`✅ Prefetched assets for pair ${pair.id}`);
+          } catch (e) {
+            console.warn(`Prefetch failed for pair ${pair.id}:`, e.message);
+          }
+        }));
+      };
+
+      // Kick off prefetch for the first two batches before the loop starts
+      if (batches.length > 0) prefetchPairs(batches[0]);
+      if (batches.length > 1) prefetchPairs(batches[1]);
+
       // Process each batch concurrently
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         if (isCancelling) {
@@ -109,6 +138,10 @@ export const useFFmpeg = () => {
         const batchStartIndex = batchIndex * maxConcurrent;
         
         console.log(`\n🚀 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} videos)`);
+
+        // Prefetch 2 batches ahead (rolling pipeline) while this batch encodes
+        const nextNextBatch = batches[batchIndex + 2];
+        if (nextNextBatch) prefetchPairs(nextNextBatch);
 
         // Process all videos in this batch concurrently
         const batchPromises = batch.map(async (pair, indexInBatch) => {

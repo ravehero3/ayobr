@@ -890,7 +890,32 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       </h1>
 
       <p style={{ fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
-        {t('landing.hero.subtitle')}
+        {(() => {
+          const subtitle = t('landing.hero.subtitle');
+          const parts = subtitle.split('TypeBeatz');
+          if (parts.length === 2) {
+            return (
+              <>
+                {parts[0]}
+                <img
+                  src={typebeatLogo}
+                  alt="TypeBeatz"
+                  style={{
+                    display: 'inline-block',
+                    height: '0.95em',
+                    verticalAlign: 'middle',
+                    marginBottom: '0.15em',
+                    marginLeft: '0.15em',
+                    marginRight: '0.1em',
+                    opacity: 0.45,
+                  }}
+                />
+                {parts[1]}
+              </>
+            );
+          }
+          return subtitle;
+        })()}
       </p>
 
       <div className="flex flex-row items-center justify-center gap-3">
