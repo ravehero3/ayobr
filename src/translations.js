@@ -407,7 +407,7 @@ export const translations = {
     "landing.pricing.title": "Ceník",
     "landing.pricing.subtitle": "Začněte zdarma. Přejděte na vyšší tarif, až budete připraveni.\nŽádné skryté poplatky.",
     "landing.pricing.toggle.monthly": "MĚSÍČNĚ",
-    "landing.pricing.toggle.annual": "ROČNĚ",
+    "landing.pricing.toggle.annual": "Roční",
     "landing.pricing.features.video": "videí měsíčně",
     "landing.pricing.features.reset": "Kredity se obnovují 1. dne v měsíci",
     "landing.pricing.features.core": "Všechny základní funkce",
