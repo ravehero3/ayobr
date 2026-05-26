@@ -19,8 +19,10 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
   const canUse4K = featureFlags?.ultra_quality;
   const canUseFullHD = featureFlags?.high_quality;
+  const canUseCustomBackground = user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
 
   const handleBackgroundChange = (background) => {
+    if (background === 'custom' && !canUseCustomBackground) return;
     setSelectedBackground(background);
   };
 
@@ -180,44 +182,55 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
                 {/* Custom Background */}
                 <motion.div
-                  className="cursor-pointer relative overflow-hidden"
+                  className="relative overflow-hidden"
                   style={{
                     flex: '1',
                     height: '80px',
                     borderRadius: '12px',
-                    border: selectedBackground === 'custom' 
-                      ? '2px solid rgba(59, 130, 246, 0.8)' 
+                    border: selectedBackground === 'custom'
+                      ? '2px solid rgba(59, 130, 246, 0.8)'
                       : '2px solid rgba(255, 255, 255, 0.1)',
-                    background: videoSettings.customBackground 
-                      ? `url(${videoSettings.customBackground})` 
+                    background: canUseCustomBackground && videoSettings.customBackground
+                      ? `url(${videoSettings.customBackground})`
                       : 'linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(17, 24, 39, 0.6))',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: selectedBackground === 'custom' 
+                    boxShadow: selectedBackground === 'custom'
                       ? '0 0 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)'
                       : 'none',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    cursor: canUseCustomBackground ? 'pointer' : 'not-allowed',
+                    opacity: canUseCustomBackground ? 1 : 0.6,
                   }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => document.getElementById('customBackgroundUpload').click()}
+                  whileHover={{ scale: canUseCustomBackground ? 1.02 : 1 }}
+                  whileTap={{ scale: canUseCustomBackground ? 0.98 : 1 }}
+                  onClick={() => canUseCustomBackground && document.getElementById('customBackgroundUpload').click()}
                 >
-                  <div style={{
-                    color: '#e0e0e0',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                    background: videoSettings.customBackground 
-                      ? 'rgba(0,0,0,0.6)' 
-                      : 'transparent',
-                    padding: videoSettings.customBackground ? '8px 12px' : '0',
-                    borderRadius: videoSettings.customBackground ? '8px' : '0'
-                  }}>
-                    Custom
-                  </div>
+                  {canUseCustomBackground ? (
+                    <div style={{
+                      color: '#e0e0e0',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                      background: videoSettings.customBackground ? 'rgba(0,0,0,0.6)' : 'transparent',
+                      padding: videoSettings.customBackground ? '8px 12px' : '0',
+                      borderRadius: videoSettings.customBackground ? '8px' : '0'
+                    }}>
+                      Custom
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: '16px' }}>🔒</span>
+                      <span style={{
+                        fontSize: '10px', fontWeight: 700, color: '#fff',
+                        background: 'linear-gradient(90deg, #3b82f6, #0ea5e9)',
+                        borderRadius: 4, padding: '1px 6px', letterSpacing: '0.05em'
+                      }}>PRO</span>
+                    </div>
+                  )}
                   <input
                     type="file"
                     id="customBackgroundUpload"

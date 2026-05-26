@@ -223,6 +223,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: t('landing.pricing.pro.f5'), icon: PricingIcons.Cancel },
         ...(isAnnual ? [{ text: t('landing.pricing.pro.f6.annual'), icon: PricingIcons.Present }] : []),
       ],
+      annualSavings: t('landing.pricing.pro.savings.annual'),
       cta: isPro ? t('landing.pricing.pro.cta.current') : t('landing.pricing.pro.cta'),
       onCta: () => handleUpgradeCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: true,
@@ -242,6 +243,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: t('landing.pricing.unlimited.f5'), icon: PricingIcons.Cancel },
         ...(isAnnual ? [{ text: t('landing.pricing.unlimited.f6.annual'), icon: PricingIcons.Present }] : []),
       ],
+      annualSavings: t('landing.pricing.unlimited.savings.annual'),
       cta: t('landing.pricing.unlimited.cta'),
       onCta: () => handleUnlimitedCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: false,
@@ -469,6 +471,22 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                   </span>
                 </div>
               </div>
+
+              {/* Annual savings badge */}
+              {plan.annualSavings && isAnnual && (
+                <div style={{ marginTop: 6, marginBottom: 2 }}>
+                  <span style={{
+                    fontFamily: NM, fontSize: '0.72rem', fontWeight: 600,
+                    color: '#4ade80',
+                    background: 'rgba(74, 222, 128, 0.12)',
+                    border: '1px solid rgba(74, 222, 128, 0.25)',
+                    borderRadius: 6, padding: '2px 8px',
+                    letterSpacing: '0.01em',
+                  }}>
+                    {plan.annualSavings}
+                  </span>
+                </div>
+              )}
 
               {/* Bottom Divider */}
               <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 24, marginTop: 16 }} />
