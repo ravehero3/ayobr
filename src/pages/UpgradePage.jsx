@@ -244,10 +244,6 @@ export default function UpgradePage() {
                   boxShadow: plan.highlight ? '0 30px 60px -12px rgba(0,0,0,0.6)' : plan.topTier ? '0 20px 50px -10px rgba(255,255,255,0.08)' : '0 10px 30px -10px rgba(0,0,0,0.3)',
                   overflow: 'hidden',
                 }}>
-                {plan.topTier && (
-                  <motion.div animate={{ x: ['-100%', '200%'] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 4, ease: 'linear' }}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)', transform: 'skewX(-20deg)', zIndex: 2, pointerEvents: 'none' }} />
-                )}
 
                 {/* Name + Toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>

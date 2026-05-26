@@ -363,31 +363,6 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                   overflow: 'hidden'
                 }}
               >
-                {/* Shiny overlay for top tier */}
-                {plan.topTier && (
-                  <motion.div
-                    animate={{
-                      x: ['-100%', '200%'],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      repeatDelay: 4,
-                      ease: "linear"
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '50%',
-                      height: '100%',
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-                      transform: 'skewX(-20deg)',
-                      zIndex: 2,
-                      pointerEvents: 'none'
-                    }}
-                  />
-                )}
                 {/* Plan name + Toggle */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, minHeight: 28 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
