@@ -62,10 +62,8 @@ router.post('/deduct-credit', isAuthenticated, async (req, res) => {
     // If multiple credits, we need to check if they have enough first
     const credits = await getUserCredits(userId);
     if (credits.credits_remaining < count) {
-      const msg = user.role === 'pro'
-        ? `You need ${count} credits but only have ${credits.credits_remaining}. Upgrade to Unlimited for unlimited video generation.`
-        : `No credits remaining. You need ${count} credits but only have ${credits.credits_remaining}. Upgrade to PRO for 31 videos/month, or Unlimited for no limits.`;
-      return res.status(402).json({ message: msg });
+      const errorCode = user.role === 'pro' ? 'insufficient_credits_pro' : 'insufficient_credits_free';
+      return res.status(402).json({ errorCode, needed: count, remaining: credits.credits_remaining });
     }
 
     // Deduct multiple credits in a single transaction

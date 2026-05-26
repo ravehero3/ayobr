@@ -93,7 +93,17 @@ export default function AppPage() {
   const handleBeforeGenerate = async (count = 1) => {
     const result = await deductCredit(count);
     if (!result.success) {
-      if (result.message) alert(result.message);
+      let msg = result.message || '';
+      if (result.errorCode === 'insufficient_credits_free') {
+        msg = t('error.insufficientCreditsFree')
+          .replace('{needed}', result.needed)
+          .replace('{remaining}', result.remaining);
+      } else if (result.errorCode === 'insufficient_credits_pro') {
+        msg = t('error.insufficientCreditsPro')
+          .replace('{needed}', result.needed)
+          .replace('{remaining}', result.remaining);
+      }
+      if (msg) alert(msg);
       return false;
     }
     return true;
