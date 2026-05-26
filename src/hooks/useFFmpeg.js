@@ -1,12 +1,15 @@
 import { useState, useCallback } from 'react';
 import { fetchFile } from '@ffmpeg/util';
 import { useAppStore } from '../store/appStore';
-import { processVideoWithFFmpeg, forceStopAllProcesses, getAudioDuration } from '../utils/ffmpegProcessor';
+import { useAuth } from '../context/AuthContext';
+import { processVideoWithFFmpeg, processVideoWithFFmpegInstance, forceStopAllProcesses, getAudioDuration } from '../utils/ffmpegProcessor';
+import { getPool } from '../utils/ffmpegPool';
 
 export const useFFmpeg = () => {
   // eslint-disable-next-line
   const DEBUG = false;
   const [progress, setProgress] = useState(0);
+  const { user } = useAuth();
   const { 
     setIsGenerating, 
     addGeneratedVideo, 
@@ -19,6 +22,17 @@ export const useFFmpeg = () => {
     getPreparedAssets,
     clearPreparedAssets 
   } = useAppStore();
+
+  // Concurrency limit based on plan:
+  //   Free / not logged in → 1 (sequential, safest)
+  //   Pro                  → 2 (2 independent FFmpeg instances, ~150MB extra RAM)
+  //   Unlimited / Admin    → 3 (3 instances, max recommended for cross-device stability)
+  const maxConcurrent = (() => {
+    const role = user?.role;
+    if (role === 'unlimited' || role === 'admin') return 3;
+    if (role === 'pro') return 2;
+    return 1;
+  })();
 
   const generateVideos = useCallback(async (pairs) => {
     DEBUG && console.log('generateVideos called with pairs:', pairs);
@@ -51,13 +65,10 @@ export const useFFmpeg = () => {
       
       // Don't clear existing videos - let users accumulate multiple generations
 
-      // Process videos sequentially - one at a time
-      const maxConcurrent = 1;  // Process 1 video at a time to prevent shared state conflicts in ffmpegProcessor
-
       DEBUG && console.log(`Processing ${pairs.length} videos with concurrency limit of ${maxConcurrent}`);
       let completedCount = 0;
 
-      // Clear any existing generation states and set up sequential generation
+      // Clear any existing generation states and set up generation
       pairs.forEach((pair, index) => {
         setVideoGenerationState(pair.id, {
           isGenerating: false,
@@ -65,7 +76,7 @@ export const useFFmpeg = () => {
           isComplete: false,
           video: null,
           error: null,
-          queuePosition: index, // Track position in generation queue
+          queuePosition: index,
           isInQueue: true
         });
       });
@@ -91,181 +102,130 @@ export const useFFmpeg = () => {
         }
       };
 
-      // Process pairs in concurrent batches
-      // Create batches of videos to process concurrently
-      const batches = [];
-      for (let i = 0; i < pairs.length; i += maxConcurrent) {
-        batches.push(pairs.slice(i, i + maxConcurrent));
-      }
+      if (maxConcurrent === 1) {
+        // ── SEQUENTIAL PATH (Free users) ───────────────────────────────────────
+        // Safe singleton FFmpeg — one video at a time with prefetch pipeline.
+        const batches = [];
+        for (let i = 0; i < pairs.length; i++) batches.push([pairs[i]]);
 
-      DEBUG && console.log(`Created ${batches.length} batches from ${pairs.length} videos (${maxConcurrent} per batch)`);
+        const prefetchPairs = async (pairsToFetch) => {
+          const { setPreparedAssets, getPreparedAssets } = useAppStore.getState();
+          await Promise.allSettled(pairsToFetch.map(async (pair) => {
+            if (getPreparedAssets(pair.id)) return;
+            try {
+              const [audioData, imageData] = await Promise.all([fetchFile(pair.audio), fetchFile(pair.image)]);
+              const audioDuration = await getAudioDuration(pair.audio);
+              setPreparedAssets(pair.id, { audioBuffer: new Uint8Array(audioData), imageBuffer: new Uint8Array(imageData), audioDuration });
+            } catch (e) { console.warn(`Prefetch failed for pair ${pair.id}:`, e.message); }
+          }));
+        };
 
-      // Pre-fetch files for upcoming pairs while FFmpeg is encoding the current one.
-      // Reads audio/image buffers + duration into preparedAssets so encoding starts instantly.
-      const prefetchPairs = async (pairsToFetch) => {
-        const { setPreparedAssets, getPreparedAssets } = useAppStore.getState();
-        await Promise.allSettled(pairsToFetch.map(async (pair) => {
-          if (getPreparedAssets(pair.id)) return; // already cached
+        if (batches.length > 0) prefetchPairs(batches[0]);
+        if (batches.length > 1) prefetchPairs(batches[1]);
+
+        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+          if (isCancelling) { forceStopAllProcesses(); break; }
+          const [pair] = batches[batchIndex];
+          const nextNext = batches[batchIndex + 2];
+          if (nextNext) prefetchPairs(nextNext);
+
           try {
-            const [audioData, imageData] = await Promise.all([
-              fetchFile(pair.audio),
-              fetchFile(pair.image)
-            ]);
-            const audioDuration = await getAudioDuration(pair.audio);
-            setPreparedAssets(pair.id, {
-              audioBuffer: new Uint8Array(audioData),
-              imageBuffer: new Uint8Array(imageData),
-              audioDuration
-            });
-            DEBUG && console.log(`✅ Prefetched assets for pair ${pair.id}`);
-          } catch (e) {
-            console.warn(`Prefetch failed for pair ${pair.id}:`, e.message);
+            const existing = useAppStore.getState().generatedVideos.find(v => v.pairId === pair.id);
+            if (existing) {
+              setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: existing, error: null });
+              completedCount++;
+            } else {
+              setVideoGenerationState(pair.id, { isGenerating: true, progress: 0, isComplete: false, video: null, error: null, queuePosition: batchIndex, isCurrentlyProcessing: true, startTime: Date.now(), lastUpdate: Date.now() });
+              const result = await processPairAsync(pair);
+              completedCount++;
+              if (result) {
+                setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: result, error: null, isCurrentlyProcessing: false, isFinished: true });
+              }
+            }
+          } catch (error) {
+            completedCount++;
+            setVideoGenerationState(pair.id, { isGenerating: false, progress: 0, isComplete: false, video: null, error: error.message || 'Video generation failed', isCurrentlyProcessing: false });
           }
-        }));
-      };
 
-      // Kick off prefetch for the first two batches before the loop starts
-      if (batches.length > 0) prefetchPairs(batches[0]);
-      if (batches.length > 1) prefetchPairs(batches[1]);
-
-      // Process each batch concurrently
-      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-        if (isCancelling) {
-          DEBUG && console.log('Video generation cancelled - stopping batch processing');
-          forceStopAllProcesses();
-          break;
+          await updateBatchProgress();
+          if (batchIndex < batches.length - 1 && !isCancelling) await new Promise(r => setTimeout(r, 200));
         }
 
-        const batch = batches[batchIndex];
-        const batchStartIndex = batchIndex * maxConcurrent;
-        
-        DEBUG && console.log(`\n🚀 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} videos)`);
+      } else {
+        // ── CONCURRENT POOL PATH (Pro = 2, Unlimited = 3) ─────────────────────
+        // Each video gets its own isolated FFmpeg instance from the pool.
+        // The pool semaphore limits how many run simultaneously.
+        const pool = getPool(maxConcurrent);
 
-        // Prefetch 2 batches ahead (rolling pipeline) while this batch encodes
-        const nextNextBatch = batches[batchIndex + 2];
-        if (nextNextBatch) prefetchPairs(nextNextBatch);
+        // Helper to build video settings (same as processPairAsync)
+        const buildVideoSettings = () => {
+          const s = useAppStore.getState();
+          return {
+            background: s.videoSettings?.background ?? 'black',
+            customBackground: s.videoSettings?.customBackground ?? null,
+            quality: s.videoSettings?.quality ?? 'fullhd',
+            logoFile: s.logoSettings?.logoFile,
+            useLogo: s.logoSettings?.useLogoInVideos,
+          };
+        };
 
-        // Process all videos in this batch concurrently
-        const batchPromises = batch.map(async (pair, indexInBatch) => {
-          const overallIndex = batchStartIndex + indexInBatch;
-          
-          if (isCancelling) {
-            DEBUG && console.log(`Cancelled before processing ${pair.id}`);
-            return { pair, success: false, error: 'Cancelled' };
-          }
+        await Promise.allSettled(pairs.map(async (pair, overallIndex) => {
+          if (isCancelling) return;
 
+          // Acquire a free pool slot (waits if all busy)
+          const slot = await pool.acquire();
           try {
-            // Skip if this pair already has a completed video
-            const currentStore = useAppStore.getState();
-            const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
+            if (isCancelling) return;
 
-            if (existingVideo) {
-              DEBUG && console.log(`Skipping pair ${pair.id} - video already exists`);
-              setVideoGenerationState(pair.id, {
-                isGenerating: false,
-                progress: 100,
-                isComplete: true,
-                video: existingVideo,
-                error: null
-              });
-              return { pair, success: true, video: existingVideo, skipped: true };
+            const existing = useAppStore.getState().generatedVideos.find(v => v.pairId === pair.id);
+            if (existing) {
+              setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: existing, error: null });
+              completedCount++;
+              setProgress(Math.floor((completedCount / pairs.length) * 100));
+              return;
             }
 
-            // Clear any existing state before starting
-            setVideoGenerationState(pair.id, {
-              isGenerating: false,
-              progress: 0,
-              isComplete: false,
-              video: null,
-              error: null,
-              isCurrentlyProcessing: false
-            });
+            setVideoGenerationState(pair.id, { isGenerating: true, progress: 0, isComplete: false, video: null, error: null, queuePosition: overallIndex, isCurrentlyProcessing: true, startTime: Date.now(), lastUpdate: Date.now() });
 
-            // Initialize state for this video to show it's starting
-            DEBUG && console.log(`🔄 Starting generation for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
-            setVideoGenerationState(pair.id, {
-              isGenerating: true,
-              progress: 0,
-              isComplete: false,
-              video: null,
-              error: null,
-              queuePosition: overallIndex,
-              isCurrentlyProcessing: true,
-              startTime: Date.now(),
-              lastUpdate: Date.now()
-            });
+            const preparedAssets = getPreparedAssets(pair.id);
+            const videoSettings = buildVideoSettings();
 
-            DEBUG && console.log(`Starting processing for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
-            const result = await processPairAsync(pair);
+            const videoData = await processVideoWithFFmpegInstance(
+              slot.inst,
+              pair.id,
+              pair.audio,
+              pair.image,
+              (pct) => {
+                const currentState = useAppStore.getState().videoGenerationStates[pair.id];
+                if (!currentState?.isGenerating) return;
+                setVideoGenerationState(pair.id, { isGenerating: true, progress: Math.floor(pct), isComplete: false, video: null, lastUpdate: Date.now() });
+              },
+              () => isCancelling,
+              videoSettings,
+              preparedAssets
+            );
 
-            if (result) {
-              DEBUG && console.log(`✅ Completed video ${overallIndex + 1}/${pairs.length} for pair ${pair.id}`);
+            if (preparedAssets) clearPreparedAssets(pair.id);
 
-              // Mark current video as completely finished
-              setVideoGenerationState(pair.id, {
-                isGenerating: false,
-                progress: 100,
-                isComplete: true,
-                video: result,
-                error: null,
-                isCurrentlyProcessing: false,
-                isFinished: true
-              });
-
-              return { pair, success: true, video: result };
-            } else {
-              console.warn(`⚠️ Video ${overallIndex + 1}/${pairs.length} returned null result`);
-              return { pair, success: false, error: 'No video returned' };
+            if (videoData) {
+              const blob = new Blob([videoData], { type: 'video/mp4' });
+              const url  = URL.createObjectURL(blob);
+              const videoObj = { pairId: pair.id, url, blob, audioName: pair.audio?.name, imageName: pair.image?.name, timestamp: Date.now() };
+              addGeneratedVideo(videoObj);
+              setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: videoObj, error: null, isCurrentlyProcessing: false, isFinished: true });
             }
+
+            completedCount++;
+            setProgress(Math.floor((completedCount / pairs.length) * 100));
 
           } catch (error) {
-            console.error(`Error processing pair ${pair.id}:`, error);
-
-            // Set error state for this specific pair
-            setVideoGenerationState(pair.id, {
-              isGenerating: false,
-              progress: 0,
-              isComplete: false,
-              video: null,
-              error: error.message || 'Video generation failed',
-              isCurrentlyProcessing: false
-            });
-
-            return { pair, success: false, error: error.message };
+            completedCount++;
+            setProgress(Math.floor((completedCount / pairs.length) * 100));
+            setVideoGenerationState(pair.id, { isGenerating: false, progress: 0, isComplete: false, video: null, error: error.message || 'Video generation failed', isCurrentlyProcessing: false });
+          } finally {
+            pool.release(slot);
           }
-        });
-
-        // Wait for all videos in this batch to complete
-        DEBUG && console.log(`⏳ Waiting for batch ${batchIndex + 1} to complete...`);
-        const batchResults = await Promise.allSettled(batchPromises);
-
-        // Process results and update completed count
-        let batchSuccessCount = 0;
-        batchResults.forEach((result, index) => {
-          if (result.status === 'fulfilled') {
-            const { success, skipped } = result.value;
-            if (success || skipped) {
-              completedCount++;
-              batchSuccessCount++;
-            } else {
-              completedCount++; // Still count as processed even if failed
-            }
-          } else {
-            console.error(`Batch promise rejected:`, result.reason);
-            completedCount++; // Count as processed
-          }
-        });
-
-        DEBUG && console.log(`✅ Batch ${batchIndex + 1}/${batches.length} completed: ${batchSuccessCount}/${batch.length} successful`);
-
-        // Update overall progress
-        await updateBatchProgress();
-
-        // Brief pause between batches to allow state to settle
-        // Progress token system already blocks stale callbacks, so a short delay is sufficient
-        if (batchIndex < batches.length - 1 && !isCancelling) {
-          await new Promise(resolve => setTimeout(resolve, 200));
-        }
+        }));
       }
 
       DEBUG && console.log(`🎉 All batches completed! Processed ${pairs.length} videos total.`);

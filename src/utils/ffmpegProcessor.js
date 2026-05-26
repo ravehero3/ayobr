@@ -888,6 +888,162 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
   }
 };
 
+// Pool-mode processor: uses a caller-provided FFmpeg instance with local state only.
+// No module-level shared state is touched, so N instances can run truly concurrently.
+export const processVideoWithFFmpegInstance = async (
+  ffmpegInst, pairId, audioFile, imageFile,
+  onProgress, shouldCancel, videoSettings = null, preparedAssets = null
+) => {
+  const timestamp = Date.now();
+  const audioFileName  = `audio_${pairId}_${timestamp}.mp3`;
+  const imageFileName  = `image_${pairId}_${timestamp}.jpg`;
+  const outputFileName = `output_${pairId}_${timestamp}.mp4`;
+  let progressHandler = null;
+  let hasCompleted = false;
+  let progressCallbackActive = true;
+
+  try {
+    ffmpegInst.off('progress');
+
+    progressHandler = ({ progress }) => {
+      if (!progressCallbackActive || hasCompleted || !onProgress) return;
+      const pct = Math.min(Math.max(progress * 100, 0), 99);
+      onProgress(pct);
+    };
+    ffmpegInst.on('progress', progressHandler);
+
+    // Read files (use pre-cached assets when available)
+    let audioData, imageData;
+    if (preparedAssets?.audioBuffer && preparedAssets?.imageBuffer) {
+      audioData = preparedAssets.audioBuffer;
+      imageData = preparedAssets.imageBuffer;
+    } else {
+      const [aRaw, iRaw] = await Promise.all([
+        fetchFile(audioFile),
+        fetchFile(imageFile),
+      ]);
+      audioData = new Uint8Array(aRaw);
+      imageData = new Uint8Array(iRaw);
+    }
+
+    await Promise.all([
+      ffmpegInst.writeFile(imageFileName,  new Uint8Array(imageData)),
+      ffmpegInst.writeFile(audioFileName,  new Uint8Array(audioData)),
+    ]);
+
+    const audioDuration = preparedAssets?.audioDuration ?? await getAudioDuration(audioFile);
+
+    // Build args
+    const ffmpegArgs = ['-loop', '1', '-i', imageFileName, '-i', audioFileName];
+
+    // Background
+    let backgroundColor = 'black';
+    let useCustomBackground = false;
+    let customBackgroundFileName = null;
+
+    if (videoSettings?.background === 'white') {
+      backgroundColor = 'white';
+    } else if (videoSettings?.background === 'custom' && videoSettings.customBackground) {
+      useCustomBackground = true;
+      customBackgroundFileName = `bg_${pairId}_${timestamp}.jpg`;
+      try {
+        let bgData;
+        const cbf = videoSettings.customBackground;
+        if (typeof cbf === 'string') {
+          const b64 = cbf.replace(/^data:image\/[a-z]+;base64,/, '');
+          bgData = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        } else {
+          bgData = new Uint8Array(await fetchFile(cbf));
+        }
+        if (bgData.length > 0) {
+          await ffmpegInst.writeFile(customBackgroundFileName, bgData);
+        } else {
+          useCustomBackground = false; customBackgroundFileName = null;
+        }
+      } catch {
+        useCustomBackground = false; customBackgroundFileName = null;
+      }
+    }
+
+    if (customBackgroundFileName && useCustomBackground) {
+      ffmpegArgs.push('-i', customBackgroundFileName);
+    }
+
+    const quality = videoSettings?.quality;
+    let RW = 1920, RH = 1080;
+    if (quality === '4k')  { RW = 3840; RH = 2160; }
+    else if (quality === 'hd') { RW = 1280; RH = 720; }
+
+    const videoFilter = (useCustomBackground && customBackgroundFileName)
+      ? `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`
+      : `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+
+    ffmpegArgs.push(
+      '-vf', videoFilter,
+      '-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'zerolatency',
+      '-crf', '28', '-pix_fmt', 'yuv420p', '-r', '5',
+      '-c:a', 'aac', '-b:a', '320k', '-ar', '48000', '-ac', '2',
+      '-threads', '4', '-shortest', '-t', audioDuration.toString(), '-y', outputFileName
+    );
+
+    // Execute
+    try {
+      await Promise.race([
+        ffmpegInst.exec(ffmpegArgs),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('FFmpeg timeout')), 900000)),
+      ]);
+    } catch (execError) {
+      const msg = execError?.message ?? String(execError);
+      const isWarning = /non monotonically|deprecated|warning|Past duration|monotonic dts/i.test(msg);
+      if (!isWarning) throw execError;
+    }
+
+    // Read output
+    let data;
+    try {
+      data = await ffmpegInst.readFile(outputFileName);
+    } catch {
+      await new Promise(r => setTimeout(r, 300));
+      data = await ffmpegInst.readFile(outputFileName);
+    }
+
+    if (!data || data.length < 1000) {
+      throw new Error(`Output file too small (${data?.length ?? 0} bytes)`);
+    }
+
+    if (onProgress && !hasCompleted) { onProgress(100); hasCompleted = true; }
+    progressCallbackActive = false;
+
+    // FS cleanup
+    const toClean = [audioFileName, imageFileName, outputFileName];
+    if (customBackgroundFileName && useCustomBackground) toClean.push(customBackgroundFileName);
+    await Promise.allSettled(toClean.map(f => ffmpegInst.deleteFile(f).catch(() => {})));
+
+    return new Uint8Array(data);
+
+  } catch (error) {
+    try {
+      await Promise.allSettled([
+        ffmpegInst.deleteFile(audioFileName).catch(() => {}),
+        ffmpegInst.deleteFile(imageFileName).catch(() => {}),
+        ffmpegInst.deleteFile(outputFileName).catch(() => {}),
+      ]);
+    } catch {}
+
+    if (shouldCancel?.()) {
+      const err = new Error('Generation cancelled by user');
+      err.isCancellation = true;
+      throw err;
+    }
+    throw error;
+  } finally {
+    progressCallbackActive = false;
+    if (ffmpegInst && progressHandler) {
+      try { ffmpegInst.off('progress', progressHandler); } catch {}
+    }
+  }
+};
+
 export const getAudioDuration = (audioFile) => {
   return new Promise((resolve, reject) => {
     const audio = new Audio();
