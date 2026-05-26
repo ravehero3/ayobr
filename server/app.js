@@ -2,6 +2,7 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const { setupAuth } = require('./auth');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
@@ -34,6 +35,34 @@ function buildApp() {
 
   // Gzip/brotli compress all responses (API JSON + static HTML/JS/CSS)
   app.use(compression());
+
+  // Rate limiting
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' },
+  });
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many login attempts, please try again later.' },
+  });
+  const paymentLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many payment requests, please try again later.' },
+  });
+  app.use('/api/', apiLimiter);
+  app.use('/api/login', authLimiter);
+  app.use('/api/callback', authLimiter);
+  app.use('/api/ls/create-checkout', paymentLimiter);
+  app.use('/api/gopay/create-payment', paymentLimiter);
 
   // Required for FFmpeg WebAssembly SharedArrayBuffer support
   app.use((req, res, next) => {

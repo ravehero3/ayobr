@@ -35,7 +35,6 @@ module.exports = {
               ['@babel/preset-react', { runtime: 'automatic' }]
             ],
             plugins: [
-              '@babel/plugin-transform-class-properties',
               '@babel/plugin-syntax-dynamic-import'
             ]
           }
