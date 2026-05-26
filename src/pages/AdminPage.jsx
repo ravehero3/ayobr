@@ -11,7 +11,7 @@ const BLUE = '#3b82f6';
 const BLUE2 = '#0ea5e9';
 const CARD = 'rgba(255,255,255,0.03)';
 const BORDER = 'rgba(255,255,255,0.08)';
-const BG = 'linear-gradient(160deg,#050a13 0%,#07111e 60%,#050e1a 100%)';
+const BG = '#000';
 
 /* ── Tiny helpers ─────────────────────────────────────────── */
 function Badge({ role }) {
@@ -107,7 +107,7 @@ function EmailPreviewCard({ tpl, onOpen }) {
         </div>
       </div>
       {/* Scaled iframe preview */}
-      <div style={{ height:240, overflow:'hidden', position:'relative', background:'#050a13' }}>
+      <div style={{ height:240, overflow:'hidden', position:'relative', background:'#000' }}>
         <iframe
           src={`${API}/email-templates/${tpl.id}/preview`}
           style={{ position:'absolute', top:0, left:0, width:'160%', height:'160%',
@@ -115,7 +115,7 @@ function EmailPreviewCard({ tpl, onOpen }) {
           title={tpl.name}
         />
         <div style={{ position:'absolute', bottom:0, left:0, right:0, height:60,
-          background:'linear-gradient(to top, rgba(5,10,19,0.95), transparent)' }} />
+          background:'linear-gradient(to top, rgba(0,0,0,0.95), transparent)' }} />
         <div style={{ position:'absolute', bottom:12, left:0, right:0, textAlign:'center' }}>
           <span style={{ fontFamily:NM, fontSize:9, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase',
             color:BLUE, background:`${BLUE}15`, border:`1px solid ${BLUE}25`, borderRadius:6, padding:'4px 10px' }}>
@@ -284,7 +284,7 @@ export default function AdminPage() {
 
   /* ── Loading guard ── */
   if (loading || !user) return (
-    <div style={{minHeight:'100vh',background:'#050a13',display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{width:28,height:28,borderRadius:'50%',border:'2px solid rgba(255,255,255,0.08)',
         borderTopColor:BLUE,animation:'spin 0.8s linear infinite'}}/>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>

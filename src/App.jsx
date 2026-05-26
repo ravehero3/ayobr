@@ -19,7 +19,7 @@ const SuccessPage   = lazy(() => import('./pages/SuccessPage'));
 
 function PageLoader() {
   return (
-    <div style={{ minHeight: '100vh', background: '#050a13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.08)', borderTopColor: '#3b82f6', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
