@@ -4,6 +4,8 @@ import { useAppStore } from '../store/appStore';
 import { processVideoWithFFmpeg, forceStopAllProcesses, getAudioDuration } from '../utils/ffmpegProcessor';
 
 export const useFFmpeg = () => {
+  // eslint-disable-next-line
+  const DEBUG = false;
   const [progress, setProgress] = useState(0);
   const { 
     setIsGenerating, 
@@ -19,7 +21,7 @@ export const useFFmpeg = () => {
   } = useAppStore();
 
   const generateVideos = useCallback(async (pairs) => {
-    console.log('generateVideos called with pairs:', pairs);
+    DEBUG && console.log('generateVideos called with pairs:', pairs);
 
     if (!pairs || pairs.length === 0) {
       console.error('No pairs provided for video generation');
@@ -52,7 +54,7 @@ export const useFFmpeg = () => {
       // Process videos sequentially - one at a time
       const maxConcurrent = 1;  // Process 1 video at a time to prevent shared state conflicts in ffmpegProcessor
 
-      console.log(`Processing ${pairs.length} videos with concurrency limit of ${maxConcurrent}`);
+      DEBUG && console.log(`Processing ${pairs.length} videos with concurrency limit of ${maxConcurrent}`);
       let completedCount = 0;
 
       // Clear any existing generation states and set up sequential generation
@@ -75,12 +77,12 @@ export const useFFmpeg = () => {
 
         // Log progress for large batches
         if (pairs.length > 20) {
-          console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
+          DEBUG && console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
         }
 
         // Memory cleanup every 10 videos to prevent crashes in browser
         if (completedCount > 0 && completedCount % 10 === 0) {
-          console.log(`Performing memory cleanup after ${completedCount} completed videos`);
+          DEBUG && console.log(`Performing memory cleanup after ${completedCount} completed videos`);
 
           // Force browser garbage collection and cleanup
           if (window.gc) {
@@ -96,7 +98,7 @@ export const useFFmpeg = () => {
         batches.push(pairs.slice(i, i + maxConcurrent));
       }
 
-      console.log(`Created ${batches.length} batches from ${pairs.length} videos (${maxConcurrent} per batch)`);
+      DEBUG && console.log(`Created ${batches.length} batches from ${pairs.length} videos (${maxConcurrent} per batch)`);
 
       // Pre-fetch files for upcoming pairs while FFmpeg is encoding the current one.
       // Reads audio/image buffers + duration into preparedAssets so encoding starts instantly.
@@ -115,7 +117,7 @@ export const useFFmpeg = () => {
               imageBuffer: new Uint8Array(imageData),
               audioDuration
             });
-            console.log(`✅ Prefetched assets for pair ${pair.id}`);
+            DEBUG && console.log(`✅ Prefetched assets for pair ${pair.id}`);
           } catch (e) {
             console.warn(`Prefetch failed for pair ${pair.id}:`, e.message);
           }
@@ -129,7 +131,7 @@ export const useFFmpeg = () => {
       // Process each batch concurrently
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         if (isCancelling) {
-          console.log('Video generation cancelled - stopping batch processing');
+          DEBUG && console.log('Video generation cancelled - stopping batch processing');
           forceStopAllProcesses();
           break;
         }
@@ -137,7 +139,7 @@ export const useFFmpeg = () => {
         const batch = batches[batchIndex];
         const batchStartIndex = batchIndex * maxConcurrent;
         
-        console.log(`\n🚀 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} videos)`);
+        DEBUG && console.log(`\n🚀 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} videos)`);
 
         // Prefetch 2 batches ahead (rolling pipeline) while this batch encodes
         const nextNextBatch = batches[batchIndex + 2];
@@ -148,7 +150,7 @@ export const useFFmpeg = () => {
           const overallIndex = batchStartIndex + indexInBatch;
           
           if (isCancelling) {
-            console.log(`Cancelled before processing ${pair.id}`);
+            DEBUG && console.log(`Cancelled before processing ${pair.id}`);
             return { pair, success: false, error: 'Cancelled' };
           }
 
@@ -158,7 +160,7 @@ export const useFFmpeg = () => {
             const existingVideo = currentStore.generatedVideos.find(v => v.pairId === pair.id);
 
             if (existingVideo) {
-              console.log(`Skipping pair ${pair.id} - video already exists`);
+              DEBUG && console.log(`Skipping pair ${pair.id} - video already exists`);
               setVideoGenerationState(pair.id, {
                 isGenerating: false,
                 progress: 100,
@@ -180,7 +182,7 @@ export const useFFmpeg = () => {
             });
 
             // Initialize state for this video to show it's starting
-            console.log(`🔄 Starting generation for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
+            DEBUG && console.log(`🔄 Starting generation for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
             setVideoGenerationState(pair.id, {
               isGenerating: true,
               progress: 0,
@@ -193,11 +195,11 @@ export const useFFmpeg = () => {
               lastUpdate: Date.now()
             });
 
-            console.log(`Starting processing for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
+            DEBUG && console.log(`Starting processing for pair ${pair.id} (${overallIndex + 1}/${pairs.length})`);
             const result = await processPairAsync(pair);
 
             if (result) {
-              console.log(`✅ Completed video ${overallIndex + 1}/${pairs.length} for pair ${pair.id}`);
+              DEBUG && console.log(`✅ Completed video ${overallIndex + 1}/${pairs.length} for pair ${pair.id}`);
 
               // Mark current video as completely finished
               setVideoGenerationState(pair.id, {
@@ -234,7 +236,7 @@ export const useFFmpeg = () => {
         });
 
         // Wait for all videos in this batch to complete
-        console.log(`⏳ Waiting for batch ${batchIndex + 1} to complete...`);
+        DEBUG && console.log(`⏳ Waiting for batch ${batchIndex + 1} to complete...`);
         const batchResults = await Promise.allSettled(batchPromises);
 
         // Process results and update completed count
@@ -254,7 +256,7 @@ export const useFFmpeg = () => {
           }
         });
 
-        console.log(`✅ Batch ${batchIndex + 1}/${batches.length} completed: ${batchSuccessCount}/${batch.length} successful`);
+        DEBUG && console.log(`✅ Batch ${batchIndex + 1}/${batches.length} completed: ${batchSuccessCount}/${batch.length} successful`);
 
         // Update overall progress
         await updateBatchProgress();
@@ -266,10 +268,10 @@ export const useFFmpeg = () => {
         }
       }
 
-      console.log(`🎉 All batches completed! Processed ${pairs.length} videos total.`);
+      DEBUG && console.log(`🎉 All batches completed! Processed ${pairs.length} videos total.`);
       // Check if generation was cancelled before finishing
       if (isCancelling) {
-        console.log('Video generation was cancelled');
+        DEBUG && console.log('Video generation was cancelled');
         setIsGenerating(false);
         setProgress(0);
 
@@ -287,7 +289,7 @@ export const useFFmpeg = () => {
         return;
       }
 
-      console.log('Video generation completed successfully');
+      DEBUG && console.log('Video generation completed successfully');
       setProgress(100);
 
       // Small delay to ensure all videos are properly added to store
@@ -295,17 +297,17 @@ export const useFFmpeg = () => {
 
       // Force completion for all videos that reached 100%
       const { generatedVideos, videoGenerationStates } = useAppStore.getState();
-      console.log('Final check - videos in store:', generatedVideos.length);
-      console.log('Video generation states:', videoGenerationStates);
+      DEBUG && console.log('Final check - videos in store:', generatedVideos.length);
+      DEBUG && console.log('Video generation states:', videoGenerationStates);
 
       // Ensure all completed videos have proper states before finishing
-      console.log('Finalizing video generation states...');
+      DEBUG && console.log('Finalizing video generation states...');
       pairs.forEach((pair) => {
         const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
         const currentState = videoGenerationStates[pair.id];
 
         if (existingVideo) {
-          console.log(`Finalizing state for pair ${pair.id} with video`);
+          DEBUG && console.log(`Finalizing state for pair ${pair.id} with video`);
           setVideoGenerationState(pair.id, {
             isGenerating: false,
             progress: 100,
@@ -314,14 +316,14 @@ export const useFFmpeg = () => {
             error: null
           });
         } else if (currentState && currentState.error) {
-          console.log(`Keeping error state for pair ${pair.id}:`, currentState.error);
+          DEBUG && console.log(`Keeping error state for pair ${pair.id}:`, currentState.error);
           // Keep error state as is
         } else if (currentState && currentState.isComplete && currentState.video) {
           // State is already complete with a video - keep it (prevents race condition in concurrent generation)
-          console.log(`Pair ${pair.id} already has complete state with video, keeping it`);
+          DEBUG && console.log(`Pair ${pair.id} already has complete state with video, keeping it`);
           // Don't modify the state - it's already correct
         } else {
-          console.log(`No video found for pair ${pair.id}, clearing state`);
+          DEBUG && console.log(`No video found for pair ${pair.id}, clearing state`);
           setVideoGenerationState(pair.id, {
             isGenerating: false,
             progress: 0,
@@ -338,13 +340,13 @@ export const useFFmpeg = () => {
 
       // Force UI update after short delay
       setTimeout(() => {
-        console.log('Forcing UI update after completion');
+        DEBUG && console.log('Forcing UI update after completion');
         const { getCurrentPage } = useAppStore.getState();
         const currentPage = getCurrentPage();
-        console.log('Current page after completion:', currentPage);
+        DEBUG && console.log('Current page after completion:', currentPage);
       }, 100);
 
-      console.log('Generation completed, videos should now be visible');
+      DEBUG && console.log('Generation completed, videos should now be visible');
 
     } catch (error) {
       console.error('Error in generateVideos:', error);
@@ -369,7 +371,7 @@ export const useFFmpeg = () => {
       // Reset cancellation state
       setTimeout(() => {
         resetCancellation();
-        console.log('Error handled, app is ready for retry');
+        DEBUG && console.log('Error handled, app is ready for retry');
       }, 1000);
     } finally {
       // Cleanup is handled in the main flow above
@@ -386,12 +388,12 @@ export const useFFmpeg = () => {
       const existingVideo = store.generatedVideos.find(v => v.pairId === pair.id);
 
       if (existingVideo) {
-        console.log(`Video already exists for pair ${pair.id}, skipping`);
+        DEBUG && console.log(`Video already exists for pair ${pair.id}, skipping`);
         return existingVideo;
       }
 
       // Initialize generation state
-      console.log(`Starting video generation for pair ${pair.id}`);
+      DEBUG && console.log(`Starting video generation for pair ${pair.id}`);
       setVideoGenerationState(pair.id, {
         isGenerating: true,
         progress: 0,
@@ -402,7 +404,7 @@ export const useFFmpeg = () => {
         lastUpdate: Date.now()
       });
 
-      console.log(`Processing video for pair ${pair.id}:`, pair);
+      DEBUG && console.log(`Processing video for pair ${pair.id}:`, pair);
 
       // Get video settings from app store including logo settings
       const videoSettings = {
@@ -410,12 +412,12 @@ export const useFFmpeg = () => {
         logoFile: store.logoSettings?.logoFile,
         useLogo: store.logoSettings?.useLogoInVideos
       };
-      console.log('Video settings for generation:', videoSettings);
+      DEBUG && console.log('Video settings for generation:', videoSettings);
 
       // Get prepared assets for this pair (if available)
       const preparedAssets = getPreparedAssets(pair.id);
       if (preparedAssets) {
-        console.log(`Using PREPARED ASSETS for pair ${pair.id} - OPTIMIZATION ACTIVE`);
+        DEBUG && console.log(`Using PREPARED ASSETS for pair ${pair.id} - OPTIMIZATION ACTIVE`);
       }
 
       let videoData;
@@ -443,7 +445,7 @@ export const useFFmpeg = () => {
             }
             
             const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
-            console.log(`Setting video generation state for pair ${pair.id}:`, {
+            DEBUG && console.log(`Setting video generation state for pair ${pair.id}:`, {
               isGenerating: true,
               progress: clampedProgress,
               isComplete: false,
@@ -459,7 +461,7 @@ export const useFFmpeg = () => {
           },
           () => {
             if (isCancelling) {
-              console.log('Cancellation detected, stopping FFmpeg process');
+              DEBUG && console.log('Cancellation detected, stopping FFmpeg process');
               return true;
             }
             return false;
@@ -470,24 +472,24 @@ export const useFFmpeg = () => {
         
         // Clear prepared assets after successful use to free memory
         if (preparedAssets) {
-          console.log(`Clearing prepared assets for pair ${pair.id} to free memory`);
+          DEBUG && console.log(`Clearing prepared assets for pair ${pair.id} to free memory`);
           clearPreparedAssets(pair.id);
         }
         
-        console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
+        DEBUG && console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
       } catch (processingError) {
         console.error(`Error during video processing for pair ${pair.id}:`, processingError);
 
         // Force cleanup on timeout or error
         if (processingError.message.includes('timeout')) {
-          console.log(`Video processing timed out for pair ${pair.id}, forcing cleanup`);
+          DEBUG && console.log(`Video processing timed out for pair ${pair.id}, forcing cleanup`);
           forceStopAllProcesses();
         }
 
         // Check if this is a file reading error but FFmpeg actually completed successfully
         if (processingError.message.includes('Output file could not be read') && 
             processingError.message.includes('attempts')) {
-          console.log('File reading failed but FFmpeg completed - trying alternate completion');
+          DEBUG && console.log('File reading failed but FFmpeg completed - trying alternate completion');
 
           // Check if there's any valid data or if this is just a read timing issue
           const alternateVideo = {
@@ -525,12 +527,12 @@ export const useFFmpeg = () => {
       }
 
       if (isCancelling) {
-        console.log('Video generation cancelled during blob creation');
+        DEBUG && console.log('Video generation cancelled during blob creation');
         return null;
       }
 
-      console.log('Creating video blob and URL...');
-      console.log('Video data size received:', videoData ? videoData.length : 'null/undefined');
+      DEBUG && console.log('Creating video blob and URL...');
+      DEBUG && console.log('Video data size received:', videoData ? videoData.length : 'null/undefined');
 
       if (!videoData || videoData.length === 0) {
         console.error(`Invalid video data for pair ${pair.id}: ${videoData ? 'empty buffer' : 'null/undefined'}`);
@@ -556,15 +558,15 @@ export const useFFmpeg = () => {
 
       let videoBlob, videoUrl;
       try {
-        console.log('Creating Blob object...');
+        DEBUG && console.log('Creating Blob object...');
         videoBlob = new Blob([videoData], { type: 'video/mp4' });
-        console.log('Blob created, size:', videoBlob.size);
+        DEBUG && console.log('Blob created, size:', videoBlob.size);
 
-        console.log('Creating object URL...');
+        DEBUG && console.log('Creating object URL...');
         videoUrl = URL.createObjectURL(videoBlob);
-        console.log('Object URL created:', videoUrl.substring(0, 50) + '...');
+        DEBUG && console.log('Object URL created:', videoUrl.substring(0, 50) + '...');
 
-        console.log('Video blob and URL created successfully');
+        DEBUG && console.log('Video blob and URL created successfully');
       } catch (blobError) {
         console.error('Error creating video blob:', blobError);
         console.error('Blob error stack:', blobError.stack);
@@ -585,7 +587,7 @@ export const useFFmpeg = () => {
         size: videoData.length
       };
 
-      console.log('Video object created:', {
+      DEBUG && console.log('Video object created:', {
         id: video.id,
         filename: video.filename,
         size: video.size,
@@ -608,8 +610,8 @@ export const useFFmpeg = () => {
 
       while (!addToStoreSuccess && retryCount < maxRetries) {
         try {
-          console.log(`Adding video to store (attempt ${retryCount + 1})...`);
-          console.log('Video object to add:', {
+          DEBUG && console.log(`Adding video to store (attempt ${retryCount + 1})...`);
+          DEBUG && console.log('Video object to add:', {
             id: video.id,
             pairId: video.pairId,
             filename: video.filename,
@@ -621,14 +623,14 @@ export const useFFmpeg = () => {
           // Get current store reference to ensure we're working with fresh state
           const { addGeneratedVideo: addVideoToStore } = useAppStore.getState();
           addVideoToStore(video);
-          console.log('addGeneratedVideo called successfully');
+          DEBUG && console.log('addGeneratedVideo called successfully');
 
           // Wait a moment for state update
           await new Promise(resolve => setTimeout(resolve, 200));
 
           // Verify video was added with multiple checks
           const storeState = useAppStore.getState();
-          console.log('Current store state:', {
+          DEBUG && console.log('Current store state:', {
             totalVideos: storeState.generatedVideos.length,
             videoIds: storeState.generatedVideos.map(v => v.id),
             videoPairIds: storeState.generatedVideos.map(v => v.pairId)
@@ -639,8 +641,8 @@ export const useFFmpeg = () => {
           const addedVideoByPairId = storeState.generatedVideos.find(v => v.pairId === pair.id);
 
           if (addedVideoById || addedVideoByPairId) {
-            console.log('Video successfully added to store');
-            console.log('Total videos in store:', storeState.generatedVideos.length);
+            DEBUG && console.log('Video successfully added to store');
+            DEBUG && console.log('Total videos in store:', storeState.generatedVideos.length);
             addToStoreSuccess = true;
           } else {
             console.error('Video verification failed:', {
@@ -671,7 +673,7 @@ export const useFFmpeg = () => {
       }
 
       // Set final completion state IMMEDIATELY when video is ready
-      console.log(`Setting completion state for pair ${pair.id}...`);
+      DEBUG && console.log(`Setting completion state for pair ${pair.id}...`);
       const completionState = {
         isGenerating: false,
         progress: 100,
@@ -689,12 +691,12 @@ export const useFFmpeg = () => {
       // Double-check with immediate callback and force UI update
       setTimeout(() => {
         setVideoGenerationState(pair.id, completionState);
-        console.log(`✅ Video ${pair.id} completion state confirmed`);
+        DEBUG && console.log(`✅ Video ${pair.id} completion state confirmed`);
         
         // Force a state verification to ensure completion stuck
         const currentState = useAppStore.getState().videoGenerationStates[pair.id];
         if (currentState && currentState.isGenerating) {
-          console.log(`🔧 Force completing stuck video ${pair.id}`);
+          DEBUG && console.log(`🔧 Force completing stuck video ${pair.id}`);
           setVideoGenerationState(pair.id, {
             ...completionState,
             isGenerating: false,
@@ -705,14 +707,14 @@ export const useFFmpeg = () => {
       }, 50);
 
       // Force immediate UI update to show completion
-      console.log(`✅ Video ${pair.id} marked as complete - ready for next video`);
+      DEBUG && console.log(`✅ Video ${pair.id} marked as complete - ready for next video`);
 
       // Force immediate UI state update
       setTimeout(() => {
         // Double-check the completion state after a small delay
         const currentState = useAppStore.getState().videoGenerationStates[pair.id];
         if (currentState && !currentState.isComplete) {
-          console.log(`Force completing stuck video for pair ${pair.id}`);
+          DEBUG && console.log(`Force completing stuck video for pair ${pair.id}`);
           setVideoGenerationState(pair.id, {
             isGenerating: false,
             progress: 100,
@@ -724,9 +726,9 @@ export const useFFmpeg = () => {
       }, 100);
 
       // Video completed successfully
-      console.log(`✅ Video ${pair.id} completed successfully`);
+      DEBUG && console.log(`✅ Video ${pair.id} completed successfully`);
 
-      console.log(`Video generation completed successfully for pair ${pair.id}`);
+      DEBUG && console.log(`Video generation completed successfully for pair ${pair.id}`);
       return video;
 
     } catch (error) {
@@ -749,15 +751,15 @@ export const useFFmpeg = () => {
       const isCompletionIssue = error && (error.message === '' || error.message === 'undefined');
 
       if (isEmptyError || isCompletionIssue) {
-        console.log('Detected empty error or completion issue after processing - checking for successful video');
-        console.log('Checking if we have valid video data in the generated videos...');
+        DEBUG && console.log('Detected empty error or completion issue after processing - checking for successful video');
+        DEBUG && console.log('Checking if we have valid video data in the generated videos...');
 
         // Check if a video was actually generated successfully
         const storeState = useAppStore.getState();
         const existingVideo = storeState.generatedVideos.find(v => v.pairId === pair.id);
 
         if (existingVideo) {
-          console.log('Found successfully generated video despite error, marking as complete');
+          DEBUG && console.log('Found successfully generated video despite error, marking as complete');
           setVideoGenerationState(pair.id, {
             isGenerating: false,
             progress: 100,
@@ -767,7 +769,7 @@ export const useFFmpeg = () => {
           });
           return existingVideo;
         } else {
-          console.log('No video found in store, but this may be a timing issue - clearing error state');
+          DEBUG && console.log('No video found in store, but this may be a timing issue - clearing error state');
           // Clear the error state and let the process continue
           setVideoGenerationState(pair.id, {
             isGenerating: false,
@@ -782,7 +784,7 @@ export const useFFmpeg = () => {
 
       // Check if generation was cancelled
       if (isCancelling || (error && error.message === 'Generation cancelled by user')) {
-        console.log(`Video generation cancelled for pair ${pair.id}`);
+        DEBUG && console.log(`Video generation cancelled for pair ${pair.id}`);
         setVideoGenerationState(pair.id, {
           isGenerating: false,
           progress: 0,
@@ -821,7 +823,7 @@ export const useFFmpeg = () => {
                                errorMsg.includes('timeout');
 
       if (isRestartableError && !isCancelling) {
-        console.log('Detected restartable error, FFmpeg will reinitialize for next video');
+        DEBUG && console.log('Detected restartable error, FFmpeg will reinitialize for next video');
         // Set the pair as not generating but don't mark it as error - it might work on retry
         setVideoGenerationState(pair.id, {
           isGenerating: false,
@@ -848,7 +850,7 @@ export const useFFmpeg = () => {
   };
 
   const stopGeneration = useCallback(() => {
-    console.log('Stop generation clicked - forcing immediate termination');
+    DEBUG && console.log('Stop generation clicked - forcing immediate termination');
 
     // Set cancelling flag first
     cancelGeneration();
@@ -884,12 +886,12 @@ export const useFFmpeg = () => {
     // Final cleanup after a short delay
     setTimeout(() => {
       resetCancellation();
-      console.log('App completely reset and ready for new generation');
+      DEBUG && console.log('App completely reset and ready for new generation');
     }, 100); // Reduced delay for immediate feedback
   }, [cancelGeneration, setProgress, resetCancellation, setIsGenerating]);
 
   const resetAppForNewGeneration = useCallback(() => {
-    console.log('Resetting app for new generation');
+    DEBUG && console.log('Resetting app for new generation');
 
     // Reset all states
     setIsGenerating(false);
@@ -903,7 +905,7 @@ export const useFFmpeg = () => {
     // Force cleanup of any lingering processes
     forceStopAllProcesses();
 
-    console.log('App reset complete - ready for new generation');
+    DEBUG && console.log('App reset complete - ready for new generation');
   }, [setIsGenerating, setProgress, resetCancellation]);
 
   return {
