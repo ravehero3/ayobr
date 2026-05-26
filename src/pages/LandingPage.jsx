@@ -6,9 +6,9 @@ import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
-import screenshotUpload from '../assets/screenshot_upload_new.png';
-import screenshotReview from '../assets/screenshot_review_new.png';
-import screenshotGenerate from '../assets/screenshot_generate_new.png';
+import screenshotUpload from '../assets/screenshot_upload_new.jpg';
+import screenshotReview from '../assets/screenshot_review_new.jpg';
+import screenshotGenerate from '../assets/screenshot_generate_new.jpg';
 import screenshotDownload from '../assets/screenshot_download.png';
 
 const NM     = "'Neue Montreal', 'Inter', sans-serif";
@@ -471,22 +471,6 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                   </span>
                 </div>
               </div>
-
-              {/* Annual savings badge */}
-              {plan.annualSavings && isAnnual && (
-                <div style={{ marginTop: 6, marginBottom: 2 }}>
-                  <span style={{
-                    fontFamily: NM, fontSize: '0.72rem', fontWeight: 600,
-                    color: '#4ade80',
-                    background: 'rgba(74, 222, 128, 0.12)',
-                    border: '1px solid rgba(74, 222, 128, 0.25)',
-                    borderRadius: 6, padding: '2px 8px',
-                    letterSpacing: '0.01em',
-                  }}>
-                    {plan.annualSavings}
-                  </span>
-                </div>
-              )}
 
               {/* Bottom Divider */}
               <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 24, marginTop: 16 }} />
