@@ -17,7 +17,6 @@ const Header = () => {
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
   const handleResetApp = () => {
-    console.log('Resetting stuck video generation...');
     stopGeneration();
     resetAppForNewGeneration();
     resetGenerationState();

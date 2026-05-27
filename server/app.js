@@ -15,6 +15,13 @@ const { resetMonthlyCredits } = require('./storage');
 function buildApp() {
   const app = express();
 
+  // Keep-alive ping endpoint — no auth, no rate limiting, no COEP headers
+  // External uptime monitors should hit GET /ping every 10 minutes
+  app.get('/ping', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.send('pong');
+  });
+
   const allowedOrigins = [
     'http://localhost:5000',
     'http://localhost:5001',
