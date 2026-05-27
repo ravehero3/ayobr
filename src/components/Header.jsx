@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useAuth } from '../context/AuthContext';
 import { useFFmpeg } from '../hooks/useFFmpeg';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import userIcon from '../assets/user_1754478889614.png';
@@ -10,6 +11,7 @@ import AppInfoWindow from './AppInfoWindow';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 const Header = () => {
+  const { user } = useAuth();
   const { generatedVideos, pairs, userProfileImage, username, isGenerating, resetGenerationState } = useAppStore();
   const { stopGeneration, resetAppForNewGeneration } = useFFmpeg();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -22,7 +24,9 @@ const Header = () => {
     resetGenerationState();
   };
 
-  // Don't render header if no files are present
+  // Producer name from auth takes priority; fall back to local store username
+  const displayName = user?.producer_name || username;
+
   if (!hasFiles) {
     return null;
   }
@@ -36,7 +40,7 @@ const Header = () => {
       style={{ zIndex: 10000 }}
     >
       <div
-        className="w-full h-full flex items-center justify-between px-4 md:px-[64px]"
+        className="relative w-full h-full flex items-center justify-between px-4 md:px-[64px]"
         style={{
           background: 'rgba(0, 0, 0, 0.38)',
           backdropFilter: 'blur(16px)',
@@ -60,15 +64,21 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Producer name — absolutely centered in the header */}
-        <div className="absolute left-0 right-0 flex justify-center pointer-events-none" style={{ zIndex: 1 }}>
-          <span className="text-white text-sm font-semibold opacity-90 tracking-wide" style={{ fontFamily: NM }}>
-            {username}
+        {/* Producer name — absolutely centred in the header, above flex siblings */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ zIndex: 2 }}
+        >
+          <span
+            className="text-white text-sm font-semibold opacity-90 tracking-wide"
+            style={{ fontFamily: NM }}
+          >
+            {displayName}
           </span>
         </div>
 
         {/* Right side: Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" style={{ zIndex: 3 }}>
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"
@@ -77,21 +87,13 @@ const Header = () => {
               src={userProfileImage || userIcon}
               alt="Profile"
               className="w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; }}
             />
           </button>
         </div>
 
-        {/* User Profile Modal */}
-        <UserProfile
-          isOpen={isProfileOpen}
-          onClose={() => setIsProfileOpen(false)}
-        />
-
-        {/* App Info Window */}
-        <AppInfoWindow
-          isOpen={isAppInfoOpen}
-          onClose={() => setIsAppInfoOpen(false)}
-        />
+        <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+        <AppInfoWindow isOpen={isAppInfoOpen} onClose={() => setIsAppInfoOpen(false)} />
       </div>
     </motion.header>
   );
