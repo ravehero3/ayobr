@@ -187,13 +187,38 @@ export default function UpgradePage() {
         body: JSON.stringify({ first_name: firstName, last_name: lastName, producer_name: producerName || undefined }),
       });
       await refreshUser();
-      const opened = await openCheckout(user?.email, pending.plan, pending.interval);
-      if (!opened) { setLoading(false); return; }
-      if (language !== 'cs') setPending(null);
+
+      if (isCzech) {
+        // Czech customers → GoPay (CZK)
+        const res = await fetch('/api/gopay/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ plan: pending.plan, isAnnual: pending.interval === 'yearly' }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.message || 'Chyba platby. Zkuste to prosím znovu.');
+          setLoading(false);
+          return;
+        }
+        const { gwUrl } = await res.json();
+        if (gwUrl) {
+          window.location.href = gwUrl;
+          // Page is navigating away — keep loading state, don't clear modal
+          return;
+        }
+        alert('Nepodařilo se zahájit platbu. Zkuste to prosím znovu.');
+        setLoading(false);
+      } else {
+        // International customers → LemonSqueezy (USD/EUR)
+        const opened = await openCheckout(user?.email, pending.plan, pending.interval);
+        if (!opened) { setLoading(false); return; }
+        setPending(null);
+      }
     } catch (err) {
       console.error('Checkout error:', err);
       alert(isCzech ? 'Chyba platby. Zkuste to prosím znovu.' : 'Payment error. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
