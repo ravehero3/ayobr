@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import page1Background from '../assets/page-1-background.png';
+import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const AnimatedBackground = () => {
   const pairs = useAppStore(state => state.pairs);
@@ -23,8 +24,8 @@ const AnimatedBackground = () => {
     img1.src = page1Background;
 
     const img2 = new Image();
-    img2.onload = () => setBackgroundLoaded(prev => ({ ...prev, page2: true }));
-    img2.src = '/attached_assets/background%20page%202_1754507959583.jpg';
+    img2.onload = () => setBackgroundLoaded(prev => ({ ...prev, stars: true }));
+    img2.src = starsBg;
   }, []);
 
   const showBlur = hasFiles && !hasVideos;
@@ -51,20 +52,18 @@ const AnimatedBackground = () => {
         transition={{ duration: 1.2, ease: 'easeOut', delay: 0.1 }}
       />
 
-      {/* Page 4 background (Earth) — shown when videos are ready */}
+      {/* Stars background — shown when videos are ready */}
       <AnimatePresence>
         {hasVideos && !isGenerating && (
           <motion.div
-            key="page4"
+            key="stars-complete"
             className="absolute inset-0 w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: 'easeInOut' }}
             style={{
-              backgroundImage: backgroundLoaded.page2
-                ? 'url(/attached_assets/background%20page%202_1754507959583.jpg)'
-                : 'none',
+              backgroundImage: backgroundLoaded.stars ? `url(${starsBg})` : 'none',
               backgroundColor: '#000000',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
