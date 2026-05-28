@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import userIcon from '../assets/user_1754478889614.png';
+import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -56,7 +57,7 @@ function formatDate(dateStr, language) {
 }
 
 export default function AccountPage() {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, setLiveProducerName, liveProducerName } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   useDocumentTitle(t('account.title'));
@@ -193,15 +194,30 @@ export default function AccountPage() {
   const creditsUsed = user?.credits?.credits_used_this_month ?? 0;
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white/20">
+    <div className="min-h-screen bg-black text-white selection:bg-white/20 relative">
+      <div className="fixed inset-0 pointer-events-none" style={{
+        zIndex: 0,
+        backgroundImage: `url(${starsBg})`,
+        backgroundSize: '130%',
+        backgroundPosition: 'center calc(50% - 200px)',
+        backgroundRepeat: 'no-repeat',
+        opacity: 1
+      }} />
       
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-12 h-16 border-b border-white/5 bg-black/50 backdrop-blur-xl">
-        <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
+        <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity z-10">
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 18 }} />
         </button>
+        
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <span className="text-white text-sm opacity-90 font-medium font-sans">
+            {liveProducerName || user?.producer_name || user?.first_name || 'User'}
+          </span>
+        </div>
+
         <button onClick={() => navigate('/app')}
-          className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all flex items-center gap-2"
+          className="z-10 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all flex items-center gap-2"
           style={{ fontFamily: NM }}>
           <span className="text-sm">←</span> {t('account.backToApp')}
         </button>
@@ -250,13 +266,13 @@ export default function AccountPage() {
                     <InputField label={t('account.firstName')} value={firstName} onChange={setFirstName} placeholder="Enter first name" />
                     <InputField label={t('account.lastName')} value={lastName} onChange={setLastName} placeholder="Enter last name" />
                   </div>
-                  <InputField label={t('account.producerName')} value={producerName} onChange={setProducerName} placeholder="Enter stage name" />
+                  <InputField label={t('account.producerName')} value={producerName} onChange={(v) => { setProducerName(v); setLiveProducerName(v); }} placeholder="Enter stage name" />
                   
                   <div className="pt-4 flex items-center justify-between">
                     <button 
                       onClick={handleSaveProfile}
                       disabled={saving}
-                      className="px-8 py-3 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                      className="px-8 py-3 rounded-full bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                       style={{ fontFamily: NM }}
                     >
                       {saving ? t('account.saving') : t('account.saveChanges')}
@@ -282,12 +298,12 @@ export default function AccountPage() {
             <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
               className="grid grid-cols-2 gap-4">
               <button onClick={() => navigate('/app')}
-                className="flex items-center justify-between p-6 rounded-2xl border border-white/5 bg-white/5 hover:border-white/20 transition-all group">
+                className="flex items-center justify-between p-6 rounded-full border border-white/5 bg-white/5 hover:border-white/20 transition-all group">
                 <span className="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-white" style={{ fontFamily: NM }}>{t('account.openApp')}</span>
                 <span className="text-gray-700 group-hover:text-white transition-all">→</span>
               </button>
               <button onClick={logout}
-                className="flex items-center justify-between p-6 rounded-2xl border border-white/5 bg-white/5 hover:border-white/20 transition-all group">
+                className="flex items-center justify-between p-6 rounded-full border border-white/5 bg-white/5 hover:border-white/20 transition-all group">
                 <span className="text-xs font-black uppercase tracking-widest text-red-900 group-hover:text-red-500" style={{ fontFamily: NM }}>{t('account.signOut')}</span>
                 <span className="text-red-900/50 group-hover:text-red-500 transition-all">→</span>
               </button>
@@ -298,13 +314,26 @@ export default function AccountPage() {
           <div className="lg:col-span-5 space-y-8">
             
             {/* Subscription Card */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <GlassCard className="h-full">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative h-full">
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '120%',
+                height: '120%',
+                background: 'rgba(59,130,246,0.25)',
+                filter: 'blur(90px)',
+                zIndex: 0,
+                pointerEvents: 'none',
+                borderRadius: '50%'
+              }} />
+              <GlassCard className="h-full relative z-10">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]" style={{ fontFamily: NM }}>{t('account.subscription')}</h2>
-                  {sub && (
+                  {sub && sub.status !== 'inactive' && (
                     <div className="px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase border border-white/10 text-gray-500" style={{ fontFamily: NM }}>
-                      {sub.status === 'active' ? t('account.active') : t('account.cancelling')}
+                      {sub.status === 'cancelling' ? t('account.cancelling') : t('account.active')}
                     </div>
                   )}
                 </div>
@@ -334,14 +363,14 @@ export default function AccountPage() {
                     <>
                       {isPro && (
                         <button onClick={() => navigate('/upgrade')}
-                          className="w-full py-3.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
+                          className="w-full py-3.5 rounded-full bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
                           style={{ fontFamily: NM }}>
                           {language === 'cs' ? 'Upgradovat na Neomezený' : 'Upgrade to Unlimited'}
                         </button>
                       )}
                       {sub?.status === 'active' && (
                         <button onClick={handleCancelSub} disabled={cancelLoading}
-                          className="w-full py-3 rounded-xl border border-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all disabled:opacity-50"
+                          className="w-full py-3 rounded-full border border-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all disabled:opacity-50"
                           style={{ fontFamily: NM }}>
                           {cancelLoading 
                             ? (language === 'cs' ? 'Ruším...' : 'Cancelling...') 
@@ -351,7 +380,7 @@ export default function AccountPage() {
                     </>
                   ) : (
                     <button onClick={() => navigate('/upgrade')}
-                      className="w-full py-4 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
+                      className="w-full py-4 rounded-full bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
                       style={{ fontFamily: NM }}>
                       {t('account.upgradeToPro')}
                     </button>
@@ -373,24 +402,26 @@ export default function AccountPage() {
                     {isUnlimited ? '∞' : creditsRemaining}
                   </span>
                   <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest" style={{ fontFamily: NM }}>
-                    {t('account.videosRemaining')}
+                    {isUnlimited ? '' : t('account.videosRemaining')}
                   </span>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                    <span className="text-gray-600">{t('account.monthlyUsage')}</span>
-                    <span className="text-gray-400">{creditsUsed} / {isPro ? 31 : 5}</span>
+                {!isUnlimited && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                      <span className="text-gray-600">{t('account.monthlyUsage')}</span>
+                      <span className="text-gray-400">{creditsUsed} / {isPro ? 31 : 5}</span>
+                    </div>
+                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, (creditsUsed / (isPro ? 31 : 5)) * 100)}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full bg-white rounded-full"
+                      />
+                    </div>
                   </div>
-                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(100, (creditsUsed / (isPro ? 31 : 5)) * 100)}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                      className="h-full bg-white rounded-full"
-                    />
-                  </div>
-                </div>
+                )}
               </GlassCard>
             </motion.div>
 

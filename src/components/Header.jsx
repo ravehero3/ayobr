@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useFFmpeg } from '../hooks/useFFmpeg';
+import { useAuth } from '../context/AuthContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import userIcon from '../assets/user_1754478889614.png';
 import UserProfile from './UserProfile';
@@ -10,8 +11,9 @@ import AppInfoWindow from './AppInfoWindow';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 const Header = () => {
-  const { generatedVideos, pairs, userProfileImage, username, isGenerating, resetGenerationState } = useAppStore();
+  const { generatedVideos, pairs, userProfileImage, isGenerating, resetGenerationState } = useAppStore();
   const { stopGeneration, resetAppForNewGeneration } = useFFmpeg();
+  const { liveProducerName, user } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAppInfoOpen, setIsAppInfoOpen] = useState(false);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
@@ -28,6 +30,8 @@ const Header = () => {
     return null;
   }
 
+  const displayName = liveProducerName || user?.producer_name || user?.first_name || 'User';
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -37,7 +41,7 @@ const Header = () => {
       style={{ zIndex: 10000 }}
     >
       <div
-        className="w-full h-full flex items-center justify-between px-4 md:px-[64px]"
+        className="relative w-full h-full flex items-center justify-between px-4 md:px-[64px]"
         style={{
           background: 'rgba(0, 0, 0, 0.38)',
           backdropFilter: 'blur(16px)',
@@ -47,7 +51,7 @@ const Header = () => {
         }}
       >
         {/* TypeBeatz Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center z-10">
           <button
             onClick={() => setIsAppInfoOpen(true)}
             className="hover:scale-105 transition-all duration-200"
@@ -61,11 +65,15 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Right side: Username and Profile */}
-        <div className="flex items-center gap-3">
-          <span className="hidden sm:inline text-white text-sm opacity-90 font-medium">
-            {username}
+        {/* Center: Username */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <span className="text-white text-sm opacity-90 font-medium">
+            {displayName}
           </span>
+        </div>
+
+        {/* Right side: Profile */}
+        <div className="flex items-center gap-3 z-10">
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"

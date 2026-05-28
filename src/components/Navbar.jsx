@@ -19,7 +19,7 @@ function getCzechCreditsPhrase(credits, isPro) {
 }
 
 export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoading, onManageSubscription, onInvite }) {
-  const { user, logout } = useAuth();
+  const { user, logout, liveProducerName } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -29,6 +29,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
   const isAdmin     = user?.role === 'admin';
   const isPaidPlan  = isPro || isUnlimited || isAdmin;
   const creditsLeft = user?.credits?.credits_remaining;
+  const displayName = liveProducerName || user?.producer_name || user?.first_name || 'User';
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[10000] flex items-center justify-between px-4 md:px-[64px] py-4"
@@ -39,11 +40,19 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
         borderBottom: '1px solid rgba(255,255,255,0.06)' 
       }}>
 
-      <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+      <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity z-10" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
       </button>
 
-      <div className="flex items-center gap-4">
+      {user && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <span className="text-white text-sm opacity-90 font-medium font-sans">
+            {displayName}
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-center gap-4 z-10">
 
         {/* Free user: credit badge + upgrade button */}
         {user && !isPaidPlan && (

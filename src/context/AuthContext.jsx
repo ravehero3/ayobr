@@ -30,6 +30,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [featureFlags, setFeatureFlags] = useState({});
   const [loading, setLoading] = useState(true);
+  const [liveProducerName, setLiveProducerName] = useState('');
 
   useEffect(() => {
     captureReferralCode();
@@ -41,6 +42,7 @@ export function AuthProvider({ children }) {
       if (res.ok) {
         const data = await res.json();
         setUser(data);
+        setLiveProducerName(data.producer_name || '');
         
         // Fetch feature flags once user is identified
         const flagsRes = await fetch(`${API_BASE}/user/features`, { credentials: 'include' });
@@ -51,10 +53,12 @@ export function AuthProvider({ children }) {
       } else {
         setUser(null);
         setFeatureFlags({});
+        setLiveProducerName('');
       }
     } catch {
       setUser(null);
       setFeatureFlags({});
+      setLiveProducerName('');
     } finally {
       setLoading(false);
     }
@@ -114,7 +118,7 @@ export function AuthProvider({ children }) {
   const refreshUser = fetchUser;
 
   return (
-    <AuthContext.Provider value={{ user, featureFlags, loading, login, logout, agreeToRights, deductCredit, refreshUser }}>
+    <AuthContext.Provider value={{ user, featureFlags, loading, login, logout, agreeToRights, deductCredit, refreshUser, liveProducerName, setLiveProducerName }}>
       {children}
     </AuthContext.Provider>
   );
@@ -123,3 +127,4 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
+

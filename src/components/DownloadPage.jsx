@@ -1,13 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
   const { generatedVideos, pairs, videoSettings, removePair } = useAppStore();
+  const { user, liveProducerName } = useAuth();
+  const { language } = useLanguage();
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Function to get video background style based on user settings
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const producerName = liveProducerName || user?.producer_name || user?.first_name || 'VOODOO808';
   const getVideoBackgroundStyle = () => {
     // Safely access videoSettings with fallback
     const currentStore = useAppStore.getState();
@@ -85,17 +97,38 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
           background: 'transparent',
         }}
       >
-        {/* Header - Same as LoadingWindow */}
-        <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-58px' }}>
-          <motion.h2
-            className="text-3xl font-bold text-white mb-4 text-center"
+        {/* Header */}
+        <div className="relative flex flex-col items-center justify-center header-no-blur" style={{ zIndex: 999999, paddingTop: '0px', paddingBottom: '24px', marginTop: '-18px' }}>
+          <motion.h1
+            className="text-center"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
+            style={{
+              fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
+              fontWeight: 500,
+              fontSize: isMobile ? '48px' : '90px',
+              lineHeight: isMobile ? '52px' : '93.5px',
+              letterSpacing: isMobile ? '-1px' : '-2px',
+              fontStyle: 'normal',
+              textTransform: 'none',
+              marginBottom: '2rem',
+              color: '#ffffff',
+              textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)'
+            }}
           >
-            Your videos are ready!
-          </motion.h2>
+            {language === 'cs' ? (
+              <>
+                Vaše type beat videa<br />
+                jsou ready <span style={{ color: '#3B82F6' }}>{producerName}</span>!
+              </>
+            ) : (
+              <>
+                Your type beat videos<br />
+                are ready <span style={{ color: '#3B82F6' }}>{producerName}</span>!
+              </>
+            )}
+          </motion.h1>
         </div>
 
         {/* Videos Grid - Same layout as LoadingWindow but with completed videos */}
