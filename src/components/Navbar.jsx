@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import userIcon from '../assets/user_1754478889614.png';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
@@ -22,6 +23,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   const isUnlimited = user?.role === 'unlimited';
   const isPro       = user?.role === 'pro';
@@ -120,23 +122,24 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           <div className="relative">
             <button onClick={() => setMenuOpen(v => !v)} className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 group-hover:border-white/50 transition-colors">
-                {user.profile_image_url ? (
+                {user.profile_image_url && !avatarFailed ? (
                   <img
                     src={user.profile_image_url}
                     alt=""
                     className="w-full h-full object-cover"
-                    onError={e => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
+                    onError={() => setAvatarFailed(true)}
                   />
                 ) : null}
                 <div
                   className="w-full h-full items-center justify-center bg-white/10"
-                  style={{ display: user.profile_image_url ? 'none' : 'flex' }}
+                  style={{ display: user.profile_image_url && !avatarFailed ? 'none' : 'flex' }}
                 >
-                  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                    <rect width="40" height="40" fill="rgba(255,255,255,0.06)"/>
-                    <circle cx="20" cy="15" r="7" fill="rgba(255,255,255,0.25)"/>
-                    <path d="M4 38c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.18)"/>
-                  </svg>
+                  <img
+                    src={userIcon}
+                    alt="Default profile"
+                    className="w-full h-full object-cover"
+                    style={{ opacity: 0.55, padding: '5px' }}
+                  />
                 </div>
               </div>
             </button>

@@ -32,8 +32,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     const settings = currentStore.videoSettings || {};
     const background = settings.background || 'black';
 
-    console.log('LoadingWindow - Background settings:', { background, settings });
-
     if (background === 'white') {
       return { backgroundColor: 'white' };
     } else if (background === 'black') {
@@ -142,32 +140,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                            (shouldBeGeneratingNext && !anyVideoActivelyGenerating && !isComplete);
 
                 const shouldShowPlayButton = isComplete && !!videoToShow && videoToShow.url;
-
-                // For debugging
-                const debugInfo = {
-                  index: currentIndex,
-                  hasGeneratedVideo: !!hasGeneratedVideo,
-                  hasStateVideo: !!hasStateVideo,
-                  isComplete,
-                  progress: progressValue,
-                  progressToDisplay,
-                  shouldShowVideoPreview,
-                  shouldShowPercentage,
-                  shouldShowPlayButton,
-                  shouldBeGeneratingNext,
-                  completedVideosCount,
-                  anyVideoActivelyGenerating,
-                  videoState: {
-                    isGenerating: videoState?.isGenerating,
-                    isComplete: videoState?.isComplete,
-                    progress: videoState?.progress,
-                    video: videoState?.video,
-                    isCurrentlyProcessing: videoState?.isCurrentlyProcessing,
-                    isFinished: videoState?.isFinished
-                  },
-                  allGeneratedVideos: generatedVideos.length
-                };
-                console.log(`LoadingWindow pair ${pair.id} (${currentIndex + 1}/${pairs.length}):`, debugInfo);
 
                 return (
                   <motion.div
@@ -407,13 +379,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                     zIndex: 9999999
                                   }}
                                   preload="metadata"
-                                  onLoadedData={() => {
-                                    console.log(`Video loaded successfully for ${pair.id}`);
-                                  }}
                                   onError={(e) => {
                                     console.error(`Video error for ${pair.id}:`, e);
-                                    console.log('Video URL:', videoToShow.url);
-                                    console.log('Video object:', videoToShow);
                                   }}
                                 />
 
@@ -423,15 +390,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                   style={{ zIndex: 9999999 }}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    console.log(`Play button clicked for video ${pair.id}`);
-                                    console.log('Video URL:', videoToShow.url);
-
                                     const videoElement = e.currentTarget.parentElement.querySelector('video');
                                     const overlay = e.currentTarget;
 
                                     if (videoElement && videoToShow.url) {
-                                      console.log('Starting video playback...');
-
                                       // Show video player
                                       videoElement.style.display = 'block';
                                       videoElement.setAttribute('controls', 'true');
@@ -441,20 +403,15 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                       // Start playback
                                       videoElement.play()
                                         .then(() => {
-                                          console.log('Video playback started successfully');
                                           overlay.style.display = 'none'; // Hide overlay after successful play
                                         })
                                         .catch(err => {
                                           console.error('Video playback failed:', err);
-                                          console.log('Attempting to create new video element...');
-
                                           // Fallback: Try opening in new tab
                                           window.open(videoToShow.url, '_blank');
                                         });
                                     } else {
                                       console.error('Video element or URL not available');
-                                      console.log('VideoElement exists:', !!videoElement);
-                                      console.log('Video URL exists:', !!videoToShow.url);
                                     }
                                   }}
                                 >

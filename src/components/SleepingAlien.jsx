@@ -15,15 +15,6 @@ const SleepingAlien = () => {
   // Only show during active video generation - more strict conditions
   const hasCompletePairs = pairs.some(pair => pair.audio && pair.image);
 
-  // Debug logging to verify conditions
-  console.log('SleepingAlien Debug:', {
-    storeIsGenerating,
-    isGenerating,
-    hasCompletePairs,
-    shouldShow: isGenerating && hasCompletePairs,
-    videoGenerationStatesCount: Object.keys(videoGenerationStates).length
-  });
-
   // Show only when actually generating videos
   const shouldShow = isGenerating && hasCompletePairs;
 

@@ -10,17 +10,20 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 import ScreenSizeWarning from '../components/ScreenSizeWarning';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
+const PRICING_GLASS = {
+  background: 'linear-gradient(to bottom, rgba(1,5,10,0.88), rgba(7,30,87,0.82))',
+  backdropFilter: 'blur(32px)',
+  WebkitBackdropFilter: 'blur(32px)',
+  border: '1px solid rgba(255,255,255,0.18)',
+  boxShadow: '0 30px 60px -12px rgba(0,0,0,0.6)',
+};
 
 function GlassCard({ children, className = '' }) {
   return (
     <div
       className={`relative overflow-hidden rounded-2xl ${className}`}
       style={{
-        background: 'linear-gradient(to bottom, rgba(1,5,10,0.88), rgba(7,30,87,0.82))',
-        backdropFilter: 'blur(32px)',
-        WebkitBackdropFilter: 'blur(32px)',
-        border: '1px solid rgba(255,255,255,0.18)',
-        boxShadow: '0 30px 60px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06) inset',
+        ...PRICING_GLASS,
         padding: '28px',
       }}
     >
@@ -74,6 +77,7 @@ export default function AccountPage() {
   const [producerName, setProducerName] = useState('');
   const [showCropModal, setShowCropModal] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   const handleSaveProfilePicture = async (base64Image) => {
     setUploadingImage(true);
@@ -114,6 +118,10 @@ export default function AccountPage() {
     if (isPaid) fetchSubscription();
     else setLoading(false);
   }, [user, isPaid]);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [user?.profile_image_url]);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -182,23 +190,48 @@ export default function AccountPage() {
     <>
       <ScreenSizeWarning />
       <div className="min-h-screen bg-black text-white selection:bg-white/20 relative">
-        <div className="fixed inset-0 pointer-events-none" style={{
-          zIndex: 0,
-          backgroundImage: `url(${starsBg})`,
-          backgroundSize: '130%',
-          backgroundPosition: 'center calc(50% - 200px)',
-          backgroundRepeat: 'no-repeat',
-          opacity: 1
-        }} />
-        
-        {/* Navbar */}
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            zIndex: 0,
+            backgroundImage: `url(${starsBg})`,
+            backgroundSize: '130%',
+            backgroundPosition: 'center calc(50% - 200px)',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none"
+          style={{ zIndex: 1, background: 'rgba(0,0,0,0.62)' }}
+        />
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            zIndex: 1,
+            background:
+              'radial-gradient(ellipse 80% 60% at 50% 70%, transparent 20%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.9) 75%, #000 92%)',
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            zIndex: 1,
+            background:
+              'linear-gradient(to right, #000 0%, rgba(0,0,0,0.65) 10%, transparent 25%, transparent 75%, rgba(0,0,0,0.65) 90%, #000 100%)',
+          }}
+        />
+
         <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-12 h-16 border-b border-white/5 bg-black/50 backdrop-blur-xl">
           <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity z-10">
             <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 18 }} />
           </button>
-          
+
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-            <span className="text-white text-sm opacity-90 font-medium font-sans">
+            <span className="text-white text-sm opacity-90 font-semibold tracking-wide" style={{ fontFamily: NM }}>
               {liveProducerName || user?.producer_name || user?.first_name || 'User'}
             </span>
           </div>
@@ -224,11 +257,11 @@ export default function AccountPage() {
                   className="w-16 h-16 rounded-full overflow-hidden border border-white/15 bg-white/5 cursor-pointer relative group hover:border-white/35 transition-all duration-300 flex-shrink-0"
                 >
                   <img
-                    src={user.profile_image_url || userIcon}
+                    src={!avatarFailed && user.profile_image_url ? user.profile_image_url : userIcon}
                     alt=""
                     className="w-full h-full object-cover"
-                    style={!user.profile_image_url ? { opacity: 0.5, padding: '10px' } : {}}
-                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; e.currentTarget.style.padding = '10px'; e.currentTarget.style.opacity = '0.5'; }}
+                    style={!user.profile_image_url || avatarFailed ? { opacity: 0.5, padding: '10px' } : {}}
+                    onError={() => setAvatarFailed(true)}
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                     <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,20 +318,34 @@ export default function AccountPage() {
             </GlassCard>
           </motion.div>
 
-          {/* Quick Actions */}
-              <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="grid grid-cols-2 gap-4">
-                <button onClick={() => navigate('/app')}
-                  className="flex items-center justify-between p-6 rounded-full border border-white/5 bg-white/5 hover:border-white/20 transition-all group">
-                  <span className="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-white" style={{ fontFamily: NM }}>{t('account.openApp')}</span>
-                  <span className="text-gray-700 group-hover:text-white transition-all">→</span>
-                </button>
-                <button onClick={logout}
-                  className="flex items-center justify-between p-6 rounded-full border border-white/5 bg-white/5 hover:border-white/20 transition-all group">
-                  <span className="text-xs font-black uppercase tracking-widest text-red-900 group-hover:text-red-500" style={{ fontFamily: NM }}>{t('account.signOut')}</span>
-                  <span className="text-red-900/50 group-hover:text-red-500 transition-all">→</span>
-                </button>
-              </motion.section>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="grid grid-cols-2 gap-4"
+          >
+            <button
+              onClick={() => navigate('/app')}
+              className="flex items-center justify-between p-5 rounded-2xl group transition-all duration-200"
+              style={{ ...PRICING_GLASS }}
+            >
+              <span className="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-white transition-colors" style={{ fontFamily: NM }}>
+                {t('account.openApp')}
+              </span>
+              <span className="text-gray-600 group-hover:text-white transition-colors">→</span>
+            </button>
+
+            <button
+              onClick={logout}
+              className="flex items-center justify-between p-5 rounded-2xl group transition-all duration-200"
+              style={{ ...PRICING_GLASS }}
+            >
+              <span className="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-white transition-colors" style={{ fontFamily: NM }}>
+                {t('account.signOut')}
+              </span>
+              <span className="text-gray-600 group-hover:text-white transition-colors">→</span>
+            </button>
+          </motion.div>
 
           {/* Subscription Card */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative h-full">
@@ -355,9 +402,25 @@ export default function AccountPage() {
                           </button>
                         )}
                         {sub?.status === 'active' && (
-                          <button onClick={handleCancelSub} disabled={cancelLoading}
-                            className="w-full py-3 rounded-full border border-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all disabled:opacity-50"
-                            style={{ fontFamily: NM }}>
+                          <button
+                            onClick={handleCancelSub}
+                            disabled={cancelLoading}
+                            className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                            style={{
+                              fontFamily: NM,
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              color: 'rgba(255,255,255,0.35)',
+                              background: 'transparent',
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.color = 'rgba(255,255,255,0.35)';
+                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                            }}
+                          >
                             {cancelLoading 
                               ? (language === 'cs' ? 'Ruším...' : 'Cancelling...') 
                               : (language === 'cs' ? 'Zrušit předplatné' : 'Cancel Subscription')}
@@ -425,7 +488,8 @@ export default function AccountPage() {
           onSave={handleSaveProfilePicture}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

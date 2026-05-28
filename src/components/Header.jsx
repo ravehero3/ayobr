@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +16,7 @@ const Header = () => {
   const { stopGeneration, resetAppForNewGeneration } = useFFmpeg();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAppInfoOpen, setIsAppInfoOpen] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
   const handleResetApp = () => {
@@ -24,8 +25,15 @@ const Header = () => {
     resetGenerationState();
   };
 
-  // Producer name from auth takes priority; fall back to local store username
-  const displayName = liveProducerName || user?.producer_name || username;
+  const displayName =
+    liveProducerName ||
+    user?.producer_name?.trim() ||
+    username?.trim() ||
+    'Producer';
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [userProfileImage]);
 
   if (!hasFiles) {
     return null;
@@ -84,10 +92,10 @@ const Header = () => {
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"
           >
             <img
-              src={userProfileImage || userIcon}
+              src={!avatarFailed && userProfileImage ? userProfileImage : userIcon}
               alt="Profile"
               className="w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; }}
+              onError={() => setAvatarFailed(true)}
             />
           </button>
         </div>
