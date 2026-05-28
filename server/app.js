@@ -1,6 +1,8 @@
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const { setupAuth } = require('./auth');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
@@ -12,6 +14,13 @@ const { resetMonthlyCredits } = require('./storage');
 
 function buildApp() {
   const app = express();
+
+  // Keep-alive ping endpoint — no auth, no rate limiting, no COEP headers
+  // External uptime monitors should hit GET /ping every 10 minutes
+  app.get('/ping', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.send('pong');
+  });
 
   const allowedOrigins = [
     'http://localhost:5000',
@@ -31,10 +40,77 @@ function buildApp() {
     credentials: true
   }));
 
+  // Gzip/brotli compress all responses (API JSON + static HTML/JS/CSS)
+  app.use(compression());
+
+  // Rate limiting
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' },
+  });
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many login attempts, please try again later.' },
+  });
+  const paymentLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many payment requests, please try again later.' },
+  });
+  app.use('/api/', apiLimiter);
+  app.use('/api/login', authLimiter);
+  app.use('/api/callback', authLimiter);
+  app.use('/api/ls/create-checkout', paymentLimiter);
+  app.use('/api/gopay/create-payment', paymentLimiter);
+
+  // Required for FFmpeg WebAssembly SharedArrayBuffer support
+  app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+    next();
+  });
+
   app.use('/api/ls/webhook', express.raw({ type: 'application/json' }));
   app.use(express.json({ limit: '10mb' }));
 
   return app;
+}
+
+const LANDING_CONTENT_FILE = path.join(__dirname, 'data/landing-content.json');
+
+function buildLandingImagesRoute(app) {
+  const LANDING_DIR = path.join(__dirname, 'uploads/landing');
+  // Serve uploaded images
+  app.use('/uploads/landing', express.static(LANDING_DIR));
+  // Public API: which slots have custom images
+  app.get('/api/landing-images', (req, res) => {
+    const result = {};
+    if (fs.existsSync(LANDING_DIR)) {
+      const files = fs.readdirSync(LANDING_DIR);
+      for (let slot = 1; slot <= 4; slot++) {
+        const file = files.find(f => f.startsWith(`slot-${slot}.`));
+        if (file) result[`slot${slot}`] = `/uploads/landing/${file}`;
+      }
+    }
+    res.json(result);
+  });
+  // Public API: custom how-it-works step text
+  app.get('/api/landing-content', (req, res) => {
+    try {
+      if (fs.existsSync(LANDING_CONTENT_FILE)) {
+        return res.json(JSON.parse(fs.readFileSync(LANDING_CONTENT_FILE, 'utf8')));
+      }
+    } catch (e) {}
+    res.json({ steps: [{}, {}, {}, {}] });
+  });
 }
 
 async function initDb(app) {
@@ -56,20 +132,28 @@ async function initDb(app) {
 
 async function mountRoutes(app) {
   await setupAuth(app);
+  buildLandingImagesRoute(app);
   app.use('/api/user', userRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/ls', lemonsqueezyRoutes);
   app.use('/api/gopay', gopayRoutes);
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-  // Serve static files from the built dist directory
-  app.use(express.static(path.join(__dirname, '../dist')));
-  
+  // Static assets: hashed filenames → cache 1 year; index.html → no cache
+  app.use(express.static(path.join(__dirname, '../dist'), {
+    maxAge: '1y',
+    etag: true,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }));
+
   // Wildcard fallback to serve index.html for SPA routing (React Router)
   app.get(/(.*)/, (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
+    if (req.path.startsWith('/api')) return next();
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   });
 }

@@ -1,26 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function UpgradeBanner({ user, onUpgradePro, onUpgradeUnlimited, checkoutLoading }) {
-  const [dismissed, setDismissed] = useState(false);
+export default function UpgradeBanner({ user }) {
   const { t } = useLanguage();
 
-  const role       = user?.role;
   const creditsLeft = user?.credits?.credits_remaining;
+  const freeExhausted = user?.role !== 'pro' && user?.role !== 'unlimited' && creditsLeft === 0;
 
-  // PRO users who hit their 31 limit
-  const proExhausted = role === 'pro' && creditsLeft === 0;
-  const proLow       = role === 'pro' && creditsLeft !== undefined && creditsLeft > 0 && creditsLeft <= 3;
-
-  // Free users running low or out
-  const freeExhausted = (!role || role === 'free') && creditsLeft === 0;
-  const freeLow       = (!role || role === 'free') && creditsLeft !== undefined && creditsLeft > 0 && creditsLeft <= 2;
-
-  const show = !dismissed && (proExhausted || proLow || freeExhausted || freeLow);
-  if (!show) return null;
-
-  const isExhausted = proExhausted || freeExhausted;
+  if (!freeExhausted) return null;
 
   return (
     <AnimatePresence>
@@ -28,39 +16,24 @@ export default function UpgradeBanner({ user, onUpgradePro, onUpgradeUnlimited, 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="fixed top-14 left-0 right-0 z-[9999] flex items-center justify-between px-6 py-2"
+        className="fixed top-0 left-0 right-0 h-16 z-[9999] flex items-center justify-center px-6"
         style={{
-          background: 'rgba(255,255,255,0.05)',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
-        }}>
-        <div className="flex items-center gap-2 text-sm">
-          <span>{isExhausted ? '🚫' : '⚠️'}</span>
-          <span className="text-gray-300 font-medium">
-            {proExhausted && t('banner.proExhausted')}
-            {proLow && t('banner.proLow').replace('{count}', creditsLeft)}
-            {freeExhausted && t('banner.freeExhausted')}
-            {freeLow && t('banner.freeLow').replace('{count}', creditsLeft)}
+          background: 'rgba(0, 0, 0, 0.38)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          fontFamily: "'Neue Montreal', 'Inter', sans-serif"
+        }}
+      >
+        <div className="flex items-center gap-3 text-sm text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x-circle">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+          <span className="text-white font-medium">
+            {t('banner.freeExhausted')}
           </span>
-        </div>
-        <div className="flex items-center gap-2">
-          {proExhausted || proLow ? (
-            <button onClick={onUpgradeUnlimited} disabled={checkoutLoading}
-              className="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all bg-white text-black hover:scale-105 disabled:opacity-60 flex items-center gap-1.5"
-            >
-              {checkoutLoading ? <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />{t('nav.opening')}</> : t('banner.goUnlimited')}
-            </button>
-          ) : (
-            <button onClick={onUpgradePro} disabled={checkoutLoading}
-              className="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all bg-white text-black hover:scale-105 disabled:opacity-60 flex items-center gap-1.5"
-            >
-              {checkoutLoading ? <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />{t('nav.opening')}</> : t('banner.goPro')}
-            </button>
-          )}
-          {!isExhausted && (
-            <button onClick={() => setDismissed(true)} className="text-gray-500 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors ml-2">
-              {t('banner.dismiss')}
-            </button>
-          )}
         </div>
       </motion.div>
     </AnimatePresence>

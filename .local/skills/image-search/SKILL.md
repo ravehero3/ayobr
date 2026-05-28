@@ -131,6 +131,14 @@ for (const [index, item] of items.entries()) {
 }
 ```
 
+## When called from the slides skill
+
+The slides skill runs `imageSearch` as part of its brand-research steps in `../slides/references/brand_research.md`. That reference owns the order (run `extractBranding` first, use `imageSearch` for the logo only when the first step's logo is missing or low quality, and use `imageSearch` for real-world photos like product / team / venue shots) and the budget (at most 4 `imageSearch` calls per deck).
+
+**Specific real subjects have a special rule.** If `imageSearch` cannot find a clean image of a logo, a named person, a specific real product, a real team, a real venue, or a real event, leave the slot empty and surface the gap to the user. **Do NOT auto-generate a stand-in via `media-generation` without explicit user approval** — a fabricated logo or fake "real" photo for a named entity is exactly the failure mode the research steps exist to prevent. The `media-generation` fallback applies only to **generic, non-specific** visuals (abstract backgrounds, mood imagery, anonymous skylines, generic illustrations). In named-entity decks (product launches, founder profiles, company overviews) the deck subject often makes product, team, and venue slots specific — treat those as real subjects and leave them empty until the user approves a stand-in. Align with `../slides/references/brand_research.md` → "Failures".
+
+Follow these steps rather than improvising the order — these are billable passthrough calls.
+
 ## Best Practices
 
 1. Use `imageSearch`, not provider-specific passthrough callbacks, so the implementation can change underneath without changing your code.

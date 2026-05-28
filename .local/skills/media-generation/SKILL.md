@@ -1,11 +1,11 @@
 ---
 name: media-generation
-description: Generate and retrieve media including AI-generated images, AI-generated videos, and stock images. Use this skill for all visual content creation and retrieval.
+description: "Generate and retrieve media including AI-generated images and stock images. Use this skill for visual content creation and retrieval. For AI video clips, read `media-generation/video_generation.md`; for music, sound effects, and text-to-speech audio, read `media-generation/audio_generation.md`"
 ---
 
 # Media Generation Skill
 
-Generate custom images, videos, and retrieve stock images.
+Generate custom images, and retrieve stock images.
 
 ## Available Functions
 
@@ -89,56 +89,6 @@ console.log(`Started workflow: ${result.workflowAlias}`);
 console.log(`Images will be saved to: ${result.imagePaths}`);
 ```
 
-### generateVideo(prompt, ...)
-
-Generate short video clips from text descriptions.
-
-**Parameters:**
-
-- `prompt` (str, required): Detailed text description of the desired video
-- `summary` (str, default "generated_video"): Short description for the filename
-- `aspectRatio` (str, default "16:9"): "16:9" (landscape) or "9:16" (portrait)
-- `resolution` (str, default "720p"): "720p" or "1080p"
-- `durationSeconds` (int, default 6): 4, 6, or 8 seconds
-- `negativePrompt` (str, optional): Description of what should NOT appear
-- `personGeneration` (str, optional): "dont_allow" or "allow_adult" for controlling people
-
-**Returns:** Dict with `filePath` and `description` keys
-
-**Example:**
-
-```javascript
-const result = await generateVideo({
-    prompt: "A cat playing with a ball of yarn, cute and playful, natural lighting",
-    summary: "playful cat",
-    aspectRatio: "16:9",
-    durationSeconds: 6
-});
-console.log(`Video saved to: ${result.filePath}`);
-```
-
-### generateVideoAsync(prompt, ...)
-
-Generate a video asynchronously. Returns immediately with a workflow ID. Same parameters as `generateVideo`.
-
-**Returns:** Dict with `workflowId`, `workflowAlias`, `status`, and `videoPath`
-
-**Example:**
-
-```javascript
-const result = await generateVideoAsync({
-    prompt: "A cat playing with a ball of yarn, cute and playful, natural lighting",
-    summary: "playful cat",
-    aspectRatio: "16:9",
-    durationSeconds: 6
-});
-console.log(`Started workflow: ${result.workflowAlias}`);
-console.log(`Video will be saved to: ${result.videoPath}`);
-
-// Later, wait for completion
-await wait_for_background_tasks({ wait_mode: "all" });
-```
-
 ### stockImage(description, ...)
 
 Retrieve stock images matching a description.
@@ -176,14 +126,6 @@ for (const path of result.filePaths) {
 - Creative or artistic content
 - Use `generateImageAsync` when images are not needed immediately
 
-### generateVideo / generateVideoAsync
-
-- Use `generateVideoAsync` when the video is not needed immediately
-- Short animated clips or motion graphics
-- Video backgrounds or visual effects
-- Product animations or demonstrations
-- Social media video content
-
 ### stockImage
 
 - Professional photography
@@ -201,11 +143,6 @@ for (const path of result.filePaths) {
 - **9:16** - Vertical, good for mobile stories, tall banners
 - **16:9** - Widescreen, good for hero images, video thumbnails
 
-### Videos
-
-- **16:9** - Widescreen landscape, good for web videos, presentations
-- **9:16** - Vertical portrait, good for mobile stories, social media shorts
-
 ## Best Practices
 
 1. **Write detailed prompts**: Include style, mood, lighting, colors, and composition
@@ -217,12 +154,10 @@ for (const path of result.filePaths) {
 ## Output Locations
 
 - Generated images: `attached_assets/generated_images/`
-- Generated videos: `attached_assets/generated_videos/`
 - Stock images: `attached_assets/stock_images/`
 
 ## Limitations
 
-- Generated videos: 8 seconds maximum
 - Stock image availability depends on the search query
 - Complex or highly specific prompts may not match exactly
 - Text in generated media is not reliably rendered
@@ -230,6 +165,6 @@ for (const path of result.filePaths) {
 ## Copyright
 
 - Use this skill to create media assets instead of copying from websites
-- Generated images and videos are created for your use
+- Generated images are created for your use
 - Stock images are licensed for use in your projects
 - Do not download or copy media files from external websites

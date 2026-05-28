@@ -6,9 +6,9 @@ import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
-import screenshotUpload from '../assets/screenshot_upload.png';
-import screenshotReview from '../assets/screenshot_review.png';
-import screenshotGenerate from '../assets/screenshot_generate.png';
+import screenshotUpload from '../assets/screenshot_upload_new.jpg';
+import screenshotReview from '../assets/screenshot_review_new.jpg';
+import screenshotGenerate from '../assets/screenshot_generate_new.jpg';
 import screenshotDownload from '../assets/screenshot_download.png';
 
 const NM     = "'Neue Montreal', 'Inter', sans-serif";
@@ -223,6 +223,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: t('landing.pricing.pro.f5'), icon: PricingIcons.Cancel },
         ...(isAnnual ? [{ text: t('landing.pricing.pro.f6.annual'), icon: PricingIcons.Present }] : []),
       ],
+      annualSavings: t('landing.pricing.pro.savings.annual'),
       cta: isPro ? t('landing.pricing.pro.cta.current') : t('landing.pricing.pro.cta'),
       onCta: () => handleUpgradeCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: true,
@@ -242,6 +243,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: t('landing.pricing.unlimited.f5'), icon: PricingIcons.Cancel },
         ...(isAnnual ? [{ text: t('landing.pricing.unlimited.f6.annual'), icon: PricingIcons.Present }] : []),
       ],
+      annualSavings: t('landing.pricing.unlimited.savings.annual'),
       cta: t('landing.pricing.unlimited.cta'),
       onCta: () => handleUnlimitedCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: false,
@@ -276,9 +278,10 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         {/* Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 320px))',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 394px)',
           gap: 32,
           alignItems: 'stretch',
+          justifyContent: 'center',
         }}>
           {plans.map((plan, idx) => (
             <div key={plan.name} style={{ position: 'relative' }}>
@@ -356,35 +359,10 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                     : plan.topTier
                       ? '0 20px 50px -10px rgba(255,255,255,0.08)'
                       : '0 10px 30px -10px rgba(0,0,0,0.3)',
-                  height: '100%',
+                  height: isMobile ? 'auto' : 536,
                   overflow: 'hidden'
                 }}
               >
-                {/* Shiny overlay for top tier */}
-                {plan.topTier && (
-                  <motion.div
-                    animate={{
-                      x: ['-100%', '200%'],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      repeatDelay: 4,
-                      ease: "linear"
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '50%',
-                      height: '100%',
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-                      transform: 'skewX(-20deg)',
-                      zIndex: 2,
-                      pointerEvents: 'none'
-                    }}
-                  />
-                )}
                 {/* Plan name + Toggle */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, minHeight: 28 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -405,7 +383,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                 {/* Small Toggle for PRO and Unlimited */}
                 {plan.hasToggle && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>ANNUAL</span>
+                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>{t('landing.pricing.toggle.annual')}</span>
                     <button 
                       onClick={() => setIsAnnual(!isAnnual)}
                       style={{
@@ -542,8 +520,8 @@ const CARD_W_CSS      = `calc(100vw - ${CARD_LEFT}px)`;
 /* dark=true → card 4 (Download) uses #0d0d0d bar + #1a1a1a pill */
 function SafariChrome({ dark = false }) {
   const sys   = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  const barBg  = dark ? '#0d0d0d' : '#2c2c2c';
-  const pillBg = dark ? '#1a1a1a' : 'rgba(0,0,0,0.28)';
+  const barBg  = dark ? '#0d0d0d' : '#0c0c0c';
+  const pillBg = dark ? '#1a1a1a' : '#151515';
   const border = dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.65)';
   return (
     <div style={{ width: '100%', flexShrink: 0 }}>
@@ -580,7 +558,7 @@ function SafariChrome({ dark = false }) {
             padding: '0 14px',
           }}>
             <span style={{ color: 'rgba(255,255,255,0.68)', fontSize: 12.5, fontFamily: sys, letterSpacing: '-0.01em', userSelect: 'none' }}>
-              typebeatz.app
+              typebeatz.voodoo808.com
             </span>
           </div>
         </div>
@@ -631,26 +609,25 @@ function MobileStepNumber({ num }) {
   );
 }
 
-/* ── Step content mockups ── */
-const STEP_CONTENTS = [
-  () => <img src={screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
-  () => <img src={screenshotReview} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
-  () => <img src={screenshotGenerate} alt="Generate" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
-  () => <img src={screenshotDownload} alt="Download" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />,
-];
-
-function HowItWorksSection({ isMobile }) {
+function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) {
+  const STEP_CONTENTS = [
+    () => <img src={customImages.slot1 || screenshotUpload} alt="Upload" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+    () => <img src={customImages.slot2 || screenshotReview} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+    () => <img src={customImages.slot3 || screenshotGenerate} alt="Generate" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+    () => <img src={customImages.slot4 || screenshotDownload} alt="Download" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />,
+  ];
   const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
   const activeRef    = useRef(0);
   const clickLockRef = useRef(false);
   const cardRefs     = useRef([]);
 
+  const customSteps = customContent?.steps || [];
   const steps = [
-    { num: '01', title: t('landing.how.s1.title'), desc: t('landing.how.s1.desc') },
-    { num: '02', title: t('landing.how.s2.title'), desc: t('landing.how.s2.desc') },
-    { num: '03', title: t('landing.how.s3.title'), desc: t('landing.how.s3.desc') },
-    { num: '04', title: t('landing.how.s4.title'), desc: t('landing.how.s4.desc') },
+    { num: '01', title: customSteps[0]?.title || t('landing.how.s1.title'), desc: customSteps[0]?.desc || t('landing.how.s1.desc') },
+    { num: '02', title: customSteps[1]?.title || t('landing.how.s2.title'), desc: customSteps[1]?.desc || t('landing.how.s2.desc') },
+    { num: '03', title: customSteps[2]?.title || t('landing.how.s3.title'), desc: customSteps[2]?.desc || t('landing.how.s3.desc') },
+    { num: '04', title: customSteps[3]?.title || t('landing.how.s4.title'), desc: customSteps[3]?.desc || t('landing.how.s4.desc') },
   ];
 
   const goToStep = useCallback((i) => {
@@ -701,9 +678,13 @@ function HowItWorksSection({ isMobile }) {
                   <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 8 }}>{step.title}</h3>
                   <p style={{ fontFamily: NM, fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: 1.6 }}>{step.desc}</p>
                 </div>
-                <div style={{ aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <SafariChrome />
-                  <Content />
+                <div style={{ aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.09)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <SafariChrome />
+                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                      <Content />
+                    </div>
+                  </div>
                 </div>
               </div>
             );
@@ -769,7 +750,8 @@ function HowItWorksSection({ isMobile }) {
                     background: '#1e1e1e',
                     borderRadius: '14px 0 0 14px',
                     overflow: 'hidden', flexShrink: 0,
-                    boxShadow: '0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    boxShadow: '0 40px 100px rgba(0,0,0,0.85)',
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -884,7 +866,32 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       </h1>
 
       <p style={{ fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
-        {t('landing.hero.subtitle')}
+        {(() => {
+          const subtitle = t('landing.hero.subtitle');
+          const parts = subtitle.split('TypeBeatz');
+          if (parts.length === 2) {
+            return (
+              <>
+                {parts[0]}
+                <img
+                  src={typebeatLogo}
+                  alt="TypeBeatz"
+                  style={{
+                    display: 'inline-block',
+                    height: '0.95em',
+                    verticalAlign: 'middle',
+                    marginBottom: '0.15em',
+                    marginLeft: '0.15em',
+                    marginRight: '0.1em',
+                    opacity: 0.45,
+                  }}
+                />
+                {parts[1]}
+              </>
+            );
+          }
+          return subtitle;
+        })()}
       </p>
 
       <div className="flex flex-row items-center justify-center gap-3">
@@ -900,7 +907,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         </a>
       </div>
 
-      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem' }}>
+      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem', textShadow: '0 1px 8px rgba(0,0,0,0.8), 0 0px 20px rgba(0,0,0,0.6)' }}>
         {t('landing.hero.statsBar')}
       </div>
     </>
@@ -928,12 +935,15 @@ function LandingFooter({ isMobile }) {
           </a>
         </div>
 
-        <div className="flex gap-6">
-          {['Terms', 'Privacy', 'Refund'].map(l => (
-            <a key={l} href={`/${l.toLowerCase()}`}
-              style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
-              className="hover:text-white transition-colors">{l}</a>
-          ))}
+        <div className="flex items-center gap-6">
+          <div className="flex gap-6">
+            {['Terms', 'Privacy', 'Refund'].map(l => (
+              <a key={l} href={`/${l.toLowerCase()}`}
+                style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
+                className="hover:text-white transition-colors">{l}</a>
+            ))}
+          </div>
+          <LanguageToggle />
         </div>
       </div>
     </footer>
@@ -945,6 +955,8 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
+  const [customImages, setCustomImages] = useState({});
+  const [customContent, setCustomContent] = useState({ steps: [{}, {}, {}, {}] });
   const starsRef = useRef(null);
   const glowRef  = useRef(null);
 
@@ -953,6 +965,28 @@ export default function LandingPage() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/landing-images')
+      .then(r => r.json())
+      .then(data => { if (data && typeof data === 'object') setCustomImages(data); })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/landing-content')
+      .then(r => r.json())
+      .then(data => { if (data?.steps) setCustomContent(data); })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      import('./AppPage');
+      import('../VideoApp');
+    }, 3000);
+    return () => clearTimeout(timer);
   }, []);
 
   useParallax([
@@ -989,7 +1023,6 @@ export default function LandingPage() {
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         </button>
         <div className="flex items-center gap-6">
-          <LanguageToggle />
           <LandingNavButtons user={user} navigate={navigate} login={login} />
         </div>
       </nav>
@@ -1044,7 +1077,7 @@ export default function LandingPage() {
 
       {/* ── How it works ── */}
       <div id="how-it-works">
-        <HowItWorksSection isMobile={isMobile} />
+        <HowItWorksSection isMobile={isMobile} customImages={customImages} customContent={customContent} />
       </div>
 
 

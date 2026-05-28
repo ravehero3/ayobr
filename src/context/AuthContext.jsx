@@ -100,7 +100,7 @@ export function AuthProvider({ children }) {
     });
     if (res.status === 402) {
       const data = await res.json();
-      return { success: false, message: data.message };
+      return { success: false, ...data };
     }
     if (res.ok) {
       const data = await res.json();
@@ -127,4 +127,3 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-

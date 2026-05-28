@@ -4,10 +4,16 @@ const { isAuthenticated } = require('../auth');
 const { getUserById, upsertSubscription, setUserRole, setCreditsForRole } = require('../storage');
 
 // GoPay REST Credentials from environment
-const GOPAY_GOID = process.env.GOPAY_GOID || '8229864229'; // Sandbox Merchant ID
-const GOPAY_CLIENT_ID = process.env.GOPAY_CLIENT_ID || '1482939626'; // Sandbox Client ID
-const GOPAY_CLIENT_SECRET = process.env.GOPAY_CLIENT_SECRET || 'rW7hHn92'; // Sandbox Client Secret
+// IMPORTANT: Set GOPAY_GOID, GOPAY_CLIENT_ID, GOPAY_CLIENT_SECRET, and GOPAY_IS_PRODUCTION=true
+// in your environment before going live. The fallbacks below are GoPay sandbox credentials only.
+const GOPAY_GOID = process.env.GOPAY_GOID || '8229864229';
+const GOPAY_CLIENT_ID = process.env.GOPAY_CLIENT_ID || '1482939626';
+const GOPAY_CLIENT_SECRET = process.env.GOPAY_CLIENT_SECRET || 'rW7hHn92';
 const GOPAY_IS_PRODUCTION = process.env.GOPAY_IS_PRODUCTION === 'true';
+
+if (GOPAY_IS_PRODUCTION && (!process.env.GOPAY_GOID || !process.env.GOPAY_CLIENT_ID || !process.env.GOPAY_CLIENT_SECRET)) {
+  console.error('[gopay] CRITICAL: GOPAY_IS_PRODUCTION=true but credentials are not set — using sandbox fallbacks in production!');
+}
 
 const GOPAY_BASE_URL = GOPAY_IS_PRODUCTION
   ? 'https://gate.gopay.cz/api'
@@ -206,7 +212,8 @@ router.get('/callback', async (req, res) => {
     // Status is 'PAID' or 'PAYMENT_METHOD_CHOSEN' or 'AUTHORIZED'
     if (payment.state === 'PAID') {
       await upgradeUserFromPayment(userId, plan, isAnnual === 'true', paymentId);
-      return res.redirect('/app?upgraded=true');
+      const finalPlan = plan === 'unlimited' ? 'unlimited' : 'pro';
+      return res.redirect(`/success?plan=${finalPlan}`);
     } else {
       console.warn(`GoPay Payment ${paymentId} has status ${payment.state}. Denying upgrade.`);
       return res.redirect('/app?cancelled=true');

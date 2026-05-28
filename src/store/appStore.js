@@ -57,7 +57,7 @@ export const useAppStore = create((set, get) => ({
   username: loadFromLocalStorage('username', 'Producer'), // Store username with persistence
 
   // Container spacing
-  containerSpacing: 4, // Default spacing in pixels between container pairs
+  containerSpacing: 200, // Default spacing in pixels between container pairs
 
 
 
@@ -143,15 +143,8 @@ export const useAppStore = create((set, get) => ({
 
   // Generated videos storage
   addGeneratedVideo: (video) => set(state => {
-    console.log('Store: Adding video to generatedVideos:', video.filename);
-    console.log('Store: Current video count:', state.generatedVideos.length);
-
     const newVideos = [...state.generatedVideos, video];
-    console.log('Store: New video count:', newVideos.length);
-
-    return {
-      generatedVideos: newVideos
-    };
+    return { generatedVideos: newVideos };
   }),
 
   removeGeneratedVideo: (videoId) => set(state => ({
@@ -191,16 +184,6 @@ export const useAppStore = create((set, get) => ({
       Object.values(state.videoGenerationStates).every(genState => 
         genState && (genState.progress === 100 || genState.isComplete)
       );
-
-    console.log('Page detection debug:', {
-      hasFiles,
-      hasVideos,
-      isGenerating,
-      hasCompletedVideos,
-      allVideosAt100Percent,
-      videoStatesCount: Object.keys(state.videoGenerationStates).length,
-      generatedVideosCount: state.generatedVideos.length
-    });
 
     // Priority order: generation (including completed) > files > upload
     // Stay on generation page when videos are complete (no more download page)
@@ -307,7 +290,6 @@ export const useAppStore = create((set, get) => ({
       
       // Clear stuck generation states (long running)
       if (genState.isGenerating && genState.startTime && (now - genState.startTime > timeout)) {
-        console.log(`Clearing stuck generation state for pair ${pairId} (timeout)`);
         updatedStates[pairId] = {
           isGenerating: false,
           progress: 0,
@@ -322,7 +304,6 @@ export const useAppStore = create((set, get) => ({
       if (genState.isComplete && genState.progress === 100 && genState.video === null) {
         const existingVideo = state.generatedVideos.find(v => v.pairId === pairId);
         if (!existingVideo) {
-          console.log(`Clearing broken completion state for pair ${pairId} (no video in store)`);
           updatedStates[pairId] = {
             isGenerating: false,
             progress: 0,
@@ -380,11 +361,6 @@ export const useAppStore = create((set, get) => ({
   // Video generation state management for individual pairs
   setVideoGenerationState: (pairId, state) => set(store => {
     const currentState = store.videoGenerationStates[pairId];
-
-    // Only log important state changes to reduce noise
-    if (!currentState || currentState.progress !== state.progress || currentState.isComplete !== state.isComplete) {
-      console.log(`Setting video generation state for pair ${pairId}:`, state);
-    }
 
     // More careful state comparison to prevent loops
     if (currentState && 
@@ -445,12 +421,8 @@ export const useAppStore = create((set, get) => ({
 
   // Complete app reset - fresh start (for X button)
   resetApp: () => {
-    console.log('Complete app reset initiated');
-    
-    // Signal cancellation first (FFmpeg hook will handle actual process termination)
     const state = get();
     if (state.isGenerating) {
-      console.log('App reset: Signaling generation cancellation');
       set({ isCancelling: true });
     }
     
@@ -614,8 +586,6 @@ export const useAppStore = create((set, get) => ({
     const newPairPreparationStates = { ...state.pairPreparationStates };
     delete newPairPreparationStates[pairId];
     
-    console.log(`Cleared prepared assets and preparation state for pair ${pairId}`);
-    
     return { 
       preparedAssets: newPreparedAssets,
       pairPreparationStates: newPairPreparationStates
@@ -623,7 +593,6 @@ export const useAppStore = create((set, get) => ({
   }),
 
   clearAllPreparedAssets: () => {
-    console.log('Clearing all prepared assets and preparation states');
     return set({
       preparedAssets: {},
       pairPreparationStates: {},

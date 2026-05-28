@@ -14,7 +14,6 @@ export default function AppPage() {
   const navigate = useNavigate();
   useDocumentTitle(t('nav.app'));
   const [searchParams, setSearchParams] = useSearchParams();
-  const [upgradeSuccess, setUpgradeSuccess]     = useState(null); // null | 'pro' | 'unlimited'
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
   const [checkoutLoading, setCheckoutLoading]   = useState(false);
   const [showReferral, setShowReferral]         = useState(false);
@@ -29,31 +28,22 @@ export default function AppPage() {
       setSearchParams({}, { replace: true });
       let cancelled = false;
       (async () => {
-        let activated = false;
+        let detectedPlan = null;
         for (let i = 0; i < 15 && !cancelled; i++) {
           await refreshUser();
           try {
             const res = await fetch('/api/user/me', { credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
-              if (data.role === 'unlimited' || data.role === 'admin') {
-                setUpgradeSuccess('unlimited');
-                activated = true;
-                break;
-              }
-              if (data.role === 'pro') {
-                setUpgradeSuccess('pro');
-                activated = true;
-                break;
-              }
+              if (data.role === 'unlimited' || data.role === 'admin') { detectedPlan = 'unlimited'; break; }
+              if (data.role === 'pro') { detectedPlan = 'pro'; break; }
             }
           } catch { /* retry */ }
           if (i < 14) await new Promise(r => setTimeout(r, 2000));
         }
-        if (!activated && !cancelled) setUpgradeSuccess('pro');
+        if (!cancelled) navigate(`/success?plan=${detectedPlan || 'pro'}`);
       })();
-      const hideTimer = setTimeout(() => setUpgradeSuccess(null), 7000);
-      return () => { cancelled = true; clearTimeout(hideTimer); };
+      return () => { cancelled = true; };
     }
     if (searchParams.get('cancelled') === 'true') {
       setShowCancelledNotice(true);
@@ -93,7 +83,17 @@ export default function AppPage() {
   const handleBeforeGenerate = async (count = 1) => {
     const result = await deductCredit(count);
     if (!result.success) {
-      if (result.message) alert(result.message);
+      let msg = result.message || '';
+      if (result.errorCode === 'insufficient_credits_free') {
+        msg = t('error.insufficientCreditsFree')
+          .replace('{needed}', result.needed)
+          .replace('{remaining}', result.remaining);
+      } else if (result.errorCode === 'insufficient_credits_pro') {
+        msg = t('error.insufficientCreditsPro')
+          .replace('{needed}', result.needed)
+          .replace('{remaining}', result.remaining);
+      }
+      if (msg) alert(msg);
       return false;
     }
     return true;
@@ -114,25 +114,6 @@ export default function AppPage() {
         onUpgradeUnlimited={handleUpgradeUnlimited}
         checkoutLoading={checkoutLoading}
       />
-
-      {/* Upgrade success banner */}
-      {upgradeSuccess && (
-        <div className="fixed top-14 left-0 right-0 z-[9999] flex items-center justify-center py-2 px-6"
-          style={{
-            background: upgradeSuccess === 'unlimited'
-              ? 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))'
-              : 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
-            borderBottom: upgradeSuccess === 'unlimited'
-              ? '1px solid rgba(251,191,36,0.4)'
-              : '1px solid rgba(255,255,255,0.4)'
-          }}>
-          <span className="text-sm font-medium" style={{ color: upgradeSuccess === 'unlimited' ? '#fbbf24' : '#ffffff' }}>
-            {upgradeSuccess === 'unlimited'
-              ? t('app.upgradedToUnlimited')
-              : t('app.upgradedToPro')}
-          </span>
-        </div>
-      )}
 
       {/* Checkout cancelled notice */}
       {showCancelledNotice && (

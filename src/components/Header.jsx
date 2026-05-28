@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import { useFFmpeg } from '../hooks/useFFmpeg';
 import { useAuth } from '../context/AuthContext';
+import { useFFmpeg } from '../hooks/useFFmpeg';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import userIcon from '../assets/user_1754478889614.png';
 import UserProfile from './UserProfile';
@@ -11,26 +11,25 @@ import AppInfoWindow from './AppInfoWindow';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 const Header = () => {
-  const { generatedVideos, pairs, userProfileImage, isGenerating, resetGenerationState } = useAppStore();
+  const { user, liveProducerName } = useAuth();
+  const { generatedVideos, pairs, userProfileImage, username, isGenerating, resetGenerationState } = useAppStore();
   const { stopGeneration, resetAppForNewGeneration } = useFFmpeg();
-  const { liveProducerName, user } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAppInfoOpen, setIsAppInfoOpen] = useState(false);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
   const handleResetApp = () => {
-    console.log('Resetting stuck video generation...');
     stopGeneration();
     resetAppForNewGeneration();
     resetGenerationState();
   };
 
-  // Don't render header if no files are present
+  // Producer name from auth takes priority; fall back to local store username
+  const displayName = liveProducerName || user?.producer_name || username;
+
   if (!hasFiles) {
     return null;
   }
-
-  const displayName = liveProducerName || user?.producer_name || user?.first_name || 'User';
 
   return (
     <motion.header
@@ -51,7 +50,7 @@ const Header = () => {
         }}
       >
         {/* TypeBeatz Logo */}
-        <div className="flex items-center z-10">
+        <div className="flex items-center">
           <button
             onClick={() => setIsAppInfoOpen(true)}
             className="hover:scale-105 transition-all duration-200"
@@ -65,15 +64,21 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Center: Username */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <span className="text-white text-sm opacity-90 font-medium">
+        {/* Producer name — absolutely centred in the header, above flex siblings */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ zIndex: 2 }}
+        >
+          <span
+            className="text-white text-sm font-semibold opacity-90 tracking-wide"
+            style={{ fontFamily: NM }}
+          >
             {displayName}
           </span>
         </div>
 
         {/* Right side: Profile */}
-        <div className="flex items-center gap-3 z-10">
+        <div className="flex items-center gap-3" style={{ zIndex: 3 }}>
           <button
             onClick={() => setIsProfileOpen(true)}
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"
@@ -82,21 +87,13 @@ const Header = () => {
               src={userProfileImage || userIcon}
               alt="Profile"
               className="w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; }}
             />
           </button>
         </div>
 
-        {/* User Profile Modal */}
-        <UserProfile
-          isOpen={isProfileOpen}
-          onClose={() => setIsProfileOpen(false)}
-        />
-
-        {/* App Info Window */}
-        <AppInfoWindow
-          isOpen={isAppInfoOpen}
-          onClose={() => setIsAppInfoOpen(false)}
-        />
+        <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+        <AppInfoWindow isOpen={isAppInfoOpen} onClose={() => setIsAppInfoOpen(false)} />
       </div>
     </motion.header>
   );

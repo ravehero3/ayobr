@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useLemonSqueezy } from '../hooks/useLemonSqueezy';
 import Navbar from '../components/Navbar';
+import LanguageToggle from '../components/LanguageToggle';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
@@ -186,13 +187,38 @@ export default function UpgradePage() {
         body: JSON.stringify({ first_name: firstName, last_name: lastName, producer_name: producerName || undefined }),
       });
       await refreshUser();
-      const opened = await openCheckout(user?.email, pending.plan, pending.interval);
-      if (!opened) { setLoading(false); return; }
-      if (language !== 'cs') setPending(null);
+
+      if (isCzech) {
+        // Czech customers → GoPay (CZK)
+        const res = await fetch('/api/gopay/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ plan: pending.plan, isAnnual: pending.interval === 'yearly' }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.message || 'Chyba platby. Zkuste to prosím znovu.');
+          setLoading(false);
+          return;
+        }
+        const { gwUrl } = await res.json();
+        if (gwUrl) {
+          window.location.href = gwUrl;
+          // Page is navigating away — keep loading state, don't clear modal
+          return;
+        }
+        alert('Nepodařilo se zahájit platbu. Zkuste to prosím znovu.');
+        setLoading(false);
+      } else {
+        // International customers → LemonSqueezy (USD/EUR)
+        const opened = await openCheckout(user?.email, pending.plan, pending.interval);
+        if (!opened) { setLoading(false); return; }
+        setPending(null);
+      }
     } catch (err) {
       console.error('Checkout error:', err);
       alert(isCzech ? 'Chyba platby. Zkuste to prosím znovu.' : 'Payment error. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -243,16 +269,12 @@ export default function UpgradePage() {
                   boxShadow: plan.highlight ? '0 30px 60px -12px rgba(0,0,0,0.6)' : plan.topTier ? '0 20px 50px -10px rgba(255,255,255,0.08)' : '0 10px 30px -10px rgba(0,0,0,0.3)',
                   overflow: 'hidden',
                 }}>
-                {plan.topTier && (
-                  <motion.div animate={{ x: ['-100%', '200%'] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 4, ease: 'linear' }}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)', transform: 'skewX(-20deg)', zIndex: 2, pointerEvents: 'none' }} />
-                )}
 
                 {/* Name + Toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
                   <span style={{ fontFamily: NM, fontSize: 22, fontWeight: 400, color: '#fff' }}>{plan.name}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(v => !v)}>ANNUAL</span>
+                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(v => !v)}>{t('landing.pricing.toggle.annual')}</span>
                     <button onClick={() => setIsAnnual(v => !v)} style={{ width: 26, height: 14, borderRadius: 99, background: isAnnual ? '#3B82F6' : 'rgba(255,255,255,0.1)', position: 'relative', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0, transition: 'background 0.3s' }}>
                       <motion.div animate={{ x: isAnnual ? 12 : 0 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }} style={{ width: 10, height: 10, borderRadius: '50%', background: '#fff', position: 'absolute', top: 1, left: 1 }} />
                     </button>
@@ -303,6 +325,17 @@ export default function UpgradePage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '24px 32px',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        background: '#000',
+      }}>
+        <LanguageToggle />
       </div>
 
       <AnimatePresence>

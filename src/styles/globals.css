@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+/* Remove mouse-click focus rings globally (keep keyboard focus for accessibility) */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 :root {
   --bg-deep-navy: #000000;
   --bg-matte-black: #080808;

@@ -198,11 +198,18 @@ const result4 = await executeSql({
     environment: "production"
 });
 
-// Data warehouse query with sampling
-// (Note: `params` is NOT supported for warehouse targets; if `year` were
-// dynamic, validate it as an integer literal before interpolating.)
+// Data warehouse query — project exact columns + partition filter + LIMIT.
+// `sampleSize` only caps rows returned to the client; it does NOT reduce the
+// bytes the warehouse scans, so a bare `SELECT *` still costs the full scan.
+// (Note: `params` is NOT supported for warehouse targets; if a date or other
+// filter value were dynamic, validate it as the expected type before
+// interpolating.)
 const result5 = await executeSql({
-    sqlQuery: "SELECT * FROM sales_data WHERE year = 2024",
+    sqlQuery: `SELECT order_id, customer_id, total_amount, order_date
+               FROM sales_data
+               WHERE order_date >= '2024-01-01'
+                 AND order_date < '2025-01-01'
+               LIMIT 100`,
     target: "bigquery",
     sampleSize: 100
 });
@@ -230,6 +237,51 @@ const result = await executeSql({
 2. **Stripe Protection**: Mutations to Stripe schema tables (stripe.*) are blocked
 3. **Discussion Mode**: Mutating queries are blocked in Planning/Discussion mode
 4. **Destructive Query Protection**: DROP, TRUNCATE, etc. are blocked via the skill callback path (use the tool interface directly for destructive operations that require user confirmation)
+
+## CRITICAL: Data Warehouse Cost Control
+
+Warehouse targets (`bigquery`, `databricks`, `snowflake`) are billed per byte scanned.
+One careless `SELECT *` against a fact table can cost tens of dollars; a dashboard
+that re-runs warehouse queries every few seconds can burn thousands of dollars per day.
+**Treat `executeSql` as an expensive debugging/exploration tool when `target` is a warehouse.**
+
+### Use `executeSql` against a warehouse ONLY for these cases
+
+1. **Schema discovery** — `INFORMATION_SCHEMA.TABLES`, `INFORMATION_SCHEMA.COLUMNS`,
+   `DESCRIBE TABLE`, and similar metadata queries to understand the structure.
+2. **Small sample reads** with an explicit `LIMIT` (`LIMIT 5`–`LIMIT 100`) to inspect
+   value shapes while designing an app or answering an ad-hoc question.
+3. **One-off analytical questions** that the user explicitly asked in chat and that
+   cannot be answered from cached data.
+
+### Do NOT use `executeSql` against a warehouse for these cases
+
+- Power a data app's runtime queries. The app's API server must run those queries
+  itself, with DB-backed caching (TTL matched to the dashboard's lowest refresh
+  interval — 5 minutes by default). See the `data-visualization` skill's
+  `common-database.md` for the `api_cache` schema and helpers.
+- Re-run the same query repeatedly during a session — cache the result locally
+  (in a JavaScript variable or a CSV file under `.agents/outputs/`) and reuse it.
+- Perform full table scans when an aggregated, partitioned, or `LIMIT`-bounded
+  query would answer the same question.
+
+### Required discipline for every warehouse query
+
+- **Project exact columns** — never `SELECT *` on wide tables.
+- **Always `LIMIT`** when exploring.
+- **Partition / cluster filter** — scope by the partition or cluster column
+  (`WHERE event_date >= ...`) so the warehouse prunes data and you are billed
+  for a tiny slice, not the whole table.
+- **Prefer pre-aggregated tables** (e.g. `_daily`, `_summary`) over raw event tables.
+- **Diff-only reads** — for incremental/refresh queries, filter on `WHERE updated_at > :last_seen`
+  and persist `last_seen` so subsequent queries only scan the delta.
+
+### If the user is building a data app (dashboard, report, explorer)
+
+Hand off to the `data-visualization` skill. Use `executeSql` only for the initial
+schema discovery and a few sample queries. The runtime queries belong in the app's
+API server with DB-backed caching — not in repeated `executeSql` calls from the agent
+loop.
 
 ## Best Practices
 

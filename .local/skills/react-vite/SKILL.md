@@ -53,6 +53,8 @@ Use the `pnpm-workspace` skill as the source of truth for shared monorepo rules.
 
 **The design subagent is the bottleneck — everything is ordered to get it running ASAP.**
 
+**The database is NOT a prerequisite for the design subagent.** Even when the app clearly needs a DB, do not provision a database, write schema, run migrations, or seed before launching the subagent. The design subagent depends only on the generated API client (OpenAPI → codegen → hooks) — it does not care whether the DB exists yet. All DB work happens AFTER the subagent is spawned, in parallel with its run (see step 5). Calling `createDatabase()` or any DB tool before step 4 directly delays first output for zero benefit.
+
 1. Create the artifact.
 2. Write the OpenAPI spec in `lib/api-spec/openapi.yaml` — include both core CRUD and the safe wow endpoints from Step 2. This is the **critical path** because it gates codegen which gates the design subagent.
 3. Run codegen (`pnpm run --filter @workspace/api-spec codegen`)
@@ -70,7 +72,7 @@ Use the `pnpm-workspace` skill as the source of truth for shared monorepo rules.
     - Seed a small amount of example data (1-3 rows per table) so the app isn't empty on first load. Do not over-seed.
     - For seed data images that don't come from a real API, use `generate_image` instead of placeholder services (DiceBear, Boring Avatars, Unsplash, Lorem Picsum, etc.). Real API image URLs (e.g. PokéAPI sprites, TMDB posters) are fine. It's okay not to seed object storage.
     - You can also ask the design subagent to generate images/video as part of its task — it has access to `generate_image`, `generate_video`, and `stock_image`.
-Note: It's important to do all the DB schema/definitions/seeding and development work only after the design subagent has been spawned for maximal speed.
+**Note: All DB schema/definition/seeding and backend development work MUST happen only after the design subagent has been spawned. Do not front-load any of it.**
 6. After your backend development process is done. wait for the design subagent to finish.
    Note: Do not restart the frontend workflow until the design subagent is done otherwise it will show a broken app, you can restart the API one if needed.
 7. Fix any integration issues (restart workflow and refresh logs).

@@ -9,8 +9,9 @@ description: "Create, read, and manipulate shapes on the canvas. The canvas is t
 
 When the user's request will produce **new visual content** on the canvas (e.g. "create a landing page", "show me 3 card variants", "mockup a dashboard"), your very first action must be to place building placeholders — before writing any code or setting up servers:
 
-1. Call `getCanvasState()` via `code_execution` to read the board and find empty space.
-2. Call `applyCanvasActions()` to create iframe shapes with `state: "building"` and `componentName` for every element you plan to produce. No URL is needed — the UI shows a building indicator.
+1. Call `applyCanvasActions()` with a `create-auto` action to create iframe shapes with `state: "building"` and names for every element you plan to produce. No URL is needed — the UI shows a building indicator.
+   - **Exception:** if the `pending_canvas_frames` block for the current user turn lists frames, use those exact `shape_id`s with `type: "update"` actions for the first N elements instead of `create-auto`. The client has already placed those Building iframes. Only fall back to `create-auto` for elements beyond the reserved count. Ignore `pending_canvas_frames` blocks attached to earlier turns — those reservations belong to those earlier user messages.
+2. Only call `getCanvasState()` first when you must place shapes at exact coordinates or relative to existing content.
 3. Only then proceed with the rest of the work (mockup-sandbox setup, writing code, starting servers, etc.).
 4. As each element becomes ready, update its iframe to `state: "live"` with the real URL.
 
@@ -35,7 +36,7 @@ Beyond iframes, the canvas also supports static shapes (rectangles, ellipses, te
 You have three callbacks available via `code_execution`:
 
 - **`getCanvasState`** -- Read what shapes are on the board, their positions, types, and properties.
-- **`applyCanvasActions`** -- Create, update, delete, move, resize, reorder, align, or distribute shapes.
+- **`applyCanvasActions`** -- Create, auto-place, update, delete, move, resize, reorder, align, or distribute shapes.
 - **`focusCanvasShapes`** -- Pan and zoom the viewport to show specific shapes.
 
 All callbacks are async and must be awaited. Call them directly in `code_execution` -- they are pre-registered.
@@ -59,12 +60,12 @@ For any request that involves showing rendered UI on the canvas, you need both t
 
 ### `applyCanvasActions`
 
-Modify the canvas board by applying an ordered list of actions in a single atomic batch. Always call `getCanvasState` first to see existing shapes and find empty space.
+Modify the canvas board by applying an ordered list of actions in a single atomic batch. For new iframes that just need automatic placement, use `create-auto`; for manual x/y placement, call `getCanvasState` first to see existing shapes and find empty space.
 
 ```json
 {
   "$defs": {
-    "ScribeAlignActionInput": {
+    "CanvasAlignActionInput": {
       "properties": {
         "type": { "const": "align", "description": "Align multiple shapes.", "type": "string" },
         "shapeIds": { "description": "Target shape ids.", "items": { "type": "string" }, "type": "array" },
@@ -72,22 +73,44 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
       },
       "required": ["type", "shapeIds", "alignment"]
     },
-    "ScribeCreateActionInput": {
+    "CanvasCreateActionInput": {
       "properties": {
         "type": { "const": "create", "description": "Create a shape.", "type": "string" },
-        "shape": { "$ref": "#/$defs/ScribeShapeInput", "description": "Shape payload." },
+        "shape": { "$ref": "#/$defs/CanvasShapeInput", "description": "Shape payload." },
         "shapeId": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "description": "Optional deterministic id." }
       },
       "required": ["type", "shape"]
     },
-    "ScribeDeleteActionInput": {
+    "CanvasCreateAutoActionInput": {
+      "properties": {
+        "type": { "const": "create-auto", "description": "Create one or more iframe shapes with automatic placement.", "type": "string" },
+        "shapeIds": { "description": "Deterministic ids for created iframe shapes.", "items": { "type": "string" }, "minItems": 1, "type": "array" },
+        "shape": { "$ref": "#/$defs/CanvasCreateAutoShapeInput", "description": "Iframe payload shared by every item." },
+        "names": { "description": "Per-shape componentName values; must match shapeIds.", "items": { "type": "string" }, "type": "array" }
+      },
+      "required": ["type", "shapeIds", "shape", "names"]
+    },
+    "CanvasCreateAutoShapeInput": {
+      "properties": {
+        "type": { "const": "iframe", "description": "Create-auto creates iframes.", "type": "string" },
+        "w": { "description": "Shape width in canvas units.", "type": "number" },
+        "h": { "description": "Shape height in canvas units.", "type": "number" },
+        "url": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "description": "For iframe shapes: the https URL to embed. Optional when creating with state 'building'; required when setting state to 'live'." },
+        "componentPath": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "description": "For iframe shapes: file path shown in the shape title bar." },
+        "componentProps": { "anyOf": [{ "additionalProperties": true, "type": "object" }, { "type": "null" }], "default": null, "description": "For iframe shapes: extra props to pass." },
+        "state": { "anyOf": [{ "enum": ["building", "modifying", "live"], "type": "string" }, { "type": "null" }], "default": null, "description": "For iframe shapes: lifecycle state. Set 'building' on create, 'modifying' before edits, 'live' when the component is ready." },
+        "artifactKind": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "description": "For iframe shapes: artifact kind metadata." }
+      },
+      "required": ["type", "w", "h"]
+    },
+    "CanvasDeleteActionInput": {
       "properties": {
         "type": { "const": "delete", "description": "Delete a shape.", "type": "string" },
         "shapeId": { "description": "Target shape id.", "type": "string" }
       },
       "required": ["type", "shapeId"]
     },
-    "ScribeDistributeActionInput": {
+    "CanvasDistributeActionInput": {
       "properties": {
         "type": { "const": "distribute", "description": "Distribute multiple shapes.", "type": "string" },
         "shapeIds": { "description": "Target shape ids.", "items": { "type": "string" }, "type": "array" },
@@ -95,7 +118,7 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
       },
       "required": ["type", "shapeIds", "direction"]
     },
-    "ScribeMoveActionInput": {
+    "CanvasMoveActionInput": {
       "properties": {
         "type": { "const": "move", "description": "Move a shape.", "type": "string" },
         "shapeId": { "description": "Target shape id.", "type": "string" },
@@ -104,7 +127,7 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
       },
       "required": ["type", "shapeId", "x", "y"]
     },
-    "ScribeReorderActionInput": {
+    "CanvasReorderActionInput": {
       "properties": {
         "type": { "const": "reorder", "description": "Reorder a shape.", "type": "string" },
         "shapeId": { "description": "Target shape id.", "type": "string" },
@@ -112,7 +135,7 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
       },
       "required": ["type", "shapeId", "direction"]
     },
-    "ScribeResizeActionInput": {
+    "CanvasResizeActionInput": {
       "properties": {
         "type": { "const": "resize", "description": "Resize a shape.", "type": "string" },
         "shapeId": { "description": "Target shape id.", "type": "string" },
@@ -121,7 +144,7 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
       },
       "required": ["type", "shapeId", "w", "h"]
     },
-    "ScribeShapeInput": {
+    "CanvasShapeInput": {
       "properties": {
         "type": { "description": "Shape type: 'geo' (rectangle/ellipse), 'text' (label), 'note' (sticky note), 'iframe' (embedded web content), 'image' (embedded image), or 'video' (embedded video).", "enum": ["geo", "text", "note", "iframe", "image", "video"], "type": "string" },
         "x": { "description": "X position on canvas (0 is left).", "type": "number" },
@@ -143,15 +166,15 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
       },
       "required": ["type", "x", "y", "w", "h"]
     },
-    "ScribeUpdateActionInput": {
+    "CanvasUpdateActionInput": {
       "properties": {
         "type": { "const": "update", "description": "Update a shape.", "type": "string" },
         "shapeId": { "description": "Target shape id.", "type": "string" },
-        "updates": { "$ref": "#/$defs/ScribeUpdateFieldsInput", "description": "Partial shape update." }
+        "updates": { "$ref": "#/$defs/CanvasUpdateFieldsInput", "description": "Partial shape update." }
       },
       "required": ["type", "shapeId", "updates"]
     },
-    "ScribeUpdateFieldsInput": {
+    "CanvasUpdateFieldsInput": {
       "properties": {
         "shapeType": { "description": "The type of shape being updated. Always required -- controls how the update is serialized.", "enum": ["geo", "text", "note", "iframe", "image", "video"], "type": "string" },
         "x": { "anyOf": [{ "type": "number" }, { "type": "null" }], "default": null, "description": "New x position." },
@@ -179,14 +202,15 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
       "description": "Ordered list of canvas actions to apply.",
       "items": {
         "anyOf": [
-          { "$ref": "#/$defs/ScribeCreateActionInput" },
-          { "$ref": "#/$defs/ScribeUpdateActionInput" },
-          { "$ref": "#/$defs/ScribeDeleteActionInput" },
-          { "$ref": "#/$defs/ScribeMoveActionInput" },
-          { "$ref": "#/$defs/ScribeResizeActionInput" },
-          { "$ref": "#/$defs/ScribeReorderActionInput" },
-          { "$ref": "#/$defs/ScribeAlignActionInput" },
-          { "$ref": "#/$defs/ScribeDistributeActionInput" }
+          { "$ref": "#/$defs/CanvasCreateActionInput" },
+          { "$ref": "#/$defs/CanvasCreateAutoActionInput" },
+          { "$ref": "#/$defs/CanvasUpdateActionInput" },
+          { "$ref": "#/$defs/CanvasDeleteActionInput" },
+          { "$ref": "#/$defs/CanvasMoveActionInput" },
+          { "$ref": "#/$defs/CanvasResizeActionInput" },
+          { "$ref": "#/$defs/CanvasReorderActionInput" },
+          { "$ref": "#/$defs/CanvasAlignActionInput" },
+          { "$ref": "#/$defs/CanvasDistributeActionInput" }
         ]
       },
       "type": "array"
@@ -195,6 +219,10 @@ Modify the canvas board by applying an ordered list of actions in a single atomi
   "required": ["actions"]
 }
 ```
+
+#### Pre-reserved frames
+
+Some user turns include a `pending_canvas_frames` block: design-mockup iframes the client already placed in `state: "building"` with listed `shape_id`s before this turn. Update those exact ids with `applyCanvasActions` `type: "update"` instead of creating replacement shapes. Each block is scoped to the user message it precedes — do not consume `shape_id`s from a `pending_canvas_frames` block attached to an earlier turn. See the **mockup-sandbox** skill for the update payload.
 
 ### `getCanvasState`
 
@@ -303,19 +331,19 @@ Embed live web content. Use the `state` field to manage the iframe lifecycle:
 - `"modifying"` -- Set before editing an existing component's backing file.
 - `"live"` -- Set when the component is ready to display. URL is **required** in this state.
 
-Create the iframe immediately with `state: "building"`, then update it to `"live"` once the URL is available:
+Create the iframe immediately with `state: "building"`, then update it to `"live"` once the URL is available. Use `create-auto` unless you need exact coordinates:
 
 ```javascript
 // 1. Create iframe immediately -- no URL needed yet
 await applyCanvasActions({ actions: [
   {
-    type: "create",
-    shapeId: "app-preview",
+    type: "create-auto",
+    shapeIds: ["app-preview"],
+    names: ["App Preview"],
     shape: {
       type: "iframe",
-      x: 0, y: 0, w: 1280, h: 720,
-      state: "building",
-      componentName: "App Preview"
+      w: 1280, h: 720,
+      state: "building"
     }
   }
 ] });
@@ -339,6 +367,7 @@ await applyCanvasActions({ actions: [
 **Note: `create` and `update` actions have different payload structures.**
 
 - **Create** defines a new shape from scratch, so it takes a full `shape` object: `shape: { type: "iframe", ... }`
+- **Create-auto** creates one or more iframe placeholders with automatic placement.
 - **Update** patches an existing shape, so it takes a partial `updates` object: `updates: { shapeType: "iframe", ... }` -- the field is `shapeType` (not `type`) because `type` is already the action discriminator
 - Do not copy the payload key from a create into an update or vice versa -- the wrong key passes validation but the action will fail when applied.
 
@@ -395,27 +424,29 @@ await applyCanvasActions({ actions: [
 
 ### Align and Distribute Shapes
 
-Prefer `align` (2+ shapes) and `distribute` (3+ shapes) over hand-computing x/y. Faster to emit, and pixel-perfect where hand math is often off by a few units. Fewer shapes than the minimum returns `INSUFFICIENT_SHAPES`.
+Prefer `create-auto` for new iframes that just need automatic placement. Use `align` (2+ shapes) and `distribute` (3+ shapes) for manual placement or cleanup.
 
 **When to use:**
 
-- Row or column of 3+ related items you are placing together (cards, iframes, thumbnails) -- `align` one axis, `distribute` the other.
+- New iframes that just need automatic placement -- use one `create-auto` action to place them together and avoid existing shapes.
+- Row or column of 3+ non-iframe items you are placing together (cards, thumbnails) -- `align` one axis, `distribute` the other.
 - Pair of shapes you are placing together and want to share an edge (e.g. before/after side-by-side) -- `align` only; do not `distribute` 2 shapes.
 - Cleaning up a group of shapes the user already placed and explicitly asked to be lined up -- all of them will move.
 
 **When NOT to use:** to place a new shape next to existing user content without moving that content, do not pass the existing shape into `align` -- `align` moves every shape in `shapeIds`. Read the anchor's position with `getCanvasState`, then compute the new shape's coordinates from the anchor: share the aligned axis (e.g. `y: anchor.y` for tops) and offset the other by `anchor.x + anchor.w + gap` (or `anchor.y + anchor.h + gap`) -- keep the `anchor.x`/`anchor.y` term so the new shape lands beside the anchor, not at the origin.
 
-**Rule of thumb (3+ shapes):** if you're chaining `x3 = x2 + w + gutter`, `x4 = x3 + w + gutter`, stop -- place shapes at approximate positions and line them up with `align`/`distribute` in the same batch. For a 2-shape pair, the gap still has to come from the `x`/`y` you pass on create -- `distribute` rejects 2 shapes and `align` only matches the shared edge. `align` modes: `left` snaps all shapes to the leftmost x; `right` to the max right edge; `top` to the minimum y; `bottom` to the max bottom edge; `center-horizontal`/`center-vertical` snap to the mean center.
+**Rule of thumb (3+ iframe placeholders):** if you're chaining `x3 = x2 + w + gutter`, `x4 = x3 + w + gutter`, stop -- use `create-auto`. For manual non-iframe placement, place shapes at approximate positions and line them up with `align`/`distribute` in the same batch. `align` modes: `left` snaps all shapes to the leftmost x; `right` to the max right edge; `top` to the minimum y; `bottom` to the max bottom edge; `center-horizontal`/`center-vertical` snap to the mean center.
 
-Recipe: row of three mockup iframes. Place at roughly different y values, then align tops and distribute horizontally in one batch:
+Recipe: three mockup iframes:
 
 ```javascript
 await applyCanvasActions({ actions: [
-  { type: "create", shapeId: "mobile",  shape: { type: "iframe", x: 0,    y: 20,  w: 390,  h: 844,  state: "building", componentName: "Mobile"  } },
-  { type: "create", shapeId: "tablet",  shape: { type: "iframe", x: 500,  y: 0,   w: 768,  h: 1024, state: "building", componentName: "Tablet"  } },
-  { type: "create", shapeId: "desktop", shape: { type: "iframe", x: 1400, y: 40,  w: 1280, h: 720,  state: "building", componentName: "Desktop" } },
-  { type: "align",      shapeIds: ["mobile", "tablet", "desktop"], alignment: "top" },
-  { type: "distribute", shapeIds: ["mobile", "tablet", "desktop"], direction: "horizontal" }
+  {
+    type: "create-auto",
+    shapeIds: ["minimal", "bold", "playful"],
+    names: ["Minimal", "Bold", "Playful"],
+    shape: { type: "iframe", w: 1280, h: 900, state: "building" }
+  }
 ] });
 ```
 
@@ -460,8 +491,8 @@ Pan and zoom the user's canvas viewport to center on specific shapes. **Only cal
 
 ## Typical Workflow
 
-1. Call `getCanvasState()` to see what's on the board.
-2. Use the `summary` and `focusedShapes` to understand positions and IDs.
+1. Use `create-auto` for new iframes that just need automatic placement, or call `getCanvasState()` before manual coordinate changes.
+2. For manual changes, use the `summary` and `focusedShapes` to understand positions and IDs.
 3. Call `applyCanvasActions` with a batch of changes.
 4. **CRITICAL — Present the result.** After your final canvas action, you MUST call `presentArtifact({ artifactId, shapeIds: [...] })` with the IDs of all shapes you created or modified. This is how the user finds your work — without it, they cannot navigate to the shapes. Do NOT skip this step. Do NOT ask the user if they want to focus — just present.
 
@@ -475,14 +506,14 @@ Pan and zoom the user's canvas viewport to center on specific shapes. **Only cal
 
 ## Best Practices
 
-1. **Read before writing** -- Always call `getCanvasState` before layout-sensitive changes.
+1. **Read before manual placement** -- Call `getCanvasState` before layout-sensitive x/y changes. For new iframes that just need automatic placement, use `create-auto`.
 2. **Set shapeId on create** -- So you can reference, update, or delete the shape later.
 3. **Always call `presentArtifact` after canvas work.** After creating or modifying shapes, pass all affected shape IDs to `presentArtifact`. Never skip this. Never ask the user if they want to see the shapes. Do NOT call `focusCanvasShapes` as a separate step (except for the narrow first-build mockup exception above).
 4. **Batch actions** -- Group related changes in one `applyCanvasActions` call.
 5. **Use https URLs** -- Iframe shapes reject http URLs.
 6. **Label iframes** -- Set `componentPath` and `componentName` so users can identify embedded content.
 7. **Use `focusArea`** -- For large boards, pass a region to `getCanvasState` to get detail where you need it.
-8. **Prefer `align`/`distribute` over manual coordinates when placing shapes together** -- For rows or columns of 3+ shapes you are laying out together, add `distribute` so you don't hand-compute gutters. `align` repositions every shape in `shapeIds` (no anchor), so only pass shapes you actually want moved. To place a new shape next to existing user content, read the anchor's position with `getCanvasState` (check both `focusedShapes` and `blurryShapes`) and create beside it -- share the aligned axis (e.g. `y: anchor.y`), offset the other by the anchor's position plus its size plus a gap (e.g. `x: anchor.x + anchor.w + gap`). Do not pass the anchor into `align`. See "Align and Distribute Shapes" above.
+8. **Prefer `create-auto` or `align`/`distribute` over manual coordinates** -- For new iframes that just need automatic placement, use one `create-auto` action. For manual rows or columns of 3+ shapes, add `distribute` so you don't hand-compute gutters. `align` repositions every shape in `shapeIds` (no anchor), so only pass shapes you actually want moved. To place a new shape next to existing user content, read the anchor's position with `getCanvasState` and create beside it. Do not pass the anchor into `align`.
 
 ### Iframe Sizing
 

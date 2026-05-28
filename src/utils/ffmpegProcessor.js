@@ -1,6 +1,7 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
+const DEBUG = false;
 let ffmpeg = null;
 let isLoaded = false;
 let isInitializing = false;
@@ -35,12 +36,12 @@ const audioBufferCache = new Map(); // Cache for audio file buffers
 
 // Force stop all active FFmpeg processes gracefully
 export const forceStopAllProcesses = async () => {
-  console.log('Force stopping all FFmpeg processes...');
+  DEBUG && console.log('Force stopping all FFmpeg processes...');
   isForceStopped = true;
 
   // CRITICAL: Resolve any outstanding cleanup promise to prevent deadlock
   if (cleanupCompletionResolver) {
-    console.log('Force stop: Resolving outstanding cleanup promise to prevent deadlock');
+    DEBUG && console.log('Force stop: Resolving outstanding cleanup promise to prevent deadlock');
     cleanupCompletionResolver();
     cleanupCompletionResolver = null;
   }
@@ -62,12 +63,12 @@ export const forceStopAllProcesses = async () => {
             f.name.startsWith('bg_')
           )
         );
-        console.log(`Found ${tempFiles.length} temporary files to clean up`);
+        DEBUG && console.log(`Found ${tempFiles.length} temporary files to clean up`);
 
         for (const tempFile of tempFiles) {
           try {
             await ffmpeg.deleteFile(tempFile.name);
-            console.log(`Cleaned up temporary file: ${tempFile.name}`);
+            DEBUG && console.log(`Cleaned up temporary file: ${tempFile.name}`);
           } catch (e) {
             console.warn(`Failed to clean temp file ${tempFile.name}:`, e.message);
           }
@@ -78,7 +79,7 @@ export const forceStopAllProcesses = async () => {
 
       // Only terminate if FFmpeg is actually loaded
       if (isLoaded) {
-        console.log('Gracefully terminating FFmpeg...');
+        DEBUG && console.log('Gracefully terminating FFmpeg...');
         await ffmpeg.terminate();
         // Wait for termination to complete
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -103,7 +104,7 @@ export const forceStopAllProcesses = async () => {
       // Reset process count
       processedCount = 0;
 
-      console.log('All FFmpeg processes terminated and cleaned up');
+      DEBUG && console.log('All FFmpeg processes terminated and cleaned up');
     } catch (error) {
       console.error('Error terminating FFmpeg:', error);
       // Force clear everything even if termination fails
@@ -121,7 +122,7 @@ export const forceStopAllProcesses = async () => {
 
 // Restart FFmpeg completely - useful for debugging
 export const restartFFmpeg = async () => {
-  console.log('Restarting FFmpeg completely...');
+  DEBUG && console.log('Restarting FFmpeg completely...');
   await forceStopAllProcesses(); // Now awaits the async operation
 
   // Wait a moment for cleanup
@@ -135,13 +136,13 @@ export const restartFFmpeg = async () => {
 const cleanupMemory = () => {
   processedCount++;
 
-  console.log(`Memory cleanup after video ${processedCount}`);
+  DEBUG && console.log(`Memory cleanup after video ${processedCount}`);
 
   // Clear excessive cache entries
   if (memoryCache.size > 20) { // Reduced cache size
     const keysToDelete = Array.from(memoryCache.keys()).slice(0, memoryCache.size - 10);
     keysToDelete.forEach(key => memoryCache.delete(key));
-    console.log(`Cleaned up ${keysToDelete.length} cached items`);
+    DEBUG && console.log(`Cleaned up ${keysToDelete.length} cached items`);
   }
 
   // Clear file caches more aggressively
@@ -152,12 +153,12 @@ const cleanupMemory = () => {
 
   if (audioBufferCache.size > 5) {
     audioBufferCache.clear();
-    console.log('Cleared audio buffer cache');
+    DEBUG && console.log('Cleared audio buffer cache');
   }
 
   if (processedImageCache.size > 5) {
     processedImageCache.clear();
-    console.log('Cleared processed image cache');
+    DEBUG && console.log('Cleared processed image cache');
   }
 
   // Force browser memory cleanup for web environment
@@ -179,7 +180,7 @@ const cleanupMemory = () => {
     } catch(e) { /* ignore cleanup errors */ }
   }
   
-  console.log(`Memory cleanup complete. Active processes: ${activeProcesses.size}, Cache size: ${memoryCache.size}`);
+  DEBUG && console.log(`Memory cleanup complete. Active processes: ${activeProcesses.size}, Cache size: ${memoryCache.size}`);
 };
 
 // Progress tracking for large batches
@@ -192,11 +193,11 @@ export const getBatchProgress = () => {
 };
 
 export const initializeFFmpeg = async () => {
-  console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing, 'isForceStopped:', isForceStopped);
+  DEBUG && console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing, 'isForceStopped:', isForceStopped);
 
   // Always reset force stopped flag when initializing
   if (isForceStopped) {
-    console.log('Resetting force stopped flag for fresh initialization');
+    DEBUG && console.log('Resetting force stopped flag for fresh initialization');
     isForceStopped = false;
     isLoaded = false; // Force re-initialization when recovering from force stop
     ffmpeg = null;
@@ -208,7 +209,7 @@ export const initializeFFmpeg = async () => {
     // Verify FFmpeg is actually working and not stuck
     try {
       const files = await ffmpeg.listDir('/');
-      console.log('FFmpeg verification passed, current files:', files.length);
+      DEBUG && console.log('FFmpeg verification passed, current files:', files.length);
       
       // Check for stuck temporary files from previous operations
       const stuckFiles = files.filter(f => 
@@ -217,7 +218,7 @@ export const initializeFFmpeg = async () => {
       );
       
       if (stuckFiles.length > 0) {
-        console.log(`Found ${stuckFiles.length} stuck files, cleaning up...`);
+        DEBUG && console.log(`Found ${stuckFiles.length} stuck files, cleaning up...`);
         for (const file of stuckFiles) {
           try {
             await ffmpeg.deleteFile(file.name);
@@ -227,7 +228,7 @@ export const initializeFFmpeg = async () => {
         }
       }
       
-      console.log('Returning existing FFmpeg instance (verified working)');
+      DEBUG && console.log('Returning existing FFmpeg instance (verified working)');
       return ffmpeg;
     } catch (verifyError) {
       console.warn('FFmpeg instance appears broken, reinitializing...', verifyError.message);
@@ -239,38 +240,38 @@ export const initializeFFmpeg = async () => {
 
   // Return existing promise if already initializing and not force stopped
   if (isInitializing && initPromise && !isForceStopped) {
-    console.log('Returning existing initialization promise');
+    DEBUG && console.log('Returning existing initialization promise');
     return initPromise;
   }
 
-  console.log('Starting FFmpeg initialization...');
+  DEBUG && console.log('Starting FFmpeg initialization...');
   isInitializing = true;
 
   initPromise = (async () => {
     try {
       // Always create a new FFmpeg instance for fresh start
       if (!ffmpeg) {
-        console.log('Creating new FFmpeg instance');
+        DEBUG && console.log('Creating new FFmpeg instance');
         ffmpeg = new FFmpeg();
       }
 
       if (!isLoaded) {
         // Try loading FFmpeg with fallback options
         try {
-          console.log('Trying default FFmpeg load...');
+          DEBUG && console.log('Trying default FFmpeg load...');
           await ffmpeg.load();
-          console.log('FFmpeg loaded successfully with default method');
+          DEBUG && console.log('FFmpeg loaded successfully with default method');
         } catch (defaultError) {
           console.error('Default FFmpeg loading failed:', defaultError);
 
           try {
-            console.log('Trying external CDN...');
+            DEBUG && console.log('Trying external CDN...');
             await ffmpeg.load({
               coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
               wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
               workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
             });
-            console.log('FFmpeg loaded successfully with external CDN');
+            DEBUG && console.log('FFmpeg loaded successfully with external CDN');
           } catch (cdnError) {
             console.error('External CDN loading failed:', cdnError);
             throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
@@ -280,7 +281,7 @@ export const initializeFFmpeg = async () => {
         // Verify initialization worked
         try {
           await ffmpeg.listDir('/');
-          console.log('FFmpeg filesystem verification successful');
+          DEBUG && console.log('FFmpeg filesystem verification successful');
         } catch (fsError) {
           console.error('FFmpeg filesystem verification failed:', fsError);
           throw new Error('FFmpeg loaded but filesystem is not accessible');
@@ -325,10 +326,10 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     }
   }
 
-  console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
-  console.log('File sizes - Audio:', audioFile.size, 'Image:', imageFile.size);
-  console.log('Video settings:', videoSettings);
-  console.log('Using pre-cached assets:', !!preparedAssets);
+  DEBUG && console.log('Starting FFmpeg processing for:', audioFile.name, imageFile.name);
+  DEBUG && console.log('File sizes - Audio:', audioFile.size, 'Image:', imageFile.size);
+  DEBUG && console.log('Video settings:', videoSettings);
+  DEBUG && console.log('Using pre-cached assets:', !!preparedAssets);
 
   let audioFileName = null;
   let imageFileName = null;
@@ -339,19 +340,19 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
   try {
     const ffmpeg = await initializeFFmpeg();
-    console.log('FFmpeg initialized successfully');
+    DEBUG && console.log('FFmpeg initialized successfully');
 
     // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
 
     // CRITICAL FIX: Wait for previous cleanup to complete BEFORE setting new currentProcessingPairId
     // This prevents the race condition where previous cleanup is skipped
-    console.log(`\n========== VIDEO ${pairId} STARTING ==========`);
-    console.log(`[${pairId}] Waiting for previous video cleanup to complete...`);
+    DEBUG && console.log(`\n========== VIDEO ${pairId} STARTING ==========`);
+    DEBUG && console.log(`[${pairId}] Waiting for previous video cleanup to complete...`);
     const cleanupWaitStart = Date.now();
     await cleanupCompletionPromise;
     const cleanupWaitDuration = Date.now() - cleanupWaitStart;
-    console.log(`[${pairId}] Previous cleanup confirmed complete (waited ${cleanupWaitDuration}ms)`);
+    DEBUG && console.log(`[${pairId}] Previous cleanup confirmed complete (waited ${cleanupWaitDuration}ms)`);
 
     // Create a NEW cleanup promise for this session
     let resolveCleanup;
@@ -359,7 +360,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       resolveCleanup = resolve;
     });
     cleanupCompletionResolver = resolveCleanup;
-    console.log(`[${pairId}] 📝 Created NEW cleanup promise for this session`);
+    DEBUG && console.log(`[${pairId}] 📝 Created NEW cleanup promise for this session`);
 
     // Increment session counter
     processingSessionCounter++;
@@ -370,42 +371,13 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     currentProgressToken = null; // Invalidate any previous token immediately
     const progressToken = crypto.randomUUID(); // Generate fresh unique token
     currentProgressToken = progressToken; // Set as current valid token
-    console.log(`[${pairId}] 🔐 Generated progress token: ${progressToken.substring(0, 8)}...`);
+    DEBUG && console.log(`[${pairId}] 🔐 Generated progress token: ${progressToken.substring(0, 8)}...`);
     
     // NOW it's safe to set the current processing pair (cleanup is done)
     currentProcessingPairId = pairId;
     const capturedPairId = pairId; // Capture for closure comparison
-    console.log(`[${pairId}] Starting FFmpeg, session: ${currentSessionId}`);
+    DEBUG && console.log(`[${pairId}] Starting FFmpeg, session: ${currentSessionId}`);
 
-    // Verify FFmpeg filesystem is clean before starting
-    try {
-      const files = await ffmpeg.listDir('/');
-      const tempFiles = files.filter(f => 
-        !f.isDir && (
-          f.name.startsWith('logo_') || 
-          f.name.startsWith('audio_') || 
-          f.name.startsWith('image_') || 
-          f.name.startsWith('output_') ||
-          f.name.startsWith('bg_')
-        )
-      );
-      
-      if (tempFiles.length > 0) {
-        console.warn(`[${pairId}] Found ${tempFiles.length} leftover temp files, cleaning...`);
-        for (const tempFile of tempFiles) {
-          try {
-            await ffmpeg.deleteFile(tempFile.name);
-            console.log(`[${pairId}] Cleaned leftover file: ${tempFile.name}`);
-          } catch (e) {
-            console.warn(`[${pairId}] Failed to clean ${tempFile.name}:`, e.message);
-          }
-        }
-      } else {
-        console.log(`[${pairId}] FFmpeg filesystem is clean, ready to start`);
-      }
-    } catch (e) {
-      console.warn(`[${pairId}] Could not verify FFmpeg state:`, e.message);
-    }
 
     // Set up progress callback with better completion handling
     let lastProgressTime = 0;
@@ -438,7 +410,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
         // Handle near-completion differently to prevent stuck at 99%
         if (normalizedProgress >= 99) {
           if (!isNearCompletion) {
-            console.log(`[Pair ${capturedPairId}] FFmpeg approaching completion (99%+), preparing for file output...`);
+            DEBUG && console.log(`[Pair ${capturedPairId}] FFmpeg approaching completion (99%+), preparing for file output...`);
             isNearCompletion = true;
             // Report 99% but don't mark as fully completed yet
             onProgress(99);
@@ -452,7 +424,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
           // Log progress for better user feedback with pairId tracking
           if (normalizedProgress % 10 === 0 || normalizedProgress > 90) {
-            console.log(`[Pair ${capturedPairId}] FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
+            DEBUG && console.log(`[Pair ${capturedPairId}] FFmpeg progress: ${normalizedProgress.toFixed(1)}%`);
           }
         }
       }
@@ -460,7 +432,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     // Add handler with logging
     ffmpeg.on('progress', progressHandler);
-    console.log(`[${pairId}] ✅ ADDED progress handler (session ${currentSessionId})`);
+    DEBUG && console.log(`[${pairId}] ✅ ADDED progress handler (session ${currentSessionId})`);
 
     // Enhanced file reading with proper error handling
     const getCachedFileData = async (file, type) => {
@@ -472,7 +444,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
         return new Uint8Array(cachedData);
       }
 
-      console.log(`Reading ${type} file:`, file.name, 'Size:', file.size);
+      DEBUG && console.log(`Reading ${type} file:`, file.name, 'Size:', file.size);
 
       let data;
       try {
@@ -483,7 +455,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
           throw new Error(`File ${file.name} is empty or could not be read`);
         }
 
-        console.log(`Successfully read ${type} file:`, file.name, 'Data size:', data.length);
+        DEBUG && console.log(`Successfully read ${type} file:`, file.name, 'Data size:', data.length);
       } catch (error) {
         console.error(`Error reading ${type} file:`, error);
         throw new Error(`Failed to read ${type} file: ${file.name}`);
@@ -503,11 +475,11 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     let audioData, imageData;
     
     if (preparedAssets && preparedAssets.audioBuffer && preparedAssets.imageBuffer) {
-      console.log('Using PRE-CACHED ASSETS (OPTIMIZED PATH)');
+      DEBUG && console.log('Using PRE-CACHED ASSETS (OPTIMIZED PATH)');
       audioData = preparedAssets.audioBuffer;
       imageData = preparedAssets.imageBuffer;
     } else {
-      console.log('Reading files from scratch (standard path)');
+      DEBUG && console.log('Reading files from scratch (standard path)');
       [audioData, imageData] = await Promise.all([
         getCachedFileData(audioFile, 'audio'),
         getCachedFileData(imageFile, 'image')
@@ -520,7 +492,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     outputFileName = `output_${pairId}_${timestamp}.mp4`;
 
     try {
-      console.log('Writing files to FFmpeg FS:', {
+      DEBUG && console.log('Writing files to FFmpeg FS:', {
         imageSize: imageData?.length || 0,
         audioSize: audioData?.length || 0
       });
@@ -537,22 +509,12 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       const imageBuffer = new Uint8Array(imageData);
       const audioBuffer = new Uint8Array(audioData);
 
-      await ffmpeg.writeFile(imageFileName, imageBuffer);
-      await ffmpeg.writeFile(audioFileName, audioBuffer);
+      await Promise.all([
+        ffmpeg.writeFile(imageFileName, imageBuffer),
+        ffmpeg.writeFile(audioFileName, audioBuffer),
+      ]);
 
-      // Verify files were written successfully
-      const imageWritten = await ffmpeg.readFile(imageFileName);
-      const audioWritten = await ffmpeg.readFile(audioFileName);
-
-      if (!imageWritten || imageWritten.length === 0) {
-        throw new Error(`Failed to write image file ${imageFileName} to FFmpeg FS`);
-      }
-
-      if (!audioWritten || audioWritten.length === 0) {
-        throw new Error(`Failed to write audio file ${audioFileName} to FFmpeg FS`);
-      }
-
-      console.log('Files written successfully to FFmpeg FS');
+      DEBUG && console.log('Files written successfully to FFmpeg FS');
     } catch (writeError) {
       console.error('Error writing files to FFmpeg FS:', writeError);
       throw new Error(`Failed to prepare input files: ${writeError.message}`);
@@ -564,15 +526,15 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // Get audio duration (use pre-cached if available, otherwise calculate)
     let audioDuration;
     if (preparedAssets && preparedAssets.audioDuration) {
-      console.log('Using pre-cached audio duration:', preparedAssets.audioDuration);
+      DEBUG && console.log('Using pre-cached audio duration:', preparedAssets.audioDuration);
       audioDuration = preparedAssets.audioDuration;
     } else {
-      console.log('Calculating audio duration...');
+      DEBUG && console.log('Calculating audio duration...');
       audioDuration = await getAudioDuration(audioFile);
     }
 
     // Create 1920x1080 video with image centered and 20px white space above/below
-    console.log('Executing FFmpeg command...');
+    DEBUG && console.log('Executing FFmpeg command...');
 
     // Build simplified FFmpeg command for better compatibility
     let ffmpegArgs = [
@@ -604,7 +566,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       }
     }
 
-    console.log('Background settings:', { 
+    DEBUG && console.log('Background settings:', { 
       backgroundColor, 
       useCustomBackground, 
       hasCustomFile: !!customBackgroundFile 
@@ -614,7 +576,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     let customBackgroundFileName = null;
     if (useCustomBackground && customBackgroundFile) {
       try {
-        console.log('Processing custom background...');
+        DEBUG && console.log('Processing custom background...');
         customBackgroundFileName = `bg_${pairId}_${timestamp}.jpg`;
 
         let backgroundData;
@@ -629,7 +591,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
         if (backgroundData && backgroundData.length > 0) {
           await ffmpeg.writeFile(customBackgroundFileName, backgroundData);
-          console.log('Custom background written successfully:', customBackgroundFileName);
+          DEBUG && console.log('Custom background written successfully:', customBackgroundFileName);
         } else {
           console.warn('Custom background data is empty, using fallback');
           useCustomBackground = false;
@@ -653,7 +615,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // Input indices: image=0, audio=1, background=2 (if exists)
     let backgroundIndex = 2;
 
-    console.log('Video filter inputs:', {
+    DEBUG && console.log('Video filter inputs:', {
       hasCustomBackground: useCustomBackground && !!customBackgroundFileName,
       backgroundIndex
     });
@@ -696,10 +658,10 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       outputFileName
     );
 
-    console.log('FFmpeg command args:', ffmpegArgs);
+    DEBUG && console.log('FFmpeg command args:', ffmpegArgs);
 
     // Execute FFmpeg command with enhanced timeout protection
-    console.log('Starting FFmpeg execution...');
+    DEBUG && console.log('Starting FFmpeg execution...');
 
     try {
       const execPromise = ffmpeg.exec(ffmpegArgs);
@@ -708,7 +670,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       });
 
       await Promise.race([execPromise, timeoutPromise]);
-      console.log('FFmpeg command executed successfully');
+      DEBUG && console.log('FFmpeg command executed successfully');
     } catch (execError) {
       console.error('FFmpeg execution error:', execError);
 
@@ -723,134 +685,51 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
                            errorMsg.includes('monotonic dts');
 
       if (isWarningError) {
-        console.log('FFmpeg warning detected, continuing with output check...');
+        DEBUG && console.log('FFmpeg warning detected, continuing with output check...');
       } else {
         // Re-throw for actual errors
         throw execError;
       }
     }
 
-    console.log('FFmpeg execution completed successfully');
+    DEBUG && console.log('FFmpeg execution completed successfully');
 
-    // Add delay to ensure filesystem is ready and force garbage collection
-    if (window.gc) {
-      window.gc();
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Optimized file reading with longer stabilization delay
-    console.log('Reading output file...');
-
-    // Force garbage collection and ensure FFmpeg has finished writing
-    if (window.gc) {
-      window.gc();
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Increased delay for stability
+    // Read output file immediately — exec() is fully awaited above
+    DEBUG && console.log('Reading output file...');
 
     let data;
-    let retryCount = 0;
-    const maxRetries = 5; // More retries with better timing
-
-    while (retryCount < maxRetries) {
+    try {
+      data = await ffmpeg.readFile(outputFileName);
+    } catch (firstErr) {
+      // One short retry in case of a transient FS flush delay
+      await new Promise(resolve => setTimeout(resolve, 300));
       try {
-        // Quick file existence check
-        const files = await ffmpeg.listDir('/');
-        const outputExists = files.some(f => f.name === outputFileName && !f.isDir);
-        console.log(`Output file ${outputFileName} exists:`, outputExists);
-
-        if (!outputExists) {
-          if (retryCount === 0) {
-            console.log('Output file not found on first attempt, waiting for FFmpeg to finish...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            continue;
-          } else {
-            throw new Error('Output file was not created by FFmpeg');
-          }
-        }
-
-        // Read the file directly
-        console.log('Attempting to read output file...');
         data = await ffmpeg.readFile(outputFileName);
-        console.log('Successfully read output file, size:', data ? data.length : 'null');
-
-        if (data && data.length > 1000) { // Minimum reasonable file size
-          console.log('File size validation passed, video data is ready');
-          
-          // Now that file is successfully read, report final progress
-          if (onProgress && !hasCompleted) {
-            onProgress(100);
-            hasCompleted = true;
-            console.log(`Deactivating progress callback for pair ${pairId}`);
-            progressCallbackActive = false;
-            console.log('Progress set to 100% after successful file read');
-          }
-          
-          break; // Success!
-        } else {
-          console.warn(`Output file too small (${data ? data.length : 0} bytes), retrying...`);
-          throw new Error(`Output file is too small: ${data ? data.length : 0} bytes`);
-        }
       } catch (readError) {
-        retryCount++;
-        console.error(`Failed to read output file (attempt ${retryCount}/${maxRetries}):`, readError.message || readError);
-
-        if (retryCount < maxRetries) {
-          // Progressive delays: 500ms, 1s, 1.5s, 2s
-          const delayMs = 500 * retryCount;
-          console.log(`Waiting ${delayMs}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delayMs));
-
-          // Force garbage collection between retries
-          if (window.gc) {
-            window.gc();
-          }
-        } else {
-          // Final attempt failed - list files for debugging
-          try {
-            const debugFiles = await ffmpeg.listDir('/');
-            console.log('Files in FFmpeg filesystem after error:', debugFiles);
-          } catch (listError) {
-            console.log('Cannot list files:', listError);
-          }
-
-          // Enhanced error details for debugging
-          console.error('Video generation failed - detailed error:');
-          console.error('- Audio file:', audioFile.name, 'size:', audioFile.size);
-          console.error('- Image file:', imageFile.name, 'size:', imageFile.size);
-          console.error('- Output file expected:', outputFileName);
-          console.error('- Last read error:', readError.message || readError);
-
-          throw new Error(`Video generation failed: Output file could not be read after ${maxRetries} attempts`);
-        }
+        console.error('Video generation failed - could not read output:', readError.message || readError);
+        console.error('- Audio:', audioFile.name, 'Image:', imageFile.name);
+        throw new Error('Video generation failed: output file could not be read');
       }
     }
 
-    console.log('FFmpeg execution completed successfully');
+    if (!data || data.length < 1000) {
+      throw new Error(`Video generation failed: output file is too small (${data ? data.length : 0} bytes)`);
+    }
 
-    // Deactivate progress callback FIRST to stop any more updates
-    console.log(`Deactivating progress callback for pair ${pairId}`);
-    progressCallbackActive = false;
-    
-    // Final progress update to 100%
     if (onProgress && !hasCompleted) {
       onProgress(100);
       hasCompleted = true;
+      progressCallbackActive = false;
     }
 
-    // Enhanced cleanup with proper sequencing
+    DEBUG && console.log('FFmpeg execution completed successfully');
+
+    // Parallel cleanup — all deletes fire at once
     const cleanupFiles = [audioFileName, imageFileName, outputFileName];
     if (customBackgroundFileName && useCustomBackground) {
       cleanupFiles.push(customBackgroundFileName);
     }
-
-    for (const fileName of cleanupFiles) {
-      try {
-        await ffmpeg.deleteFile(fileName);
-        console.log(`Cleaned up file: ${fileName}`);
-      } catch (e) { 
-        console.warn(`Failed to clean file ${fileName}:`, e.message); 
-      }
-    }
+    await Promise.all(cleanupFiles.map(f => ffmpeg.deleteFile(f).catch(() => {})));
 
     // Call memory cleanup after successful video generation
     cleanupMemory();
@@ -867,19 +746,19 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
                         !error.message && !error.name;
 
     if (isEmptyError) {
-      console.log('Detected empty error object, this usually indicates successful completion');
+      DEBUG && console.log('Detected empty error object, this usually indicates successful completion');
       // Check if we completed successfully and have valid data
       if (hasCompleted && data && data.length > 0) {
-        console.log('Found valid data despite empty error, returning successfully');
+        DEBUG && console.log('Found valid data despite empty error, returning successfully');
         return new Uint8Array(data);
       } else {
-        console.log('Empty error but no valid data available, treating as real error');
+        DEBUG && console.log('Empty error but no valid data available, treating as real error');
       }
     }
 
     // Force reinitialize FFmpeg on filesystem errors
     if (error && error.message && error.message.includes('FS error')) {
-      console.log('Filesystem error detected, reinitializing FFmpeg...');
+      DEBUG && console.log('Filesystem error detected, reinitializing FFmpeg...');
       try {
         await forceStopAllProcesses();
         // FFmpeg will be reinitialized on next call
@@ -917,7 +796,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       
       // CRITICAL: Ensure cleanup promise is resolved on cancellation
       if (cleanupCompletionResolver) {
-        console.log('Cancellation: Resolving cleanup promise to prevent deadlock');
+        DEBUG && console.log('Cancellation: Resolving cleanup promise to prevent deadlock');
         cleanupCompletionResolver();
         cleanupCompletionResolver = null;
       }
@@ -934,9 +813,9 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // CRITICAL: Clean up event handlers and state to prevent leaks into next job
     if (ffmpeg && progressHandler) {
       try {
-        console.log(`[${pairId}] 🧹 REMOVING progress handler...`);
+        DEBUG && console.log(`[${pairId}] 🧹 REMOVING progress handler...`);
         ffmpeg.off('progress', progressHandler);
-        console.log(`[${pairId}] ✅ Progress handler REMOVED successfully`);
+        DEBUG && console.log(`[${pairId}] ✅ Progress handler REMOVED successfully`);
       } catch (cleanupError) {
         console.warn(`[${pairId}] ❌ Error removing progress handler:`, cleanupError);
       }
@@ -945,13 +824,13 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     // Clear the current processing pair tracker
     if (currentProcessingPairId === pairId) {
       currentProcessingPairId = null;
-      console.log(`[Job Cleanup] Cleared current processing pair: ${pairId}`);
+      DEBUG && console.log(`[Job Cleanup] Cleared current processing pair: ${pairId}`);
     }
     
     // CRITICAL TOKEN CLEANUP: Invalidate progress token to block any lingering callbacks
     // This ensures callbacks from this video can never fire during the next video
     currentProgressToken = null;
-    console.log(`[Job Cleanup] 🔒 Invalidated progress token for ${pairId}`);
+    DEBUG && console.log(`[Job Cleanup] 🔒 Invalidated progress token for ${pairId}`);
 
     // CRITICAL FIX: Ensure FFmpeg filesystem is ACTUALLY clean before signaling completion
     // This prevents video 2 from having to clean up video 1's leftover files
@@ -969,46 +848,198 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
         );
         
         if (tempFiles.length > 0) {
-          console.log(`[${pairId}] 🧹 Found ${tempFiles.length} leftover temp files, cleaning...`);
-          console.log(`[${pairId}] Files to clean:`, tempFiles.map(f => f.name));
+          DEBUG && console.log(`[${pairId}] 🧹 Found ${tempFiles.length} leftover temp files, cleaning...`);
+          DEBUG && console.log(`[${pairId}] Files to clean:`, tempFiles.map(f => f.name));
           // Use Promise.allSettled to ensure all deletions attempt to complete
           await Promise.allSettled(
             tempFiles.map(async (tempFile) => {
               try {
                 await ffmpeg.deleteFile(tempFile.name);
-                console.log(`[${pairId}] ✅ Deleted: ${tempFile.name}`);
+                DEBUG && console.log(`[${pairId}] ✅ Deleted: ${tempFile.name}`);
               } catch (e) {
                 console.warn(`[${pairId}] ❌ Failed to delete ${tempFile.name}:`, e.message);
               }
             })
           );
-          console.log(`[${pairId}] ✅ All leftover files cleaned`);
+          DEBUG && console.log(`[${pairId}] ✅ All leftover files cleaned`);
         } else {
-          console.log(`[${pairId}] ✅ FFmpeg filesystem is CLEAN (no temp files)`);
+          DEBUG && console.log(`[${pairId}] ✅ FFmpeg filesystem is CLEAN (no temp files)`);
         }
       } catch (e) {
         console.warn(`[Job Cleanup] Could not verify filesystem state:`, e.message);
       }
     }
 
-    // Wait for any remaining callbacks to fully drain before returning
-    // This prevents callbacks from bleeding into the next video
-    await new Promise(resolve => setTimeout(resolve, 100));
-
     // Force garbage collection between videos for memory stability
     if (window.gc) {
       try { window.gc(); } catch(e) { /* ignore */ }
     }
 
-    console.log(`[${pairId}] ✅ Cleanup complete, ready for next job`);
+    DEBUG && console.log(`[${pairId}] ✅ Cleanup complete, ready for next job`);
 
     // CRITICAL FIX: Signal cleanup completion ONLY after filesystem is verified clean
     // This ensures next video starts with a clean FFmpeg instance
     if (cleanupCompletionResolver) {
-      console.log(`[${pairId}] 🚀 RESOLVING cleanup promise - next video can start`);
+      DEBUG && console.log(`[${pairId}] 🚀 RESOLVING cleanup promise - next video can start`);
       cleanupCompletionResolver();
       cleanupCompletionResolver = null;
-      console.log(`[${pairId}] ========== VIDEO ${pairId} CLEANUP COMPLETE ==========\n`);
+      DEBUG && console.log(`[${pairId}] ========== VIDEO ${pairId} CLEANUP COMPLETE ==========\n`);
+    }
+  }
+};
+
+// Pool-mode processor: uses a caller-provided FFmpeg instance with local state only.
+// No module-level shared state is touched, so N instances can run truly concurrently.
+export const processVideoWithFFmpegInstance = async (
+  ffmpegInst, pairId, audioFile, imageFile,
+  onProgress, shouldCancel, videoSettings = null, preparedAssets = null
+) => {
+  const timestamp = Date.now();
+  const audioFileName  = `audio_${pairId}_${timestamp}.mp3`;
+  const imageFileName  = `image_${pairId}_${timestamp}.jpg`;
+  const outputFileName = `output_${pairId}_${timestamp}.mp4`;
+  let progressHandler = null;
+  let hasCompleted = false;
+  let progressCallbackActive = true;
+
+  try {
+    ffmpegInst.off('progress');
+
+    progressHandler = ({ progress }) => {
+      if (!progressCallbackActive || hasCompleted || !onProgress) return;
+      const pct = Math.min(Math.max(progress * 100, 0), 99);
+      onProgress(pct);
+    };
+    ffmpegInst.on('progress', progressHandler);
+
+    // Read files (use pre-cached assets when available)
+    let audioData, imageData;
+    if (preparedAssets?.audioBuffer && preparedAssets?.imageBuffer) {
+      audioData = preparedAssets.audioBuffer;
+      imageData = preparedAssets.imageBuffer;
+    } else {
+      const [aRaw, iRaw] = await Promise.all([
+        fetchFile(audioFile),
+        fetchFile(imageFile),
+      ]);
+      audioData = new Uint8Array(aRaw);
+      imageData = new Uint8Array(iRaw);
+    }
+
+    await Promise.all([
+      ffmpegInst.writeFile(imageFileName,  new Uint8Array(imageData)),
+      ffmpegInst.writeFile(audioFileName,  new Uint8Array(audioData)),
+    ]);
+
+    const audioDuration = preparedAssets?.audioDuration ?? await getAudioDuration(audioFile);
+
+    // Build args
+    const ffmpegArgs = ['-loop', '1', '-i', imageFileName, '-i', audioFileName];
+
+    // Background
+    let backgroundColor = 'black';
+    let useCustomBackground = false;
+    let customBackgroundFileName = null;
+
+    if (videoSettings?.background === 'white') {
+      backgroundColor = 'white';
+    } else if (videoSettings?.background === 'custom' && videoSettings.customBackground) {
+      useCustomBackground = true;
+      customBackgroundFileName = `bg_${pairId}_${timestamp}.jpg`;
+      try {
+        let bgData;
+        const cbf = videoSettings.customBackground;
+        if (typeof cbf === 'string') {
+          const b64 = cbf.replace(/^data:image\/[a-z]+;base64,/, '');
+          bgData = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        } else {
+          bgData = new Uint8Array(await fetchFile(cbf));
+        }
+        if (bgData.length > 0) {
+          await ffmpegInst.writeFile(customBackgroundFileName, bgData);
+        } else {
+          useCustomBackground = false; customBackgroundFileName = null;
+        }
+      } catch {
+        useCustomBackground = false; customBackgroundFileName = null;
+      }
+    }
+
+    if (customBackgroundFileName && useCustomBackground) {
+      ffmpegArgs.push('-i', customBackgroundFileName);
+    }
+
+    const quality = videoSettings?.quality;
+    let RW = 1920, RH = 1080;
+    if (quality === '4k')  { RW = 3840; RH = 2160; }
+    else if (quality === 'hd') { RW = 1280; RH = 720; }
+
+    const videoFilter = (useCustomBackground && customBackgroundFileName)
+      ? `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`
+      : `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+
+    ffmpegArgs.push(
+      '-vf', videoFilter,
+      '-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'zerolatency',
+      '-crf', '28', '-pix_fmt', 'yuv420p', '-r', '5',
+      '-c:a', 'aac', '-b:a', '320k', '-ar', '48000', '-ac', '2',
+      '-threads', '4', '-shortest', '-t', audioDuration.toString(), '-y', outputFileName
+    );
+
+    // Execute
+    try {
+      await Promise.race([
+        ffmpegInst.exec(ffmpegArgs),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('FFmpeg timeout')), 900000)),
+      ]);
+    } catch (execError) {
+      const msg = execError?.message ?? String(execError);
+      const isWarning = /non monotonically|deprecated|warning|Past duration|monotonic dts/i.test(msg);
+      if (!isWarning) throw execError;
+    }
+
+    // Read output
+    let data;
+    try {
+      data = await ffmpegInst.readFile(outputFileName);
+    } catch {
+      await new Promise(r => setTimeout(r, 300));
+      data = await ffmpegInst.readFile(outputFileName);
+    }
+
+    if (!data || data.length < 1000) {
+      throw new Error(`Output file too small (${data?.length ?? 0} bytes)`);
+    }
+
+    if (onProgress && !hasCompleted) { onProgress(100); hasCompleted = true; }
+    progressCallbackActive = false;
+
+    // FS cleanup
+    const toClean = [audioFileName, imageFileName, outputFileName];
+    if (customBackgroundFileName && useCustomBackground) toClean.push(customBackgroundFileName);
+    await Promise.allSettled(toClean.map(f => ffmpegInst.deleteFile(f).catch(() => {})));
+
+    return new Uint8Array(data);
+
+  } catch (error) {
+    try {
+      await Promise.allSettled([
+        ffmpegInst.deleteFile(audioFileName).catch(() => {}),
+        ffmpegInst.deleteFile(imageFileName).catch(() => {}),
+        ffmpegInst.deleteFile(outputFileName).catch(() => {}),
+      ]);
+    } catch {}
+
+    if (shouldCancel?.()) {
+      const err = new Error('Generation cancelled by user');
+      err.isCancellation = true;
+      throw err;
+    }
+    throw error;
+  } finally {
+    progressCallbackActive = false;
+    if (ffmpegInst && progressHandler) {
+      try { ffmpegInst.off('progress', progressHandler); } catch {}
     }
   }
 };

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import LanguageToggle from './LanguageToggle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -104,22 +103,17 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           </span>
         )}
 
-        {/* Admin badge */}
+        {/* Admin — SPRÁVCE link */}
         {isAdmin && (
-          <>
-            <span className="px-3 py-1 rounded-full text-xs font-bold border border-white/20 text-white"
-              style={{ background: 'rgba(255,255,255,0.05)', fontFamily: NM }}>
-              Admin
-            </span>
-            <button onClick={() => navigate('/admin')}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
-              style={{ fontFamily: NM }}>
-              Panel
-            </button>
-          </>
+          <button onClick={() => navigate('/admin')}
+            style={{ fontFamily: NM, fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.14em',
+              textTransform: 'uppercase', background: 'none', border: '1px solid rgba(59,130,246,0.35)',
+              color: '#60a5fa', padding: '5px 14px', borderRadius: 9999, cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.15)'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.35)'; }}>
+            SPRÁVCE
+          </button>
         )}
-
-        <LanguageToggle />
 
         {/* User avatar + dropdown */}
         {user ? (
@@ -191,8 +185,9 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                   <div className="py-1 border-t border-white/5">
                     {isAdmin && (
                       <button onClick={() => { navigate('/admin'); setMenuOpen(false); }}
-                        className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 transition-colors">
-                        {t('adminPanel')}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-white/5 transition-colors font-bold uppercase tracking-widest"
+                        style={{ color: '#60a5fa', fontSize: '0.7rem', letterSpacing: '0.1em', fontFamily: NM }}>
+                        SPRÁVCE
                       </button>
                     )}
                   </div>

@@ -501,9 +501,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         transition={{ duration: 0.5 }}
                       >
                         <motion.div
-                          className="h-full rounded-full transition-all duration-300"
+                          className="h-full rounded-full"
                           style={{
-                            width: `${progressToDisplay}%`,
                             background: isComplete 
                               ? 'linear-gradient(90deg, #9ca3af 0%, #ffffff 50%, #ffffff 100%)'
                               : 'linear-gradient(90deg, #374151 0%, #6b7280 50%, #d1d5db 100%)',
@@ -513,7 +512,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           }}
                           initial={{ width: 0 }}
                           animate={{ width: `${progressToDisplay}%` }}
-                          transition={{ duration: 0.3 }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
                         />
                       </motion.div>
                     </div>

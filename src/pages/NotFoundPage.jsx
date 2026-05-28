@@ -6,9 +6,9 @@ import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303
 export default function NotFoundPage() {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-[#050a13] text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-4"
-        style={{ background: 'rgba(5,10,19,0.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         </button>

@@ -30,6 +30,8 @@ const hounddog =
 
 Do not fail the whole scan because one scanner errors.
 
+If a package install fails with HTTP 403 from `package-firewall.replit.local`, treat it as a likely security block and do not retry the same install.
+
 ## Minimal Response Shape
 
 - `runDependencyAudit()`

@@ -115,23 +115,35 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   };
 
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files);
-    const audioFile = files.find(file => file.type.startsWith('audio/'));
+    const files = Array.from(e.target.files).filter(f => f.type.startsWith('audio/'));
+    if (files.length === 0) { e.target.value = ''; return; }
 
-    if (audioFile) {
-      updatePair(pairId, { audio: audioFile });
+    // First file fills current pair
+    updatePair(pairId, { audio: files[0] });
+
+    // Remaining files: fill existing empty audio slots or create new pairs
+    if (files.length > 1) {
+      const { pairs, addPair, updatePair: storeUpdatePair } = useAppStore.getState();
+      let remaining = files.slice(1);
+      // Fill empty slots after current pair
+      const emptyPairs = pairs.filter(p => p.id !== pairId && !p.audio);
+      emptyPairs.forEach((p, i) => {
+        if (i < remaining.length) storeUpdatePair(p.id, { audio: remaining[i] });
+      });
+      remaining = remaining.slice(emptyPairs.length);
+      // Create new pairs for leftover files
+      remaining.forEach(f => addPair({ audio: f, image: null }));
     }
-    
-    // Clear the input so the same file can be selected again
+
     e.target.value = '';
   };
 
-  const handleContainerClick = () => {
+  const handleContainerClick = (e) => {
+    // Only open file picker when clicking on an empty container
+    // (avoid conflicts with waveform seek and play/pause button on filled containers)
     if (!audio) {
       const fileInput = document.getElementById(`audio-file-input-${pairId}`);
-      if (fileInput) {
-        fileInput.click();
-      }
+      if (fileInput) fileInput.click();
     }
   };
 
@@ -182,6 +194,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         id={`audio-file-input-${pairId}`}
         type="file"
         accept="audio/*,.mp3,.wav"
+        multiple
         onChange={handleFileSelect}
         style={{ display: 'none' }}
       />
@@ -344,53 +357,10 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full relative z-10">
-          <div className="mb-4">
-            <div 
-              className="flex items-center gap-1" 
-              style={{ 
-                width: '48px', 
-                height: '48px', 
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-            >
-              <div
-                style={{
-                  width: '4px',
-                  height: '20px',
-                  background: '#ffffff',
-                  borderRadius: '2px',
-                  animation: 'wave 1.5s ease-in-out infinite alternate',
-                  animationDelay: '0s'
-                }}
-              />
-              <div
-                style={{
-                  width: '4px',
-                  height: '32px',
-                  background: '#ffffff',
-                  borderRadius: '2px',
-                  animation: 'wave 1.5s ease-in-out infinite alternate',
-                  animationDelay: '0.3s'
-                }}
-              />
-              <div
-                style={{
-                  width: '4px',
-                  height: '16px',
-                  background: '#ffffff',
-                  borderRadius: '2px',
-                  animation: 'wave 1.5s ease-in-out infinite alternate',
-                  animationDelay: '0.6s'
-                }}
-              />
-              <style jsx>{`
-                @keyframes wave {
-                  0% { transform: scaleY(0.3); opacity: 0.6; }
-                  100% { transform: scaleY(1); opacity: 1; }
-                }
-              `}</style>
-            </div>
+          <div className="mb-3">
+            <svg className="w-10 h-10 text-white/70" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
+            </svg>
           </div>
           <p className="text-body-text text-white mb-1 text-center drop-shadow-lg">Drop audio file here</p>
           <p className="text-small-notes text-white/70 font-light text-center drop-shadow-sm px-8 py-1 rounded-full bg-white/5 backdrop-blur-sm">MP3, WAV</p>

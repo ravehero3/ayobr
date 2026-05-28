@@ -161,12 +161,12 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                     minWidth: '240px',
                     maxWidth: '240px',
                     height: '220px',
-                    background: 'rgba(0, 0, 0, 0.41)',
+                    background: 'linear-gradient(to bottom, rgba(1,5,10,0.88), rgba(7,30,87,0.80))',
                     borderRadius: '16px',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                    backdropFilter: 'blur(11.4px)',
-                    WebkitBackdropFilter: 'blur(11.4px)',
-                    border: 'none',
+                    boxShadow: '0 20px 50px -10px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.12)',
+                    backdropFilter: 'blur(32px)',
+                    WebkitBackdropFilter: 'blur(32px)',
+                    border: '1px solid rgba(255,255,255,0.18)',
                     padding: '2px',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
@@ -174,8 +174,8 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                     zIndex: 60
                   }}
                   whileHover={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.51)',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(255, 255, 255, 0.15), 0 0 80px rgba(255, 255, 255, 0.05)',
+                    boxShadow: '0 24px 60px -10px rgba(0,0,0,0.8), 0 0 40px rgba(255,255,255,0.12), 0 0 80px rgba(59,130,246,0.08)',
+                    borderColor: 'rgba(255,255,255,0.28)',
                     zIndex: 70
                   }}
                 >

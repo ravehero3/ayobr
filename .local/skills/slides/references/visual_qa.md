@@ -76,6 +76,10 @@ Does any slide have more than 6 lines of text or feel like a document page? Spli
 
 Does any slide have an entire half that's empty for no reason? Does any slide feel crammed? Balance is the goal — purposeful negative space, not accidental dead zones.
 
+### Image opportunity test
+
+Would a searched or generated image make any slide clearer, more memorable, or more visually balanced? If yes, prefer adding and integrating it into the slide layout. Do not force decorative images that don't improve the slide.
+
 ### Emoji audit
 
 Grep every slide file for emoji characters. If any emoji appears anywhere in the deck — titles, bullets, labels, descriptions — remove it. A single emoji fails the entire deck. Arrows (→), checkmarks (✓), bullets (•), and stars (★) are fine as typographic elements; colorful pictographs are not.
