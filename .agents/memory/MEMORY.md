@@ -1,0 +1,1 @@
+- [Sequential FFmpeg quality bug](sequential-ffmpeg-quality.md) — processPairAsync in useFFmpeg.js was missing `quality` and `customBackground` from videoSettings, causing all videos to silently render at 1080p regardless of settings.

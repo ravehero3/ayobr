@@ -360,7 +360,9 @@ export const useFFmpeg = () => {
 
       // Get video settings from app store including logo settings
       const videoSettings = {
-        background: (store.videoSettings && store.videoSettings.background) ? store.videoSettings.background : 'black',
+        background: store.videoSettings?.background ?? 'black',
+        customBackground: store.videoSettings?.customBackground ?? null,
+        quality: store.videoSettings?.quality ?? 'fullhd',
         logoFile: store.logoSettings?.logoFile,
         useLogo: store.logoSettings?.useLogoInVideos
       };
