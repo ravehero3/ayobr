@@ -1,5 +1,6 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { fetchFile } from '@ffmpeg/util';
+import { createLoadedFFmpeg } from './ffmpegLoader';
 
 const DEBUG = false;
 let ffmpeg = null;
@@ -192,7 +193,20 @@ export const getBatchProgress = () => {
   };
 };
 
-export const initializeFFmpeg = async () => {
+let preloadPromise = null;
+
+/** Warm up FFmpeg WASM when the user opens /app (avoids 0% stall on first Generate). */
+export const preloadFFmpeg = () => {
+  if (!preloadPromise) {
+    preloadPromise = initializeFFmpeg().catch((err) => {
+      preloadPromise = null;
+      console.warn('FFmpeg preload failed:', err?.message || err);
+    });
+  }
+  return preloadPromise;
+};
+
+export const initializeFFmpeg = async (onInitProgress) => {
   DEBUG && console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing, 'isForceStopped:', isForceStopped);
 
   // Always reset force stopped flag when initializing
@@ -249,39 +263,13 @@ export const initializeFFmpeg = async () => {
 
   initPromise = (async () => {
     try {
-      // Always create a new FFmpeg instance for fresh start
-      if (!ffmpeg) {
-        DEBUG && console.log('Creating new FFmpeg instance');
-        ffmpeg = new FFmpeg();
-      }
-
       if (!isLoaded) {
-        // Load FFmpeg core from locally-served files (copied to dist/ at build time).
-        // Using toBlobURL converts them to same-origin blob: URLs which bypass the
-        // Cross-Origin-Embedder-Policy: require-corp restriction that blocks CDN fetches.
-        try {
-          DEBUG && console.log('Loading FFmpeg from local files via toBlobURL...');
-          const [coreURL, wasmURL] = await Promise.all([
-            toBlobURL('/ffmpeg-core.js',   'text/javascript'),
-            toBlobURL('/ffmpeg-core.wasm', 'application/wasm'),
-          ]);
-          await ffmpeg.load({ coreURL, wasmURL });
-          DEBUG && console.log('FFmpeg loaded successfully from local files');
-        } catch (localError) {
-          console.error('Local FFmpeg load failed, trying CDN via toBlobURL...', localError);
-          try {
-            const base = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
-            const [coreURL, wasmURL] = await Promise.all([
-              toBlobURL(`${base}/ffmpeg-core.js`,   'text/javascript'),
-              toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
-            ]);
-            await ffmpeg.load({ coreURL, wasmURL });
-            DEBUG && console.log('FFmpeg loaded successfully from CDN via toBlobURL');
-          } catch (cdnError) {
-            console.error('CDN FFmpeg load also failed:', cdnError);
-            throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
-          }
-        }
+        onInitProgress?.(3);
+        ffmpeg = await createLoadedFFmpeg({
+          onStatus: () => onInitProgress?.(5),
+        });
+        onInitProgress?.(8);
+        DEBUG && console.log('FFmpeg loaded successfully');
 
         // Verify initialization worked
         try {
@@ -344,7 +332,11 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
   let progressHandler = null; // Declare handler outside try block for finally cleanup
 
   try {
-    const ffmpeg = await initializeFFmpeg();
+    if (onProgress) onProgress(1);
+    const ffmpeg = await initializeFFmpeg((pct) => {
+      if (onProgress) onProgress(Math.min(pct, 9));
+    });
+    if (onProgress) onProgress(10);
     DEBUG && console.log('FFmpeg initialized successfully');
 
     // Clear any previous progress listeners to prevent memory leaks
@@ -423,8 +415,9 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
           }
           // Don't update progress further until file is actually ready
         } else {
-          // Normal progress updates
-          onProgress(normalizedProgress);
+          // Map FFmpeg 0–100% into UI 10–99% (0–10 reserved for WASM init)
+          const uiProgress = 10 + Math.floor(normalizedProgress * 0.89);
+          onProgress(uiProgress);
           lastProgressTime = now;
 
           // Log progress for better user feedback with pairId tracking

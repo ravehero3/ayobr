@@ -1,24 +1,6 @@
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { toBlobURL } from '@ffmpeg/util';
+import { createLoadedFFmpeg } from './ffmpegLoader';
 
-const loadFFmpegInstance = async () => {
-  const inst = new FFmpeg();
-  try {
-    const [coreURL, wasmURL] = await Promise.all([
-      toBlobURL('/ffmpeg-core.js',   'text/javascript'),
-      toBlobURL('/ffmpeg-core.wasm', 'application/wasm'),
-    ]);
-    await inst.load({ coreURL, wasmURL });
-  } catch {
-    const base = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
-    const [coreURL, wasmURL] = await Promise.all([
-      toBlobURL(`${base}/ffmpeg-core.js`,   'text/javascript'),
-      toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
-    ]);
-    await inst.load({ coreURL, wasmURL });
-  }
-  return inst;
-};
+const loadFFmpegInstance = () => createLoadedFFmpeg();
 
 class Slot {
   constructor(id) {
@@ -67,7 +49,6 @@ class FFmpegPool {
     if (this._waiting.length > 0) {
       const next = this._waiting.shift();
       slot.busy = true;
-      // slot.inst already loaded from previous acquire; init() is a no-op here
       slot.init().then(() => next(slot));
     }
   }

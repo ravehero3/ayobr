@@ -40,8 +40,14 @@ function buildApp() {
     credentials: true
   }));
 
-  // Gzip/brotli compress all responses (API JSON + static HTML/JS/CSS)
-  app.use(compression());
+  // Gzip/brotli — skip WASM (large binary; compression adds CPU and can confuse clients)
+  app.use(compression({
+    filter: (req, res) => {
+      if (res.getHeader('Content-Type') === 'application/wasm') return false;
+      if (req.path && req.path.endsWith('.wasm')) return false;
+      return compression.filter(req, res);
+    },
+  }));
 
   // Rate limiting
   const apiLimiter = rateLimit({
@@ -146,6 +152,14 @@ async function mountRoutes(app) {
     setHeaders(res, filePath) {
       if (filePath.endsWith('.html')) {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+      if (filePath.endsWith('.wasm')) {
+        res.setHeader('Content-Type', 'application/wasm');
+        res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+      if (filePath.endsWith('ffmpeg-core.js')) {
+        res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
       }
     },
   }));

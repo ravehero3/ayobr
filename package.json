@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
+    "predev": "mkdir -p dist && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js dist/ffmpeg-core.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm dist/ffmpeg-core.wasm",
     "dev": "node_modules/.bin/webpack serve --config webpack.config.js",
     "server": "node server/index.js",
     "start": "node server/index.js",
