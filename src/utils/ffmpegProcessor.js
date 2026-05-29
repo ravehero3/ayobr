@@ -531,6 +531,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       ]);
 
       DEBUG && console.log('Files written successfully to FFmpeg FS');
+      if (onProgress) onProgress(20);
     } catch (writeError) {
       console.error('Error writing files to FFmpeg FS:', writeError);
       throw new Error(`Failed to prepare input files: ${writeError.message}`);
