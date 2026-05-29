@@ -1,0 +1,7 @@
+[auth] Google OAuth strategy not registered — GOOGLE_CLIENT_ID/SECRET missing
+[auth] Google OAuth not configured — login will be unavailable: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+[payments] Lemon Squeezy incomplete — checkout/webhooks may fail: LEMONSQUEEZY_API_KEY, LEMONSQUEEZY_STORE_ID, LEMONSQUEEZY_WEBHOOK_SECRET, LEMONSQUEEZY_PRO_MONTHLY_VARIANT_ID, LEMONSQUEEZY_PRO_YEARLY_VARIANT_ID, LEMONSQUEEZY_UNLIMITED_MONTHLY_VARIANT_ID, LEMONSQUEEZY_UNLIMITED_YEARLY_VARIANT_ID
+Database schema initialized
+Monthly credit reset scheduled (runs 00:00 UTC on the 1st)
+TypeBeatz API server running on port 5000
+[payments] Lemon Squeezy variant validation failed:
