@@ -80,7 +80,7 @@ function buildApp() {
   // Required for FFmpeg WebAssembly SharedArrayBuffer support
   app.use((req, res, next) => {
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
     next();
   });
 
@@ -145,6 +145,19 @@ async function mountRoutes(app) {
   app.use('/api/gopay', gopayRoutes);
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+  app.get('/api/ffmpeg-ready', (req, res) => {
+    const wasmPath = path.join(__dirname, '../dist/ffmpeg-core.wasm');
+    const jsPath = path.join(__dirname, '../dist/ffmpeg-core.js');
+    const wasmExists = fs.existsSync(wasmPath);
+    const jsExists = fs.existsSync(jsPath);
+    res.json({
+      ok: wasmExists && jsExists,
+      wasmBytes: wasmExists ? fs.statSync(wasmPath).size : 0,
+      jsExists,
+      wasmExists,
+    });
+  });
+
   // Static assets: hashed filenames → cache 1 year; index.html → no cache
   app.use(express.static(path.join(__dirname, '../dist'), {
     maxAge: '1y',
@@ -158,7 +171,7 @@ async function mountRoutes(app) {
         res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       }
-      if (filePath.endsWith('ffmpeg-core.js')) {
+      if (filePath.endsWith('ffmpeg-core.js') || filePath.endsWith('.js')) {
         res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
       }
     },
