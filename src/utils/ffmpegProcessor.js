@@ -1,6 +1,6 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
-import { createLoadedFFmpeg } from './ffmpegLoader';
+import { loadFFmpegWasm } from './ffmpegLoader';
 
 const DEBUG = false;
 let ffmpeg = null;
@@ -193,20 +193,17 @@ export const getBatchProgress = () => {
   };
 };
 
-let preloadPromise = null;
+const INIT_TIMEOUT_MS = 90000;
 
-/** Warm up FFmpeg WASM when the user opens /app (avoids 0% stall on first Generate). */
-export const preloadFFmpeg = () => {
-  if (!preloadPromise) {
-    preloadPromise = initializeFFmpeg().catch((err) => {
-      preloadPromise = null;
-      console.warn('FFmpeg preload failed:', err?.message || err);
-    });
-  }
-  return preloadPromise;
-};
+const withTimeout = (promise, ms, label) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+    }),
+  ]);
 
-export const initializeFFmpeg = async (onInitProgress) => {
+export const initializeFFmpeg = async () => {
   DEBUG && console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing, 'isForceStopped:', isForceStopped);
 
   // Always reset force stopped flag when initializing
@@ -264,32 +261,27 @@ export const initializeFFmpeg = async (onInitProgress) => {
   initPromise = (async () => {
     try {
       if (!isLoaded) {
-        onInitProgress?.(3);
-        ffmpeg = await createLoadedFFmpeg({
-          onStatus: () => onInitProgress?.(5),
-        });
-        onInitProgress?.(8);
+        ffmpeg = await withTimeout(
+          loadFFmpegWasm(),
+          INIT_TIMEOUT_MS,
+          'FFmpeg load'
+        );
         DEBUG && console.log('FFmpeg loaded successfully');
 
-        // Verify initialization worked
-        try {
-          await ffmpeg.listDir('/');
-          DEBUG && console.log('FFmpeg filesystem verification successful');
-        } catch (fsError) {
-          console.error('FFmpeg filesystem verification failed:', fsError);
-          throw new Error('FFmpeg loaded but filesystem is not accessible');
-        }
+        await ffmpeg.listDir('/');
+        DEBUG && console.log('FFmpeg filesystem verification successful');
 
         isLoaded = true;
-        isForceStopped = false; // Ensure force stopped is cleared on successful load
+        isForceStopped = false;
       }
 
       return ffmpeg;
     } catch (error) {
       console.error('FFmpeg initialization error:', error);
       isLoaded = false;
-      isForceStopped = false; // Reset on error to allow retry
+      isForceStopped = false;
       ffmpeg = null;
+      initPromise = null;
       throw error;
     } finally {
       isInitializing = false;
@@ -332,22 +324,25 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
   let progressHandler = null; // Declare handler outside try block for finally cleanup
 
   try {
-    if (onProgress) onProgress(1);
-    const ffmpeg = await initializeFFmpeg((pct) => {
-      if (onProgress) onProgress(Math.min(pct, 9));
-    });
-    if (onProgress) onProgress(10);
+    const ffmpeg = await initializeFFmpeg();
     DEBUG && console.log('FFmpeg initialized successfully');
 
-    // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
 
-    // CRITICAL FIX: Wait for previous cleanup to complete BEFORE setting new currentProcessingPairId
-    // This prevents the race condition where previous cleanup is skipped
     DEBUG && console.log(`\n========== VIDEO ${pairId} STARTING ==========`);
     DEBUG && console.log(`[${pairId}] Waiting for previous video cleanup to complete...`);
     const cleanupWaitStart = Date.now();
-    await cleanupCompletionPromise;
+    await withTimeout(
+      cleanupCompletionPromise,
+      15000,
+      'Previous video cleanup'
+    ).catch((err) => {
+      console.warn(`[${pairId}] Cleanup wait:`, err.message);
+      if (cleanupCompletionResolver) {
+        cleanupCompletionResolver();
+        cleanupCompletionResolver = null;
+      }
+    });
     const cleanupWaitDuration = Date.now() - cleanupWaitStart;
     DEBUG && console.log(`[${pairId}] Previous cleanup confirmed complete (waited ${cleanupWaitDuration}ms)`);
 
@@ -415,9 +410,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
           }
           // Don't update progress further until file is actually ready
         } else {
-          // Map FFmpeg 0–100% into UI 10–99% (0–10 reserved for WASM init)
-          const uiProgress = 10 + Math.floor(normalizedProgress * 0.89);
-          onProgress(uiProgress);
+          onProgress(normalizedProgress);
           lastProgressTime = now;
 
           // Log progress for better user feedback with pairId tracking

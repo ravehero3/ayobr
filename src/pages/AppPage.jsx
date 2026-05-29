@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import UpgradeBanner from '../components/UpgradeBanner';
 import ReferralPanel from '../components/ReferralPanel';
 import VideoApp from '../VideoApp';
-import { preloadFFmpeg } from '../utils/ffmpegProcessor';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -19,19 +18,10 @@ export default function AppPage() {
   const [checkoutLoading, setCheckoutLoading]   = useState(false);
   const [showReferral, setShowReferral]         = useState(false);
 
-  const ffmpegPreloaded = useRef(false);
-
   useEffect(() => {
     if (!loading && !user) navigate('/login');
     if (!loading && user && !user.rights_agreed) navigate('/login');
   }, [user, loading, navigate]);
-
-  useEffect(() => {
-    if (!loading && user?.rights_agreed && !ffmpegPreloaded.current) {
-      ffmpegPreloaded.current = true;
-      preloadFFmpeg();
-    }
-  }, [loading, user]);
 
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') {

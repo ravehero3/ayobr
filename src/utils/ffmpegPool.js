@@ -1,6 +1,6 @@
-import { createLoadedFFmpeg } from './ffmpegLoader';
+import { loadFFmpegWasm } from './ffmpegLoader';
 
-const loadFFmpegInstance = () => createLoadedFFmpeg();
+const loadFFmpegInstance = () => loadFFmpegWasm();
 
 class Slot {
   constructor(id) {

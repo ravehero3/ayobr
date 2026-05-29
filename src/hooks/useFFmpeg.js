@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { fetchFile } from '@ffmpeg/util';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
-import { processVideoWithFFmpeg, processVideoWithFFmpegInstance, forceStopAllProcesses, getAudioDuration, preloadFFmpeg } from '../utils/ffmpegProcessor';
+import { processVideoWithFFmpeg, processVideoWithFFmpegInstance, forceStopAllProcesses, getAudioDuration } from '../utils/ffmpegProcessor';
 import { getPool } from '../utils/ffmpegPool';
 
 export const useFFmpeg = () => {
@@ -127,7 +127,7 @@ export const useFFmpeg = () => {
               setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: existing, error: null });
               completedCount++;
             } else {
-              setVideoGenerationState(pair.id, { isGenerating: true, progress: 2, isComplete: false, video: null, error: null, queuePosition: batchIndex, isCurrentlyProcessing: true, startTime: Date.now(), lastUpdate: Date.now() });
+              setVideoGenerationState(pair.id, { isGenerating: true, progress: 0, isComplete: false, video: null, error: null, queuePosition: batchIndex, isCurrentlyProcessing: true, startTime: Date.now(), lastUpdate: Date.now() });
               const result = await processPairAsync(pair);
               completedCount++;
               if (result) {
@@ -347,7 +347,7 @@ export const useFFmpeg = () => {
       DEBUG && console.log(`Starting video generation for pair ${pair.id}`);
       setVideoGenerationState(pair.id, {
         isGenerating: true,
-        progress: 2,
+        progress: 0,
         isComplete: false,
         video: null,
         error: null,
@@ -383,10 +383,10 @@ export const useFFmpeg = () => {
           pair.image, 
           (progress) => {
             const currentState = useAppStore.getState().videoGenerationStates[pair.id];
-            // Allow early init progress (1–10%) even if isGenerating flips briefly during setup
-            const isEarlyInit = progress > 0 && progress <= 10;
-            if (!currentState) return;
-            if (!currentState.isGenerating && !isEarlyInit) return;
+            if (!currentState || !currentState.isGenerating) return;
+
+            const processingDuration = Date.now() - (currentState.startTime || Date.now());
+            if (progress > 95 && processingDuration < 1000) return;
 
             const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
             DEBUG && console.log(`Setting video generation state for pair ${pair.id}:`, {
@@ -856,7 +856,6 @@ export const useFFmpeg = () => {
     generateVideos,
     stopGeneration,
     resetAppForNewGeneration,
-    preloadFFmpeg,
     progress
   };
 };
