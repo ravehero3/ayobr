@@ -256,24 +256,29 @@ export const initializeFFmpeg = async () => {
       }
 
       if (!isLoaded) {
-        // Try loading FFmpeg with fallback options
+        // Load FFmpeg core from locally-served files (copied to dist/ at build time).
+        // Using toBlobURL converts them to same-origin blob: URLs which bypass the
+        // Cross-Origin-Embedder-Policy: require-corp restriction that blocks CDN fetches.
         try {
-          DEBUG && console.log('Trying default FFmpeg load...');
-          await ffmpeg.load();
-          DEBUG && console.log('FFmpeg loaded successfully with default method');
-        } catch (defaultError) {
-          console.error('Default FFmpeg loading failed:', defaultError);
-
+          DEBUG && console.log('Loading FFmpeg from local files via toBlobURL...');
+          const [coreURL, wasmURL] = await Promise.all([
+            toBlobURL('/ffmpeg-core.js',   'text/javascript'),
+            toBlobURL('/ffmpeg-core.wasm', 'application/wasm'),
+          ]);
+          await ffmpeg.load({ coreURL, wasmURL });
+          DEBUG && console.log('FFmpeg loaded successfully from local files');
+        } catch (localError) {
+          console.error('Local FFmpeg load failed, trying CDN via toBlobURL...', localError);
           try {
-            DEBUG && console.log('Trying external CDN...');
-            await ffmpeg.load({
-              coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-              wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-              workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
-            });
-            DEBUG && console.log('FFmpeg loaded successfully with external CDN');
+            const base = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
+            const [coreURL, wasmURL] = await Promise.all([
+              toBlobURL(`${base}/ffmpeg-core.js`,   'text/javascript'),
+              toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
+            ]);
+            await ffmpeg.load({ coreURL, wasmURL });
+            DEBUG && console.log('FFmpeg loaded successfully from CDN via toBlobURL');
           } catch (cdnError) {
-            console.error('External CDN loading failed:', cdnError);
+            console.error('CDN FFmpeg load also failed:', cdnError);
             throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
           }
         }

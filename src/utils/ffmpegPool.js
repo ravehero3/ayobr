@@ -1,15 +1,21 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { toBlobURL } from '@ffmpeg/util';
 
 const loadFFmpegInstance = async () => {
   const inst = new FFmpeg();
   try {
-    await inst.load();
+    const [coreURL, wasmURL] = await Promise.all([
+      toBlobURL('/ffmpeg-core.js',   'text/javascript'),
+      toBlobURL('/ffmpeg-core.wasm', 'application/wasm'),
+    ]);
+    await inst.load({ coreURL, wasmURL });
   } catch {
-    await inst.load({
-      coreURL:   'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-      wasmURL:   'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-      workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js',
-    });
+    const base = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
+    const [coreURL, wasmURL] = await Promise.all([
+      toBlobURL(`${base}/ffmpeg-core.js`,   'text/javascript'),
+      toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
+    ]);
+    await inst.load({ coreURL, wasmURL });
   }
   return inst;
 };

@@ -1,1 +1,2 @@
 - [Sequential FFmpeg quality bug](sequential-ffmpeg-quality.md) — processPairAsync in useFFmpeg.js was missing `quality` and `customBackground` from videoSettings, causing all videos to silently render at 1080p regardless of settings.
+- [FFmpeg WASM COEP loading fix](ffmpeg-coep-fix.md) — COEP require-corp blocks CDN WASM fetches; fix is toBlobURL + local files in dist/.
