@@ -1,6 +1,7 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
-import { loadFFmpegWasm } from './ffmpegLoader';
+
+const FFMPEG_CDN = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
 
 const DEBUG = false;
 let ffmpeg = null;
@@ -193,15 +194,13 @@ export const getBatchProgress = () => {
   };
 };
 
-const INIT_TIMEOUT_MS = 90000;
-
-const withTimeout = (promise, ms, label) =>
-  Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`${label} timed out`)), ms);
-    }),
-  ]);
+async function tryLoadFFmpeg(instance, config) {
+  if (config) {
+    await instance.load(config);
+  } else {
+    await instance.load();
+  }
+}
 
 export const initializeFFmpeg = async () => {
   DEBUG && console.log('initializeFFmpeg called, isLoaded:', isLoaded, 'isInitializing:', isInitializing, 'isForceStopped:', isForceStopped);
@@ -260,13 +259,67 @@ export const initializeFFmpeg = async () => {
 
   initPromise = (async () => {
     try {
+      if (!ffmpeg) {
+        DEBUG && console.log('Creating new FFmpeg instance');
+        ffmpeg = new FFmpeg();
+      }
+
       if (!isLoaded) {
-        ffmpeg = await withTimeout(
-          loadFFmpegWasm(),
-          INIT_TIMEOUT_MS,
-          'FFmpeg load'
-        );
-        DEBUG && console.log('FFmpeg loaded successfully');
+        const origin =
+          typeof window !== 'undefined' && window.location?.origin
+            ? window.location.origin
+            : '';
+
+        const strategies = [
+          ...(origin
+            ? [
+                {
+                  label: 'local',
+                  config: {
+                    coreURL: `${origin}/ffmpeg-core.js`,
+                    wasmURL: `${origin}/ffmpeg-core.wasm`,
+                  },
+                },
+              ]
+            : []),
+          { label: 'default', config: null },
+          {
+            label: 'cdn',
+            config: {
+              coreURL: `${FFMPEG_CDN}/ffmpeg-core.js`,
+              wasmURL: `${FFMPEG_CDN}/ffmpeg-core.wasm`,
+            },
+          },
+        ];
+
+        let loaded = false;
+        let lastError;
+
+        for (const { label, config } of strategies) {
+          try {
+            DEBUG && console.log(`Trying FFmpeg load (${label})...`);
+            await tryLoadFFmpeg(ffmpeg, config);
+            DEBUG && console.log(`FFmpeg loaded via ${label}`);
+            loaded = true;
+            break;
+          } catch (err) {
+            lastError = err;
+            console.warn(`FFmpeg load (${label}) failed:`, err?.message || err);
+            try {
+              if (ffmpeg.loaded) await ffmpeg.terminate();
+            } catch {
+              /* ignore */
+            }
+            ffmpeg = new FFmpeg();
+          }
+        }
+
+        if (!loaded) {
+          throw new Error(
+            lastError?.message ||
+              'Failed to initialize FFmpeg. Please refresh and try again.'
+          );
+        }
 
         await ffmpeg.listDir('/');
         DEBUG && console.log('FFmpeg filesystem verification successful');
@@ -324,7 +377,10 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
   let progressHandler = null; // Declare handler outside try block for finally cleanup
 
   try {
+    if (onProgress) onProgress(5);
+
     const ffmpeg = await initializeFFmpeg();
+    if (onProgress) onProgress(12);
     DEBUG && console.log('FFmpeg initialized successfully');
 
     ffmpeg.off('progress');
@@ -332,17 +388,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     DEBUG && console.log(`\n========== VIDEO ${pairId} STARTING ==========`);
     DEBUG && console.log(`[${pairId}] Waiting for previous video cleanup to complete...`);
     const cleanupWaitStart = Date.now();
-    await withTimeout(
-      cleanupCompletionPromise,
-      15000,
-      'Previous video cleanup'
-    ).catch((err) => {
-      console.warn(`[${pairId}] Cleanup wait:`, err.message);
-      if (cleanupCompletionResolver) {
-        cleanupCompletionResolver();
-        cleanupCompletionResolver = null;
-      }
-    });
+    await cleanupCompletionPromise;
     const cleanupWaitDuration = Date.now() - cleanupWaitStart;
     DEBUG && console.log(`[${pairId}] Previous cleanup confirmed complete (waited ${cleanupWaitDuration}ms)`);
 
@@ -358,14 +404,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     processingSessionCounter++;
     const currentSessionId = processingSessionCounter;
     
-    // CRITICAL TOKEN FIX: Generate unique token to prevent stale progress callbacks
-    // This ensures Video 2's progress handler NEVER accepts Video 1's progress events
-    currentProgressToken = null; // Invalidate any previous token immediately
-    const progressToken = crypto.randomUUID(); // Generate fresh unique token
-    currentProgressToken = progressToken; // Set as current valid token
-    DEBUG && console.log(`[${pairId}] 🔐 Generated progress token: ${progressToken.substring(0, 8)}...`);
-    
-    // NOW it's safe to set the current processing pair (cleanup is done)
     currentProcessingPairId = pairId;
     const capturedPairId = pairId; // Capture for closure comparison
     DEBUG && console.log(`[${pairId}] Starting FFmpeg, session: ${currentSessionId}`);
@@ -380,22 +418,9 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     // Store handler reference for proper cleanup (assign to outer scope variable)
     progressHandler = ({ progress }) => {
-      // CRITICAL TOKEN GUARD: Primary defense against stale progress callbacks
-      // If this callback's token doesn't match the current valid token, it's from a previous video - REJECT IT
-      if (progressToken !== currentProgressToken) {
-        // Stale callback from previous video detected and blocked - no logging to avoid spam
-        return;
-      }
-      
-      // Enhanced Guard: Prevent progress bleeding from previous videos
-      // Check BOTH pairId AND session ID to ensure this callback belongs to current processing
-      if (!capturedPairId || capturedPairId !== currentProcessingPairId || currentSessionId !== processingSessionCounter) {
-        // Don't log warnings anymore - just silently reject stale updates
-        return;
-      }
-      
+      if (capturedPairId !== currentProcessingPairId) return;
+
       const now = Date.now();
-      // Throttle progress updates to every 100ms for faster updates
       if (onProgress && progressCallbackActive && (now - lastProgressTime > 100) && !hasCompleted) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         
@@ -818,11 +843,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       DEBUG && console.log(`[Job Cleanup] Cleared current processing pair: ${pairId}`);
     }
     
-    // CRITICAL TOKEN CLEANUP: Invalidate progress token to block any lingering callbacks
-    // This ensures callbacks from this video can never fire during the next video
-    currentProgressToken = null;
-    DEBUG && console.log(`[Job Cleanup] 🔒 Invalidated progress token for ${pairId}`);
-
     // CRITICAL FIX: Ensure FFmpeg filesystem is ACTUALLY clean before signaling completion
     // This prevents video 2 from having to clean up video 1's leftover files
     if (ffmpeg && isLoaded) {

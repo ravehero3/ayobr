@@ -23,8 +23,12 @@ export const useFFmpeg = () => {
     clearPreparedAssets 
   } = useAppStore();
 
-  // Always process one video at a time for maximum stability and quality
-  const maxConcurrent = 1;
+  const maxConcurrent = (() => {
+    const role = user?.role;
+    if (role === 'unlimited' || role === 'admin') return 3;
+    if (role === 'pro') return 2;
+    return 1;
+  })();
 
   const generateVideos = useCallback(async (pairs) => {
     DEBUG && console.log('generateVideos called with pairs:', pairs);
@@ -384,9 +388,6 @@ export const useFFmpeg = () => {
           (progress) => {
             const currentState = useAppStore.getState().videoGenerationStates[pair.id];
             if (!currentState || !currentState.isGenerating) return;
-
-            const processingDuration = Date.now() - (currentState.startTime || Date.now());
-            if (progress > 95 && processingDuration < 1000) return;
 
             const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
             DEBUG && console.log(`Setting video generation state for pair ${pair.id}:`, {

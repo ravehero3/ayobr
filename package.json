@@ -7,7 +7,7 @@
     "dev": "node_modules/.bin/webpack serve --config webpack.config.js",
     "server": "node server/index.js",
     "start": "node server/index.js",
-    "build": "NODE_ENV=production node_modules/.bin/webpack --config webpack.config.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js dist/ffmpeg-core.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm dist/ffmpeg-core.wasm && cp robots.txt sitemap.xml manifest.json _redirects _headers dist/ 2>/dev/null || true",
+    "build": "NODE_ENV=production node_modules/.bin/webpack --config webpack.config.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js dist/ffmpeg-core.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm dist/ffmpeg-core.wasm && cp robots.txt sitemap.xml manifest.json _redirects _headers dist/ 2>/dev/null || true && test -f dist/ffmpeg-core.wasm && echo 'FFmpeg WASM copied OK' || (echo 'ERROR: dist/ffmpeg-core.wasm missing' && exit 1)",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

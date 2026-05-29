@@ -1,6 +1,36 @@
-import { loadFFmpegWasm } from './ffmpegLoader';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
 
-const loadFFmpegInstance = () => loadFFmpegWasm();
+const FFMPEG_CDN = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+
+const loadFFmpegInstance = async () => {
+  const inst = new FFmpeg();
+  const origin =
+    typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : '';
+
+  if (origin) {
+    try {
+      await inst.load({
+        coreURL: `${origin}/ffmpeg-core.js`,
+        wasmURL: `${origin}/ffmpeg-core.wasm`,
+      });
+      return inst;
+    } catch (e) {
+      console.warn('Pool FFmpeg local load failed:', e?.message || e);
+    }
+  }
+
+  try {
+    await inst.load();
+  } catch {
+    await inst.load({
+      coreURL: `${FFMPEG_CDN}/ffmpeg-core.js`,
+      wasmURL: `${FFMPEG_CDN}/ffmpeg-core.wasm`,
+    });
+  }
+  return inst;
+};
 
 class Slot {
   constructor(id) {

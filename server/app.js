@@ -80,7 +80,7 @@ function buildApp() {
   // Required for FFmpeg WebAssembly SharedArrayBuffer support
   app.use((req, res, next) => {
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
     next();
   });
 
