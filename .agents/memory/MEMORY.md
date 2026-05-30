@@ -1,2 +1,4 @@
 - [Sequential FFmpeg quality bug](sequential-ffmpeg-quality.md) — processPairAsync in useFFmpeg.js was missing `quality` and `customBackground` from videoSettings, causing all videos to silently render at 1080p regardless of settings.
 - [FFmpeg WASM COEP loading fix](ffmpeg-coep-fix.md) — COEP require-corp blocks CDN WASM fetches; fix is toBlobURL + local files in dist/.
+- [FFmpeg quality-aware encoding](ffmpeg-quality-encoding.md) — buildFastEncodeArgs in videoEncode.js must accept quality param; 4K uses CRF 20 + 320k audio, fullhd uses CRF 23 + 192k, hd uses CRF 26 + 128k.
+- [FFmpeg isCancelling stale closure](ffmpeg-cancelling-stale.md) — useFFmpeg.js must use useAppStore.getState().isCancelling inside async generateVideos callbacks, not the destructured isCancelling from hook scope.

@@ -6,10 +6,27 @@ export function getVideoDimensions(quality) {
 }
 
 /**
- * Fast encode for pre-composited JPEG frame + audio (static type-beat visual).
- * 1 fps + stillimage tune = minimal work for a single image.
+ * Quality-aware encoding settings.
+ * Higher quality = lower CRF (better video) + higher audio bitrate.
  */
-export function buildFastEncodeArgs(imageFileName, audioFileName, outputFileName, audioDuration) {
+function getEncodeSettings(quality) {
+  if (quality === '4k') {
+    return { crf: 20, audioBitrate: '320k', sampleRate: '48000' };
+  }
+  if (quality === 'hd') {
+    return { crf: 26, audioBitrate: '128k', sampleRate: '44100' };
+  }
+  // fullhd (default)
+  return { crf: 23, audioBitrate: '192k', sampleRate: '44100' };
+}
+
+/**
+ * Fast encode for pre-composited JPEG frame + audio (static type-beat visual).
+ * 1 fps + stillimage tune = minimal CPU work for a single image.
+ * Quality settings scale with the selected output resolution.
+ */
+export function buildFastEncodeArgs(imageFileName, audioFileName, outputFileName, audioDuration, quality = 'fullhd') {
+  const { crf, audioBitrate, sampleRate } = getEncodeSettings(quality);
   return [
     '-loop', '1',
     '-framerate', '1',
@@ -18,13 +35,13 @@ export function buildFastEncodeArgs(imageFileName, audioFileName, outputFileName
     '-c:v', 'libx264',
     '-preset', 'ultrafast',
     '-tune', 'stillimage',
-    '-crf', '30',
+    '-crf', String(crf),
     '-pix_fmt', 'yuv420p',
     '-r', '1',
     '-g', '1',
     '-c:a', 'aac',
-    '-b:a', '128k',
-    '-ar', '44100',
+    '-b:a', audioBitrate,
+    '-ar', sampleRate,
     '-ac', '2',
     '-movflags', '+faststart',
     '-shortest',

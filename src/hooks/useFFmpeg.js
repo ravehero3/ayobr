@@ -120,7 +120,7 @@ export const useFFmpeg = () => {
         if (batches.length > 1) prefetchPairs(batches[1]);
 
         for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-          if (isCancelling) { forceStopAllProcesses(); break; }
+          if (useAppStore.getState().isCancelling) { forceStopAllProcesses(); break; }
           const [pair] = batches[batchIndex];
           const nextNext = batches[batchIndex + 2];
           if (nextNext) prefetchPairs(nextNext);
@@ -144,7 +144,7 @@ export const useFFmpeg = () => {
           }
 
           await updateBatchProgress();
-          if (batchIndex < batches.length - 1 && !isCancelling) await new Promise(r => setTimeout(r, 200));
+          if (batchIndex < batches.length - 1 && !useAppStore.getState().isCancelling) await new Promise(r => setTimeout(r, 200));
         }
 
       } else {
@@ -166,12 +166,12 @@ export const useFFmpeg = () => {
         };
 
         await Promise.allSettled(pairs.map(async (pair, overallIndex) => {
-          if (isCancelling) return;
+          if (useAppStore.getState().isCancelling) return;
 
           // Acquire a free pool slot (waits if all busy)
           const slot = await pool.acquire();
           try {
-            if (isCancelling) return;
+            if (useAppStore.getState().isCancelling) return;
 
             const existing = useAppStore.getState().generatedVideos.find(v => v.pairId === pair.id);
             if (existing) {
@@ -196,7 +196,7 @@ export const useFFmpeg = () => {
                 if (!currentState?.isGenerating) return;
                 setVideoGenerationState(pair.id, { isGenerating: true, progress: Math.floor(pct), isComplete: false, video: null, lastUpdate: Date.now() });
               },
-              () => isCancelling,
+              () => useAppStore.getState().isCancelling,
               videoSettings,
               preparedAssets
             );
@@ -226,7 +226,7 @@ export const useFFmpeg = () => {
 
       DEBUG && console.log(`🎉 All batches completed! Processed ${pairs.length} videos total.`);
       // Check if generation was cancelled before finishing
-      if (isCancelling) {
+      if (useAppStore.getState().isCancelling) {
         DEBUG && console.log('Video generation was cancelled');
         setIsGenerating(false);
         setProgress(0);
@@ -318,7 +318,7 @@ export const useFFmpeg = () => {
       setProgress(0);
 
       // Show user-friendly error message only if not cancelled
-      if (!isCancelling) {
+      if (!useAppStore.getState().isCancelling) {
         console.error('Video generation error details:', error);
         // More informative error without alert popup that might cause issues
         console.warn(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);

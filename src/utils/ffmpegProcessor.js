@@ -3,6 +3,7 @@ import { fetchFile } from '@ffmpeg/util';
 import { getFFmpegCoreUrls, preloadFFmpegCore, resetFFmpegCoreCache } from './ffmpegCoreUrls';
 import { renderCoverArtJpeg } from './imagePrep';
 import { getVideoDimensions, buildFastEncodeArgs } from './videoEncode';
+import { logFFmpeg, updateFFmpegStatus } from './ffmpegLogger';
 
 const DEBUG = false;
 let ffmpeg = null;
@@ -218,19 +219,38 @@ export const initializeFFmpeg = async () => {
       if (!ffmpeg) {
         DEBUG && console.log('Creating new FFmpeg instance');
         ffmpeg = new FFmpeg();
+        // Wire FFmpeg's internal log output to the admin debug collector
+        ffmpeg.on('log', ({ type, message }) => {
+          const level = type === 'stderr' ? 'ffmpeg' : 'info';
+          logFFmpeg(level, message);
+        });
       }
 
       if (!isLoaded) {
+        updateFFmpegStatus({ initializing: true, initialized: false, lastError: null });
+        logFFmpeg('info', 'FFmpeg: loading core…');
         const { coreURL, wasmURL } = await getFFmpegCoreUrls();
+        const loadSource = coreURL.startsWith('blob:') ? 'toBlobURL (CDN)' : 'local';
+        logFFmpeg('info', `FFmpeg: using core from ${loadSource}`);
         await ffmpeg.load({ coreURL, wasmURL });
         await ffmpeg.listDir('/');
         isLoaded = true;
         isForceStopped = false;
+        updateFFmpegStatus({
+          initialized: true,
+          initializing: false,
+          loadSource,
+          lastInitTime: new Date().toISOString(),
+          lastError: null,
+        });
+        logFFmpeg('info', 'FFmpeg: ready ✓');
       }
 
       return ffmpeg;
     } catch (error) {
       console.error('FFmpeg initialization error:', error);
+      logFFmpeg('error', `FFmpeg init failed: ${error?.message || error}`);
+      updateFFmpegStatus({ initialized: false, initializing: false, lastError: error?.message || String(error) });
       isLoaded = false;
       isForceStopped = false;
       ffmpeg = null;
@@ -413,8 +433,11 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       imageFileName,
       audioFileName,
       outputFileName,
-      audioDuration
+      audioDuration,
+      quality
     );
+    updateFFmpegStatus({ activeProcesses: activeProcesses.size + 1 });
+    logFFmpeg('info', `FFmpeg: encoding pair ${pairId} at ${quality || 'fullhd'} (${RW}×${RH})`);
 
     DEBUG && console.log('FFmpeg command args:', ffmpegArgs);
 
@@ -664,12 +687,15 @@ export const processVideoWithFFmpegInstance = async (
       ffmpegInst.writeFile(audioFileName, new Uint8Array(audioData)),
     ]);
 
+    const poolQuality = videoSettings?.quality ?? 'fullhd';
     const ffmpegArgs = buildFastEncodeArgs(
       imageFileName,
       audioFileName,
       outputFileName,
-      audioDuration
+      audioDuration,
+      poolQuality
     );
+    logFFmpeg('info', `FFmpeg[pool]: encoding pair ${pairId} at ${poolQuality} (${RW}×${RH})`);
 
     // Execute
     try {

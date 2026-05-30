@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import { subscribeFFmpegLogs, clearFFmpegLogs } from '../utils/ffmpegLogger';
+import { forceStopAllProcesses, restartFFmpeg } from '../utils/ffmpegProcessor';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -367,6 +369,200 @@ function HowItWorksImageManager({ landingImages, setLandingImages, landingUpload
 }
 
 /* ════════════════════════════════════════════════════════════
+   FFmpeg Debug Tab
+════════════════════════════════════════════════════════════ */
+const LOG_COLORS = {
+  error:  '#f87171',
+  warn:   '#fbbf24',
+  info:   '#93c5fd',
+  ffmpeg: '#94a3b8',
+  debug:  '#6b7280',
+};
+
+function FFmpegDebugTab() {
+  const [snapshot, setSnapshot] = useState({ entries: [], status: {} });
+  const [restarting, setRestarting] = useState(false);
+  const [stopping, setStopping] = useState(false);
+  const logRef = useRef(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+
+  /* Browser environment capabilities */
+  const caps = (() => {
+    const sab = typeof SharedArrayBuffer !== 'undefined';
+    const wasm = typeof WebAssembly !== 'undefined';
+    let coep = '?'; let coop = '?';
+    try {
+      coep = document.documentElement.getAttribute('crossorigin') ||
+        (performance.getEntriesByType?.('navigation')[0]?.initiatorType != null ? 'present' : '?');
+    } catch (_) {}
+    return { sab, wasm, coep, coop };
+  })();
+
+  const isMultiThread = caps.sab;
+
+  useEffect(() => {
+    const unsub = subscribeFFmpegLogs(setSnapshot);
+    return unsub;
+  }, []);
+
+  /* Auto-scroll log pane */
+  useEffect(() => {
+    if (autoScroll && logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [snapshot.entries, autoScroll]);
+
+  async function handleStop() {
+    setStopping(true);
+    try { await forceStopAllProcesses(); } catch (_) {}
+    setStopping(false);
+  }
+
+  async function handleRestart() {
+    setRestarting(true);
+    try { await restartFFmpeg(); } catch (_) {}
+    setRestarting(false);
+  }
+
+  const st = snapshot.status;
+
+  const statusColor = st.initialized ? '#34d399' : st.initializing ? '#fbbf24' : st.lastError ? '#f87171' : '#6b7280';
+  const statusLabel = st.initialized ? 'READY' : st.initializing ? 'LOADING…' : st.lastError ? 'ERROR' : 'IDLE';
+
+  return (
+    <motion.div key="ffmpeg" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
+      <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:8}}>FFmpeg Debug</h2>
+      <p style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.4)',marginBottom:28,lineHeight:1.7}}>
+        Stav FFmpeg WASM enginu, prostředí prohlížeče a live logy kódování.
+      </p>
+
+      {/* ── Row: status + browser caps ── */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:20}}>
+
+        {/* FFmpeg status */}
+        <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,padding:'20px 24px'}}>
+          <div style={{fontFamily:NM,fontSize:10,fontWeight:900,letterSpacing:'0.12em',textTransform:'uppercase',
+            color:'rgba(255,255,255,0.3)',marginBottom:14}}>FFmpeg Status</div>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+            <div style={{width:10,height:10,borderRadius:'50%',background:statusColor,boxShadow:`0 0 8px ${statusColor}`}}/>
+            <span style={{fontFamily:NM,fontSize:14,fontWeight:900,color:statusColor}}>{statusLabel}</span>
+          </div>
+          {[
+            ['Load source', st.loadSource || '—'],
+            ['Last init',   st.lastInitTime ? new Date(st.lastInitTime).toLocaleTimeString() : '—'],
+            ['Active jobs', st.activeProcesses ?? 0],
+          ].map(([k,v]) => (
+            <div key={k} style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+              <span style={{fontFamily:NM,fontSize:11,color:'rgba(255,255,255,0.35)'}}>{k}</span>
+              <span style={{fontFamily:'monospace',fontSize:11,color:'#fff'}}>{String(v)}</span>
+            </div>
+          ))}
+          {st.lastError && (
+            <div style={{marginTop:10,padding:'8px 12px',borderRadius:8,background:'rgba(248,113,113,0.08)',
+              border:'1px solid rgba(248,113,113,0.2)',fontFamily:'monospace',fontSize:10,color:'#f87171',lineHeight:1.5,wordBreak:'break-all'}}>
+              {st.lastError}
+            </div>
+          )}
+        </div>
+
+        {/* Browser capabilities */}
+        <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,padding:'20px 24px'}}>
+          <div style={{fontFamily:NM,fontSize:10,fontWeight:900,letterSpacing:'0.12em',textTransform:'uppercase',
+            color:'rgba(255,255,255,0.3)',marginBottom:14}}>Browser Capabilities</div>
+          {[
+            { label:'SharedArrayBuffer', ok: caps.sab, note: caps.sab ? 'Multi-thread enabled' : 'Single-thread only — COEP/COOP required' },
+            { label:'WebAssembly',       ok: caps.wasm, note: caps.wasm ? 'Supported' : 'Not supported — browser too old' },
+            { label:'Multi-thread',      ok: isMultiThread, note: isMultiThread ? 'FFmpeg will use threads' : 'FFmpeg single-threaded (slower)' },
+          ].map(({ label, ok, note }) => (
+            <div key={label} style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
+              <span style={{fontSize:14,flexShrink:0,lineHeight:1.4}}>{ok ? '✅' : '⚠️'}</span>
+              <div>
+                <div style={{fontFamily:NM,fontSize:11,fontWeight:700,color:ok?'#fff':'#fbbf24'}}>{label}</div>
+                <div style={{fontFamily:NM,fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:2}}>{note}</div>
+              </div>
+            </div>
+          ))}
+          <div style={{marginTop:6,padding:'8px 12px',borderRadius:8,background:'rgba(255,255,255,0.03)',
+            border:'1px solid rgba(255,255,255,0.06)'}}>
+            <div style={{fontFamily:NM,fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.3)',marginBottom:4}}>COEP / COOP headers</div>
+            <div style={{fontFamily:'monospace',fontSize:10,color:'rgba(255,255,255,0.5)',lineHeight:1.6}}>
+              Cross-Origin-Embedder-Policy: require-corp<br/>
+              Cross-Origin-Opener-Policy: same-origin
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Controls ── */}
+      <div style={{display:'flex',gap:10,marginBottom:16,flexWrap:'wrap'}}>
+        <button onClick={handleStop} disabled={stopping} style={{
+          fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
+          padding:'9px 20px',borderRadius:9999,cursor:stopping?'not-allowed':'pointer',
+          border:'1px solid rgba(248,113,113,0.4)',background:'rgba(248,113,113,0.08)',color:'#f87171',
+          opacity:stopping?0.5:1,transition:'all 0.2s'}}>
+          {stopping ? 'Zastavuji…' : '⏹ Force Stop FFmpeg'}
+        </button>
+        <button onClick={handleRestart} disabled={restarting} style={{
+          fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
+          padding:'9px 20px',borderRadius:9999,cursor:restarting?'not-allowed':'pointer',
+          border:`1px solid ${BLUE}40`,background:`${BLUE}08`,color:BLUE,
+          opacity:restarting?0.5:1,transition:'all 0.2s'}}>
+          {restarting ? 'Restartuji…' : '🔄 Restart FFmpeg'}
+        </button>
+        <button onClick={() => clearFFmpegLogs()} style={{
+          fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
+          padding:'9px 20px',borderRadius:9999,cursor:'pointer',
+          border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.04)',color:'rgba(255,255,255,0.5)',
+          transition:'all 0.2s'}}>
+          🗑 Smazat logy
+        </button>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto'}}>
+          <label style={{fontFamily:NM,fontSize:10,color:'rgba(255,255,255,0.4)',cursor:'pointer',display:'flex',alignItems:'center',gap:6}}>
+            <input type="checkbox" checked={autoScroll} onChange={e=>setAutoScroll(e.target.checked)}
+              style={{accentColor:BLUE}}/>
+            Auto-scroll
+          </label>
+          <span style={{fontFamily:'monospace',fontSize:10,color:'rgba(255,255,255,0.25)'}}>
+            {snapshot.entries.length} záznamů
+          </span>
+        </div>
+      </div>
+
+      {/* ── Log console ── */}
+      <div ref={logRef} onScroll={() => {
+        if (!logRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = logRef.current;
+        setAutoScroll(scrollHeight - scrollTop - clientHeight < 40);
+      }} style={{
+        background:'rgba(0,0,0,0.6)',border:`1px solid ${BORDER}`,borderRadius:14,
+        padding:'14px 16px',height:480,overflowY:'auto',fontFamily:'monospace',fontSize:11,lineHeight:1.6,
+      }}>
+        {snapshot.entries.length === 0 && (
+          <div style={{color:'rgba(255,255,255,0.2)',textAlign:'center',marginTop:40,fontFamily:NM,fontSize:12}}>
+            Žádné logy — spusť generování videa pro zobrazení FFmpeg výstupu.
+          </div>
+        )}
+        {snapshot.entries.map(e => (
+          <div key={e.id} style={{display:'flex',gap:10,marginBottom:2,alignItems:'flex-start'}}>
+            <span style={{color:'rgba(255,255,255,0.2)',flexShrink:0,fontSize:10}}>
+              {e.ts.slice(11,19)}
+            </span>
+            <span style={{color:LOG_COLORS[e.level]||'#fff',flexShrink:0,fontSize:9,fontWeight:700,
+              letterSpacing:'0.08em',textTransform:'uppercase',minWidth:42,paddingTop:1}}>
+              {e.level}
+            </span>
+            <span style={{color:e.level==='ffmpeg'?'rgba(255,255,255,0.45)':'rgba(255,255,255,0.85)',
+              wordBreak:'break-all',whiteSpace:'pre-wrap'}}>
+              {e.message}
+            </span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
    Main component
 ════════════════════════════════════════════════════════════ */
 export default function AdminPage() {
@@ -537,6 +733,7 @@ export default function AdminPage() {
     {id:'newsletter',  label:'NEWSLETTER'},
     {id:'howItWorks',  label:'LANDING PAGE'},
     {id:'settings',    label:'NASTAVENÍ'},
+    {id:'ffmpeg',      label:'FFMPEG DEBUG'},
   ];
 
   /* ════════════════ RENDER ════════════════ */
@@ -1200,6 +1397,9 @@ export default function AdminPage() {
                 </div>
               </motion.div>
             )}
+
+            {/* ══════════ FFMPEG DEBUG ══════════ */}
+            {tab==='ffmpeg' && <FFmpegDebugTab />}
 
           </AnimatePresence>
         )}
