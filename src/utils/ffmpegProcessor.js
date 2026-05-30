@@ -148,23 +148,41 @@ export const initializeFFmpeg = async () => {
       const LOCAL_BASE = `${typeof window !== 'undefined' ? window.location.origin : ''}/`;
       const CDN_BASE   = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/';
 
+      // Race ffmpeg.load() against a timeout so a hanging worker never blocks forever.
+      // The internal @ffmpeg/ffmpeg worker can silently fail to initialise when bundled
+      // with webpack (import.meta.url resolution issue), causing load() to never resolve.
+      const loadWithTimeout = (opts, ms, label) => Promise.race([
+        opts ? ffmpeg.load(opts) : ffmpeg.load(),
+        new Promise((_, rej) =>
+          setTimeout(() => rej(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
+        ),
+      ]);
+
+      // Preflight: verify local WASM file actually exists before bothering to download it
+      const localWasmOk = await fetch(`${LOCAL_BASE}ffmpeg-core.wasm`, { method: 'HEAD' })
+        .then(r => r.ok).catch(() => false);
+
       let loaded = false;
 
       // Attempt 1: local files served from dist/
-      try {
-        logFFmpeg('info', 'FFmpeg: trying local files…');
-        const [coreURL, wasmURL, workerURL] = await Promise.all([
-          toBlobURL(`${LOCAL_BASE}ffmpeg-core.js`,      'text/javascript'),
-          toBlobURL(`${LOCAL_BASE}ffmpeg-core.wasm`,    'application/wasm'),
-          toBlobURL(`${LOCAL_BASE}ffmpeg-core.worker.js`, 'text/javascript').catch(() => null),
-        ]);
-        const loadOpts = { coreURL, wasmURL };
-        if (workerURL) loadOpts.workerURL = workerURL;
-        await ffmpeg.load(loadOpts);
-        logFFmpeg('info', 'FFmpeg: loaded from local files ✓');
-        loaded = true;
-      } catch (localErr) {
-        logFFmpeg('warn', `FFmpeg: local load failed (${localErr?.message || localErr}) — trying CDN…`);
+      if (localWasmOk) {
+        try {
+          logFFmpeg('info', 'FFmpeg: trying local files…');
+          const [coreURL, wasmURL, workerURL] = await Promise.all([
+            toBlobURL(`${LOCAL_BASE}ffmpeg-core.js`,        'text/javascript'),
+            toBlobURL(`${LOCAL_BASE}ffmpeg-core.wasm`,      'application/wasm'),
+            toBlobURL(`${LOCAL_BASE}ffmpeg-core.worker.js`, 'text/javascript').catch(() => null),
+          ]);
+          const loadOpts = { coreURL, wasmURL };
+          if (workerURL) loadOpts.workerURL = workerURL;
+          await loadWithTimeout(loadOpts, 30000, 'local load');
+          logFFmpeg('info', 'FFmpeg: loaded from local files ✓');
+          loaded = true;
+        } catch (localErr) {
+          logFFmpeg('warn', `FFmpeg: local load failed (${localErr?.message || localErr}) — trying CDN…`);
+        }
+      } else {
+        logFFmpeg('warn', 'FFmpeg: local WASM not found — skipping to CDN…');
       }
 
       // Attempt 2: CDN via toBlobURL
@@ -178,7 +196,7 @@ export const initializeFFmpeg = async () => {
           ]);
           const loadOpts = { coreURL, wasmURL };
           if (workerURL) loadOpts.workerURL = workerURL;
-          await ffmpeg.load(loadOpts);
+          await loadWithTimeout(loadOpts, 60000, 'CDN load');
           logFFmpeg('info', 'FFmpeg: loaded from CDN ✓');
           loaded = true;
         } catch (cdnErr) {
@@ -186,10 +204,10 @@ export const initializeFFmpeg = async () => {
         }
       }
 
-      // Attempt 3: bare load() — lets ffmpeg-wasm find its own files
+      // Attempt 3: bare load() — last resort
       if (!loaded) {
         logFFmpeg('info', 'FFmpeg: trying bare load()…');
-        await ffmpeg.load();
+        await loadWithTimeout(null, 30000, 'bare load');
         logFFmpeg('info', 'FFmpeg: bare load succeeded ✓');
         loaded = true;
       }
