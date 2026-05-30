@@ -1,6 +1,6 @@
-import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { logFFmpeg, updateFFmpegStatus } from './ffmpegLogger';
+import { ensureFFmpegClass } from './ffmpegLoader';
 
 const DEBUG = false;
 let ffmpeg = null;
@@ -141,7 +141,8 @@ export const initializeFFmpeg = async () => {
 
   initPromise = (async () => {
     try {
-      ffmpeg = new FFmpeg();
+      const FFmpegClass = await ensureFFmpegClass();
+      ffmpeg = new FFmpegClass();
 
       // Try local copy first (fastest, avoids CDN round-trip)
       // Then fall back to CDN

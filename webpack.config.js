@@ -86,10 +86,6 @@ module.exports = {
       '@utils':      path.resolve(__dirname, 'src/utils'),
       '@store':      path.resolve(__dirname, 'src/store'),
       '@styles':     path.resolve(__dirname, 'src/styles'),
-      // Use the UMD bundle for @ffmpeg/ffmpeg to avoid the import.meta.url
-      // worker-URL issue that causes ffmpeg.load() to hang forever when
-      // the ESM version is bundled by webpack (Critical dependency warning).
-      '@ffmpeg/ffmpeg': path.resolve(__dirname, 'node_modules/@ffmpeg/ffmpeg/dist/umd/ffmpeg.js'),
     }
   },
 

@@ -1,11 +1,12 @@
-import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
+import { ensureFFmpegClass } from './ffmpegLoader';
 
 const CDN = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
 
 const loadFFmpegInstance = async () => {
-  const inst = new FFmpeg();
-  // Try default load first (uses bundled service worker / local resolution)
+  const FFmpegClass = await ensureFFmpegClass();
+  const inst = new FFmpegClass();
+  // Try default load first (uses local files resolved by the UMD worker)
   try {
     await inst.load();
     return inst;
