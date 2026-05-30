@@ -3,3 +3,4 @@
 - [FFmpeg quality-aware encoding](ffmpeg-quality-encoding.md) — buildFastEncodeArgs in videoEncode.js must accept quality param; 4K uses CRF 20 + 320k audio, fullhd uses CRF 23 + 192k, hd uses CRF 26 + 128k.
 - [FFmpeg isCancelling stale closure](ffmpeg-cancelling-stale.md) — useFFmpeg.js must use useAppStore.getState().isCancelling inside async generateVideos callbacks, not the destructured isCancelling from hook scope.
 - [FFmpeg webpack hang fix](ffmpeg-webpack-hang.md) — @ffmpeg/ffmpeg ESM + webpack breaks worker URL; alias to UMD + add load() timeouts to fix infinite LOADING state.
+- [Generation state stale-progress bug](generation-state-stale.md) — Cancel via back-arrow never set isCancelling:true, leaving generateVideos running in background and corrupting state. Fix: call cancelGeneration() before forceStopAllProcesses(), and call clearAllVideoGenerationStates() at top of generateVideos.

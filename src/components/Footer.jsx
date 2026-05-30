@@ -68,9 +68,13 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={async () => {
-              const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates, clearGeneratedVideos, resetGenerationState } = useAppStore.getState();
+              const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates, clearGeneratedVideos, resetGenerationState, cancelGeneration } = useAppStore.getState();
 
               if (isGenerating) {
+                // Set isCancelling FIRST so the running generateVideos loop
+                // stops immediately — without this it keeps updating state in the
+                // background and the next generation sees stale progress values.
+                cancelGeneration();
                 const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
                 await forceStopAllProcesses();
                 resetGenerationState();

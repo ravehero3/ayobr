@@ -128,7 +128,11 @@ export const useFFmpeg = () => {
     const invalid = pairs.filter(p => !p.audio || !p.image);
     if (invalid.length > 0) throw new Error('All pairs must have both audio and image files');
 
-    const { clearStuckGenerationStates, ensureAutoNavigation } = useAppStore.getState();
+    const { clearStuckGenerationStates, ensureAutoNavigation, clearAllVideoGenerationStates } = useAppStore.getState();
+    // Atomically wipe all stale generation states before starting a new run.
+    // Without this, stale progress values from a previously cancelled generation
+    // can flash on-screen for one render before the init loop overwrites them.
+    clearAllVideoGenerationStates();
     clearStuckGenerationStates();
 
     try {

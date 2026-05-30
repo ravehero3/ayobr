@@ -7,20 +7,22 @@ import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303
 import userIcon from '../assets/user_1754478889614.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import SettingsPanel from '../components/SettingsPanel';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
+/* ── Pure-black glass card — no blue tint ──────────────────────────────────── */
 function GlassCard({ children, className = '' }) {
   return (
     <div
       className={`relative overflow-hidden rounded-2xl ${className}`}
       style={{
-        background: 'linear-gradient(to bottom, rgba(1,5,10,0.88), rgba(7,30,87,0.82))',
-        backdropFilter: 'blur(32px)',
-        WebkitBackdropFilter: 'blur(32px)',
-        border: '1px solid rgba(255,255,255,0.18)',
-        boxShadow: '0 30px 60px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06) inset',
-        padding: '28px',
+        background: 'rgba(10,10,12,0.88)',
+        backdropFilter: 'blur(28px)',
+        WebkitBackdropFilter: 'blur(28px)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        boxShadow: '0 20px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset',
+        padding: '28px 28px',
       }}
     >
       {children}
@@ -28,20 +30,37 @@ function GlassCard({ children, className = '' }) {
   );
 }
 
+/* ── Card section label ────────────────────────────────────────────────────── */
+function FieldLabel({ children }) {
+  return (
+    <p
+      className="text-xs font-medium text-gray-500 mb-1.5 px-0.5"
+      style={{ fontFamily: NM, letterSpacing: '0.01em' }}
+    >
+      {children}
+    </p>
+  );
+}
+
+/* ── Text input ────────────────────────────────────────────────────────────── */
 function InputField({ label, value, onChange, placeholder, disabled }) {
   return (
-    <div className="space-y-2">
-      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] px-1" style={{ fontFamily: NM }}>
-        {label}
-      </label>
+    <div>
+      <FieldLabel>{label}</FieldLabel>
       <input
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 transition-all"
-        style={{ fontFamily: NM }}
+        className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-700 focus:outline-none transition-all"
+        style={{
+          fontFamily: NM,
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.09)',
+        }}
+        onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)')}
+        onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)')}
       />
     </div>
   );
@@ -62,17 +81,49 @@ export default function AccountPage() {
   const navigate = useNavigate();
   useDocumentTitle(t('account.title'));
 
-  const [sub, setSub] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
-  const [cancelLoading, setCancelLoading] = useState(false);
+  const [sub, setSub]                       = useState(null);
+  const [loading, setLoading]               = useState(true);
+  const [saving, setSaving]                 = useState(false);
+  const [saveMessage, setSaveMessage]       = useState('');
+  const [cancelLoading, setCancelLoading]   = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName]       = useState('');
+  const [lastName, setLastName]         = useState('');
   const [producerName, setProducerName] = useState('');
-  const [showCropModal, setShowCropModal] = useState(false);
+  const [showCropModal, setShowCropModal]   = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  const isUnlimited = user?.role === 'unlimited' || user?.role === 'admin';
+  const isPro       = user?.role === 'pro';
+  const isPaid      = isPro || isUnlimited;
+  const isCzech     = language === 'cs';
+
+  /* ── Live header display name ─────────────────────────────────────────── */
+  const displayName =
+    producerName.trim() ||
+    [firstName, lastName].filter(Boolean).join(' ') ||
+    user?.producer_name ||
+    user?.first_name ||
+    user?.email?.split('@')[0] ||
+    'Your Name';
+
+  const fetchSubscription = () => {
+    fetch('/api/ls/subscription', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setSub(data || { status: 'inactive' }))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    setFirstName(user.first_name || '');
+    setLastName(user.last_name || '');
+    setProducerName(user.producer_name || '');
+    if (isPaid) fetchSubscription();
+    else setLoading(false);
+  }, [user, isPaid]);
 
   const handleSaveProfilePicture = async (base64Image) => {
     setUploadingImage(true);
@@ -91,28 +142,6 @@ export default function AccountPage() {
       setUploadingImage(false);
     }
   };
-
-  const isUnlimited = user?.role === 'unlimited' || user?.role === 'admin';
-  const isPro = user?.role === 'pro';
-  const isPaid = isPro || isUnlimited;
-  const isCzech = language === 'cs';
-
-  const fetchSubscription = () => {
-    fetch('/api/ls/subscription', { credentials: 'include' })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => setSub(data || { status: 'inactive' }))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    if (!user) return;
-    setFirstName(user.first_name || '');
-    setLastName(user.last_name || '');
-    setProducerName(user.producer_name || '');
-    if (isPaid) fetchSubscription();
-    else setLoading(false);
-  }, [user, isPaid]);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -165,133 +194,140 @@ export default function AccountPage() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-          className="w-12 h-12 rounded-full border-2 border-white/5 border-t-white"
+          className="w-10 h-10 rounded-full border-2 border-white/5 border-t-white/60"
         />
-        <p className="mt-8 text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase" style={{ fontFamily: NM }}>
-          {t('account.securingSession')}
-        </p>
       </div>
     );
   }
 
-  const creditsRemaining = user?.credits?.credits_remaining ?? 5;
-  const creditsUsed = user?.credits?.credits_used_this_month ?? 0;
+  const creditsRemaining    = user?.credits?.credits_remaining ?? (isPro ? 31 : 5);
+  const creditsUsed         = user?.credits?.credits_used_this_month ?? 0;
+  const creditsTotal        = isPro ? 31 : 5;
+  const usagePct            = Math.min(100, (creditsUsed / creditsTotal) * 100);
 
   return (
     <div className="min-h-screen text-white selection:bg-white/20" style={{ position: 'relative' }}>
 
       {/* Stars background */}
       <div
-        aria-hidden="true"
+        aria-hidden
         style={{
-          position: 'fixed',
-          inset: 0,
+          position: 'fixed', inset: 0,
           backgroundImage: `url(${starsBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: 'cover', backgroundPosition: 'center',
           zIndex: 0,
         }}
       />
-      {/* Dark overlay so text stays readable */}
+
+      {/* Dark overlay */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.72)', zIndex: 1 }} />
+
+      {/* Vignette — fades to pure black at every edge */}
       <div
-        aria-hidden="true"
+        aria-hidden
         style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.62)',
-          zIndex: 1,
+          position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none',
+          background: [
+            'radial-gradient(ellipse 120% 60% at 50% 50%, transparent 30%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.95) 100%)',
+          ].join(', '),
         }}
       />
 
-      {/* Navbar */}
+      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
       <nav
-        className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 sm:px-12 h-16"
+        className="fixed top-0 left-0 right-0 h-14 grid items-center"
         style={{
           zIndex: 50,
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          background: 'rgba(0,0,0,0.45)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          gridTemplateColumns: '1fr auto 1fr',
+          padding: '0 24px',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          background: 'rgba(0,0,0,0.60)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
         }}
       >
-        <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
-          <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 18 }} />
+        {/* Left — logo */}
+        <button onClick={() => navigate('/')} className="hover:opacity-70 transition-opacity justify-self-start">
+          <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16 }} />
         </button>
-        <button
-          onClick={() => navigate('/app')}
-          className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all flex items-center gap-2"
+
+        {/* Centre — live producer name */}
+        <motion.span
+          key={displayName}
+          initial={{ opacity: 0.6 }}
+          animate={{ opacity: 1 }}
+          className="text-sm font-bold text-white/85 tracking-tight text-center truncate max-w-[220px]"
           style={{ fontFamily: NM }}
         >
-          <span className="text-sm">←</span> {t('account.backToApp')}
-        </button>
+          {displayName}
+        </motion.span>
+
+        {/* Right — empty placeholder keeps grid balanced */}
+        <span />
       </nav>
 
-      {/* Page content */}
-      <div className="relative pt-28 pb-24 px-6" style={{ zIndex: 2 }}>
-        <div className="max-w-xl mx-auto space-y-6">
+      {/* ── Page content ───────────────────────────────────────────────────── */}
+      <div className="relative pt-24 pb-36 px-5" style={{ zIndex: 3 }}>
+        <div className="max-w-[480px] mx-auto space-y-4">
 
-          {/* Profile Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {/* ── Profile Card ─────────────────────────────────────────────── */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <GlassCard>
               {/* Avatar + name */}
-              <div className="flex items-center gap-5 mb-8">
+              <div className="flex items-center gap-4 mb-7">
                 <div
                   onClick={() => setShowCropModal(true)}
-                  className="w-16 h-16 rounded-full overflow-hidden border border-white/15 bg-white/5 cursor-pointer relative group hover:border-white/35 transition-all duration-300 flex-shrink-0"
+                  className="w-14 h-14 rounded-full overflow-hidden border border-white/10 bg-white/4 cursor-pointer relative group hover:border-white/30 transition-all duration-300 flex-shrink-0"
                 >
                   <img
                     src={user.profile_image_url || userIcon}
                     alt=""
                     className="w-full h-full object-cover"
-                    style={!user.profile_image_url ? { opacity: 0.5, padding: '10px' } : {}}
-                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; e.currentTarget.style.padding = '10px'; e.currentTarget.style.opacity = '0.5'; }}
+                    style={!user.profile_image_url ? { opacity: 0.45, padding: '9px' } : {}}
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; e.currentTarget.style.padding = '9px'; e.currentTarget.style.opacity = '0.45'; }}
                   />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                    <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                    <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                   </div>
                 </div>
-                <div>
-                  <h1 className="text-2xl font-black text-white tracking-tighter" style={{ fontFamily: NM }}>
-                    {user.producer_name || `${user.first_name || 'User'}${user.last_name ? ` ${user.last_name}` : ''}`}
+                <div className="min-w-0">
+                  <h1 className="text-xl font-black text-white tracking-tight truncate" style={{ fontFamily: NM }}>
+                    {user.producer_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Producer'}
                   </h1>
-                  <p className="text-gray-400 text-sm font-medium mt-0.5" style={{ fontFamily: NM }}>{user.email}</p>
-                  <div className="mt-2">
-                    <span
-                      className="px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase border border-white/10 text-gray-400 bg-white/5"
-                      style={{ fontFamily: NM }}
-                    >
-                      {user.role}
-                    </span>
-                  </div>
+                  <p className="text-gray-500 text-xs font-medium mt-0.5 truncate" style={{ fontFamily: NM }}>{user.email}</p>
+                  <span
+                    className="mt-1.5 inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-widest uppercase"
+                    style={{ fontFamily: NM, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  >
+                    {user.role}
+                  </span>
                 </div>
               </div>
 
               {/* Form fields */}
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   <InputField label={t('account.firstName')} value={firstName} onChange={setFirstName} placeholder="First name" />
                   <InputField label={t('account.lastName')} value={lastName} onChange={setLastName} placeholder="Last name" />
                 </div>
                 <InputField label={t('account.producerName')} value={producerName} onChange={setProducerName} placeholder="Stage name" />
 
-                <div className="pt-2 flex items-center justify-between">
+                <div className="pt-1 flex items-center justify-between gap-3">
                   <button
                     onClick={handleSaveProfile}
                     disabled={saving}
-                    className="px-7 py-2.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40"
                     style={{ fontFamily: NM }}
                   >
-                    {saving ? t('account.saving') : t('account.saveChanges')}
+                    {saving ? (isCzech ? 'Ukládám…' : 'Saving…') : t('account.saveChanges')}
                   </button>
                   <AnimatePresence>
                     {saveMessage && (
                       <motion.span
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="text-xs font-bold text-gray-400"
+                        initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
+                        className="text-xs font-medium text-gray-400" style={{ fontFamily: NM }}
                       >
                         {saveMessage}
                       </motion.span>
@@ -302,89 +338,51 @@ export default function AccountPage() {
             </GlassCard>
           </motion.div>
 
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="grid grid-cols-2 gap-4"
-          >
-            <button
-              onClick={() => navigate('/app')}
-              className="flex items-center justify-between p-5 rounded-2xl group transition-all duration-200"
-              style={{
-                background: 'linear-gradient(to bottom, rgba(1,5,10,0.88), rgba(7,30,87,0.82))',
-                backdropFilter: 'blur(32px)',
-                WebkitBackdropFilter: 'blur(32px)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.6)',
-              }}
-            >
-              <span className="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-white transition-colors" style={{ fontFamily: NM }}>
-                {t('account.openApp')}
-              </span>
-              <span className="text-gray-600 group-hover:text-white transition-colors">→</span>
-            </button>
-
-            <button
-              onClick={logout}
-              className="flex items-center justify-between p-5 rounded-2xl group transition-all duration-200"
-              style={{
-                background: 'linear-gradient(to bottom, rgba(1,5,10,0.88), rgba(7,30,87,0.82))',
-                backdropFilter: 'blur(32px)',
-                WebkitBackdropFilter: 'blur(32px)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.6)',
-              }}
-            >
-              <span className="text-xs font-black uppercase tracking-widest text-gray-400 group-hover:text-white transition-colors" style={{ fontFamily: NM }}>
-                {t('account.signOut')}
-              </span>
-              <span className="text-gray-600 group-hover:text-white transition-colors">→</span>
-            </button>
-          </motion.div>
-
-          {/* Subscription Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          {/* ── Subscription Card ─────────────────────────────────────────── */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07, duration: 0.45 }}>
             <GlassCard>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]" style={{ fontFamily: NM }}>
+              {/* Header row */}
+              <div className="flex items-center justify-between mb-5">
+                <p className="text-xs font-semibold text-gray-500" style={{ fontFamily: NM }}>
                   {t('account.subscription')}
-                </h2>
+                </p>
                 {sub && (
-                  <div className="px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase border border-white/10 text-gray-500" style={{ fontFamily: NM }}>
-                    {sub.status === 'active' ? t('account.active') : t('account.cancelling')}
-                  </div>
+                  <span
+                    className="px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase"
+                    style={{ fontFamily: NM, background: 'rgba(255,255,255,0.05)', color: sub.status === 'active' ? 'rgba(255,255,255,0.5)' : 'rgba(255,200,100,0.7)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  >
+                    {sub.status === 'active' ? t('account.active') : isCzech ? 'Ruší se' : 'Cancelling'}
+                  </span>
                 )}
               </div>
 
               <div className="mb-5">
-                <div className="text-4xl font-black text-white tracking-tighter mb-1" style={{ fontFamily: NM }}>
+                <div className="text-3xl font-black text-white tracking-tighter mb-1" style={{ fontFamily: NM }}>
                   {isUnlimited ? t('account.unlimitedPlan') : isPro ? t('account.proPlan') : t('account.freePlan')}
                 </div>
-                <p className="text-sm text-gray-500 font-medium" style={{ fontFamily: NM }}>
+                <p className="text-sm text-gray-500 font-medium leading-snug" style={{ fontFamily: NM }}>
                   {isUnlimited ? t('account.unlimitedPlanDesc') : isPro ? t('account.proPlanDesc') : t('account.freePlanDesc')}
                 </p>
               </div>
 
               {sub?.current_period_end && (
-                <div className="mb-6 py-4 border-y border-white/8">
-                  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1" style={{ fontFamily: NM }}>
-                    {sub.status === 'cancelling' ? t('account.accessUntil') : t('account.nextBilling')}
+                <div className="mb-5 py-4 border-y border-white/5">
+                  <p className="text-[10px] font-semibold text-gray-600 mb-1" style={{ fontFamily: NM }}>
+                    {sub.status === 'cancelling' ? (isCzech ? 'Přístup do' : 'Access until') : t('account.nextBilling')}
                   </p>
-                  <p className="text-sm font-black text-white" style={{ fontFamily: NM }}>
+                  <p className="text-sm font-bold text-white" style={{ fontFamily: NM }}>
                     {formatDate(sub.current_period_end, language)}
                   </p>
                 </div>
               )}
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2 pt-1">
                 {isPaid ? (
                   <>
                     {isPro && (
                       <button
                         onClick={() => navigate('/upgrade')}
-                        className="w-full py-3.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
+                        className="w-full py-3 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.01] transition-all"
                         style={{ fontFamily: NM }}
                       >
                         {isCzech ? 'Upgradovat na Neomezený' : 'Upgrade to Unlimited'}
@@ -394,26 +392,26 @@ export default function AccountPage() {
                       <button
                         onClick={handleCancelSub}
                         disabled={cancelLoading}
-                        className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                        className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40"
                         style={{
                           fontFamily: NM,
-                          border: '1px solid rgba(255,255,255,0.12)',
-                          color: 'rgba(255,255,255,0.35)',
+                          border: '1px solid rgba(255,255,255,0.10)',
+                          color: 'rgba(255,255,255,0.38)',
                           background: 'transparent',
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,80,80,0.85)'; e.currentTarget.style.borderColor = 'rgba(255,80,80,0.3)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.38)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'; }}
                       >
                         {cancelLoading
-                          ? (isCzech ? 'Ruším...' : 'Cancelling...')
-                          : (isCzech ? 'Zrušit předplatné' : 'Cancel Subscription')}
+                          ? (isCzech ? 'Ruším…' : 'Cancelling…')
+                          : (isCzech ? 'Zrušit předplatné' : 'Cancel subscription')}
                       </button>
                     )}
                   </>
                 ) : (
                   <button
                     onClick={() => navigate('/upgrade')}
-                    className="w-full py-4 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
+                    className="w-full py-3.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.01] transition-all"
                     style={{ fontFamily: NM }}
                   >
                     {t('account.upgradeToPro')}
@@ -423,46 +421,126 @@ export default function AccountPage() {
             </GlassCard>
           </motion.div>
 
-          {/* Usage Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+          {/* ── Usage Card ───────────────────────────────────────────────── */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45 }}>
             <GlassCard>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]" style={{ fontFamily: NM }}>
+              <div className="flex items-center justify-between mb-5">
+                <p className="text-xs font-semibold text-gray-500" style={{ fontFamily: NM }}>
                   {t('account.thisMonth')}
-                </h2>
-                <span className="text-[10px] text-gray-600 font-medium uppercase tracking-widest" style={{ fontFamily: NM }}>
+                </p>
+                <p className="text-[10px] text-gray-600 font-medium" style={{ fontFamily: NM }}>
                   {t('account.resetsOn')}
-                </span>
+                </p>
               </div>
 
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-6xl font-black text-white tracking-tighter" style={{ fontFamily: NM }}>
-                  {isUnlimited ? '∞' : creditsRemaining}
-                </span>
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest" style={{ fontFamily: NM }}>
-                  {t('account.videosRemaining')}
-                </span>
-              </div>
+              {isUnlimited ? (
+                /* Unlimited layout — no progress bar */
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl font-black text-white tracking-tighter" style={{ fontFamily: NM }}>∞</span>
+                  <div>
+                    <p className="text-sm font-bold text-white" style={{ fontFamily: NM }}>
+                      {isCzech ? 'Neomezené' : 'Unlimited'}
+                    </p>
+                    <p className="text-xs text-gray-500 font-medium" style={{ fontFamily: NM }}>
+                      {isCzech ? 'videa za měsíc' : 'videos per month'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Free / Pro layout */
+                <>
+                  <div className="flex items-baseline gap-2 mb-5">
+                    <span className="text-5xl font-black text-white tracking-tighter" style={{ fontFamily: NM }}>
+                      {creditsRemaining}
+                    </span>
+                    <span className="text-xs font-semibold text-gray-500" style={{ fontFamily: NM }}>
+                      {isCzech ? 'zbývá' : 'remaining'}
+                    </span>
+                  </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                  <span className="text-gray-600">{t('account.monthlyUsage')}</span>
-                  <span className="text-gray-400">{creditsUsed} / {isPro ? 31 : 5}</span>
-                </div>
-                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(100, (creditsUsed / (isPro ? 31 : 5)) * 100)}%` }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                    className="h-full bg-white rounded-full"
-                  />
-                </div>
-              </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[10px] font-semibold" style={{ fontFamily: NM }}>
+                      <span className="text-gray-600">{t('account.monthlyUsage')}</span>
+                      <span className="text-gray-400">{creditsUsed} / {creditsTotal}</span>
+                    </div>
+                    <div className="h-[3px] w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${usagePct}%` }}
+                        transition={{ duration: 0.9, ease: 'easeOut' }}
+                        className="h-full rounded-full"
+                        style={{ background: usagePct >= 100 ? 'rgba(255,90,90,0.8)' : 'rgba(255,255,255,0.65)' }}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </GlassCard>
+          </motion.div>
+
+          {/* ── Sign out button — below all cards ────────────────────────── */}
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.21, duration: 0.45 }}>
+            <button
+              onClick={logout}
+              className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all hover:scale-[1.01] active:scale-[0.99]"
+              style={{
+                fontFamily: NM,
+                background: 'rgba(0,0,0,0.75)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.65)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
+            >
+              {isCzech ? 'Odhlásit se' : 'Sign out'}
+            </button>
           </motion.div>
 
         </div>
       </div>
+
+      {/* ── Footer ─────────────────────────────────────────────────────────── */}
+      <div
+        className="fixed bottom-0 left-0 right-0 h-14 flex items-center justify-between px-5"
+        style={{
+          zIndex: 50,
+          background: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+        }}
+      >
+        {/* Left — Back to app */}
+        <button
+          onClick={() => navigate('/app')}
+          className="flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-white transition-colors"
+          style={{ fontFamily: NM }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="hidden sm:inline">{t('account.backToApp')}</span>
+        </button>
+
+        {/* Right — Video settings gear */}
+        <motion.button
+          onClick={() => setIsSettingsOpen(true)}
+          whileHover={{ rotate: 90 }}
+          transition={{ duration: 0.25 }}
+          className="p-2 rounded-lg text-gray-500 hover:text-white transition-colors"
+          title={isCzech ? 'Nastavení videa' : 'Video settings'}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </motion.button>
+      </div>
+
+      {/* ── Modals ──────────────────────────────────────────────────────────── */}
+      <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
       {showCropModal && (
         <ProfilePictureModal
@@ -475,14 +553,15 @@ export default function AccountPage() {
   );
 }
 
+/* ── Profile picture crop modal ─────────────────────────────────────────────── */
 function ProfilePictureModal({ onClose, onSave, userIcon }) {
-  const [imgSrc, setImgSrc] = React.useState(null);
-  const [zoom, setZoom] = React.useState(1);
-  const [offset, setOffset] = React.useState({ x: 0, y: 0 });
+  const [imgSrc, setImgSrc]       = React.useState(null);
+  const [zoom, setZoom]           = React.useState(1);
+  const [offset, setOffset]       = React.useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const canvasRef = React.useRef(null);
-  const imgRef = React.useRef(null);
+  const imgRef    = React.useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -505,10 +584,10 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
     const img = imgRef.current;
     if (!canvas || !ctx || !img) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const size = Math.min(img.width, img.height);
+    const size  = Math.min(img.width, img.height);
     const scale = (canvas.width / size) * zoom;
-    const dx = (canvas.width - img.width * scale) / 2 + offset.x;
-    const dy = (canvas.height - img.height * scale) / 2 + offset.y;
+    const dx    = (canvas.width - img.width * scale) / 2 + offset.x;
+    const dy    = (canvas.height - img.height * scale) / 2 + offset.y;
     ctx.drawImage(img, dx, dy, img.width * scale, img.height * scale);
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.beginPath();
@@ -524,7 +603,7 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
 
   const handleMouseDown = (e) => { if (!imgSrc) return; setIsDragging(true); setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y }); };
   const handleMouseMove = (e) => { if (!isDragging || !imgSrc) return; setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y }); };
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp   = () => setIsDragging(false);
 
   const handleSave = () => {
     const canvas = document.createElement('canvas');
@@ -532,86 +611,66 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
     const ctx = canvas.getContext('2d');
     const img = imgRef.current;
     if (!img || !ctx) return;
-    const size = Math.min(img.width, img.height);
+    const size  = Math.min(img.width, img.height);
     const scale = (250 / size) * zoom;
-    const dx = (250 - img.width * scale) / 2 + offset.x;
-    const dy = (250 - img.height * scale) / 2 + offset.y;
+    const dx    = (250 - img.width * scale) / 2 + offset.x;
+    const dy    = (250 - img.height * scale) / 2 + offset.y;
     ctx.fillStyle = '#111';
     ctx.fillRect(0, 0, 250, 250);
+    ctx.beginPath();
+    ctx.arc(125, 125, 125, 0, Math.PI * 2);
+    ctx.clip();
     ctx.drawImage(img, dx, dy, img.width * scale, img.height * scale);
     onSave(canvas.toDataURL('image/jpeg', 0.85));
   };
 
   return (
-    <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: 200, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-md rounded-2xl p-6 relative"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(1,5,10,0.95), rgba(7,30,87,0.92))',
-          border: '1px solid rgba(255,255,255,0.18)',
-          backdropFilter: 'blur(32px)',
-          WebkitBackdropFilter: 'blur(32px)',
-        }}
+        className="relative rounded-2xl p-6 w-80"
+        style={{ background: 'rgba(10,10,12,0.96)', border: '1px solid rgba(255,255,255,0.10)' }}
+        onClick={e => e.stopPropagation()}
       >
-        <h3 className="text-xl font-bold text-white mb-4" style={{ fontFamily: NM }}>
-          Upravit profilový obrázek
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-lg">✕</button>
+        <h3 className="text-sm font-black text-white mb-4" style={{ fontFamily: NM }}>
+          Profile photo
         </h3>
 
-        {!imgSrc ? (
-          <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center flex flex-col items-center gap-4 bg-white/5">
-            <img src={userIcon} className="w-16 h-16 opacity-30 object-cover rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-            <p className="text-sm text-gray-400">Vyberte soubor JPG nebo PNG</p>
-            <label className="px-4 py-2 bg-white text-black font-semibold rounded-lg cursor-pointer hover:bg-gray-200 transition-colors text-sm">
-              Vybrat soubor
-              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-            </label>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative overflow-hidden rounded-xl bg-black border border-white/10">
-              <canvas
-                ref={canvasRef}
-                width={300}
-                height={300}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                className="cursor-move"
-              />
-            </div>
-            <div className="w-full flex items-center gap-3">
-              <span className="text-xs text-gray-500 font-bold">ZOOM</span>
-              <input type="range" min="1" max="3" step="0.05" value={zoom} onChange={e => setZoom(parseFloat(e.target.value))} className="flex-1 accent-white" />
-            </div>
-            <div className="w-full">
-              <label className="text-xs text-gray-400 font-bold hover:text-white cursor-pointer transition-colors">
-                Změnit obrázek
-                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-              </label>
-            </div>
+        <canvas
+          ref={canvasRef} width={240} height={240}
+          className="rounded-full mx-auto block mb-4 cursor-move"
+          style={{ background: '#111' }}
+          onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+        />
+
+        {imgSrc && (
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-[10px] text-gray-500" style={{ fontFamily: NM }}>Zoom</span>
+            <input type="range" min="0.5" max="3" step="0.05" value={zoom}
+              onChange={e => setZoom(parseFloat(e.target.value))}
+              className="flex-1 accent-white"
+            />
           </div>
         )}
 
-        <div className="flex justify-end gap-3 mt-6 border-t border-white/8 pt-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors"
-            style={{ border: '1px solid rgba(255,255,255,0.10)' }}
-          >
-            Zrušit
+        <label className="block w-full py-2.5 rounded-xl text-center text-xs font-bold uppercase tracking-widest cursor-pointer transition-all mb-2"
+          style={{ border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.55)', fontFamily: NM }}>
+          Choose photo
+          <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        </label>
+
+        {imgSrc && (
+          <button onClick={handleSave}
+            className="w-full py-2.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
+            style={{ fontFamily: NM }}>
+            Save photo
           </button>
-          <button
-            onClick={handleSave}
-            disabled={!imgSrc}
-            className="px-4 py-2 rounded-lg text-sm text-white font-semibold transition-all disabled:opacity-40"
-            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)' }}
-            onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
-          >
-            Uložit
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
