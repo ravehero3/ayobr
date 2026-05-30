@@ -1,9 +1,20 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { getFFmpegCoreUrls } from './ffmpegCoreUrls';
+import { toBlobURL } from '@ffmpeg/util';
+
+const CDN = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
 
 const loadFFmpegInstance = async () => {
   const inst = new FFmpeg();
-  const { coreURL, wasmURL } = await getFFmpegCoreUrls();
+  // Try default load first (uses bundled service worker / local resolution)
+  try {
+    await inst.load();
+    return inst;
+  } catch (_) {}
+  // Fallback: CDN via toBlobURL
+  const [coreURL, wasmURL] = await Promise.all([
+    toBlobURL(`${CDN}/ffmpeg-core.js`,   'text/javascript'),
+    toBlobURL(`${CDN}/ffmpeg-core.wasm`, 'application/wasm'),
+  ]);
   await inst.load({ coreURL, wasmURL });
   return inst;
 };
@@ -25,7 +36,7 @@ class Slot {
 
   async terminate() {
     if (this.inst) {
-      try { await this.inst.terminate(); } catch {}
+      try { await this.inst.terminate(); } catch (_) {}
       this.inst = null;
     }
     this._initPromise = null;

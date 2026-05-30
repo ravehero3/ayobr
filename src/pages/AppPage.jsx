@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import UpgradeBanner from '../components/UpgradeBanner';
 import ReferralPanel from '../components/ReferralPanel';
 import VideoApp from '../VideoApp';
-import { preloadFFmpegCore } from '../utils/ffmpegCoreUrls';
+import { initializeFFmpeg } from '../utils/ffmpegProcessor';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -29,7 +29,7 @@ export default function AppPage() {
   useEffect(() => {
     if (!loading && user?.rights_agreed && !wasmPreloaded.current) {
       wasmPreloaded.current = true;
-      preloadFFmpegCore().catch((err) => {
+      initializeFFmpeg().catch((err) => {
         console.warn('FFmpeg WASM preload:', err?.message || err);
         wasmPreloaded.current = false;
       });

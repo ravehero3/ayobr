@@ -2,27 +2,30 @@ import { useState, useCallback } from 'react';
 import { fetchFile } from '@ffmpeg/util';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
-import { processVideoWithFFmpeg, processVideoWithFFmpegInstance, forceStopAllProcesses, getAudioDuration } from '../utils/ffmpegProcessor';
+import {
+  processVideoWithFFmpeg,
+  processVideoWithFFmpegInstance,
+  forceStopAllProcesses,
+  getAudioDuration,
+} from '../utils/ffmpegProcessor';
 import { getPool } from '../utils/ffmpegPool';
 
 export const useFFmpeg = () => {
-  // eslint-disable-next-line
   const DEBUG = false;
   const [progress, setProgress] = useState(0);
   const { user } = useAuth();
-  const { 
-    setIsGenerating, 
-    addGeneratedVideo, 
-    clearGeneratedVideos, 
-    setVideoGenerationState, 
-    isCancelling, 
-    cancelGeneration, 
+  const {
+    setIsGenerating,
+    addGeneratedVideo,
+    clearGeneratedVideos,
+    setVideoGenerationState,
     resetCancellation,
-    concurrencySettings,
     getPreparedAssets,
-    clearPreparedAssets 
+    clearPreparedAssets,
   } = useAppStore();
 
+  // Sequential processing (maxConcurrent = 1) is the proven-stable approach.
+  // Pool/concurrent mode kept for Pro/Unlimited but can be disabled if issues arise.
   const maxConcurrent = (() => {
     const role = user?.role;
     if (role === 'unlimited' || role === 'admin') return 3;
@@ -30,161 +33,213 @@ export const useFFmpeg = () => {
     return 1;
   })();
 
+  // ── Helper: build video settings from store ─────────────────────────────────
+  const getVideoSettings = () => {
+    const s = useAppStore.getState();
+    return {
+      background:       s.videoSettings?.background       ?? 'black',
+      customBackground: s.videoSettings?.customBackground ?? null,
+      quality:          s.videoSettings?.quality          ?? 'fullhd',
+    };
+  };
+
+  // ── Helper: process one pair (sequential mode) ──────────────────────────────
+  const processPairAsync = async (pair) => {
+    if (useAppStore.getState().isCancelling) return null;
+
+    const store = useAppStore.getState();
+    const existing = store.generatedVideos.find(v => v.pairId === pair.id);
+    if (existing) return existing;
+
+    setVideoGenerationState(pair.id, {
+      isGenerating: true, progress: 0, isComplete: false,
+      video: null, error: null, startTime: Date.now(), lastUpdate: Date.now(),
+    });
+
+    const videoSettings  = getVideoSettings();
+    const preparedAssets = getPreparedAssets(pair.id);
+
+    let videoData;
+    try {
+      videoData = await processVideoWithFFmpeg(
+        pair.id,
+        pair.audio,
+        pair.image,
+        (pct) => {
+          const st = useAppStore.getState().videoGenerationStates[pair.id];
+          if (!st?.isGenerating) return;
+          setVideoGenerationState(pair.id, {
+            isGenerating: true,
+            progress: Math.min(Math.max(Math.floor(pct), 0), 100),
+            isComplete: false, video: null, lastUpdate: Date.now(),
+          });
+        },
+        () => useAppStore.getState().isCancelling,
+        videoSettings,
+        preparedAssets,
+      );
+      if (preparedAssets) clearPreparedAssets(pair.id);
+    } catch (err) {
+      if (preparedAssets) clearPreparedAssets(pair.id);
+      if (err.message?.includes('timeout')) forceStopAllProcesses();
+      setVideoGenerationState(pair.id, {
+        isGenerating: false, progress: 0, isComplete: false,
+        video: null, error: err.message || 'Video generation failed',
+      });
+      throw err;
+    }
+
+    if (useAppStore.getState().isCancelling) return null;
+
+    if (!videoData || videoData.length === 0) {
+      const msg = 'Invalid video data received from FFmpeg';
+      setVideoGenerationState(pair.id, {
+        isGenerating: false, progress: 0, isComplete: false, video: null, error: msg,
+      });
+      throw new Error(msg);
+    }
+
+    const blob = new Blob([videoData], { type: 'video/mp4' });
+    const url  = URL.createObjectURL(blob);
+    const audioName = pair.audio.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const imageName = pair.image.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    const video = {
+      id: crypto.randomUUID(),
+      pairId: pair.id,
+      url,
+      blob,
+      filename: `video_${audioName}_${imageName}.mp4`,
+      createdAt: new Date(),
+      size: videoData.length,
+    };
+
+    setVideoGenerationState(pair.id, {
+      isGenerating: false, progress: 100, isComplete: true, video, error: null,
+    });
+    addGeneratedVideo(video);
+    return video;
+  };
+
+  // ── Main generate function ──────────────────────────────────────────────────
   const generateVideos = useCallback(async (pairs) => {
-    DEBUG && console.log('generateVideos called with pairs:', pairs);
+    if (!pairs?.length) throw new Error('No pairs provided for video generation');
 
-    if (!pairs || pairs.length === 0) {
-      console.error('No pairs provided for video generation');
-      throw new Error('No pairs provided for video generation');
-    }
+    const invalid = pairs.filter(p => !p.audio || !p.image);
+    if (invalid.length > 0) throw new Error('All pairs must have both audio and image files');
 
-    const invalidPairs = pairs.filter(pair => !pair.audio || !pair.image);
-    if (invalidPairs.length > 0) {
-      console.error('Invalid pairs found:', invalidPairs);
-      throw new Error('All pairs must have both audio and image files');
-    }
-
-    // Clear any stuck generation states before starting
     const { clearStuckGenerationStates, ensureAutoNavigation } = useAppStore.getState();
     clearStuckGenerationStates();
 
     try {
       setIsGenerating(true);
-      // Also set the store state
-      const { setIsGenerating: setStoreIsGenerating } = useAppStore.getState();
-      setStoreIsGenerating(true);
+      useAppStore.getState().setIsGenerating(true);
       resetCancellation();
       setProgress(0);
-      
-      // Ensure navigation returns to auto mode so LoadingWindow appears
       ensureAutoNavigation();
-      
-      // Don't clear existing videos - let users accumulate multiple generations
 
-      DEBUG && console.log(`Processing ${pairs.length} videos with concurrency limit of ${maxConcurrent}`);
       let completedCount = 0;
 
-      // Clear any existing generation states and set up generation
-      pairs.forEach((pair, index) => {
+      // Initialise all pair states to queued
+      pairs.forEach((pair, i) => {
         setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: null,
-          queuePosition: index,
-          isInQueue: true
+          isGenerating: false, progress: 0, isComplete: false,
+          video: null, error: null, queuePosition: i, isInQueue: true,
         });
       });
 
-      // Enhanced progress tracking for large batches
-      const updateBatchProgress = async () => {
-        const overallProgress = Math.floor((completedCount / pairs.length) * 100);
-        setProgress(overallProgress);
-
-        // Log progress for large batches
-        if (pairs.length > 20) {
-          DEBUG && console.log(`Batch progress: ${completedCount}/${pairs.length} (${overallProgress}%)`);
-        }
-
-        // Memory cleanup every 10 videos to prevent crashes in browser
-        if (completedCount > 0 && completedCount % 10 === 0) {
-          DEBUG && console.log(`Performing memory cleanup after ${completedCount} completed videos`);
-
-          // Force browser garbage collection and cleanup
-          if (window.gc) {
-            try { window.gc(); } catch(e) { /* ignore */ }
-          }
+      const tickProgress = () => {
+        completedCount++;
+        setProgress(Math.floor((completedCount / pairs.length) * 100));
+        if (completedCount % 10 === 0 && typeof window !== 'undefined' && window.gc) {
+          try { window.gc(); } catch (_) {}
         }
       };
 
       if (maxConcurrent === 1) {
-        // ── SEQUENTIAL PATH (Free users) ───────────────────────────────────────
-        // Safe singleton FFmpeg — one video at a time with prefetch pipeline.
-        const batches = [];
-        for (let i = 0; i < pairs.length; i++) batches.push([pairs[i]]);
-
-        const prefetchPairs = async (pairsToFetch) => {
-          const { setPreparedAssets, getPreparedAssets } = useAppStore.getState();
+        // ── SEQUENTIAL PATH ──────────────────────────────────────────────────
+        // Prefetch next 2 pairs while the current one encodes
+        const prefetch = async (pairsToFetch) => {
+          const { setPreparedAssets, getPreparedAssets: getPA } = useAppStore.getState();
           await Promise.allSettled(pairsToFetch.map(async (pair) => {
-            if (getPreparedAssets(pair.id)) return;
+            if (getPA(pair.id)) return;
             try {
-              const [audioData, imageData] = await Promise.all([fetchFile(pair.audio), fetchFile(pair.image)]);
-              const audioDuration = await getAudioDuration(pair.audio);
-              setPreparedAssets(pair.id, { audioBuffer: new Uint8Array(audioData), imageBuffer: new Uint8Array(imageData), audioDuration });
-            } catch (e) { console.warn(`Prefetch failed for pair ${pair.id}:`, e.message); }
+              const [aData, iData] = await Promise.all([fetchFile(pair.audio), fetchFile(pair.image)]);
+              const dur = await getAudioDuration(pair.audio);
+              setPreparedAssets(pair.id, {
+                audioBuffer: new Uint8Array(aData),
+                imageBuffer: new Uint8Array(iData),
+                audioDuration: dur,
+              });
+            } catch (e) { console.warn(`Prefetch failed for ${pair.id}:`, e.message); }
           }));
         };
 
-        if (batches.length > 0) prefetchPairs(batches[0]);
-        if (batches.length > 1) prefetchPairs(batches[1]);
+        // Start prefetching first two pairs immediately
+        if (pairs[0]) prefetch([pairs[0]]);
+        if (pairs[1]) prefetch([pairs[1]]);
 
-        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        for (let i = 0; i < pairs.length; i++) {
           if (useAppStore.getState().isCancelling) { forceStopAllProcesses(); break; }
-          const [pair] = batches[batchIndex];
-          const nextNext = batches[batchIndex + 2];
-          if (nextNext) prefetchPairs(nextNext);
+
+          const pair = pairs[i];
+          // Prefetch 2 ahead
+          if (pairs[i + 2]) prefetch([pairs[i + 2]]);
 
           try {
             const existing = useAppStore.getState().generatedVideos.find(v => v.pairId === pair.id);
             if (existing) {
-              setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: existing, error: null });
-              completedCount++;
+              setVideoGenerationState(pair.id, {
+                isGenerating: false, progress: 100, isComplete: true, video: existing, error: null,
+              });
             } else {
-              setVideoGenerationState(pair.id, { isGenerating: true, progress: 0, isComplete: false, video: null, error: null, queuePosition: batchIndex, isCurrentlyProcessing: true, startTime: Date.now(), lastUpdate: Date.now() });
-              const result = await processPairAsync(pair);
-              completedCount++;
-              if (result) {
-                setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: result, error: null, isCurrentlyProcessing: false, isFinished: true });
-              }
+              setVideoGenerationState(pair.id, {
+                isGenerating: true, progress: 0, isComplete: false, video: null, error: null,
+                queuePosition: i, isCurrentlyProcessing: true, startTime: Date.now(), lastUpdate: Date.now(),
+              });
+              await processPairAsync(pair);
             }
-          } catch (error) {
-            completedCount++;
-            setVideoGenerationState(pair.id, { isGenerating: false, progress: 0, isComplete: false, video: null, error: error.message || 'Video generation failed', isCurrentlyProcessing: false });
+          } catch (err) {
+            setVideoGenerationState(pair.id, {
+              isGenerating: false, progress: 0, isComplete: false,
+              video: null, error: err.message || 'Video generation failed', isCurrentlyProcessing: false,
+            });
           }
 
-          await updateBatchProgress();
-          if (batchIndex < batches.length - 1 && !useAppStore.getState().isCancelling) await new Promise(r => setTimeout(r, 200));
+          tickProgress();
+          if (i < pairs.length - 1 && !useAppStore.getState().isCancelling) {
+            await new Promise(r => setTimeout(r, 50));
+          }
         }
 
       } else {
-        // ── CONCURRENT POOL PATH (Pro = 2, Unlimited = 3) ─────────────────────
-        // Each video gets its own isolated FFmpeg instance from the pool.
-        // The pool semaphore limits how many run simultaneously.
+        // ── CONCURRENT POOL PATH (Pro = 2, Unlimited/Admin = 3) ──────────────
         const pool = getPool(maxConcurrent);
 
-        // Helper to build video settings (same as processPairAsync)
-        const buildVideoSettings = () => {
-          const s = useAppStore.getState();
-          return {
-            background: s.videoSettings?.background ?? 'black',
-            customBackground: s.videoSettings?.customBackground ?? null,
-            quality: s.videoSettings?.quality ?? 'fullhd',
-            logoFile: s.logoSettings?.logoFile,
-            useLogo: s.logoSettings?.useLogoInVideos,
-          };
-        };
-
-        await Promise.allSettled(pairs.map(async (pair, overallIndex) => {
+        await Promise.allSettled(pairs.map(async (pair, idx) => {
           if (useAppStore.getState().isCancelling) return;
 
-          // Acquire a free pool slot (waits if all busy)
           const slot = await pool.acquire();
           try {
             if (useAppStore.getState().isCancelling) return;
 
             const existing = useAppStore.getState().generatedVideos.find(v => v.pairId === pair.id);
             if (existing) {
-              setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: existing, error: null });
-              completedCount++;
-              setProgress(Math.floor((completedCount / pairs.length) * 100));
+              setVideoGenerationState(pair.id, {
+                isGenerating: false, progress: 100, isComplete: true, video: existing, error: null,
+              });
+              tickProgress();
               return;
             }
 
-            setVideoGenerationState(pair.id, { isGenerating: true, progress: 0, isComplete: false, video: null, error: null, queuePosition: overallIndex, isCurrentlyProcessing: true, startTime: Date.now(), lastUpdate: Date.now() });
+            setVideoGenerationState(pair.id, {
+              isGenerating: true, progress: 0, isComplete: false, video: null, error: null,
+              queuePosition: idx, isCurrentlyProcessing: true,
+              startTime: Date.now(), lastUpdate: Date.now(),
+            });
 
+            const videoSettings  = getVideoSettings();
             const preparedAssets = getPreparedAssets(pair.id);
-            const videoSettings = buildVideoSettings();
 
             const videoData = await processVideoWithFFmpegInstance(
               slot.inst,
@@ -192,13 +247,17 @@ export const useFFmpeg = () => {
               pair.audio,
               pair.image,
               (pct) => {
-                const currentState = useAppStore.getState().videoGenerationStates[pair.id];
-                if (!currentState?.isGenerating) return;
-                setVideoGenerationState(pair.id, { isGenerating: true, progress: Math.floor(pct), isComplete: false, video: null, lastUpdate: Date.now() });
+                const st = useAppStore.getState().videoGenerationStates[pair.id];
+                if (!st?.isGenerating) return;
+                setVideoGenerationState(pair.id, {
+                  isGenerating: true,
+                  progress: Math.floor(pct),
+                  isComplete: false, video: null, lastUpdate: Date.now(),
+                });
               },
               () => useAppStore.getState().isCancelling,
               videoSettings,
-              preparedAssets
+              preparedAssets,
             );
 
             if (preparedAssets) clearPreparedAssets(pair.id);
@@ -206,657 +265,96 @@ export const useFFmpeg = () => {
             if (videoData) {
               const blob = new Blob([videoData], { type: 'video/mp4' });
               const url  = URL.createObjectURL(blob);
-              const videoObj = { pairId: pair.id, url, blob, audioName: pair.audio?.name, imageName: pair.image?.name, timestamp: Date.now() };
-              addGeneratedVideo(videoObj);
-              setVideoGenerationState(pair.id, { isGenerating: false, progress: 100, isComplete: true, video: videoObj, error: null, isCurrentlyProcessing: false, isFinished: true });
+              const vo = {
+                pairId: pair.id, url, blob,
+                audioName: pair.audio?.name,
+                imageName: pair.image?.name,
+                timestamp: Date.now(),
+              };
+              addGeneratedVideo(vo);
+              setVideoGenerationState(pair.id, {
+                isGenerating: false, progress: 100, isComplete: true,
+                video: vo, error: null, isCurrentlyProcessing: false, isFinished: true,
+              });
             }
+            tickProgress();
 
-            completedCount++;
-            setProgress(Math.floor((completedCount / pairs.length) * 100));
-
-          } catch (error) {
-            completedCount++;
-            setProgress(Math.floor((completedCount / pairs.length) * 100));
-            setVideoGenerationState(pair.id, { isGenerating: false, progress: 0, isComplete: false, video: null, error: error.message || 'Video generation failed', isCurrentlyProcessing: false });
+          } catch (err) {
+            tickProgress();
+            setVideoGenerationState(pair.id, {
+              isGenerating: false, progress: 0, isComplete: false,
+              video: null, error: err.message || 'Video generation failed', isCurrentlyProcessing: false,
+            });
           } finally {
             pool.release(slot);
           }
         }));
       }
 
-      DEBUG && console.log(`🎉 All batches completed! Processed ${pairs.length} videos total.`);
-      // Check if generation was cancelled before finishing
+      // ── Post-generation cleanup ──────────────────────────────────────────
       if (useAppStore.getState().isCancelling) {
-        DEBUG && console.log('Video generation was cancelled');
         setIsGenerating(false);
         setProgress(0);
-
-        // Clean up any partial state
-        pairs.forEach(pair => {
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 0,
-            isComplete: false,
-            video: null,
-            error: null
-          });
-        });
-
+        pairs.forEach(p => setVideoGenerationState(p.id, {
+          isGenerating: false, progress: 0, isComplete: false, video: null, error: null,
+        }));
         return;
       }
 
-      DEBUG && console.log('Video generation completed successfully');
       setProgress(100);
+      await new Promise(r => setTimeout(r, 300));
 
-      // Small delay to ensure all videos are properly added to store
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Force completion for all videos that reached 100%
+      // Finalise states
       const { generatedVideos, videoGenerationStates } = useAppStore.getState();
-      DEBUG && console.log('Final check - videos in store:', generatedVideos.length);
-      DEBUG && console.log('Video generation states:', videoGenerationStates);
-
-      // Ensure all completed videos have proper states before finishing
-      DEBUG && console.log('Finalizing video generation states...');
       pairs.forEach((pair) => {
-        const existingVideo = generatedVideos.find(v => v.pairId === pair.id);
-        const currentState = videoGenerationStates[pair.id];
-
-        if (existingVideo) {
-          DEBUG && console.log(`Finalizing state for pair ${pair.id} with video`);
+        const vid = generatedVideos.find(v => v.pairId === pair.id);
+        const st  = videoGenerationStates[pair.id];
+        if (vid) {
           setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: existingVideo,
-            error: null
+            isGenerating: false, progress: 100, isComplete: true, video: vid, error: null,
           });
-        } else if (currentState && currentState.error) {
-          DEBUG && console.log(`Keeping error state for pair ${pair.id}:`, currentState.error);
-          // Keep error state as is
-        } else if (currentState && currentState.isComplete && currentState.video) {
-          // State is already complete with a video - keep it (prevents race condition in concurrent generation)
-          DEBUG && console.log(`Pair ${pair.id} already has complete state with video, keeping it`);
-          // Don't modify the state - it's already correct
-        } else {
-          DEBUG && console.log(`No video found for pair ${pair.id}, clearing state`);
+        } else if (!st?.error && !(st?.isComplete && st?.video)) {
           setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 0,
-            isComplete: false,
-            video: null,
-            error: 'Video generation failed'
+            isGenerating: false, progress: 0, isComplete: false, video: null,
+            error: 'Video generation failed',
           });
         }
       });
 
-      // Reset generation flags to trigger UI transition
       setIsGenerating(false);
-      setStoreIsGenerating(false);
+      useAppStore.getState().setIsGenerating(false);
+      DEBUG && console.log('All videos generated');
 
-      // Force UI update after short delay
-      setTimeout(() => {
-        DEBUG && console.log('Forcing UI update after completion');
-        const { getCurrentPage } = useAppStore.getState();
-        const currentPage = getCurrentPage();
-        DEBUG && console.log('Current page after completion:', currentPage);
-      }, 100);
-
-      DEBUG && console.log('Generation completed, videos should now be visible');
-
-    } catch (error) {
-      console.error('Error in generateVideos:', error);
-
-      // Force stop any remaining processes
+    } catch (err) {
+      console.error('generateVideos error:', err);
       forceStopAllProcesses();
-
-      // Use comprehensive reset from store
       const { resetGenerationState } = useAppStore.getState();
       resetGenerationState();
-
-      // Reset progress in hook
       setProgress(0);
-
-      // Show user-friendly error message only if not cancelled
       if (!useAppStore.getState().isCancelling) {
-        console.error('Video generation error details:', error);
-        // More informative error without alert popup that might cause issues
-        console.warn(`Video generation failed: ${error.message || 'Unknown error occurred'}. Please try again.`);
+        console.warn(`Video generation failed: ${err.message || 'Unknown error'}`);
       }
-
-      // Reset cancellation state
-      setTimeout(() => {
-        resetCancellation();
-        DEBUG && console.log('Error handled, app is ready for retry');
-      }, 1000);
-    } finally {
-      // Cleanup is handled in the main flow above
-      // No additional state reset needed here to prevent double reset
+      setTimeout(() => resetCancellation(), 1000);
     }
-  }, [isCancelling, setIsGenerating, addGeneratedVideo, clearGeneratedVideos, setVideoGenerationState, resetCancellation]);
+  }, [
+    setIsGenerating, addGeneratedVideo, clearGeneratedVideos,
+    setVideoGenerationState, resetCancellation,
+    getPreparedAssets, clearPreparedAssets,
+  ]);
 
-  const processPairAsync = async (pair) => {
-    try {
-      if (isCancelling) return;
-
-      // Check if this pair already has a generated video
-      const store = useAppStore.getState();
-      const existingVideo = store.generatedVideos.find(v => v.pairId === pair.id);
-
-      if (existingVideo) {
-        DEBUG && console.log(`Video already exists for pair ${pair.id}, skipping`);
-        return existingVideo;
-      }
-
-      DEBUG && console.log(`Starting video generation for pair ${pair.id}`);
-      setVideoGenerationState(pair.id, {
-        isGenerating: true,
-        progress: 0,
-        isComplete: false,
-        video: null,
-        error: null,
-        startTime: Date.now(),
-        lastUpdate: Date.now(),
-      });
-
-      DEBUG && console.log(`Processing video for pair ${pair.id}:`, pair);
-
-      // Get video settings from app store including logo settings
-      const videoSettings = {
-        background: store.videoSettings?.background ?? 'black',
-        customBackground: store.videoSettings?.customBackground ?? null,
-        quality: store.videoSettings?.quality ?? 'fullhd',
-        logoFile: store.logoSettings?.logoFile,
-        useLogo: store.logoSettings?.useLogoInVideos
-      };
-      DEBUG && console.log('Video settings for generation:', videoSettings);
-
-      // Get prepared assets for this pair (if available)
-      const preparedAssets = getPreparedAssets(pair.id);
-      if (preparedAssets) {
-        DEBUG && console.log(`Using PREPARED ASSETS for pair ${pair.id} - OPTIMIZATION ACTIVE`);
-      }
-
-      let videoData;
-
-      try {
-        // Process video without timeout racing - let FFmpeg handle its own timeouts
-        videoData = await processVideoWithFFmpeg(
-          pair.id,
-          pair.audio, 
-          pair.image, 
-          (progress) => {
-            const currentState = useAppStore.getState().videoGenerationStates[pair.id];
-            if (!currentState || !currentState.isGenerating) return;
-
-            const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
-            DEBUG && console.log(`Setting video generation state for pair ${pair.id}:`, {
-              isGenerating: true,
-              progress: clampedProgress,
-              isComplete: false,
-              video: null
-            });
-            setVideoGenerationState(pair.id, {
-              isGenerating: true,
-              progress: clampedProgress,
-              isComplete: false,
-              video: null,
-              lastUpdate: Date.now()
-            });
-          },
-          () => {
-            if (isCancelling) {
-              DEBUG && console.log('Cancellation detected, stopping FFmpeg process');
-              return true;
-            }
-            return false;
-          },
-          videoSettings,
-          preparedAssets  // Pass prepared assets for optimization
-        );
-        
-        // Clear prepared assets after successful use to free memory
-        if (preparedAssets) {
-          DEBUG && console.log(`Clearing prepared assets for pair ${pair.id} to free memory`);
-          clearPreparedAssets(pair.id);
-        }
-        
-        DEBUG && console.log(`Video processing completed for pair ${pair.id}, buffer size:`, videoData ? videoData.length : 'null');
-      } catch (processingError) {
-        console.error(`Error during video processing for pair ${pair.id}:`, processingError);
-
-        // Force cleanup on timeout or error
-        if (processingError.message.includes('timeout')) {
-          DEBUG && console.log(`Video processing timed out for pair ${pair.id}, forcing cleanup`);
-          forceStopAllProcesses();
-        }
-
-        // Check if this is a file reading error but FFmpeg actually completed successfully
-        if (processingError.message.includes('Output file could not be read') && 
-            processingError.message.includes('attempts')) {
-          DEBUG && console.log('File reading failed but FFmpeg completed - trying alternate completion');
-
-          // Check if there's any valid data or if this is just a read timing issue
-          const alternateVideo = {
-            id: crypto.randomUUID(),
-            pairId: pair.id,
-            url: null, // Will be null but we can show completion
-            blob: null,
-            filename: `video_${pair.audio?.name || 'audio'}_${pair.image?.name || 'image'}.mp4`,
-            createdAt: new Date(),
-            size: 0
-          };
-
-          // Mark as complete even if file reading failed
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: alternateVideo,
-            error: 'Video completed but preview unavailable'
-          });
-
-          return alternateVideo;
-        }
-
-        // Set error state for the pair
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: processingError.message || 'Video processing failed'
-        });
-
-        throw processingError; // Re-throw to be handled by the main catch block
-      }
-
-      if (isCancelling) {
-        DEBUG && console.log('Video generation cancelled during blob creation');
-        return null;
-      }
-
-      DEBUG && console.log('Creating video blob and URL...');
-      DEBUG && console.log('Video data size received:', videoData ? videoData.length : 'null/undefined');
-
-      if (!videoData || videoData.length === 0) {
-        console.error(`Invalid video data for pair ${pair.id}: ${videoData ? 'empty buffer' : 'null/undefined'}`);
-
-        // Set error state immediately
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: 'Invalid video data received from FFmpeg processor'
-        });
-
-        throw new Error('Invalid video data received from FFmpeg processor');
-      }
-
-      // Additional validation - check if video data looks valid (MP4 should start with specific bytes)
-      const uint8Array = new Uint8Array(videoData);
-      if (uint8Array.length < 8) {
-        console.error(`Video data too small for pair ${pair.id}: ${uint8Array.length} bytes`);
-        throw new Error('Video data appears corrupted - file too small');
-      }
-
-      let videoBlob, videoUrl;
-      try {
-        DEBUG && console.log('Creating Blob object...');
-        videoBlob = new Blob([videoData], { type: 'video/mp4' });
-        DEBUG && console.log('Blob created, size:', videoBlob.size);
-
-        DEBUG && console.log('Creating object URL...');
-        videoUrl = URL.createObjectURL(videoBlob);
-        DEBUG && console.log('Object URL created:', videoUrl.substring(0, 50) + '...');
-
-        DEBUG && console.log('Video blob and URL created successfully');
-      } catch (blobError) {
-        console.error('Error creating video blob:', blobError);
-        console.error('Blob error stack:', blobError.stack);
-        throw new Error(`Failed to create video blob: ${blobError.message}`);
-      }
-
-      // Ensure clean filename
-      const audioName = pair.audio.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-      const imageName = pair.image.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-
-      const video = {
-        id: crypto.randomUUID(),
-        pairId: pair.id,
-        url: videoUrl,
-        blob: videoBlob,
-        filename: `video_${audioName}_${imageName}.mp4`,
-        createdAt: new Date(),
-        size: videoData.length
-      };
-
-      DEBUG && console.log('Video object created:', {
-        id: video.id,
-        filename: video.filename,
-        size: video.size,
-        pairId: video.pairId
-      });
-
-      // Add video to store with retry logic and immediate state update
-      let addToStoreSuccess = false;
-      let retryCount = 0;
-      const maxRetries = 3;
-
-      // Update state first to show immediate completion
-      setVideoGenerationState(pair.id, {
-        isGenerating: false,
-        progress: 100,
-        isComplete: true,
-        video: video,
-        error: null
-      });
-
-      while (!addToStoreSuccess && retryCount < maxRetries) {
-        try {
-          DEBUG && console.log(`Adding video to store (attempt ${retryCount + 1})...`);
-          DEBUG && console.log('Video object to add:', {
-            id: video.id,
-            pairId: video.pairId,
-            filename: video.filename,
-            size: video.size,
-            hasBlob: !!video.blob,
-            hasUrl: !!video.url
-          });
-
-          // Get current store reference to ensure we're working with fresh state
-          const { addGeneratedVideo: addVideoToStore } = useAppStore.getState();
-          addVideoToStore(video);
-          DEBUG && console.log('addGeneratedVideo called successfully');
-
-          // Wait a moment for state update
-          await new Promise(resolve => setTimeout(resolve, 200));
-
-          // Verify video was added with multiple checks
-          const storeState = useAppStore.getState();
-          DEBUG && console.log('Current store state:', {
-            totalVideos: storeState.generatedVideos.length,
-            videoIds: storeState.generatedVideos.map(v => v.id),
-            videoPairIds: storeState.generatedVideos.map(v => v.pairId)
-          });
-
-          // Check by both ID and pairId for better verification
-          const addedVideoById = storeState.generatedVideos.find(v => v.id === video.id);
-          const addedVideoByPairId = storeState.generatedVideos.find(v => v.pairId === pair.id);
-
-          if (addedVideoById || addedVideoByPairId) {
-            DEBUG && console.log('Video successfully added to store');
-            DEBUG && console.log('Total videos in store:', storeState.generatedVideos.length);
-            addToStoreSuccess = true;
-          } else {
-            console.error('Video verification failed:', {
-              expectedVideoId: video.id,
-              expectedPairId: video.pairId,
-              actualVideoIds: storeState.generatedVideos.map(v => v.id),
-              actualPairIds: storeState.generatedVideos.map(v => v.pairId)
-            });
-            throw new Error('Video was not found in store after addition');
-          }
-        } catch (storeError) {
-          retryCount++;
-          console.error(`Error adding video to store (attempt ${retryCount}):`, storeError);
-          console.error('Store error details:', {
-            name: storeError.name,
-            message: storeError.message,
-            stack: storeError.stack
-          });
-
-          if (retryCount >= maxRetries) {
-            console.error('Failed to add video to store after all retries');
-            throw new Error(`Failed to add video to store: ${storeError.message}`);
-          }
-
-          // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 200));
-        }
-      }
-
-      // Set final completion state IMMEDIATELY when video is ready
-      DEBUG && console.log(`Setting completion state for pair ${pair.id}...`);
-      const completionState = {
-        isGenerating: false,
-        progress: 100,
-        isComplete: true,
-        video: video,
-        error: null,
-        isCurrentlyProcessing: false,
-        isFinished: true,
-        completedAt: Date.now()
-      };
-
-      // Force immediate state update with multiple calls to ensure it sticks
-      setVideoGenerationState(pair.id, completionState);
-
-      // Double-check with immediate callback and force UI update
-      setTimeout(() => {
-        setVideoGenerationState(pair.id, completionState);
-        DEBUG && console.log(`✅ Video ${pair.id} completion state confirmed`);
-        
-        // Force a state verification to ensure completion stuck
-        const currentState = useAppStore.getState().videoGenerationStates[pair.id];
-        if (currentState && currentState.isGenerating) {
-          DEBUG && console.log(`🔧 Force completing stuck video ${pair.id}`);
-          setVideoGenerationState(pair.id, {
-            ...completionState,
-            isGenerating: false,
-            isComplete: true,
-            progress: 100
-          });
-        }
-      }, 50);
-
-      // Force immediate UI update to show completion
-      DEBUG && console.log(`✅ Video ${pair.id} marked as complete - ready for next video`);
-
-      // Force immediate UI state update
-      setTimeout(() => {
-        // Double-check the completion state after a small delay
-        const currentState = useAppStore.getState().videoGenerationStates[pair.id];
-        if (currentState && !currentState.isComplete) {
-          DEBUG && console.log(`Force completing stuck video for pair ${pair.id}`);
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: video,
-            error: null
-          });
-        }
-      }, 100);
-
-      // Video completed successfully
-      DEBUG && console.log(`✅ Video ${pair.id} completed successfully`);
-
-      DEBUG && console.log(`Video generation completed successfully for pair ${pair.id}`);
-      return video;
-
-    } catch (error) {
-      console.error(`Error generating video for pair ${pair.id}:`, error);
-      console.error('Error stack:', error.stack);
-      console.error('Error details:', {
-        name: error.name,
-        message: error.message,
-        cause: error.cause,
-        type: typeof error,
-        toString: error.toString()
-      });
-      console.error('Full error object:', error);
-
-      // Check if this is an empty error object or completion issue (often indicates successful completion)
-      const isEmptyError = error && typeof error === 'object' && 
-                          Object.keys(error).length === 0 && 
-                          !error.message && !error.name;
-
-      const isCompletionIssue = error && (error.message === '' || error.message === 'undefined');
-
-      if (isEmptyError || isCompletionIssue) {
-        DEBUG && console.log('Detected empty error or completion issue after processing - checking for successful video');
-        DEBUG && console.log('Checking if we have valid video data in the generated videos...');
-
-        // Check if a video was actually generated successfully
-        const storeState = useAppStore.getState();
-        const existingVideo = storeState.generatedVideos.find(v => v.pairId === pair.id);
-
-        if (existingVideo) {
-          DEBUG && console.log('Found successfully generated video despite error, marking as complete');
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: existingVideo,
-            error: null
-          });
-          return existingVideo;
-        } else {
-          DEBUG && console.log('No video found in store, but this may be a timing issue - clearing error state');
-          // Clear the error state and let the process continue
-          setVideoGenerationState(pair.id, {
-            isGenerating: false,
-            progress: 100,
-            isComplete: true,
-            video: null,
-            error: null
-          });
-          return null;
-        }
-      }
-
-      // Check if generation was cancelled
-      if (isCancelling || (error && error.message === 'Generation cancelled by user')) {
-        DEBUG && console.log(`Video generation cancelled for pair ${pair.id}`);
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: null
-        });
-        return null;
-      }
-
-      // Handle actual errors
-      const errorMessage = (error && typeof error === 'object' && error.message) ? error.message : 
-                          (typeof error === 'string') ? error : 'Unknown error';
-      setVideoGenerationState(pair.id, {
-        isGenerating: false,
-        progress: 0,
-        isComplete: false,
-        video: null,
-        error: errorMessage
-      });
-
-      // Clean up any partial video data
-      if (pair.video) {
-        try {
-          URL.revokeObjectURL(pair.video.url);
-        } catch (e) {
-          console.warn('Failed to revoke object URL:', e);
-        }
-      }
-
-      // Check if this is a restart-related error that we can retry
-      const errorMsg = (error && typeof error === 'object' && error.message) ? error.message : 
-                      (typeof error === 'string') ? error : '';
-      const isRestartableError = errorMsg.includes('restarting for next attempt') || 
-                               errorMsg.includes('terminate') ||
-                               errorMsg.includes('timeout');
-
-      if (isRestartableError && !isCancelling) {
-        DEBUG && console.log('Detected restartable error, FFmpeg will reinitialize for next video');
-        // Set the pair as not generating but don't mark it as error - it might work on retry
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: null // Don't show error to user for restartable errors
-        });
-      } else {
-        // Set error state for non-restartable errors
-        const finalErrorMessage = (error && typeof error === 'object' && error.message) ? error.message : 
-                                 (typeof error === 'string') ? error : 'Unknown error';
-        setVideoGenerationState(pair.id, {
-          isGenerating: false,
-          progress: 0,
-          isComplete: false,
-          video: null,
-          error: finalErrorMessage
-        });
-      }
-
-      return null; // Don't throw to prevent unhandled rejections
-    }
-  };
-
-  const stopGeneration = useCallback(() => {
-    DEBUG && console.log('Stop generation clicked - forcing immediate termination');
-
-    // Set cancelling flag first
-    cancelGeneration();
-
-    // Force stop all FFmpeg processes
-    forceStopAllProcesses();
-
-    // Immediately clear all generation states and return to containers view
-    const { resetGenerationState, clearAllVideoGenerationStates, pairs } = useAppStore.getState();
-
-    // Reset all states immediately
-    setIsGenerating(false);
+  const stopGeneration = useCallback(async () => {
+    const { cancelGeneration } = useAppStore.getState();
+    if (cancelGeneration) cancelGeneration();
+    await forceStopAllProcesses();
     setProgress(0);
+  }, []);
 
-    // Clear all video generation states for all pairs
-    clearAllVideoGenerationStates();
-
-    // Reset each pair's video generation state to ensure UI shows containers
-    pairs.forEach(pair => {
-      const { setVideoGenerationState } = useAppStore.getState();
-      setVideoGenerationState(pair.id, {
-        isGenerating: false,
-        progress: 0,
-        isComplete: false,
-        video: null,
-        error: null
-      });
-    });
-
-    // Use comprehensive reset from store
-    resetGenerationState();
-
-    // Final cleanup after a short delay
-    setTimeout(() => {
-      resetCancellation();
-      DEBUG && console.log('App completely reset and ready for new generation');
-    }, 100); // Reduced delay for immediate feedback
-  }, [cancelGeneration, setProgress, resetCancellation, setIsGenerating]);
-
+  // For components that need to reset between generations
   const resetAppForNewGeneration = useCallback(() => {
-    DEBUG && console.log('Resetting app for new generation');
-
-    // Reset all states
-    setIsGenerating(false);
+    const { resetGenerationState } = useAppStore.getState();
+    if (resetGenerationState) resetGenerationState();
     setProgress(0);
-    resetCancellation();
+  }, []);
 
-    // Clear all video generation states
-    const { pairs, clearAllVideoGenerationStates } = useAppStore.getState();
-    clearAllVideoGenerationStates();
-
-    // Force cleanup of any lingering processes
-    forceStopAllProcesses();
-
-    DEBUG && console.log('App reset complete - ready for new generation');
-  }, [setIsGenerating, setProgress, resetCancellation]);
-
-  return {
-    generateVideos,
-    stopGeneration,
-    resetAppForNewGeneration,
-    progress
-  };
+  return { generateVideos, stopGeneration, resetAppForNewGeneration, progress };
 };
