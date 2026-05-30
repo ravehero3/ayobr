@@ -6,8 +6,6 @@ import { useAuth } from '../context/AuthContext';
 const SettingsPanel = ({ isOpen, onClose }) => {
   const { user, featureFlags } = useAuth();
   const { 
-    concurrencySettings, 
-    setConcurrencySettings,
     videoSettings,
     setVideoBackground,
     setCustomBackground,
@@ -17,8 +15,9 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
   const [selectedResolution, setSelectedResolution] = useState(videoSettings.quality || 'fullhd');
 
-  const canUse4K = featureFlags?.ultra_quality;
-  const canUseFullHD = featureFlags?.high_quality;
+  // 4K requires ultra_quality feature flag (PRO/Unlimited plan)
+  // Full HD (1080p) and HD (720p) are available to everyone
+  const canUse4K = featureFlags?.ultra_quality || user?.role === 'unlimited' || user?.role === 'admin';
   const canUseCustomBackground = user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
 
   const handleBackgroundChange = (background) => {
@@ -28,7 +27,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
   const handleResolutionChange = (resolution) => {
     if (resolution === '4k' && !canUse4K) return;
-    if (resolution === 'fullhd' && !canUseFullHD) return;
     setSelectedResolution(resolution);
   };
 
@@ -297,7 +295,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
                 {/* Full HD */}
                 <motion.div
-                  className={`text-center ${canUseFullHD ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                  className="text-center cursor-pointer"
                   style={{
                     flex: '1',
                     padding: '16px 8px',
@@ -311,13 +309,10 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                     position: 'relative',
                     transition: 'all 0.3s ease'
                   }}
-                  whileHover={canUseFullHD ? { scale: 1.02 } : {}}
-                  whileTap={canUseFullHD ? { scale: 0.98 } : {}}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => handleResolutionChange('fullhd')}
                 >
-                  {!canUseFullHD && (
-                    <div style={{ position: 'absolute', top: -8, right: -4, fontSize: '14px' }}>🔒</div>
-                  )}
                   <div style={{
                     width: '50px',
                     height: '28px',
