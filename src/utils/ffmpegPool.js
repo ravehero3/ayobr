@@ -1,16 +1,10 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { getFFmpegCoreUrls } from './ffmpegCoreUrls';
 
 const loadFFmpegInstance = async () => {
   const inst = new FFmpeg();
-  try {
-    await inst.load();
-  } catch {
-    await inst.load({
-      coreURL:   'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-      wasmURL:   'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-      workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js',
-    });
-  }
+  const { coreURL, wasmURL } = await getFFmpegCoreUrls();
+  await inst.load({ coreURL, wasmURL });
   return inst;
 };
 
@@ -61,7 +55,6 @@ class FFmpegPool {
     if (this._waiting.length > 0) {
       const next = this._waiting.shift();
       slot.busy = true;
-      // slot.inst already loaded from previous acquire; init() is a no-op here
       slot.init().then(() => next(slot));
     }
   }

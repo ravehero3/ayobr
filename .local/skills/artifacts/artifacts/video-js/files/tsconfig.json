@@ -3,6 +3,11 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
+<<<<<<< HEAD
+=======
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+>>>>>>> 5824128892bad47eb7d4a6a5868d9da332fe0ec2
     "noEmit": true,
     "jsx": "preserve",
     "resolveJsonModule": true,

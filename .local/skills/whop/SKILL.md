@@ -88,6 +88,19 @@ Run these via `shell_exec` — do NOT ask the user for IDs:
 
 Add `/account` or `/settings` page with cancel and view subscription. See `./references/code-templates.md` for routes.
 
+<<<<<<< HEAD
+=======
+## Step 6: Tell the user how to test and check their Whop account
+
+When you finish the run setting up Whop, send this message to the user verbatim (do not paraphrase, do not skip — this is the only way users know their Whop account already exists):
+
+> Your app has payments built-in via Whop! Open in a new tab to test.
+>
+> To check your Whop balance (revenue, customers, etc.) just visit Whop.com and login with the same email you use for Replit (your Whop account was just automatically created).
+
+Send it as the final message of the Whop setup run, after the integration is wired up and any task list is complete.
+
+>>>>>>> 5824128892bad47eb7d4a6a5868d9da332fe0ec2
 ## Rules (read these last — they override any conflicting info above)
 
 - Do NOT ask the user for Company ID, Plan ID, or API key — get them yourself

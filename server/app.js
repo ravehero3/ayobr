@@ -40,8 +40,14 @@ function buildApp() {
     credentials: true
   }));
 
-  // Gzip/brotli compress all responses (API JSON + static HTML/JS/CSS)
-  app.use(compression());
+  // Gzip/brotli — skip WASM (large binary; compression adds CPU and can confuse clients)
+  app.use(compression({
+    filter: (req, res) => {
+      if (res.getHeader('Content-Type') === 'application/wasm') return false;
+      if (req.path && req.path.endsWith('.wasm')) return false;
+      return compression.filter(req, res);
+    },
+  }));
 
   // Rate limiting
   const apiLimiter = rateLimit({
@@ -139,6 +145,19 @@ async function mountRoutes(app) {
   app.use('/api/gopay', gopayRoutes);
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+  app.get('/api/ffmpeg-ready', (req, res) => {
+    const wasmPath = path.join(__dirname, '../dist/ffmpeg-core.wasm');
+    const jsPath = path.join(__dirname, '../dist/ffmpeg-core.js');
+    const wasmExists = fs.existsSync(wasmPath);
+    const jsExists = fs.existsSync(jsPath);
+    res.json({
+      ok: wasmExists && jsExists,
+      wasmBytes: wasmExists ? fs.statSync(wasmPath).size : 0,
+      jsExists,
+      wasmExists,
+    });
+  });
+
   // Static assets: hashed filenames → cache 1 year; index.html → no cache
   app.use(express.static(path.join(__dirname, '../dist'), {
     maxAge: '1y',
@@ -146,6 +165,14 @@ async function mountRoutes(app) {
     setHeaders(res, filePath) {
       if (filePath.endsWith('.html')) {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+      if (filePath.endsWith('.wasm')) {
+        res.setHeader('Content-Type', 'application/wasm');
+        res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+      if (filePath.endsWith('ffmpeg-core.js') || filePath.endsWith('.js')) {
+        res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
       }
     },
   }));

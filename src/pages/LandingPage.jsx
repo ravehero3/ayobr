@@ -841,6 +841,7 @@ function LandingNavButtons({ user, navigate, login }) {
 
 function LandingHeroContent({ user, handleCTA, isMobile }) {
   const { t } = useLanguage();
+  const producerName = user?.producer_name;
   return (
     <>
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400 mb-8"
@@ -848,6 +849,23 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         <span>🎬</span>
         <span>{t('landing.hero.badge')}</span>
       </div>
+
+      {producerName && (
+        <div style={{
+          fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
+          fontWeight: 500,
+          fontSize: isMobile ? '46px' : '105px',
+          lineHeight: isMobile ? '50px' : '89px',
+          letterSpacing: isMobile ? '-1px' : '-2px',
+          marginBottom: isMobile ? '0px' : '2px',
+          background: 'linear-gradient(90deg, #60a5fa 0%, #93c5fd 50%, #bfdbfe 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}>
+          {producerName},
+        </div>
+      )}
 
       <h1 style={{
         fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',

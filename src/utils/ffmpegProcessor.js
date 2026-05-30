@@ -1,5 +1,8 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { fetchFile } from '@ffmpeg/util';
+import { getFFmpegCoreUrls, preloadFFmpegCore, resetFFmpegCoreCache } from './ffmpegCoreUrls';
+import { renderCoverArtJpeg } from './imagePrep';
+import { getVideoDimensions, buildFastEncodeArgs } from './videoEncode';
 
 const DEBUG = false;
 let ffmpeg = null;
@@ -10,9 +13,7 @@ let activeProcesses = new Set(); // Track active FFmpeg processes for immediate 
 let isForceStopped = false; // Track if processes were force stopped
 let currentProcessingPairId = null; // Track which pair is currently being processed
 let processingSessionCounter = 0; // Session counter to track unique processing sessions
-let cleanupCompletionPromise = Promise.resolve(); // Track when cleanup is fully done
-let cleanupCompletionResolver = null; // Resolver for the current cleanup
-let currentProgressToken = null; // CRITICAL: Unique token for current video to prevent stale progress callbacks
+let currentProgressToken = null;
 
 // Reduced concurrency for memory stability
 const getOptimalConcurrency = (totalFiles) => {
@@ -39,12 +40,7 @@ export const forceStopAllProcesses = async () => {
   DEBUG && console.log('Force stopping all FFmpeg processes...');
   isForceStopped = true;
 
-  // CRITICAL: Resolve any outstanding cleanup promise to prevent deadlock
-  if (cleanupCompletionResolver) {
-    DEBUG && console.log('Force stop: Resolving outstanding cleanup promise to prevent deadlock');
-    cleanupCompletionResolver();
-    cleanupCompletionResolver = null;
-  }
+  resetFFmpegCoreCache();
 
   if (ffmpeg) {
     try {
@@ -204,38 +200,8 @@ export const initializeFFmpeg = async () => {
     initPromise = null; // Clear existing promise
   }
 
-  // For sequential video processing, always verify FFmpeg state
   if (isLoaded && ffmpeg && !isForceStopped) {
-    // Verify FFmpeg is actually working and not stuck
-    try {
-      const files = await ffmpeg.listDir('/');
-      DEBUG && console.log('FFmpeg verification passed, current files:', files.length);
-      
-      // Check for stuck temporary files from previous operations
-      const stuckFiles = files.filter(f => 
-        !f.isDir && (f.name.includes('_') && 
-        (f.name.startsWith('audio_') || f.name.startsWith('image_') || f.name.startsWith('output_')))
-      );
-      
-      if (stuckFiles.length > 0) {
-        DEBUG && console.log(`Found ${stuckFiles.length} stuck files, cleaning up...`);
-        for (const file of stuckFiles) {
-          try {
-            await ffmpeg.deleteFile(file.name);
-          } catch (e) {
-            console.warn(`Failed to clean stuck file ${file.name}:`, e.message);
-          }
-        }
-      }
-      
-      DEBUG && console.log('Returning existing FFmpeg instance (verified working)');
-      return ffmpeg;
-    } catch (verifyError) {
-      console.warn('FFmpeg instance appears broken, reinitializing...', verifyError.message);
-      isLoaded = false;
-      ffmpeg = null;
-      initPromise = null;
-    }
+    return ffmpeg;
   }
 
   // Return existing promise if already initializing and not force stopped
@@ -249,54 +215,26 @@ export const initializeFFmpeg = async () => {
 
   initPromise = (async () => {
     try {
-      // Always create a new FFmpeg instance for fresh start
       if (!ffmpeg) {
         DEBUG && console.log('Creating new FFmpeg instance');
         ffmpeg = new FFmpeg();
       }
 
       if (!isLoaded) {
-        // Try loading FFmpeg with fallback options
-        try {
-          DEBUG && console.log('Trying default FFmpeg load...');
-          await ffmpeg.load();
-          DEBUG && console.log('FFmpeg loaded successfully with default method');
-        } catch (defaultError) {
-          console.error('Default FFmpeg loading failed:', defaultError);
-
-          try {
-            DEBUG && console.log('Trying external CDN...');
-            await ffmpeg.load({
-              coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-              wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-              workerURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js'
-            });
-            DEBUG && console.log('FFmpeg loaded successfully with external CDN');
-          } catch (cdnError) {
-            console.error('External CDN loading failed:', cdnError);
-            throw new Error('Failed to initialize FFmpeg. Please refresh the page and try again.');
-          }
-        }
-
-        // Verify initialization worked
-        try {
-          await ffmpeg.listDir('/');
-          DEBUG && console.log('FFmpeg filesystem verification successful');
-        } catch (fsError) {
-          console.error('FFmpeg filesystem verification failed:', fsError);
-          throw new Error('FFmpeg loaded but filesystem is not accessible');
-        }
-
+        const { coreURL, wasmURL } = await getFFmpegCoreUrls();
+        await ffmpeg.load({ coreURL, wasmURL });
+        await ffmpeg.listDir('/');
         isLoaded = true;
-        isForceStopped = false; // Ensure force stopped is cleared on successful load
+        isForceStopped = false;
       }
 
       return ffmpeg;
     } catch (error) {
       console.error('FFmpeg initialization error:', error);
       isLoaded = false;
-      isForceStopped = false; // Reset on error to allow retry
+      isForceStopped = false;
       ffmpeg = null;
+      initPromise = null;
       throw error;
     } finally {
       isInitializing = false;
@@ -339,43 +277,18 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
   let progressHandler = null; // Declare handler outside try block for finally cleanup
 
   try {
+    if (onProgress) onProgress(8);
+
     const ffmpeg = await initializeFFmpeg();
+    if (onProgress) onProgress(18);
     DEBUG && console.log('FFmpeg initialized successfully');
 
-    // Clear any previous progress listeners to prevent memory leaks
     ffmpeg.off('progress');
 
-    // CRITICAL FIX: Wait for previous cleanup to complete BEFORE setting new currentProcessingPairId
-    // This prevents the race condition where previous cleanup is skipped
-    DEBUG && console.log(`\n========== VIDEO ${pairId} STARTING ==========`);
-    DEBUG && console.log(`[${pairId}] Waiting for previous video cleanup to complete...`);
-    const cleanupWaitStart = Date.now();
-    await cleanupCompletionPromise;
-    const cleanupWaitDuration = Date.now() - cleanupWaitStart;
-    DEBUG && console.log(`[${pairId}] Previous cleanup confirmed complete (waited ${cleanupWaitDuration}ms)`);
-
-    // Create a NEW cleanup promise for this session
-    let resolveCleanup;
-    cleanupCompletionPromise = new Promise(resolve => {
-      resolveCleanup = resolve;
-    });
-    cleanupCompletionResolver = resolveCleanup;
-    DEBUG && console.log(`[${pairId}] 📝 Created NEW cleanup promise for this session`);
-
-    // Increment session counter
     processingSessionCounter++;
     const currentSessionId = processingSessionCounter;
-    
-    // CRITICAL TOKEN FIX: Generate unique token to prevent stale progress callbacks
-    // This ensures Video 2's progress handler NEVER accepts Video 1's progress events
-    currentProgressToken = null; // Invalidate any previous token immediately
-    const progressToken = crypto.randomUUID(); // Generate fresh unique token
-    currentProgressToken = progressToken; // Set as current valid token
-    DEBUG && console.log(`[${pairId}] 🔐 Generated progress token: ${progressToken.substring(0, 8)}...`);
-    
-    // NOW it's safe to set the current processing pair (cleanup is done)
     currentProcessingPairId = pairId;
-    const capturedPairId = pairId; // Capture for closure comparison
+    const capturedPairId = pairId;
     DEBUG && console.log(`[${pairId}] Starting FFmpeg, session: ${currentSessionId}`);
 
 
@@ -388,22 +301,9 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     // Store handler reference for proper cleanup (assign to outer scope variable)
     progressHandler = ({ progress }) => {
-      // CRITICAL TOKEN GUARD: Primary defense against stale progress callbacks
-      // If this callback's token doesn't match the current valid token, it's from a previous video - REJECT IT
-      if (progressToken !== currentProgressToken) {
-        // Stale callback from previous video detected and blocked - no logging to avoid spam
-        return;
-      }
-      
-      // Enhanced Guard: Prevent progress bleeding from previous videos
-      // Check BOTH pairId AND session ID to ensure this callback belongs to current processing
-      if (!capturedPairId || capturedPairId !== currentProcessingPairId || currentSessionId !== processingSessionCounter) {
-        // Don't log warnings anymore - just silently reject stale updates
-        return;
-      }
-      
+      if (capturedPairId !== currentProcessingPairId) return;
+
       const now = Date.now();
-      // Throttle progress updates to every 100ms for faster updates
       if (onProgress && progressCallbackActive && (now - lastProgressTime > 100) && !hasCompleted) {
         const normalizedProgress = Math.min(Math.max(progress * 100, 0), 100);
         
@@ -418,7 +318,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
           }
           // Don't update progress further until file is actually ready
         } else {
-          // Normal progress updates
           onProgress(normalizedProgress);
           lastProgressTime = now;
 
@@ -471,191 +370,50 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       return new Uint8Array(data); // Return a copy
     };
 
-    // Use prepared assets if available, otherwise read files
-    let audioData, imageData;
-    
-    if (preparedAssets && preparedAssets.audioBuffer && preparedAssets.imageBuffer) {
-      DEBUG && console.log('Using PRE-CACHED ASSETS (OPTIMIZED PATH)');
+    const quality = videoSettings?.quality;
+    const { width: RW, height: RH } = getVideoDimensions(quality);
+    const bg = videoSettings?.background ?? 'black';
+    const customBg =
+      bg === 'custom' && videoSettings?.customBackground
+        ? videoSettings.customBackground
+        : null;
+
+    let audioDuration =
+      preparedAssets?.audioDuration ?? (await getAudioDuration(audioFile));
+    if (onProgress) onProgress(28);
+
+    const imageSource = imageFile;
+    const jpegFrame = await renderCoverArtJpeg(
+      imageSource,
+      RW,
+      RH,
+      bg,
+      customBg
+    );
+    if (onProgress) onProgress(38);
+
+    let audioData;
+    if (preparedAssets?.audioBuffer) {
       audioData = preparedAssets.audioBuffer;
-      imageData = preparedAssets.imageBuffer;
     } else {
-      DEBUG && console.log('Reading files from scratch (standard path)');
-      [audioData, imageData] = await Promise.all([
-        getCachedFileData(audioFile, 'audio'),
-        getCachedFileData(imageFile, 'image')
-      ]);
+      audioData = new Uint8Array(await fetchFile(audioFile));
     }
 
-    // Use unique filenames to avoid conflicts (includes pairId for concurrent processing)
     audioFileName = `audio_${pairId}_${timestamp}.mp3`;
     imageFileName = `image_${pairId}_${timestamp}.jpg`;
     outputFileName = `output_${pairId}_${timestamp}.mp4`;
 
-    try {
-      DEBUG && console.log('Writing files to FFmpeg FS:', {
-        imageSize: imageData?.length || 0,
-        audioSize: audioData?.length || 0
-      });
+    await Promise.all([
+      ffmpeg.writeFile(imageFileName, jpegFrame),
+      ffmpeg.writeFile(audioFileName, new Uint8Array(audioData)),
+    ]);
+    if (onProgress) onProgress(45);
 
-      // Check if data is valid before processing
-      if (!imageData || imageData.length === 0) {
-        throw new Error('Image data is empty or invalid');
-      }
-      if (!audioData || audioData.length === 0) {
-        throw new Error('Audio data is empty or invalid');
-      }
-
-      // Clone ArrayBuffers to prevent detachment
-      const imageBuffer = new Uint8Array(imageData);
-      const audioBuffer = new Uint8Array(audioData);
-
-      await Promise.all([
-        ffmpeg.writeFile(imageFileName, imageBuffer),
-        ffmpeg.writeFile(audioFileName, audioBuffer),
-      ]);
-
-      DEBUG && console.log('Files written successfully to FFmpeg FS');
-    } catch (writeError) {
-      console.error('Error writing files to FFmpeg FS:', writeError);
-      throw new Error(`Failed to prepare input files: ${writeError.message}`);
-    }
-
-
-
-
-    // Get audio duration (use pre-cached if available, otherwise calculate)
-    let audioDuration;
-    if (preparedAssets && preparedAssets.audioDuration) {
-      DEBUG && console.log('Using pre-cached audio duration:', preparedAssets.audioDuration);
-      audioDuration = preparedAssets.audioDuration;
-    } else {
-      DEBUG && console.log('Calculating audio duration...');
-      audioDuration = await getAudioDuration(audioFile);
-    }
-
-    // Create 1920x1080 video with image centered and 20px white space above/below
-    DEBUG && console.log('Executing FFmpeg command...');
-
-    // Build simplified FFmpeg command for better compatibility
-    let ffmpegArgs = [
-      '-loop', '1',
-      '-i', imageFileName,
-      '-i', audioFileName
-    ];
-
-
-
-
-
-    // Get background color from settings (default to black) and ensure FFmpeg compatibility
-    let backgroundColor = 'black';
-    let useCustomBackground = false;
-    let customBackgroundFile = null;
-
-    if (videoSettings && videoSettings.background) {
-      if (videoSettings.background === 'white') {
-        backgroundColor = 'white';
-      } else if (videoSettings.background === 'black') {
-        backgroundColor = 'black';
-      } else if (videoSettings.background === 'custom' && videoSettings.customBackground) {
-        useCustomBackground = true;
-        customBackgroundFile = videoSettings.customBackground;
-        backgroundColor = 'black'; // Fallback if custom fails
-      } else {
-        backgroundColor = 'black';
-      }
-    }
-
-    DEBUG && console.log('Background settings:', { 
-      backgroundColor, 
-      useCustomBackground, 
-      hasCustomFile: !!customBackgroundFile 
-    });
-
-    // Handle custom background implementation
-    let customBackgroundFileName = null;
-    if (useCustomBackground && customBackgroundFile) {
-      try {
-        DEBUG && console.log('Processing custom background...');
-        customBackgroundFileName = `bg_${pairId}_${timestamp}.jpg`;
-
-        let backgroundData;
-        if (typeof customBackgroundFile === 'string') {
-          // Base64 data - convert to binary
-          const base64Data = customBackgroundFile.replace(/^data:image\/[a-z]+;base64,/, '');
-          backgroundData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-        } else {
-          // File object
-          backgroundData = await getCachedFileData(customBackgroundFile, 'background');
-        }
-
-        if (backgroundData && backgroundData.length > 0) {
-          await ffmpeg.writeFile(customBackgroundFileName, backgroundData);
-          DEBUG && console.log('Custom background written successfully:', customBackgroundFileName);
-        } else {
-          console.warn('Custom background data is empty, using fallback');
-          useCustomBackground = false;
-          customBackgroundFileName = null;
-        }
-      } catch (error) {
-        console.error('Error processing custom background:', error);
-        console.warn('Using black background as fallback');
-        useCustomBackground = false;
-        customBackgroundFileName = null;
-      }
-    }
-
-    // Add custom background input if provided
-    if (customBackgroundFileName && useCustomBackground) {
-      ffmpegArgs.push('-i', customBackgroundFileName);
-    }
-
-    // Build video filter with proper input index handling
-    let videoFilter;
-    // Input indices: image=0, audio=1, background=2 (if exists)
-    let backgroundIndex = 2;
-
-    DEBUG && console.log('Video filter inputs:', {
-      hasCustomBackground: useCustomBackground && !!customBackgroundFileName,
-      backgroundIndex
-    });
-
-    // Determine output resolution from settings
-    const quality = videoSettings && videoSettings.quality;
-    const is4K = quality === '4k';
-    const isHD = quality === 'hd';
-    
-    // RW = Render Width, RH = Render Height
-    let RW = 1920, RH = 1080; // Default: Full HD
-    if (is4K) { RW = 3840; RH = 2160; }
-    else if (isHD) { RW = 1280; RH = 720; }
-
-    if (useCustomBackground && customBackgroundFileName) {
-      // Custom background video filter - overlay image on background
-      videoFilter = `[${backgroundIndex}:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`;
-    } else {
-      // Standard solid color background - center image on solid background
-      videoFilter = `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
-    }
-
-    // Ultra-optimized parameters for maximum speed
-    ffmpegArgs.push(
-      '-vf', videoFilter,
-      '-c:v', 'libx264',
-      '-preset', 'ultrafast',        // Fastest encoding preset
-      '-tune', 'zerolatency',        // Optimize for streaming/low latency processing
-      '-crf', '28',                  // Slightly better quality while still fast
-      '-pix_fmt', 'yuv420p',
-      '-r', '5',                     // Low frame rate for static content (5 fps - perfect for non-moving images with audio)
-      '-c:a', 'aac',
-      '-b:a', '320k',                // High quality audio bitrate (320k - no compression for best quality)
-      '-ar', '48000',                // High sample rate for professional quality (48 kHz)
-      '-ac', '2',                    // Stereo audio for full quality
-      '-threads', '4',               // Limit threads to prevent browser overload
-      '-shortest',
-      '-t', audioDuration.toString(),
-      '-y',                          // Overwrite output file
-      outputFileName
+    const ffmpegArgs = buildFastEncodeArgs(
+      imageFileName,
+      audioFileName,
+      outputFileName,
+      audioDuration
     );
 
     DEBUG && console.log('FFmpeg command args:', ffmpegArgs);
@@ -726,9 +484,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
     // Parallel cleanup — all deletes fire at once
     const cleanupFiles = [audioFileName, imageFileName, outputFileName];
-    if (customBackgroundFileName && useCustomBackground) {
-      cleanupFiles.push(customBackgroundFileName);
-    }
     await Promise.all(cleanupFiles.map(f => ffmpeg.deleteFile(f).catch(() => {})));
 
     // Call memory cleanup after successful video generation
@@ -776,10 +531,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
           ffmpeg.deleteFile(outputFileName).catch(() => {})
         ];
 
-        if (customBackgroundFileName && useCustomBackground) {
-          cleanupPromises.push(ffmpeg.deleteFile(customBackgroundFileName).catch(() => {}));
-        }
-
         await Promise.allSettled(cleanupPromises);
         
         // Call memory cleanup after error cleanup
@@ -793,13 +544,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     if (shouldCancel && shouldCancel()) {
       const cancellationError = new Error('Generation cancelled by user');
       cancellationError.isCancellation = true;
-      
-      // CRITICAL: Ensure cleanup promise is resolved on cancellation
-      if (cleanupCompletionResolver) {
-        DEBUG && console.log('Cancellation: Resolving cleanup promise to prevent deadlock');
-        cleanupCompletionResolver();
-        cleanupCompletionResolver = null;
-      }
       
       throw cancellationError;
     }
@@ -827,11 +571,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       DEBUG && console.log(`[Job Cleanup] Cleared current processing pair: ${pairId}`);
     }
     
-    // CRITICAL TOKEN CLEANUP: Invalidate progress token to block any lingering callbacks
-    // This ensures callbacks from this video can never fire during the next video
-    currentProgressToken = null;
-    DEBUG && console.log(`[Job Cleanup] 🔒 Invalidated progress token for ${pairId}`);
-
     // CRITICAL FIX: Ensure FFmpeg filesystem is ACTUALLY clean before signaling completion
     // This prevents video 2 from having to clean up video 1's leftover files
     if (ffmpeg && isLoaded) {
@@ -876,15 +615,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     }
 
     DEBUG && console.log(`[${pairId}] ✅ Cleanup complete, ready for next job`);
-
-    // CRITICAL FIX: Signal cleanup completion ONLY after filesystem is verified clean
-    // This ensures next video starts with a clean FFmpeg instance
-    if (cleanupCompletionResolver) {
-      DEBUG && console.log(`[${pairId}] 🚀 RESOLVING cleanup promise - next video can start`);
-      cleanupCompletionResolver();
-      cleanupCompletionResolver = null;
-      DEBUG && console.log(`[${pairId}] ========== VIDEO ${pairId} CLEANUP COMPLETE ==========\n`);
-    }
   }
 };
 
@@ -912,78 +642,33 @@ export const processVideoWithFFmpegInstance = async (
     };
     ffmpegInst.on('progress', progressHandler);
 
-    // Read files (use pre-cached assets when available)
-    let audioData, imageData;
-    if (preparedAssets?.audioBuffer && preparedAssets?.imageBuffer) {
-      audioData = preparedAssets.audioBuffer;
-      imageData = preparedAssets.imageBuffer;
-    } else {
-      const [aRaw, iRaw] = await Promise.all([
-        fetchFile(audioFile),
-        fetchFile(imageFile),
-      ]);
-      audioData = new Uint8Array(aRaw);
-      imageData = new Uint8Array(iRaw);
-    }
+    const quality = videoSettings?.quality;
+    const { width: RW, height: RH } = getVideoDimensions(quality);
+    const bg = videoSettings?.background ?? 'black';
+    const customBg =
+      bg === 'custom' && videoSettings?.customBackground
+        ? videoSettings.customBackground
+        : null;
+
+    const audioDuration =
+      preparedAssets?.audioDuration ?? (await getAudioDuration(audioFile));
+
+    const jpegFrame = await renderCoverArtJpeg(imageFile, RW, RH, bg, customBg);
+
+    const audioData = preparedAssets?.audioBuffer
+      ? preparedAssets.audioBuffer
+      : new Uint8Array(await fetchFile(audioFile));
 
     await Promise.all([
-      ffmpegInst.writeFile(imageFileName,  new Uint8Array(imageData)),
-      ffmpegInst.writeFile(audioFileName,  new Uint8Array(audioData)),
+      ffmpegInst.writeFile(imageFileName, jpegFrame),
+      ffmpegInst.writeFile(audioFileName, new Uint8Array(audioData)),
     ]);
 
-    const audioDuration = preparedAssets?.audioDuration ?? await getAudioDuration(audioFile);
-
-    // Build args
-    const ffmpegArgs = ['-loop', '1', '-i', imageFileName, '-i', audioFileName];
-
-    // Background
-    let backgroundColor = 'black';
-    let useCustomBackground = false;
-    let customBackgroundFileName = null;
-
-    if (videoSettings?.background === 'white') {
-      backgroundColor = 'white';
-    } else if (videoSettings?.background === 'custom' && videoSettings.customBackground) {
-      useCustomBackground = true;
-      customBackgroundFileName = `bg_${pairId}_${timestamp}.jpg`;
-      try {
-        let bgData;
-        const cbf = videoSettings.customBackground;
-        if (typeof cbf === 'string') {
-          const b64 = cbf.replace(/^data:image\/[a-z]+;base64,/, '');
-          bgData = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-        } else {
-          bgData = new Uint8Array(await fetchFile(cbf));
-        }
-        if (bgData.length > 0) {
-          await ffmpegInst.writeFile(customBackgroundFileName, bgData);
-        } else {
-          useCustomBackground = false; customBackgroundFileName = null;
-        }
-      } catch {
-        useCustomBackground = false; customBackgroundFileName = null;
-      }
-    }
-
-    if (customBackgroundFileName && useCustomBackground) {
-      ffmpegArgs.push('-i', customBackgroundFileName);
-    }
-
-    const quality = videoSettings?.quality;
-    let RW = 1920, RH = 1080;
-    if (quality === '4k')  { RW = 3840; RH = 2160; }
-    else if (quality === 'hd') { RW = 1280; RH = 720; }
-
-    const videoFilter = (useCustomBackground && customBackgroundFileName)
-      ? `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];[bg][img]overlay=(W-w)/2:(H-h)/2`
-      : `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
-
-    ffmpegArgs.push(
-      '-vf', videoFilter,
-      '-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'zerolatency',
-      '-crf', '28', '-pix_fmt', 'yuv420p', '-r', '5',
-      '-c:a', 'aac', '-b:a', '320k', '-ar', '48000', '-ac', '2',
-      '-threads', '4', '-shortest', '-t', audioDuration.toString(), '-y', outputFileName
+    const ffmpegArgs = buildFastEncodeArgs(
+      imageFileName,
+      audioFileName,
+      outputFileName,
+      audioDuration
     );
 
     // Execute
@@ -1016,7 +701,6 @@ export const processVideoWithFFmpegInstance = async (
 
     // FS cleanup
     const toClean = [audioFileName, imageFileName, outputFileName];
-    if (customBackgroundFileName && useCustomBackground) toClean.push(customBackgroundFileName);
     await Promise.allSettled(toClean.map(f => ffmpegInst.deleteFile(f).catch(() => {})));
 
     return new Uint8Array(data);

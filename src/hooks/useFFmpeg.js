@@ -23,8 +23,12 @@ export const useFFmpeg = () => {
     clearPreparedAssets 
   } = useAppStore();
 
-  // Always process one video at a time for maximum stability and quality
-  const maxConcurrent = 1;
+  const maxConcurrent = (() => {
+    const role = user?.role;
+    if (role === 'unlimited' || role === 'admin') return 3;
+    if (role === 'pro') return 2;
+    return 1;
+  })();
 
   const generateVideos = useCallback(async (pairs) => {
     DEBUG && console.log('generateVideos called with pairs:', pairs);
@@ -344,7 +348,6 @@ export const useFFmpeg = () => {
         return existingVideo;
       }
 
-      // Initialize generation state
       DEBUG && console.log(`Starting video generation for pair ${pair.id}`);
       setVideoGenerationState(pair.id, {
         isGenerating: true,
@@ -353,14 +356,16 @@ export const useFFmpeg = () => {
         video: null,
         error: null,
         startTime: Date.now(),
-        lastUpdate: Date.now()
+        lastUpdate: Date.now(),
       });
 
       DEBUG && console.log(`Processing video for pair ${pair.id}:`, pair);
 
       // Get video settings from app store including logo settings
       const videoSettings = {
-        background: (store.videoSettings && store.videoSettings.background) ? store.videoSettings.background : 'black',
+        background: store.videoSettings?.background ?? 'black',
+        customBackground: store.videoSettings?.customBackground ?? null,
+        quality: store.videoSettings?.quality ?? 'fullhd',
         logoFile: store.logoSettings?.logoFile,
         useLogo: store.logoSettings?.useLogoInVideos
       };
@@ -381,21 +386,9 @@ export const useFFmpeg = () => {
           pair.audio, 
           pair.image, 
           (progress) => {
-            // Strengthened validation: ensure this update belongs to the currently generating pair
             const currentState = useAppStore.getState().videoGenerationStates[pair.id];
-            if (!currentState || !currentState.isGenerating) {
-              console.warn(`Stale progress update for pair ${pair.id} - state not generating, ignoring`);
-              return;
-            }
-            
-            // Additional timing-based stale update detection
-            // If progress > 95% but pair hasn't been processing for at least 1 second, reject as stale
-            const processingDuration = Date.now() - (currentState.startTime || Date.now());
-            if (progress > 95 && processingDuration < 1000) {
-              console.warn(`Rejecting suspicious high progress (${progress}%) for pair ${pair.id} - only processing for ${processingDuration}ms, likely stale from previous video`);
-              return;
-            }
-            
+            if (!currentState || !currentState.isGenerating) return;
+
             const clampedProgress = Math.min(Math.max(Math.floor(progress), 0), 100);
             DEBUG && console.log(`Setting video generation state for pair ${pair.id}:`, {
               isGenerating: true,
