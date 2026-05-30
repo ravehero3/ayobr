@@ -4,3 +4,4 @@
 - [FFmpeg isCancelling stale closure](ffmpeg-cancelling-stale.md) — useFFmpeg.js must use useAppStore.getState().isCancelling inside async generateVideos callbacks, not the destructured isCancelling from hook scope.
 - [FFmpeg webpack hang fix](ffmpeg-webpack-hang.md) — @ffmpeg/ffmpeg ESM + webpack breaks worker URL; alias to UMD + add load() timeouts to fix infinite LOADING state.
 - [Generation state stale-progress bug](generation-state-stale.md) — Cancel via back-arrow never set isCancelling:true, leaving generateVideos running in background and corrupting state. Fix: call cancelGeneration() before forceStopAllProcesses(), and call clearAllVideoGenerationStates() at top of generateVideos.
+- [Custom background FFmpeg crash](custom-bg-ffmpeg.md) — buildArgsWithCustomBg used -vf for a multi-input filter graph and didn't loop the bg image; fix is -filter_complex + -loop 1 on bg input + explicit -map.

@@ -293,28 +293,41 @@ function buildArgsWithCustomBg(imageFileName, audioFileName, bgFileName, outputF
   if (quality === '4k') { RW = 3840; RH = 2160; }
   else if (quality === 'hd') { RW = 1280; RH = 720; }
 
-  const videoFilter =
+  // Multi-input graphs MUST use -filter_complex, not -vf.
+  // -vf only accepts a single input stream; referencing [2:v] inside -vf makes
+  // FFmpeg throw "Filtergraph has a complex filter" and the whole exec fails.
+  // We also label the final pad [out] so we can map it explicitly.
+  const filterComplex =
     `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];` +
     `[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];` +
-    `[bg][img]overlay=(W-w)/2:(H-h)/2`;
+    `[bg][img]overlay=(W-w)/2:(H-h)/2[out]`;
 
+  // Match quality-aware settings used in buildArgs so custom-bg output is consistent.
+  const crf         = quality === '4k' ? '20' : quality === 'hd' ? '26' : '23';
+  const audioBitrate = quality === '4k' ? '320k' : quality === 'hd' ? '128k' : '192k';
   const threadCount = quality === '4k' ? '1' : '4';
 
   return [
-    '-loop', '1',
-    '-i', imageFileName,
+    // cover image — loop so it has infinite duration
+    '-loop', '1', '-i', imageFileName,
+    // audio — provides the real duration via -shortest / -t
     '-i', audioFileName,
-    '-i', bgFileName,
-    '-vf', videoFilter,
+    // background image — MUST also be looped; without -loop 1 it is a single
+    // frame (~0 s), and -shortest would produce an essentially empty video file.
+    '-loop', '1', '-i', bgFileName,
+    '-filter_complex', filterComplex,
+    // Explicit stream mapping is required when -filter_complex is used.
+    '-map', '[out]',
+    '-map', '1:a',
     '-c:v', 'libx264',
     '-preset', 'ultrafast',
     '-tune', 'zerolatency',
-    '-crf', '28',
+    '-crf', crf,
     '-pix_fmt', 'yuv420p',
     '-r', '5',
     '-g', '60', '-keyint_min', '60',
     '-c:a', 'aac',
-    '-b:a', '320k',
+    '-b:a', audioBitrate,
     '-ar', '48000',
     '-ac', '2',
     '-threads', threadCount,
