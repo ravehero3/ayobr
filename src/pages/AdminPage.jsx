@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import FFmpegAdminPanel from '../components/admin/FFmpegAdminPanel';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -536,6 +537,7 @@ export default function AdminPage() {
     {id:'autoEmails',  label:'AUTOMATICKÉ EMAILY'},
     {id:'newsletter',  label:'NEWSLETTER'},
     {id:'howItWorks',  label:'LANDING PAGE'},
+    {id:'ffmpeg',      label:'FFMPEG'},
     {id:'settings',    label:'NASTAVENÍ'},
   ];
 
@@ -661,7 +663,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {busy ? (
+        {busy && tab !== 'ffmpeg' ? (
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'120px 0'}}>
             <div style={{width:28,height:28,borderRadius:'50%',border:'2px solid rgba(255,255,255,0.08)',
               borderTopColor:BLUE,animation:'spin 0.8s linear infinite'}}/>
@@ -1117,6 +1119,13 @@ export default function AdminPage() {
                   setLandingContent={setLandingContent}
                   flash={flash}
                 />
+              </motion.div>
+            )}
+
+            {/* ══════════ FFMPEG ══════════ */}
+            {tab==='ffmpeg' && (
+              <motion.div key="ffmpeg" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
+                <FFmpegAdminPanel flash={flash} />
               </motion.div>
             )}
 

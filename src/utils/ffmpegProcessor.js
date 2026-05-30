@@ -3,6 +3,13 @@ import { fetchFile } from '@ffmpeg/util';
 import { getFFmpegCoreUrls, preloadFFmpegCore, resetFFmpegCoreCache } from './ffmpegCoreUrls';
 import { renderCoverArtJpeg } from './imagePrep';
 import { getVideoDimensions, buildFastEncodeArgs } from './videoEncode';
+import {
+  attachFFmpegInstanceLogs,
+  ffmpegLog,
+  getFFmpegRuntimeState,
+  patchFFmpegRuntimeState,
+  recordJobEvent,
+} from './ffmpegDiagnostics';
 
 const DEBUG = false;
 let ffmpeg = null;
@@ -114,6 +121,7 @@ export const forceStopAllProcesses = async () => {
 
   // Reset force stopped flag immediately for fresh start
   isForceStopped = false;
+  patchFFmpegRuntimeState({ loaded: false, activePairId: null, initializing: false });
 };
 
 // Restart FFmpeg completely - useful for debugging
@@ -221,16 +229,36 @@ export const initializeFFmpeg = async () => {
       }
 
       if (!isLoaded) {
+        patchFFmpegRuntimeState({ initializing: true, lastInitError: null });
+        ffmpegLog('info', 'init', 'Loading FFmpeg WASM core…');
         const { coreURL, wasmURL } = await getFFmpegCoreUrls();
+        patchFFmpegRuntimeState({
+          coreSource: coreURL?.startsWith('blob:') ? 'blob (cached)' : coreURL,
+        });
         await ffmpeg.load({ coreURL, wasmURL });
+        attachFFmpegInstanceLogs(ffmpeg, 'singleton');
         await ffmpeg.listDir('/');
         isLoaded = true;
         isForceStopped = false;
+        patchFFmpegRuntimeState({
+          loaded: true,
+          initializing: false,
+          lastInitAt: new Date().toISOString(),
+        });
+        ffmpegLog('info', 'init', 'FFmpeg loaded successfully', {
+          sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
+        });
       }
 
       return ffmpeg;
     } catch (error) {
       console.error('FFmpeg initialization error:', error);
+      ffmpegLog('error', 'init', error?.message || 'FFmpeg init failed', { stack: error?.stack });
+      patchFFmpegRuntimeState({
+        loaded: false,
+        initializing: false,
+        lastInitError: error?.message || String(error),
+      });
       isLoaded = false;
       isForceStopped = false;
       ffmpeg = null;
@@ -275,6 +303,7 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
   let logoFileName = null; // Declare logoFileName here
   const timestamp = Date.now(); // Generate a timestamp for temporary files
   let progressHandler = null; // Declare handler outside try block for finally cleanup
+  const quality = videoSettings?.quality ?? 'fullhd';
 
   try {
     if (onProgress) onProgress(8);
@@ -289,6 +318,13 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     const currentSessionId = processingSessionCounter;
     currentProcessingPairId = pairId;
     const capturedPairId = pairId;
+    patchFFmpegRuntimeState({ activePairId: pairId });
+    recordJobEvent('job-start', { pairId, quality: videoSettings?.quality });
+    ffmpegLog('info', 'job', `Starting encode for pair ${pairId}`, {
+      quality: videoSettings?.quality,
+      audio: audioFile?.name,
+      image: imageFile?.name,
+    });
     DEBUG && console.log(`[${pairId}] Starting FFmpeg, session: ${currentSessionId}`);
 
 
@@ -370,7 +406,6 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       return new Uint8Array(data); // Return a copy
     };
 
-    const quality = videoSettings?.quality;
     const { width: RW, height: RH } = getVideoDimensions(quality);
     const bg = videoSettings?.background ?? 'black';
     const customBg =
@@ -413,9 +448,16 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       imageFileName,
       audioFileName,
       outputFileName,
-      audioDuration
+      audioDuration,
+      quality
     );
 
+    patchFFmpegRuntimeState({
+      lastExecArgs: ffmpegArgs,
+      lastExecAt: new Date().toISOString(),
+      lastExecError: null,
+    });
+    ffmpegLog('info', 'exec', `FFmpeg exec (${quality})`, { args: ffmpegArgs });
     DEBUG && console.log('FFmpeg command args:', ffmpegArgs);
 
     // Execute FFmpeg command with enhanced timeout protection
@@ -444,8 +486,17 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
 
       if (isWarningError) {
         DEBUG && console.log('FFmpeg warning detected, continuing with output check...');
+        ffmpegLog('warn', 'exec', errorMsg, { pairId });
       } else {
-        // Re-throw for actual errors
+        ffmpegLog('error', 'exec', errorMsg, { pairId, quality });
+        patchFFmpegRuntimeState({ lastExecError: errorMsg });
+        if (quality === '4k') {
+          ffmpegLog('warn', 'init', '[4K] Exec failed — resetting FFmpeg instance for next job');
+          isLoaded = false;
+          ffmpeg = null;
+          initPromise = null;
+          patchFFmpegRuntimeState({ loaded: false });
+        }
         throw execError;
       }
     }
@@ -486,14 +537,35 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
     const cleanupFiles = [audioFileName, imageFileName, outputFileName];
     await Promise.all(cleanupFiles.map(f => ffmpeg.deleteFile(f).catch(() => {})));
 
-    // Call memory cleanup after successful video generation
     cleanupMemory();
+    patchFFmpegRuntimeState({
+      processedCount: getFFmpegRuntimeState().processedCount + 1,
+      lastSuccessAt: new Date().toISOString(),
+    });
+    recordJobEvent('job-complete', {
+      pairId,
+      quality,
+      bytes: data?.length ?? 0,
+    });
+    ffmpegLog('info', 'job', `Encode complete for ${pairId}`, { bytes: data?.length });
 
-    // Return a new Uint8Array to ensure data integrity
     return new Uint8Array(data);
 
   } catch (error) {
     console.error('FFmpeg processing error:', error);
+    ffmpegLog('error', 'job', error?.message || 'Processing failed', {
+      pairId,
+      quality: videoSettings?.quality,
+    });
+    patchFFmpegRuntimeState({
+      failedCount: getFFmpegRuntimeState().failedCount + 1,
+      lastExecError: error?.message || String(error),
+    });
+    recordJobEvent('job-failed', {
+      pairId,
+      quality: videoSettings?.quality,
+      error: error?.message || String(error),
+    });
 
     // Check if this is an empty error object (which often indicates success)
     const isEmptyError = error && typeof error === 'object' && 
@@ -614,6 +686,9 @@ export const processVideoWithFFmpeg = async (pairId, audioFile, imageFile, onPro
       try { window.gc(); } catch(e) { /* ignore */ }
     }
 
+    if (currentProcessingPairId === pairId) {
+      patchFFmpegRuntimeState({ activePairId: null });
+    }
     DEBUG && console.log(`[${pairId}] ✅ Cleanup complete, ready for next job`);
   }
 };
@@ -668,10 +743,13 @@ export const processVideoWithFFmpegInstance = async (
       imageFileName,
       audioFileName,
       outputFileName,
-      audioDuration
+      audioDuration,
+      quality
     );
 
-    // Execute
+    attachFFmpegInstanceLogs(ffmpegInst, `pool-${pairId}`);
+    patchFFmpegRuntimeState({ lastExecArgs: ffmpegArgs, lastExecAt: new Date().toISOString() });
+
     try {
       await Promise.race([
         ffmpegInst.exec(ffmpegArgs),
@@ -680,7 +758,14 @@ export const processVideoWithFFmpegInstance = async (
     } catch (execError) {
       const msg = execError?.message ?? String(execError);
       const isWarning = /non monotonically|deprecated|warning|Past duration|monotonic dts/i.test(msg);
-      if (!isWarning) throw execError;
+      if (!isWarning) {
+        ffmpegLog('error', 'exec-pool', msg, { pairId, quality });
+        if (quality === '4k') {
+          ffmpegLog('warn', 'init', '[4K pool] Exec failed — terminate pool slot on next release');
+        }
+        throw execError;
+      }
+      ffmpegLog('warn', 'exec-pool', msg, { pairId });
     }
 
     // Read output

@@ -1,5 +1,7 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { fetchFile } from '@ffmpeg/util';
+import { getFFmpegCoreUrls } from '../utils/ffmpegCoreUrls';
+import { buildFastEncodeArgs } from '../utils/videoEncode';
 import { v4 as uuidv4 } from 'uuid';
 
 const CONFIG = {
@@ -31,11 +33,7 @@ class JobManager {
     if (this.ffmpegBaseURLs) return this.ffmpegBaseURLs;
 
     try {
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
-      this.ffmpegBaseURLs = {
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      };
+      this.ffmpegBaseURLs = await getFFmpegCoreUrls();
       return this.ffmpegBaseURLs;
     } catch (error) {
       console.error('Failed to initialize FFmpeg base URLs:', error);

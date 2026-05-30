@@ -61,7 +61,12 @@ export const useFFmpeg = () => {
       
       // Don't clear existing videos - let users accumulate multiple generations
 
-      DEBUG && console.log(`Processing ${pairs.length} videos with concurrency limit of ${maxConcurrent}`);
+      const quality = useAppStore.getState().videoSettings?.quality ?? 'fullhd';
+      // 4K exhausts WASM memory — always one encode at a time (matches working 30.5 build)
+      const effectiveMaxConcurrent = quality === '4k' ? 1 : maxConcurrent;
+      DEBUG && console.log(
+        `Processing ${pairs.length} videos (quality=${quality}, concurrency=${effectiveMaxConcurrent})`
+      );
       let completedCount = 0;
 
       // Clear any existing generation states and set up generation
@@ -98,7 +103,7 @@ export const useFFmpeg = () => {
         }
       };
 
-      if (maxConcurrent === 1) {
+      if (effectiveMaxConcurrent === 1) {
         // ── SEQUENTIAL PATH (Free users) ───────────────────────────────────────
         // Safe singleton FFmpeg — one video at a time with prefetch pipeline.
         const batches = [];
@@ -151,7 +156,7 @@ export const useFFmpeg = () => {
         // ── CONCURRENT POOL PATH (Pro = 2, Unlimited = 3) ─────────────────────
         // Each video gets its own isolated FFmpeg instance from the pool.
         // The pool semaphore limits how many run simultaneously.
-        const pool = getPool(maxConcurrent);
+        const pool = getPool(effectiveMaxConcurrent);
 
         // Helper to build video settings (same as processPairAsync)
         const buildVideoSettings = () => {

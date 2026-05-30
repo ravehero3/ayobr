@@ -1,6 +1,7 @@
 import { toBlobURL } from '@ffmpeg/util';
 
-const CDN = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+/** Must match package.json @ffmpeg/core version */
+const CDN = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
 
 let cachedUrls = null;
 let loadPromise = null;
