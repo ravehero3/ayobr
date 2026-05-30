@@ -382,6 +382,12 @@ export const processVideoWithFFmpeg = async (
     currentProgressToken = token;
     currentProcessingPairId = pairId;
 
+    // Audio duration — must be hoisted above the progress handler so the closure
+    // has a valid value when FFmpeg first fires progress events.
+    // Use preparedAssets if available (synchronous); otherwise default to 180 and
+    // refine it after reading the file below.
+    let audioDuration = preparedAssets?.audioDuration || 180;
+
     // Progress handler
     let lastPT = 0;
     let isNearComplete = false;
@@ -389,7 +395,7 @@ export const processVideoWithFFmpeg = async (
       if (token !== currentProgressToken) return;
       if (pairId !== currentProcessingPairId || sessionId !== processingSessionCounter) return;
       const now = Date.now();
-      if (!onProgress || !hasCompleted === false || now - lastPT < 100) return;
+      if (!onProgress || hasCompleted || now - lastPT < 100) return;
       let pct = progress;
       if ((!pct || isNaN(pct)) && time !== undefined) {
         pct = (time / 1000000) / (audioDuration || 180);
@@ -416,11 +422,15 @@ export const processVideoWithFFmpeg = async (
     }
     if (onProgress) onProgress(25);
 
-    // Audio duration
-    var audioDuration = preparedAssets?.audioDuration ?? await getAudioDuration(audioFile);
-    if (!audioDuration || isNaN(audioDuration) || !isFinite(audioDuration) || audioDuration <= 0) {
-      console.warn('Invalid audio duration, defaulting to 180s');
-      audioDuration = 180;
+    // Refine audio duration now that we have the file (if not already from preparedAssets)
+    if (!preparedAssets?.audioDuration) {
+      const resolved = await getAudioDuration(audioFile);
+      if (resolved && !isNaN(resolved) && isFinite(resolved) && resolved > 0) {
+        audioDuration = resolved;
+      } else {
+        console.warn('Invalid audio duration, defaulting to 180s');
+        audioDuration = 180;
+      }
     }
     if (onProgress) onProgress(30);
 

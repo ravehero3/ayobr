@@ -1,12 +1,13 @@
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useAppStore } from '../store/appStore';
 
 export const usePairingLogic = () => {
   const { pairs, setPairs, setCurrentPage, setIsFilesBeingDropped, assignDisplayIndex, reassignDisplayIndices } = useAppStore();
 
-  // Cache to track processed files and prevent immediate re-processing
-  const processedFilesCache = new Set();
+  // useRef so the Set persists across re-renders (plain `new Set()` would reset every render)
+  const processedFilesCacheRef = useRef(new Set());
+  const processedFilesCache = processedFilesCacheRef.current;
 
   // Helper function to resize large images
   const resizeImageIfNeeded = async (imageFile) => {
