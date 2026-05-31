@@ -202,7 +202,7 @@ export const translations = {
     "landing.pricing.unlimited.price.annual": "$14",
     "landing.pricing.unlimited.price.monthly": "$19",
 
-    "landing.hero.badge": "The fastest way to fill your YouTube channel.",
+    "landing.hero.badge": "Every beat deserves a YouTube video",
     "landing.hero.goUnlimited": "Go unlimited",
     "landing.hero.statsBar": "Free — 5 videos/month · PRO — 31 videos/month · Unlimited — Always Unlimited",
 
@@ -509,7 +509,7 @@ export const translations = {
     "landing.pricing.unlimited.price.annual": "299 Kč",
     "landing.pricing.unlimited.price.monthly": "399 Kč",
 
-    "landing.hero.badge": "Nejrychlejší způsob, jak naplnit váš YouTube kanál.",
+    "landing.hero.badge": "Každý beat si zaslouží YouTube video",
     "landing.hero.goUnlimited": "Odemknout vše",
     "landing.hero.statsBar": "Zdarma — 5 videí/měsíc · PRO — 31 videí/měsíc · Neomezený — vždy neomezeno",
 

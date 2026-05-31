@@ -673,7 +673,6 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
             const Content = STEP_CONTENTS[i];
             return (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'relative' }}>
-                <MobileStepNumber num={parseInt(step.num, 10)} />
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 20, position: 'relative', zIndex: 1 }}>
                   <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 8 }}>{step.title}</h3>
                   <p style={{ fontFamily: NM, fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: 1.6 }}>{step.desc}</p>
@@ -843,7 +842,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
   return (
     <>
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
-        style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
+        style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
         <span>🎬</span>
         <span>{t('landing.hero.badge')}</span>
       </div>
@@ -870,15 +869,16 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         fontWeight: 500,
         fontSize: isMobile ? '48px' : '110px',
         lineHeight: isMobile ? '52px' : '93.5px',
-        letterSpacing: isMobile ? '-1px' : '-2px',
+        letterSpacing: isMobile ? '-1px' : '-5.5px',
         fontStyle: 'normal',
         textTransform: 'none',
         marginBottom: '2rem',
         color: '#ffffff',
       }}>
-        {t('landing.hero.title').split('\n').map((line, i, arr) => (
-          <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
-        ))}
+        {t('landing.hero.title').split('\n').map((line, i, arr) => {
+          const text = (producerName && i === 0) ? line.charAt(0).toLowerCase() + line.slice(1) : line;
+          return <React.Fragment key={i}>{text}{i < arr.length - 1 && <br />}</React.Fragment>;
+        })}
       </h1>
 
       <p style={isMobile ? {
@@ -936,9 +936,6 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         </a>
       </div>
 
-      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.55)', marginTop: '1.5rem', textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 12px rgba(0,0,0,0.9)' }}>
-        {t('landing.hero.statsBar')}
-      </div>
     </>
   );
 }
