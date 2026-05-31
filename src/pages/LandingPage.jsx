@@ -839,7 +839,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
             zIndex: 10,
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
-              <h2 style={{ fontFamily: GT_W, fontWeight: 300, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
+              <h2 style={{ fontFamily: '"GT Walsheim Medium", "GT Walsheim Medium Placeholder", sans-serif', fontWeight: 500, fontSize: 62, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1em', color: '#fff', margin: 0, fontFeatureSettings: '"ss02" on' }}>
                 {t('landing.how.title').split('\n').map((line, i, arr) => (
                   <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
                 ))}
