@@ -195,8 +195,10 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
           </div>
         ) : (
           <button onClick={() => navigate('/login')}
-            className="px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:opacity-80"
-            style={{ background: '#fff', color: '#000', fontFamily: NM }}>
+            className="px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+            style={{ background: '#fff', color: '#000', fontFamily: NM }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.5)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.boxShadow = 'none'; }}>
             {t('nav.signIn')}
           </button>
         )}

@@ -6,6 +6,7 @@ import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import alienLogo from '../assets/alien_logo_1780252226447.png';
+import alienZzz from '../assets/alien_zzz_1780258131893.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import screenshotUpload from '../assets/screenshot_upload_new.jpg';
 import screenshotReview from '../assets/screenshot_review_new.jpg';
@@ -23,52 +24,18 @@ const LH_BODY  = 1.6;
 const LH_LABEL = 'normal';
 const LH_HEAD  = 1.05;
 
-const PARTICLE_CSS = `
-@keyframes particleFloat {
-  0%   { opacity: 0; transform: translate(0, 0) scale(0); }
-  15%  { opacity: 1; transform: translate(var(--dx), -6px) scale(1); }
-  100% { opacity: 0; transform: translate(var(--dx), -32px) scale(0.4); }
-}
-`;
-
-function ParticleButton({ onClick, children, style, className }) {
-  const [particles, setParticles] = useState([]);
+function DarkerButton({ onClick, children, style, className }) {
   const [hovered, setHovered] = useState(false);
-  const idRef = useRef(0);
-  const intervalRef = useRef(null);
-
-  const spawn = () => {
-    const id = idRef.current++;
-    const dur = 700 + Math.random() * 700;
-    const dx = (Math.random() - 0.5) * 50;
-    setParticles(p => [...p, { id, left: 5 + Math.random() * 90, top: 5 + Math.random() * 90, size: 1.5 + Math.random() * 2.5, dur, dx }]);
-    setTimeout(() => setParticles(p => p.filter(x => x.id !== id)), dur);
-  };
-
-  useEffect(() => {
-    if (hovered) { spawn(); intervalRef.current = setInterval(spawn, 130); }
-    else clearInterval(intervalRef.current);
-    return () => clearInterval(intervalRef.current);
-  }, [hovered]);
-
   return (
-    <>
-      <style>{PARTICLE_CSS}</style>
-      <button onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-        className={className} style={{ ...style, position: 'relative', overflow: 'visible' }}>
-        {particles.map(p => (
-          <span key={p.id} style={{
-            position: 'absolute', left: `${p.left}%`, top: `${p.top}%`,
-            width: p.size, height: p.size, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.95)', pointerEvents: 'none',
-            boxShadow: '0 0 5px rgba(255,255,255,0.7)',
-            animation: `particleFloat ${p.dur}ms ease-out forwards`,
-            '--dx': `${p.dx}px`, zIndex: 20,
-          }} />
-        ))}
-        <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
-      </button>
-    </>
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={className}
+      style={{ ...style, filter: hovered ? 'brightness(0.85)' : 'brightness(1)', transition: 'filter 0.2s ease' }}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -274,7 +241,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
             }}>
               {t('landing.pricing.title')}
             </h2>
-            <p style={{ fontFamily: IV, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
+            <p style={{ fontFamily: '"Inter Variable", "Inter Variable Placeholder", sans-serif', fontSize: '1.25rem', fontWeight: 400, lineHeight: '1.75rem', color: '#9d9d9d', maxWidth: 460, margin: '0 auto', textAlign: 'center' }}>
               {t('landing.pricing.subtitle').split('\n').map((line, i, arr) => <span key={i}>{line}{i < arr.length - 1 && <br />}</span>)}
             </p>
           </motion.div>
@@ -474,9 +441,9 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
 
               {/* CTA */}
               {plan.ctaStyle === 'solid' ? (
-                <ParticleButton
+                <DarkerButton
                   onClick={plan.onCta}
-                  className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
+                  className="flex items-center justify-center"
                   style={{
                     fontFamily: IV, fontWeight: 600, fontSize: '0.85rem',
                     lineHeight: LH_LABEL, padding: '0 16px', height: 34, width: '100%',
@@ -485,7 +452,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                   }}
                 >
                   {plan.cta}
-                </ParticleButton>
+                </DarkerButton>
               ) : (
                 <button
                   onClick={plan.onCta}
@@ -626,25 +593,46 @@ function ShareModal({ onClose }) {
       rg.addColorStop(0, 'rgba(0,0,0,0)'); rg.addColorStop(1, 'rgba(0,0,0,0.75)');
       ctx.fillStyle = rg; ctx.fillRect(760, 0, 320, 1920);
 
-      // Logo — alien app icon
+      // Logo — alien zzz icon
       const logoImg = new Image();
       logoImg.crossOrigin = 'anonymous';
-      await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; logoImg.src = alienLogo; });
+      await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; logoImg.src = alienZzz; });
 
       const logoSize = 320;
       const logoX = (1080 - logoSize) / 2;
       const logoY = (1920 - logoSize) / 2 + 20;
 
-      // "I ❤" text — same width as logo, above it
-      ctx.textAlign = 'center';
+      // "I ♥" — draw "I" text + I Love NY style canvas heart
+      const fontSize = 160;
+      ctx.font = `bold ${fontSize}px 'Arial Black', 'Helvetica Neue', sans-serif`;
+      const iWidth = ctx.measureText('I').width;
+      const heartW = fontSize * 1.05;
+      const gap = fontSize * 0.18;
+      const totalW = iWidth + gap + heartW;
+      const startX = 540 - totalW / 2;
+      const textY = logoY - 56;
+
+      // Draw "I"
+      ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
       ctx.fillStyle = '#ffffff';
-      // Scale font so text spans logoSize width
-      ctx.font = `bold 140px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
-      const measured = ctx.measureText('I \u2764');
-      const targetFontSize = Math.floor(140 * (logoSize / measured.width));
-      ctx.font = `bold ${Math.min(targetFontSize, 160)}px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
-      ctx.fillText('I \u2764', 540, logoY - 36);
+      ctx.fillText('I', startX, textY);
+
+      // Draw I Love NY style heart
+      const hcx = startX + iWidth + gap + heartW / 2;
+      const hcy = textY - fontSize * 0.45;
+      const r = heartW / 2;
+      ctx.save();
+      ctx.translate(hcx, hcy);
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.42);
+      ctx.bezierCurveTo(-r * 0.08, r * 0.18, -r, r * 0.06, -r, -r * 0.22);
+      ctx.bezierCurveTo(-r, -r * 0.72, 0, -r * 0.82, 0, -r * 0.32);
+      ctx.bezierCurveTo(0, -r * 0.82, r, -r * 0.72, r, -r * 0.22);
+      ctx.bezierCurveTo(r, r * 0.06, r * 0.08, r * 0.18, 0, r * 0.42);
+      ctx.fillStyle = '#CC2233';
+      ctx.fill();
+      ctx.restore();
 
       ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
 
@@ -835,10 +823,12 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
           <div style={{
             flexShrink: 0,
             width: CHAPTER_NAV_W,
+            position: 'sticky',
+            top: 92,
             alignSelf: 'flex-start',
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
-              <h2 style={{ fontFamily: '"GT Walsheim Medium", "GT Walsheim Medium Placeholder", sans-serif', fontWeight: 500, fontSize: 62, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1em', color: '#fff', margin: 0, fontFeatureSettings: '"ss02" on' }}>
+              <h2 style={{ fontFamily: IV, fontWeight: 700, fontSize: 62, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1em', color: '#fff', margin: 0 }}>
                 {t('landing.how.title').split('\n').map((line, i, arr) => (
                   <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
                 ))}
@@ -855,16 +845,16 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                 }}>
                   <span style={{
                     fontFamily: '"Inter Variable", "Inter Variable Placeholder", sans-serif',
-                    fontWeight: 400, fontSize: 20,
-                    letterSpacing: '-0.01px', textTransform: 'uppercase',
-                    color: active ? 'rgb(255,255,255)' : 'rgba(255,255,255,0.25)',
-                    lineHeight: '28px', transition: 'color 0.3s ease',
+                    fontWeight: 400, fontSize: 24,
+                    letterSpacing: '-0.01px', textTransform: 'none',
+                    color: active ? 'rgb(255,255,255)' : '#9d9d9d',
+                    lineHeight: '28.8px', transition: 'color 0.3s ease',
                   }}>
                     {step.title}
                   </span>
                   <span style={{
                     fontFamily: IV, fontSize: 14, lineHeight: 1.65,
-                    color: 'rgba(255,255,255,0.6)',
+                    color: '#9d9d9d',
                     maxHeight: active ? '160px' : '0px',
                     opacity: active ? 1 : 0, overflow: 'hidden',
                     transition: 'max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s ease',
@@ -900,7 +890,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                       <Content />
                     </div>
                   </div>
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(to bottom, transparent, #000)', pointerEvents: 'none', zIndex: 1 }} />
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '400px', background: 'linear-gradient(to bottom, transparent, #000)', pointerEvents: 'none', zIndex: 1 }} />
                 </div>
               );
             })}
@@ -959,21 +949,28 @@ function useStarsScrollReveal(starsRef) {
 /* ── Sub-components that use useLanguage (must be inside the tree) ── */
 function LandingNavButtons({ user, navigate, login }) {
   const { t } = useLanguage();
+  const [signinHovered, setSigninHovered] = useState(false);
+  const [ctaHovered, setCtaHovered] = useState(false);
   return (
     <>
       <button onClick={() => navigate('/login')}
-        style={{ fontFamily: IV, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-        className="hover:text-white transition-colors">
+        onMouseEnter={() => setSigninHovered(true)}
+        onMouseLeave={() => setSigninHovered(false)}
+        style={{ fontFamily: IV, fontSize: '0.875rem', lineHeight: LH_LABEL, color: signinHovered ? '#fff' : 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}>
         {t('login')}
       </button>
       {user ? (
         <button onClick={() => navigate('/app')}
-          style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+          onMouseEnter={() => setCtaHovered(true)}
+          onMouseLeave={() => setCtaHovered(false)}
+          style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer', filter: ctaHovered ? 'brightness(0.85)' : 'brightness(1)', transition: 'filter 0.2s ease' }}>
           Open App
         </button>
       ) : (
         <button onClick={login}
-          style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+          onMouseEnter={() => setCtaHovered(true)}
+          onMouseLeave={() => setCtaHovered(false)}
+          style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer', filter: ctaHovered ? 'brightness(0.85)' : 'brightness(1)', transition: 'filter 0.2s ease' }}>
           {t('landing.hero.cta')}
         </button>
       )}
@@ -1023,8 +1020,8 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
-          fontWeight: 500,
+          fontFamily: IV,
+          fontWeight: 700,
           fontSize: isMobile ? '48px' : '110px',
           lineHeight: isMobile ? '52px' : '93.5px',
           letterSpacing: isMobile ? '-1px' : '-5.5px',
@@ -1091,11 +1088,11 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-row items-center justify-center gap-3"
       >
-        <ParticleButton onClick={handleCTA}
-          className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
+        <DarkerButton onClick={handleCTA}
+          className="flex items-center justify-center"
           style={{ fontFamily: IV, fontWeight: 400, fontSize: '15px', lineHeight: 'normal', background: '#fff', border: 'none', color: '#000', padding: '9px 0', width: 128, borderRadius: 9999, cursor: 'pointer' }}>
           {user ? t('landing.hero.openApp') : t('landing.hero.cta')}
-        </ParticleButton>
+        </DarkerButton>
         <a href="#pricing"
           style={{ fontFamily: IV, fontWeight: 400, fontSize: '15px', lineHeight: 'normal', textDecoration: 'none', padding: '9px 0', width: 128, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
@@ -1227,17 +1224,17 @@ export default function LandingPage() {
         <div ref={starsRef} className="absolute pointer-events-none" style={{
           zIndex: 0,
           opacity: 0,
-          top: 1400,
+          top: 0,
           left: 0,
           right: 0,
           bottom: 0,
           backgroundImage: `url(${starsBg})`,
-          backgroundSize: '160%',
-          backgroundPosition: 'center 40%',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 72%',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
-          maskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, black 20%, rgba(0,0,0,0.6) 60%, transparent 90%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, black 20%, rgba(0,0,0,0.6) 60%, transparent 90%)',
+          maskImage: 'radial-gradient(ellipse 70% 35% at 50% 72%, black 15%, rgba(0,0,0,0.5) 50%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 35% at 50% 72%, black 15%, rgba(0,0,0,0.5) 50%, transparent 75%)',
         }} />
 
         {/* Subtle blue glow — mid-layer */}

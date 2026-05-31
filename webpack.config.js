@@ -13,6 +13,7 @@ module.exports = {
     chunkFilename: isProd ? '[name].[contenthash:8].chunk.js' : '[name].chunk.js',
     publicPath: '/',
     clean: true,
+    hashFunction: 'sha256',
   },
 
   // Persistent filesystem cache — dramatically speeds up rebuilds
