@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import alienLogo from '../assets/alien_logo_1780252226447.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import screenshotUpload from '../assets/screenshot_upload_new.jpg';
 import screenshotReview from '../assets/screenshot_review_new.jpg';
@@ -622,25 +623,25 @@ function ShareModal({ onClose }) {
       rg.addColorStop(0, 'rgba(0,0,0,0)'); rg.addColorStop(1, 'rgba(0,0,0,0.75)');
       ctx.fillStyle = rg; ctx.fillRect(760, 0, 320, 1920);
 
-      // Logo
+      // Logo — alien app icon
       const logoImg = new Image();
       logoImg.crossOrigin = 'anonymous';
-      await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; logoImg.src = typebeatLogo; });
+      await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; logoImg.src = alienLogo; });
 
       const logoSize = 320;
       const logoX = (1080 - logoSize) / 2;
       const logoY = (1920 - logoSize) / 2 + 20;
 
-      // "I love" text — same width as logo, above it
+      // "I ❤" text — same width as logo, above it
       ctx.textAlign = 'center';
       ctx.textBaseline = 'alphabetic';
       ctx.fillStyle = '#ffffff';
       // Scale font so text spans logoSize width
       ctx.font = `bold 140px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
-      const measured = ctx.measureText('I love');
+      const measured = ctx.measureText('I \u2764');
       const targetFontSize = Math.floor(140 * (logoSize / measured.width));
       ctx.font = `bold ${Math.min(targetFontSize, 160)}px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
-      ctx.fillText('I love', 540, logoY - 36);
+      ctx.fillText('I \u2764', 540, logoY - 36);
 
       ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
 

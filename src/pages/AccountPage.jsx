@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import alienLogo from '../assets/alien_logo_1780252226447.png';
 import userIcon from '../assets/user_1754478889614.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -297,12 +298,36 @@ export default function AccountPage() {
                     {user.producer_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Producer'}
                   </h1>
                   <p className="text-gray-500 text-xs font-medium mt-0.5 truncate" style={{ fontFamily: NM }}>{user.email}</p>
-                  <span
-                    className="mt-1.5 inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-widest uppercase"
-                    style={{ fontFamily: NM, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}
-                  >
-                    {user.role}
-                  </span>
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    {/* Admin badge (dark, only for admins) */}
+                    {user.role === 'admin' && (
+                      <span
+                        className="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-widest uppercase"
+                        style={{ fontFamily: NM, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}
+                      >
+                        admin
+                      </span>
+                    )}
+                    {/* Role badge (white) — clicking navigates to upgrade */}
+                    <span
+                      onClick={() => navigate('/upgrade')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', lineHeight: 1, whiteSpace: 'nowrap',
+                        cursor: 'pointer', padding: '4px 10px', borderRadius: 6,
+                        background: '#fff', color: '#000', fontSize: 12, fontWeight: 600,
+                        border: '1.5px solid #fff', fontFamily: NM,
+                        transition: 'background 0.18s, color 0.18s, transform 0.18s', userSelect: 'none',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#e8e8e8'; e.currentTarget.style.transform = 'scale(1.06)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
+                    >
+                      {user.role === 'admin' || user.role === 'unlimited'
+                        ? (isCzech ? 'Bez omezení' : 'Unlimited')
+                        : user.role === 'pro'
+                          ? 'Pro'
+                          : (isCzech ? 'Zdarma' : 'Free')}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -346,12 +371,12 @@ export default function AccountPage() {
                 <p className="text-xs font-semibold text-gray-500" style={{ fontFamily: NM }}>
                   {t('account.subscription')}
                 </p>
-                {sub && (
+                {sub?.status === 'active' && (
                   <span
                     className="px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase"
-                    style={{ fontFamily: NM, background: 'rgba(255,255,255,0.05)', color: sub.status === 'active' ? 'rgba(255,255,255,0.5)' : 'rgba(255,200,100,0.7)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    style={{ fontFamily: NM, background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
-                    {sub.status === 'active' ? t('account.active') : isCzech ? 'Ruší se' : 'Cancelling'}
+                    {t('account.active')}
                   </span>
                 )}
               </div>
@@ -395,16 +420,16 @@ export default function AccountPage() {
                         className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40"
                         style={{
                           fontFamily: NM,
-                          border: '1px solid rgba(255,255,255,0.10)',
-                          color: 'rgba(255,255,255,0.38)',
-                          background: 'transparent',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          color: 'rgba(255,255,255,0.55)',
+                          background: 'rgba(40,40,40,0.85)',
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,80,80,0.85)'; e.currentTarget.style.borderColor = 'rgba(255,80,80,0.3)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.38)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(55,55,55,0.9)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(40,40,40,0.85)'; }}
                       >
                         {cancelLoading
                           ? (isCzech ? 'Ruším…' : 'Cancelling…')
-                          : (isCzech ? 'Zrušit předplatné' : 'Cancel subscription')}
+                          : (isCzech ? 'Zrušit' : 'Cancel')}
                       </button>
                     )}
                   </>
@@ -482,17 +507,13 @@ export default function AccountPage() {
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.21, duration: 0.45 }}>
             <button
               onClick={logout}
-              className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 fontFamily: NM,
-                background: 'rgba(0,0,0,0.75)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'rgba(255,255,255,0.65)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
+                background: '#ffffff',
+                border: 'none',
+                color: '#000000',
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
             >
               {isCzech ? 'Odhlásit se' : 'Sign out'}
             </button>

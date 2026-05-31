@@ -98,10 +98,10 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
         {isAdmin && (
           <button onClick={() => navigate('/admin')}
             style={{ fontFamily: NM, fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.14em',
-              textTransform: 'uppercase', background: 'none', border: '1px solid rgba(59,130,246,0.35)',
-              color: '#60a5fa', padding: '5px 14px', borderRadius: 9999, cursor: 'pointer', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.15)'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.6)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.35)'; }}>
+              textTransform: 'uppercase', background: 'none', border: '1px solid rgba(255,255,255,0.35)',
+              color: '#ffffff', padding: '5px 14px', borderRadius: 9999, cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)'; }}>
             SPRÁVCE
           </button>
         )}

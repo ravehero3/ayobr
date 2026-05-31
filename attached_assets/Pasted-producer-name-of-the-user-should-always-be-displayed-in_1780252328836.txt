@@ -1,0 +1,42 @@
+producer name of the user should always be displayed in the header of the typebeatz app.
+„open app“ button in the czech version of the landing page should say „Otevřít Aplikaci"
+the last page of the app (generated videos page) should show cards of the generated videos with gausian blur with 40 percent blur 
+generated video card should have correct padding. as if it was pricing card from the upgrade page
+správce button in the header should be white
+Předplatné card should not have text that says „ruší se“ instead it should have a dark grey button that says „Zrušit“
+instead of using „tarif“ in the předplatné card, use just „Unlimited“ or „Neomezený“ we dont want to see „tarif“ written anywhere
+Final page of the app (generated videos page) should show a text that is the same size and has the same properties as the text from the landing page that says „generujte type beat videa jedním clickem“. the text on the last page of the app should appear between the header and between the top edge of the generated video card of the 1st video thats right at the top. this text should say „Vaše videa jsou ready VOODOO808“ (the „VOODOO808“ should change for each user and should show the producer name of each user
+uložit změny button should look exactly the same as the Začít zdarma button on the landing page. 
+Odhlásit se button in the account page should be aligned to the right edge of the cards above and it should be as wide as the cards above, 
+odhlásit se button in the account page should be the same design as the začít zdarma button on the landing page
+on the account page instead of saying the text „bez limitů, 4K renderování“ it should say „4K renderování bez limitů“
+i like the dark grey admin badge under the users email  in the account page. Lets implement a new white badge that says either Pro or Unlimited (CZ: "Bez omezení“) 
+here is a set of badges to show for each user: Here's the CSS — one class covers all of them, just swap the text. make sure each user sees this below their email address in the account page (clicking on this badge should bring us to the upgrade page) :
+.badge {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #fff;
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid #fff;
+  transition: background 0.18s, color 0.18s, transform 0.18s;
+  user-select: none;
+}
+
+.badge:hover {
+  background: #e8e8e8;
+  transform: scale(1.06);
+}
+<span class="badge">Zdarma</span>
+<span class="badge">Free</span>
+<span class="badge">Pro</span>
+<span class="badge">Bez omezení</span>
+<span class="badge">Unlimited</span>
+﻿
+﻿

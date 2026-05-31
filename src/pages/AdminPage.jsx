@@ -992,7 +992,7 @@ export default function AdminPage() {
                   <table style={{width:'100%',borderCollapse:'collapse',minWidth:560}}>
                     <thead>
                       <tr style={{background:'rgba(255,255,255,0.03)',borderBottom:`1px solid ${BORDER}`}}>
-                        {['E-mail','Jméno','Tarif','Datum'].map(h=>(
+                        {['E-mail','Jméno','Plán','Datum'].map(h=>(
                           <th key={h} style={{fontFamily:NM,fontSize:9,fontWeight:900,letterSpacing:'0.1em',textTransform:'uppercase',
                             color:'rgba(255,255,255,0.3)',padding:'14px 20px',textAlign:'left'}}>{h}</th>
                         ))}
@@ -1327,7 +1327,7 @@ export default function AdminPage() {
                       <table style={{width:'100%',borderCollapse:'collapse',minWidth:560}}>
                         <thead>
                           <tr style={{background:'rgba(255,255,255,0.03)',borderBottom:`1px solid ${BORDER}`}}>
-                            {['Funkce','Tarif','Popis','Stav'].map(h=>(
+                            {['Funkce','Plán','Popis','Stav'].map(h=>(
                               <th key={h} style={{fontFamily:NM,fontSize:9,fontWeight:900,letterSpacing:'0.1em',textTransform:'uppercase',
                                 color:'rgba(255,255,255,0.3)',padding:'14px 20px',textAlign:'left'}}>{h}</th>
                             ))}
