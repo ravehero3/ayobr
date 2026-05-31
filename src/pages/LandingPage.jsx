@@ -13,7 +13,7 @@ import screenshotGenerate from '../assets/screenshot_generate_new.jpg';
 import screenshotDownload from '../assets/screenshot_download.png';
 
 const NM     = "'Neue Montreal', 'Inter', sans-serif"; // legacy — prefer IV or GT_W
-const IV     = '"Inter Variable", "Inter Variable Placeholder", sans-serif';
+const IV     = '"Figtree", sans-serif';
 const GT_W   = '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif';
 const SCRIPT = "'Satisfy', cursive";
 const BTN_BG  = '#ffffff';
