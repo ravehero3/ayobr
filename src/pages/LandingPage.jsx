@@ -842,8 +842,8 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
   const producerName = user?.producer_name;
   return (
     <>
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400 mb-8"
-        style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em' }}>
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
+        style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
         <span>🎬</span>
         <span>{t('landing.hero.badge')}</span>
       </div>
@@ -936,7 +936,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         </a>
       </div>
 
-      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.25)', marginTop: '1.5rem', textShadow: '0 1px 8px rgba(0,0,0,0.8), 0 0px 20px rgba(0,0,0,0.6)' }}>
+      <div style={{ fontFamily: NM, fontSize: '0.8rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.55)', marginTop: '1.5rem', textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 12px rgba(0,0,0,0.9)' }}>
         {t('landing.hero.statsBar')}
       </div>
     </>
