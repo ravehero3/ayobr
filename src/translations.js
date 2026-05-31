@@ -435,7 +435,7 @@ export const translations = {
     "landing.title": "TypeBeatz",
     "landing.hero.title": "Generujte\ntype beat videa\njedním clickem",
     "landing.hero.titleHighlight": "jedním clickem",
-    "landing.hero.subtitle": "Nahrajte beaty a obrázky a my se postaráme o zbytek.",
+    "landing.hero.subtitle": "Pravidelné vydávání přivádí nové fanoušky a prodává beaty — automaticky",
     "landing.hero.cta": "Začít zdarma",
     "landing.hero.openApp": "Začít zdarma",
     "landing.hero.ctaNote": "Bez nutnosti kreditní karty.",

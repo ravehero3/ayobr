@@ -518,14 +518,13 @@ const CARD_W_CSS      = `calc(100vw - ${CARD_LEFT}px)`;
 
 /* ── Safari-style browser chrome ── */
 /* dark=true → card 4 (Download) uses #0d0d0d bar + #1a1a1a pill */
-function SafariChrome({ dark = false }) {
+function SafariChrome({ dark = false, onShare }) {
   const sys   = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
   const barBg  = dark ? '#0d0d0d' : '#0c0c0c';
   const pillBg = dark ? '#1a1a1a' : '#151515';
   const border = dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.65)';
   return (
     <div style={{ width: '100%', flexShrink: 0 }}>
-      {/* Single unified toolbar — macOS Sonoma/Sequoia Safari style */}
       <div style={{
         height: 52,
         background: barBg,
@@ -545,14 +544,11 @@ function SafariChrome({ dark = false }) {
           ))}
         </div>
 
-        {/* URL pill — centred, fully pill-shaped, macOS style */}
+        {/* URL pill */}
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', margin: '0 16px' }}>
           <div style={{
-            height: 30,
-            width: '100%',
-            maxWidth: 400,
-            background: pillBg,
-            borderRadius: 9999,
+            height: 30, width: '100%', maxWidth: 400,
+            background: pillBg, borderRadius: 9999,
             border: '1px solid rgba(255,255,255,0.1)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '0 14px',
@@ -563,19 +559,161 @@ function SafariChrome({ dark = false }) {
           </div>
         </div>
 
-        {/* Right actions — share + sidebar/tabs */}
+        {/* Share button only */}
         <div style={{ display: 'flex', gap: 1, flexShrink: 0 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', userSelect: 'none' }}>
+          <button onClick={onShare} style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.32)'}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
             </svg>
-          </div>
-          <div style={{ width: 28, height: 28, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.32)', userSelect: 'none' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-            </svg>
-          </div>
+          </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Share Modal ── */
+function ShareModal({ onClose }) {
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [generating, setGenerating] = useState(true);
+
+  useEffect(() => {
+    generateStoryImage();
+  }, []);
+
+  async function generateStoryImage() {
+    setGenerating(true);
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext('2d');
+
+      // Draw stars background (cover-fill)
+      const bgImg = new Image();
+      bgImg.crossOrigin = 'anonymous';
+      await new Promise((res) => { bgImg.onload = res; bgImg.onerror = res; bgImg.src = starsBg; });
+      const scale = Math.max(1080 / bgImg.width, 1920 / bgImg.height);
+      const sw = bgImg.width * scale, sh = bgImg.height * scale;
+      ctx.drawImage(bgImg, (1080 - sw) / 2, (1920 - sh) / 2, sw, sh);
+
+      // Vignette — fade to black on all edges
+      const radGrad = ctx.createRadialGradient(540, 960, 280, 540, 960, 1050);
+      radGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      radGrad.addColorStop(1, 'rgba(0,0,0,0.92)');
+      ctx.fillStyle = radGrad; ctx.fillRect(0, 0, 1080, 1920);
+
+      const tg = ctx.createLinearGradient(0, 0, 0, 480);
+      tg.addColorStop(0, 'rgba(0,0,0,0.9)'); tg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = tg; ctx.fillRect(0, 0, 1080, 480);
+
+      const bg2 = ctx.createLinearGradient(0, 1440, 0, 1920);
+      bg2.addColorStop(0, 'rgba(0,0,0,0)'); bg2.addColorStop(1, 'rgba(0,0,0,0.9)');
+      ctx.fillStyle = bg2; ctx.fillRect(0, 1440, 1080, 480);
+
+      const lg = ctx.createLinearGradient(0, 0, 320, 0);
+      lg.addColorStop(0, 'rgba(0,0,0,0.75)'); lg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = lg; ctx.fillRect(0, 0, 320, 1920);
+
+      const rg = ctx.createLinearGradient(760, 0, 1080, 0);
+      rg.addColorStop(0, 'rgba(0,0,0,0)'); rg.addColorStop(1, 'rgba(0,0,0,0.75)');
+      ctx.fillStyle = rg; ctx.fillRect(760, 0, 320, 1920);
+
+      // Logo
+      const logoImg = new Image();
+      logoImg.crossOrigin = 'anonymous';
+      await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; logoImg.src = typebeatLogo; });
+
+      const logoSize = 320;
+      const logoX = (1080 - logoSize) / 2;
+      const logoY = (1920 - logoSize) / 2 + 20;
+
+      // "I 🤍" text — same width as logo, above it
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#ffffff';
+      // Scale font so text spans logoSize width
+      ctx.font = `bold 140px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
+      const measured = ctx.measureText('I 🤍');
+      const targetFontSize = Math.floor(140 * (logoSize / measured.width));
+      ctx.font = `bold ${Math.min(targetFontSize, 160)}px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
+      ctx.fillText('I 🤍', 540, logoY - 36);
+
+      ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+
+      setPreviewUrl(canvas.toDataURL('image/png'));
+    } catch (e) {
+      console.error('Story generation failed:', e);
+    }
+    setGenerating(false);
+  }
+
+  async function handleInstagramShare() {
+    if (!previewUrl) return;
+    try {
+      const res = await fetch(previewUrl);
+      const blob = await res.blob();
+      const file = new File([blob], 'typebeatz-story.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'TypeBeatz' });
+      } else {
+        const a = document.createElement('a');
+        a.href = previewUrl; a.download = 'typebeatz-story.png'; a.click();
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') console.error(e);
+    }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+      onClick={onClose}>
+      <div style={{
+        background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
+        border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20,
+        padding: '32px 28px', boxShadow: '0 40px 80px -20px rgba(0,0,0,0.8)',
+        backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)',
+        width: '90%', maxWidth: 340, position: 'relative',
+      }} onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>✕</button>
+        <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.05rem', color: '#fff', margin: '0 0 6px' }}>Share TypeBeatz</h3>
+        <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: '0 0 20px' }}>Post a story to your Instagram</p>
+
+        {/* Story preview */}
+        <div style={{ width: '100%', aspectRatio: '9/16', borderRadius: 10, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 16, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 220 }}>
+          {generating ? (
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontFamily: NM, fontSize: '0.75rem' }}>Generating preview…</span>
+          ) : previewUrl ? (
+            <img src={previewUrl} alt="Story preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontFamily: NM, fontSize: '0.75rem' }}>Preview unavailable</span>
+          )}
+        </div>
+
+        {/* Instagram Stories button */}
+        <button onClick={handleInstagramShare} disabled={!previewUrl || generating}
+          style={{
+            width: '100%', padding: '11px 0', borderRadius: 10, border: 'none',
+            cursor: (previewUrl && !generating) ? 'pointer' : 'not-allowed',
+            background: (previewUrl && !generating) ? 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)' : 'rgba(255,255,255,0.06)',
+            color: '#fff', fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            opacity: (previewUrl && !generating) ? 1 : 0.45, transition: 'opacity 0.2s',
+          }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+          Instagram Stories
+        </button>
+
+        <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', margin: '14px 0' }} />
+        <button onClick={() => { if (previewUrl) { const a = document.createElement('a'); a.href = previewUrl; a.download = 'typebeatz-story.png'; a.click(); } }}
+          disabled={!previewUrl || generating}
+          style={{ width: '100%', padding: '9px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontFamily: NM, fontWeight: 500, fontSize: '0.78rem', cursor: 'pointer' }}>
+          Download image
+        </button>
       </div>
     </div>
   );
@@ -618,6 +756,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
   ];
   const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
+  const [showShareModal, setShowShareModal] = useState(false);
   const activeRef    = useRef(0);
   const clickLockRef = useRef(false);
   const cardRefs     = useRef([]);
@@ -751,7 +890,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <SafariChrome dark={i === 3} />
+                    <SafariChrome dark={i === 3} onShare={() => setShowShareModal(true)} />
                     <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                       <Content />
                     </div>
@@ -763,6 +902,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
           </div>
         </div>
       )}
+      {showShareModal && <ShareModal onClose={() => setShowShareModal(false)} />}
     </div>
   );
 }
