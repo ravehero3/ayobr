@@ -1181,7 +1181,7 @@ export default function LandingPage() {
   }, []);
 
   useParallax([
-    { ref: starsRef, speed: 0.25, mode: 'bgY', yOffset: 600 },
+    { ref: starsRef, speed: 0.25, mode: 'bgY', yOffset: 0 },
     { ref: glowRef,  speed: 0.5,  mode: 'translateY' },
   ]);
   useStarsScrollReveal(starsRef);
@@ -1222,12 +1222,16 @@ export default function LandingPage() {
       <section className="relative flex flex-col items-center px-6 text-center" style={{ overflow: 'hidden', minHeight: '100vh', background: '#000', justifyContent: isMobile ? 'flex-start' : 'center', paddingTop: isMobile ? '72px' : '80px' }}>
 
         {/* Stars background — starts invisible, fades in on mount as text loads */}
-        <div ref={starsRef} className="absolute inset-0 pointer-events-none" style={{
+        <div ref={starsRef} className="absolute pointer-events-none" style={{
           zIndex: 0,
           opacity: 0,
+          top: 800,
+          left: 0,
+          right: 0,
+          bottom: 0,
           backgroundImage: `url(${starsBg})`,
-          backgroundSize: '130%',
-          backgroundPosition: 'center calc(50% + 600px)',
+          backgroundSize: '160%',
+          backgroundPosition: 'center 40%',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
         }} />
@@ -1237,10 +1241,10 @@ export default function LandingPage() {
           <div style={{ width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 65%)' }} />
         </div>
 
-        {/* Vignette — fades stars toward edges */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'radial-gradient(ellipse 80% 60% at 50% 70%, transparent 20%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.9) 75%, #000 92%)' }} />
+        {/* Vignette — fades stars toward edges, anchored to match stars at top:800 */}
+        <div className="absolute pointer-events-none" style={{ zIndex: 1, top: 800, left: 0, right: 0, bottom: 0, background: 'radial-gradient(ellipse 90% 70% at 50% 50%, transparent 20%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.9) 75%, #000 92%)' }} />
         <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to right, #000 0%, rgba(0,0,0,0.65) 10%, transparent 25%, transparent 75%, rgba(0,0,0,0.65) 90%, #000 100%)' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.5) 6%, transparent 18%, transparent 65%, rgba(0,0,0,0.7) 82%, #000 100%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, #000 0%, #000 82%, rgba(0,0,0,0.6) 90%, transparent 96%, #000 100%)' }} />
 
         {/* Hero content */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
