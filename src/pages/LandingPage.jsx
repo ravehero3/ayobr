@@ -833,10 +833,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
           <div style={{
             flexShrink: 0,
             width: CHAPTER_NAV_W,
-            position: 'sticky',
-            top: 140,
             alignSelf: 'flex-start',
-            zIndex: 10,
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
               <h2 style={{ fontFamily: '"GT Walsheim Medium", "GT Walsheim Medium Placeholder", sans-serif', fontWeight: 500, fontSize: 62, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1em', color: '#fff', margin: 0, fontFeatureSettings: '"ss02" on' }}>
@@ -855,10 +852,11 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                   display: 'flex', flexDirection: 'column', outline: 'none',
                 }}>
                   <span style={{
-                    fontFamily: IV, fontWeight: 700, fontSize: 13,
-                    letterSpacing: '0.06em', textTransform: 'uppercase',
-                    color: active ? '#fff' : 'rgba(255,255,255,0.25)',
-                    lineHeight: 1.3, transition: 'color 0.3s ease',
+                    fontFamily: '"Inter Variable", "Inter Variable Placeholder", sans-serif',
+                    fontWeight: 400, fontSize: 20,
+                    letterSpacing: '-0.01px', textTransform: 'uppercase',
+                    color: active ? 'rgb(255,255,255)' : 'rgba(255,255,255,0.25)',
+                    lineHeight: '28px', transition: 'color 0.3s ease',
                   }}>
                     {step.title}
                   </span>
