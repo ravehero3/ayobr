@@ -482,9 +482,9 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
 /* How It Works — title scrolls away, two-column panel pins while stepping through chapters */
 const NAV_H           = 60;
 const HOW_SCROLL_STEP = 1600;
-const CHAPTER_NAV_LEFT = 242;
-const CHAPTER_NAV_W   = 320;
-const CARD_GAP        = 100;
+const CHAPTER_NAV_LEFT = 420;
+const CHAPTER_NAV_W   = 440;
+const CARD_GAP        = 60;
 const CARD_LEFT       = CHAPTER_NAV_LEFT + CHAPTER_NAV_W + CARD_GAP;
 const CARD_W_CSS      = `calc(100vw - ${CARD_LEFT}px)`;
 
@@ -828,7 +828,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
             alignSelf: 'flex-start',
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
-              <h2 style={{ fontFamily: IV, fontWeight: 700, fontSize: 62, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1em', color: '#fff', margin: 0 }}>
+              <h2 style={{ fontFamily: IV, fontWeight: 700, fontSize: 52, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1.1em', color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>
                 {t('landing.how.title').split('\n').map((line, i, arr) => (
                   <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
                 ))}
@@ -1021,7 +1021,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         style={{
           fontFamily: IV,
-          fontWeight: 700,
+          fontWeight: 500,
           fontSize: isMobile ? '48px' : '110px',
           lineHeight: isMobile ? '52px' : '93.5px',
           letterSpacing: isMobile ? '-1px' : '-5.5px',
@@ -1206,8 +1206,8 @@ export default function LandingPage() {
           background: 'rgba(0,0,0,0.38)', 
           backdropFilter: 'blur(16px)', 
           borderBottom: '1px solid rgba(255,255,255,0.06)', 
-          paddingLeft: isMobile ? '1rem' : '4rem', 
-          paddingRight: isMobile ? '1rem' : '4rem' 
+          paddingLeft: isMobile ? '1rem' : '420px', 
+          paddingRight: isMobile ? '1rem' : '420px' 
         }}>
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
