@@ -433,8 +433,8 @@ export const translations = {
 
     // Landing Page
     "landing.title": "TypeBeatz",
-    "landing.hero.title": "Generujte\ntype beat videa\njedním clickem",
-    "landing.hero.titleHighlight": "jedním clickem",
+    "landing.hero.title": "Generujte\ntype beat videa\njedním kliknutím",
+    "landing.hero.titleHighlight": "jedním kliknutím",
     "landing.hero.subtitle": "Pravidelné vydávání přivádí nové fanoušky a prodává beaty — automaticky",
     "landing.hero.cta": "Začít zdarma",
     "landing.hero.openApp": "Otevřít aplikaci",
@@ -467,7 +467,7 @@ export const translations = {
     "landing.pricing.features.priority": "Prioritní rychlost renderování",
     "landing.pricing.features.quality4k": "Výstupní kvalita 4K",
     "landing.pricing.features.support": "Prioritní podpora",
-    "landing.pricing.footer": "Generujte type beat videa jedním clicknutím",
+    "landing.pricing.footer": "Generujte type beat videa jedním kliknutím",
 
     "landing.pricing.free.name": "Zdarma",
     "landing.pricing.free.desc": "Ideální pro začátek.",

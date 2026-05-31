@@ -147,8 +147,9 @@ export default function LoginPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-md z-10">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2">
-            {t('login.welcome')} <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 26 }} />
+          <h1 className="text-3xl font-bold mb-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', lineHeight: 1 }}>
+            <span>{t('login.welcome')}</span>
+            <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 26, display: 'block', flexShrink: 0 }} />
           </h1>
           <p className="text-gray-400 mt-4">{t('login.signInSubtitle')}</p>
         </div>
