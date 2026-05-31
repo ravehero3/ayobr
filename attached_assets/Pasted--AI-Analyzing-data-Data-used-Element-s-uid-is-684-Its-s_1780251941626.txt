@@ -1,0 +1,261 @@
+## AI
+
+### Analyzing data
+
+**Data used:**
+````
+* Element's uid is 684.
+* Its selector is `header.framer-1kxsj99`
+* It has 3 child element nodes: `.ssr-variant` (uid=1095), `.framer-1knetyx` (uid=685), `.framer-1t92ft3` (uid=516)
+* It doesn't have any child text nodes
+* It has a next sibling and it is an element (uid=521) node
+* Its parent's selector is `section#hero` (uid=553)
+* Its parent is an element node
+* Its parent has 2 child element nodes: `header.framer-1kxsj99` (uid=684), `.framer-hvkaaj` (uid=521)
+````
+
+### Reading computed and source styles
+
+I need to check for initial opacity, visibility, or animation/transition properties on the header and its related elements to understand how the "gradual show" effect might be implemented.
+
+**Code executed:**
+```
+getStyles([684,1095,685,516,521,553], ["opacity","visibility","animation-name","animation-duration","animation-fill-mode","transition-property","transition-duration","transform"])
+```
+
+**Data returned:**
+```
+{
+  "516": {
+    "computed": {
+      "opacity": "1",
+      "visibility": "visible",
+      "animation-name": "none",
+      "animation-duration": "0s",
+      "animation-fill-mode": "none",
+      "transition-property": "all",
+      "transition-duration": "0s",
+      "transform": "matrix(1, 0, 0, 1, 0, 0)"
+    },
+    "authored": {
+      "transform": "translateY(0px)",
+      "opacity": "1"
+    }
+  },
+  "521": {
+    "computed": {
+      "opacity": "1",
+      "visibility": "visible",
+      "animation-name": "none",
+      "animation-duration": "0s",
+      "animation-fill-mode": "none",
+      "transition-property": "all",
+      "transition-duration": "0s",
+      "transform": "none"
+    },
+    "authored": {}
+  },
+  "553": {
+    "computed": {
+      "opacity": "1",
+      "visibility": "visible",
+      "animation-name": "none",
+      "animation-duration": "0s",
+      "animation-fill-mode": "none",
+      "transition-property": "all",
+      "transition-duration": "0s",
+      "transform": "none"
+    },
+    "authored": {}
+  },
+  "684": {
+    "computed": {
+      "opacity": "1",
+      "visibility": "visible",
+      "animation-name": "none",
+      "animation-duration": "0s",
+      "animation-fill-mode": "none",
+      "transition-property": "all",
+      "transition-duration": "0s",
+      "transform": "none"
+    },
+    "authored": {}
+  },
+  "685": {
+    "computed": {
+      "opacity": "1",
+      "visibility": "visible",
+      "animation-name": "none",
+      "animation-duration": "0s",
+      "animation-fill-mode": "none",
+      "transition-property": "all",
+      "transition-duration": "0s",
+      "transform": "none"
+    },
+    "authored": {}
+  },
+  "1095": {
+    "computed": {
+      "opacity": "1",
+      "visibility": "visible",
+      "animation-name": "none",
+      "animation-duration": "0s",
+      "animation-fill-mode": "none",
+      "transition-property": "all",
+      "transition-duration": "0s",
+      "transform": "none"
+    },
+    "authored": {}
+  }
+}
+```
+
+### Checking for Framer animations and scripts
+
+I am looking for Framer-specific attributes, CSS keyframes, or Framer runtime scripts that would explain the "gradual show" (reveal) effect, as the initial style check showed opacity 1 but the user describes a loading animation.
+
+**Code executed:**
+```
+const data = {
+  framerAttributes: [],
+  animations: [],
+  scripts: []
+};
+
+// Check for Framer-specific motion attributes on the element and its children
+const elements = [
+  document.querySelector('header.framer-1kxsj99'),
+  ...document.querySelectorAll('header.framer-1kxsj99 *')
+];
+
+elements.forEach(el => {
+  if (el) {
+    const attrs = Array.from(el.attributes)
+      .filter(attr => attr.name.startsWith('data-framer') || attr.name.includes('motion'))
+      .map(attr => ({ name: attr.name, value: attr.value }));
+    if (attrs.length > 0) {
+      data.framerAttributes.push({ tagName: el.tagName, className: el.className, attrs });
+    }
+  }
+});
+
+// Look for CSS keyframes that might be relevant
+for (let i = 0; i < document.styleSheets.length; i++) {
+  try {
+    const sheet = document.styleSheets[i];
+    const rules = sheet.cssRules || sheet.rules;
+    for (let j = 0; j < rules.length; j++) {
+      if (rules[j].type === window.CSSRule.KEYFRAMES_RULE) {
+        data.animations.push(rules[j].name);
+      }
+    }
+  } catch (e) {
+    // Ignore cross-origin stylesheet errors
+  }
+}
+
+// Check for script tags that might be Framer runtime
+data.scripts = Array.from(document.querySelectorAll('script'))
+  .map(s => s.src)
+  .filter(src => src.includes('framer'));
+
+data;
+```
+
+**Data returned:**
+```
+{"framerAttributes":[{"tagName":"HEADER","className":"framer-1kxsj99","attrs":[{"name":"data-framer-name","value":"Header"}]},{"tagName":"DIV","className":"framer-wewrhe-container","attrs":[{"name":"data-framer-appear-id","value":"wewrhe"}]},{"tagName":"A","className":"framer-CLUM6 framer-6m9q4h framer-v-1hzqten framer-pyho2g","attrs":[{"name":"data-framer-appear-id","value":"6m9q4h"},{"name":"data-framer-name","value":"Variant 2"}]},{"tagName":"DIV","className":"framer-5jxk7o","attrs":[{"name":"data-framer-name","value":"Text"}]},{"tagName":"DIV","className":"framer-19rzt7a","attrs":[{"name":"data-framer-appear-id","value":"19rzt7a"},{"name":"data-framer-component-type","value":"RichTextContainer"}]},{"tagName":"DIV","className":"framer-1knetyx","attrs":[{"name":"data-framer-name","value":"Text"}]},{"tagName":"DIV","className":"framer-1rel4c6","attrs":[{"name":"data-framer-appear-id","value":"1rel4c6"},{"name":"data-framer-component-type","value":"RichTextContainer"}]},{"tagName":"DIV","className":"framer-1dlfy3o","attrs":[{"name":"data-framer-appear-id","value":"1dlfy3o"},{"name":"data-framer-component-type","value":"RichTextContainer"}]},{"tagName":"DIV","className":"framer-1t92ft3","attrs":[{"name":"data-framer-appear-id","value":"1t92ft3"},{"name":"data-framer-name","value":"Buttons"}]},{"tagName":"A","className":"framer-T5Ti0 framer-11816n4 framer-v-11816n4 framer-b89n3n","attrs":[{"name":"data-framer-name","value":"Regular"}]},{"tagName":"DIV","className":"framer-1gwemsj","attrs":[{"name":"data-framer-name","value":"Default"},{"name":"data-framer-component-type","value":"RichTextContainer"}]},{"tagName":"A","className":"framer-T5Ti0 framer-11816n4 framer-v-11816n4 framer-b89n3n","attrs":[{"name":"data-framer-name","value":"Regular"}]},{"tagName":"DIV","className":"framer-1gwemsj","attrs":[{"name":"data-framer-name","value":"Default"},{"name":"data-framer-component-type","value":"RichTextContainer"}]}],"animations":["__framer-blink-input","__framer-loading-spin","Typewriter-cursor","Typewriter-cursor"],"scripts":["https://events.framer.com/script?v=2","https://framerusercontent.com/sites/3BJ9zINIeWtEEVRMAcoTL8/script_main.CvkAYJwP.mjs"]}
+```
+
+### Investigating Framer Appear Animations
+
+I'm looking for how the 'data-framer-appear-id' elements are being animated. This usually involves CSS transitions or animations triggered by Framer's runtime.
+
+**Code executed:**
+```
+const data = {};
+const element = document.querySelector('header.framer-1kxsj99');
+const elementsWithAppearId = [element, ...element.querySelectorAll('[data-framer-appear-id]')];
+
+data.animations = elementsWithAppearId.map(el => {
+  const styles = window.getComputedStyle(el);
+  return {
+    tagName: el.tagName,
+    className: el.className,
+    appearId: el.getAttribute('data-framer-appear-id'),
+    transition: styles.transition,
+    animation: styles.animation,
+    willChange: styles.willChange,
+    // Often Framer sets styles via JS onto the element
+    inlineStyle: el.getAttribute('style')
+  };
+});
+
+// Check for any <style> tags that might contain the appear animation logic
+data.styleBlocks = Array.from(document.querySelectorAll('style'))
+  .filter(s => s.textContent.includes('data-framer-appear-id'))
+  .map(s => s.textContent.substring(0, 500)); // Just a snippet
+
+data;
+```
+
+**Data returned:**
+```
+{"animations":[{"tagName":"HEADER","className":"framer-1kxsj99","appearId":null,"transition":"all","animation":"none","willChange":"auto","inlineStyle":null},{"tagName":"DIV","className":"framer-wewrhe-container","appearId":"wewrhe","transition":"all","animation":"none","willChange":"transform","inlineStyle":"opacity: 1; transform: none; will-change: transform;"},{"tagName":"A","className":"framer-CLUM6 framer-6m9q4h framer-v-1hzqten framer-pyho2g","appearId":"6m9q4h","transition":"all","animation":"none","willChange":"transform","inlineStyle":"background-color: rgb(0, 0, 0); will-change: transform; opacity: 1; transform: none;"},{"tagName":"DIV","className":"framer-19rzt7a","appearId":"19rzt7a","transition":"all","animation":"none","willChange":"transform","inlineStyle":"--extracted-2gg91v: \"opsz\" 24, \"wght\" 490; --extracted-r6o4lv: var(--token-26e3cb56-8447-4a64-9b7d-37f16a9909d4, rgb(255, 255, 255)); --framer-link-text-color: rgb(0, 153, 255); --framer-link-text-decoration: underline; will-change: transform; opacity: 1; transform: none;"},{"tagName":"DIV","className":"framer-1rel4c6","appearId":"1rel4c6","transition":"all","animation":"none","willChange":"transform","inlineStyle":"opacity: 1; transform: none; will-change: transform;"},{"tagName":"DIV","className":"framer-1dlfy3o","appearId":"1dlfy3o","transition":"all","animation":"none","willChange":"transform","inlineStyle":"opacity: 1; transform: none; will-change: transform;"},{"tagName":"DIV","className":"framer-1t92ft3","appearId":"1t92ft3","transition":"all","animation":"none","willChange":"transform","inlineStyle":"opacity: 1; transform: none; will-change: transform;"}],"styleBlocks":[]}
+```
+
+### Answer
+
+The gradual appearance of elements when the page loads (often called a "reveal animation" or "entrance animation") on this site is handled by the **Framer** design tool's runtime.
+
+Based on the inspection, here is how it is being achieved:
+
+### 1. The "Appear" Logic (`data-framer-appear-id`)
+The elements you see fading in have a special attribute called `data-framer-appear-id` (e.g., `19rzt7a`, `1rel4c6`). This is a hook used by Framer’s JavaScript library (**Framer Motion**) to track which elements should be animated when they enter the viewport.
+
+### 2. Initial State (Hidden)
+When the page first loads, these elements are typically set to an initial state via JavaScript or inline styles:
+*   **Opacity:** `0` (invisible).
+*   **Transform:** Often shifted slightly down (`translateY`) or scaled down to create motion.
+*   **Will-Change:** You can see `will-change: transform` on your elements, which tells the browser to optimize these for upcoming movement.
+
+### 3. Orchestrated Transition
+Framer uses JavaScript to "stagger" these animations. Instead of everything appearing at once, it applies a slight delay to each subsequent element (`0.1s`, `0.2s`, etc.), creating that smooth, flowing effect.
+*   **Spring Physics:** Unlike standard CSS transitions, Framer often uses "spring" animations which make the movement feel more organic and less robotic.
+*   **CSS Result:** Once the animation finishes, the element ends up with `opacity: 1` and `transform: none` (which is what we see now in the styles).
+
+### How you can do this yourself
+If you aren't using a tool like Framer, you can recreate this in two ways:
+
+**A. Pure CSS (Simple)**
+Define a keyframe and apply it with a delay to different elements:
+
+`````css
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.item {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.item:nth-child(1) { animation-delay: 0.1s; }
+.item:nth-child(2) { animation-delay: 0.2s; }
+`````
+
+
+**B. Framer Motion (Advanced)**
+If you are using React, this site uses the **Framer Motion** library, which looks like this:
+
+`````
+jsx
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, delay: 0.2 }}
+>
+  Content here
+</motion.div>
+`````
+

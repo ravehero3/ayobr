@@ -837,7 +837,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
             zIndex: 10,
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
-              <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
+              <h2 style={{ fontFamily: NM, fontWeight: 300, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
                 {t('landing.how.title').split('\n').map((line, i, arr) => (
                   <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
                 ))}
@@ -984,12 +984,21 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
   const producerName = user?.producer_name;
   return (
     <>
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
         style={{ fontFamily: IV, fontSize: '12px', fontWeight: 400, lineHeight: 'normal', letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
         <span>{t('landing.hero.badge')}</span>
-      </div>
+      </motion.div>
 
       {producerName && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        >
         <div style={{
           fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
           fontWeight: 500,
@@ -1004,26 +1013,35 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         }}>
           {producerName},
         </div>
+        </motion.div>
       )}
 
-      <h1 style={{
-        fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
-        fontWeight: 500,
-        fontSize: isMobile ? '48px' : '110px',
-        lineHeight: isMobile ? '52px' : '93.5px',
-        letterSpacing: isMobile ? '-1px' : '-5.5px',
-        fontStyle: 'normal',
-        textTransform: 'none',
-        marginBottom: '2rem',
-        color: '#ffffff',
-      }}>
+      <motion.h1
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
+          fontWeight: 500,
+          fontSize: isMobile ? '48px' : '110px',
+          lineHeight: isMobile ? '52px' : '93.5px',
+          letterSpacing: isMobile ? '-1px' : '-5.5px',
+          fontStyle: 'normal',
+          textTransform: 'none',
+          marginBottom: '2rem',
+          color: '#ffffff',
+        }}>
         {t('landing.hero.title').split('\n').map((line, i, arr) => {
           const text = (producerName && i === 0) ? line.charAt(0).toLowerCase() + line.slice(1) : line;
           return <React.Fragment key={i}>{text}{i < arr.length - 1 && <br />}</React.Fragment>;
         })}
-      </h1>
+      </motion.h1>
 
-      <p style={isMobile ? {
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        style={isMobile ? {
           fontFamily: '"Inter Variable", "Inter Variable Placeholder", sans-serif',
           fontSize: '16px',
           fontWeight: 400,
@@ -1063,9 +1081,14 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
           }
           return subtitle;
         })()}
-      </p>
+      </motion.p>
 
-      <div className="flex flex-row items-center justify-center gap-3">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-row items-center justify-center gap-3"
+      >
         <ParticleButton onClick={handleCTA}
           className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
           style={{ fontFamily: IV, fontWeight: 600, fontSize: '14px', lineHeight: 'normal', background: '#fff', border: 'none', color: '#000', padding: '9px 0', width: 128, borderRadius: 9999, cursor: 'pointer' }}>
@@ -1076,7 +1099,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
           className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
           {t('landing.hero.goUnlimited')}
         </a>
-      </div>
+      </motion.div>
 
     </>
   );
