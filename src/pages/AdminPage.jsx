@@ -84,7 +84,7 @@ function SignupChart({ daily }) {
 
 /* ── Email template scaled preview ───────────────────────── */
 function EmailPreviewCard({ tpl, onOpen }) {
-  const icons = { welcome:'👋', purchase_pro:'🎉', purchase_unlimited:'🚀', credit_limit:'⚡' };
+  const icons = { welcome:'W', purchase_pro:'P', purchase_unlimited:'U', credit_limit:'C' };
   return (
     <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:18, overflow:'hidden',
       transition:'all 0.2s', cursor:'pointer' }} onClick={onOpen}
@@ -94,8 +94,8 @@ function EmailPreviewCard({ tpl, onOpen }) {
       <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${BORDER}` }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
           <div style={{ width:36, height:36, borderRadius:10, background:`${BLUE}15`, border:`1px solid ${BLUE}25`,
-            display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>
-            {icons[tpl.id] || '✉️'}
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color:BLUE }}>
+            {icons[tpl.id] || 'E'}
           </div>
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:NM, fontSize:13, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>{tpl.name}</div>
@@ -475,7 +475,7 @@ function FFmpegDebugTab() {
             { label:'Multi-thread',      ok: isMultiThread, note: isMultiThread ? 'FFmpeg will use threads' : 'FFmpeg single-threaded (slower)' },
           ].map(({ label, ok, note }) => (
             <div key={label} style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
-              <span style={{fontSize:14,flexShrink:0,lineHeight:1.4}}>{ok ? '✅' : '⚠️'}</span>
+              <span style={{fontSize:12,flexShrink:0,lineHeight:1.4,color:ok?'#34d399':'#fbbf24',fontWeight:700}}>{ok ? 'OK' : '!'}</span>
               <div>
                 <div style={{fontFamily:NM,fontSize:11,fontWeight:700,color:ok?'#fff':'#fbbf24'}}>{label}</div>
                 <div style={{fontFamily:NM,fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:2}}>{note}</div>
@@ -507,14 +507,14 @@ function FFmpegDebugTab() {
           padding:'9px 20px',borderRadius:9999,cursor:restarting?'not-allowed':'pointer',
           border:`1px solid ${BLUE}40`,background:`${BLUE}08`,color:BLUE,
           opacity:restarting?0.5:1,transition:'all 0.2s'}}>
-          {restarting ? 'Restartuji…' : '🔄 Restart FFmpeg'}
+          {restarting ? 'Restartuji…' : 'Restart FFmpeg'}
         </button>
         <button onClick={() => clearFFmpegLogs()} style={{
           fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
           padding:'9px 20px',borderRadius:9999,cursor:'pointer',
           border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.04)',color:'rgba(255,255,255,0.5)',
           transition:'all 0.2s'}}>
-          🗑 Smazat logy
+          Smazat logy
         </button>
         <div style={{display:'flex',alignItems:'center',gap:8,marginLeft:'auto'}}>
           <label style={{fontFamily:NM,fontSize:10,color:'rgba(255,255,255,0.4)',cursor:'pointer',display:'flex',alignItems:'center',gap:6}}>
@@ -1043,12 +1043,11 @@ export default function AdminPage() {
                     color:'rgba(255,255,255,0.4)',marginBottom:14}}>Jak to funguje</div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:16}}>
                     {[
-                      {emoji:'👋',title:'Uvítací e-mail',desc:'Odeslán ihned po prvním přihlášení'},
-                      {emoji:'🎉',title:'Potvrzení platby',desc:'Odeslán při aktivaci PRO nebo UNLIMITED předplatného'},
-                      {emoji:'⚡',title:'Limit kreditů',desc:'Odeslán FREE uživateli, který vyčerpal všechny kredity'},
+                      {title:'Uvítací e-mail',desc:'Odeslán ihned po prvním přihlášení'},
+                      {title:'Potvrzení platby',desc:'Odeslán při aktivaci PRO nebo UNLIMITED předplatného'},
+                      {title:'Limit kreditů',desc:'Odeslán FREE uživateli, který vyčerpal všechny kredity'},
                     ].map(item=>(
                       <div key={item.title} style={{display:'flex',gap:12,alignItems:'flex-start'}}>
-                        <span style={{fontSize:20,flexShrink:0}}>{item.emoji}</span>
                         <div>
                           <div style={{fontFamily:NM,fontSize:12,fontWeight:700,color:'#fff',marginBottom:2}}>{item.title}</div>
                           <div style={{fontFamily:NM,fontSize:11,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>{item.desc}</div>
@@ -1140,7 +1139,7 @@ export default function AdminPage() {
                         color:BLUE,marginBottom:16}}>2. Obsah e-mailu</div>
                       <div style={{display:'flex',gap:6,marginBottom:20,background:'rgba(255,255,255,0.04)',
                         padding:4,borderRadius:10,width:'fit-content'}}>
-                        {[['template','🗂 Šablona'],['custom','✏️ Vlastní HTML']].map(([m,l])=>(
+                        {[['template','Šablona'],['custom','Vlastní HTML']].map(([m,l])=>(
                           <button key={m} onClick={()=>setNlMode(m)} style={{fontFamily:NM,fontWeight:700,fontSize:10,
                             letterSpacing:'0.06em',padding:'7px 16px',borderRadius:7,cursor:'pointer',border:'none',
                             transition:'all 0.2s',background:nlMode===m?'#fff':'transparent',
@@ -1151,13 +1150,13 @@ export default function AdminPage() {
                       {nlMode==='template' ? (
                         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:10}}>
                           {templates.map(tpl=>{
-                            const icons={welcome:'👋',purchase_pro:'🎉',purchase_unlimited:'🚀',credit_limit:'⚡'};
+                            const icons={welcome:'W',purchase_pro:'P',purchase_unlimited:'U',credit_limit:'C'};
                             const active = nlTplId===tpl.id;
                             return (
                               <button key={tpl.id} onClick={()=>handleSelectTpl(tpl.id)} style={{
                                 textAlign:'left',padding:'14px',borderRadius:12,cursor:'pointer',border:`1px solid ${active?BLUE:BORDER}`,
                                 background:active?`${BLUE}15`:CARD,transition:'all 0.2s'}}>
-                                <div style={{fontSize:22,marginBottom:6}}>{icons[tpl.id]||'✉️'}</div>
+                                <div style={{fontSize:11,fontWeight:700,color:BLUE,marginBottom:6}}>{icons[tpl.id]||'E'}</div>
                                 <div style={{fontFamily:NM,fontSize:11,fontWeight:800,color:active?'#fff':'rgba(255,255,255,0.7)',marginBottom:4}}>{tpl.name}</div>
                                 <div style={{fontFamily:NM,fontSize:9,color:'rgba(255,255,255,0.3)',lineHeight:1.5}}>{tpl.trigger}</div>
                               </button>
@@ -1189,7 +1188,7 @@ export default function AdminPage() {
                         type="text"
                         value={nlSubject}
                         onChange={e=>setNlSubject(e.target.value)}
-                        placeholder="Například: Velká novinka od TypeBeatz 🎵"
+                        placeholder="Například: Velká novinka od TypeBeatz"
                         style={{width:'100%',background:'rgba(255,255,255,0.05)',border:`1px solid ${BORDER}`,
                           borderRadius:10,padding:'12px 16px',color:'#fff',fontSize:14,outline:'none',
                           boxSizing:'border-box',transition:'border-color 0.2s'}}
@@ -1210,7 +1209,7 @@ export default function AdminPage() {
                             <p style={{color:'#f87171',fontSize:13,margin:0}}>Chyba: {nlResult.error}</p>
                           ) : (
                             <>
-                              <p style={{color:'#34d399',fontSize:14,fontWeight:800,margin:'0 0 4px'}}>Kampaň odeslána! ✓</p>
+                              <p style={{color:'#34d399',fontSize:14,fontWeight:800,margin:'0 0 4px'}}>Kampaň odeslána!</p>
                               <p style={{color:'rgba(255,255,255,0.5)',fontSize:12,margin:0}}>
                                 Odesláno: {nlResult.sent} · Nepodařilo se: {nlResult.failed} · Celkem: {nlResult.total}
                               </p>
@@ -1273,7 +1272,7 @@ export default function AdminPage() {
                         ) : (
                           <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
                             height:'100%',color:'rgba(255,255,255,0.15)',gap:12}}>
-                            <span style={{fontSize:40}}>✉️</span>
+                            <span style={{fontSize:14,color:'rgba(255,255,255,0.3)'}}>E-mail</span>
                             <span style={{fontFamily:NM,fontSize:12}}>
                               {nlMode==='template' ? 'Vyber šablonu pro náhled' : 'Napiš HTML pro náhled'}
                             </span>
@@ -1286,7 +1285,7 @@ export default function AdminPage() {
                       <div style={{marginTop:12,padding:'10px 14px',background:'rgba(167,139,250,0.07)',
                         border:'1px solid rgba(167,139,250,0.2)',borderRadius:10}}>
                         <p style={{fontFamily:NM,fontSize:10,color:'rgba(167,139,250,0.8)',margin:0,lineHeight:1.6}}>
-                          ✨ Každý příjemce dostane personalizovanou verzi e-mailu se svým jménem a rolí.
+                          Každý příjemce dostane personalizovanou verzi e-mailu se svým jménem a rolí.
                         </p>
                       </div>
                     )}

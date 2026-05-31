@@ -56,7 +56,7 @@ function UserDetailsModal({ plan, interval, onClose, onSubmit, loading }) {
           border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20, padding: '36px 32px',
           boxShadow: '0 40px 80px -20px rgba(0,0,0,0.8)',
         }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>✕</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>x</button>
 
         <div style={{ marginBottom: 28 }}>
           <h2 style={{ fontFamily: NM, fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: 6, letterSpacing: '-0.03em' }}>

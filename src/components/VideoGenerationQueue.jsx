@@ -81,13 +81,13 @@ function VideoGenerationQueue() {
   const getStatusText = (job) => {
     switch (job.status) {
       case 'queued':
-        return '⏳ Waiting in queue...';
+        return 'Waiting in queue...';
       case 'processing':
-        return '🔄 Processing...';
+        return 'Processing...';
       case 'completed':
-        return '✅ Completed';
+        return 'Completed';
       case 'failed':
-        return `❌ Failed: ${job.error || 'Unknown error'}`;
+        return `Failed: ${job.error || 'Unknown error'}`;
       default:
         return job.status;
     }

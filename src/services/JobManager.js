@@ -462,7 +462,7 @@ class JobManager {
       progressHandler = ({ progress, time }) => {
         // Critical: Only process progress if session token matches
         if (ffmpeg.__activeSessionToken !== sessionToken) {
-          console.log(`⚠️ Ignoring stale progress callback for job ${job.id.substring(0, 8)} (token mismatch)`);
+          console.log(`Ignoring stale progress callback for job ${job.id.substring(0, 8)} (token mismatch)`);
           return;
         }
         

@@ -98,7 +98,6 @@ export default function LoginPage() {
           className="w-full max-w-lg rounded-2xl border border-white/10 p-8 backdrop-blur-xl relative z-10"
           style={{ background: 'rgba(255,255,255,0.03)' }}>
           <div className="text-center mb-8">
-            <div className="text-4xl mb-4">⚖️</div>
             <h2 className="text-2xl font-bold mb-2">{t('login.rights.title')}</h2>
             <p className="text-gray-400 text-sm">{t('login.rights.subtitle')}</p>
           </div>
@@ -157,15 +156,12 @@ export default function LoginPage() {
         <div className="rounded-2xl border border-white/10 p-8 backdrop-blur-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
           <div className="space-y-4 mb-8 text-sm text-gray-400">
             <div className="flex items-center gap-3">
-              <span className="text-gray-400">✓</span>
               <span>{t('login.feature1')}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-gray-400">✓</span>
               <span>{t('login.feature2')}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-gray-400">✓</span>
               <span>{t('login.feature3')}</span>
             </div>
           </div>

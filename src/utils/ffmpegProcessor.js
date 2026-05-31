@@ -177,7 +177,7 @@ export const initializeFFmpeg = async () => {
           const loadOpts = { coreURL, wasmURL };
           if (workerURL) loadOpts.workerURL = workerURL;
           await loadWithTimeout(loadOpts, 30000, 'local load');
-          logFFmpeg('info', 'FFmpeg: loaded from local files ✓');
+          logFFmpeg('info', 'FFmpeg: loaded from local files');
           loaded = true;
         } catch (localErr) {
           logFFmpeg('warn', `FFmpeg: local load failed (${localErr?.message || localErr}) — trying CDN…`);
@@ -198,7 +198,7 @@ export const initializeFFmpeg = async () => {
           const loadOpts = { coreURL, wasmURL };
           if (workerURL) loadOpts.workerURL = workerURL;
           await loadWithTimeout(loadOpts, 60000, 'CDN load');
-          logFFmpeg('info', 'FFmpeg: loaded from CDN ✓');
+          logFFmpeg('info', 'FFmpeg: loaded from CDN');
           loaded = true;
         } catch (cdnErr) {
           logFFmpeg('error', `FFmpeg: CDN load failed (${cdnErr?.message || cdnErr})`);
@@ -209,7 +209,7 @@ export const initializeFFmpeg = async () => {
       if (!loaded) {
         logFFmpeg('info', 'FFmpeg: trying bare load()…');
         await loadWithTimeout(null, 30000, 'bare load');
-        logFFmpeg('info', 'FFmpeg: bare load succeeded ✓');
+        logFFmpeg('info', 'FFmpeg: bare load succeeded');
         loaded = true;
       }
 
@@ -227,7 +227,7 @@ export const initializeFFmpeg = async () => {
         lastInitTime: new Date().toISOString(),
         lastError: null,
       });
-      logFFmpeg('info', `FFmpeg ready ✓  (threads: ${typeof SharedArrayBuffer !== 'undefined'})`);
+      logFFmpeg('info', `FFmpeg ready (threads: ${typeof SharedArrayBuffer !== 'undefined'})`);
       return ffmpeg;
 
     } catch (err) {

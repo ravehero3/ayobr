@@ -171,7 +171,7 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
   
   // Debug logging for display index tracking
   if (!displayIndex && pairIndex >= 0) {
-    console.log(`⚠️ Pair ${pair.id} missing displayIndex, using fallback index ${pairIndex + 1}`, {
+    console.log(`Pair ${pair.id} missing displayIndex, using fallback index ${pairIndex + 1}`, {
       pairId: pair.id,
       displayIndex,
       pairIndex,

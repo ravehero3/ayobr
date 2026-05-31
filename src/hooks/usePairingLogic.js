@@ -59,7 +59,7 @@ export const usePairingLogic = () => {
               
               const originalSize = (imageFile.size / 1024 / 1024).toFixed(2);
               const newSize = (resizedFile.size / 1024 / 1024).toFixed(2);
-              console.log(`✓ Resized ${imageFile.name} from ${originalSize}MB to ${newSize}MB`);
+              console.log(`Resized ${imageFile.name} from ${originalSize}MB to ${newSize}MB`);
               
               resolve(resizedFile);
             } else {

@@ -254,7 +254,7 @@ function App({ onBeforeGenerate }) {
           // Clear stuck states specifically
           if (stuckAtZeroStates.length > 0) {
             stuckAtZeroStates.forEach(pair => {
-              console.log(`🔧 Clearing stuck state for ${pair.id}`);
+              console.log(`Clearing stuck state for ${pair.id}`);
               const { setVideoGenerationState } = useAppStore.getState();
               setVideoGenerationState(pair.id, {
                 isGenerating: false,

@@ -36,7 +36,6 @@ export default function ReferralPanel({ onClose }) {
         onClick={e => e.stopPropagation()}>
 
         <div className="text-center mb-5">
-          <div className="text-3xl mb-2">🎁</div>
           <h2 className="text-white font-black text-lg mb-1 tracking-tighter" style={{ fontFamily: NM }}>Invite friends, earn credits</h2>
           <p className="text-gray-500 text-sm leading-relaxed" style={{ fontFamily: NM }}>
             Share your link. When a friend signs up, they get <span className="text-white font-bold">+1 bonus credit</span> and so do you.
@@ -59,7 +58,7 @@ export default function ReferralPanel({ onClose }) {
               className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all mb-4 ${copied ? 'bg-white/10 text-white' : 'bg-white text-black hover:scale-[1.02]'}`}
               style={{ fontFamily: NM }}
             >
-              {copied ? '✓ Copied!' : 'Copy link'}
+              {copied ? 'Copied!' : 'Copy link'}
             </button>
 
             <div className="flex items-center justify-between px-3 py-2.5 rounded-xl"

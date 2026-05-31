@@ -635,7 +635,7 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
         style={{ background: 'rgba(10,10,12,0.96)', border: '1px solid rgba(255,255,255,0.10)' }}
         onClick={e => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-lg">✕</button>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-lg">x</button>
         <h3 className="text-sm font-black text-white mb-4" style={{ fontFamily: NM }}>
           Profile photo
         </h3>

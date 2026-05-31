@@ -12,12 +12,13 @@ import screenshotGenerate from '../assets/screenshot_generate_new.jpg';
 import screenshotDownload from '../assets/screenshot_download.png';
 
 const NM     = "'Neue Montreal', 'Inter', sans-serif";
+const IV     = '"Inter Variable", "Inter Variable Placeholder", sans-serif';
 const SCRIPT = "'Satisfy', cursive";
 const BTN_BG  = '#ffffff';
 const BTN_GLOW = '0 0 40px rgba(255,255,255,0.15)';
 
 const LH_BODY  = 1.6;
-const LH_LABEL = 1.5;
+const LH_LABEL = 'normal';
 const LH_HEAD  = 1.05;
 
 const PARTICLE_CSS = `
@@ -630,16 +631,16 @@ function ShareModal({ onClose }) {
       const logoX = (1080 - logoSize) / 2;
       const logoY = (1920 - logoSize) / 2 + 20;
 
-      // "I 🤍" text — same width as logo, above it
+      // "I love" text — same width as logo, above it
       ctx.textAlign = 'center';
       ctx.textBaseline = 'alphabetic';
       ctx.fillStyle = '#ffffff';
       // Scale font so text spans logoSize width
       ctx.font = `bold 140px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
-      const measured = ctx.measureText('I 🤍');
+      const measured = ctx.measureText('I love');
       const targetFontSize = Math.floor(140 * (logoSize / measured.width));
       ctx.font = `bold ${Math.min(targetFontSize, 160)}px 'GT Walsheim Framer Medium', 'Arial Black', sans-serif`;
-      ctx.fillText('I 🤍', 540, logoY - 36);
+      ctx.fillText('I love', 540, logoY - 36);
 
       ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
 
@@ -677,7 +678,7 @@ function ShareModal({ onClose }) {
         backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)',
         width: '90%', maxWidth: 340, position: 'relative',
       }} onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>✕</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>x</button>
         <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.05rem', color: '#fff', margin: '0 0 6px' }}>Share TypeBeatz</h3>
         <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: '0 0 20px' }}>Post a story to your Instagram</p>
 
@@ -982,8 +983,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
   return (
     <>
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
-        style={{ fontFamily: NM, fontSize: '0.8rem', fontWeight: 500, lineHeight: LH_LABEL, letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
-        <span>🎬</span>
+        style={{ fontFamily: IV, fontSize: '12px', fontWeight: 400, lineHeight: 'normal', letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
         <span>{t('landing.hero.badge')}</span>
       </div>
 
@@ -1066,11 +1066,11 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       <div className="flex flex-row items-center justify-center gap-3">
         <ParticleButton onClick={handleCTA}
           className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
-          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '8px 0', width: 116, borderRadius: 9999, cursor: 'pointer' }}>
+          style={{ fontFamily: IV, fontWeight: 400, fontSize: '12px', lineHeight: 'normal', background: '#fff', border: 'none', color: '#000', padding: '8px 0', width: 116, borderRadius: 9999, cursor: 'pointer' }}>
           {user ? t('landing.hero.openApp') : t('landing.hero.cta')}
         </ParticleButton>
         <a href="#pricing"
-          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.75rem', lineHeight: LH_LABEL, textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ fontFamily: IV, fontWeight: 400, fontSize: '12px', lineHeight: 'normal', textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
           {t('landing.hero.goUnlimited')}
         </a>
@@ -1087,16 +1087,16 @@ function LandingFooter({ isMobile }) {
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col items-center md:items-start gap-2">
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16, opacity: 0.5 }} />
-          <p style={{ fontFamily: NM, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>
+          <p style={{ fontFamily: IV, fontSize: '12px', fontWeight: 400, lineHeight: 'normal', color: 'rgba(255,255,255,0.2)' }}>
             {t('landing.pricing.footer')}
           </p>
         </div>
         
         <div className="flex flex-col items-center gap-2">
-          <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>
+          <p style={{ fontFamily: IV, fontSize: '12px', fontWeight: 400, lineHeight: 'normal', color: 'rgba(255,255,255,0.3)' }}>
             © {new Date().getFullYear()} TypeBeatz. {t('landing.footer.rights')}
           </p>
-          <a href="mailto:typebeatz@voodoo808.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: NM }}>
+          <a href="mailto:typebeatz@voodoo808.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: IV, fontSize: '12px', fontWeight: 400, lineHeight: 'normal' }}>
             typebeatz@voodoo808.com
           </a>
         </div>
@@ -1105,7 +1105,7 @@ function LandingFooter({ isMobile }) {
           <div className="flex gap-6">
             {['Terms', 'Privacy', 'Refund'].map(l => (
               <a key={l} href={`/${l.toLowerCase()}`}
-                style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
+                style={{ fontFamily: IV, fontSize: '12px', fontWeight: 400, lineHeight: 'normal', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}
                 className="hover:text-white transition-colors">{l}</a>
             ))}
           </div>

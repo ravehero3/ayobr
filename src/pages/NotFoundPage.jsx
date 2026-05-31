@@ -21,9 +21,6 @@ export default function NotFoundPage() {
               style={{ backgroundImage: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(14,165,233,0.3))' }}>
               404
             </div>
-            <div className="absolute inset-0 flex items-center justify-center text-6xl pointer-events-none">
-              😴
-            </div>
           </div>
 
           <h1 className="text-2xl font-bold mb-3">This page doesn't exist</h1>

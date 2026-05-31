@@ -221,7 +221,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: '16px' }}>🔒</span>
+                      <span style={{ fontSize: '16px' }}>PRO</span>
                       <span style={{
                         fontSize: '10px', fontWeight: 700, color: '#fff',
                         background: 'linear-gradient(90deg, #3b82f6, #0ea5e9)',
@@ -353,7 +353,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   onClick={() => handleResolutionChange('4k')}
                 >
                   {!canUse4K && (
-                    <div style={{ position: 'absolute', top: -8, right: -4, fontSize: '14px' }}>🔒</div>
+                    <div style={{ position: 'absolute', top: -8, right: -4, fontSize: '9px', fontWeight: 700, color: '#3b82f6' }}>PRO</div>
                   )}
                   <div style={{
                     width: '50px',

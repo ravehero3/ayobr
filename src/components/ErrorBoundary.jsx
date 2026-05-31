@@ -19,7 +19,7 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 text-center">
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/10">
-            <span className="text-2xl grayscale opacity-50">⚠️</span>
+            <span className="text-2xl grayscale opacity-50">!</span>
           </div>
           
           <h1 className="text-2xl font-black mb-3 tracking-tighter" style={{ fontFamily: "'Neue Montreal', sans-serif" }}>
