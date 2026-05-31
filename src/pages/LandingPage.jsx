@@ -12,8 +12,9 @@ import screenshotReview from '../assets/screenshot_review_new.jpg';
 import screenshotGenerate from '../assets/screenshot_generate_new.jpg';
 import screenshotDownload from '../assets/screenshot_download.png';
 
-const NM     = "'Neue Montreal', 'Inter', sans-serif";
+const NM     = "'Neue Montreal', 'Inter', sans-serif"; // legacy — prefer IV or GT_W
 const IV     = '"Inter Variable", "Inter Variable Placeholder", sans-serif';
+const GT_W   = '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif';
 const SCRIPT = "'Satisfy', cursive";
 const BTN_BG  = '#ffffff';
 const BTN_GLOW = '0 0 40px rgba(255,255,255,0.15)';
@@ -75,18 +76,18 @@ function Stat({ prefix, val, label }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
       <div style={{
-        fontFamily: NM, fontSize: '0.72rem', fontWeight: 500,
+        fontFamily: IV, fontSize: '0.72rem', fontWeight: 500,
         color: 'rgba(255,255,255,0.38)', lineHeight: LH_LABEL, letterSpacing: '0.04em',
         marginBottom: 4, visibility: prefix ? 'visible' : 'hidden', userSelect: 'none',
       }}>
         {prefix ?? 'up to'}
       </div>
       <WordReveal text={val} style={{
-        fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.9rem, 3vw, 2.6rem)',
+        fontFamily: GT_W, fontWeight: 500, fontSize: 'clamp(1.9rem, 3vw, 2.6rem)',
         lineHeight: 1, letterSpacing: '-0.04em', color: '#fff', display: 'block',
       }} />
       <WordReveal text={label} style={{
-        fontFamily: NM, fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)',
+        fontFamily: IV, fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)',
         marginTop: 5, letterSpacing: '0.02em', lineHeight: LH_LABEL, display: 'block',
       }} />
     </div>
@@ -271,7 +272,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
             }}>
               {t('landing.pricing.title')}
             </h2>
-            <p style={{ fontFamily: NM, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
+            <p style={{ fontFamily: IV, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
               {t('landing.pricing.subtitle').split('\n').map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}
             </p>
           </motion.div>
@@ -385,7 +386,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                 {/* Small Toggle for PRO and Unlimited */}
                 {plan.hasToggle && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontFamily: NM, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>{t('landing.pricing.toggle.annual')}</span>
+                    <span style={{ fontFamily: IV, fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }} onClick={() => setIsAnnual(!isAnnual)}>{t('landing.pricing.toggle.annual')}</span>
                     <button 
                       onClick={() => setIsAnnual(!isAnnual)}
                       style={{
@@ -410,7 +411,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
 
               {/* Description */}
               <p style={{
-                fontFamily: NM, fontSize: '0.82rem',
+                fontFamily: IV, fontSize: '0.82rem',
                 color: 'rgba(255,255,255,0.32)',
                 lineHeight: LH_BODY, marginBottom: 24,
               }}>
@@ -431,7 +432,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                       exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
                       style={{
-                        fontFamily: NM, fontWeight: 600,
+                        fontFamily: IV, fontWeight: 600,
                         fontSize: '2rem', lineHeight: 1,
                         letterSpacing: '-0.03em', color: '#fff',
                         display: 'inline-block'
@@ -441,7 +442,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                     </motion.span>
                   </AnimatePresence>
                   <span style={{
-                    fontFamily: NM, fontWeight: 400, fontSize: '0.85rem',
+                    fontFamily: IV, fontWeight: 400, fontSize: '0.85rem',
                     color: 'rgba(255,255,255,0.3)', marginLeft: 4,
                   }}>
                     {plan.period}
@@ -456,7 +457,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
                 {plan.features.map((f, i) => (
                   <li key={i} style={{
-                    fontFamily: NM, fontSize: '0.85rem',
+                    fontFamily: IV, fontSize: '0.85rem',
                     color: 'rgba(255,255,255,0.55)',
                     lineHeight: LH_BODY,
                     display: 'flex', alignItems: 'center', gap: 10,
@@ -475,7 +476,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                   onClick={plan.onCta}
                   className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
                   style={{
-                    fontFamily: NM, fontWeight: 600, fontSize: '0.85rem',
+                    fontFamily: IV, fontWeight: 600, fontSize: '0.85rem',
                     lineHeight: LH_LABEL, padding: '0 16px', height: 34, width: '100%',
                     borderRadius: 9999, cursor: 'pointer', outline: 'none',
                     background: plan.highlight ? '#ffffff' : '#1a1a1a', color: plan.highlight ? '#000000' : '#ffffff', border: 'none'
@@ -487,7 +488,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
                 <button
                   onClick={plan.onCta}
                   style={{
-                    fontFamily: NM, fontWeight: 600, fontSize: '0.85rem',
+                    fontFamily: IV, fontWeight: 600, fontSize: '0.85rem',
                     lineHeight: LH_LABEL, padding: '0 16px', height: 34, width: '100%',
                     borderRadius: 9999, cursor: 'pointer', outline: 'none',
                     transition: 'opacity 0.2s ease',
@@ -680,17 +681,17 @@ function ShareModal({ onClose }) {
         width: '90%', maxWidth: 340, position: 'relative',
       }} onClick={e => e.stopPropagation()}>
         <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>x</button>
-        <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: '1.05rem', color: '#fff', margin: '0 0 6px' }}>Share TypeBeatz</h3>
-        <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: '0 0 20px' }}>Post a story to your Instagram</p>
+        <h3 style={{ fontFamily: IV, fontWeight: 700, fontSize: '1.05rem', color: '#fff', margin: '0 0 6px' }}>Share TypeBeatz</h3>
+        <p style={{ fontFamily: IV, fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: '0 0 20px' }}>Post a story to your Instagram</p>
 
         {/* Story preview */}
         <div style={{ width: '100%', aspectRatio: '9/16', borderRadius: 10, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 16, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 220 }}>
           {generating ? (
-            <span style={{ color: 'rgba(255,255,255,0.25)', fontFamily: NM, fontSize: '0.75rem' }}>Generating preview…</span>
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontFamily: IV, fontSize: '0.75rem' }}>Generating preview…</span>
           ) : previewUrl ? (
             <img src={previewUrl} alt="Story preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <span style={{ color: 'rgba(255,255,255,0.25)', fontFamily: NM, fontSize: '0.75rem' }}>Preview unavailable</span>
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontFamily: IV, fontSize: '0.75rem' }}>Preview unavailable</span>
           )}
         </div>
 
@@ -700,7 +701,7 @@ function ShareModal({ onClose }) {
             width: '100%', padding: '11px 0', borderRadius: 10, border: 'none',
             cursor: (previewUrl && !generating) ? 'pointer' : 'not-allowed',
             background: (previewUrl && !generating) ? 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)' : 'rgba(255,255,255,0.06)',
-            color: '#fff', fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
+            color: '#fff', fontFamily: IV, fontWeight: 600, fontSize: '0.82rem',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             opacity: (previewUrl && !generating) ? 1 : 0.45, transition: 'opacity 0.2s',
           }}>
@@ -713,7 +714,7 @@ function ShareModal({ onClose }) {
         <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', margin: '14px 0' }} />
         <button onClick={() => { if (previewUrl) { const a = document.createElement('a'); a.href = previewUrl; a.download = 'typebeatz-story.png'; a.click(); } }}
           disabled={!previewUrl || generating}
-          style={{ width: '100%', padding: '9px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontFamily: NM, fontWeight: 500, fontSize: '0.78rem', cursor: 'pointer' }}>
+          style={{ width: '100%', padding: '9px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontFamily: IV, fontWeight: 500, fontSize: '0.78rem', cursor: 'pointer' }}>
           Download image
         </button>
       </div>
@@ -815,8 +816,8 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
             return (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'relative' }}>
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 20, position: 'relative', zIndex: 1 }}>
-                  <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 8 }}>{step.title}</h3>
-                  <p style={{ fontFamily: NM, fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: 1.6 }}>{step.desc}</p>
+                  <h3 style={{ fontFamily: GT_W, fontWeight: 500, fontSize: 24, color: '#fff', marginTop: 8 }}>{step.title}</h3>
+                  <p style={{ fontFamily: IV, fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: 1.6 }}>{step.desc}</p>
                 </div>
                 <div style={{ aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.09)', position: 'relative' }}>
                   <Content />
@@ -838,7 +839,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
             zIndex: 10,
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
-              <h2 style={{ fontFamily: NM, fontWeight: 300, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
+              <h2 style={{ fontFamily: GT_W, fontWeight: 300, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
                 {t('landing.how.title').split('\n').map((line, i, arr) => (
                   <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
                 ))}
@@ -854,7 +855,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                   display: 'flex', flexDirection: 'column', outline: 'none',
                 }}>
                   <span style={{
-                    fontFamily: NM, fontWeight: 700, fontSize: 13,
+                    fontFamily: IV, fontWeight: 700, fontSize: 13,
                     letterSpacing: '0.06em', textTransform: 'uppercase',
                     color: active ? '#fff' : 'rgba(255,255,255,0.25)',
                     lineHeight: 1.3, transition: 'color 0.3s ease',
@@ -862,7 +863,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                     {step.title}
                   </span>
                   <span style={{
-                    fontFamily: NM, fontSize: 14, lineHeight: 1.65,
+                    fontFamily: IV, fontSize: 14, lineHeight: 1.65,
                     color: 'rgba(255,255,255,0.6)',
                     maxHeight: active ? '160px' : '0px',
                     opacity: active ? 1 : 0, overflow: 'hidden',
@@ -961,18 +962,18 @@ function LandingNavButtons({ user, navigate, login }) {
   return (
     <>
       <button onClick={() => navigate('/login')}
-        style={{ fontFamily: NM, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        style={{ fontFamily: IV, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         className="hover:text-white transition-colors">
         {t('login')}
       </button>
       {user ? (
         <button onClick={() => navigate('/app')}
-          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+          style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
           Open App
         </button>
       ) : (
         <button onClick={login}
-          style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+          style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
           {t('landing.hero.cta')}
         </button>
       )}
@@ -1200,7 +1201,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#000', fontFamily: NM, overflowX: 'clip' }}>
+    <div className="min-h-screen text-white" style={{ background: '#000', fontFamily: IV, overflowX: 'clip' }}>
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-4"
