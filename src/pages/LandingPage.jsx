@@ -838,7 +838,9 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
               <h2 style={{ fontFamily: NM, fontWeight: 900, fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', lineHeight: LH_HEAD, letterSpacing: '-0.03em', color: '#fff', margin: 0 }}>
-                {t('landing.how.title')}
+                {t('landing.how.title').split('\n').map((line, i, arr) => (
+                  <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
+                ))}
               </h2>
             </div>
             {steps.map((step, i) => {
@@ -1066,11 +1068,11 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       <div className="flex flex-row items-center justify-center gap-3">
         <ParticleButton onClick={handleCTA}
           className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
-          style={{ fontFamily: IV, fontWeight: 400, fontSize: '12px', lineHeight: 'normal', background: '#fff', border: 'none', color: '#000', padding: '8px 0', width: 116, borderRadius: 9999, cursor: 'pointer' }}>
+          style={{ fontFamily: IV, fontWeight: 600, fontSize: '14px', lineHeight: 'normal', background: '#fff', border: 'none', color: '#000', padding: '9px 0', width: 128, borderRadius: 9999, cursor: 'pointer' }}>
           {user ? t('landing.hero.openApp') : t('landing.hero.cta')}
         </ParticleButton>
         <a href="#pricing"
-          style={{ fontFamily: IV, fontWeight: 400, fontSize: '12px', lineHeight: 'normal', textDecoration: 'none', padding: '8px 0', width: 116, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ fontFamily: IV, fontWeight: 600, fontSize: '14px', lineHeight: 'normal', textDecoration: 'none', padding: '9px 0', width: 128, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
           {t('landing.hero.goUnlimited')}
         </a>
@@ -1156,7 +1158,7 @@ export default function LandingPage() {
   }, []);
 
   useParallax([
-    { ref: starsRef, speed: 0.25, mode: 'bgY', yOffset: -200 },
+    { ref: starsRef, speed: 0.25, mode: 'bgY', yOffset: 600 },
     { ref: glowRef,  speed: 0.5,  mode: 'translateY' },
   ]);
   useStarsScrollReveal(starsRef);
@@ -1202,7 +1204,7 @@ export default function LandingPage() {
           opacity: 0,
           backgroundImage: `url(${starsBg})`,
           backgroundSize: '130%',
-          backgroundPosition: 'center calc(50% - 200px)',
+          backgroundPosition: 'center calc(50% + 600px)',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
         }} />

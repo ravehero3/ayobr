@@ -137,7 +137,7 @@ export const translations = {
     "landing.stats.videos": "Videos Generated",
     "landing.stats.hours": "Hours Saved",
     
-    "landing.how.title": "How it works.",
+    "landing.how.title": "Spend time on beats,\nnot editing.",
     "landing.how.s1.title": "Upload your tracks.",
     "landing.how.s1.desc": "Drop your MP3s and WAVs. Upload your artwork. We support batch processing up to 30 beats at once.",
     "landing.how.s2.title": "Review & Customize.",
@@ -218,7 +218,7 @@ export const translations = {
     "landing.stats.s4.val": "Custom",
     "landing.stats.s4.label": "backgrounds",
 
-    "landing.how.title": "How it works",
+    "landing.how.title": "Spend time on beats,\nnot editing.",
     "landing.how.s1.title": "Upload your files",
     "landing.how.s1.desc": "Drag and drop your beat MP3s and artwork PNGs — up to 100 files at a time.",
     "landing.how.s2.title": "Review your pairs",
@@ -444,7 +444,7 @@ export const translations = {
     "landing.stats.videos": "Vygenerovaných videí",
     "landing.stats.hours": "Ušetřených hodin",
     
-    "landing.how.title": "Jak to funguje.",
+    "landing.how.title": "Dělejte beaty\nmísto stříhání videí",
     "landing.how.s1.title": "Nahrajte své tracky.",
     "landing.how.s1.desc": "Vložte své MP3 a WAV soubory. Nahrajte své obrázky. Podporujeme hromadné zpracování až 30 beatů najednou.",
     "landing.how.s2.title": "Kontrola a úpravy.",
@@ -525,7 +525,7 @@ export const translations = {
     "landing.stats.s4.val": "Vlastní",
     "landing.stats.s4.label": "pozadí",
 
-    "landing.how.title": "Jak to funguje",
+    "landing.how.title": "Dělejte beaty\nmísto stříhání videí",
     "landing.how.s1.title": "Nahrajte soubory",
     "landing.how.s1.desc": "Přetáhněte své MP3 beaty a obrázky PNG — až 100 souborů najednou.",
     "landing.how.s2.title": "Zkontrolujte párování",
