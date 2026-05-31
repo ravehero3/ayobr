@@ -1,0 +1,21 @@
+{
+  "name": "TypeBeatz",
+  "short_name": "TypeBeatz",
+  "description": "Batch generate type beat videos in one click",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050a13",
+  "theme_color": "#050a13",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

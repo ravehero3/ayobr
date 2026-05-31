@@ -1,0 +1,59 @@
+Ceník
+Začněte zdarma.
+Upgradujte až budete připraveni.
+Žádné skryté poplatky
+
+make sure these are both aligned to the centre of the page and make sure the „Začněte zdarma.
+Upgradujte až budete připraveni.
+Žádné skryté poplatky“ text has these properties:
+Font Family: "Inter Variable", "Inter Variable Placeholder", sans-serif
+Font Size: 20px (calculated from a base of 16px with scaling applied)
+Font Weight: 400 (Regular)
+Line Height: 28px
+
+
+
+
+also in the pricing cards on the landing page and upgrade page pricing cards show information and texts but they use „tvůj“ instead of „váš“ or „vaše“ please change it so we always everywhere use „váš“ and „vaše“ instead of „tvůj“ and „tvoje“
+
+also make sure all grey texts in the landing page use this grey: 9d9d9d
+
+in the how it works section the titles of each subsection should have these text properties:
+
+he font used for the inspected element is Inter Variable (with fallbacks to "Inter Variable Placeholder" and sans-serif), and its computed font size is 24px.
+Here are the details from the computed styles:
+Font Family: "Inter Variable", "Inter Variable Placeholder", sans-serif
+Font Size: 24px
+Font Weight: 400 (Regular)
+Line Height: 28.8px (which corresponds to the authored value of 1.2em)
+Color: rgba(255, 255, 255, 0.6)
+The styles are applied via Framer CSS variables, which scale the base font size (likely from a preset) to the final 24px value.
+
+
+also change the text on the landing page that says „
+Dělejte beaty
+místo stříhání videí
+„
+
+to use this font instead:
+
+https://fonts.google.com/specimen/Figtree?preview.script=Latn
+
+also make sure its on two lines like
+
+Dělejte beaty
+místo stříhání videí
+
+also make sure that the how it works menu sticks to the pag while we scroll through the browser cards. until we scroll through all stages, the top edge of the text thats stuck should be 92px under the bottom edge of the header.
+
+Also the sub-titles in the sub-sections of the how it works section on the home page should be written in first capital letter kind of way, not full caps lock.- so for example it will say „Nahrajte soubory“ and „Zkontrolujte párování“ „Klikněte na generovat“
+„Stáhněte a nahrajte“
+
+make sure the browser cards that show in the how it works section show fade to black on the bottom edge (the fade to black should be 400px tall
+
+Also set the background image with the stars to the default setting and make sure we can see the whole stars image. make sure its centre is behind the „až 4k kvalita videa“ and make sure all of its edges fade to black
+
+also change the text in the how it works menu from „Přetáhněte své MP3 beaty a obrázky PNG - až 100 souborů najednou“ to „Hromadně nahrajte beaty a obrázky - klidně 100 souborů najednou“
+
+also change the H1 font to this: https://fonts.google.com/specimen/Figtree?preview.script=Latn
+
