@@ -529,7 +529,7 @@ export const translations = {
     "landing.how.s1.title": "Nahrajte soubory",
     "landing.how.s1.desc": "Přetáhněte své MP3 beaty a obrázky PNG — až 100 souborů najednou.",
     "landing.how.s2.title": "Zkontrolujte párování",
-    "landing.how.s2.desc": "TypeBeatz automaticky spáruje audio s obrázky. Upravte si to podle sebe.",
+    "landing.how.s2.desc": "TypeBeatz automaticky spáruje audio s obrázky. Změňte co chcete, nebo nechte jak to je.",
     "landing.how.s3.title": "Klikněte na Generovat",
     "landing.how.s3.desc": "Odpočívejte. Aplikace zpracovává každé video na pozadí, zatímco děláte jiné věci.",
     "landing.how.s4.title": "Stáhněte a nahrajte",
