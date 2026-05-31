@@ -990,7 +990,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
         className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
-        style={{ fontFamily: IV, fontSize: '12px', fontWeight: 400, lineHeight: 'normal', letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
+        style={{ fontFamily: IV, fontSize: '14px', fontWeight: 400, lineHeight: 'normal', letterSpacing: '0.01em', background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(8px)' }}>
         <span>{t('landing.hero.badge')}</span>
       </motion.div>
 
@@ -1043,10 +1043,10 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
         style={isMobile ? {
-          fontFamily: '"Inter Variable", "Inter Variable Placeholder", sans-serif',
-          fontSize: '16px',
+          fontFamily: IV,
+          fontSize: '18px',
           fontWeight: 400,
-          lineHeight: '20.8px',
+          lineHeight: '1.5',
           letterSpacing: '-0.01px',
           color: 'rgba(255,255,255,0.6)',
           textAlign: 'center',
@@ -1055,7 +1055,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
           padding: '0',
           margin: '0 auto 2.5rem',
           display: 'block',
-        } : { fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
+        } : { fontFamily: IV, fontSize: '24px', fontWeight: 400, lineHeight: '1.5', color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
         {(() => {
           const subtitle = t('landing.hero.subtitle');
           const parts = subtitle.split('TypeBeatz');
@@ -1092,11 +1092,11 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       >
         <ParticleButton onClick={handleCTA}
           className="transition-all duration-200 hover:scale-105 flex items-center justify-center"
-          style={{ fontFamily: IV, fontWeight: 600, fontSize: '14px', lineHeight: 'normal', background: '#fff', border: 'none', color: '#000', padding: '9px 0', width: 128, borderRadius: 9999, cursor: 'pointer' }}>
+          style={{ fontFamily: IV, fontWeight: 400, fontSize: '15px', lineHeight: 'normal', background: '#fff', border: 'none', color: '#000', padding: '9px 0', width: 128, borderRadius: 9999, cursor: 'pointer' }}>
           {user ? t('landing.hero.openApp') : t('landing.hero.cta')}
         </ParticleButton>
         <a href="#pricing"
-          style={{ fontFamily: IV, fontWeight: 600, fontSize: '14px', lineHeight: 'normal', textDecoration: 'none', padding: '9px 0', width: 128, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ fontFamily: IV, fontWeight: 400, fontSize: '15px', lineHeight: 'normal', textDecoration: 'none', padding: '9px 0', width: 128, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           className="bg-[#2a2a2a] text-white hover:bg-[#111] hover:text-[#999] transition-colors border-none">
           {t('landing.hero.goUnlimited')}
         </a>
