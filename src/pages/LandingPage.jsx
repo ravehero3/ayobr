@@ -193,6 +193,8 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
   const [isAnnual, setIsAnnual] = useState(true);
   const { t } = useLanguage();
   const isPro = user?.role === 'pro' || user?.role === 'admin';
+  const isUnlimited = user?.role === 'unlimited';
+  const isFreeUser = user && !isPro && !isUnlimited;
 
   const plans = [
     {
@@ -207,7 +209,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         { text: t('landing.pricing.free.f4'), icon: PricingIcons.Image },
         { text: t('landing.pricing.free.f5'), icon: PricingIcons.Monitor },
       ],
-      cta: user ? t('landing.pricing.free.cta.current') : t('landing.pricing.free.cta'),
+      cta: isFreeUser ? t('landing.pricing.free.cta.current') : t('landing.pricing.free.cta'),
       onCta: handleCTA,
       highlight: false,
       ctaStyle: 'ghost',
@@ -247,7 +249,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
         ...(isAnnual ? [{ text: t('landing.pricing.unlimited.f6.annual'), icon: PricingIcons.Present }] : []),
       ],
       annualSavings: t('landing.pricing.unlimited.savings.annual'),
-      cta: t('landing.pricing.unlimited.cta'),
+      cta: isUnlimited ? t('landing.pricing.unlimited.cta.current') : t('landing.pricing.unlimited.cta'),
       onCta: () => handleUnlimitedCTA(isAnnual ? 'yearly' : 'monthly'),
       highlight: false,
       topTier: true,
@@ -273,7 +275,7 @@ function PricingSection({ handleCTA, handleUpgradeCTA, handleUnlimitedCTA, user,
               {t('landing.pricing.title')}
             </h2>
             <p style={{ fontFamily: IV, fontSize: '1.2rem', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.4)', maxWidth: 460, margin: '0 auto' }}>
-              {t('landing.pricing.subtitle').split('\n').map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}
+              {t('landing.pricing.subtitle').split('\n').map((line, i, arr) => <span key={i}>{line}{i < arr.length - 1 && <br />}</span>)}
             </p>
           </motion.div>
         </div>
@@ -1234,6 +1236,8 @@ export default function LandingPage() {
           backgroundPosition: 'center 40%',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
+          maskImage: 'linear-gradient(to bottom, transparent 0px, black 70px, black calc(100% - 30px), transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, black 70px, black calc(100% - 30px), transparent 100%)',
         }} />
 
         {/* Subtle blue glow — mid-layer */}
