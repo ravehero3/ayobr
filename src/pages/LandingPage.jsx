@@ -678,13 +678,9 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                   <h3 style={{ fontFamily: NM, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 8 }}>{step.title}</h3>
                   <p style={{ fontFamily: NM, fontSize: 16, color: 'rgba(255,255,255,0.6)', marginTop: 12, lineHeight: 1.6 }}>{step.desc}</p>
                 </div>
-                <div style={{ aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.09)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <SafariChrome />
-                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                      <Content />
-                    </div>
-                  </div>
+                <div style={{ aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.09)', position: 'relative' }}>
+                  <Content />
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, transparent, #000)', pointerEvents: 'none', zIndex: 1 }} />
                 </div>
               </div>
             );
@@ -752,6 +748,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                     overflow: 'hidden', flexShrink: 0,
                     border: '1px solid rgba(255,255,255,0.09)',
                     boxShadow: '0 40px 100px rgba(0,0,0,0.85)',
+                    position: 'relative',
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -760,6 +757,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                       <Content />
                     </div>
                   </div>
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(to bottom, transparent, #000)', pointerEvents: 'none', zIndex: 1 }} />
                 </div>
               );
             })}
@@ -883,7 +881,20 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
         ))}
       </h1>
 
-      <p style={{ fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
+      <p style={isMobile ? {
+          fontFamily: '"Inter Variable", "Inter Variable Placeholder", sans-serif',
+          fontSize: '16px',
+          fontWeight: 400,
+          lineHeight: '20.8px',
+          letterSpacing: '-0.01px',
+          color: 'rgba(255,255,255,0.6)',
+          textAlign: 'center',
+          width: '320px',
+          maxWidth: '100%',
+          padding: '0',
+          margin: '0 auto 2.5rem',
+          display: 'block',
+        } : { fontFamily: NM, fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: LH_BODY, color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
         {(() => {
           const subtitle = t('landing.hero.subtitle');
           const parts = subtitle.split('TypeBeatz');
@@ -948,8 +959,8 @@ function LandingFooter({ isMobile }) {
           <p style={{ fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>
             © {new Date().getFullYear()} TypeBeatz. {t('landing.footer.rights')}
           </p>
-          <a href="mailto:www@voodoo808.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: NM }}>
-            www@voodoo808.com
+          <a href="mailto:typebeatz@voodoo808.com" className="text-blue-500/50 hover:text-blue-400 transition-colors text-xs" style={{ fontFamily: NM }}>
+            typebeatz@voodoo808.com
           </a>
         </div>
 
@@ -1046,7 +1057,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative flex flex-col items-center justify-center px-6 text-center pt-20" style={{ overflow: 'hidden', minHeight: '100vh', background: '#000' }}>
+      <section className="relative flex flex-col items-center px-6 text-center" style={{ overflow: 'hidden', minHeight: '100vh', background: '#000', justifyContent: isMobile ? 'flex-start' : 'center', paddingTop: isMobile ? '72px' : '80px' }}>
 
         {/* Stars background — starts invisible, fades in on mount as text loads */}
         <div ref={starsRef} className="absolute inset-0 pointer-events-none" style={{
