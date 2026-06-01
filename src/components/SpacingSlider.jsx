@@ -18,7 +18,7 @@ const SpacingSlider = () => {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
         transition={{ duration: 0.3 }}
-        className="spacing-slider-container"
+        className="spacing-slider-container hidden md:flex"
       >
         <div className="spacing-slider-title">Spacing</div>
         

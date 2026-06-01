@@ -4,8 +4,10 @@ import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
 import mrakyBackground from '../assets/mraky-a-zzz.png';
 
+const NM = "'Neue Montreal', 'Inter', sans-serif";
+
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
-  const { getVideoGenerationState, generatedVideos, videoSettings, removePair, popPage, resetApp } = useAppStore();
+  const { getVideoGenerationState, generatedVideos, isGenerating, videoSettings, removePair, popPage, resetApp } = useAppStore();
   const { t } = useLanguage();
 
   // Function to download a single video
@@ -522,10 +524,48 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
             </div>
           </div>
 
-          {/* Footer - removed Stop Button */}
-          <div className="p-6 pt-2">
-            {/* Empty footer space */}
-          </div>
+          {/* Footer — shown when all videos are complete */}
+          {!isGenerating && generatedVideos.length > 0 && (
+            <div className="flex justify-center gap-4 p-6 pt-2">
+              <button
+                onClick={async () => {
+                  for (const video of generatedVideos) {
+                    const link = document.createElement('a');
+                    link.href = video.url;
+                    link.download = video.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    await new Promise(r => setTimeout(r, 400));
+                  }
+                }}
+                style={{
+                  fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
+                  background: '#fff', color: '#000', border: 'none',
+                  padding: '9px 22px', borderRadius: 9999, cursor: 'pointer',
+                  transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              >
+                {t('app.downloadAll')}
+              </button>
+              <button
+                onClick={() => resetApp()}
+                style={{
+                  fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
+                  background: 'rgba(255,255,255,0.08)', color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  padding: '9px 22px', borderRadius: 9999, cursor: 'pointer',
+                  transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              >
+                {t('app.reset')}
+              </button>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

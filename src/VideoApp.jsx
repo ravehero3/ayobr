@@ -560,7 +560,7 @@ function App({ onBeforeGenerate }) {
 
       {/* Loading Window */}
       <LoadingWindow 
-        isVisible={isGenerating}
+        isVisible={isGenerating || generatedVideos.length > 0}
         pairs={getCompletePairs()}
         onClose={() => {
           // Loading window will close automatically when generation completes

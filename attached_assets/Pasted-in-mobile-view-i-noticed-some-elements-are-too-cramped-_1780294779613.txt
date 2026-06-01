@@ -1,0 +1,39 @@
+in mobile view i noticed some elements are too cramped together. for example the „zbývá ještě 5 kreditů“ pill in the mobile view should be smaller text and smaller pill. make sure the text in the pill is always on one line only
+
+also in mobile view the „získat pro“ pill is too cramped too. make sure its smaller text and smaller pill too. it should also always show the text in the pill only on one line, not two lines above each other.
+
+in the pricing section, clicking on „začít s pro“ or „jít na neomezený“ should let the user pay. i clicked it and i was forwarded to the app instead. make sure all pay buttons are correctly set to complete the purchase
+
+in the account page, the profile picture crop should let use mouse clicking to drag within the image to select the exact crop. 
+
+make sure the spacing tool is not visible in mobile
+
+also make sure the spacing tool fades to black
+
+also make sure the spacing on desktop is set to 0px from start
+
+In the pricing cards in ceník section and on the upgrade page too, i noticed the cards text says „Vytvoř“ make sure all „Vytvoř“ say „Vytvořte“ instead
+
+also in all pricing cards change the "Ideální pro začátek.“ to „Vyzkoušejte. Bez rizika“
+
+also in all pricing cards change the „tvůj kanál si zaslouží víc“ to "Váš YouTube si zaslouží víc"
+
+also in all pricing cards change the "Žádné limity. Žádné kompromisy."
+To „Pro producenty, kteří to myslí vážně“
+
+Also change the „vlastní foto pozadí pro tvůj branding“ to „Vlastní foto pozadí pro váš branding“ in all pricing cards 
+
+also change the "Vyber svůj plán“ in the upgrade page to „Vyberte svůj plán“ 
+
+also change the „Generuj bez limitů - kolik skladeb, tolik videí“ to „Generujte bez limitů - kolik skladeb, tolik videí“
+
+also change the „kvalita až 4k - vynikni na youtube i dalších platformách“ to „Kvalita až 4K - vynikněte na YouTube i dalších platformách“
+
+in the typebeatz app, page1, change „nahrajte své soubory“ to „Nahrajte soubory“
+
+also in the typebeatz app on page1, delete the text that says „TIP: PRO MAXIMÁLNÍ STABILITU DOPORUČUJEME MAXIMÁLNĚ 100 SOUBORŮ NAJEDNOU.“
+
+also make sure the page1 texts and fonts use the same design rules and fonts like the h1 on landing page
+
+also make sure the users producer name is always displayed in the header (centre of the header)
+

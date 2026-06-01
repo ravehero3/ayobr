@@ -81,7 +81,8 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
         {/* Title */}
         <motion.h2
-          className="text-3xl font-semibold text-white mb-2 group-hover:text-white transition-colors duration-300"
+          className="text-white mb-2 group-hover:text-white transition-colors duration-300"
+          style={{ fontFamily: '"Figtree", sans-serif', fontWeight: 500, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', letterSpacing: '-0.03em', lineHeight: 1.1 }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
@@ -91,7 +92,8 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
 
         {/* Description */}
         <motion.p
-          className="text-lg text-gray-300 mb-8 max-w-md mx-auto leading-relaxed group-hover:text-gray-200 transition-colors duration-300"
+          className="text-gray-400 mb-8 max-w-md mx-auto leading-relaxed group-hover:text-gray-300 transition-colors duration-300"
+          style={{ fontFamily: '"Figtree", sans-serif', fontWeight: 400, fontSize: '1rem' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
@@ -122,16 +124,6 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             <span className="text-xs font-medium text-white whitespace-nowrap">PNG, JPG</span>
           </div>
         </motion.div>
-
-        {/* Pro Tip */}
-        <motion.p
-          className="text-[10px] uppercase tracking-widest text-gray-500 mb-6 font-medium"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-        >
-          {t('app.proTip')}
-        </motion.p>
 
         {/* Browse Button */}
         <motion.button

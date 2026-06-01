@@ -240,7 +240,7 @@ export default function UpgradePage() {
         <div style={{ textAlign: 'center', marginBottom: 80 }}>
           <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
             style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: 16 }}>
-            {isCzech ? 'Vyber svůj plán' : 'Choose your plan'}
+            {isCzech ? 'Vyberte svůj plán' : 'Choose your plan'}
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
             style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.1rem', lineHeight: 1.6 }}>

@@ -27,7 +27,7 @@ const Header = () => {
   // Producer name from auth takes priority; fall back to local store username
   const displayName = user?.producer_name || username;
 
-  if (!hasFiles) {
+  if (!user) {
     return null;
   }
 

@@ -47,9 +47,9 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
         {/* Free user: credit badge + upgrade button */}
         {user && !isPaidPlan && (
           <>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-xs text-gray-300"
-              style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM }}>
-              <span>
+            <div className="flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full border border-white/10 whitespace-nowrap"
+              style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM, fontSize: 'clamp(9px, 1.8vw, 12px)' }}>
+              <span className="text-gray-300">
                 {language === 'cs' 
                   ? getCzechCreditsPhrase(creditsLeft, false) 
                   : `${creditsLeft ?? 5} ${t('creditsLeft')}`}
@@ -57,8 +57,8 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
             </div>
             {onUpgradePro && (
               <button onClick={onUpgradePro} disabled={checkoutLoading}
-                className="transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-                style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.5, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer' }}>
+                className="transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-1 whitespace-nowrap"
+                style={{ fontFamily: NM, fontWeight: 600, fontSize: 'clamp(9px, 1.8vw, 13px)', lineHeight: 1.5, background: '#fff', border: 'none', color: '#000', padding: 'clamp(4px,0.8vw,6px) clamp(8px,2vw,14px)', borderRadius: 9999, cursor: 'pointer' }}>
                 {checkoutLoading ? (
                   <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />{t('nav.opening')}</>
                 ) : t('goPro')}
@@ -70,9 +70,9 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
         {/* PRO user: show credit count + badge */}
         {user && isPro && (
           <>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-xs text-gray-300"
-              style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM }}>
-              <span>
+            <div className="flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full border border-white/10 whitespace-nowrap"
+              style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM, fontSize: 'clamp(9px, 1.8vw, 12px)' }}>
+              <span className="text-gray-300">
                 {language === 'cs' 
                   ? getCzechCreditsPhrase(creditsLeft, true)
                   : `${creditsLeft ?? 31} / 31 left`}

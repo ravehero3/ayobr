@@ -592,12 +592,19 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
     reader.readAsDataURL(file);
   };
 
+  // Load image only when src changes
   React.useEffect(() => {
     if (!imgSrc) return;
     const img = new Image();
     img.src = imgSrc;
     img.onload = () => { imgRef.current = img; draw(); };
-  }, [imgSrc, zoom, offset]);
+  }, [imgSrc]);
+
+  // Redraw when zoom or offset changes (no need to reload image)
+  React.useEffect(() => {
+    if (!imgRef.current) return;
+    draw();
+  }, [zoom, offset]);
 
   const draw = () => {
     const canvas = canvasRef.current;

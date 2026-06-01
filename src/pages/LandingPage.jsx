@@ -1189,12 +1189,12 @@ export default function LandingPage() {
   const handleUpgradeCTA = (interval = 'yearly') => {
     if (!user) { login(); return; }
     if (user.role === 'pro' || user.role === 'unlimited' || user.role === 'admin') navigate('/app');
-    else navigate(`/app?upgrade=true&interval=${interval}`);
+    else navigate(`/upgrade?plan=pro&interval=${interval}`);
   };
   const handleUnlimitedCTA = (interval = 'yearly') => {
     if (!user) { login(); return; }
     if (user.role === 'unlimited' || user.role === 'admin') navigate('/app');
-    else navigate(`/app?upgrade=unlimited&interval=${interval}`);
+    else navigate(`/upgrade?plan=unlimited&interval=${interval}`);
   };
 
   return (

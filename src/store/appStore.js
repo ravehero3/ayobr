@@ -57,7 +57,7 @@ export const useAppStore = create((set, get) => ({
   username: loadFromLocalStorage('username', 'Producer'), // Store username with persistence
 
   // Container spacing
-  containerSpacing: 200, // Default spacing in pixels between container pairs
+  containerSpacing: 0, // Default spacing in pixels between container pairs
 
 
 
