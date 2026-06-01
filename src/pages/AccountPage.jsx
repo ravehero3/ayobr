@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import alienLogo from '../assets/alien_logo_1780252226447.png';
+import alienZzzIcon from '../assets/alien_zzz_icon_1780296423141.png';
 import userIcon from '../assets/user_1754478889614.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -381,13 +382,20 @@ export default function AccountPage() {
                 )}
               </div>
 
-              <div className="mb-5">
-                <div className="text-3xl font-black text-white tracking-tighter mb-1" style={{ fontFamily: NM }}>
-                  {isUnlimited ? t('account.unlimitedPlan') : isPro ? t('account.proPlan') : t('account.freePlan')}
+              <div className="mb-5 flex items-center gap-4">
+                <img
+                  src={alienZzzIcon}
+                  alt=""
+                  style={{ width: 56, height: 56, flexShrink: 0, borderRadius: 12, objectFit: 'cover' }}
+                />
+                <div>
+                  <div className="text-3xl font-black text-white tracking-tighter mb-1" style={{ fontFamily: NM }}>
+                    {isUnlimited ? t('account.unlimitedPlan') : isPro ? t('account.proPlan') : t('account.freePlan')}
+                  </div>
+                  <p className="text-sm text-gray-500 font-medium leading-snug" style={{ fontFamily: NM }}>
+                    {isUnlimited ? t('account.unlimitedPlanDesc') : isPro ? t('account.proPlanDesc') : t('account.freePlanDesc')}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-500 font-medium leading-snug" style={{ fontFamily: NM }}>
-                  {isUnlimited ? t('account.unlimitedPlanDesc') : isPro ? t('account.proPlanDesc') : t('account.freePlanDesc')}
-                </p>
               </div>
 
               {sub?.current_period_end && (
