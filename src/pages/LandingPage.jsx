@@ -844,17 +844,20 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                   display: 'flex', flexDirection: 'column', outline: 'none',
                 }}>
                   <span style={{
-                    fontFamily: '"Inter Variable", "Inter Variable Placeholder", sans-serif',
-                    fontWeight: 400, fontSize: 24,
-                    letterSpacing: '-0.01px', textTransform: 'none',
-                    color: active ? 'rgb(255,255,255)' : '#9d9d9d',
-                    lineHeight: '28.8px', transition: 'color 0.3s ease',
+                    fontFamily: IV,
+                    fontWeight: 500,
+                    fontSize: 24,
+                    letterSpacing: '-0.01px',
+                    textTransform: 'none',
+                    color: active ? '#ffffff' : 'rgba(255,255,255,0.36)',
+                    lineHeight: '1.06',
+                    transition: 'color 0.3s ease',
                   }}>
                     {step.title}
                   </span>
                   <span style={{
                     fontFamily: IV, fontSize: 14, lineHeight: 1.65,
-                    color: '#9d9d9d',
+                    color: active ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.28)',
                     maxHeight: active ? '160px' : '0px',
                     opacity: active ? 1 : 0, overflow: 'hidden',
                     transition: 'max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s ease',
@@ -880,7 +883,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
                     borderRadius: '14px 0 0 14px',
                     overflow: 'hidden', flexShrink: 0,
                     border: '1px solid rgba(255,255,255,0.09)',
-                    boxShadow: '0 40px 100px rgba(0,0,0,0.85)',
+                    boxShadow: '0 40px 100px rgba(0,0,0,0.85), inset 0 -50px 80px -25px rgba(0,0,0,0.95)',
                     position: 'relative',
                   }}
                 >
@@ -964,7 +967,7 @@ function LandingNavButtons({ user, navigate, login }) {
           onMouseEnter={() => setCtaHovered(true)}
           onMouseLeave={() => setCtaHovered(false)}
           style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer', filter: ctaHovered ? 'brightness(0.85)' : 'brightness(1)', transition: 'filter 0.2s ease' }}>
-          Open App
+          {t('landing.hero.openApp')}
         </button>
       ) : (
         <button onClick={login}
@@ -999,7 +1002,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
           transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
         <div style={{
-          fontFamily: '"GT Walsheim Framer Medium", "GT Walsheim Framer Medium Placeholder", sans-serif',
+          fontFamily: IV,
           fontWeight: 500,
           fontSize: isMobile ? '46px' : '105px',
           lineHeight: isMobile ? '50px' : '89px',
@@ -1053,7 +1056,8 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
           padding: '0',
           margin: '0 auto 2.5rem',
           display: 'block',
-        } : { fontFamily: IV, fontSize: '24px', fontWeight: 400, lineHeight: '1.5', color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem' }}>
+          textShadow: '0 8px 25px rgba(0,0,0,0.24)',
+        } : { fontFamily: IV, fontSize: '24px', fontWeight: 400, lineHeight: '1.5', color: 'rgba(255,255,255,0.45)', maxWidth: '36rem', margin: '0 auto 2.5rem', textShadow: '0 8px 25px rgba(0,0,0,0.24)' }}>
         {(() => {
           const subtitle = t('landing.hero.subtitle');
           const parts = subtitle.split('TypeBeatz');
@@ -1224,17 +1228,17 @@ export default function LandingPage() {
         <div ref={starsRef} className="absolute pointer-events-none" style={{
           zIndex: 0,
           opacity: 0,
-          top: 0,
+          top: '-1000px',
           left: 0,
           right: 0,
-          bottom: 0,
+          height: 'calc(100% + 1000px)',
           backgroundImage: `url(${starsBg})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center 72%',
+          backgroundPosition: 'center 0%',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
-          maskImage: 'radial-gradient(ellipse 70% 35% at 50% 72%, black 15%, rgba(0,0,0,0.5) 50%, transparent 75%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 70% 35% at 50% 72%, black 15%, rgba(0,0,0,0.5) 50%, transparent 75%)',
+          maskImage: 'radial-gradient(ellipse 70% 35% at 50% 5%, black 15%, rgba(0,0,0,0.5) 48%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 35% at 50% 5%, black 15%, rgba(0,0,0,0.5) 48%, transparent 70%)',
         }} />
 
         {/* Subtle blue glow — mid-layer */}
