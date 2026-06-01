@@ -328,13 +328,11 @@ export default function UpgradePage() {
       </div>
 
       {/* Footer */}
-      <div style={{
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: '24px 32px',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        background: '#000',
-      }}>
+      <div className="flex items-center justify-end px-4 md:px-[64px] py-4"
+        style={{
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          background: '#000',
+        }}>
         <LanguageToggle />
       </div>
 
