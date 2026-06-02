@@ -25,12 +25,13 @@ const Header = () => {
   };
 
   // Producer name from auth takes priority; fall back through all available names
+  // Note: username from the Zustand store can be '' (empty string from localStorage) — always treat '' as falsy
   const displayName =
-    user?.producer_name ||
-    username ||
-    [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
-    user?.email?.split('@')[0] ||
-    '';
+    user?.producer_name?.trim() ||
+    (typeof username === 'string' && username.trim() ? username.trim() : null) ||
+    [user?.first_name, user?.last_name].filter(s => s?.trim()).join(' ').trim() ||
+    (user?.email ? user.email.split('@')[0] : null) ||
+    'Producer';
 
   if (!user) {
     return null;
@@ -42,7 +43,7 @@ const Header = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0 }}
       className="fixed top-0 left-0 right-0 h-16"
-      style={{ zIndex: 10000 }}
+      style={{ zIndex: 10100 }}
     >
       <div
         className="relative w-full h-full flex items-center justify-between px-4 md:px-[64px]"
@@ -69,14 +70,22 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Producer name — absolutely centred in the header, above flex siblings */}
+        {/* Producer name — absolutely centred in the header, above all siblings */}
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ zIndex: 2 }}
+          style={{ zIndex: 20 }}
         >
           <span
-            className="text-white text-sm font-semibold opacity-90 tracking-wide"
-            style={{ fontFamily: NM }}
+            style={{
+              fontFamily: NM,
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: '#ffffff',
+              opacity: 0.92,
+              letterSpacing: '0.04em',
+              textShadow: '0 1px 8px rgba(0,0,0,0.55)',
+              userSelect: 'none',
+            }}
           >
             {displayName}
           </span>
