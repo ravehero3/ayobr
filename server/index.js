@@ -25,10 +25,8 @@ function validateEnv() {
     process.exit(1);
   }
 
-  const googleKeys = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
-  const googleMissing = googleKeys.filter(key => !process.env[key]);
-  if (googleMissing.length > 0) {
-    console.warn(`[auth] Google OAuth not configured — login will be unavailable: ${googleMissing.join(', ')}`);
+  if (!process.env.REPL_ID) {
+    console.warn('[auth] REPL_ID not set — Replit Auth will not work');
   }
 
   const lsKeys = [
