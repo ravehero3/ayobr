@@ -290,9 +290,6 @@ router.get('/subscription', isAuthenticated, async (req, res) => {
 
 // Cancel subscription endpoint
 router.post('/cancel', isAuthenticated, async (req, res) => {
-  const apiKey = getApiKey();
-  if (!apiKey) return res.status(503).json({ message: 'Lemon Squeezy not configured' });
-
   try {
     const userId = req.user.id;
     const sub = await getSubscription(userId);
@@ -300,20 +297,26 @@ router.post('/cancel', isAuthenticated, async (req, res) => {
       return res.status(404).json({ message: 'No active subscription found' });
     }
 
-    if (sub.provider_subscription_id.startsWith('gopay_')) {
+    const subId = sub.provider_subscription_id;
+
+    // Non-LS subscriptions (GoPay, test_*) — cancel locally, no API call needed
+    if (!subId.startsWith('ls_')) {
       await upsertSubscription({
         userId,
         providerCustomerId: sub.provider_customer_id,
-        providerSubscriptionId: sub.provider_subscription_id,
+        providerSubscriptionId: subId,
         status: 'cancelled',
         currentPeriodEnd: sub.current_period_end
       });
-      return res.json({ message: 'GoPay subscription cancelled locally' });
+      return res.json({ message: 'Subscription cancelled', endsAt: sub.current_period_end });
     }
 
-    // Call Lemon Squeezy API to cancel subscription (DELETE /v1/subscriptions/:id)
-    const subId = sub.provider_subscription_id.replace('ls_', '');
-    const response = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${subId}`, {
+    // Lemon Squeezy subscription — requires API key
+    const apiKey = getApiKey();
+    if (!apiKey) return res.status(503).json({ message: 'Lemon Squeezy not configured' });
+
+    const lsSubId = subId.replace('ls_', '');
+    const response = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${lsSubId}`, {
       method: 'DELETE',
       headers: {
         'Accept': 'application/vnd.api+json',
@@ -331,19 +334,43 @@ router.post('/cancel', isAuthenticated, async (req, res) => {
     const result = await response.json();
     const endsAt = result?.data?.attributes?.ends_at;
 
-    // Update local status to cancelled
     await upsertSubscription({
       userId,
       providerCustomerId: sub.provider_customer_id,
-      providerSubscriptionId: sub.provider_subscription_id,
+      providerSubscriptionId: subId,
       status: 'cancelled',
       currentPeriodEnd: endsAt ? new Date(endsAt) : sub.current_period_end
     });
 
-    res.json({ message: 'Subscription cancelled successfully at period end' });
+    res.json({ message: 'Subscription cancelled successfully at period end', endsAt: endsAt || sub.current_period_end });
   } catch (err) {
     console.error('Lemon Squeezy cancel error:', err);
     res.status(500).json({ message: 'Failed to cancel subscription' });
+  }
+});
+
+// Admin: seed a test subscription so cancellation flow can be tested without real payments
+router.post('/admin/test-subscription', isAdmin, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const endsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+    const testSubId = `test_${userId}_${Date.now()}`;
+
+    await upsertSubscription({
+      userId,
+      providerCustomerId: 'test_customer',
+      providerSubscriptionId: testSubId,
+      status: 'active',
+      currentPeriodEnd: endsAt
+    });
+    await setUserRole(userId, 'unlimited');
+    await setCreditsForRole(userId, 'unlimited');
+
+    console.log(`Admin ${userId} created test subscription ${testSubId}`);
+    res.json({ message: 'Test subscription created', endsAt });
+  } catch (err) {
+    console.error('Admin test-subscription error:', err);
+    res.status(500).json({ message: 'Failed to create test subscription' });
   }
 });
 
