@@ -68,6 +68,47 @@ function InputField({ label, value, onChange, placeholder, disabled }) {
   );
 }
 
+/* ── Pill button — matches the landing page "Open app" style ───────────────── */
+function PillButton({ children, onClick, disabled, variant = 'primary', style: extraStyle = {} }) {
+  const base = {
+    fontFamily: NM,
+    fontWeight: 600,
+    fontSize: '0.82rem',
+    borderRadius: 9999,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    outline: 'none',
+    border: 'none',
+    transition: 'filter 0.2s ease, opacity 0.2s ease',
+    opacity: disabled ? 0.4 : 1,
+    padding: '9px 22px',
+    ...extraStyle,
+  };
+  const primary = { background: '#fff', color: '#000' };
+  const secondary = {
+    background: 'rgba(255,255,255,0.08)',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,0.15)',
+  };
+  const danger = {
+    background: 'rgba(40,40,40,0.85)',
+    color: 'rgba(255,255,255,0.55)',
+    border: '1px solid rgba(255,255,255,0.08)',
+  };
+  const variantStyle = variant === 'secondary' ? secondary : variant === 'danger' ? danger : primary;
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{ ...base, ...variantStyle }}
+      onMouseEnter={e => { if (!disabled) e.currentTarget.style.filter = 'brightness(0.85)'; }}
+      onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+    >
+      {children}
+    </button>
+  );
+}
+
 function formatDate(dateStr, language) {
   if (!dateStr) return '—';
   try {
@@ -276,31 +317,50 @@ export default function AccountPage() {
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <GlassCard>
               {/* Avatar + name */}
-              <div className="flex items-center gap-4 mb-7">
+              <div className="flex items-center gap-5 mb-7">
+                {/* 2× bigger avatar: w-28 h-28 = 112px */}
                 <div
                   onClick={() => setShowCropModal(true)}
-                  className="w-14 h-14 rounded-full overflow-hidden border border-white/10 bg-white/4 cursor-pointer relative group hover:border-white/30 transition-all duration-300 flex-shrink-0"
+                  className="relative group flex-shrink-0 cursor-pointer"
+                  style={{
+                    width: 112, height: 112, borderRadius: '50%',
+                    overflow: 'hidden',
+                    border: '1.5px solid rgba(255,255,255,0.10)',
+                    background: 'rgba(255,255,255,0.04)',
+                    transition: 'border-color 0.3s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.30)')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)')}
                 >
                   <img
                     src={user.profile_image_url || userIcon}
                     alt=""
-                    className="w-full h-full object-cover"
-                    style={!user.profile_image_url ? { opacity: 0.45, padding: '9px' } : {}}
-                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; e.currentTarget.style.padding = '9px'; e.currentTarget.style.opacity = '0.45'; }}
+                    style={{
+                      width: '100%', height: '100%',
+                      objectFit: 'cover',
+                      ...(!user.profile_image_url ? { opacity: 0.45, padding: '18px' } : {}),
+                    }}
+                    onError={e => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = userIcon;
+                      e.currentTarget.style.padding = '18px';
+                      e.currentTarget.style.opacity = '0.45';
+                    }}
                   />
                   <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                    <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                   </div>
                 </div>
+
                 <div className="min-w-0">
                   <h1 className="text-xl font-black text-white tracking-tight truncate" style={{ fontFamily: NM }}>
                     {user.producer_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Producer'}
                   </h1>
                   <p className="text-gray-500 text-xs font-medium mt-0.5 truncate" style={{ fontFamily: NM }}>{user.email}</p>
-                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    {/* Admin badge (dark, only for admins) */}
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    {/* Admin badge */}
                     {user.role === 'admin' && (
                       <span
                         className="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-widest uppercase"
@@ -309,24 +369,31 @@ export default function AccountPage() {
                         admin
                       </span>
                     )}
-                    {/* Role badge (white) — clicking navigates to upgrade */}
+                    {/* Role badge — always "UNLIMITED" for unlimited/admin, pill shape, gets darker on hover */}
                     <span
                       onClick={() => navigate('/upgrade')}
                       style={{
                         display: 'inline-flex', alignItems: 'center', lineHeight: 1, whiteSpace: 'nowrap',
-                        cursor: 'pointer', padding: '4px 10px', borderRadius: 6,
-                        background: '#fff', color: '#000', fontSize: 12, fontWeight: 600,
-                        border: '1.5px solid #fff', fontFamily: NM,
-                        transition: 'background 0.18s, color 0.18s, transform 0.18s', userSelect: 'none',
+                        cursor: 'pointer',
+                        padding: '3px 9px',
+                        borderRadius: 9999,
+                        background: '#fff', color: '#000',
+                        fontSize: 10, fontWeight: 700,
+                        letterSpacing: '0.04em',
+                        border: '1.5px solid #fff',
+                        fontFamily: NM,
+                        transition: 'filter 0.18s ease',
+                        userSelect: 'none',
+                        textTransform: 'uppercase',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#e8e8e8'; e.currentTarget.style.transform = 'scale(1.06)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
+                      onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.80)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
                     >
                       {user.role === 'admin' || user.role === 'unlimited'
-                        ? (isCzech ? 'Bez omezení' : 'Unlimited')
+                        ? 'UNLIMITED'
                         : user.role === 'pro'
-                          ? 'Pro'
-                          : (isCzech ? 'Zdarma' : 'Free')}
+                          ? 'PRO'
+                          : (isCzech ? 'ZDARMA' : 'FREE')}
                     </span>
                   </div>
                 </div>
@@ -340,15 +407,10 @@ export default function AccountPage() {
                 </div>
                 <InputField label={t('account.producerName')} value={producerName} onChange={setProducerName} placeholder="Stage name" />
 
-                <div className="pt-1 flex items-center justify-between gap-3">
-                  <button
-                    onClick={handleSaveProfile}
-                    disabled={saving}
-                    className="px-6 py-2.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40"
-                    style={{ fontFamily: NM }}
-                  >
+                <div className="pt-1 flex items-center gap-3">
+                  <PillButton onClick={handleSaveProfile} disabled={saving} style={{ paddingLeft: 24, paddingRight: 24 }}>
                     {saving ? (isCzech ? 'Ukládám…' : 'Saving…') : t('account.saveChanges')}
-                  </button>
+                  </PillButton>
                   <AnimatePresence>
                     {saveMessage && (
                       <motion.span
@@ -409,46 +471,26 @@ export default function AccountPage() {
                 </div>
               )}
 
-              <div className="space-y-2 pt-1">
+              <div className="space-y-2 pt-1 flex flex-col items-start">
                 {isPaid ? (
                   <>
                     {isPro && (
-                      <button
-                        onClick={() => navigate('/upgrade')}
-                        className="w-full py-3 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.01] transition-all"
-                        style={{ fontFamily: NM }}
-                      >
+                      <PillButton onClick={() => navigate('/upgrade')} style={{ width: '100%', textAlign: 'center', padding: '12px 22px' }}>
                         {isCzech ? 'Upgradovat na Neomezený' : 'Upgrade to Unlimited'}
-                      </button>
+                      </PillButton>
                     )}
                     {sub?.status === 'active' && (
-                      <button
-                        onClick={handleCancelSub}
-                        disabled={cancelLoading}
-                        className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40"
-                        style={{
-                          fontFamily: NM,
-                          border: '1px solid rgba(255,255,255,0.08)',
-                          color: 'rgba(255,255,255,0.55)',
-                          background: 'rgba(40,40,40,0.85)',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(55,55,55,0.9)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(40,40,40,0.85)'; }}
-                      >
+                      <PillButton onClick={handleCancelSub} disabled={cancelLoading} variant="danger" style={{ width: '100%', textAlign: 'center', padding: '12px 22px' }}>
                         {cancelLoading
                           ? (isCzech ? 'Ruším…' : 'Cancelling…')
                           : (isCzech ? 'Zrušit' : 'Cancel')}
-                      </button>
+                      </PillButton>
                     )}
                   </>
                 ) : (
-                  <button
-                    onClick={() => navigate('/upgrade')}
-                    className="w-full py-3.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.01] transition-all"
-                    style={{ fontFamily: NM }}
-                  >
+                  <PillButton onClick={() => navigate('/upgrade')} style={{ width: '100%', textAlign: 'center', padding: '14px 22px' }}>
                     {t('account.upgradeToPro')}
-                  </button>
+                  </PillButton>
                 )}
               </div>
             </GlassCard>
@@ -467,15 +509,20 @@ export default function AccountPage() {
               </div>
 
               {isUnlimited ? (
-                /* Unlimited layout — no progress bar */
-                <div className="flex items-baseline gap-3">
-                  <span className="text-5xl font-black text-white tracking-tighter" style={{ fontFamily: NM }}>∞</span>
+                /* Unlimited layout — infinity symbol 2.5× bigger, updated Czech text */
+                <div className="flex items-center gap-4">
+                  <span
+                    className="font-black text-white leading-none flex-shrink-0"
+                    style={{ fontFamily: NM, fontSize: '7.5rem', lineHeight: 1 }}
+                  >
+                    ∞
+                  </span>
                   <div>
                     <p className="text-sm font-bold text-white" style={{ fontFamily: NM }}>
-                      {isCzech ? 'Neomezené' : 'Unlimited'}
+                      {isCzech ? 'Neomezené generování' : 'Unlimited'}
                     </p>
                     <p className="text-xs text-gray-500 font-medium" style={{ fontFamily: NM }}>
-                      {isCzech ? 'videa za měsíc' : 'videos per month'}
+                      {isCzech ? 'videí za měsíc' : 'videos per month'}
                     </p>
                   </div>
                 </div>
@@ -506,25 +553,17 @@ export default function AccountPage() {
                       />
                     </div>
                   </div>
+
+                  {!isPaid && (
+                    <div className="mt-5">
+                      <PillButton onClick={() => navigate('/upgrade')} style={{ width: '100%', textAlign: 'center', padding: '11px 22px' }}>
+                        {isCzech ? 'Získat více kreditů' : 'Get more credits'}
+                      </PillButton>
+                    </div>
+                  )}
                 </>
               )}
             </GlassCard>
-          </motion.div>
-
-          {/* ── Sign out button — below all cards ────────────────────────── */}
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.21, duration: 0.45 }}>
-            <button
-              onClick={logout}
-              className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98]"
-              style={{
-                fontFamily: NM,
-                background: '#ffffff',
-                border: 'none',
-                color: '#000000',
-              }}
-            >
-              {isCzech ? 'Odhlásit se' : 'Sign out'}
-            </button>
           </motion.div>
 
         </div>
@@ -553,19 +592,43 @@ export default function AccountPage() {
           <span className="hidden sm:inline">{t('account.backToApp')}</span>
         </button>
 
-        {/* Right — Video settings gear */}
-        <motion.button
-          onClick={() => setIsSettingsOpen(true)}
-          whileHover={{ rotate: 90 }}
-          transition={{ duration: 0.25 }}
-          className="p-2 rounded-lg text-gray-500 hover:text-white transition-colors"
-          title={isCzech ? 'Nastavení videa' : 'Video settings'}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </motion.button>
+        {/* Right — Sign out (small black pill) + gear */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={logout}
+            style={{
+              fontFamily: NM,
+              fontWeight: 600,
+              fontSize: '0.72rem',
+              borderRadius: 9999,
+              cursor: 'pointer',
+              outline: 'none',
+              border: '1px solid rgba(255,255,255,0.12)',
+              transition: 'filter 0.2s ease',
+              padding: '5px 14px',
+              background: 'rgba(20,20,20,0.9)',
+              color: 'rgba(255,255,255,0.65)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+          >
+            {isCzech ? 'Odhlásit se' : 'Sign out'}
+          </button>
+
+          {/* Video settings gear */}
+          <motion.button
+            onClick={() => setIsSettingsOpen(true)}
+            whileHover={{ rotate: 90 }}
+            transition={{ duration: 0.25 }}
+            className="p-2 rounded-lg text-gray-500 hover:text-white transition-colors"
+            title={isCzech ? 'Nastavení videa' : 'Video settings'}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </motion.button>
+        </div>
       </div>
 
       {/* ── Modals ──────────────────────────────────────────────────────────── */}
@@ -600,7 +663,6 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
     reader.readAsDataURL(file);
   };
 
-  // Load image only when src changes
   React.useEffect(() => {
     if (!imgSrc) return;
     const img = new Image();
@@ -608,7 +670,6 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
     img.onload = () => { imgRef.current = img; draw(); };
   }, [imgSrc]);
 
-  // Redraw when zoom or offset changes (no need to reload image)
   React.useEffect(() => {
     if (!imgRef.current) return;
     draw();
@@ -694,17 +755,23 @@ function ProfilePictureModal({ onClose, onSave, userIcon }) {
           </div>
         )}
 
-        <label className="block w-full py-2.5 rounded-xl text-center text-xs font-bold uppercase tracking-widest cursor-pointer transition-all mb-2"
-          style={{ border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.55)', fontFamily: NM }}>
+        <label
+          className="block w-full py-2.5 rounded-full text-center text-xs font-bold uppercase tracking-widest cursor-pointer transition-all mb-2"
+          style={{ border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.55)', fontFamily: NM }}
+        >
           Choose photo
-          <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+          <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
         </label>
 
         {imgSrc && (
-          <button onClick={handleSave}
-            className="w-full py-2.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all"
-            style={{ fontFamily: NM }}>
-            Save photo
+          <button
+            onClick={handleSave}
+            className="w-full py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all"
+            style={{ background: '#fff', color: '#000', fontFamily: NM }}
+            onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
+            onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+          >
+            Save
           </button>
         )}
       </div>

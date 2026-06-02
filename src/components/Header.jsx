@@ -24,8 +24,13 @@ const Header = () => {
     resetGenerationState();
   };
 
-  // Producer name from auth takes priority; fall back to local store username
-  const displayName = user?.producer_name || username;
+  // Producer name from auth takes priority; fall back through all available names
+  const displayName =
+    user?.producer_name ||
+    username ||
+    [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
+    user?.email?.split('@')[0] ||
+    '';
 
   if (!user) {
     return null;

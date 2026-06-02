@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
 
+const NM = "'Neue Montreal', 'Inter', sans-serif";
+
 const SettingsPanel = ({ isOpen, onClose }) => {
   const { user, featureFlags } = useAuth();
-  const { 
+  const {
     videoSettings,
     setVideoBackground,
     setCustomBackground,
@@ -15,8 +17,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
   const [selectedResolution, setSelectedResolution] = useState(videoSettings.quality || 'fullhd');
 
-  // 4K requires ultra_quality feature flag (PRO/Unlimited plan)
-  // Full HD (1080p) and HD (720p) are available to everyone
   const canUse4K = featureFlags?.ultra_quality || user?.role === 'unlimited' || user?.role === 'admin';
   const canUseCustomBackground = user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
 
@@ -30,12 +30,9 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     setSelectedResolution(resolution);
   };
 
-
-
   const handleCustomBackgroundUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
-      // Convert file to base64 for storage
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64Data = e.target.result;
@@ -53,10 +50,22 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   };
 
   const handleCancel = () => {
-    // Reset selections to current values
     setSelectedBackground(videoSettings.background || 'black');
     setSelectedResolution(videoSettings.quality || 'fullhd');
     onClose();
+  };
+
+  /* ── shared pill-button style ── */
+  const pillBtn = {
+    fontFamily: NM,
+    fontWeight: 600,
+    fontSize: '0.82rem',
+    borderRadius: 9999,
+    cursor: 'pointer',
+    outline: 'none',
+    transition: 'filter 0.2s ease',
+    padding: '10px 28px',
+    border: 'none',
   };
 
   return (
@@ -64,170 +73,131 @@ const SettingsPanel = ({ isOpen, onClose }) => {
       {isOpen && (
         <motion.div
           className="fixed inset-0 flex items-center justify-center"
-          style={{
-            zIndex: 999999,
-            pointerEvents: 'auto',
-          }}
+          style={{ zIndex: 999999, pointerEvents: 'auto' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Enhanced Gaussian blur backdrop matching AppInfoWindow */}
-          <div 
+          {/* Backdrop */}
+          <div
             className="absolute inset-0"
+            onClick={handleCancel}
             style={{
-              background: 'rgba(0, 0, 0, 0.6)',
-              backdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(110%) brightness(80%)',
-              minHeight: '100vh',
-              minWidth: '100vw',
+              background: 'rgba(0,0,0,0.72)',
+              backdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
             }}
           />
 
-          {/* Settings Window */}
+          {/* Settings card — pure-black glassmorphism */}
           <motion.div
             className="relative"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
             style={{
-              width: '480px',
-              height: '520px',
-              background: 'rgba(8, 8, 12, 0.85)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '20px',
-              border: '2px solid rgba(255, 255, 255, 0.08)',
-              boxShadow: `
-                0 32px 64px rgba(0, 0, 0, 0.6),
-                0 8px 16px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05)
-              `,
+              width: 480,
+              background: 'rgba(10,10,12,0.88)',
+              backdropFilter: 'blur(28px)',
+              WebkitBackdropFilter: 'blur(28px)',
+              borderRadius: 20,
+              border: '1px solid rgba(255,255,255,0.07)',
+              boxShadow: '0 20px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset',
               padding: '32px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '24px'
+              gap: 24,
             }}
           >
             {/* Title */}
-            <h2 
-              className="text-center mb-2"
+            <h2
               style={{
-                color: '#e0e0e0',
-                fontSize: '20px',
-                fontWeight: '600'
+                fontFamily: NM,
+                color: 'rgba(255,255,255,0.90)',
+                fontSize: 18,
+                fontWeight: 700,
+                textAlign: 'center',
+                margin: 0,
+                letterSpacing: '-0.01em',
               }}
             >
               Settings
             </h2>
 
-
-
             {/* Background Selection */}
             <div>
-              <div style={{
-                color: '#e0e0e0',
-                fontSize: '14px',
-                fontWeight: '600',
-                marginBottom: '12px',
-                opacity: '0.9'
-              }}>
+              <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 12 }}>
                 Background
-              </div>
-              <div style={{
-                display: 'flex',
-                gap: '16px',
-                justifyContent: 'space-between'
-              }}>
-                {/* White Background */}
+              </p>
+              <div style={{ display: 'flex', gap: 12 }}>
+                {/* White */}
                 <motion.div
-                  className="cursor-pointer relative overflow-hidden"
-                  style={{
-                    flex: '1',
-                    height: '80px',
-                    borderRadius: '12px',
-                    border: selectedBackground === 'white' 
-                      ? '2px solid rgba(59, 130, 246, 0.8)' 
-                      : '2px solid rgba(255, 255, 255, 0.1)',
-                    background: 'linear-gradient(135deg, #ffffff, #f8f8f8)',
-                    boxShadow: selectedBackground === 'white' 
-                      ? '0 0 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)'
-                      : 'none',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   onClick={() => handleBackgroundChange('white')}
-                />
-
-                {/* Black Background */}
-                <motion.div
-                  className="cursor-pointer relative overflow-hidden"
                   style={{
-                    flex: '1',
-                    height: '80px',
-                    borderRadius: '12px',
-                    border: selectedBackground === 'black' 
-                      ? '2px solid rgba(59, 130, 246, 0.8)' 
-                      : '2px solid rgba(255, 255, 255, 0.1)',
-                    background: 'linear-gradient(135deg, #1a1a1a, #000000)',
-                    boxShadow: selectedBackground === 'black' 
-                      ? '0 0 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)'
-                      : 'none',
-                    transition: 'all 0.3s ease'
+                    flex: 1, height: 72, borderRadius: 12, cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #ffffff, #f0f0f0)',
+                    border: selectedBackground === 'white'
+                      ? '2px solid rgba(255,255,255,0.9)'
+                      : '2px solid rgba(255,255,255,0.10)',
+                    boxShadow: selectedBackground === 'white' ? '0 0 0 2px rgba(255,255,255,0.15)' : 'none',
+                    transition: 'all 0.2s ease',
+                    position: 'relative', overflow: 'hidden',
                   }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                >
+                  {selectedBackground === 'white' && (
+                    <div style={{ position: 'absolute', bottom: 6, right: 8, width: 8, height: 8, borderRadius: '50%', background: '#000', opacity: 0.6 }} />
+                  )}
+                </motion.div>
+
+                {/* Black */}
+                <motion.div
                   onClick={() => handleBackgroundChange('black')}
-                />
-
-                {/* Custom Background */}
-                <motion.div
-                  className="relative overflow-hidden"
                   style={{
-                    flex: '1',
-                    height: '80px',
-                    borderRadius: '12px',
-                    border: selectedBackground === 'custom'
-                      ? '2px solid rgba(59, 130, 246, 0.8)'
-                      : '2px solid rgba(255, 255, 255, 0.1)',
-                    background: canUseCustomBackground && videoSettings.customBackground
-                      ? `url(${videoSettings.customBackground})`
-                      : 'linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(17, 24, 39, 0.6))',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: selectedBackground === 'custom'
-                      ? '0 0 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)'
-                      : 'none',
-                    transition: 'all 0.3s ease',
-                    cursor: canUseCustomBackground ? 'pointer' : 'not-allowed',
-                    opacity: canUseCustomBackground ? 1 : 0.6,
+                    flex: 1, height: 72, borderRadius: 12, cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #1a1a1a, #000)',
+                    border: selectedBackground === 'black'
+                      ? '2px solid rgba(255,255,255,0.9)'
+                      : '2px solid rgba(255,255,255,0.10)',
+                    boxShadow: selectedBackground === 'black' ? '0 0 0 2px rgba(255,255,255,0.08)' : 'none',
+                    transition: 'all 0.2s ease',
+                    position: 'relative', overflow: 'hidden',
                   }}
-                  whileHover={{ scale: canUseCustomBackground ? 1.02 : 1 }}
-                  whileTap={{ scale: canUseCustomBackground ? 0.98 : 1 }}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                >
+                  {selectedBackground === 'black' && (
+                    <div style={{ position: 'absolute', bottom: 6, right: 8, width: 8, height: 8, borderRadius: '50%', background: '#fff', opacity: 0.7 }} />
+                  )}
+                </motion.div>
+
+                {/* Custom */}
+                <motion.div
                   onClick={() => canUseCustomBackground && document.getElementById('customBackgroundUpload').click()}
+                  style={{
+                    flex: 1, height: 72, borderRadius: 12,
+                    cursor: canUseCustomBackground ? 'pointer' : 'not-allowed',
+                    opacity: canUseCustomBackground ? 1 : 0.5,
+                    background: canUseCustomBackground && videoSettings.customBackground
+                      ? `url(${videoSettings.customBackground}) center/cover no-repeat`
+                      : 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                    border: selectedBackground === 'custom'
+                      ? '2px solid rgba(255,255,255,0.9)'
+                      : '2px solid rgba(255,255,255,0.10)',
+                    transition: 'all 0.2s ease',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    position: 'relative', overflow: 'hidden',
+                  }}
+                  whileHover={canUseCustomBackground ? { scale: 1.03 } : {}}
+                  whileTap={canUseCustomBackground ? { scale: 0.97 } : {}}
                 >
                   {canUseCustomBackground ? (
-                    <div style={{
-                      color: '#e0e0e0',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                      background: videoSettings.customBackground ? 'rgba(0,0,0,0.6)' : 'transparent',
-                      padding: videoSettings.customBackground ? '8px 12px' : '0',
-                      borderRadius: videoSettings.customBackground ? '8px' : '0'
-                    }}>
+                    <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.55)', textShadow: '0 2px 6px rgba(0,0,0,0.9)', background: videoSettings.customBackground ? 'rgba(0,0,0,0.55)' : 'transparent', padding: videoSettings.customBackground ? '4px 8px' : 0, borderRadius: 6 }}>
                       Custom
-                    </div>
+                    </span>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: '16px' }}>PRO</span>
-                      <span style={{
-                        fontSize: '10px', fontWeight: 700, color: '#fff',
-                        background: 'linear-gradient(90deg, #3b82f6, #0ea5e9)',
-                        borderRadius: 4, padding: '1px 6px', letterSpacing: '0.05em'
-                      }}>PRO</span>
-                    </div>
+                    <span style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>PRO</span>
                   )}
                   <input
                     type="file"
@@ -242,204 +212,87 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
             {/* Resolution Selection */}
             <div>
-              <div style={{
-                color: '#e0e0e0',
-                fontSize: '14px',
-                fontWeight: '600',
-                marginBottom: '12px',
-                opacity: '0.9'
-              }}>
+              <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 12 }}>
                 Resolution
-              </div>
-              <div style={{
-                display: 'flex',
-                gap: '12px'
-              }}>
-                {/* 720p HD */}
-                <motion.div
-                  className="cursor-pointer text-center"
-                  style={{
-                    flex: '1',
-                    padding: '16px 8px',
-                    background: selectedResolution === 'hd' 
-                      ? 'rgba(59, 130, 246, 0.05)' 
-                      : 'rgba(15, 15, 25, 0.6)',
-                    border: selectedResolution === 'hd' 
-                      ? '2px solid rgba(59, 130, 246, 0.8)' 
-                      : '2px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleResolutionChange('hd')}
-                >
-                  <div style={{
-                    width: '50px',
-                    height: '28px',
-                    margin: '0 auto 8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '9px',
-                    borderRadius: '4px',
-                    background: 'linear-gradient(135deg, #4b5563, #1f2937)',
-                    color: 'white',
-                  }}>
-                    720p
-                  </div>
-                  <div style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: '600' }}>HD</div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '11px' }}>1280×720</div>
-                </motion.div>
-
-                {/* Full HD */}
-                <motion.div
-                  className="text-center cursor-pointer"
-                  style={{
-                    flex: '1',
-                    padding: '16px 8px',
-                    background: selectedResolution === 'fullhd' 
-                      ? 'rgba(59, 130, 246, 0.05)' 
-                      : 'rgba(15, 15, 25, 0.6)',
-                    border: selectedResolution === 'fullhd' 
-                      ? '2px solid rgba(59, 130, 246, 0.8)' 
-                      : '2px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    position: 'relative',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleResolutionChange('fullhd')}
-                >
-                  <div style={{
-                    width: '50px',
-                    height: '28px',
-                    margin: '0 auto 8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '9px',
-                    borderRadius: '4px',
-                    background: 'linear-gradient(135deg, #1e40af, #1e3a8a)',
-                    color: 'white',
-                  }}>
-                    1080p
-                  </div>
-                  <div style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: '600' }}>Full HD</div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '11px' }}>1920×1080</div>
-                </motion.div>
-
-                {/* 4K Ultra HD */}
-                <motion.div
-                  className={`text-center ${canUse4K ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
-                  style={{
-                    flex: '1',
-                    padding: '16px 8px',
-                    background: selectedResolution === '4k' 
-                      ? 'rgba(59, 130, 246, 0.05)' 
-                      : 'rgba(15, 15, 25, 0.6)',
-                    border: selectedResolution === '4k' 
-                      ? '2px solid rgba(59, 130, 246, 0.8)' 
-                      : '2px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    position: 'relative',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={canUse4K ? { scale: 1.02 } : {}}
-                  whileTap={canUse4K ? { scale: 0.98 } : {}}
-                  onClick={() => handleResolutionChange('4k')}
-                >
-                  {!canUse4K && (
-                    <div style={{ position: 'absolute', top: -8, right: -4, fontSize: '9px', fontWeight: 700, color: '#3b82f6' }}>PRO</div>
-                  )}
-                  <div style={{
-                    width: '50px',
-                    height: '28px',
-                    margin: '0 auto 8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    borderRadius: '4px',
-                    background: 'linear-gradient(135deg, #1e40af, #111827)',
-                    color: 'white',
-                  }}>
-                    4K
-                  </div>
-                  <div style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: '600' }}>4K Ultra</div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '11px' }}>3840×2160</div>
-                </motion.div>
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {[
+                  { key: 'hd', label: 'HD', sub: '1280×720', badge: '720p' },
+                  { key: 'fullhd', label: 'Full HD', sub: '1920×1080', badge: '1080p' },
+                  { key: '4k', label: '4K Ultra', sub: '3840×2160', badge: '4K', locked: !canUse4K },
+                ].map(({ key, label, sub, badge, locked }) => (
+                  <motion.div
+                    key={key}
+                    onClick={() => handleResolutionChange(key)}
+                    style={{
+                      flex: 1, padding: '14px 8px',
+                      borderRadius: 12,
+                      cursor: locked ? 'not-allowed' : 'pointer',
+                      opacity: locked ? 0.5 : 1,
+                      background: selectedResolution === key
+                        ? 'rgba(255,255,255,0.07)'
+                        : 'rgba(255,255,255,0.02)',
+                      border: selectedResolution === key
+                        ? '1.5px solid rgba(255,255,255,0.35)'
+                        : '1.5px solid rgba(255,255,255,0.08)',
+                      textAlign: 'center',
+                      transition: 'all 0.2s ease',
+                      position: 'relative',
+                    }}
+                    whileHover={!locked ? { scale: 1.02 } : {}}
+                    whileTap={!locked ? { scale: 0.98 } : {}}
+                  >
+                    {locked && (
+                      <span style={{ position: 'absolute', top: -8, right: -4, fontFamily: NM, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.07)', borderRadius: 4, padding: '1px 5px', border: '1px solid rgba(255,255,255,0.1)', letterSpacing: '0.04em' }}>PRO</span>
+                    )}
+                    <div style={{
+                      width: 44, height: 24, margin: '0 auto 8px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontFamily: NM, fontWeight: 700, fontSize: 9,
+                      borderRadius: 5,
+                      background: selectedResolution === key ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+                      color: 'rgba(255,255,255,0.7)',
+                    }}>
+                      {badge}
+                    </div>
+                    <div style={{ fontFamily: NM, color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: 600 }}>{label}</div>
+                    <div style={{ fontFamily: NM, color: 'rgba(255,255,255,0.30)', fontSize: 10, marginTop: 2 }}>{sub}</div>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div style={{
-              display: 'flex',
-              gap: '16px',
-              marginTop: 'auto',
-              paddingTop: '24px'
-            }}>
-              <motion.button
-                className="cursor-pointer"
-                style={{
-                  flex: '1',
-                  padding: '16px',
-                  border: '2px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  background: 'rgba(15, 15, 25, 0.8)',
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  transition: 'all 0.3s ease'
-                }}
-                whileHover={{
-                  background: 'rgba(25, 25, 35, 0.9)',
-                  borderColor: 'rgba(255, 255, 255, 0.25)',
-                  color: '#ffffff'
-                }}
-                whileTap={{ scale: 0.98 }}
+            {/* Action Buttons — pill style matching "Open app" */}
+            <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+              <button
                 onClick={handleCancel}
+                style={{
+                  ...pillBtn,
+                  flex: 1,
+                  background: 'rgba(255,255,255,0.06)',
+                  color: 'rgba(255,255,255,0.70)',
+                  border: '1px solid rgba(255,255,255,0.10)',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.3)'; }}
+                onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
                 Cancel
-              </motion.button>
-
-              <motion.button
-                className="cursor-pointer"
-                style={{
-                  flex: '1',
-                  padding: '16px',
-                  border: '2px solid rgba(59, 130, 246, 0.5)',
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9))',
-                  color: '#ffffff',
-                  transition: 'all 0.3s ease'
-                }}
-                whileHover={{
-                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 1), rgba(37, 99, 235, 1))',
-                  boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
-                  y: -1
-                }}
-                whileTap={{ scale: 0.98 }}
+              </button>
+              <button
                 onClick={handleSave}
+                style={{
+                  ...pillBtn,
+                  flex: 1,
+                  background: '#fff',
+                  color: '#000',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
+                onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
                 Save
-              </motion.button>
+              </button>
             </div>
           </motion.div>
-
-          {/* CSS Animation Keyframes */}
-          <style jsx>{`
-            @keyframes gradientShift {
-              0% { background-position: 0% 50%; }
-              50% { background-position: 100% 50%; }
-              100% { background-position: 0% 50%; }
-            }
-          `}</style>
         </motion.div>
       )}
     </AnimatePresence>

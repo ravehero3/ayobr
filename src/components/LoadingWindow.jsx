@@ -67,7 +67,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
-        style={{ zIndex: 9999, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none' }}
+        style={{ zIndex: 9999, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none', overflow: 'hidden' }}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -89,7 +89,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {isGenerating && (
             <div
               className="relative overflow-y-auto px-4"
-              style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)', paddingTop: '60px', paddingBottom: '60px' }}
+              style={{ marginTop: '50px', zIndex: 50, flex: 1, paddingTop: '60px', paddingBottom: '60px' }}
             >
               <div
                 className="grid gap-6 w-full mx-auto"
