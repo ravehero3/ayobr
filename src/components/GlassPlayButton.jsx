@@ -9,30 +9,32 @@ const GlassPlayButton = ({ isPlaying, onClick, size = 44, className = '' }) => {
         width: `${size}px`,
         height: `${size}px`,
         borderRadius: '50%',
-        border: '2px solid rgba(255,255,255,0.9)',
-        background: isPlaying ? '#ffffff' : 'rgba(255,255,255,0.12)',
+        border: '1.5px solid rgba(255,255,255,0.28)',
+        background: isPlaying ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.10)',
         color: isPlaying ? '#000' : '#fff',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        transition: 'transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.35), inset 0 0 8px rgba(255,255,255,0.18)',
+        transition: 'transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+        boxShadow: '0 4px 18px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.15)',
         outline: 'none',
         padding: 0,
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'scale(1.1)';
-        e.currentTarget.style.background = isPlaying ? '#fff' : 'rgba(255,255,255,0.22)';
-        e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.45), inset 0 0 12px rgba(255,255,255,0.28)';
+        e.currentTarget.style.background = isPlaying ? 'rgba(255,255,255,0.98)' : 'rgba(255,255,255,0.18)';
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.45)';
+        e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.2)';
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'scale(1)';
-        e.currentTarget.style.background = isPlaying ? '#fff' : 'rgba(255,255,255,0.12)';
-        e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.35), inset 0 0 8px rgba(255,255,255,0.18)';
+        e.currentTarget.style.background = isPlaying ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.10)';
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)';
+        e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.15)';
       }}
     >
       {isPlaying ? (

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
@@ -31,12 +31,26 @@ const IconGridThird = ({ active }) => (
   </svg>
 );
 
+const IconGridSpiral = ({ active }) => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <rect x="7" y="7" width="4" height="4" rx="0.8" fill={active ? '#fff' : 'rgba(255,255,255,0.45)'} />
+    <rect x="7" y="12" width="4" height="4" rx="0.8" rx="0.8" fill={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.32)'} />
+    <rect x="12" y="7" width="4" height="4" rx="0.8" fill={active ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)'} />
+    <rect x="12" y="2" width="4" height="4" rx="0.8" fill={active ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.2)'} />
+    <rect x="7" y="2" width="4" height="4" rx="0.8" fill={active ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.18)'} />
+    <rect x="2" y="2" width="4" height="4" rx="0.8" fill={active ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.14)'} />
+    <rect x="2" y="7" width="4" height="4" rx="0.8" fill={active ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.11)'} />
+    <rect x="2" y="12" width="4" height="4" rx="0.8" fill={active ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.08)'} />
+  </svg>
+);
+
 /* ─── Grid layout switcher panel ────────────────────────────── */
 const GridSwitcher = ({ layout, setLayout }) => {
   const options = [
-    { key: 'grid', icon: IconGridAuto, label: 'Grid' },
-    { key: 'full', icon: IconGridFull, label: 'Full width' },
-    { key: 'third', icon: IconGridThird, label: 'Centered' },
+    { key: 'grid',   icon: IconGridAuto,   label: 'Grid' },
+    { key: 'full',   icon: IconGridFull,   label: 'Full width' },
+    { key: 'third',  icon: IconGridThird,  label: 'Centered' },
+    { key: 'spiral', icon: IconGridSpiral, label: 'Spiral' },
   ];
   return (
     <motion.div
@@ -45,7 +59,7 @@ const GridSwitcher = ({ layout, setLayout }) => {
       transition={{ duration: 0.3, delay: 0.2 }}
       style={{
         position: 'fixed',
-        bottom: '28px',
+        bottom: '84px',
         left: '28px',
         zIndex: 10005,
         display: 'flex',
@@ -88,6 +102,176 @@ const GridSwitcher = ({ layout, setLayout }) => {
         );
       })}
     </motion.div>
+  );
+};
+
+/* ─── Spiral position algorithm ─────────────────────────────── */
+// Returns [col, row] for the nth card in a clockwise spiral
+// Card 0 = center [0,0], card 1 = directly below [0,1], then spirals clockwise
+function getSpiralPos(n) {
+  if (n === 0) return [0, 0];
+  // Directions: down, right, up, left
+  const dx = [0, 1, 0, -1];
+  const dy = [1, 0, -1, 0];
+  let col = 0, row = 0, dir = 0, steps = 1, stepsDone = 0, turns = 0;
+  for (let i = 0; i < n; i++) {
+    col += dx[dir];
+    row += dy[dir];
+    stepsDone++;
+    if (stepsDone === steps) {
+      stepsDone = 0;
+      dir = (dir + 1) % 4;
+      turns++;
+      if (turns % 2 === 0) steps++;
+    }
+  }
+  return [col, row];
+}
+
+/* ─── Spiral grid layout component ──────────────────────────── */
+const SpiralGridLayout = ({
+  pairs, generatedVideos, playingIds, setPlayingIds, videoRefs,
+  handlePlayPause, handleDownloadSingle, removePair, getVideoBackgroundStyle,
+}) => {
+  const containerRef = useRef(null);
+  const CARD_W = 360;
+  const CARD_H = 262;
+  const GAP = 20;
+  const CELL_W = CARD_W + GAP;
+  const CELL_H = CARD_H + GAP;
+  const PADDING = 80;
+
+  const cards = pairs.filter(p => generatedVideos.find(v => v.pairId === p.id));
+  const positions = cards.map((_, i) => getSpiralPos(i));
+
+  const allCols = positions.map(([c]) => c);
+  const allRows = positions.map(([, r]) => r);
+  const minCol = cards.length > 0 ? Math.min(...allCols) : 0;
+  const maxCol = cards.length > 0 ? Math.max(...allCols) : 0;
+  const minRow = cards.length > 0 ? Math.min(...allRows) : 0;
+  const maxRow = cards.length > 0 ? Math.max(...allRows) : 0;
+
+  const gridW = (maxCol - minCol + 1) * CELL_W + PADDING * 2;
+  const gridH = (maxRow - minRow + 1) * CELL_H + PADDING * 2;
+
+  // Where col=0, row=0 maps to inside the grid (in px)
+  const originX = PADDING + (-minCol) * CELL_W;
+  const originY = PADDING + (-minRow) * CELL_H;
+
+  useEffect(() => {
+    if (!containerRef.current || cards.length === 0) return;
+    const view = containerRef.current;
+    // Scroll so card 0 is roughly centered in the viewport
+    view.scrollLeft = originX - view.clientWidth / 2 + CARD_W / 2;
+    view.scrollTop  = originY - view.clientHeight / 2 + CARD_H / 2;
+  }, []); // run once on mount
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        flex: 1,
+        overflow: 'auto',
+        position: 'relative',
+        paddingTop: 0,
+        paddingBottom: 0,
+      }}
+    >
+      <div style={{ position: 'relative', width: gridW, height: Math.max(gridH, 600) }}>
+        {cards.map((pair, index) => {
+          const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+          if (!generatedVideo) return null;
+          const [col, row] = positions[index];
+          const left = originX + col * CELL_W;
+          const top  = originY + row * CELL_H;
+          const isPlaying = !!playingIds[pair.id];
+          const title = pair.audio?.name && pair.image?.name
+            ? `${pair.audio.name.replace(/\.[^/.]+$/, '')} + ${pair.image.name.replace(/\.[^/.]+$/, '')}`
+            : generatedVideo?.filename || `Video ${index + 1}`;
+
+          return (
+            <motion.div
+              key={pair.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.04, duration: 0.3, ease: 'easeOut' }}
+              className="group"
+              style={{
+                position: 'absolute',
+                left,
+                top,
+                width: CARD_W,
+                height: CARD_H,
+                borderRadius: 16,
+                overflow: 'hidden',
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+              }}
+            >
+              {/* Download */}
+              <button
+                onClick={e => handleDownloadSingle(generatedVideo, e)}
+                className="absolute top-3 left-3 z-20 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+                style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}
+                title="Download"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+
+              {/* Remove */}
+              <button
+                onClick={e => { e.stopPropagation(); removePair(pair.id); }}
+                className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 text-gray-400 hover:text-white hover:scale-110"
+                style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '18px', fontWeight: 'bold' }}
+              >×</button>
+
+              {/* 16:9 video area */}
+              <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
+                {pair.image && !isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <img src={URL.createObjectURL(pair.image)} alt="Preview"
+                      className="max-w-full max-h-full object-contain" style={{ opacity: 0.85 }} />
+                  </div>
+                )}
+                <video
+                  ref={el => { if (el) videoRefs.current[pair.id] = el; }}
+                  key={`spiral-vid-${pair.id}`}
+                  src={generatedVideo.url}
+                  className="absolute inset-0 w-full h-full object-contain"
+                  style={{ display: isPlaying ? 'block' : 'none', background: 'transparent', zIndex: 10 }}
+                  controls controlsList="nodownload" preload="metadata"
+                  onEnded={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
+                  onPause={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
+                  onPlay={() => setPlayingIds(prev => ({ ...prev, [pair.id]: true }))}
+                />
+                {!isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    style={{ background: 'rgba(0,0,0,0.18)', zIndex: 15 }}
+                    onClick={e => handlePlayPause(pair.id, e)}>
+                    <GlassPlayButton isPlaying={false} onClick={e => handlePlayPause(pair.id, e)} size={60} />
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-4 py-3 flex items-center justify-between">
+                <p className="text-white/75 text-sm font-medium truncate" style={{ fontFamily: NM }} title={title}>
+                  {title}
+                </p>
+                {isPlaying && (
+                  <GlassPlayButton isPlaying={true} onClick={e => handlePlayPause(pair.id, e)} size={28} className="flex-shrink-0 ml-2" />
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
@@ -147,25 +331,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
   /* ─── grid style for allComplete layout ─────────────────── */
   const getGridStyle = () => {
     if (gridLayout === 'full') {
-      return {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        width: '100%',
-        maxWidth: '1080px',
-        margin: '0 auto',
-      };
+      return { display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', maxWidth: '1080px', margin: '0 auto' };
     }
     if (gridLayout === 'third') {
-      return {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '24px',
-        width: '100%',
-      };
+      return { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' };
     }
-    /* default 'grid' */
     return {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
@@ -329,7 +499,19 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           )}
 
           {/* ── COMPLETED STATE: full video cards ─────────────────── */}
-          {allComplete && (
+          {allComplete && gridLayout === 'spiral' ? (
+            <SpiralGridLayout
+              pairs={pairs}
+              generatedVideos={generatedVideos}
+              playingIds={playingIds}
+              setPlayingIds={setPlayingIds}
+              videoRefs={videoRefs}
+              handlePlayPause={handlePlayPause}
+              handleDownloadSingle={handleDownloadSingle}
+              removePair={removePair}
+              getVideoBackgroundStyle={getVideoBackgroundStyle}
+            />
+          ) : allComplete ? (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -361,7 +543,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         ...getCardStyle(),
                       }}
                     >
-                      {/* Download button */}
                       <button
                         onClick={e => handleDownloadSingle(generatedVideo, e)}
                         className="absolute top-3 left-3 z-20 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
@@ -373,14 +554,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         </svg>
                       </button>
 
-                      {/* Remove button */}
                       <button
                         onClick={e => { e.stopPropagation(); removePair(pair.id); }}
                         className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 text-gray-400 hover:text-white hover:scale-110"
                         style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '18px', fontWeight: 'bold' }}
                       >×</button>
 
-                      {/* 16:9 video area */}
                       <div className="relative w-full overflow-hidden rounded-t-2xl" style={{ aspectRatio: '16/9' }}>
                         <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
                         {pair.image && !isPlaying && (
@@ -409,7 +588,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         )}
                       </div>
 
-                      {/* Card footer */}
                       <div className="px-4 py-3 flex items-center justify-between">
                         <p className="text-white/75 text-sm font-medium truncate" style={{ fontFamily: NM }} title={title}>
                           {title}
@@ -423,11 +601,11 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 })}
               </div>
             </motion.div>
-          )}
+          ) : null}
         </motion.div>
       </motion.div>
 
-      {/* ── Grid layout switcher (bottom-left) ───────────────────── */}
+      {/* ── Grid layout switcher (bottom-left, above footer) ─────── */}
       {allComplete && <GridSwitcher layout={gridLayout} setLayout={setGridLayout} />}
     </AnimatePresence>
   );

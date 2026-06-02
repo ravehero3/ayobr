@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -89,6 +89,186 @@ function formatDate(dateStr, language) {
       month: 'long', day: 'numeric', year: 'numeric',
     });
   } catch { return '—'; }
+}
+
+/* ── Profile picture crop / upload modal ───────────────────────────────────── */
+function ProfilePictureModal({ isOpen, currentImageUrl, onClose, onSave, saving, isCzech }) {
+  const [imgUrl, setImgUrl] = useState(null);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef(null);
+  const PREVIEW_SIZE = 200;
+
+  useEffect(() => {
+    if (isOpen) { setImgUrl(null); setPos({ x: 0, y: 0 }); setZoom(1); }
+  }, [isOpen]);
+
+  const handleFile = (file) => {
+    if (!file?.type.startsWith('image/')) return;
+    setImgUrl(URL.createObjectURL(file));
+    setPos({ x: 0, y: 0 });
+    setZoom(1);
+  };
+
+  const handleMouseDown = (e) => {
+    if (!imgUrl) return;
+    e.preventDefault();
+    dragStart.current = { mx: e.clientX, my: e.clientY, px: pos.x, py: pos.y };
+    setDragging(true);
+  };
+  const handleMouseMove = (e) => {
+    if (!dragging || !dragStart.current) return;
+    setPos({ x: dragStart.current.px + (e.clientX - dragStart.current.mx), y: dragStart.current.py + (e.clientY - dragStart.current.my) });
+  };
+  const handleMouseUp = () => { setDragging(false); dragStart.current = null; };
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    setZoom(z => Math.max(0.4, Math.min(4, z - e.deltaY * 0.002)));
+  };
+
+  const handleSave = () => {
+    const srcUrl = imgUrl || currentImageUrl;
+    if (!srcUrl) return;
+    const size = 256;
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.clip();
+      const coverScale = zoom * Math.max(PREVIEW_SIZE / img.naturalWidth, PREVIEW_SIZE / img.naturalHeight);
+      const scaledW = img.naturalWidth * coverScale;
+      const scaledH = img.naturalHeight * coverScale;
+      const ratio = size / PREVIEW_SIZE;
+      const cx = (PREVIEW_SIZE / 2 + pos.x) * ratio;
+      const cy = (PREVIEW_SIZE / 2 + pos.y) * ratio;
+      ctx.drawImage(img, cx - (scaledW * ratio) / 2, cy - (scaledH * ratio) / 2, scaledW * ratio, scaledH * ratio);
+      onSave(canvas.toDataURL('image/jpeg', 0.9));
+    };
+    img.src = srcUrl;
+  };
+
+  if (!isOpen) return null;
+  const srcPreview = imgUrl || currentImageUrl;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ zIndex: 99999, background: 'rgba(0,0,0,0.80)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+          onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            style={{
+              width: '100%', maxWidth: 380,
+              background: 'rgba(8,8,10,0.97)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
+              border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 24px 60px rgba(0,0,0,0.85)',
+              borderRadius: 20, padding: '28px 24px 24px', fontFamily: NM,
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', marginBottom: 4 }}>
+              {isCzech ? 'Upravit profilový obrázek' : 'Edit profile picture'}
+            </h3>
+            <p style={{ color: 'rgba(255,255,255,0.32)', fontSize: '0.72rem', marginBottom: 20 }}>
+              {isCzech ? 'Vyberte obrázek, přetáhněte pro výřez a posuňte kolečkem pro přiblížení.' : 'Pick an image · drag to reposition · scroll to zoom.'}
+            </p>
+
+            {/* Circle preview + drag area */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+              <div
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onWheel={handleWheel}
+                style={{
+                  width: PREVIEW_SIZE, height: PREVIEW_SIZE, borderRadius: '50%',
+                  overflow: 'hidden', border: '2px solid rgba(255,255,255,0.14)',
+                  background: 'rgba(255,255,255,0.04)',
+                  cursor: imgUrl ? (dragging ? 'grabbing' : 'grab') : 'default',
+                  position: 'relative', userSelect: 'none',
+                }}
+              >
+                {srcPreview ? (
+                  <img
+                    src={srcPreview}
+                    style={{
+                      position: 'absolute', width: `${100 * zoom}%`, height: `${100 * zoom}%`,
+                      objectFit: 'cover', left: '50%', top: '50%',
+                      transform: `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px))`,
+                      pointerEvents: 'none', userSelect: 'none',
+                    }}
+                    alt="Preview"
+                    draggable={false}
+                  />
+                ) : (
+                  <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.72rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '0 20px' }}>
+                    {isCzech ? 'Žádný obrázek' : 'No image selected'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Zoom slider */}
+            {imgUrl && (
+              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.68rem', flexShrink: 0 }}>
+                  {isCzech ? 'Zoom' : 'Zoom'}
+                </span>
+                <input type="range" min="0.4" max="4" step="0.01" value={zoom}
+                  onChange={e => setZoom(parseFloat(e.target.value))}
+                  style={{ flex: 1, accentColor: '#fff', cursor: 'pointer' }} />
+              </div>
+            )}
+
+            {/* File drop zone */}
+            <label
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                height: 66, borderRadius: 12, cursor: 'pointer',
+                border: '1.5px dashed rgba(255,255,255,0.11)',
+                background: 'rgba(255,255,255,0.025)', marginBottom: 20,
+              }}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); }}
+            >
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFile(e.target.files[0])} />
+              <svg width="20" height="20" style={{ marginBottom: 4 }} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span style={{ color: 'rgba(255,255,255,0.28)', fontSize: '0.73rem' }}>
+                {isCzech ? 'Klikněte nebo přetáhněte obrázek' : 'Click or drop an image'}
+              </span>
+            </label>
+
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={onClose} style={{ flex: 1, fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', borderRadius: 9999, padding: '10px 0', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+                {isCzech ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button onClick={handleSave} disabled={saving || !srcPreview} style={{ flex: 1, fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', borderRadius: 9999, padding: '10px 0', background: '#fff', color: '#000', border: 'none', cursor: (saving || !srcPreview) ? 'not-allowed' : 'pointer', opacity: saving ? 0.65 : 1 }}>
+                {saving ? (isCzech ? 'Ukládám…' : 'Saving…') : (isCzech ? 'Uložit' : 'Save')}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 /* ── Cancel confirmation modal ─────────────────────────────────────────────── */
@@ -370,17 +550,33 @@ export default function AccountPage() {
       <div aria-hidden style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.72)', zIndex: 1 }} />
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', background: 'radial-gradient(ellipse 120% 60% at 50% 50%, transparent 30%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.95) 100%)' }} />
 
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 h-14 grid items-center"
-        style={{ zIndex: 50, gridTemplateColumns: '1fr auto 1fr', padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.60)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}>
-        <button onClick={() => navigate('/')} className="hover:opacity-70 transition-opacity justify-self-start">
-          <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 16 }} />
-        </button>
-        <motion.span key={displayName} initial={{ opacity: 0.6 }} animate={{ opacity: 1 }}
-          className="text-sm font-bold text-white/85 tracking-tight text-center truncate max-w-[220px]" style={{ fontFamily: NM }}>
-          {displayName}
-        </motion.span>
-        <span />
+      {/* Navbar — matches Header.jsx style */}
+      <nav className="fixed top-0 left-0 right-0 h-16" style={{ zIndex: 50 }}>
+        <div className="relative w-full h-full flex items-center justify-between px-4 md:px-[64px]"
+          style={{ background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+
+          {/* Producer name — absolutely centred */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 20 }}>
+            <span style={{ fontFamily: NM, fontSize: '0.875rem', fontWeight: 600, color: '#ffffff', opacity: 0.92, letterSpacing: '0.04em', textShadow: '0 1px 8px rgba(0,0,0,0.55)', userSelect: 'none' }}>
+              {displayName}
+            </span>
+          </div>
+
+          {/* Logo */}
+          <button onClick={() => navigate(-1)} className="hover:opacity-70 transition-opacity" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative', zIndex: 30 }}>
+            <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
+          </button>
+
+          {/* Avatar — links back to app */}
+          <button
+            onClick={() => navigate('/app')}
+            className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"
+            style={{ flexShrink: 0, position: 'relative', zIndex: 30 }}
+          >
+            <img src={user.profile_image_url || userIcon} alt="Profile" className="w-full h-full object-cover"
+              onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; }} />
+          </button>
+        </div>
       </nav>
 
       {/* Page content */}
@@ -637,6 +833,16 @@ export default function AccountPage() {
       </div>
 
       <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+
+      {/* Profile picture crop modal */}
+      <ProfilePictureModal
+        isOpen={showCropModal}
+        currentImageUrl={user.profile_image_url || null}
+        onClose={() => setShowCropModal(false)}
+        onSave={handleSaveProfilePicture}
+        saving={uploadingImage}
+        isCzech={isCzech}
+      />
 
       {/* Cancel confirmation modal */}
       <CancelConfirmModal

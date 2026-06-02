@@ -29,16 +29,41 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
   const isPaidPlan  = isPro || isUnlimited || isAdmin;
   const creditsLeft = user?.credits?.credits_remaining;
 
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-[10000] flex items-center justify-between px-4 md:px-[64px] py-4"
-      style={{ 
-        background: 'rgba(0,0,0,0.38)', 
-        backdropFilter: 'blur(16px)', 
-        WebkitBackdropFilter: 'blur(16px)', 
-        borderBottom: '1px solid rgba(255,255,255,0.06)' 
-      }}>
+  const displayName =
+    user?.producer_name?.trim() ||
+    [user?.first_name, user?.last_name].filter(s => s?.trim()).join(' ').trim() ||
+    (user?.email ? user.email.split('@')[0] : null) ||
+    '';
 
-      <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-[10000] h-16"
+      style={{
+        background: 'rgba(0,0,0,0.38)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+      <div className="relative w-full h-full flex items-center justify-between px-4 md:px-[64px]">
+
+      {/* Centered producer name — absolutely positioned above other content */}
+      {displayName && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 20 }}>
+          <span style={{
+            fontFamily: NM,
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            color: '#ffffff',
+            opacity: 0.92,
+            letterSpacing: '0.04em',
+            textShadow: '0 1px 8px rgba(0,0,0,0.55)',
+            userSelect: 'none',
+          }}>
+            {displayName}
+          </span>
+        </div>
+      )}
+
+      <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative', zIndex: 30 }}>
         <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
       </button>
 
@@ -202,6 +227,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
             {t('nav.signIn')}
           </button>
         )}
+      </div>
       </div>
     </nav>
   );
