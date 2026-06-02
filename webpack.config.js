@@ -16,8 +16,8 @@ module.exports = {
     hashFunction: 'sha256',
   },
 
-  // Persistent filesystem cache — dramatically speeds up rebuilds
-  cache: {
+  // Persistent filesystem cache — speeds up dev rebuilds; disabled in prod to avoid cache write errors
+  cache: isProd ? false : {
     type: 'filesystem',
     buildDependencies: { config: [__filename] },
   },
