@@ -59,7 +59,7 @@ const GridSwitcher = ({ layout, setLayout }) => {
       transition={{ duration: 0.3, delay: 0.2 }}
       style={{
         position: 'fixed',
-        bottom: '84px',
+        bottom: '100px',
         left: '28px',
         zIndex: 10005,
         display: 'flex',

@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import page1Background from '../assets/page-1-background.png';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 const SettingsPanel = ({ isOpen, onClose }) => {
   const { user, featureFlags } = useAuth();
+  const { t } = useLanguage();
   const {
     videoSettings,
     setVideoBackground,
@@ -83,11 +86,22 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             className="absolute inset-0"
             onClick={handleCancel}
             style={{
-              background: 'rgba(0,0,0,0.72)',
+              background: 'rgba(0,0,0,0.55)',
               backdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
               WebkitBackdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
+              overflow: 'hidden',
             }}
-          />
+          >
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${page1Background})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              filter: 'blur(40px)',
+              transform: 'scale(1.1)',
+              opacity: 0.55,
+              zIndex: 0,
+            }} />
+          </div>
 
           {/* Settings card — pure-black glassmorphism */}
           <motion.div
@@ -123,13 +137,13 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 letterSpacing: '-0.01em',
               }}
             >
-              Settings
+              {t('settings.title')}
             </h2>
 
             {/* Background Selection */}
             <div>
               <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 12 }}>
-                Background
+                {t('settings.background')}
               </p>
               <div style={{ display: 'flex', gap: 12 }}>
                 {/* White */}
@@ -194,7 +208,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 >
                   {canUseCustomBackground ? (
                     <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.55)', textShadow: '0 2px 6px rgba(0,0,0,0.9)', background: videoSettings.customBackground ? 'rgba(0,0,0,0.55)' : 'transparent', padding: videoSettings.customBackground ? '4px 8px' : 0, borderRadius: 6 }}>
-                      Custom
+                      {t('settings.background.custom')}
                     </span>
                   ) : (
                     <span style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>PRO</span>
@@ -213,7 +227,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             {/* Resolution Selection */}
             <div>
               <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 12 }}>
-                Resolution
+                {t('settings.resolution')}
               </p>
               <div style={{ display: 'flex', gap: 10 }}>
                 {[
@@ -276,7 +290,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.3)'; }}
                 onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
-                Cancel
+                {t('settings.cancel')}
               </button>
               <button
                 onClick={handleSave}
@@ -289,7 +303,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
                 onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
-                Save
+                {t('settings.save')}
               </button>
             </div>
           </motion.div>

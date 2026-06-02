@@ -124,6 +124,14 @@ export const translations = {
     "account.saving": "Saving...",
     "account.profileUpdated": "Profile updated successfully!",
 
+    // Settings panel
+    "settings.title": "Video settings",
+    "settings.background": "Background",
+    "settings.background.custom": "Custom",
+    "settings.resolution": "Resolution",
+    "settings.cancel": "Cancel",
+    "settings.save": "Save",
+
     // Landing Page
     "landing.title": "TypeBeatz",
     "landing.hero.title": "Batch generate\ntype beat videos\nin one click",
@@ -430,6 +438,14 @@ export const translations = {
     "account.saveChanges": "Uložit změny",
     "account.saving": "Ukládám...",
     "account.profileUpdated": "Profil byl úspěšně aktualizován!",
+
+    // Settings panel
+    "settings.title": "Nastavení videa",
+    "settings.background": "Pozadí",
+    "settings.background.custom": "Vlastní",
+    "settings.resolution": "Rozlišení",
+    "settings.cancel": "Zrušit",
+    "settings.save": "Uložit",
 
     // Landing Page
     "landing.title": "TypeBeatz",

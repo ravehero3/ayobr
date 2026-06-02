@@ -8,6 +8,7 @@ import alienLogo from '../assets/alien_logo_1780252226447.png';
 import alienZzzIcon from '../assets/alien_zzz_icon_1780296423141.png';
 import userIcon from '../assets/user_1754478889614.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
+import page1Background from '../assets/page-1-background.png';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import SettingsPanel from '../components/SettingsPanel';
 
@@ -545,10 +546,11 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen text-white selection:bg-white/20" style={{ position: 'relative' }}>
 
-      {/* Stars background */}
-      <div aria-hidden style={{ position: 'fixed', inset: 0, backgroundImage: `url(${starsBg})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 0 }} />
-      <div aria-hidden style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.72)', zIndex: 1 }} />
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', background: 'radial-gradient(ellipse 120% 60% at 50% 50%, transparent 30%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.95) 100%)' }} />
+      {/* Blurred background */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+        <div style={{ position: 'absolute', inset: '-5%', backgroundImage: `url(${page1Background})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(40px)', transform: 'scale(1.08)' }} />
+      </div>
+      <div aria-hidden style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.60)', zIndex: 1 }} />
 
       {/* Navbar — matches Header.jsx style */}
       <nav className="fixed top-0 left-0 right-0 h-16" style={{ zIndex: 50 }}>

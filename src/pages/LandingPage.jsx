@@ -1222,23 +1222,22 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative flex flex-col items-center px-6 text-center" style={{ overflow: 'hidden', minHeight: isMobile ? '100vh' : 'max(100vh, 1650px)', background: '#000', justifyContent: 'flex-start', paddingTop: isMobile ? '72px' : '160px' }}>
+      <section className="relative flex flex-col items-center px-6 text-center" style={{ overflow: 'hidden', minHeight: '100vh', background: '#000', justifyContent: 'flex-start', paddingTop: isMobile ? '72px' : '160px' }}>
 
         {/* Stars background — starts invisible, fades in on mount as text loads */}
         <div ref={starsRef} className="absolute pointer-events-none" style={{
           zIndex: 0,
           opacity: 0,
-          top: '-1000px',
-          left: 0,
-          right: 0,
-          height: 'calc(100% + 1000px)',
+          inset: 0,
           backgroundImage: `url(${starsBg})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center 0%',
+          backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
-          maskImage: 'radial-gradient(ellipse 70% 35% at 50% 5%, black 15%, rgba(0,0,0,0.5) 48%, transparent 70%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 70% 35% at 50% 5%, black 15%, rgba(0,0,0,0.5) 48%, transparent 70%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 8%, black 22%, black 78%, rgba(0,0,0,0.5) 92%, transparent 100%), linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 8%, black 22%, black 78%, rgba(0,0,0,0.5) 92%, transparent 100%), linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+          maskComposite: 'intersect',
+          WebkitMaskComposite: 'destination-in',
         }} />
 
         {/* Subtle blue glow — mid-layer */}
@@ -1246,8 +1245,8 @@ export default function LandingPage() {
           <div style={{ width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 65%)' }} />
         </div>
 
-        {/* Vignette — top-bottom fade; solid black above 1400px, transparent where stars are */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, #000 0%, #000 1390px, transparent 1480px, transparent calc(100% - 60px), rgba(0,0,0,0.8) calc(100% - 20px), #000 100%)' }} />
+        {/* Vignette — top-bottom fade */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 14%, transparent calc(100% - 100px), #000 100%)' }} />
 
         {/* Hero content */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
