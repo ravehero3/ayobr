@@ -48,6 +48,8 @@ async function setupAuth(app) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  let oidcReady = false;
+
   const replId = process.env.REPL_ID;
   if (!replId) {
     console.warn('[auth] REPL_ID not set — Replit Auth will not work');
@@ -56,7 +58,6 @@ async function setupAuth(app) {
       const issuer = await discovery(
         new URL('https://replit.com/oidc'),
         replId,
-        process.env.REPLIT_DEPLOYMENT_ID || '',
       );
 
       const callbackURL = getCallbackURL();
@@ -95,6 +96,8 @@ async function setupAuth(app) {
           }
         )
       );
+      oidcReady = true;
+      console.log('[auth] Replit OIDC strategy registered successfully');
     } catch (err) {
       console.warn('[auth] Failed to set up Replit OIDC:', err.message);
     }
@@ -110,16 +113,24 @@ async function setupAuth(app) {
     }
   });
 
-  app.get('/api/login', passport.authenticate('oidc'));
+  app.get('/api/login', (req, res, next) => {
+    if (!oidcReady) {
+      return res.status(503).send('Authentication is not configured. REPL_ID may be missing or OIDC discovery failed.');
+    }
+    return passport.authenticate('oidc')(req, res, next);
+  });
 
-  app.get('/api/callback',
-    passport.authenticate('oidc', { failureRedirect: '/?auth=failed' }),
-    (req, res) => {
+  app.get('/api/callback', (req, res, next) => {
+    if (!oidcReady) {
+      return res.redirect('/?auth=failed');
+    }
+    return passport.authenticate('oidc', { failureRedirect: '/?auth=failed' })(req, res, (err) => {
+      if (err) return next(err);
       req.session.userId = req.user?.id;
       req.session.user = { id: req.user?.id, email: req.user?.email };
       res.redirect('/app');
-    }
-  );
+    });
+  });
 
   app.get('/api/logout', (req, res) => {
     req.logout(() => {

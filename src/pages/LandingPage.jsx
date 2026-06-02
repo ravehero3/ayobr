@@ -1228,16 +1228,14 @@ export default function LandingPage() {
         <div ref={starsRef} className="absolute pointer-events-none" style={{
           zIndex: 0,
           opacity: 0,
-          inset: 0,
+          inset: '-6%',
           backgroundImage: `url(${starsBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
-          maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 8%, black 22%, black 78%, rgba(0,0,0,0.5) 92%, transparent 100%), linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 8%, black 22%, black 78%, rgba(0,0,0,0.5) 92%, transparent 100%), linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-          maskComposite: 'intersect',
-          WebkitMaskComposite: 'destination-in',
+          maskImage: 'radial-gradient(ellipse 82% 82% at 50% 50%, black 28%, rgba(0,0,0,0.85) 48%, rgba(0,0,0,0.45) 66%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 82% 82% at 50% 50%, black 28%, rgba(0,0,0,0.85) 48%, rgba(0,0,0,0.45) 66%, transparent 80%)',
         }} />
 
         {/* Subtle blue glow — mid-layer */}
