@@ -136,12 +136,24 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
             }
           }}
           type="button"
-          className="px-7 py-2 bg-white text-black hover:bg-white/90 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 text-xs font-black uppercase tracking-widest focus:outline-none"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
+          style={{
+            background: '#fff',
+            color: '#000',
+            border: 'none',
+            borderRadius: 9999,
+            padding: '8px 22px',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            outline: 'none',
+            transition: 'filter 0.2s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
+          onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+          whileTap={{ scale: 0.97 }}
         >
           {t('app.browseFiles')}
         </motion.button>

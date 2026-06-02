@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
+import GlassPlayButton from './GlassPlayButton';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
@@ -44,16 +45,21 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     return { backgroundColor: 'black' };
   };
 
-  const handlePlayVideo = (pairId, videoUrl, e) => {
-    e.stopPropagation();
+  const handlePlayPause = (pairId, e) => {
+    if (e) e.stopPropagation();
     const vid = videoRefs.current[pairId];
     if (!vid) return;
-    vid.style.display = 'block';
-    vid.play().then(() => {
-      setPlayingIds(prev => ({ ...prev, [pairId]: true }));
-    }).catch(() => {
-      window.open(videoUrl, '_blank');
-    });
+    if (playingIds[pairId]) {
+      vid.pause();
+      setPlayingIds(prev => ({ ...prev, [pairId]: false }));
+    } else {
+      vid.style.display = 'block';
+      vid.play().then(() => {
+        setPlayingIds(prev => ({ ...prev, [pairId]: true }));
+      }).catch(err => {
+        console.error('Video play failed:', err);
+      });
+    }
   };
 
   if (!isVisible) return null;
@@ -125,6 +131,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                   const shouldShowPercentage = (isCurrentlyGenerating && progressToDisplay < 100 && !isComplete) ||
                     (shouldBeGeneratingNext && !anyVideoActivelyGenerating && !isComplete);
                   const shouldShowVideoPreview = isComplete && !!(videoToShow?.url);
+                  const isPlaying = !!playingIds[pair.id];
 
                   return (
                     <motion.div
@@ -147,7 +154,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         border: isComplete ? 'none' : '1px solid rgba(0, 0, 0, 0.4)',
                         padding: isComplete ? '2px' : '20px',
                         transition: 'all 0.3s ease',
-                        cursor: 'pointer',
+                        cursor: 'default',
                         overflow: 'visible',
                         zIndex: 60
                       }}
@@ -178,24 +185,42 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
                           <div className="aspect-video rounded relative overflow-hidden" style={{ width: '192px', height: '108px', minWidth: '192px', maxWidth: '192px', minHeight: '108px', maxHeight: '108px', flexShrink: 0 }}>
                             <div className="absolute inset-0 w-full h-full" style={getVideoBackgroundStyle()} />
-                            {pair.image && (
+
+                            {/* Image thumbnail — hidden when playing */}
+                            {pair.image && !isPlaying && (
                               <div className="absolute flex items-center justify-center" style={{ top: '2px', left: '2px', right: '2px', bottom: '2px' }}>
                                 <img src={URL.createObjectURL(pair.image)} alt="Preview" className="max-w-full max-h-full object-contain opacity-80" />
                               </div>
                             )}
+
+                            {/* Inline video for completed mini cards */}
+                            {shouldShowVideoPreview && videoToShow?.url && (
+                              <video
+                                ref={el => { if (el) videoRefs.current[pair.id] = el; }}
+                                key={`gen-vid-${pair.id}`}
+                                src={videoToShow.url}
+                                className="absolute inset-0 w-full h-full object-contain"
+                                style={{ display: isPlaying ? 'block' : 'none', background: 'transparent', zIndex: 15 }}
+                                controlsList="nodownload"
+                                preload="metadata"
+                                onEnded={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
+                              />
+                            )}
+
                             {shouldShowPercentage && (
                               <div className="absolute inset-0 flex items-center justify-center text-white text-sm font-medium" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)', zIndex: 10 }}>
                                 {Math.round(progressToDisplay)}%
                               </div>
                             )}
+
+                            {/* GlassPlayButton for completed mini cards */}
                             {shouldShowVideoPreview && videoToShow?.url && (
-                              <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 20 }}>
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer"
-                                  onClick={e => { e.stopPropagation(); window.open(videoToShow.url, '_blank'); }}>
-                                  <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-200 shadow-lg">
-                                    <svg className="w-4 h-4 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                  </div>
-                                </div>
+                              <div
+                                className="absolute inset-0 flex items-center justify-center transition-opacity duration-200"
+                                style={{ zIndex: 20, background: isPlaying ? 'transparent' : 'rgba(0,0,0,0.15)', opacity: isPlaying ? 0 : 1, pointerEvents: isPlaying ? 'none' : 'auto' }}
+                                onClick={e => handlePlayPause(pair.id, e)}
+                              >
+                                <GlassPlayButton isPlaying={false} onClick={e => handlePlayPause(pair.id, e)} size={36} />
                               </div>
                             )}
                           </div>
@@ -243,7 +268,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                 {pairs.map((pair, index) => {
                   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
                   if (!generatedVideo) return null;
-                  const isPlaying = playingIds[pair.id];
+                  const isPlaying = !!playingIds[pair.id];
 
                   const title = pair.audio?.name && pair.image?.name
                     ? `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}`
@@ -255,17 +280,12 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: index * 0.06, duration: 0.4, ease: 'easeOut' }}
-                      className="relative group rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden"
+                      className="relative group rounded-2xl border transition-all duration-300 overflow-hidden"
                       style={{
                         background: 'rgba(255, 255, 255, 0.02)',
                         border: '1px solid rgba(255, 255, 255, 0.05)',
                         backdropFilter: 'blur(12px)',
                         WebkitBackdropFilter: 'blur(12px)',
-                      }}
-                      whileHover={{
-                        background: 'rgba(255, 255, 255, 0.04)',
-                        borderColor: 'rgba(255, 255, 255, 0.10)',
-                        boxShadow: '0 8px 40px rgba(0,0,0,0.3), 0 0 60px rgba(59,130,246,0.08)',
                       }}
                     >
                       {/* Inner glow layer */}
@@ -296,7 +316,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         {/* Background */}
                         <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
 
-                        {/* Image thumbnail */}
+                        {/* Image thumbnail — hidden while playing */}
                         {pair.image && !isPlaying && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <img
@@ -308,50 +328,44 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           </div>
                         )}
 
-                        {/* Video element */}
+                        {/* Inline video — always present, display toggled */}
                         <video
                           ref={el => { if (el) videoRefs.current[pair.id] = el; }}
                           key={`vid-${pair.id}`}
                           src={generatedVideo.url}
                           className="absolute inset-0 w-full h-full object-contain"
-                          style={{ display: isPlaying ? 'block' : 'none', background: 'transparent' }}
+                          style={{ display: isPlaying ? 'block' : 'none', background: 'transparent', zIndex: 10 }}
                           controls
                           controlsList="nodownload"
                           preload="metadata"
+                          onEnded={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
+                          onPause={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
+                          onPlay={() => setPlayingIds(prev => ({ ...prev, [pair.id]: true }))}
                         />
 
                         {/* Play overlay — hidden when playing */}
                         {!isPlaying && (
                           <div
                             className="absolute inset-0 flex items-center justify-center transition-all duration-200 cursor-pointer"
-                            style={{ background: 'rgba(0,0,0,0.15)' }}
-                            onClick={e => handlePlayVideo(pair.id, generatedVideo.url, e)}
+                            style={{ background: 'rgba(0,0,0,0.18)', zIndex: 15 }}
+                            onClick={e => handlePlayPause(pair.id, e)}
                           >
-                            <motion.div
-                              className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl"
-                              style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}
-                              whileHover={{ scale: 1.12 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </motion.div>
+                            <GlassPlayButton isPlaying={false} onClick={e => handlePlayPause(pair.id, e)} size={56} />
                           </div>
                         )}
 
                         {/* Completed badge */}
                         <div
                           className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full"
-                          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.1)', zIndex: 20 }}
                         >
                           <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
                           <span className="text-white/80 text-xs font-medium" style={{ fontFamily: NM }}>Ready</span>
                         </div>
                       </div>
 
-                      {/* Card footer — title */}
-                      <div className="px-4 py-3">
+                      {/* Card footer — title + pause button when playing */}
+                      <div className="px-4 py-3 flex items-center justify-between">
                         <p
                           className="text-white/80 text-sm font-medium truncate"
                           style={{ fontFamily: NM }}
@@ -359,6 +373,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         >
                           {title}
                         </p>
+                        {isPlaying && (
+                          <GlassPlayButton isPlaying={true} onClick={e => handlePlayPause(pair.id, e)} size={28} className="flex-shrink-0 ml-2" />
+                        )}
                       </div>
                     </motion.div>
                   );
@@ -382,17 +399,17 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     await new Promise(r => setTimeout(r, 400));
                   }
                 }}
-                style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', background: '#fff', color: '#000', border: 'none', padding: '9px 22px', borderRadius: 9999, cursor: 'pointer', transition: 'opacity 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', background: '#fff', color: '#000', border: 'none', padding: '9px 22px', borderRadius: 9999, cursor: 'pointer', transition: 'filter 0.2s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
+                onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
                 {t('app.downloadAll')}
               </button>
               <button
                 onClick={() => resetApp()}
-                style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', padding: '9px 22px', borderRadius: 9999, cursor: 'pointer', transition: 'opacity 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
-                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', padding: '9px 22px', borderRadius: 9999, cursor: 'pointer', transition: 'filter 0.2s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
                 {t('app.reset')}
               </button>
