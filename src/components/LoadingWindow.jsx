@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
-import mrakyBackground from '../assets/mraky-a-zzz.png';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
-  const { getVideoGenerationState, generatedVideos, isGenerating, videoSettings, removePair, popPage, resetApp } = useAppStore();
+  const { getVideoGenerationState, generatedVideos, isGenerating, videoSettings, removePair, resetApp } = useAppStore();
   const { t } = useLanguage();
+  const [playingIds, setPlayingIds] = useState({});
+  const videoRefs = useRef({});
 
-  // Function to download a single video
   const handleDownloadSingle = async (video, event) => {
-    if (event) {
-      event.stopPropagation();
-    }
+    if (event) event.stopPropagation();
     try {
       const link = document.createElement('a');
       link.href = video.url;
@@ -27,41 +25,40 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     }
   };
 
-  // Function to get video background style based on user settings
   const getVideoBackgroundStyle = () => {
-    // Safely access videoSettings with fallback - ensure we get the most recent settings
     const currentStore = useAppStore.getState();
     const settings = currentStore.videoSettings || {};
     const background = settings.background || 'black';
-
-    console.log('LoadingWindow - Background settings:', { background, settings });
-
-    if (background === 'white') {
-      return { backgroundColor: 'white' };
-    } else if (background === 'black') {
-      return { backgroundColor: 'black' };
-    } else if (background === 'custom' && settings.customBackground) {
+    if (background === 'white') return { backgroundColor: 'white' };
+    if (background === 'black') return { backgroundColor: 'black' };
+    if (background === 'custom' && settings.customBackground) {
       try {
-        // Check if it's already a data URL (base64) or needs to be converted from File object
         const backgroundUrl = typeof settings.customBackground === 'string'
           ? settings.customBackground
           : URL.createObjectURL(settings.customBackground);
-
-        return {
-          backgroundImage: `url(${backgroundUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        };
-      } catch (error) {
-        console.warn('Error creating background URL:', error);
-        return { backgroundColor: 'black' }; // fallback on error
+        return { backgroundImage: `url(${backgroundUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' };
+      } catch {
+        return { backgroundColor: 'black' };
       }
     }
-    return { backgroundColor: 'black' }; // fallback
+    return { backgroundColor: 'black' };
+  };
+
+  const handlePlayVideo = (pairId, videoUrl, e) => {
+    e.stopPropagation();
+    const vid = videoRefs.current[pairId];
+    if (!vid) return;
+    vid.style.display = 'block';
+    vid.play().then(() => {
+      setPlayingIds(prev => ({ ...prev, [pairId]: true }));
+    }).catch(() => {
+      window.open(videoUrl, '_blank');
+    });
   };
 
   if (!isVisible) return null;
+
+  const allComplete = !isGenerating && generatedVideos.length > 0;
 
   return (
     <AnimatePresence>
@@ -70,463 +67,309 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
-        style={{ zIndex: 9999, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none' }} // Backdrop doesn't block clicks, z-index below header
+        style={{ zIndex: 9999, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none' }}
       >
-        {/* Loading Window - No Background */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative w-full max-w-7xl mx-4 p-2 rounded-lg overflow-visible"
+          className="relative w-full mx-4 rounded-lg overflow-visible"
           style={{
-            maxHeight: 'calc(100vh - 80px)',
+            maxHeight: 'calc(100vh - 112px)',
             width: '100%',
             maxWidth: '112rem',
             background: 'transparent',
-            pointerEvents: 'auto', // Modal content can be clicked
+            pointerEvents: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          {/* No sleeping alien backgrounds here - only in AnimatedBackground */}
+          {/* ── GENERATING STATE: mini progress cards ─────────────────── */}
+          {isGenerating && (
+            <div
+              className="relative overflow-y-auto px-4"
+              style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)', paddingTop: '60px', paddingBottom: '60px' }}
+            >
+              <div
+                className="grid gap-6 w-full mx-auto"
+                style={{
+                  gridTemplateColumns: 'repeat(auto-fit, 240px)',
+                  justifyContent: 'center',
+                  justifyItems: 'center',
+                  maxWidth: 'calc(100vw - 160px)',
+                  padding: '0 80px',
+                }}
+              >
+                {pairs.map((pair, index) => {
+                  const videoState = getVideoGenerationState(pair.id);
+                  const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+                  const progressValue = Math.max(0, videoState?.progress || 0);
+                  const hasGeneratedVideo = !!generatedVideo;
+                  const hasStateVideo = !!(videoState?.video);
+                  const isComplete = hasGeneratedVideo || (videoState?.isComplete === true && hasStateVideo);
+                  const progressToDisplay = isComplete ? 100 : progressValue;
+                  const videoToShow = generatedVideo || videoState?.video;
+                  const isCurrentlyGenerating = videoState?.isGenerating && !isComplete;
+                  const completedCount = pairs.filter(p => {
+                    const pState = getVideoGenerationState(p.id);
+                    const pVideo = generatedVideos.find(v => v.pairId === p.id);
+                    return pVideo || (pState?.isComplete && pState?.video);
+                  }).length;
+                  const currentIndex = pairs.findIndex(p => p.id === pair.id);
+                  const shouldBeGeneratingNext = currentIndex === completedCount && !hasGeneratedVideo && !hasStateVideo && !isComplete;
+                  const anyVideoActivelyGenerating = pairs.some(p => {
+                    const pState = getVideoGenerationState(p.id);
+                    return pState?.isGenerating && !pState?.isComplete;
+                  });
+                  const shouldShowPercentage = (isCurrentlyGenerating && progressToDisplay < 100 && !isComplete) ||
+                    (shouldBeGeneratingNext && !anyVideoActivelyGenerating && !isComplete);
+                  const shouldShowVideoPreview = isComplete && !!(videoToShow?.url);
 
-          {/* Miniature Containers Grid - Moved 30px down */}
-          <div className="relative overflow-y-auto mb-8 px-4" style={{ marginTop: '50px', zIndex: 50, maxHeight: 'calc(24rem + 100px)', paddingTop: '60px', paddingBottom: '60px' }}>
-            {/* Grid of pairs */}
-          <div
-            className="grid gap-6 w-full mx-auto"
-            style={{
-              gridTemplateColumns: 'repeat(auto-fit, 240px)',
-              justifyContent: 'center',
-              justifyItems: 'center',
-              maxWidth: 'calc(100vw - 160px)',
-              padding: '0 80px',
-              zIndex: 50,
-              gap: '24px'
-            }}
-          >
-              {pairs.map((pair, index) => {
-                const videoState = getVideoGenerationState(pair.id);
-                const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
-
-                // Simplified completion detection
-                const progressValue = Math.max(0, videoState?.progress || 0);
-                const hasGeneratedVideo = !!generatedVideo;
-                const hasStateVideo = !!(videoState?.video);
-                const isComplete = hasGeneratedVideo || (videoState?.isComplete === true && hasStateVideo);
-                const progress = isComplete ? 100 : progressValue;
-                const videoToShow = generatedVideo || videoState?.video;
-
-                // Enhanced display logic for video previews with proper sequential generation
-                const shouldShowVideoPreview = hasGeneratedVideo || (videoState?.isComplete === true && hasStateVideo);
-                const progressToDisplay = isComplete ? 100 : progressValue;
-
-                // Check if this should be the next video to generate (first incomplete video after any completed ones)
-                const completedVideosCount = pairs.filter(p => {
-                  const pState = getVideoGenerationState(p.id);
-                  const pVideo = generatedVideos.find(v => v.pairId === p.id);
-                  return pVideo || (pState?.isComplete && pState?.video);
-                }).length;
-
-                const currentIndex = pairs.findIndex(p => p.id === pair.id);
-                const shouldBeGeneratingNext = currentIndex === completedVideosCount && !hasGeneratedVideo && !hasStateVideo && !isComplete;
-
-                // Check if any video is actively generating (not just at 100% waiting for completion)
-                const anyVideoActivelyGenerating = pairs.some(p => {
-                  const pState = getVideoGenerationState(p.id);
-                  return pState?.isGenerating && !pState?.isComplete;
-                });
-
-                // Check if this video is currently generating
-                const isCurrentlyGenerating = videoState?.isGenerating && !isComplete;
-                
-                // Show percentage for currently generating (but not when at 100% and complete) OR next video that should start
-                const shouldShowPercentage = (isCurrentlyGenerating && progressToDisplay < 100 && !isComplete) ||
-                                           (shouldBeGeneratingNext && !anyVideoActivelyGenerating && !isComplete);
-
-                const shouldShowPlayButton = isComplete && !!videoToShow && videoToShow.url;
-
-                // For debugging
-                const debugInfo = {
-                  index: currentIndex,
-                  hasGeneratedVideo: !!hasGeneratedVideo,
-                  hasStateVideo: !!hasStateVideo,
-                  isComplete,
-                  progress: progressValue,
-                  progressToDisplay,
-                  shouldShowVideoPreview,
-                  shouldShowPercentage,
-                  shouldShowPlayButton,
-                  shouldBeGeneratingNext,
-                  completedVideosCount,
-                  anyVideoActivelyGenerating,
-                  videoState: {
-                    isGenerating: videoState?.isGenerating,
-                    isComplete: videoState?.isComplete,
-                    progress: videoState?.progress,
-                    video: videoState?.video,
-                    isCurrentlyProcessing: videoState?.isCurrentlyProcessing,
-                    isFinished: videoState?.isFinished
-                  },
-                  allGeneratedVideos: generatedVideos.length
-                };
-                console.log(`LoadingWindow pair ${pair.id} (${currentIndex + 1}/${pairs.length}):`, debugInfo);
-
-                return (
-                  <motion.div
-                    key={pair.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="video-loading-container group"
-                    style={{
-                      position: 'relative',
-                      width: '240px',
-                      minWidth: '240px',
-                      maxWidth: '240px',
-                      height: '220px',
-                      background: 'rgba(0, 0, 0, 0.41)',
-                      borderRadius: '16px',
-                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                      backdropFilter: 'blur(11.4px)',
-                      WebkitBackdropFilter: 'blur(11.4px)',
-                      border: isComplete ? 'none' : '1px solid rgba(0, 0, 0, 0.4)',
-                      padding: isComplete ? '2px' : '20px',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      overflow: 'visible',
-                      zIndex: 60
-                    }}
-                    whileHover={{
-                      backgroundColor: 'rgba(0, 0, 0, 0.51)',
-                      boxShadow: isComplete 
-                        ? '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(59, 130, 246, 0.4), 0 0 80px rgba(96, 165, 250, 0.3)'
-                        : '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 40px rgba(19, 0, 255, 0.3), 0 0 80px rgba(79, 172, 254, 0.2)',
-                      zIndex: 70
-                    }}
-                  >
-                    {/* Gradient border layer - positioned behind container */}
-                    {isComplete && (
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          borderRadius: '16px',
-                          background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%)',
-                          zIndex: 0
-                        }}
-                      />
-                    )}
-                    {/* Dark inner background - covers gradient except for 2px border */}
-                    {isComplete && (
-                      <div
-                        className="absolute pointer-events-none"
-                        style={{
-                          top: '2px',
-                          left: '2px',
-                          right: '2px',
-                          bottom: '2px',
-                          borderRadius: '14px',
-                          background: 'rgba(0, 0, 0, 0.41)',
-                          backdropFilter: 'blur(11.4px)',
-                          WebkitBackdropFilter: 'blur(11.4px)',
-                          zIndex: 1
-                        }}
-                      />
-                    )}
-                    {/* Enhanced Particle system - similar to Generate Videos button */}
-                    <div className="absolute inset-0 pointer-events-none overflow-visible rounded-2xl" style={{ zIndex: 80 }}>
-                      {/* Particles positioned around entire video preview container */}
-                      {[...Array(12)].map((_, i) => {
-                        // Distribute particles around the perimeter of the container
-                        const angle = (i * 360) / 12; // Evenly space particles in a circle
-                        const radius = 45; // Distance from center (percentage)
-                        const centerX = 50; // Center X position
-                        const centerY = 50; // Center Y position
-                        
-                        return (
-                          <motion.div
-                            key={`progress-particle-${i}`}
-                            className="absolute rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                            style={{
-                              width: '2px',
-                              height: '2px',
-                              background: i % 2 === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(179, 229, 252, 0.8)',
-                              // Position around entire container perimeter
-                              top: `${centerY + radius * Math.sin(angle * Math.PI / 180)}%`,
-                              left: `${centerX + radius * Math.cos(angle * Math.PI / 180)}%`,
-                              boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
-                            }}
-                            animate={{
-                              // Circular motion around the video preview
-                              x: [0, 20 * Math.cos(i * 30 * Math.PI / 180), 20 * Math.cos((i * 30 + 90) * Math.PI / 180), 20 * Math.cos((i * 30 + 180) * Math.PI / 180), 20 * Math.cos((i * 30 + 270) * Math.PI / 180), 0],
-                              y: [0, 20 * Math.sin(i * 30 * Math.PI / 180), 20 * Math.sin((i * 30 + 90) * Math.PI / 180), 20 * Math.sin((i * 30 + 180) * Math.PI / 180), 20 * Math.sin((i * 30 + 270) * Math.PI / 180), 0],
-                              scale: [0.8, 1.2, 1.0, 0.8, 1.0, 0.8]
-                            }}
-                            transition={{
-                              duration: 4.95,
-                              repeat: Infinity,
-                              delay: i * 0.25,
-                              ease: "linear"
-                            }}
-                          />
-                        );
-                      })}
-
-                    </div>
-
-                    {/* Delete button - appears on hover */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removePair(pair.id);
+                  return (
+                    <motion.div
+                      key={pair.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="group"
+                      style={{
+                        position: 'relative',
+                        width: '240px',
+                        minWidth: '240px',
+                        maxWidth: '240px',
+                        height: '220px',
+                        background: 'rgba(0, 0, 0, 0.41)',
+                        borderRadius: '16px',
+                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(11.4px)',
+                        WebkitBackdropFilter: 'blur(11.4px)',
+                        border: isComplete ? 'none' : '1px solid rgba(0, 0, 0, 0.4)',
+                        padding: isComplete ? '2px' : '20px',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                        overflow: 'visible',
+                        zIndex: 60
                       }}
-                      className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-white"
-                      style={{ fontSize: '16px', fontWeight: 'bold', zIndex: 90 }}
                     >
-                      ×
-                    </button>
+                      {isComplete && (
+                        <div className="absolute inset-0 pointer-events-none" style={{ borderRadius: '16px', background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.8) 0%, rgba(135, 206, 235, 0.8) 25%, rgba(29, 78, 216, 0.8) 50%, rgba(15, 23, 42, 0.9) 100%)', zIndex: 0 }} />
+                      )}
+                      {isComplete && (
+                        <div className="absolute pointer-events-none" style={{ top: '2px', left: '2px', right: '2px', bottom: '2px', borderRadius: '14px', background: 'rgba(0, 0, 0, 0.41)', backdropFilter: 'blur(11.4px)', WebkitBackdropFilter: 'blur(11.4px)', zIndex: 1 }} />
+                      )}
 
-                    {/* Download button - appears on hover when video is complete */}
-                    {isComplete && videoToShow && (
                       <button
-                        onClick={(e) => handleDownloadSingle(videoToShow, e)}
-                        className="absolute top-2 left-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-green-400 hover:text-green-300"
-                        style={{ fontSize: '14px', zIndex: 90 }}
-                        title="Download video"
-                      >
-                        ↓
-                      </button>
-                    )}
+                        onClick={e => { e.stopPropagation(); removePair(pair.id); }}
+                        className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-white"
+                        style={{ fontSize: '16px', fontWeight: 'bold', zIndex: 90 }}
+                      >×</button>
 
-                    <div className="relative h-full flex flex-col">
-                      {/* Title - Audio + Image names - positioned in front of image */}
-                      <div
-                        className="text-white font-semibold mb-3 text-center relative"
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                          lineHeight: '1.3',
-                          zIndex: 75,
-                          minHeight: '36px',
-                          maxHeight: '36px',
-                          overflow: 'hidden',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        {(() => {
-                          let title = '';
-                          if (pair.audio?.name && pair.image?.name) {
-                            title = `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}`;
-                          } else {
-                            title = generatedVideo?.filename || `Video ${index + 1}`;
-                          }
-                          // Truncate to 44 characters maximum
-                          return title.length > 44 ? title.substring(0, 44) : title;
-                        })()}
-                      </div>
+                      <div className="relative h-full flex flex-col" style={{ zIndex: 5 }}>
+                        <div className="text-white font-semibold mb-3 text-center" style={{ fontSize: '14px', lineHeight: '1.3', minHeight: '36px', maxHeight: '36px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 75 }}>
+                          {(() => {
+                            let title = pair.audio?.name && pair.image?.name
+                              ? `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}`
+                              : generatedVideo?.filename || `Video ${index + 1}`;
+                            return title.length > 44 ? title.substring(0, 44) : title;
+                          })()}
+                        </div>
 
-                      {/* Video Preview Area - moved 30px down from previous position and fixed positioning */}
-                      <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
-                        <div
-                          className="aspect-video bg-black/30 rounded flex items-center justify-center relative overflow-hidden"
-                          style={{
-                            width: '192px',
-                            height: '108px',
-                            minWidth: '192px',
-                            maxWidth: '192px',
-                            minHeight: '108px',
-                            maxHeight: '108px',
-                            position: 'relative',
-                            flexShrink: 0,
-                            padding: '2px'
-                          }}
-                        >
-                          {/* Video background preview based on user settings - centered */}
-                          <div
-                            className="absolute inset-0 w-full h-full flex items-center justify-center"
-                            style={{
-                              ...getVideoBackgroundStyle()
-                            }}
-                          />
-
-                          {/* Foreground image preview - centered with proper spacing */}
-                          {pair.image && (
-                            <div className="absolute flex items-center justify-center" style={{
-                              top: '2px',
-                              left: '2px',
-                              right: '2px',
-                              bottom: '2px'
-                            }}>
-                              <img
-                                src={URL.createObjectURL(pair.image)}
-                                alt="Preview"
-                                className="max-w-full max-h-full object-contain opacity-80"
-                                style={{ zIndex: 1 }}
-                              />
-                            </div>
-                          )}
-
-                          {/* Progress percentage - fade out when reaching 100% or when video is ready */}
-                          {shouldShowPercentage && (
-                            <div
-                              className="absolute text-white text-sm font-medium text-center transition-opacity duration-500"
-                              style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                zIndex: 10,
-                                textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 1)',
-                                opacity: shouldShowPercentage ? 1 : 0
-                              }}
-                            >
-                              {Math.round(progressToDisplay)}%
-                            </div>
-                          )}
-
-
-
-                          {/* Video Preview with Play Button - show when we have a generated video */}
-                          {shouldShowVideoPreview && videoToShow?.url && (
-                            <div
-                              className="absolute inset-0 flex items-center justify-center transition-opacity duration-500"
-                              style={{
-                                opacity: shouldShowVideoPreview ? 1 : 0,
-                                zIndex: 9999999 // Ensure video preview is above all other elements
-                              }}
-                            >
-                              <div className="relative w-full h-full" style={{ zIndex: 9999999 }}>
-                                {/* Enhanced video player with better error handling */}
-                                <video
-                                  key={`video-player-${pair.id}`}
-                                  src={videoToShow.url}
-                                  className="absolute inset-0 w-full h-full object-contain rounded"
-                                  style={{
-                                    background: 'transparent',
-                                    display: 'none', // Initially hidden until play button is clicked
-                                    zIndex: 9999999
-                                  }}
-                                  preload="metadata"
-                                  onLoadedData={() => {
-                                    console.log(`Video loaded successfully for ${pair.id}`);
-                                  }}
-                                  onError={(e) => {
-                                    console.error(`Video error for ${pair.id}:`, e);
-                                    console.log('Video URL:', videoToShow.url);
-                                    console.log('Video object:', videoToShow);
-                                  }}
-                                />
-
-                                {/* Interactive video thumbnail with play button */}
-                                <div
-                                  className="absolute inset-0 cursor-pointer group"
-                                  style={{ zIndex: 9999999 }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log(`Play button clicked for video ${pair.id}`);
-                                    console.log('Video URL:', videoToShow.url);
-
-                                    const videoElement = e.currentTarget.parentElement.querySelector('video');
-                                    const overlay = e.currentTarget;
-
-                                    if (videoElement && videoToShow.url) {
-                                      console.log('Starting video playback...');
-
-                                      // Show video player
-                                      videoElement.style.display = 'block';
-                                      videoElement.setAttribute('controls', 'true');
-                                      videoElement.setAttribute('controlsList', 'nodownload');
-                                      videoElement.style.zIndex = '9999999';
-
-                                      // Start playback
-                                      videoElement.play()
-                                        .then(() => {
-                                          console.log('Video playback started successfully');
-                                          overlay.style.display = 'none'; // Hide overlay after successful play
-                                        })
-                                        .catch(err => {
-                                          console.error('Video playback failed:', err);
-                                          console.log('Attempting to create new video element...');
-
-                                          // Fallback: Try opening in new tab
-                                          window.open(videoToShow.url, '_blank');
-                                        });
-                                    } else {
-                                      console.error('Video element or URL not available');
-                                      console.log('VideoElement exists:', !!videoElement);
-                                      console.log('Video URL exists:', !!videoToShow.url);
-                                    }
-                                  }}
-                                >
-                                  {/* Simple video preview thumbnail - hover text */}
-                                  <div
-                                    className="absolute w-full h-full object-contain rounded pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    style={{
-                                      background: 'rgba(0,0,0,0.3)',
-                                      color: 'white',
-                                      fontSize: '12px',
-                                      textAlign: 'center',
-                                      zIndex: 9999999,
-                                      top: '40px'
-                                    }}
-                                  >
-                                    {t('app.videoReady')}
-                                  </div>
-
-                                  {/* Play button overlay with highest z-index */}
-                                  <div
-                                    className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors"
-                                    style={{ zIndex: 9999999 }}
-                                  >
-                                    <div
-                                      className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-200 shadow-lg"
-                                      style={{ zIndex: 9999999 }}
-                                    >
-                                      <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M8 5v14l11-7z"/>
-                                      </svg>
-                                    </div>
+                        <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
+                          <div className="aspect-video rounded relative overflow-hidden" style={{ width: '192px', height: '108px', minWidth: '192px', maxWidth: '192px', minHeight: '108px', maxHeight: '108px', flexShrink: 0 }}>
+                            <div className="absolute inset-0 w-full h-full" style={getVideoBackgroundStyle()} />
+                            {pair.image && (
+                              <div className="absolute flex items-center justify-center" style={{ top: '2px', left: '2px', right: '2px', bottom: '2px' }}>
+                                <img src={URL.createObjectURL(pair.image)} alt="Preview" className="max-w-full max-h-full object-contain opacity-80" />
+                              </div>
+                            )}
+                            {shouldShowPercentage && (
+                              <div className="absolute inset-0 flex items-center justify-center text-white text-sm font-medium" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)', zIndex: 10 }}>
+                                {Math.round(progressToDisplay)}%
+                              </div>
+                            )}
+                            {shouldShowVideoPreview && videoToShow?.url && (
+                              <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 20 }}>
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer"
+                                  onClick={e => { e.stopPropagation(); window.open(videoToShow.url, '_blank'); }}>
+                                  <div className="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-200 shadow-lg">
+                                    <svg className="w-4 h-4 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
+                        </div>
+
+                        <motion.div
+                          className="w-full bg-white/10 rounded-full h-2 mt-4"
+                          animate={{ opacity: isComplete ? 0 : 1 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ background: isComplete ? 'linear-gradient(90deg, #9ca3af 0%, #ffffff 100%)' : 'linear-gradient(90deg, #374151 0%, #d1d5db 100%)' }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressToDisplay}%` }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                          />
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── COMPLETED STATE: big glassmorphism cards ──────────────── */}
+          {allComplete && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              className="flex-1 overflow-y-auto px-6"
+              style={{ paddingTop: '24px', paddingBottom: '80px' }}
+            >
+              <div
+                className="grid w-full mx-auto"
+                style={{
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                  gap: '20px',
+                  maxWidth: 'calc(100vw - 120px)',
+                  margin: '0 auto',
+                }}
+              >
+                {pairs.map((pair, index) => {
+                  const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
+                  if (!generatedVideo) return null;
+                  const isPlaying = playingIds[pair.id];
+
+                  const title = pair.audio?.name && pair.image?.name
+                    ? `${pair.audio.name.replace(/\.[^/.]+$/, "")} + ${pair.image.name.replace(/\.[^/.]+$/, "")}`
+                    : generatedVideo?.filename || `Video ${index + 1}`;
+
+                  return (
+                    <motion.div
+                      key={pair.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.06, duration: 0.4, ease: 'easeOut' }}
+                      className="relative group rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)',
+                      }}
+                      whileHover={{
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        borderColor: 'rgba(255, 255, 255, 0.10)',
+                        boxShadow: '0 8px 40px rgba(0,0,0,0.3), 0 0 60px rgba(59,130,246,0.08)',
+                      }}
+                    >
+                      {/* Inner glow layer */}
+                      <div className="absolute inset-0 rounded-2xl pointer-events-none transition-all duration-300"
+                        style={{ background: 'rgba(255,255,255,0.005)' }} />
+
+                      {/* Download button — top-left on hover */}
+                      <button
+                        onClick={e => handleDownloadSingle(generatedVideo, e)}
+                        className="absolute top-3 left-3 z-20 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+                        style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}
+                        title="Download"
+                      >
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
+
+                      {/* Remove button — top-right on hover */}
+                      <button
+                        onClick={e => { e.stopPropagation(); removePair(pair.id); }}
+                        className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 text-gray-400 hover:text-white hover:scale-110"
+                        style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '18px', fontWeight: 'bold' }}
+                      >×</button>
+
+                      {/* Video preview area — 16:9 */}
+                      <div className="relative w-full overflow-hidden rounded-t-2xl" style={{ aspectRatio: '16/9' }}>
+                        {/* Background */}
+                        <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
+
+                        {/* Image thumbnail */}
+                        {pair.image && !isPlaying && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <img
+                              src={URL.createObjectURL(pair.image)}
+                              alt="Preview"
+                              className="max-w-full max-h-full object-contain"
+                              style={{ opacity: 0.85 }}
+                            />
+                          </div>
+                        )}
+
+                        {/* Video element */}
+                        <video
+                          ref={el => { if (el) videoRefs.current[pair.id] = el; }}
+                          key={`vid-${pair.id}`}
+                          src={generatedVideo.url}
+                          className="absolute inset-0 w-full h-full object-contain"
+                          style={{ display: isPlaying ? 'block' : 'none', background: 'transparent' }}
+                          controls
+                          controlsList="nodownload"
+                          preload="metadata"
+                        />
+
+                        {/* Play overlay — hidden when playing */}
+                        {!isPlaying && (
+                          <div
+                            className="absolute inset-0 flex items-center justify-center transition-all duration-200 cursor-pointer"
+                            style={{ background: 'rgba(0,0,0,0.15)' }}
+                            onClick={e => handlePlayVideo(pair.id, generatedVideo.url, e)}
+                          >
+                            <motion.div
+                              className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl"
+                              style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}
+                              whileHover={{ scale: 1.12 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </motion.div>
+                          </div>
+                        )}
+
+                        {/* Completed badge */}
+                        <div
+                          className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.1)' }}
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                          <span className="text-white/80 text-xs font-medium" style={{ fontFamily: NM }}>Ready</span>
                         </div>
                       </div>
 
-                      {/* Single Progress Bar - shows green when complete, blue when loading */}
-                      <motion.div
-                        className="w-full bg-white/10 rounded-full h-2 mt-4"
-                        animate={{ opacity: isComplete ? 0 : 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{
-                            background: isComplete 
-                              ? 'linear-gradient(90deg, #9ca3af 0%, #ffffff 50%, #ffffff 100%)'
-                              : 'linear-gradient(90deg, #374151 0%, #6b7280 50%, #d1d5db 100%)',
-                            boxShadow: isComplete 
-                              ? '0 0 15px rgba(255, 255, 255, 0.3)'
-                              : '0 0 15px rgba(255, 255, 255, 0.1)'
-                          }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${progressToDisplay}%` }}
-                          transition={{ duration: 0.6, ease: "easeOut" }}
-                        />
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
+                      {/* Card footer — title */}
+                      <div className="px-4 py-3">
+                        <p
+                          className="text-white/80 text-sm font-medium truncate"
+                          style={{ fontFamily: NM }}
+                          title={title}
+                        >
+                          {title}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
 
-          {/* Footer — shown when all videos are complete */}
-          {!isGenerating && generatedVideos.length > 0 && (
-            <div className="flex justify-center gap-4 p-6 pt-2">
+          {/* ── Footer actions ─────────────────────────────────────────── */}
+          {allComplete && (
+            <div className="flex justify-center gap-4 px-6 pb-4 pt-2 flex-shrink-0">
               <button
                 onClick={async () => {
                   for (const video of generatedVideos) {
@@ -539,12 +382,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                     await new Promise(r => setTimeout(r, 400));
                   }
                 }}
-                style={{
-                  fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
-                  background: '#fff', color: '#000', border: 'none',
-                  padding: '9px 22px', borderRadius: 9999, cursor: 'pointer',
-                  transition: 'opacity 0.2s'
-                }}
+                style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', background: '#fff', color: '#000', border: 'none', padding: '9px 22px', borderRadius: 9999, cursor: 'pointer', transition: 'opacity 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >
@@ -552,13 +390,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               </button>
               <button
                 onClick={() => resetApp()}
-                style={{
-                  fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
-                  background: 'rgba(255,255,255,0.08)', color: '#fff',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  padding: '9px 22px', borderRadius: 9999, cursor: 'pointer',
-                  transition: 'opacity 0.2s'
-                }}
+                style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', padding: '9px 22px', borderRadius: 9999, cursor: 'pointer', transition: 'opacity 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >
