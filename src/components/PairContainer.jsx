@@ -6,7 +6,7 @@ import VideoGenerationAnimation from './VideoGenerationAnimation';
 import PairMergeAnimation from './PairMergeAnimation';
 import { useAppStore } from '../store/appStore';
 
-const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
+const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair, containerSpacing, getDisplayIndex, getPairPreparationState } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
@@ -168,24 +168,20 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
 
   const pairIndex = pairs.findIndex(p => p.id === pair.id);
   const calculatedIndex = displayIndex ?? (pairIndex >= 0 ? pairIndex + 1 : 1);
-  
-  // Debug logging for display index tracking
-  if (!displayIndex && pairIndex >= 0) {
-    console.log(`Pair ${pair.id} missing displayIndex, using fallback index ${pairIndex + 1}`, {
-      pairId: pair.id,
-      displayIndex,
-      pairIndex,
-      calculatedIndex,
-      hasAudio: !!pair.audio,
-      hasImage: !!pair.image
-    });
-  }
+
+  const isFirstPair    = pairIndex === 0;
+  const visibleCount   = pairs.filter(p => p.audio || p.image).length;
+  const isMultiCol     = gridMode >= 2;
+  // Container width per mode: default 560px, compact 420px, grid cols 100%
+  const containerW     = isMultiCol ? '100%' : gridMode === 1 ? '420px' : '560px';
+  // First-pair top spacing (grid modes use paddingTop on the parent instead)
+  const firstPairTop   = isMultiCol ? '0px' : (visibleCount > 1 ? '68px' : '281px');
 
   return (
     <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ 
-      marginLeft: '8px',
+      marginLeft: isMultiCol ? '0px' : '8px',
       marginBottom: `${4 + Math.abs(containerSpacing)}px`,
-      marginTop: pairs.findIndex(p => p.id === pair.id) === 0 ? '281px' : '0px'
+      marginTop: isFirstPair ? firstPairTop : '0px'
     }}>
 
       {/* Delete button - positioned at top right of container */}
@@ -255,11 +251,11 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
         </div>
       ) : !generatedVideo ? (
         <div 
-          className="flex flex-col lg:flex-row items-center relative z-10 group/pair"
+          className={`flex items-center relative z-10 group/pair ${isMultiCol ? 'flex-col' : 'flex-col lg:flex-row'}`}
           style={{ 
             gap: '12px',
-            paddingLeft: '15px',
-            paddingRight: '15px',
+            paddingLeft: isMultiCol ? '8px' : '15px',
+            paddingRight: isMultiCol ? '8px' : '15px',
             justifyContent: 'center',
             alignItems: 'center',
             width: '100%'
@@ -280,8 +276,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 height: '180px',
                 minHeight: '180px',
                 maxHeight: '180px',
-                width: '560px',
-                minWidth: '560px',
+                width: containerW,
+                minWidth: isMultiCol ? '0' : containerW,
                 overflow: 'visible',
               }}
             >
@@ -338,21 +334,17 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
           </div>
 
           {/* Connecting Bridge - Simple Plus Symbol */}
-          <div className="relative z-20 hidden lg:flex items-center justify-center flex-shrink-0 connecting-bridge" style={{ 
-            width: '40px', 
-            height: '180px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <div className="relative flex items-center justify-center" style={{ width: '32px', height: '48px' }}>
-              {/* Plus icon using SVG for crisp rendering */}
-              <svg 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="none"
-              >
+          <div
+            className={`relative z-20 flex items-center justify-center flex-shrink-0 connecting-bridge${!isMultiCol ? ' hidden lg:flex' : ''}`}
+            style={{ 
+              width: isMultiCol ? '100%' : '40px', 
+              height: isMultiCol ? '28px' : '180px',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <div className="relative flex items-center justify-center" style={{ width: '32px', height: '32px' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path 
                   d="M12 5V19M5 12H19" 
                   stroke="rgba(255, 255, 255, 0.2)" 
@@ -380,8 +372,8 @@ const Pairs = ({ pair, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCac
                 height: '180px',
                 minHeight: '180px',
                 maxHeight: '180px',
-                width: '560px',
-                minWidth: '560px',
+                width: containerW,
+                minWidth: isMultiCol ? '0' : containerW,
                 overflow: 'visible',
               }}
             >

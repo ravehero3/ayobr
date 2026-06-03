@@ -1234,8 +1234,8 @@ export default function LandingPage() {
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
           transition: 'opacity 1.8s ease',
-          maskImage: 'radial-gradient(ellipse 82% 82% at 50% 50%, black 28%, rgba(0,0,0,0.85) 48%, rgba(0,0,0,0.45) 66%, transparent 80%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 82% 82% at 50% 50%, black 28%, rgba(0,0,0,0.85) 48%, rgba(0,0,0,0.45) 66%, transparent 80%)',
+          maskImage: 'radial-gradient(ellipse 76% 72% at 50% 50%, black 18%, rgba(0,0,0,0.75) 38%, rgba(0,0,0,0.3) 56%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 76% 72% at 50% 50%, black 18%, rgba(0,0,0,0.75) 38%, rgba(0,0,0,0.3) 56%, transparent 70%)',
         }} />
 
         {/* Subtle blue glow — mid-layer */}

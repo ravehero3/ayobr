@@ -22,7 +22,7 @@ import SleepingAlien from './components/SleepingAlien';
 
 
 function App({ onBeforeGenerate }) {
-  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, selectCurrentPage, setCurrentPage, containerSpacing, resetPageState, setIsFilesBeingDropped, ensureAutoNavigation } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, selectCurrentPage, setCurrentPage, containerSpacing, page2GridMode, resetPageState, setIsFilesBeingDropped, ensureAutoNavigation } = useAppStore();
   const { t } = useLanguage();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { prepareCompletePairs } = usePairPreparation(); // Activate automatic pair preparation
@@ -428,21 +428,25 @@ function App({ onBeforeGenerate }) {
             {/* Page 2: File Management - Pairs Grid */}
             {currentPage === 'fileManagement' && (
               <motion.div data-page-section="fileManagement">
-                <motion.div
-                  className="w-full flex flex-col items-center mb-8"
-                >
+                <motion.div className="w-full flex flex-col items-center mb-8">
                   <motion.div
-                    className="flex flex-col max-w-[1200px] w-full px-4 sm:px-6 mx-auto"
-                    style={{ gap: `${containerSpacing}px` }}
+                    className="w-full max-w-[1200px] px-4 sm:px-6 mx-auto"
+                    style={{
+                      display: page2GridMode >= 2 ? 'grid' : 'flex',
+                      flexDirection: page2GridMode < 2 ? 'column' : undefined,
+                      gridTemplateColumns: page2GridMode === 3 ? 'repeat(3, 1fr)' : page2GridMode === 2 ? 'repeat(2, 1fr)' : undefined,
+                      columnGap: page2GridMode >= 2 ? '16px' : undefined,
+                      rowGap: `${Math.max(containerSpacing, page2GridMode >= 2 ? 16 : 0)}px`,
+                      gap: page2GridMode < 2 ? `${containerSpacing}px` : undefined,
+                      paddingTop: page2GridMode >= 2 ? '68px' : '0px',
+                    }}
                   >
                     <AnimatePresence>
                       {pairs
                         .filter(pair => {
-                          // During generation, only show pairs that have files or are being processed
                           if (isGenerating) {
                             return (pair.audio && pair.image) || getVideoGenerationState(pair.id);
                           }
-                          // When not generating, show pairs that have at least one file
                           return pair.audio || pair.image;
                         })
                         .map((pair, index) => (
@@ -457,6 +461,7 @@ function App({ onBeforeGenerate }) {
                           <Pairs
                             pair={pair}
                             index={index}
+                            gridMode={page2GridMode}
                             onMoveUp={moveContainerUp}
                             onMoveDown={moveContainerDown}
                             onStartAudioDrag={handleStartAudioDrag}

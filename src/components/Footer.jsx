@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
 import SettingsPanel from './SettingsPanel';
+import GridLayoutModal from './GridLayoutModal';
 
 const Footer = ({ onGenerateVideos, onStop }) => {
   const { pairs, generatedVideos, isGenerating, videoGenerationStates, popPage, resetApp } = useAppStore();
   const { t } = useLanguage();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isGridLayoutOpen, setIsGridLayoutOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
@@ -146,18 +148,35 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         </div>
 
         {/* Right side - Settings or Start Over */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {!isOnPage3 ? (
-            <motion.button
-              onClick={() => setIsSettingsOpen(true)}
-              className="relative p-2 rounded-lg hover:bg-white/5 transition-all"
-              whileHover={{ rotate: 90 }}
-            >
-              <svg className="w-6 h-6 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </motion.button>
+            <>
+              {/* Grid layout button */}
+              <motion.button
+                onClick={() => setIsGridLayoutOpen(true)}
+                className="relative p-2 rounded-lg hover:bg-white/5 transition-all"
+                title="Grid layout"
+                whileHover={{ scale: 1.1 }}
+              >
+                <svg className="w-5 h-5 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="1.8"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="1.8"/>
+                </svg>
+              </motion.button>
+              {/* Video settings button */}
+              <motion.button
+                onClick={() => setIsSettingsOpen(true)}
+                className="relative p-2 rounded-lg hover:bg-white/5 transition-all"
+                whileHover={{ rotate: 90 }}
+              >
+                <svg className="w-6 h-6 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </motion.button>
+            </>
           ) : (
             <button
               onClick={() => {
@@ -177,6 +196,8 @@ const Footer = ({ onGenerateVideos, onStop }) => {
 
       {/* Settings Panel */}
       <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      {/* Grid Layout Modal */}
+      <GridLayoutModal isOpen={isGridLayoutOpen} onClose={() => setIsGridLayoutOpen(false)} />
     </motion.footer>
   );
 };

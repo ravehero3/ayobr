@@ -582,8 +582,8 @@ export default function AccountPage() {
       </nav>
 
       {/* Page content */}
-      <div className="relative pt-24 pb-36 px-5" style={{ zIndex: 3 }}>
-        <div className="max-w-[480px] mx-auto space-y-4">
+      <div className="relative px-5 flex flex-col items-center justify-center" style={{ zIndex: 3, minHeight: '100vh', paddingTop: '96px', paddingBottom: '80px' }}>
+        <div className="max-w-[480px] w-full space-y-4">
 
           {/* ── Profile Card ──────────────────────────────────────────────── */}
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>

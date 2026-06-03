@@ -59,6 +59,9 @@ export const useAppStore = create((set, get) => ({
   // Container spacing
   containerSpacing: 0, // Default spacing in pixels between container pairs
 
+  // Page 2 (file management) grid layout mode: 0=default, 1=compact, 2=2-col, 3=3-col
+  page2GridMode: loadFromLocalStorage('page2GridMode', 0),
+
 
 
   // Video generation settings - Load from localStorage
@@ -515,6 +518,12 @@ export const useAppStore = create((set, get) => ({
 
   // Container spacing actions
   setContainerSpacing: (spacing) => set({ containerSpacing: spacing }),
+
+  // Page 2 grid layout mode
+  setPage2GridMode: (mode) => {
+    saveToLocalStorage('page2GridMode', mode);
+    set({ page2GridMode: mode });
+  },
 
   // Pair preparation actions
   getDisplayIndex: (pairId) => {
