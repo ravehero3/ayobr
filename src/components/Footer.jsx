@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
+import { useAnimation } from '../context/AnimationContext';
 import SettingsPanel from './SettingsPanel';
 import GridLayoutModal from './GridLayoutModal';
 
 const Footer = ({ onGenerateVideos, onStop }) => {
   const { pairs, generatedVideos, isGenerating, videoGenerationStates, popPage, resetApp } = useAppStore();
   const { t } = useLanguage();
+  const { isAnimEnabled } = useAnimation();
+  const blurEnabled = isAnimEnabled('backdrop_blur');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGridLayoutOpen, setIsGridLayoutOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
@@ -61,8 +64,8 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         className="w-full h-full flex items-center justify-between px-4 md:px-[64px]"
         style={{
           background: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
+          backdropFilter: blurEnabled ? 'blur(16px)' : 'none',
+          WebkitBackdropFilter: blurEnabled ? 'blur(16px)' : 'none',
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >

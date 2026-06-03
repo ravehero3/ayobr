@@ -84,14 +84,17 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
     }
   }, [image]);
 
+  const blurEnabled = isAnimEnabled('backdrop_blur');
+  const hoverEnabled = isAnimEnabled('image_placeholder');
+
   return (
     <motion.div
       ref={containerRef}
       className="relative w-full h-full transition-all duration-300 group cursor-pointer image-container"
       style={{
         background: 'rgba(10, 10, 10, 0.7)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backdropFilter: blurEnabled ? 'blur(16px)' : 'none',
+        WebkitBackdropFilter: blurEnabled ? 'blur(16px)' : 'none',
         borderRadius: '16px',
         backgroundImage: 'none', // Clean container without texture
         padding: image ? '16px' : '20px',
@@ -104,7 +107,7 @@ const ImageContainer = ({ image, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       }}
       data-pair-id={pairId}
       data-image-container="true"
-      whileHover={{ scale: 1.02 }}
+      whileHover={hoverEnabled ? { scale: 1.02 } : {}}
       title={image ? `${image.name} • ${imageDimensions} • ${formatFileSize(image.size)}` : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

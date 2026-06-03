@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useAnimation } from '../context/AnimationContext';
 
 const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete }) => {
   const [animationStage, setAnimationStage] = useState('idle'); // idle, merging, merged, completed
@@ -10,6 +11,8 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
   const [imagePosition, setImagePosition] = useState(null);
   const containerRef = useRef(null);
   const { generatedVideos, videoSettings, getVideoGenerationState } = useAppStore();
+  const { isAnimEnabled } = useAnimation();
+  const mergeAnimEnabled = isAnimEnabled('pair_merge');
 
   // Find the generated video for this pair
   const generatedVideo = generatedVideos.find(v => v.pairId === pair.id);
@@ -95,7 +98,12 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
 
       const positionsCaptured = captureContainerPositions();
 
-      if (positionsCaptured) {
+      if (!mergeAnimEnabled) {
+        setTimeout(() => {
+          setAnimationStage('merged');
+          setShowProgress(true);
+        }, 100);
+      } else if (positionsCaptured) {
         // Start the merge animation after a brief delay to ensure positions are captured
         setTimeout(() => {
           console.log('Starting merge animation');
@@ -117,7 +125,7 @@ const PairMergeAnimation = ({ pair, isGenerating, progress, onAnimationComplete 
         }, 100);
       }
     }
-  }, [isGenerating, animationStage, generatedVideo, pair.id]);
+  }, [isGenerating, animationStage, generatedVideo, pair.id, mergeAnimEnabled]);
 
   useEffect(() => {
     // When video is generated and we're in merged state, show video preview

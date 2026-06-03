@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useAuth } from '../context/AuthContext';
 import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
+import { useAnimation } from '../context/AnimationContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import alienLogo from '../assets/alien_logo_1780252226447.png';
 import alienZzz from '../assets/alien_zzz_1780258131893.png';
@@ -63,9 +64,12 @@ function Stat({ prefix, val, label }) {
 
 function WordReveal({ text, style, className }) {
   const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
+  const { isAnimEnabled } = useAnimation();
+  const animEnabled = isAnimEnabled('landing_animations');
+  const [visible, setVisible] = useState(!animEnabled);
 
   useEffect(() => {
+    if (!animEnabled) { setVisible(true); return; }
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(([entry]) => {
@@ -73,7 +77,7 @@ function WordReveal({ text, style, className }) {
     }, { threshold: 0.2 });
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [animEnabled]);
 
   const words = String(text).split(' ');
   return (
@@ -83,7 +87,7 @@ function WordReveal({ text, style, className }) {
           display: 'inline-block',
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0)' : 'translateY(10px)',
-          transition: `opacity 0.5s ease ${i * 60}ms, transform 0.5s ease ${i * 60}ms`,
+          transition: animEnabled ? `opacity 0.5s ease ${i * 60}ms, transform 0.5s ease ${i * 60}ms` : 'none',
           marginRight: i < words.length - 1 ? '0.2em' : 0,
         }}>
           {word}
@@ -97,11 +101,14 @@ function WordReveal({ text, style, className }) {
    minScroll: if set, the reveal will only fire once window.scrollY >= minScroll */
 function BlurReveal({ children, delay = 0, style = {}, minScroll = 0 }) {
   const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
+  const { isAnimEnabled } = useAnimation();
+  const animEnabled = isAnimEnabled('landing_animations');
+  const [visible, setVisible] = useState(!animEnabled);
   const intersecting = useRef(false);
   const revealed = useRef(false);
 
   useEffect(() => {
+    if (!animEnabled) { setVisible(true); return; }
     const tryReveal = () => {
       if (revealed.current) return;
       if (intersecting.current && window.scrollY >= minScroll) {
@@ -130,13 +137,13 @@ function BlurReveal({ children, delay = 0, style = {}, minScroll = 0 }) {
       window.removeEventListener('scroll', onScroll);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [minScroll]);
+  }, [minScroll, animEnabled]);
 
   return (
     <div ref={ref} style={{
       filter:     visible ? 'blur(0px)'   : 'blur(12px)',
       opacity:    visible ? 1             : 0,
-      transition: `filter 0.9s ease-out ${delay}ms, opacity 0.9s ease-out ${delay}ms`,
+      transition: animEnabled ? `filter 0.9s ease-out ${delay}ms, opacity 0.9s ease-out ${delay}ms` : 'none',
       ...style,
     }}>
       {children}
@@ -906,8 +913,9 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
 }
 
 /* Multi-layer parallax — each layer may have an optional yOffset (px) applied to bgY base */
-function useParallax(layers) {
+function useParallax(layers, enabled = true) {
   useEffect(() => {
+    if (!enabled) return;
     let rafId = null;
     const update = () => {
       const sy = window.scrollY;
@@ -926,7 +934,7 @@ function useParallax(layers) {
     window.addEventListener('scroll', onScroll, { passive: true });
     update();
     return () => { window.removeEventListener('scroll', onScroll); if (rafId) cancelAnimationFrame(rafId); };
-  }, []);
+  }, [enabled]);
 }
 
 /* Stars fade-in on mount — visible from start, fades in as the page loads */
@@ -1148,6 +1156,7 @@ export default function LandingPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { user, login } = useAuth();
+  const { isAnimEnabled } = useAnimation();
   const [isMobile, setIsMobile] = useState(false);
   const [customImages, setCustomImages] = useState({});
   const [customContent, setCustomContent] = useState({ steps: [{}, {}, {}, {}] });
@@ -1187,7 +1196,7 @@ export default function LandingPage() {
   useParallax([
     { ref: starsRef, speed: 0.25, mode: 'bgY', yOffset: 0 },
     { ref: glowRef,  speed: 0.5,  mode: 'translateY' },
-  ]);
+  ], isAnimEnabled('diagonal_move'));
   useStarsScrollReveal(starsRef);
 
   const handleCTA = () => { user ? navigate('/app') : login(); };

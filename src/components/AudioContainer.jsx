@@ -181,14 +181,16 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const blurEnabled = isAnimEnabled('backdrop_blur');
+
   return (
     <motion.div
       ref={containerRef}
       className="relative w-full h-full transition-all duration-300 group cursor-pointer audio-container"
       style={{
         background: 'rgba(10, 10, 10, 0.7)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backdropFilter: blurEnabled ? 'blur(16px)' : 'none',
+        WebkitBackdropFilter: blurEnabled ? 'blur(16px)' : 'none',
         borderRadius: '16px',
         backgroundImage: 'none', // Clean container without texture
         padding: audio ? '16px' : '20px',
@@ -201,7 +203,7 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
       }}
       data-pair-id={pairId}
       data-audio-container="true"
-      whileHover={{ scale: 1.02 }}
+      whileHover={blurEnabled ? { scale: 1.02 } : {}}
       title={audio ? `${audio.name} • ${formatTime(duration)} • ${formatFileSize(audio.size)}` : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
