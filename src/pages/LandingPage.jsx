@@ -1178,8 +1178,9 @@ export default function LandingPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       import('./AppPage');
+      import('./LoginPage');
       import('../VideoApp');
-    }, 3000);
+    }, 800);
     return () => clearTimeout(timer);
   }, []);
 

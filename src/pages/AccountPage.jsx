@@ -8,7 +8,6 @@ import alienLogo from '../assets/alien_logo_1780252226447.png';
 import alienZzzIcon from '../assets/alien_zzz_icon_1780296423141.png';
 import userIcon from '../assets/user_1754478889614.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
-import page1Background from '../assets/page-1-background.png';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import SettingsPanel from '../components/SettingsPanel';
 
@@ -551,11 +550,20 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen text-white selection:bg-white/20" style={{ position: 'relative' }}>
 
-      {/* Blurred background */}
-      <div aria-hidden style={{ position: 'fixed', inset: 0, overflow: 'hidden', zIndex: 0 }}>
-        <div style={{ position: 'absolute', inset: '-5%', backgroundImage: `url(${page1Background})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(40px)', transform: 'scale(1.08)' }} />
-      </div>
-      <div aria-hidden style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.60)', zIndex: 1 }} />
+      {/* Stars background — matches landing page hero */}
+      <div aria-hidden style={{
+        position: 'fixed', inset: '-6%', zIndex: 0, pointerEvents: 'none',
+        backgroundImage: `url(${starsBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center center',
+        backgroundRepeat: 'no-repeat',
+        maskImage: 'radial-gradient(ellipse 76% 72% at 50% 50%, black 18%, rgba(0,0,0,0.75) 38%, rgba(0,0,0,0.3) 56%, transparent 70%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 76% 72% at 50% 50%, black 18%, rgba(0,0,0,0.75) 38%, rgba(0,0,0,0.3) 56%, transparent 70%)',
+      }} />
+      {/* Subtle blue accent glow */}
+      <div aria-hidden style={{ position: 'fixed', top: '5%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 65%)', zIndex: 0, pointerEvents: 'none' }} />
+      {/* Fade-to-black vignette — matches landing page hero gradient */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 18%, transparent 48%, rgba(0,0,0,0.75) 68%, #000 85%)' }} />
 
       {/* Navbar — matches Header.jsx style */}
       <nav className="fixed top-0 left-0 right-0 h-16" style={{ zIndex: 50 }}>
