@@ -145,6 +145,17 @@ async function mountRoutes(app) {
   app.use('/api/gopay', gopayRoutes);
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+  // Public animation settings — read by all users to get admin-configured defaults
+  app.get('/api/animation-settings', (req, res) => {
+    const filePath = path.join(__dirname, 'data/animation-settings.json');
+    try {
+      if (fs.existsSync(filePath)) {
+        return res.json(JSON.parse(fs.readFileSync(filePath, 'utf8')));
+      }
+    } catch (e) {}
+    res.json({});
+  });
+
   app.get('/api/ffmpeg-ready', (req, res) => {
     const wasmPath = path.join(__dirname, '../dist/ffmpeg-core.wasm');
     const jsPath = path.join(__dirname, '../dist/ffmpeg-core.js');

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAnimation } from '../context/AnimationContext';
 
 const GlassmorphismVideoLoader = ({ 
   isVisible, 
@@ -8,6 +9,7 @@ const GlassmorphismVideoLoader = ({
   onClose,
   filename = "video.mp4" 
 }) => {
+  const { isAnimEnabled } = useAnimation();
   const [particles, setParticles] = useState([]);
   const [displayProgress, setDisplayProgress] = useState(0);
 
@@ -44,9 +46,11 @@ const GlassmorphismVideoLoader = ({
     }, particle.duration);
   };
 
-  // Ambient particles
+  const particlesEnabled = isAnimEnabled('loader_particles');
+
+  // Ambient particles (only when enabled)
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || !particlesEnabled) return;
 
     const interval = setInterval(() => {
       if (Math.random() < 0.3) {
@@ -55,7 +59,7 @@ const GlassmorphismVideoLoader = ({
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isVisible]);
+  }, [isVisible, particlesEnabled]);
 
   if (!isVisible) return null;
 
@@ -114,7 +118,7 @@ const GlassmorphismVideoLoader = ({
           </div>
 
           {/* Enhanced Particles */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+          {particlesEnabled && <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
             {/* Static particles that activate on hover */}
             {[...Array(7)].map((_, i) => (
               <motion.div
@@ -178,7 +182,7 @@ const GlassmorphismVideoLoader = ({
                 }}
               />
             ))}
-          </div>
+          </div>}
 
           {/* Content */}
           <div className="flex flex-col h-full text-left relative z-10">

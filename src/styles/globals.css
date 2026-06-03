@@ -2157,3 +2157,99 @@ input[type="file"] {
   33% { transform: translateY(-10px) rotate(120deg); }
   66% { transform: translateY(5px) rotate(240deg); }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   PERFORMANCE MODE CSS OVERRIDES
+   Applied via data-anim-* and data-perf attributes on <body>
+   These override inline styles/CSS animations when disabled.
+═══════════════════════════════════════════════════════════ */
+
+/* ── Backdrop blur off ── */
+[data-anim-backdrop-blur="off"] .glass-container,
+[data-anim-backdrop-blur="off"] .glass-card,
+[data-anim-backdrop-blur="off"] .glass,
+[data-anim-backdrop-blur="off"] .premium-container {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── Noise texture off ── */
+[data-anim-noise-texture="off"] .glass-container {
+  background-image: none !important;
+}
+
+/* ── Video card hover glow off ── */
+[data-anim-video-card-hover="off"] .video-card-container {
+  transition: none !important;
+}
+[data-anim-video-card-hover="off"] .video-card-container:hover .video-card,
+[data-anim-video-card-hover="off"] .video-card-container:hover {
+  transform: none !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+}
+[data-anim-video-card-hover="off"] .video-card-glow,
+[data-anim-video-card-hover="off"] .video-particle {
+  display: none !important;
+}
+
+/* ── Thumbnail pulse off ── */
+[data-anim-thumbnail-pulse="off"] .thumbnail-pulse {
+  animation: none !important;
+  opacity: 0.5 !important;
+}
+
+/* ── Generate button animation off ── */
+[data-anim-generate-btn="off"] .generate-videos-btn::before,
+[data-anim-generate-btn="off"] .generate-videos-btn::after {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+/* ── Button particles off ── */
+[data-anim-button-particles="off"] .particle-system,
+[data-anim-button-particles="off"] .static-particles {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOW PERFORMANCE MODE — all CSS animations disabled
+   data-perf="low" on body
+═══════════════════════════════════════════════════════════ */
+
+[data-perf="low"] .glass-container,
+[data-perf="low"] .glass-card,
+[data-perf="low"] .glass,
+[data-perf="low"] .premium-container {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+[data-perf="low"] .glass-container {
+  background-image: none !important;
+}
+[data-perf="low"] .video-card-container:hover .video-card,
+[data-perf="low"] .video-card-container:hover {
+  transform: none !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+}
+[data-perf="low"] .video-card-glow,
+[data-perf="low"] .video-particle {
+  display: none !important;
+}
+[data-perf="low"] .thumbnail-pulse {
+  animation: none !important;
+  opacity: 0.5 !important;
+}
+[data-perf="low"] .generate-videos-btn::before,
+[data-perf="low"] .generate-videos-btn::after {
+  animation: none !important;
+  opacity: 0 !important;
+}
+[data-perf="low"] .particle-system,
+[data-perf="low"] .static-particles {
+  display: none !important;
+}
+[data-perf="low"] .animate-diagonal-move,
+[data-perf="low"] [class*="diagonal"] {
+  animation: none !important;
+  transform: none !important;
+}

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useAnimation } from '../context/AnimationContext';
 import page1Background from '../assets/page-1-background.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const AnimatedBackground = () => {
+  const { isAnimEnabled } = useAnimation();
   const pairs = useAppStore(state => state.pairs);
   const generatedVideos = useAppStore(state => state.generatedVideos);
   const storeIsGenerating = useAppStore(state => state.isGenerating);
@@ -44,7 +46,7 @@ const AnimatedBackground = () => {
           zIndex: -12,
           willChange: 'opacity',
           transform: 'translateZ(0)',
-          filter: showBlur ? 'blur(40px)' : 'none',
+          filter: (showBlur && isAnimEnabled('background_blur')) ? 'blur(40px)' : 'none',
           transition: 'filter 1.0s ease-in-out',
         }}
         initial={{ opacity: 0 }}

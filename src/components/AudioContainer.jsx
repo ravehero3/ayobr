@@ -3,14 +3,19 @@ import { motion } from 'framer-motion';
 import WaveSurfer from 'wavesurfer.js';
 import { useAppStore } from '../store/appStore';
 import DotLoader from './DotLoader';
+import { useAnimation } from '../context/AnimationContext';
 
 // Global reference to track currently playing audio
 let currentlyPlayingWaveSurfer = null;
 
 const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap, onStartAudioDrag, onUpdateDragPosition, onEndDrag, shouldShowGlow }) => {
   const { updatePair } = useAppStore();
+  const { isAnimEnabled } = useAnimation();
+  const waveformEnabled = isAnimEnabled('waveform');
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
+  // Native audio fallback when waveform is disabled
+  const nativeAudioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -24,8 +29,26 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
 
 
+  // Native audio fallback (when waveform is disabled)
   useEffect(() => {
-    if (audio && containerRef.current && !isContentChanging) {
+    if (!audio || waveformEnabled) return;
+    const audioUrl = URL.createObjectURL(new Blob([audio], { type: audio.type }));
+    const na = new Audio(audioUrl);
+    na.onloadedmetadata = () => setDuration(na.duration);
+    na.ontimeupdate = () => setCurrentTime(na.currentTime);
+    na.onplay = () => setIsPlaying(true);
+    na.onpause = () => setIsPlaying(false);
+    na.onended = () => { setIsPlaying(false); setCurrentTime(0); };
+    nativeAudioRef.current = na;
+    return () => {
+      na.pause();
+      nativeAudioRef.current = null;
+      URL.revokeObjectURL(audioUrl);
+    };
+  }, [audio, waveformEnabled]);
+
+  useEffect(() => {
+    if (audio && containerRef.current && !isContentChanging && waveformEnabled) {
       const loadAudio = async () => {
         try {
           if (wavesurfer.current) {
@@ -38,13 +61,13 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
 
           const ws = WaveSurfer.create({
             container: waveformRef.current,
-            waveColor: '#6C737F', // Muted gray for unplayed portions (like Decibels)
-            progressColor: '#9CA3AF', // Gray for played portions
+            waveColor: '#6C737F',
+            progressColor: '#9CA3AF',
             cursorColor: 'rgba(156, 163, 175, 0.6)',
             barWidth: 2,
             barRadius: 1,
             barGap: 1,
-            height: 80, // Taller for prominence like Decibels
+            height: 80,
             normalize: true,
             backend: 'WebAudio',
             interact: true,
@@ -56,16 +79,12 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
           setDuration(ws.getDuration());
           wavesurfer.current = ws;
 
-          // Track play/pause state
           ws.on('play', () => setIsPlaying(true));
           ws.on('pause', () => setIsPlaying(false));
           ws.on('finish', () => setIsPlaying(false));
 
-          // Clean up blob URL when component unmounts
           return () => {
-            if (audioUrl) {
-              URL.revokeObjectURL(audioUrl);
-            }
+            if (audioUrl) URL.revokeObjectURL(audioUrl);
           };
         } catch (error) {
           console.error("Error loading audio:", error);
@@ -86,16 +105,17 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
   }, [audio, isContentChanging]);
 
   const handlePlayPause = () => {
+    if (!waveformEnabled && nativeAudioRef.current) {
+      const na = nativeAudioRef.current;
+      if (na.paused) { na.play().catch(() => {}); }
+      else { na.pause(); }
+      return;
+    }
     if (wavesurfer.current) {
-      // Stop any currently playing audio BEFORE starting this one
       if (currentlyPlayingWaveSurfer && currentlyPlayingWaveSurfer !== wavesurfer.current) {
         currentlyPlayingWaveSurfer.pause();
       }
-
-      // Play/pause this audio
       wavesurfer.current.playPause();
-
-      // Update the global reference based on the new state
       if (wavesurfer.current.isPlaying()) {
         currentlyPlayingWaveSurfer = wavesurfer.current;
       } else {
@@ -289,35 +309,41 @@ const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap,
             </button>
           </div>
 
-          {/* Waveform - moved 7px higher */}
+          {/* Waveform or simple fallback */}
           <div className="flex-1 flex items-start" style={{ marginTop: '-7px' }}>
-            <div 
-              ref={waveformRef}
-              className="w-full cursor-pointer relative z-10"
-              style={{ height: '60px' }}
-            >
-              {/* Loading animation */}
-              {isWaveformLoading && (
-                <div className="absolute inset-0 flex items-center justify-center z-20">
-                  <svg 
-                    className="w-8 h-8 text-white animate-pulse" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M2 10v3"/>
-                    <path d="M6 6v11"/>
-                    <path d="M10 3v18"/>
-                    <path d="M14 8v7"/>
-                    <path d="M18 5v13"/>
-                    <path d="M22 10v3"/>
-                  </svg>
+            {waveformEnabled ? (
+              <div 
+                ref={waveformRef}
+                className="w-full cursor-pointer relative z-10"
+                style={{ height: '60px' }}
+              >
+                {isWaveformLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <svg className="w-8 h-8 text-white animate-pulse" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="w-full flex items-center justify-center relative z-10" style={{ height: '60px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  {[...Array(20)].map((_, i) => {
+                    const heights = [12,18,28,22,35,28,18,32,24,16,28,20,36,22,14,30,24,18,28,12];
+                    const prog = duration > 0 ? (currentTime / duration) : 0;
+                    const filled = (i / 20) <= prog;
+                    return (
+                      <div key={i} style={{
+                        width: 3, borderRadius: 2,
+                        height: heights[i],
+                        background: filled ? 'rgba(156,163,175,0.9)' : 'rgba(108,115,127,0.5)',
+                        flexShrink: 0,
+                      }} />
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Play button and time information - moved 2px down */}

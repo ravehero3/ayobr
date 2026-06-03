@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { AnimationProvider } from './context/AnimationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -30,6 +31,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <LanguageProvider>
+        <AnimationProvider>
         <AuthProvider>
           <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
@@ -61,6 +63,7 @@ export default function App() {
             </Suspense>
           </BrowserRouter>
         </AuthProvider>
+        </AnimationProvider>
       </LanguageProvider>
     </ErrorBoundary>
   );

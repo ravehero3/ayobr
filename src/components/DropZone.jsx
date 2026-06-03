@@ -1,9 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
+import { useAnimation } from '../context/AnimationContext';
 
 const DropZone = ({ onFileDrop, hasFiles = false }) => {
   const { t } = useLanguage();
+  const { isAnimEnabled } = useAnimation();
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDrop = useCallback((e) => {
@@ -43,10 +45,10 @@ const DropZone = ({ onFileDrop, hasFiles = false }) => {
       />
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={isAnimEnabled('dropzone_animation') ? { opacity: 0, scale: 0.95 } : { opacity: 1 }}
         animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        exit={isAnimEnabled('dropzone_animation') ? { opacity: 0, scale: 0.95 } : { opacity: 0 }}
+        transition={isAnimEnabled('dropzone_animation') ? { duration: 0.4, ease: "easeOut" } : { duration: 0.1 }}
         className={`
           relative w-full max-w-4xl mx-auto p-12 rounded-3xl
           bg-white/[0.02] border border-white/5

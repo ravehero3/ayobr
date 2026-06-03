@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import { useAnimation } from '../context/AnimationContext';
 import sleepingAlienImg from '../assets/sleeping-alien-updated.png';
 
 const SleepingAlien = () => {
+  const { isAnimEnabled } = useAnimation();
   const pairs = useAppStore(state => state.pairs);
   const storeIsGenerating = useAppStore(state => state.isGenerating);
   const videoGenerationStates = useAppStore(state => state.videoGenerationStates);
@@ -19,6 +21,8 @@ const SleepingAlien = () => {
     setIsHidden(true);
     revealTimer.current = setTimeout(() => setIsHidden(false), 3500);
   };
+
+  if (!isAnimEnabled('sleeping_alien')) return null;
 
   return (
     <AnimatePresence mode="wait">

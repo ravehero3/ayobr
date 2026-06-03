@@ -14,6 +14,7 @@ const LANDING_DIR = path.join(__dirname, '../uploads/landing');
 if (!fs.existsSync(LANDING_DIR)) fs.mkdirSync(LANDING_DIR, { recursive: true });
 
 const LANDING_CONTENT_FILE = path.join(__dirname, '../data/landing-content.json');
+const ANIM_SETTINGS_FILE = path.join(__dirname, '../data/animation-settings.json');
 const DATA_DIR = path.join(__dirname, '../data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -266,6 +267,37 @@ router.put('/landing-content', isAdmin, (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'Failed to save landing content' });
+  }
+});
+
+// GET animation settings (admin read)
+router.get('/animation-settings', isAdmin, (req, res) => {
+  try {
+    if (fs.existsSync(ANIM_SETTINGS_FILE)) {
+      return res.json(JSON.parse(fs.readFileSync(ANIM_SETTINGS_FILE, 'utf8')));
+    }
+    res.json({});
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to read animation settings' });
+  }
+});
+
+// PATCH animation settings (admin write)
+router.patch('/animation-settings', isAdmin, (req, res) => {
+  try {
+    const { key, enabled } = req.body;
+    if (typeof key !== 'string' || typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: 'Invalid payload — key (string) and enabled (boolean) required' });
+    }
+    let current = {};
+    if (fs.existsSync(ANIM_SETTINGS_FILE)) {
+      try { current = JSON.parse(fs.readFileSync(ANIM_SETTINGS_FILE, 'utf8')); } catch {}
+    }
+    current[key] = enabled;
+    fs.writeFileSync(ANIM_SETTINGS_FILE, JSON.stringify(current, null, 2));
+    res.json({ ok: true, key, enabled });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to save animation settings' });
   }
 });
 

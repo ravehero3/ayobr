@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { ANIMATION_KEYS } from '../context/AnimationContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import { subscribeFFmpegLogs, clearFFmpegLogs } from '../utils/ffmpegLogger';
@@ -585,6 +586,8 @@ export default function AdminPage() {
   const [landingImages, setLandingImages] = useState({});
   const [landingUploading, setLandingUploading] = useState({});
   const [landingContent, setLandingContent] = useState({ steps: [{}, {}, {}, {}] });
+  const [animSettings, setAnimSettings] = useState({});
+  const [animSaving, setAnimSaving] = useState({});
 
   // Users tab
   const [userFilter, setUserFilter] = useState('all');
@@ -639,6 +642,13 @@ export default function AdminPage() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    fetch(`${API}/animation-settings`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : {})
+      .then(data => setAnimSettings(data))
+      .catch(() => {});
+  }, []);
+
   function flash(m) { setMsg(m); setTimeout(() => setMsg(''), 3500); }
 
   /* ── User actions ── */
@@ -665,6 +675,22 @@ export default function AdminPage() {
       credentials:'include', body:JSON.stringify({featureKey:key,plan,enabled})
     });
     if (res.ok) setFlags(p=>p.map(f=>f.feature_key===key&&f.plan===plan?{...f,enabled}:f));
+  }
+
+  async function toggleAnimSetting(key, enabled) {
+    setAnimSettings(prev => ({ ...prev, [key]: enabled }));
+    setAnimSaving(prev => ({ ...prev, [key]: true }));
+    try {
+      await fetch(`${API}/animation-settings`, {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, enabled }),
+      });
+    } catch (e) {
+      setAnimSettings(prev => ({ ...prev, [key]: !enabled }));
+    } finally {
+      setAnimSaving(prev => ({ ...prev, [key]: false }));
+    }
   }
 
   async function resetCredits() {
@@ -733,6 +759,7 @@ export default function AdminPage() {
     {id:'newsletter',  label:'NEWSLETTER'},
     {id:'howItWorks',  label:'LANDING PAGE'},
     {id:'settings',    label:'NASTAVENÍ'},
+    {id:'speedOpt',    label:'⚡ SPEED OPTIMIZATION'},
     {id:'ffmpeg',      label:'FFMPEG DEBUG'},
   ];
 
@@ -1393,6 +1420,69 @@ export default function AdminPage() {
                       </button>
                     </div>
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ══════════ SPEED OPTIMIZATION ══════════ */}
+            {tab==='speedOpt' && (
+              <motion.div key="speedOpt" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
+                <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:8}}>
+                  ⚡ Speed Optimization
+                </h2>
+                <p style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.4)',marginBottom:32,lineHeight:1.7}}>
+                  Zapni nebo vypni jednotlivé animace pro všechny uživatele v MAX módu.
+                  Uživatelé v LOW módu mají všechno automaticky vypnuté.
+                </p>
+
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:14}}>
+                  {ANIMATION_KEYS.map(({ key, label, desc }) => {
+                    const enabled = animSettings[key] !== false;
+                    const saving  = !!animSaving[key];
+                    return (
+                      <div key={key} style={{
+                        background: CARD, border:`1px solid ${BORDER}`,
+                        borderRadius:14, padding:'18px 20px',
+                        display:'flex', alignItems:'flex-start', gap:16,
+                        opacity: saving ? 0.6 : 1, transition:'opacity 0.2s',
+                      }}>
+                        <div style={{flex:1}}>
+                          <div style={{fontFamily:NM,fontSize:13,fontWeight:700,color:'#fff',marginBottom:4,letterSpacing:'-0.01em'}}>
+                            {label}
+                          </div>
+                          <div style={{fontFamily:NM,fontSize:11,color:'rgba(255,255,255,0.35)',lineHeight:1.6}}>
+                            {desc}
+                          </div>
+                        </div>
+                        {/* Toggle switch */}
+                        <div
+                          onClick={() => !saving && toggleAnimSetting(key, !enabled)}
+                          style={{
+                            flexShrink:0, width:44, height:24, borderRadius:12,
+                            cursor: saving ? 'not-allowed' : 'pointer',
+                            background: enabled ? BLUE : 'rgba(255,255,255,0.12)',
+                            border:`1px solid ${enabled ? BLUE : 'rgba(255,255,255,0.15)'}`,
+                            position:'relative', transition:'background 0.25s, border-color 0.25s',
+                            marginTop:2,
+                          }}
+                        >
+                          <div style={{
+                            position:'absolute', top:3,
+                            left: enabled ? 21 : 3,
+                            width:16, height:16, borderRadius:'50%',
+                            background:'#fff', transition:'left 0.25s',
+                            boxShadow:'0 1px 4px rgba(0,0,0,0.35)',
+                          }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{marginTop:28,padding:'14px 18px',borderRadius:12,background:`${BLUE}08`,border:`1px solid ${BLUE}20`}}>
+                  <p style={{fontFamily:NM,fontSize:11,color:'rgba(255,255,255,0.4)',margin:0,lineHeight:1.7}}>
+                    💡 Tato nastavení jsou globální výchozí hodnoty. Uživatelé si mohou zapnout LOW mód v Nastavení aplikace (ikona ozubeného kola), čímž přepíší tato nastavení a vypnou vše.
+                  </p>
                 </div>
               </motion.div>
             )}
