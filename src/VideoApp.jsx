@@ -5,6 +5,7 @@ import { usePairingLogic } from './hooks/usePairingLogic';
 import { usePairPreparation } from './hooks/usePairPreparation';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import { useLanguage } from './context/LanguageContext';
+import { useAnimation } from './context/AnimationContext';
 import Pairs from './components/Pairs';
 import VideoPreviewCard from './components/VideoPreviewCard';
 import BatchStatusIndicator from './components/BatchStatusIndicator';
@@ -27,6 +28,7 @@ function App({ onBeforeGenerate }) {
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { prepareCompletePairs } = usePairPreparation(); // Activate automatic pair preparation
   const { generateVideos, stopGeneration } = useFFmpeg();
+  const { isAnimEnabled } = useAnimation();
   const [isDragOver, setIsDragOver] = useState(false);
 
   // Drag overlay state
@@ -407,9 +409,9 @@ function App({ onBeforeGenerate }) {
       {currentPage === 'upload' && (
         <motion.div
           data-page-section="upload"
-          initial={{ opacity: 0, y: 20 }}
+          initial={isAnimEnabled('dropzone_animation') ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={isAnimEnabled('dropzone_animation') ? { duration: 0.5 } : { duration: 0 }}
           className="fixed inset-0 flex items-center justify-center p-6 pt-24 pb-24"
           style={{ zIndex: 100 }}
         >
