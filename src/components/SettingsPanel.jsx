@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useAnimation } from '../context/AnimationContext';
+
 import page1Background from '../assets/page-1-background.png';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -11,7 +11,7 @@ const NM = "'Neue Montreal', 'Inter', sans-serif";
 const SettingsPanel = ({ isOpen, onClose }) => {
   const { user, featureFlags } = useAuth();
   const { t } = useLanguage();
-  const { perfMode, setUserPerfMode } = useAnimation();
+
   const {
     videoSettings,
     setVideoBackground,
@@ -297,62 +297,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* APP SETTINGS — Performance Mode */}
-            <div>
-              <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 12 }}>
-                APP SETTINGS
-              </p>
-              <div style={{ display: 'flex', gap: 12 }}>
-                {/* MAX mode */}
-                <motion.div
-                  onClick={() => setUserPerfMode('max')}
-                  style={{
-                    flex: 1, borderRadius: 12, cursor: 'pointer',
-                    padding: '14px 12px',
-                    background: perfMode === 'max' ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.02)',
-                    border: perfMode === 'max' ? '1.5px solid rgba(255,255,255,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
-                    transition: 'all 0.2s ease',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                  }}
-                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                >
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: perfMode === 'max' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)' }}>
-                    <rect x="2" y="3" width="20" height="14" rx="2"/>
-                    <path d="M8 21h8M12 17v4"/>
-                  </svg>
-                  <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: perfMode === 'max' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                    MAX
-                  </div>
-                  <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.4 }}>
-                    Všechny animace
-                  </div>
-                </motion.div>
-
-                {/* LOW mode */}
-                <motion.div
-                  onClick={() => setUserPerfMode('low')}
-                  style={{
-                    flex: 1, borderRadius: 12, cursor: 'pointer',
-                    padding: '14px 12px',
-                    background: perfMode === 'low' ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.02)',
-                    border: perfMode === 'low' ? '1.5px solid rgba(255,255,255,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
-                    transition: 'all 0.2s ease',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                  }}
-                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                >
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: perfMode === 'low' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)' }}>
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                  </svg>
-                  <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: perfMode === 'low' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                    LOW
-                  </div>
-                  <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.4 }}>
-                    Bez animací — starší PC
-                  </div>
-                </motion.div>
-              </div>
-            </div>
 
             {/* Action Buttons — pill style matching "Open app" */}
             <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>

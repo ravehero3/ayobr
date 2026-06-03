@@ -4,15 +4,15 @@ import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
 import { useAnimation } from '../context/AnimationContext';
 import SettingsPanel from './SettingsPanel';
-import GridLayoutModal from './GridLayoutModal';
+import ViewOptionsModal from './ViewOptionsModal';
 
 const Footer = ({ onGenerateVideos, onStop }) => {
-  const { pairs, generatedVideos, isGenerating, videoGenerationStates, popPage, resetApp } = useAppStore();
+  const { pairs, generatedVideos, isGenerating, videoGenerationStates, popPage, resetApp, spacingSliderVisible, setSpacingSliderVisible } = useAppStore();
   const { t } = useLanguage();
   const { isAnimEnabled } = useAnimation();
   const blurEnabled = isAnimEnabled('backdrop_blur');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isGridLayoutOpen, setIsGridLayoutOpen] = useState(false);
+  const [isViewOptionsOpen, setIsViewOptionsOpen] = useState(false);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
@@ -70,15 +70,12 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         }}
       >
         {/* Left side - Back Arrow and Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={async () => {
               const { clearAllPairs, setCurrentPage, setIsGenerating, clearAllVideoGenerationStates, clearGeneratedVideos, resetGenerationState, cancelGeneration } = useAppStore.getState();
 
               if (isGenerating) {
-                // Set isCancelling FIRST so the running generateVideos loop
-                // stops immediately — without this it keeps updating state in the
-                // background and the next generation sees stale progress values.
                 cancelGeneration();
                 const { forceStopAllProcesses } = await import('../utils/ffmpegProcessor');
                 await forceStopAllProcesses();
@@ -106,7 +103,29 @@ const Footer = ({ onGenerateVideos, onStop }) => {
             <span className="hidden xs:inline text-sm text-gray-300 group-hover:text-white">{t('app.back')}</span>
           </button>
 
-
+          {/* Spacing slider toggle — fader icon, only on page 2 */}
+          {!isOnPage3 && (
+            <motion.button
+              onClick={() => setSpacingSliderVisible(!spacingSliderVisible)}
+              className="hidden md:flex p-2 rounded-lg hover:bg-white/5 transition-all"
+              title="Spacing"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                stroke={spacingSliderVisible ? '#ffffff' : 'rgba(255,255,255,0.35)'}
+                strokeWidth="1.8"
+                style={{ transition: 'stroke 0.2s ease' }}
+              >
+                <line x1="4" y1="4" x2="4" y2="20"/>
+                <line x1="12" y1="4" x2="12" y2="20"/>
+                <line x1="20" y1="4" x2="20" y2="20"/>
+                <rect x="1.5" y="7" width="5" height="3.5" rx="1"/>
+                <rect x="9.5" y="13" width="5" height="3.5" rx="1"/>
+                <rect x="17.5" y="5" width="5" height="3.5" rx="1"/>
+              </svg>
+            </motion.button>
+          )}
         </div>
 
         {/* Center - Status or Action Button */}
@@ -154,14 +173,16 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         <div className="flex items-center gap-1">
           {!isOnPage3 ? (
             <>
-              {/* Grid layout button */}
+              {/* View options button */}
               <motion.button
-                onClick={() => setIsGridLayoutOpen(true)}
+                onClick={() => setIsViewOptionsOpen(v => !v)}
                 className="relative p-2 rounded-lg hover:bg-white/5 transition-all"
-                title="Grid layout"
+                title="Zobrazení"
                 whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <svg className="w-5 h-5 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  style={{ color: isViewOptionsOpen ? '#ffffff' : 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}>
                   <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
                   <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
                   <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="1.8"/>
@@ -199,8 +220,8 @@ const Footer = ({ onGenerateVideos, onStop }) => {
 
       {/* Settings Panel */}
       <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      {/* Grid Layout Modal */}
-      <GridLayoutModal isOpen={isGridLayoutOpen} onClose={() => setIsGridLayoutOpen(false)} />
+      {/* View Options Modal (page 2) */}
+      <ViewOptionsModal isOpen={isViewOptionsOpen} onClose={() => setIsViewOptionsOpen(false)} />
     </motion.footer>
   );
 };

@@ -469,7 +469,10 @@ html {
 /* Subtle Gradient + Particles Button Styles */
 .generate-btn-subtle-particles {
   position: relative;
-  padding: 7px 24px 17px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
   background: #0a0a0a;
   color: white;
   border: 2px solid transparent;
@@ -480,7 +483,6 @@ html {
   transition: all 0.3s ease;
   overflow: visible;
   min-width: 180px;
-  text-align: center;
   height: 44px;
   background: linear-gradient(#0a0a0a, #0a0a0a) padding-box, 
              conic-gradient(from 270deg, 
@@ -2213,47 +2215,3 @@ input[type="file"] {
   visibility: hidden !important;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   LOW PERFORMANCE MODE — all CSS animations disabled
-   data-perf="low" on body
-═══════════════════════════════════════════════════════════ */
-
-[data-perf="low"] .glass-container,
-[data-perf="low"] .glass-card,
-[data-perf="low"] .glass,
-[data-perf="low"] .premium-container {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-[data-perf="low"] .glass-container {
-  background-image: none !important;
-}
-[data-perf="low"] .video-card-container:hover .video-card,
-[data-perf="low"] .video-card-container:hover {
-  transform: none !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
-}
-[data-perf="low"] .video-card-glow,
-[data-perf="low"] .video-particle {
-  display: none !important;
-}
-[data-perf="low"] .thumbnail-pulse {
-  animation: none !important;
-  opacity: 0.5 !important;
-}
-[data-perf="low"] .generate-btn-subtle-particles::before,
-[data-perf="low"] .generate-btn-subtle-particles::after {
-  animation: none !important;
-  opacity: 0 !important;
-  background: rgba(255,255,255,0.06) !important;
-}
-[data-perf="low"] .particle-system,
-[data-perf="low"] .static-particles {
-  display: none !important;
-  visibility: hidden !important;
-}
-[data-perf="low"] .animate-diagonal-move,
-[data-perf="low"] [class*="diagonal"] {
-  animation: none !important;
-  transform: none !important;
-}

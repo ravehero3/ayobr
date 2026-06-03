@@ -172,8 +172,8 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
   const isFirstPair    = pairIndex === 0;
   const visibleCount   = pairs.filter(p => p.audio || p.image).length;
   const isMultiCol     = gridMode >= 2;
-  // Container width per mode: default 560px, compact 420px, grid cols 100%
-  const containerW     = isMultiCol ? '100%' : gridMode === 1 ? '420px' : '560px';
+  // Container width per mode: default 560px, compact 420px, grid cols fit 2 side by side
+  const containerW     = isMultiCol ? 'calc(50% - 6px)' : gridMode === 1 ? '420px' : '560px';
   // First-pair top spacing (grid modes use paddingTop on the parent instead)
   const firstPairTop   = isMultiCol ? '0px' : (visibleCount > 1 ? '68px' : '281px');
 
@@ -251,7 +251,7 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
         </div>
       ) : !generatedVideo ? (
         <div 
-          className={`flex items-center relative z-10 group/pair ${isMultiCol ? 'flex-col' : 'flex-col lg:flex-row'}`}
+          className="flex items-center relative z-10 group/pair flex-col lg:flex-row"
           style={{ 
             gap: '12px',
             paddingLeft: isMultiCol ? '8px' : '15px',
@@ -335,10 +335,10 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div
-            className={`relative z-20 flex items-center justify-center flex-shrink-0 connecting-bridge${!isMultiCol ? ' hidden lg:flex' : ''}`}
+            className="relative z-20 flex items-center justify-center flex-shrink-0 connecting-bridge hidden lg:flex"
             style={{ 
-              width: isMultiCol ? '100%' : '40px', 
-              height: isMultiCol ? '28px' : '180px',
+              width: '40px', 
+              height: '180px',
               alignItems: 'center',
               justifyContent: 'center'
             }}

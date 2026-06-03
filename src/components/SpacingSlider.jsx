@@ -3,11 +3,11 @@ import { useAppStore } from '../store/appStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SpacingSlider = () => {
-  const { containerSpacing, setContainerSpacing, pairs, isGenerating, generatedVideos } = useAppStore();
+  const { containerSpacing, setContainerSpacing, pairs, isGenerating, generatedVideos, spacingSliderVisible } = useAppStore();
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
-  // Don't render if no files are present or if videos are being generated/completed
-  if (!hasFiles || isGenerating || generatedVideos.length > 0) {
+  // Don't render if not visible, no files, or generating/completed
+  if (!spacingSliderVisible || !hasFiles || isGenerating || generatedVideos.length > 0) {
     return null;
   }
 

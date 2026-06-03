@@ -58,6 +58,7 @@ export const useAppStore = create((set, get) => ({
 
   // Container spacing
   containerSpacing: 0, // Default spacing in pixels between container pairs
+  spacingSliderVisible: false, // Spacing slider hidden by default
 
   // Page 2 (file management) grid layout mode: 0=default, 1=compact, 2=2-col, 3=3-col
   page2GridMode: loadFromLocalStorage('page2GridMode', 0),
@@ -518,6 +519,7 @@ export const useAppStore = create((set, get) => ({
 
   // Container spacing actions
   setContainerSpacing: (spacing) => set({ containerSpacing: spacing }),
+  setSpacingSliderVisible: (v) => set({ spacingSliderVisible: v }),
 
   // Page 2 grid layout mode
   setPage2GridMode: (mode) => {

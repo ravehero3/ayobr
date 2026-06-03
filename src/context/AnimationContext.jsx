@@ -24,9 +24,7 @@ const AnimationContext = createContext(null);
 
 export function AnimationProvider({ children }) {
   const [adminSettings, setAdminSettings] = useState(DEFAULT_SETTINGS);
-  const [perfMode, setPerfMode] = useState(() => {
-    try { return localStorage.getItem('typebeatz_perf_mode') || 'max'; } catch { return 'max'; }
-  });
+  const perfMode = 'max';
 
   useEffect(() => {
     fetch('/api/animation-settings', { credentials: 'include' })
@@ -36,22 +34,18 @@ export function AnimationProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    document.body.setAttribute('data-perf', perfMode);
+    document.body.setAttribute('data-perf', 'max');
     ANIMATION_KEYS.forEach(({ key }) => {
-      const enabled = perfMode === 'low' ? false : adminSettings[key] !== false;
+      const enabled = adminSettings[key] !== false;
       document.body.setAttribute(`data-anim-${key.replace(/_/g, '-')}`, enabled ? 'on' : 'off');
     });
-  }, [perfMode, adminSettings]);
+  }, [adminSettings]);
 
   const isAnimEnabled = useCallback((key) => {
-    if (perfMode === 'low') return false;
     return adminSettings[key] !== false;
-  }, [perfMode, adminSettings]);
+  }, [adminSettings]);
 
-  const setUserPerfMode = useCallback((mode) => {
-    setPerfMode(mode);
-    try { localStorage.setItem('typebeatz_perf_mode', mode); } catch {}
-  }, []);
+  const setUserPerfMode = useCallback(() => {}, []);
 
   return (
     <AnimationContext.Provider value={{ isAnimEnabled, perfMode, setUserPerfMode, adminSettings, setAdminSettings }}>
