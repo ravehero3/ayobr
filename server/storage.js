@@ -14,7 +14,7 @@ async function upsertUser(userData) {
        email = EXCLUDED.email,
        first_name = EXCLUDED.first_name,
        last_name = EXCLUDED.last_name,
-       profile_image_url = EXCLUDED.profile_image_url,
+       profile_image_url = CASE WHEN users.profile_image_url LIKE 'data:%' THEN users.profile_image_url ELSE EXCLUDED.profile_image_url END,
        language = COALESCE(NULLIF(users.language, ''), EXCLUDED.language, 'cs'),
        updated_at = NOW()
      RETURNING *, (xmax = 0) AS is_new`,

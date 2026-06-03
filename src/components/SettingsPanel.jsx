@@ -101,7 +101,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             className="absolute inset-0"
             onClick={handleCancel}
             style={{
-              background: 'rgba(0,0,0,0.55)',
               backdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
               WebkitBackdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
               overflow: 'hidden',
@@ -113,8 +112,13 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               backgroundSize: 'cover', backgroundPosition: 'center',
               filter: 'blur(40px)',
               transform: 'scale(1.1)',
-              opacity: 0.55,
+              opacity: 0.45,
               zIndex: 0,
+            }} />
+            {/* Strong fade to black on all edges */}
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 1,
+              background: 'radial-gradient(ellipse 50% 52% at 50% 50%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.96) 100%)',
             }} />
           </div>
 

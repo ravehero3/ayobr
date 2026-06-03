@@ -137,7 +137,12 @@ function ProfilePictureModal({ isOpen, currentImageUrl, onClose, onSave, saving,
     canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
     const img = new window.Image();
-    img.crossOrigin = 'anonymous';
+    // Only set crossOrigin for remote http(s) URLs — blob: and data: URLs must NOT
+    // have crossOrigin set or canvas.toDataURL() will throw a security error in some browsers.
+    if (srcUrl.startsWith('http://') || srcUrl.startsWith('https://')) {
+      img.crossOrigin = 'anonymous';
+    }
+    img.onerror = () => console.error('[ProfilePicture] Failed to load image for canvas');
     img.onload = () => {
       ctx.beginPath();
       ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
