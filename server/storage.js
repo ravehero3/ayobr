@@ -7,6 +7,54 @@ const PRE_APPROVED_ADMINS = [
 
 async function upsertUser(userData) {
   const { id, email, first_name, last_name, profile_image_url, language } = userData;
+
+  // ── Cross-provider account merge ──────────────────────────────────────────
+  // If the same email already exists under a different auth ID (e.g., user
+  // previously logged in via Replit OIDC and now via Google OAuth), update
+  // the existing row in-place rather than inserting a new one — which would
+  // violate the users_email_key unique constraint.
+  if (email) {
+    const clash = await pool.query(
+      'SELECT id FROM users WHERE email = $1 AND id != $2',
+      [email, id]
+    );
+    if (clash.rows.length > 0) {
+      const existingId = clash.rows[0].id;
+      console.log(`[auth] Merging auth providers for ${email}: ${id} → existing ${existingId}`);
+      const merged = await pool.query(
+        `UPDATE users SET
+           first_name = $1,
+           last_name  = $2,
+           profile_image_url = CASE WHEN profile_image_url LIKE 'data:%' THEN profile_image_url ELSE $3 END,
+           language   = COALESCE(NULLIF(language, ''), $4, 'cs'),
+           updated_at = NOW()
+         WHERE id = $5
+         RETURNING *, false AS is_new`,
+        [first_name, last_name, profile_image_url, language || 'cs', existingId]
+      );
+      const mergedUser = merged.rows[0];
+      // Ensure credits exist (they should, but be safe)
+      await pool.query(
+        `INSERT INTO credits (user_id, credits_remaining, credits_used_this_month)
+         VALUES ($1, 5, 0) ON CONFLICT (user_id) DO NOTHING`,
+        [existingId]
+      );
+      // Auto-promote if needed
+      if (email && PRE_APPROVED_ADMINS.includes(email.toLowerCase()) && mergedUser.role !== 'admin') {
+        const promoted = await pool.query(
+          `UPDATE users SET role = 'admin', updated_at = NOW() WHERE id = $1 RETURNING *`,
+          [existingId]
+        );
+        if (promoted.rowCount > 0) {
+          console.log(`[auth] Auto-promoted (merged) ${email} to admin`);
+          return promoted.rows[0];
+        }
+      }
+      return mergedUser;
+    }
+  }
+
+  // ── Normal upsert by primary auth ID ─────────────────────────────────────
   const result = await pool.query(
     `INSERT INTO users (id, email, first_name, last_name, profile_image_url, language, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, NOW())
@@ -30,7 +78,6 @@ async function upsertUser(userData) {
     [id]
   );
 
-  // Detect if this was a fresh INSERT (new user)
   const isNew = user.is_new === true;
 
   // Auto-promote pre-approved admin emails
@@ -44,7 +91,6 @@ async function upsertUser(userData) {
     if (promoted.rowCount > 0) {
       console.log(`[auth] Auto-promoted ${email} to admin`);
       const promotedUser = promoted.rows[0];
-      // Send welcome email async (non-blocking)
       setImmediate(() => {
         try { require('./email').sendWelcomeEmail(promotedUser); } catch (e) {}
       });
@@ -52,7 +98,6 @@ async function upsertUser(userData) {
     }
   }
 
-  // Send welcome email to brand new users (async, non-blocking)
   if (isNew) {
     setImmediate(() => {
       try { require('./email').sendWelcomeEmail(user); } catch (e) {}
