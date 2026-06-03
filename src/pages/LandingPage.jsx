@@ -991,11 +991,13 @@ function LandingNavButtons({ user, navigate, login }) {
 
 function LandingHeroContent({ user, handleCTA, isMobile }) {
   const { t } = useLanguage();
+  const { isAnimEnabled } = useAnimation();
+  const animEnabled = isAnimEnabled('landing_animations');
   const producerName = user?.producer_name;
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={animEnabled ? { opacity: 0, y: 20 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
         className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
@@ -1005,7 +1007,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
 
       {producerName && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={animEnabled ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -1027,7 +1029,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       )}
 
       <motion.h1
-        initial={{ opacity: 0, y: 24 }}
+        initial={animEnabled ? { opacity: 0, y: 24 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         style={{
@@ -1048,7 +1050,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       </motion.h1>
 
       <motion.p
-        initial={{ opacity: 0, y: 20 }}
+        initial={animEnabled ? { opacity: 0, y: 20 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
         style={isMobile ? {
@@ -1095,7 +1097,7 @@ function LandingHeroContent({ user, handleCTA, isMobile }) {
       </motion.p>
 
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={animEnabled ? { opacity: 0, y: 16 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-row items-center justify-center gap-3"
@@ -1257,7 +1259,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 14%, transparent calc(100% - 100px), #000 100%)' }} />
 
         {/* Hero content */}
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
+        <motion.div initial={isAnimEnabled('landing_animations') ? { opacity: 0, y: 30 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="relative" style={{ zIndex: 2 }}>
           <LandingHeroContent user={user} handleCTA={handleCTA} isMobile={isMobile} />
         </motion.div>

@@ -10,8 +10,8 @@ let currentlyPlayingWaveSurfer = null;
 
 const AudioContainer = ({ audio, pairId, onMoveUp, onMoveDown, onDelete, onSwap, onStartAudioDrag, onUpdateDragPosition, onEndDrag, shouldShowGlow }) => {
   const { updatePair } = useAppStore();
-  const { isAnimEnabled } = useAnimation();
-  const waveformEnabled = isAnimEnabled('waveform');
+  const { isAnimEnabled, adminSettings } = useAnimation();
+  const waveformEnabled = adminSettings?.waveform !== false;
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
   // Native audio fallback when waveform is disabled

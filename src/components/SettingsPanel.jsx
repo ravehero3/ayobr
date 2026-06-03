@@ -309,24 +309,18 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   style={{
                     flex: 1, borderRadius: 12, cursor: 'pointer',
                     padding: '14px 12px',
-                    background: perfMode === 'max' ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.03)',
-                    border: perfMode === 'max' ? '2px solid rgba(59,130,246,0.7)' : '2px solid rgba(255,255,255,0.08)',
-                    boxShadow: perfMode === 'max' ? '0 0 0 2px rgba(59,130,246,0.12)' : 'none',
+                    background: perfMode === 'max' ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.02)',
+                    border: perfMode === 'max' ? '1.5px solid rgba(255,255,255,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
                     transition: 'all 0.2s ease',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                    position: 'relative', overflow: 'hidden',
                   }}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 >
-                  {/* iMac icon with sparks */}
-                  <div style={{ position: 'relative', lineHeight: 1 }}>
-                    <span style={{ fontSize: 28 }}>🖥️</span>
-                    {perfMode === 'max' && <>
-                      <span style={{ position: 'absolute', top: -4, right: -6, fontSize: 10 }}>✨</span>
-                      <span style={{ position: 'absolute', bottom: -2, left: -6, fontSize: 8 }}>✦</span>
-                    </>}
-                  </div>
-                  <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: perfMode === 'max' ? '#60a5fa' : 'rgba(255,255,255,0.7)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: perfMode === 'max' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)' }}>
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <path d="M8 21h8M12 17v4"/>
+                  </svg>
+                  <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: perfMode === 'max' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                     MAX
                   </div>
                   <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.4 }}>
@@ -340,16 +334,17 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   style={{
                     flex: 1, borderRadius: 12, cursor: 'pointer',
                     padding: '14px 12px',
-                    background: perfMode === 'low' ? 'rgba(16,185,129,0.10)' : 'rgba(255,255,255,0.03)',
-                    border: perfMode === 'low' ? '2px solid rgba(16,185,129,0.6)' : '2px solid rgba(255,255,255,0.08)',
-                    boxShadow: perfMode === 'low' ? '0 0 0 2px rgba(16,185,129,0.10)' : 'none',
+                    background: perfMode === 'low' ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.02)',
+                    border: perfMode === 'low' ? '1.5px solid rgba(255,255,255,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
                     transition: 'all 0.2s ease',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                   }}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 >
-                  <span style={{ fontSize: 28, lineHeight: 1 }}>⚡</span>
-                  <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: perfMode === 'low' ? '#34d399' : 'rgba(255,255,255,0.7)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: perfMode === 'low' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)' }}>
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                  </svg>
+                  <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: perfMode === 'low' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                     LOW
                   </div>
                   <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.4 }}>
