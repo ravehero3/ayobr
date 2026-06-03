@@ -8,6 +8,7 @@ import VideoApp from '../VideoApp';
 import { initializeFFmpeg } from '../utils/ffmpegProcessor';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useLanguage } from '../context/LanguageContext';
+import { useAppStore } from '../store/appStore';
 
 export default function AppPage() {
   const { user, loading, refreshUser, deductCredit } = useAuth();
@@ -18,8 +19,23 @@ export default function AppPage() {
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
   const [checkoutLoading, setCheckoutLoading]   = useState(false);
   const [showReferral, setShowReferral]         = useState(false);
+  const { videoSettings, setVideoQuality } = useAppStore();
 
   const wasmPreloaded = useRef(false);
+
+  // Enforce quality limits per plan: free → max 720p, pro → max 1080p, unlimited/admin → 4K ok
+  useEffect(() => {
+    if (!user) return;
+    const role = user.role;
+    const quality = videoSettings?.quality || 'fullhd';
+    const isFree = role === 'free' || !role;
+    const isPro  = role === 'pro';
+    if (isFree && (quality === 'fullhd' || quality === '4k')) {
+      setVideoQuality('hd');
+    } else if (isPro && quality === '4k') {
+      setVideoQuality('fullhd');
+    }
+  }, [user, videoSettings?.quality, setVideoQuality]);
 
   useEffect(() => {
     if (!loading && !user) navigate('/login');

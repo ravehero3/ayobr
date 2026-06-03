@@ -18,10 +18,24 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   } = useAppStore();
 
   const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
-  const [selectedResolution, setSelectedResolution] = useState(videoSettings.quality || 'fullhd');
+  const [selectedResolution, setSelectedResolution] = useState(() => {
+    const q = videoSettings.quality || 'fullhd';
+    const canHD = featureFlags?.high_quality || user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
+    const can4K = featureFlags?.ultra_quality || user?.role === 'unlimited' || user?.role === 'admin';
+    if (q === '4k' && !can4K) return canHD ? 'fullhd' : 'hd';
+    if (q === 'fullhd' && !canHD) return 'hd';
+    return q;
+  });
 
+  const canUseFullHD = featureFlags?.high_quality || user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
   const canUse4K = featureFlags?.ultra_quality || user?.role === 'unlimited' || user?.role === 'admin';
   const canUseCustomBackground = user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
+
+  const clampQuality = (q) => {
+    if (q === '4k' && !canUse4K) return canUseFullHD ? 'fullhd' : 'hd';
+    if (q === 'fullhd' && !canUseFullHD) return 'hd';
+    return q;
+  };
 
   const handleBackgroundChange = (background) => {
     if (background === 'custom' && !canUseCustomBackground) return;
@@ -30,6 +44,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
   const handleResolutionChange = (resolution) => {
     if (resolution === '4k' && !canUse4K) return;
+    if (resolution === 'fullhd' && !canUseFullHD) return;
     setSelectedResolution(resolution);
   };
 
@@ -54,7 +69,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
   const handleCancel = () => {
     setSelectedBackground(videoSettings.background || 'black');
-    setSelectedResolution(videoSettings.quality || 'fullhd');
+    setSelectedResolution(clampQuality(videoSettings.quality || 'fullhd'));
     onClose();
   };
 
@@ -232,7 +247,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               <div style={{ display: 'flex', gap: 10 }}>
                 {[
                   { key: 'hd', label: 'HD', sub: '1280×720', badge: '720p' },
-                  { key: 'fullhd', label: 'Full HD', sub: '1920×1080', badge: '1080p' },
+                  { key: 'fullhd', label: 'Full HD', sub: '1920×1080', badge: '1080p', locked: !canUseFullHD },
                   { key: '4k', label: '4K Ultra', sub: '3840×2160', badge: '4K', locked: !canUse4K },
                 ].map(({ key, label, sub, badge, locked }) => (
                   <motion.div
