@@ -102,15 +102,16 @@ export const useFFmpeg = () => {
 
     const blob = new Blob([videoData], { type: 'video/mp4' });
     const url  = URL.createObjectURL(blob);
-    const audioName = pair.audio.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const imageName = pair.image.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const cleanName = (n) => n.replace(/\.[^/.]+$/, '').replace(/[\/\\:*?"<>|]/g, '_').trim();
+    const audioName = cleanName(pair.audio.name);
+    const imageName = cleanName(pair.image.name);
 
     const video = {
       id: crypto.randomUUID(),
       pairId: pair.id,
       url,
       blob,
-      filename: `video_${audioName}_${imageName}.mp4`,
+      filename: `${audioName} + ${imageName} (typebeatz.voodoo808.com).mp4`,
       createdAt: new Date(),
       size: videoData.length,
     };
@@ -273,10 +274,14 @@ export const useFFmpeg = () => {
             if (videoData) {
               const blob = new Blob([videoData], { type: 'video/mp4' });
               const url  = URL.createObjectURL(blob);
+              const cleanName = (n) => n.replace(/\.[^/.]+$/, '').replace(/[\/\\:*?"<>|]/g, '_').trim();
+              const audioBase = cleanName(pair.audio?.name || 'audio');
+              const imageBase = cleanName(pair.image?.name || 'image');
               const vo = {
                 pairId: pair.id, url, blob,
                 audioName: pair.audio?.name,
                 imageName: pair.image?.name,
+                filename: `${audioBase} + ${imageBase} (typebeatz.voodoo808.com).mp4`,
                 timestamp: Date.now(),
               };
               addGeneratedVideo(vo);
