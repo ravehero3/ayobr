@@ -259,25 +259,29 @@ function buildArgs(imageFileName, audioFileName, outputFileName, audioDuration, 
   const backgroundColor = bg === 'white' ? 'white' : 'black';
   const videoFilter = `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
 
+  // Quality-aware CRF (lower = better quality)
+  const crf = quality === '4k' ? '20' : quality === 'hd' ? '26' : '23';
   // 4K needs single-thread to stay within WASM memory limits
   const threadCount = quality === '4k' ? '1' : '4';
 
   return [
     '-loop', '1',
+    '-framerate', '1',
     '-i', imageFileName,
     '-i', audioFileName,
     '-vf', videoFilter,
     '-c:v', 'libx264',
     '-preset', 'ultrafast',
-    '-tune', 'zerolatency',
-    '-crf', '28',
+    '-tune', 'stillimage',
+    '-crf', crf,
     '-pix_fmt', 'yuv420p',
-    '-r', '5',
-    '-g', '60', '-keyint_min', '60',
+    '-r', '1',
+    '-g', '1',
     '-c:a', 'aac',
     '-b:a', '320k',
     '-ar', '48000',
     '-ac', '2',
+    '-movflags', '+faststart',
     '-threads', threadCount,
     '-shortest',
     '-t', String(Math.max(0.1, audioDuration)),
@@ -302,34 +306,34 @@ function buildArgsWithCustomBg(imageFileName, audioFileName, bgFileName, outputF
     `[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];` +
     `[bg][img]overlay=(W-w)/2:(H-h)/2[out]`;
 
-  // Match quality-aware settings used in buildArgs so custom-bg output is consistent.
+  // Quality-aware CRF; audio always 320k per product requirement
   const crf         = quality === '4k' ? '20' : quality === 'hd' ? '26' : '23';
-  const audioBitrate = quality === '4k' ? '320k' : quality === 'hd' ? '128k' : '192k';
   const threadCount = quality === '4k' ? '1' : '4';
 
   return [
     // cover image — loop so it has infinite duration
-    '-loop', '1', '-i', imageFileName,
+    '-loop', '1', '-framerate', '1', '-i', imageFileName,
     // audio — provides the real duration via -shortest / -t
     '-i', audioFileName,
     // background image — MUST also be looped; without -loop 1 it is a single
     // frame (~0 s), and -shortest would produce an essentially empty video file.
-    '-loop', '1', '-i', bgFileName,
+    '-loop', '1', '-framerate', '1', '-i', bgFileName,
     '-filter_complex', filterComplex,
     // Explicit stream mapping is required when -filter_complex is used.
     '-map', '[out]',
     '-map', '1:a',
     '-c:v', 'libx264',
     '-preset', 'ultrafast',
-    '-tune', 'zerolatency',
+    '-tune', 'stillimage',
     '-crf', crf,
     '-pix_fmt', 'yuv420p',
-    '-r', '5',
-    '-g', '60', '-keyint_min', '60',
+    '-r', '1',
+    '-g', '1',
     '-c:a', 'aac',
-    '-b:a', audioBitrate,
+    '-b:a', '320k',
     '-ar', '48000',
     '-ac', '2',
+    '-movflags', '+faststart',
     '-threads', threadCount,
     '-shortest',
     '-t', String(Math.max(0.1, audioDuration)),
@@ -582,24 +586,6 @@ export const processVideoWithFFmpeg = async (
     }
     if (currentProcessingPairId === pairId) currentProcessingPairId = null;
     currentProgressToken = null;
-
-    // Verify FS is clean
-    if (ffmpeg && isLoaded) {
-      try {
-        const files = await ffmpeg.listDir('/');
-        const leftovers = files.filter(f =>
-          !f.isDir && (f.name.startsWith('audio_') || f.name.startsWith('image_') ||
-            f.name.startsWith('output_') || f.name.startsWith('bg_'))
-        );
-        if (leftovers.length > 0) {
-          await Promise.allSettled(leftovers.map(f => ffmpeg.deleteFile(f.name).catch(() => {})));
-        }
-      } catch (_) {}
-    }
-
-    if (typeof window !== 'undefined' && window.gc) {
-      try { window.gc(); } catch (_) {}
-    }
 
     if (cleanupCompletionResolver) {
       cleanupCompletionResolver();
