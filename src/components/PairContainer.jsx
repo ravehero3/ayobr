@@ -172,8 +172,9 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
   const isFirstPair    = pairIndex === 0;
   const visibleCount   = pairs.filter(p => p.audio || p.image).length;
   const isMultiCol     = gridMode >= 2;
-  // Container width per mode: default 560px, compact 420px, grid cols fit 2 side by side
-  const containerW     = isMultiCol ? 'calc(50% - 6px)' : gridMode === 1 ? '420px' : '560px';
+  // Multi-col modes stack audio+image vertically (flex-col) so each fills the full
+  // grid-cell width. Horizontal side-by-side layout is only used in single-column modes.
+  const containerW     = isMultiCol ? '100%' : gridMode === 1 ? '420px' : '560px';
   // First-pair top spacing (grid modes use paddingTop on the parent instead)
   const firstPairTop   = isMultiCol ? '0px' : (visibleCount > 1 ? '68px' : '281px');
 
@@ -251,7 +252,7 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
         </div>
       ) : !generatedVideo ? (
         <div 
-          className="flex items-center relative z-10 group/pair flex-col lg:flex-row"
+          className={`flex items-center relative z-10 group/pair flex-col${isMultiCol ? '' : ' lg:flex-row'}`}
           style={{ 
             gap: '12px',
             paddingLeft: isMultiCol ? '8px' : '15px',

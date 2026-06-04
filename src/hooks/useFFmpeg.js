@@ -128,7 +128,7 @@ export const useFFmpeg = () => {
     const invalid = pairs.filter(p => !p.audio || !p.image);
     if (invalid.length > 0) throw new Error('All pairs must have both audio and image files');
 
-    const { clearStuckGenerationStates, ensureAutoNavigation, clearAllVideoGenerationStates } = useAppStore.getState();
+    const { clearStuckGenerationStates, ensureAutoNavigation, clearAllVideoGenerationStates, setCurrentPage } = useAppStore.getState();
     // Atomically wipe all stale generation states before starting a new run.
     // Without this, stale progress values from a previously cancelled generation
     // can flash on-screen for one render before the init loop overwrites them.
@@ -141,6 +141,9 @@ export const useFFmpeg = () => {
       resetCancellation();
       setProgress(0);
       ensureAutoNavigation();
+      // Clear any explicit currentPage override (e.g. set by the back-button handler)
+      // so auto-detection can properly resolve to 'generation' while isGenerating=true.
+      setCurrentPage(null);
 
       let completedCount = 0;
 
