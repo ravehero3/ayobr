@@ -374,10 +374,59 @@ function CancelConfirmModal({ isOpen, onClose, onConfirm, loading, endsAt, isCze
   );
 }
 
-/* ── Status pill ────────────────────────────────────────────────────────────── */
+/* ── Status badge (new pill design) ─────────────────────────────────────────── */
+const badgeBase = {
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  padding: '4px 13px', borderRadius: 999,
+  fontSize: 11, letterSpacing: '0.03em',
+  transition: 'all 0.18s ease', fontFamily: NM, fontWeight: 500,
+};
+
+function ActiveBadge({ isCzech }) {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <span
+      style={{
+        ...badgeBase,
+        border: hovered ? '1px solid rgba(80,140,255,0.30)' : '1px solid rgba(80,140,255,0.18)',
+        background: hovered ? 'rgba(60,110,255,0.14)' : 'rgba(60,110,255,0.09)',
+        color: hovered ? '#90bcff' : '#6fa3ef',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span style={{
+        width: 5, height: 5, borderRadius: '50%', background: '#6fa3ef', flexShrink: 0,
+        animation: 'accountBadgePulse 2.2s ease-in-out infinite',
+      }} />
+      {isCzech ? 'Aktivní' : 'Active'}
+    </span>
+  );
+}
+
+function CancelBadge({ onClick, disabled, isCzech }) {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <span
+      onClick={!disabled ? onClick : undefined}
+      style={{
+        ...badgeBase,
+        border: hovered ? '1px solid rgba(255,255,255,0.16)' : '1px solid rgba(255,255,255,0.09)',
+        background: hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.04)',
+        color: hovered ? '#888' : '#5a5a6a',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {isCzech ? 'Zrušit předplatné' : 'Cancel subscription'}
+    </span>
+  );
+}
+
 function SubStatusPill({ status, isCzech }) {
   const cfg = {
-    active:    { label: isCzech ? 'Aktivní' : 'Active',       bg: 'rgba(30,200,100,0.1)', color: 'rgba(80,220,130,0.9)', border: 'rgba(60,200,100,0.2)' },
     cancelled: { label: isCzech ? 'Zrušeno' : 'Cancelled',    bg: 'rgba(255,80,80,0.08)', color: 'rgba(255,110,110,0.8)', border: 'rgba(255,80,80,0.15)' },
     expired:   { label: isCzech ? 'Vypršelo' : 'Expired',     bg: 'rgba(255,255,255,0.04)', color: 'rgba(180,180,180,0.7)', border: 'rgba(255,255,255,0.08)' },
     inactive:  { label: isCzech ? 'Neaktivní' : 'Inactive',   bg: 'rgba(255,255,255,0.04)', color: 'rgba(150,150,150,0.6)', border: 'rgba(255,255,255,0.07)' },
@@ -550,20 +599,23 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen text-white selection:bg-white/20" style={{ position: 'relative' }}>
 
-      {/* Stars background — matches landing page hero */}
+      {/* Badge pulse keyframes */}
+      <style>{`@keyframes accountBadgePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.8)} }`}</style>
+
+      {/* Stars background */}
       <div aria-hidden style={{
         position: 'fixed', inset: '-6%', zIndex: 0, pointerEvents: 'none',
         backgroundImage: `url(${starsBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center center',
         backgroundRepeat: 'no-repeat',
-        maskImage: 'radial-gradient(ellipse 76% 72% at 50% 50%, black 18%, rgba(0,0,0,0.75) 38%, rgba(0,0,0,0.3) 56%, transparent 70%)',
-        WebkitMaskImage: 'radial-gradient(ellipse 76% 72% at 50% 50%, black 18%, rgba(0,0,0,0.75) 38%, rgba(0,0,0,0.3) 56%, transparent 70%)',
+        maskImage: 'radial-gradient(ellipse 58% 55% at 50% 50%, black 10%, rgba(0,0,0,0.65) 28%, rgba(0,0,0,0.15) 46%, transparent 60%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 58% 55% at 50% 50%, black 10%, rgba(0,0,0,0.65) 28%, rgba(0,0,0,0.15) 46%, transparent 60%)',
       }} />
       {/* Subtle blue accent glow */}
       <div aria-hidden style={{ position: 'fixed', top: '5%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 65%)', zIndex: 0, pointerEvents: 'none' }} />
-      {/* Fade-to-black vignette — matches landing page hero gradient */}
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 18%, transparent 48%, rgba(0,0,0,0.75) 68%, #000 85%)' }} />
+      {/* Fade-to-black vignette — all edges */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to right, rgba(0,0,0,0.82) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.82) 100%), linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, transparent 16%, transparent 50%, rgba(0,0,0,0.85) 72%, #000 88%)' }} />
 
       {/* Navbar — matches Header.jsx style */}
       <nav className="fixed top-0 left-0 right-0 h-16" style={{ zIndex: 50 }}>
@@ -675,7 +727,7 @@ export default function AccountPage() {
                   {t('account.subscription')}
                 </p>
                 <div className="flex items-center gap-2">
-                  {sub?.status && sub.status !== 'inactive' && (
+                  {sub?.status && sub.status !== 'inactive' && sub.status !== 'active' && (
                     <SubStatusPill status={sub.status} isCzech={isCzech} />
                   )}
                 </div>
@@ -733,10 +785,10 @@ export default function AccountPage() {
                       </PillButton>
                     )}
                     {subIsActive && (
-                      <PillButton onClick={() => setCancelModalOpen(true)} disabled={cancelLoading} variant="danger"
-                        style={{ fontSize: '0.75rem', padding: '7px 16px' }}>
-                        {isCzech ? 'Zrušit předplatné' : 'Cancel subscription'}
-                      </PillButton>
+                      <div className="flex items-center gap-2">
+                        <ActiveBadge isCzech={isCzech} />
+                        <CancelBadge onClick={() => setCancelModalOpen(true)} disabled={cancelLoading} isCzech={isCzech} />
+                      </div>
                     )}
                   </div>
                 ) : (

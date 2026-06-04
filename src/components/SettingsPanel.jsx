@@ -4,7 +4,7 @@ import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
-import page1Background from '../assets/page-1-background.png';
+import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
@@ -98,30 +98,26 @@ const SettingsPanel = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Backdrop */}
+          {/* Backdrop — stars background matching account page */}
           <div
             className="absolute inset-0"
             onClick={handleCancel}
-            style={{
-              backdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
-              WebkitBackdropFilter: 'blur(24px) saturate(110%) brightness(75%)',
-              overflow: 'hidden',
-            }}
+            style={{ overflow: 'hidden', background: '#000' }}
           >
             <div style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: `url(${page1Background})`,
+              position: 'absolute', inset: '-6%',
+              backgroundImage: `url(${starsBg})`,
               backgroundSize: 'cover', backgroundPosition: 'center',
-              filter: 'blur(40px)',
-              transform: 'scale(1.1)',
-              opacity: 0.45,
+              opacity: 0.55,
               zIndex: 0,
             }} />
-            {/* Strong fade to black on all edges */}
+            {/* Edge fade-to-black vignette matching account page */}
             <div style={{
               position: 'absolute', inset: 0, zIndex: 1,
-              background: 'radial-gradient(ellipse 50% 52% at 50% 50%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.96) 100%)',
+              background: 'linear-gradient(to right, rgba(0,0,0,0.82) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.82) 100%), linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, transparent 16%, transparent 50%, rgba(0,0,0,0.85) 72%, #000 88%)',
             }} />
+            {/* Extra darkening overlay so the modal panel pops */}
+            <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'rgba(0,0,0,0.35)' }} />
           </div>
 
           {/* Settings card — pure-black glassmorphism */}
