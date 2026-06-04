@@ -772,12 +772,10 @@ export default function AccountPage() {
                         {isCzech ? 'Upgradovat na Neomezený' : 'Upgrade to Unlimited'}
                       </PillButton>
                     )}
-                    {subIsActive && (
-                      <div className="flex items-center gap-2">
-                        <ActiveBadge isCzech={isCzech} />
-                        <CancelBadge onClick={() => setCancelModalOpen(true)} disabled={cancelLoading} isCzech={isCzech} />
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {subIsActive && <ActiveBadge isCzech={isCzech} />}
+                      <CancelBadge onClick={() => setCancelModalOpen(true)} disabled={cancelLoading} isCzech={isCzech} />
+                    </div>
                   </div>
                 ) : (
                   <PillButton onClick={() => navigate('/upgrade')} style={{ width: '100%', textAlign: 'center', padding: '14px 22px' }}>
