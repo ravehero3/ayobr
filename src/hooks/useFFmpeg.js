@@ -40,6 +40,7 @@ export const useFFmpeg = () => {
       background:       s.videoSettings?.background       ?? 'black',
       customBackground: s.videoSettings?.customBackground ?? null,
       quality:          s.videoSettings?.quality          ?? 'fullhd',
+      imageLayout:      s.videoSettings?.imageLayout      ?? 'full',
     };
   };
 
