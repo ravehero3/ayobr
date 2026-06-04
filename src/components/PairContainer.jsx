@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AudioContainer from './AudioContainer';
 import ImageContainer from './ImageContainer';
@@ -8,7 +8,7 @@ import GlassPlayButton from './GlassPlayButton';
 import { useAppStore } from '../store/appStore';
 
 const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
-  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair, containerSpacing, getDisplayIndex, getPairPreparationState } = useAppStore();
+  const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair, containerSpacing, getDisplayIndex, getPairPreparationState, videoSettings } = useAppStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOverContainer, setIsDragOverContainer] = useState(false);
   const [isValidDragTarget, setIsValidDragTarget] = useState(false);
@@ -26,6 +26,68 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
 
   const videoRef = useRef(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [posterUrl, setPosterUrl] = useState(null);
+
+  // Generate canvas poster that matches the actual FFmpeg output
+  useEffect(() => {
+    if (!pair.image) { setPosterUrl(null); return; }
+    let cancelled = false;
+    const bg = videoSettings?.background || 'black';
+    const layout = videoSettings?.imageLayout || 'full';
+
+    (async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 640; canvas.height = 360;
+      const ctx = canvas.getContext('2d');
+
+      if (bg === 'custom' && videoSettings?.customBackground) {
+        await new Promise((resolve) => {
+          const bgImg = new Image();
+          bgImg.onload = () => {
+            const s = Math.max(640 / bgImg.width, 360 / bgImg.height);
+            ctx.drawImage(bgImg, (640 - bgImg.width * s) / 2, (360 - bgImg.height * s) / 2, bgImg.width * s, bgImg.height * s);
+            resolve();
+          };
+          bgImg.onerror = resolve;
+          bgImg.src = videoSettings.customBackground;
+        });
+      } else {
+        ctx.fillStyle = bg === 'white' ? '#ffffff' : '#000000';
+        ctx.fillRect(0, 0, 640, 360);
+      }
+
+      const url = URL.createObjectURL(pair.image);
+      await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          if (layout === 'padded') {
+            const padY = Math.round(360 * 100 / 1080);
+            const availH = 360 - padY * 2;
+            const s = Math.min(640 / img.width, availH / img.height);
+            const w = img.width * s, h = img.height * s;
+            ctx.drawImage(img, (640 - w) / 2, padY + (availH - h) / 2, w, h);
+          } else if (layout === 'thumbnail') {
+            const tH = Math.round(360 * 250 / 1080);
+            const s = Math.min(640 / img.width, tH / img.height);
+            const w = img.width * s, h = img.height * s;
+            ctx.drawImage(img, (640 - w) / 2, (360 - h) / 2, w, h);
+          } else {
+            const s = Math.min(640 / img.width, 360 / img.height);
+            const w = img.width * s, h = img.height * s;
+            ctx.drawImage(img, (640 - w) / 2, (360 - h) / 2, w, h);
+          }
+          resolve();
+        };
+        img.onerror = resolve;
+        img.src = url;
+      });
+      URL.revokeObjectURL(url);
+
+      if (!cancelled) setPosterUrl(canvas.toDataURL('image/jpeg', 0.85));
+    })();
+
+    return () => { cancelled = true; };
+  }, [pair.image, videoSettings?.background, videoSettings?.customBackground, videoSettings?.imageLayout]);
 
   const handlePlayPause = () => {
     const v = videoRef.current;
@@ -232,6 +294,7 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
               <video
                 ref={videoRef}
                 src={(generatedVideo || videoState?.video)?.url}
+                poster={posterUrl || undefined}
                 className="w-full h-full rounded-lg shadow-lg object-contain"
                 style={{
                   maxHeight: '400px',

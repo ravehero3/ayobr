@@ -69,7 +69,8 @@ export const useAppStore = create((set, get) => ({
   videoSettings: loadFromLocalStorage('videoSettings', {
     background: 'black', // 'white', 'black', or 'custom'
     customBackground: null, // Base64 string for custom background
-    quality: 'fullhd' // 'fullhd' or '4k'
+    quality: 'fullhd', // 'fullhd', 'hd', or '4k'
+    imageLayout: 'full', // 'full', 'padded' (100px top/bottom), or 'thumbnail' (250px tall)
   }),
 
   // Concurrency settings optimized for up to 100 files
@@ -513,6 +514,12 @@ export const useAppStore = create((set, get) => ({
 
   setVideoQuality: (quality) => set(state => {
     const newVideoSettings = { ...state.videoSettings, quality };
+    saveToLocalStorage('videoSettings', newVideoSettings);
+    return { videoSettings: newVideoSettings };
+  }),
+
+  setImageLayout: (imageLayout) => set(state => {
+    const newVideoSettings = { ...state.videoSettings, imageLayout };
     saveToLocalStorage('videoSettings', newVideoSettings);
     return { videoSettings: newVideoSettings };
   }),

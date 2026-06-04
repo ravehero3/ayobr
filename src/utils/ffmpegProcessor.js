@@ -249,15 +249,27 @@ export const initializeFFmpeg = async () => {
 
 // ─── Build FFmpeg args ────────────────────────────────────────────────────────
 function buildArgs(imageFileName, audioFileName, outputFileName, audioDuration, videoSettings) {
-  const quality = videoSettings?.quality ?? 'fullhd';
-  const bg      = videoSettings?.background ?? 'black';
+  const quality     = videoSettings?.quality      ?? 'fullhd';
+  const bg          = videoSettings?.background   ?? 'black';
+  const imageLayout = videoSettings?.imageLayout  ?? 'full';
 
   let RW = 1920, RH = 1080;
   if (quality === '4k') { RW = 3840; RH = 2160; }
   else if (quality === 'hd') { RW = 1280; RH = 720; }
 
   const backgroundColor = bg === 'white' ? 'white' : 'black';
-  const videoFilter = `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+
+  let videoFilter;
+  if (imageLayout === 'padded') {
+    // 100px padding on top and bottom, image scaled to fit within remaining height
+    videoFilter = `scale=${RW}:${RH - 200}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:100:${backgroundColor}`;
+  } else if (imageLayout === 'thumbnail') {
+    // Image scaled so its height is at most 250px, centered in frame
+    videoFilter = `scale=${RW}:250:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+  } else {
+    // 'full' — default: scale to fill frame with letterboxing
+    videoFilter = `scale=${RW}:${RH}:force_original_aspect_ratio=decrease,pad=${RW}:${RH}:(ow-iw)/2:(oh-ih)/2:${backgroundColor}`;
+  }
 
   // Quality-aware CRF (lower = better quality)
   const crf = quality === '4k' ? '20' : quality === 'hd' ? '26' : '23';
@@ -292,19 +304,30 @@ function buildArgs(imageFileName, audioFileName, outputFileName, audioDuration, 
 
 // ─── Build args with custom background ───────────────────────────────────────
 function buildArgsWithCustomBg(imageFileName, audioFileName, bgFileName, outputFileName, audioDuration, videoSettings) {
-  const quality = videoSettings?.quality ?? 'fullhd';
+  const quality     = videoSettings?.quality     ?? 'fullhd';
+  const imageLayout = videoSettings?.imageLayout ?? 'full';
   let RW = 1920, RH = 1080;
   if (quality === '4k') { RW = 3840; RH = 2160; }
   else if (quality === 'hd') { RW = 1280; RH = 720; }
 
   // Multi-input graphs MUST use -filter_complex, not -vf.
-  // -vf only accepts a single input stream; referencing [2:v] inside -vf makes
-  // FFmpeg throw "Filtergraph has a complex filter" and the whole exec fails.
-  // We also label the final pad [out] so we can map it explicitly.
-  const filterComplex =
-    `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];` +
-    `[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];` +
-    `[bg][img]overlay=(W-w)/2:(H-h)/2[out]`;
+  let filterComplex;
+  if (imageLayout === 'padded') {
+    filterComplex =
+      `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];` +
+      `[0:v]scale=${RW}:${RH - 200}:force_original_aspect_ratio=decrease[img];` +
+      `[bg][img]overlay=(W-w)/2:100[out]`;
+  } else if (imageLayout === 'thumbnail') {
+    filterComplex =
+      `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];` +
+      `[0:v]scale=${RW}:250:force_original_aspect_ratio=decrease[img];` +
+      `[bg][img]overlay=(W-w)/2:(H-h)/2[out]`;
+  } else {
+    filterComplex =
+      `[2:v]scale=${RW}:${RH}:force_original_aspect_ratio=increase,crop=${RW}:${RH}[bg];` +
+      `[0:v]scale=${RW}:${RH}:force_original_aspect_ratio=decrease[img];` +
+      `[bg][img]overlay=(W-w)/2:(H-h)/2[out]`;
+  }
 
   // Quality-aware CRF; audio always 320k per product requirement
   const crf         = quality === '4k' ? '20' : quality === 'hd' ? '26' : '23';

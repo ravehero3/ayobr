@@ -1152,7 +1152,7 @@ input[type="file"] {
 /* Charcoal Vertical Slider Styles */
 .spacing-slider-container {
   position: fixed;
-  left: 20px;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1000;

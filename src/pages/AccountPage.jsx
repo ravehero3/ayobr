@@ -308,15 +308,17 @@ function CancelConfirmModal({ isOpen, onClose, onConfirm, loading, endsAt, isCze
             }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Icon */}
-            <div className="flex items-center justify-center w-11 h-11 rounded-full mb-5"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
+            {/* Simple X close button */}
+            <button
+              onClick={onClose}
+              className="mb-5 flex items-center"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </div>
+            </button>
 
             <h3 className="text-white font-bold text-lg mb-2" style={{ fontFamily: NM }}>
               {isCzech ? 'Zrušit předplatné?' : 'Cancel subscription?'}
@@ -354,12 +356,12 @@ function CancelConfirmModal({ isOpen, onClose, onConfirm, loading, endsAt, isCze
                 disabled={loading}
                 style={{
                   flex: 1, fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
-                  background: '#fff', color: '#000',
-                  border: 'none', borderRadius: 9999,
+                  background: '#000', color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.18)', borderRadius: 9999,
                   padding: '10px 0', cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.6 : 1, transition: 'filter 0.2s',
                 }}
-                onMouseEnter={e => { if (!loading) e.currentTarget.style.filter = 'brightness(0.85)'; }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.filter = 'brightness(1.4)'; }}
                 onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
                 {loading
@@ -709,6 +711,13 @@ export default function AccountPage() {
           {/* ── Subscription Card ─────────────────────────────────────────── */}
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07, duration: 0.45 }}>
             <GlassCard>
+              {/* Aktivní badge — top right of card */}
+              {isPaid && !subIsCancelled && !subIsExpired && (
+                <div style={{ position: 'absolute', top: 20, right: 24 }}>
+                  <ActiveBadge isCzech={isCzech} />
+                </div>
+              )}
+
               {/* Header row */}
               <div className="flex items-center justify-between mb-5">
                 <p className="text-xs font-semibold text-gray-500" style={{ fontFamily: NM }}>
@@ -766,17 +775,13 @@ export default function AccountPage() {
               {/* Action buttons */}
               <div className="space-y-2 pt-1">
                 {isPaid ? (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <>
                     {isPro && (
-                      <PillButton onClick={() => navigate('/upgrade')} style={{ flex: 1, textAlign: 'center', padding: '11px 18px' }}>
+                      <PillButton onClick={() => navigate('/upgrade')} style={{ width: '100%', textAlign: 'center', padding: '11px 18px' }}>
                         {isCzech ? 'Upgradovat na Neomezený' : 'Upgrade to Unlimited'}
                       </PillButton>
                     )}
-                    <div className="flex items-center gap-2">
-                      {!subIsCancelled && !subIsExpired && <ActiveBadge isCzech={isCzech} />}
-                      <CancelBadge onClick={() => setCancelModalOpen(true)} disabled={cancelLoading} isCzech={isCzech} />
-                    </div>
-                  </div>
+                  </>
                 ) : (
                   <PillButton onClick={() => navigate('/upgrade')} style={{ width: '100%', textAlign: 'center', padding: '14px 22px' }}>
                     {t('account.upgradeToPro')}
@@ -798,6 +803,13 @@ export default function AccountPage() {
                   </div>
                 )}
               </div>
+
+              {/* Zrušit předplatné — bottom left */}
+              {isPaid && (
+                <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-start' }}>
+                  <CancelBadge onClick={() => setCancelModalOpen(true)} disabled={cancelLoading} isCzech={isCzech} />
+                </div>
+              )}
             </GlassCard>
           </motion.div>
 
