@@ -773,7 +773,7 @@ export default function AccountPage() {
                       </PillButton>
                     )}
                     <div className="flex items-center gap-2">
-                      {subIsActive && <ActiveBadge isCzech={isCzech} />}
+                      {!subIsCancelled && !subIsExpired && <ActiveBadge isCzech={isCzech} />}
                       <CancelBadge onClick={() => setCancelModalOpen(true)} disabled={cancelLoading} isCzech={isCzech} />
                     </div>
                   </div>
