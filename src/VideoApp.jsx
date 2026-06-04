@@ -377,7 +377,7 @@ function App({ onBeforeGenerate }) {
       <AnimatedBackground />
 
       <div className="fixed inset-0 flex justify-center">
-        <div className="w-full max-w-6xl transition-all duration-300 overflow-auto">
+        <div className={`w-full transition-all duration-300 overflow-auto ${page2GridMode < 2 ? 'max-w-6xl' : ''}`}>
       {/* Drag Overlay */}
       <AnimatePresence>
         {isDragOver && (
@@ -432,12 +432,12 @@ function App({ onBeforeGenerate }) {
               <motion.div data-page-section="fileManagement">
                 <motion.div className="w-full flex flex-col items-center mb-8">
                   <motion.div
-                    className="w-full max-w-[1200px] px-4 sm:px-6 mx-auto"
+                    className={`w-full mx-auto ${page2GridMode < 2 ? 'max-w-[1200px] px-4 sm:px-6' : 'px-10'}`}
                     style={{
                       display: page2GridMode >= 2 ? 'grid' : 'flex',
                       flexDirection: page2GridMode < 2 ? 'column' : undefined,
                       gridTemplateColumns: page2GridMode === 3 ? 'repeat(3, 1fr)' : page2GridMode === 2 ? 'repeat(2, 1fr)' : undefined,
-                      columnGap: page2GridMode >= 2 ? '16px' : undefined,
+                      columnGap: page2GridMode >= 2 ? '24px' : undefined,
                       rowGap: `${Math.max(containerSpacing, page2GridMode >= 2 ? 16 : 0)}px`,
                       gap: page2GridMode < 2 ? `${containerSpacing}px` : undefined,
                       paddingTop: page2GridMode >= 2 ? '68px' : '0px',

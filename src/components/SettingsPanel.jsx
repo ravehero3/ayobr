@@ -232,7 +232,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
           {/* Two-column layout */}
           <div
-            style={{ position: 'relative', zIndex: 10, display: 'flex', gap: 20, alignItems: 'flex-start' }}
+            style={{ position: 'relative', zIndex: 10, display: 'flex', gap: 20, alignItems: 'stretch', justifyContent: 'center' }}
             onClick={e => e.stopPropagation()}
           >
             {/* ── Left: Settings card ───────────────────────────── */}
@@ -462,41 +462,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.22)', fontSize: 11 }}>{resLabel}</span>
                 </div>
 
-                {/* Layout indicator */}
-                <div style={{ padding: '12px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.30)', fontSize: 10, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-                    Pozice obrázku
-                  </p>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {IMAGE_LAYOUTS.map(({ key, label }) => {
-                      const active = selectedImageLayout === key;
-                      return (
-                        <div
-                          key={key}
-                          onClick={() => setSelectedImageLayout(key)}
-                          style={{
-                            flex: 1, padding: '6px 4px', borderRadius: 7,
-                            textAlign: 'center', cursor: 'pointer',
-                            background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
-                            border: active ? '1px solid rgba(255,255,255,0.20)' : '1px solid transparent',
-                            transition: 'all 0.15s ease',
-                          }}
-                        >
-                          <div style={{ fontFamily: NM, color: active ? 'rgba(255,255,255,0.80)' : 'rgba(255,255,255,0.30)', fontSize: 11, fontWeight: 600 }}>
-                            {label}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Description */}
-                <p style={{ fontFamily: NM, color: 'rgba(255,255,255,0.22)', fontSize: 11, lineHeight: 1.55, margin: 0 }}>
-                  {selectedImageLayout === 'full' && 'Obrázek vyplní celý rámeček s letterboxingem dle poměru stran.'}
-                  {selectedImageLayout === 'padded' && 'Obrázek bude 100px od horního a spodního okraje videa.'}
-                  {selectedImageLayout === 'thumbnail' && 'Obrázek bude 250px vysoký a vycentrovaný ve středu rámu.'}
-                </p>
               </div>
             </motion.div>
           </div>
