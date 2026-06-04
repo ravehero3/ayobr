@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import AudioContainer from './AudioContainer';
 import ImageContainer from './ImageContainer';
 import VideoGenerationAnimation from './VideoGenerationAnimation';
 import PairMergeAnimation from './PairMergeAnimation';
+import GlassPlayButton from './GlassPlayButton';
 import { useAppStore } from '../store/appStore';
 
 const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
@@ -22,6 +23,15 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
   const displayIndex = getDisplayIndex(pair.id);
   const preparationState = getPairPreparationState(pair.id);
   const isComplete = pair.audio && pair.image;
+
+  const videoRef = useRef(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
+  const handlePlayPause = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); } else { v.pause(); }
+  };
 
   const handleDelete = () => {
     removePair(pair.id);
@@ -212,26 +222,40 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
               height: '450px',
               minHeight: '450px',
               maxHeight: '450px',
-              borderColor: 'rgba(255, 255, 255, 0.4)', // Subtle white border for completed video
+              borderColor: 'rgba(255, 255, 255, 0.4)',
               borderWidth: '2px',
-              borderRadius: '16px' // Reduced radius
+              borderRadius: '16px'
             }}
           >
-            {/* Clean video display - just the video */}
+            {/* Video */}
             <div className="absolute inset-0 p-6 flex items-center justify-center">
               <video
+                ref={videoRef}
                 src={(generatedVideo || videoState?.video)?.url}
-                controls
                 className="w-full h-full rounded-lg shadow-lg object-contain"
                 style={{
                   maxHeight: '400px',
                   boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
                 }}
                 preload="metadata"
+                onPlay={() => setIsVideoPlaying(true)}
+                onPause={() => setIsVideoPlaying(false)}
+                onEnded={() => setIsVideoPlaying(false)}
               />
             </div>
 
-            {/* Download button - positioned subtly */}
+            {/* Play / Pause overlay — visible on hover */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity duration-200">
+              <div className="pointer-events-auto">
+                <GlassPlayButton
+                  isPlaying={isVideoPlaying}
+                  onClick={handlePlayPause}
+                  size={64}
+                />
+              </div>
+            </div>
+
+            {/* Download button */}
             <button
               onClick={() => {
                 const link = document.createElement('a');
@@ -241,7 +265,7 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
                 link.click();
                 document.body.removeChild(link);
               }}
-              className="absolute bottom-4 right-4 p-2 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-lg text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 opacity-0 group-hover:opacity-100"
+              className="absolute bottom-4 right-4 p-2 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-lg text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 opacity-0 group-hover/container:opacity-100"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
