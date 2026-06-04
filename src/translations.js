@@ -136,7 +136,7 @@ export const translations = {
     "landing.title": "TypeBeatz",
     "landing.hero.title": "Batch generate\ntype beat videos\nin one click",
     "landing.hero.titleHighlight": "in one click",
-    "landing.hero.subtitle": "Upload your audio and images, and let TypeBeatz handle the rest.",
+    "landing.hero.subtitle": "Consistent uploads bring new fans and sell beats — automatically.",
     "landing.hero.cta": "Start for free",
     "landing.hero.openApp": "Open the App",
     "landing.hero.ctaNote": "No credit card required.",
