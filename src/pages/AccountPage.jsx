@@ -597,25 +597,13 @@ export default function AccountPage() {
   const subHasEnd      = !!sub?.current_period_end;
 
   return (
-    <div className="min-h-screen text-white selection:bg-white/20" style={{ position: 'relative' }}>
+    <div className="min-h-screen text-white selection:bg-white/20" style={{ position: 'relative', background: '#000' }}>
 
       {/* Badge pulse keyframes */}
       <style>{`@keyframes accountBadgePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.8)} }`}</style>
 
-      {/* Stars background */}
-      <div aria-hidden style={{
-        position: 'fixed', inset: '-6%', zIndex: 0, pointerEvents: 'none',
-        backgroundImage: `url(${starsBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center center',
-        backgroundRepeat: 'no-repeat',
-        maskImage: 'radial-gradient(ellipse 58% 55% at 50% 50%, black 10%, rgba(0,0,0,0.65) 28%, rgba(0,0,0,0.15) 46%, transparent 60%)',
-        WebkitMaskImage: 'radial-gradient(ellipse 58% 55% at 50% 50%, black 10%, rgba(0,0,0,0.65) 28%, rgba(0,0,0,0.15) 46%, transparent 60%)',
-      }} />
-      {/* Subtle blue accent glow */}
-      <div aria-hidden style={{ position: 'fixed', top: '5%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 65%)', zIndex: 0, pointerEvents: 'none' }} />
-      {/* Fade-to-black vignette — all edges */}
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to right, rgba(0,0,0,0.82) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.82) 100%), linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, transparent 16%, transparent 50%, rgba(0,0,0,0.85) 72%, #000 88%)' }} />
+      {/* Page content — blurs when settings panel is open */}
+      <div style={{ transition: 'filter 0.3s ease', filter: isSettingsOpen ? 'blur(8px)' : 'none', pointerEvents: isSettingsOpen ? 'none' : 'auto' }}>
 
       {/* Navbar — matches Header.jsx style */}
       <nav className="fixed top-0 left-0 right-0 h-16" style={{ zIndex: 50 }}>
@@ -891,13 +879,15 @@ export default function AccountPage() {
           </button>
           <motion.button onClick={() => setIsSettingsOpen(true)} whileHover={{ rotate: 90 }} transition={{ duration: 0.25 }}
             className="p-2 rounded-lg text-gray-500 hover:text-white transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </motion.button>
         </div>
       </div>
+
+      </div>{/* end blur wrapper */}
 
       <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 

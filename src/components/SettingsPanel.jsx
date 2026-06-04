@@ -4,9 +4,8 @@ import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
-import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
-
 const NM = "'Neue Montreal', 'Inter', sans-serif";
+const IV = '"Figtree", sans-serif';
 
 const SettingsPanel = ({ isOpen, onClose }) => {
   const { user, featureFlags } = useAuth();
@@ -98,27 +97,12 @@ const SettingsPanel = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Backdrop — stars background matching account page */}
+          {/* Backdrop — dark blur, no stars */}
           <div
             className="absolute inset-0"
             onClick={handleCancel}
-            style={{ overflow: 'hidden', background: '#000' }}
-          >
-            <div style={{
-              position: 'absolute', inset: '-6%',
-              backgroundImage: `url(${starsBg})`,
-              backgroundSize: 'cover', backgroundPosition: 'center',
-              opacity: 0.55,
-              zIndex: 0,
-            }} />
-            {/* Edge fade-to-black vignette matching account page */}
-            <div style={{
-              position: 'absolute', inset: 0, zIndex: 1,
-              background: 'linear-gradient(to right, rgba(0,0,0,0.82) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.82) 100%), linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, transparent 16%, transparent 50%, rgba(0,0,0,0.85) 72%, #000 88%)',
-            }} />
-            {/* Extra darkening overlay so the modal panel pops */}
-            <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'rgba(0,0,0,0.35)' }} />
-          </div>
+            style={{ background: 'rgba(0,0,0,0.60)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)' }}
+          />
 
           {/* Settings card — pure-black glassmorphism */}
           <motion.div
@@ -295,29 +279,44 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             </div>
 
 
-            {/* Action Buttons — pill style matching "Open app" */}
-            <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+            {/* Action Buttons — match landing page CTA button style exactly */}
+            <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
               <button
                 onClick={handleCancel}
                 style={{
-                  ...pillBtn,
                   flex: 1,
-                  background: 'rgba(255,255,255,0.06)',
-                  color: 'rgba(255,255,255,0.70)',
-                  border: '1px solid rgba(255,255,255,0.10)',
+                  fontFamily: IV,
+                  fontWeight: 400,
+                  fontSize: '15px',
+                  lineHeight: 'normal',
+                  background: '#2a2a2a',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '9px 0',
+                  borderRadius: 9999,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, color 0.2s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.3)'; }}
-                onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#111'; e.currentTarget.style.color = '#999'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#2a2a2a'; e.currentTarget.style.color = '#fff'; }}
               >
                 {t('settings.cancel')}
               </button>
               <button
                 onClick={handleSave}
                 style={{
-                  ...pillBtn,
                   flex: 1,
+                  fontFamily: IV,
+                  fontWeight: 400,
+                  fontSize: '15px',
+                  lineHeight: 'normal',
                   background: '#fff',
                   color: '#000',
+                  border: 'none',
+                  padding: '9px 0',
+                  borderRadius: 9999,
+                  cursor: 'pointer',
+                  transition: 'filter 0.2s ease',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
                 onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
