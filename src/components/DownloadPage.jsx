@@ -1,11 +1,65 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+
+function VideoFirstFrame({ src }) {
+  const [frameUrl, setFrameUrl] = useState(null);
+
+  useEffect(() => {
+    if (!src) return;
+    let cancelled = false;
+    const vid = document.createElement('video');
+    vid.preload = 'auto';
+    vid.muted = true;
+    vid.src = src;
+
+    const capture = () => {
+      if (cancelled) return;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = vid.videoWidth || 192;
+        canvas.height = vid.videoHeight || 108;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+        const url = canvas.toDataURL('image/jpeg', 0.9);
+        if (!cancelled && url.length > 100) setFrameUrl(url);
+      } catch (_) {}
+      vid.src = '';
+    };
+
+    vid.onseeked = capture;
+    vid.onloadeddata = () => { vid.currentTime = 0.001; };
+    vid.onerror = () => { vid.src = ''; };
+
+    return () => { cancelled = true; vid.src = ''; };
+  }, [src]);
+
+  if (!frameUrl) {
+    return <div className="absolute inset-0 w-full h-full bg-black rounded" />;
+  }
+  return (
+    <img
+      src={frameUrl}
+      className="absolute inset-0 w-full h-full object-contain rounded"
+      alt="Video preview"
+      draggable={false}
+    />
+  );
+}
 
 const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
   const { generatedVideos, pairs, videoSettings, removePair } = useAppStore();
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [playingIds, setPlayingIds] = useState(new Set());
+
+  const togglePlay = (id) => {
+    setPlayingIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  };
 
   // Function to get video background style based on user settings
   const getVideoBackgroundStyle = () => {
@@ -273,27 +327,37 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                           padding: '2px'
                         }}
                       >
-                        {/* Video background preview based on user settings */}
-                        <div 
-                          className="absolute inset-0 w-full h-full flex items-center justify-center"
-                          style={{
-                            ...getVideoBackgroundStyle()
-                          }}
-                        />
+                        {/* First-frame thumbnail (pixel-perfect match to actual video) */}
+                        {generatedVideo && !playingIds.has(pair.id) && (
+                          <VideoFirstFrame src={generatedVideo.url} />
+                        )}
 
-                        {/* Generated Video Preview - Always show the actual video */}
-                        {generatedVideo && (
+                        {/* Video player — shown after user clicks play */}
+                        {generatedVideo && playingIds.has(pair.id) && (
                           <video
                             src={generatedVideo.url}
                             className="absolute inset-0 w-full h-full object-contain rounded"
                             controls
-                            preload="metadata"
+                            autoPlay
+                            preload="auto"
                             style={{ background: 'transparent' }}
-                            onError={(e) => {
-                              console.error('Video playback error:', e);
-                              console.log('Video URL:', generatedVideo.url);
-                            }}
+                            onError={(e) => console.error('Video playback error:', e)}
                           />
+                        )}
+
+                        {/* Play button overlay — only when not playing */}
+                        {generatedVideo && !playingIds.has(pair.id) && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); togglePlay(pair.id); }}
+                            className="absolute inset-0 w-full h-full flex items-center justify-center group/play"
+                            style={{ background: 'rgba(0,0,0,0.25)', zIndex: 5 }}
+                          >
+                            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center group-hover/play:bg-white/35 transition-all">
+                              <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            </div>
+                          </button>
                         )}
 
                         {/* Success indicator overlay */}

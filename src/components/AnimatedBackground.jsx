@@ -57,23 +57,37 @@ const AnimatedBackground = () => {
       {/* Stars background — shown when videos are ready */}
       <AnimatePresence>
         {hasVideos && !isGenerating && (
-          <motion.div
-            key="stars-complete"
-            className="absolute inset-0 w-full h-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: 'easeInOut' }}
-            style={{
-              backgroundImage: backgroundLoaded.stars ? `url(${starsBg})` : 'none',
-              backgroundColor: '#000000',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              zIndex: -11,
-              willChange: 'opacity',
-              transform: 'translateZ(0)',
-            }}
-          />
+          <>
+            <motion.div
+              key="stars-complete"
+              className="absolute inset-0 w-full h-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: 'easeInOut' }}
+              style={{
+                backgroundImage: backgroundLoaded.stars ? `url(${starsBg})` : 'none',
+                backgroundColor: '#000000',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                zIndex: -11,
+                willChange: 'opacity',
+                transform: 'translateZ(0)',
+              }}
+            />
+            <motion.div
+              key="stars-fade"
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.8, ease: 'easeInOut' }}
+              style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.82) 75%, rgba(0,0,0,0.97) 100%)',
+                zIndex: -10,
+              }}
+            />
+          </>
         )}
       </AnimatePresence>
 
