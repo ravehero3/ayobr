@@ -129,6 +129,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
             style={{
+              zIndex: 10,
               width: 480,
               background: 'rgba(10,10,12,0.88)',
               backdropFilter: 'blur(28px)',

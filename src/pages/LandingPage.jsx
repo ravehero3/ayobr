@@ -835,7 +835,7 @@ function HowItWorksSection({ isMobile, customImages = {}, customContent = {} }) 
             alignSelf: 'flex-start',
           }}>
             <div style={{ paddingTop: 120, paddingBottom: 48 }}>
-              <h2 style={{ fontFamily: IV, fontWeight: 700, fontSize: 52, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1.1em', color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>
+              <h2 style={{ fontFamily: IV, fontWeight: 500, fontSize: 52, fontStyle: 'normal', letterSpacing: '-0.05em', lineHeight: '1.05', color: '#fff', margin: 0, whiteSpace: 'nowrap', textTransform: 'none' }}>
                 {t('landing.how.title').split('\n').map((line, i, arr) => (
                   <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
                 ))}
@@ -960,16 +960,36 @@ function useStarsScrollReveal(starsRef) {
 /* ── Sub-components that use useLanguage (must be inside the tree) ── */
 function LandingNavButtons({ user, navigate, login }) {
   const { t } = useLanguage();
-  const [signinHovered, setSigninHovered] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
   return (
     <>
-      <button onClick={() => navigate('/login')}
-        onMouseEnter={() => setSigninHovered(true)}
-        onMouseLeave={() => setSigninHovered(false)}
-        style={{ fontFamily: IV, fontSize: '0.875rem', lineHeight: LH_LABEL, color: signinHovered ? '#fff' : 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}>
-        {t('login')}
-      </button>
+      {user ? (
+        /* Profile picture — links to account page */
+        <button
+          onClick={() => navigate('/account')}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
+        >
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-200 hover:scale-105"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.07)' }}>
+            {user.profile_image_url ? (
+              <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <svg viewBox="0 0 40 40" fill="none" className="w-full h-full">
+                <rect width="40" height="40" fill="rgba(255,255,255,0.06)" />
+                <circle cx="20" cy="15" r="7" fill="rgba(255,255,255,0.25)" />
+                <path d="M4 38c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.18)" />
+              </svg>
+            )}
+          </div>
+        </button>
+      ) : (
+        <button onClick={() => navigate('/login')}
+          style={{ fontFamily: IV, fontSize: '0.875rem', lineHeight: LH_LABEL, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
+          {t('login')}
+        </button>
+      )}
       {user ? (
         <button onClick={() => navigate('/app')}
           onMouseEnter={() => setCtaHovered(true)}
@@ -1225,7 +1245,7 @@ export default function LandingPage() {
           paddingLeft: isMobile ? '1rem' : '420px', 
           paddingRight: isMobile ? '1rem' : '420px' 
         }}>
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+        <button onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         </button>
         <div className="flex items-center gap-6">
