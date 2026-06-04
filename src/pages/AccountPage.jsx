@@ -310,8 +310,8 @@ function CancelConfirmModal({ isOpen, onClose, onConfirm, loading, endsAt, isCze
           >
             {/* Icon */}
             <div className="flex items-center justify-center w-11 h-11 rounded-full mb-5"
-              style={{ background: 'rgba(255,70,70,0.1)', border: '1px solid rgba(255,70,70,0.2)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,100,100,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="15" y1="9" x2="9" y2="15" />
                 <line x1="9" y1="9" x2="15" y2="15" />
@@ -354,12 +354,12 @@ function CancelConfirmModal({ isOpen, onClose, onConfirm, loading, endsAt, isCze
                 disabled={loading}
                 style={{
                   flex: 1, fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
-                  background: 'rgba(180,30,30,0.85)', color: '#fff',
-                  border: '1px solid rgba(255,80,80,0.25)', borderRadius: 9999,
+                  background: '#fff', color: '#000',
+                  border: 'none', borderRadius: 9999,
                   padding: '10px 0', cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.6 : 1, transition: 'filter 0.2s',
                 }}
-                onMouseEnter={e => { if (!loading) e.currentTarget.style.filter = 'brightness(1.15)'; }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.filter = 'brightness(0.85)'; }}
                 onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >
                 {loading
@@ -388,15 +388,15 @@ function ActiveBadge({ isCzech }) {
     <span
       style={{
         ...badgeBase,
-        border: hovered ? '1px solid rgba(80,140,255,0.30)' : '1px solid rgba(80,140,255,0.18)',
-        background: hovered ? 'rgba(60,110,255,0.14)' : 'rgba(60,110,255,0.09)',
-        color: hovered ? '#90bcff' : '#6fa3ef',
+        border: hovered ? '1px solid rgba(37,99,235,0.55)' : '1px solid rgba(37,99,235,0.35)',
+        background: hovered ? 'rgba(29,78,216,0.22)' : 'rgba(29,78,216,0.14)',
+        color: hovered ? '#60a5fa' : '#3b82f6',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <span style={{
-        width: 5, height: 5, borderRadius: '50%', background: '#6fa3ef', flexShrink: 0,
+        width: 5, height: 5, borderRadius: '50%', background: '#3b82f6', flexShrink: 0,
         animation: 'accountBadgePulse 2.2s ease-in-out infinite',
       }} />
       {isCzech ? 'Aktivní' : 'Active'}

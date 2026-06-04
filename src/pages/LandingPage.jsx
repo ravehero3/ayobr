@@ -963,14 +963,35 @@ function LandingNavButtons({ user, navigate, login }) {
   const [ctaHovered, setCtaHovered] = useState(false);
   return (
     <>
-      {/* CTA button always first */}
       {user ? (
-        <button onClick={() => navigate('/app')}
-          onMouseEnter={() => setCtaHovered(true)}
-          onMouseLeave={() => setCtaHovered(false)}
-          style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer', filter: ctaHovered ? 'brightness(0.85)' : 'brightness(1)', transition: 'filter 0.2s ease' }}>
-          {t('landing.hero.openApp')}
-        </button>
+        <>
+          {/* Profile picture — left of Open App button */}
+          <button
+            onClick={() => navigate('/app')}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
+          >
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-200 hover:scale-105"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.07)' }}>
+              {user.profile_image_url ? (
+                <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <svg viewBox="0 0 40 40" fill="none" className="w-full h-full">
+                  <rect width="40" height="40" fill="rgba(255,255,255,0.06)" />
+                  <circle cx="20" cy="15" r="7" fill="rgba(255,255,255,0.25)" />
+                  <path d="M4 38c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.18)" />
+                </svg>
+              )}
+            </div>
+          </button>
+
+          {/* Open App button — right of profile picture */}
+          <button onClick={() => navigate('/app')}
+            onMouseEnter={() => setCtaHovered(true)}
+            onMouseLeave={() => setCtaHovered(false)}
+            style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer', filter: ctaHovered ? 'brightness(0.85)' : 'brightness(1)', transition: 'filter 0.2s ease' }}>
+            {t('landing.hero.openApp')}
+          </button>
+        </>
       ) : (
         <>
           <button onClick={() => navigate('/login')}
@@ -986,27 +1007,6 @@ function LandingNavButtons({ user, navigate, login }) {
             {t('landing.hero.cta')}
           </button>
         </>
-      )}
-
-      {/* Profile picture — rightmost, links to /app (page 1) */}
-      {user && (
-        <button
-          onClick={() => navigate('/app')}
-          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
-        >
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-200 hover:scale-105"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.07)' }}>
-            {user.profile_image_url ? (
-              <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <svg viewBox="0 0 40 40" fill="none" className="w-full h-full">
-                <rect width="40" height="40" fill="rgba(255,255,255,0.06)" />
-                <circle cx="20" cy="15" r="7" fill="rgba(255,255,255,0.25)" />
-                <path d="M4 38c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.18)" />
-              </svg>
-            )}
-          </div>
-        </button>
       )}
     </>
   );
