@@ -26,10 +26,23 @@ const SECTION_LABEL = {
 };
 
 const StarIcon = ({ active }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? '#ffffff' : 'none'}
-    stroke={active ? '#ffffff' : 'rgba(255,255,255,0.55)'} strokeWidth={active ? 0 : 1.5}
-    strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+  <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path
+      d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"
+      fill={active ? '#fff' : 'none'}
+      stroke="#fff"
+      strokeWidth={active ? '0' : '0.9'}
+      strokeLinejoin="round"
+      style={{ transition: 'fill 0.15s, stroke-width 0.15s' }}
+    />
+    <path
+      d="M12 6 L12.8 11.2 L18 12 L12.8 12.8 L12 18 L11.2 12.8 L6 12 L11.2 11.2 Z"
+      fill="none"
+      stroke="#fff"
+      strokeWidth={active ? '0.5' : '0'}
+      opacity="0.4"
+      style={{ transition: 'stroke-width 0.15s' }}
+    />
   </svg>
 );
 
