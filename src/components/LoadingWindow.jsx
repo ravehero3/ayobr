@@ -6,6 +6,41 @@ import GlassPlayButton from './GlassPlayButton';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
+/* ─── Aspect ratio + image layout helpers (mirrors SettingsPanel) ─────── */
+const getAspectRatioStyle = (quality) => {
+  if (quality === 'square')    return '1 / 1';
+  if (quality === 'ultrawide') return '2560 / 1080';
+  return '16 / 9';
+};
+
+const getPreviewImageStyle = (imageLayout) => {
+  if (imageLayout === 'padded') {
+    const p = (100 / 1080) * 100;
+    return {
+      position: 'absolute',
+      top: `${p.toFixed(2)}%`,
+      left: 0,
+      right: 0,
+      height: `${(100 - p * 2).toFixed(2)}%`,
+      width: '100%',
+      objectFit: 'contain',
+    };
+  }
+  if (imageLayout === 'thumbnail') {
+    return {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      maxWidth: '100%',
+      height: `${((250 / 1080) * 100).toFixed(2)}%`,
+      width: 'auto',
+      objectFit: 'contain',
+    };
+  }
+  return { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' };
+};
+
 /* ─── Grid layout icons ─────────────────────────────────────── */
 const IconGridAuto = ({ active }) => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -132,10 +167,17 @@ function getSpiralPos(n) {
 const SpiralGridLayout = ({
   pairs, generatedVideos, playingIds, setPlayingIds, videoRefs,
   handlePlayPause, handleDownloadSingle, removePair, getVideoBackgroundStyle,
+  quality, imageLayout,
 }) => {
   const containerRef = useRef(null);
   const CARD_W = 360;
-  const CARD_H = 262;
+  const FOOTER_H = 50;
+  const VIDEO_H = quality === 'square'
+    ? CARD_W
+    : quality === 'ultrawide'
+      ? Math.round(CARD_W * 1080 / 2560)
+      : Math.round(CARD_W * 9 / 16);
+  const CARD_H = VIDEO_H + FOOTER_H;
   const GAP = 20;
   const CELL_W = CARD_W + GAP;
   const CELL_H = CARD_H + GAP;
@@ -229,14 +271,15 @@ const SpiralGridLayout = ({
                 style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '18px', fontWeight: 'bold' }}
               >×</button>
 
-              {/* 16:9 video area */}
-              <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16/9' }}>
+              {/* Video area — aspect ratio matches selected quality */}
+              <div className="relative w-full overflow-hidden" style={{ aspectRatio: getAspectRatioStyle(quality) }}>
                 <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
                 {pair.image && !isPlaying && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <img src={URL.createObjectURL(pair.image)} alt="Preview"
-                      className="max-w-full max-h-full object-contain" style={{ opacity: 0.85 }} />
-                  </div>
+                  <img
+                    src={URL.createObjectURL(pair.image)}
+                    alt="Preview"
+                    style={{ ...getPreviewImageStyle(imageLayout), opacity: 0.85 }}
+                  />
                 )}
                 <video
                   ref={el => { if (el) videoRefs.current[pair.id] = el; }}
@@ -421,7 +464,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                       transition={{ delay: index * 0.1 }}
                       className="group"
                       style={{
-                        position: 'relative', width: '240px', minWidth: '240px', maxWidth: '240px', height: '220px',
+                        position: 'relative', width: '240px', minWidth: '240px', maxWidth: '240px',
                         background: 'rgba(0,0,0,0.41)', borderRadius: '16px',
                         boxShadow: '0 4px 30px rgba(0,0,0,0.1)',
                         backdropFilter: 'blur(11.4px)', WebkitBackdropFilter: 'blur(11.4px)',
@@ -448,14 +491,16 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                             return t.length > 44 ? t.substring(0, 44) : t;
                           })()}
                         </div>
-                        <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
-                          <div className="aspect-video rounded relative overflow-hidden"
-                            style={{ width: '192px', height: '108px', minWidth: '192px', maxWidth: '192px', minHeight: '108px', maxHeight: '108px', flexShrink: 0 }}>
+                        <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px' }}>
+                          <div className="rounded relative overflow-hidden"
+                            style={{ width: '192px', aspectRatio: getAspectRatioStyle(videoSettings.quality), flexShrink: 0 }}>
                             <div className="absolute inset-0 w-full h-full" style={getVideoBackgroundStyle()} />
                             {pair.image && !isPlaying && (
-                              <div className="absolute flex items-center justify-center" style={{ top: '2px', left: '2px', right: '2px', bottom: '2px' }}>
-                                <img src={URL.createObjectURL(pair.image)} alt="Preview" className="max-w-full max-h-full object-contain opacity-80" />
-                              </div>
+                              <img
+                                src={URL.createObjectURL(pair.image)}
+                                alt="Preview"
+                                style={{ ...getPreviewImageStyle(videoSettings.imageLayout), opacity: 0.8 }}
+                              />
                             )}
                             {shouldShowVideo && videoToShow?.url && (
                               <video
@@ -511,6 +556,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               handleDownloadSingle={handleDownloadSingle}
               removePair={removePair}
               getVideoBackgroundStyle={getVideoBackgroundStyle}
+              quality={videoSettings.quality}
+              imageLayout={videoSettings.imageLayout}
             />
           ) : allComplete ? (
             <motion.div
@@ -561,13 +608,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                         style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '18px', fontWeight: 'bold' }}
                       >×</button>
 
-                      <div className="relative w-full overflow-hidden rounded-t-2xl" style={{ aspectRatio: '16/9' }}>
+                      <div className="relative w-full overflow-hidden rounded-t-2xl" style={{ aspectRatio: getAspectRatioStyle(videoSettings.quality) }}>
                         <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
                         {pair.image && !isPlaying && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <img src={URL.createObjectURL(pair.image)} alt="Preview"
-                              className="max-w-full max-h-full object-contain" style={{ opacity: 0.85 }} />
-                          </div>
+                          <img
+                            src={URL.createObjectURL(pair.image)}
+                            alt="Preview"
+                            style={{ ...getPreviewImageStyle(videoSettings.imageLayout), opacity: 0.85 }}
+                          />
                         )}
                         <video
                           ref={el => { if (el) videoRefs.current[pair.id] = el; }}
