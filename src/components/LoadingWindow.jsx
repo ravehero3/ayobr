@@ -324,7 +324,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
   const { t } = useLanguage();
   const [playingIds, setPlayingIds] = useState({});
   const videoRefs = useRef({});
-  const [gridLayout, setGridLayout] = useState('grid');
+  const [gridLayout, setGridLayoutState] = useState(() => {
+    try { return localStorage.getItem('loadingGridLayout') || 'grid'; } catch { return 'grid'; }
+  });
+  const setGridLayout = (layout) => {
+    try { localStorage.setItem('loadingGridLayout', layout); } catch {}
+    setGridLayoutState(layout);
+  };
 
   const handleDownloadSingle = async (video, event) => {
     if (event) event.stopPropagation();
@@ -492,14 +498,19 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           })()}
                         </div>
                         <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px' }}>
+                          {(() => {
+                            const q = videoSettings.quality;
+                            const pw = 192;
+                            const ph = q === 'square' ? 192 : q === 'ultrawide' ? Math.round(192 * 1080 / 2560) : 108;
+                            return (
                           <div className="rounded relative overflow-hidden"
-                            style={{ width: '192px', aspectRatio: getAspectRatioStyle(videoSettings.quality), flexShrink: 0 }}>
-                            <div className="absolute inset-0 w-full h-full" style={getVideoBackgroundStyle()} />
+                            style={{ width: pw + 'px', height: ph + 'px', flexShrink: 0 }}>
+                            <div className="absolute inset-0 w-full h-full" style={{ ...getVideoBackgroundStyle(), zIndex: 1 }} />
                             {pair.image && !isPlaying && (
                               <img
                                 src={URL.createObjectURL(pair.image)}
                                 alt="Preview"
-                                style={{ ...getPreviewImageStyle(videoSettings.imageLayout), opacity: 0.8 }}
+                                style={{ ...getPreviewImageStyle(videoSettings.imageLayout), opacity: 0.85, zIndex: 2 }}
                               />
                             )}
                             {shouldShowVideo && videoToShow?.url && (
@@ -527,6 +538,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                               </div>
                             )}
                           </div>
+                            );
+                          })()}
                         </div>
                         <motion.div className="w-full bg-white/10 rounded-full h-2 mt-4"
                           animate={{ opacity: isComplete ? 0 : 1 }} transition={{ duration: 0.5 }}>

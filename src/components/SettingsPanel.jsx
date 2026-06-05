@@ -7,14 +7,13 @@ import { useLanguage } from '../context/LanguageContext';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 const IV = '"Figtree", sans-serif';
 
-// ── Two padding values used throughout ────────────────────────────────────────
-const CARD_PADDING  = 32;          // outer card
-const ITEM_PADDING  = '12px 8px';  // every option container
-const CARD_H        = 90;          // height of every option container (px)
-const CARD_RADIUS   = 12;          // border-radius of every option container
-const COL_GAP       = 24;          // gap between the 3 columns
-const ITEM_GAP      = 10;          // gap between cards within a column
-const PREVIEW_H     = 300;         // outer preview height (px)
+const CARD_PADDING  = 32;
+const ITEM_PADDING  = '12px 8px';
+const CARD_H        = 90;
+const CARD_RADIUS   = 12;
+const COL_GAP       = 24;
+const ITEM_GAP      = 10;
+const PREVIEW_H     = 300;
 
 const SECTION_LABEL = {
   fontFamily: NM,
@@ -33,6 +32,27 @@ const StarIcon = ({ active }) => (
     <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
   </svg>
 );
+
+/* ── Aspect-ratio shape preview icons for resolution options ── */
+const ResolutionIcon = ({ quality, active }) => {
+  const FIXED_H = 18;
+  const ratios = { hd: 16 / 9, fullhd: 16 / 9, '4k': 16 / 9, square: 1, ultrawide: 2560 / 1080 };
+  const ratio = ratios[quality] ?? 16 / 9;
+  const w = Math.round(FIXED_H * ratio);
+  const h = FIXED_H;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" style={{ display: 'block', flexShrink: 0 }}>
+      <rect
+        x="0.75" y="0.75"
+        width={w - 1.5} height={h - 1.5}
+        rx="2"
+        fill={active ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.05)'}
+        stroke={active ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.22)'}
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+};
 
 const IMAGE_LAYOUT_ICONS = {
   full: (active) => (
@@ -61,11 +81,21 @@ const IMAGE_LAYOUT_ICONS = {
   ),
 };
 
-// ── Preview frame dimensions: explicit pixels so the bg colour always renders ──
 const getFrameDims = (resolution) => {
   if (resolution === 'square')    return { w: PREVIEW_H,                             h: PREVIEW_H };
   if (resolution === 'ultrawide') return { w: Math.round(PREVIEW_H * 2560 / 1080),  h: PREVIEW_H };
   return                                 { w: Math.round(PREVIEW_H * 16   / 9),     h: PREVIEW_H };
+};
+
+/* ── Persist star state helpers ── */
+const loadStarState = (key, fallback) => {
+  try {
+    const v = localStorage.getItem(key);
+    return v !== null ? v === 'true' : fallback;
+  } catch { return fallback; }
+};
+const saveStarState = (key, value) => {
+  try { localStorage.setItem(key, String(value)); } catch {}
 };
 
 const SettingsPanel = ({ isOpen, onClose }) => {
@@ -74,8 +104,8 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
   const { videoSettings, pairs, setVideoBackground, setCustomBackground, setVideoQuality, setImageLayout } = useAppStore();
 
-  const canUseFullHD  = featureFlags?.high_quality  || ['pro','unlimited','admin'].includes(user?.role);
-  const canUse4K      = featureFlags?.ultra_quality  || ['unlimited','admin'].includes(user?.role);
+  const canUseFullHD   = featureFlags?.high_quality  || ['pro','unlimited','admin'].includes(user?.role);
+  const canUse4K       = featureFlags?.ultra_quality  || ['unlimited','admin'].includes(user?.role);
   const canUseCustomBg = ['pro','unlimited','admin'].includes(user?.role);
 
   const clamp = (q) => {
@@ -87,21 +117,22 @@ const SettingsPanel = ({ isOpen, onClose }) => {
   const [selBg,  setSelBg]  = useState(videoSettings.background || 'black');
   const [selRes, setSelRes] = useState(() => clamp(videoSettings.quality  || 'fullhd'));
   const [selLay, setSelLay] = useState(videoSettings.imageLayout || 'full');
-  const [hdAlt,  setHdAlt]  = useState(() => videoSettings.quality === 'square');
-  const [fhdAlt, setFhdAlt] = useState(() => videoSettings.quality === 'ultrawide');
 
-  // Sync when modal opens
+  /* Stars persist independently so pressing them stays remembered */
+  const [hdAlt,  setHdAlt]  = useState(() => loadStarState('settings_hdAlt',  videoSettings.quality === 'square'));
+  const [fhdAlt, setFhdAlt] = useState(() => loadStarState('settings_fhdAlt', videoSettings.quality === 'ultrawide'));
+
   useEffect(() => {
     if (!isOpen) return;
     const q = clamp(videoSettings.quality || 'fullhd');
     setSelBg(videoSettings.background || 'black');
     setSelRes(q);
     setSelLay(videoSettings.imageLayout || 'full');
-    setHdAlt(q === 'square');
-    setFhdAlt(q === 'ultrawide');
+    /* reload star state from localStorage each open */
+    setHdAlt(loadStarState('settings_hdAlt',  q === 'square'));
+    setFhdAlt(loadStarState('settings_fhdAlt', q === 'ultrawide'));
   }, [isOpen]);
 
-  // Latest image from pairs
   const lastImage = [...pairs].reverse().find(p => p.image)?.image ?? null;
   const [imgUrl, setImgUrl] = useState(null);
   useEffect(() => {
@@ -118,8 +149,22 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     setSelRes(res);
   };
 
-  const toggleHd  = (e) => { e.stopPropagation(); const n = !hdAlt;  setHdAlt(n);  if (n  && selRes === 'hd'     && canUseFullHD) setSelRes('square');   if (!n  && selRes === 'square')   setSelRes('hd'); };
-  const toggleFhd = (e) => { e.stopPropagation(); const n = !fhdAlt; setFhdAlt(n); if (n  && selRes === 'fullhd' && canUseFullHD) setSelRes('ultrawide'); if (!n  && selRes === 'ultrawide') setSelRes('fullhd'); };
+  const toggleHd = (e) => {
+    e.stopPropagation();
+    const n = !hdAlt;
+    setHdAlt(n);
+    saveStarState('settings_hdAlt', n);
+    if (n  && selRes === 'hd'   && canUseFullHD) setSelRes('square');
+    if (!n && selRes === 'square')               setSelRes('hd');
+  };
+  const toggleFhd = (e) => {
+    e.stopPropagation();
+    const n = !fhdAlt;
+    setFhdAlt(n);
+    saveStarState('settings_fhdAlt', n);
+    if (n  && selRes === 'fullhd' && canUseFullHD) setSelRes('ultrawide');
+    if (!n && selRes === 'ultrawide')               setSelRes('fullhd');
+  };
 
   const onCustomUpload = (e) => {
     const file = e.target.files[0];
@@ -137,7 +182,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // ── Live preview helpers ────────────────────────────────────────────────────
   const previewBg = () => {
     if (selBg === 'white') return { backgroundColor: '#ffffff' };
     if (selBg === 'custom' && videoSettings.customBackground) {
@@ -157,27 +201,24 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     return { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' };
   };
 
-  // ── Resolution option definitions ──────────────────────────────────────────
   const resOpts = [
     hdAlt
-      ? { key: 'square',    label: 'Square',    sub: '1080×1080', badge: '1:1',   locked: !canUseFullHD }
-      : { key: 'hd',        label: 'HD',        sub: '1280×720',  badge: '720p',  locked: false },
+      ? { key: 'square',    label: 'Square',     sub: '1080×1080', locked: !canUseFullHD }
+      : { key: 'hd',        label: 'HD',         sub: '1280×720',  locked: false },
     fhdAlt
-      ? { key: 'ultrawide', label: 'Ultra-Wide', sub: '2560×1080', badge: '21:9', locked: !canUseFullHD }
-      : { key: 'fullhd',   label: 'Full HD',    sub: '1920×1080', badge: '1080p', locked: !canUseFullHD },
-    { key: '4k',    label: '4K Ultra', sub: '3840×2160', badge: '4K',    locked: !canUse4K },
+      ? { key: 'ultrawide', label: 'Ultra-Wide',  sub: '2560×1080', locked: !canUseFullHD }
+      : { key: 'fullhd',    label: 'Full HD',     sub: '1920×1080', locked: !canUseFullHD },
+    { key: '4k',    label: '4K Ultra',  sub: '3840×2160', locked: !canUse4K },
   ];
 
   const { w: frameW, h: frameH } = getFrameDims(selRes);
 
-  // ── Image layout options (translated) ─────────────────────────────────────
   const imageLayouts = [
     { key: 'full',      label: t('settings.layout.full'),      sub: t('settings.layout.full.sub'),      icon: IMAGE_LAYOUT_ICONS.full },
     { key: 'padded',    label: t('settings.layout.padded'),    sub: t('settings.layout.padded.sub'),    icon: IMAGE_LAYOUT_ICONS.padded },
     { key: 'thumbnail', label: t('settings.layout.thumbnail'), sub: t('settings.layout.thumbnail.sub'), icon: IMAGE_LAYOUT_ICONS.thumbnail },
   ];
 
-  // ── Shared card style factory ──────────────────────────────────────────────
   const optCard = (selected, locked = false) => ({
     flex: 1,
     height: CARD_H,
@@ -193,7 +234,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 6,
     padding: ITEM_PADDING,
     boxSizing: 'border-box',
     textAlign: 'center',
@@ -209,15 +250,12 @@ const SettingsPanel = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Backdrop */}
           <div className="absolute inset-0" onClick={handleCancel}
             style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }} />
 
-          {/* Card + buttons — vertical stack */}
           <div onClick={e => e.stopPropagation()}
             style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
 
-            {/* ════ CARD ════════════════════════════════════════════════════════ */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1,    y: 0  }}
@@ -238,27 +276,19 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 gap: COL_GAP,
               }}
             >
-              {/* Title — centered */}
               <h2 style={{ fontFamily: NM, color: 'rgba(255,255,255,0.92)', fontSize: 20, fontWeight: 700, textAlign: 'center', margin: 0, letterSpacing: '-0.02em' }}>
                 {t('settings.title')}
               </h2>
 
-              {/* ── Preview ──────────────────────────────────────────────────── */}
+              {/* Preview */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={SECTION_LABEL}>{t('settings.preview')}</p>
-
-                {/* Outer náhled — always black, full card width */}
                 <div style={{ width: '100%', height: PREVIEW_H, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-
-                  {/* Inner frame — explicit pixel size; thin grey outline shows the resolution shape */}
                   <div style={{
-                    width:  frameW,
-                    height: frameH,
-                    position: 'relative',
-                    overflow: 'hidden',
+                    width: frameW, height: frameH,
+                    position: 'relative', overflow: 'hidden',
                     outline: '1px solid rgba(255,255,255,0.20)',
-                    boxSizing: 'border-box',
-                    flexShrink: 0,
+                    boxSizing: 'border-box', flexShrink: 0,
                     ...previewBg(),
                   }}>
                     {imgUrl ? (
@@ -282,18 +312,14 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-              {/* Divider */}
               <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: `-${COL_GAP / 2}px 0` }} />
 
-              {/* ── Three equal columns ───────────────────────────────────────── */}
               <div style={{ display: 'flex', gap: COL_GAP }}>
 
-                {/* ─ Column 1: Pozadí ────────────────────────────────────────── */}
+                {/* Column 1: Background */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={SECTION_LABEL}>{t('settings.background')}</p>
                   <div style={{ display: 'flex', gap: ITEM_GAP }}>
-
-                    {/* White */}
                     <motion.div
                       onClick={() => changeBg('white')}
                       style={{ ...optCard(selBg === 'white'), background: 'linear-gradient(135deg,#fff,#f0f0f0)', padding: 0 }}
@@ -302,7 +328,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       {selBg === 'white' && <div style={{ position: 'absolute', bottom: 7, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#000', opacity: 0.45 }} />}
                     </motion.div>
 
-                    {/* Black */}
                     <motion.div
                       onClick={() => changeBg('black')}
                       style={{ ...optCard(selBg === 'black'), background: 'linear-gradient(135deg,#1c1c1c,#000)', padding: 0 }}
@@ -311,7 +336,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       {selBg === 'black' && <div style={{ position: 'absolute', bottom: 7, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#fff', opacity: 0.55 }} />}
                     </motion.div>
 
-                    {/* Custom */}
                     <motion.div
                       onClick={() => canUseCustomBg && document.getElementById('settingsBgUpload').click()}
                       style={{
@@ -336,11 +360,11 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* ─ Column 2: Rozlišení ─────────────────────────────────────── */}
+                {/* Column 2: Resolution */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={SECTION_LABEL}>{t('settings.resolution')}</p>
                   <div style={{ display: 'flex', gap: ITEM_GAP }}>
-                    {resOpts.map(({ key, label, sub, badge, locked }, idx) => {
+                    {resOpts.map(({ key, label, sub, locked }, idx) => {
                       const isHd  = idx === 0;
                       const isFhd = idx === 1;
                       const hasAlien = isHd || isFhd;
@@ -366,10 +390,10 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                               <StarIcon active={alienOn} />
                             </button>
                           )}
-                          {/* Badge */}
-                          <div style={{ width: 44, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: NM, fontWeight: 700, fontSize: 9, borderRadius: 4, background: isSel ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.72)' }}>
-                            {badge}
-                          </div>
+
+                          {/* Aspect-ratio shape preview */}
+                          <ResolutionIcon quality={key} active={isSel} />
+
                           <div style={{ fontFamily: NM, color: isSel ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.58)', fontSize: 11, fontWeight: 600 }}>{label}</div>
                           <div style={{ fontFamily: NM, color: 'rgba(255,255,255,0.27)', fontSize: 9 }}>{sub}</div>
                         </motion.div>
@@ -378,7 +402,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* ─ Column 3: Pozice obrázku ────────────────────────────────── */}
+                {/* Column 3: Image position */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={SECTION_LABEL}>{t('settings.imagePosition')}</p>
                   <div style={{ display: 'flex', gap: ITEM_GAP }}>
@@ -404,7 +428,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               </div>
             </motion.div>
 
-            {/* ════ BUTTONS — below the card ════════════════════════════════════ */}
+            {/* Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
