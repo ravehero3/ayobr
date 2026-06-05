@@ -212,11 +212,12 @@ const SpiralGridLayout = ({
     <div
       ref={containerRef}
       style={{
-        flex: 1,
+        position: 'fixed',
+        inset: 0,
+        top: '72px',        /* clear the navbar */
+        bottom: '72px',     /* clear the footer bar */
         overflow: 'auto',
-        position: 'relative',
-        paddingTop: 0,
-        paddingBottom: 0,
+        zIndex: 10000,
       }}
     >
       <div style={{ position: 'relative', width: gridW, height: Math.max(gridH, 600) }}>
