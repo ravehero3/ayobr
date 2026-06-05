@@ -312,15 +312,20 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
 
                     {/* Video Preview Area - Same positioning as LoadingWindow */}
                     <div className="flex-1 flex items-center justify-center" style={{ marginTop: '-7px', minHeight: '112px' }}>
+                      {(() => {
+                        const q = videoSettings?.quality || 'fullhd';
+                        const pw = 192;
+                        const ph = q === 'square' ? 192 : q === 'ultrawide' ? Math.round(pw * 1080 / 2560) : 108;
+                        return (
                       <div 
-                        className="aspect-video bg-black/30 rounded flex items-center justify-center relative overflow-hidden"
+                        className="bg-black/30 rounded flex items-center justify-center relative overflow-hidden"
                         style={{ 
-                          width: '192px', 
-                          height: '108px', 
-                          minWidth: '192px', 
-                          maxWidth: '192px', 
-                          minHeight: '108px', 
-                          maxHeight: '108px',
+                          width: `${pw}px`, 
+                          height: `${ph}px`, 
+                          minWidth: `${pw}px`, 
+                          maxWidth: `${pw}px`, 
+                          minHeight: `${ph}px`, 
+                          maxHeight: `${ph}px`,
                           position: 'relative',
                           flexShrink: 0,
                           padding: '2px'
@@ -366,6 +371,8 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
                           </svg>
                         </div>
                       </div>
+                        );
+                      })()}
                     </div>
 
                     {/* Completed Status Bar - Monochromatic */}
