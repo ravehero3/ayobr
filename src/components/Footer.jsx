@@ -201,15 +201,26 @@ const Footer = ({ onGenerateVideos, onStop }) => {
                   }
                   setDownloadProgress(null);
                 } else {
-                  // Chrome / Firefox: instant simultaneous downloads work fine
-                  generatedVideos.forEach(video => {
-                    const link = document.createElement('a');
-                    link.href = video.url;
-                    link.download = video.filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  });
+                  // Chrome / Firefox: download in batches of 10, 1.5s gap between batches
+                  const BATCH = 10;
+                  for (let start = 0; start < generatedVideos.length; start += BATCH) {
+                    const batch = generatedVideos.slice(start, start + BATCH);
+                    const batchEnd = Math.min(start + BATCH, generatedVideos.length);
+                    setDownloadProgress({ current: batchEnd, total: generatedVideos.length });
+                    batch.forEach(video => {
+                      const link = document.createElement('a');
+                      link.href = video.url;
+                      link.download = video.filename;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    });
+                    // Wait before next batch (skip delay after the last batch)
+                    if (batchEnd < generatedVideos.length) {
+                      await new Promise(resolve => setTimeout(resolve, 1500));
+                    }
+                  }
+                  setDownloadProgress(null);
                 }
               }}
               className="generate-btn-subtle-particles scale-90 sm:scale-100"
