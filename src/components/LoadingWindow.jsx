@@ -315,12 +315,14 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     if (!vid) return;
     if (playingIds[pairId]) {
       vid.pause();
-      setPlayingIds(prev => ({ ...prev, [pairId]: false }));
+      setPlayingIds({});
     } else {
+      Object.entries(playingIds).forEach(([id, isPlaying]) => {
+        if (isPlaying && videoRefs.current[id]) videoRefs.current[id].pause();
+      });
+      setPlayingIds({ [pairId]: true });
       vid.style.display = 'block';
-      vid.play()
-        .then(() => setPlayingIds(prev => ({ ...prev, [pairId]: true })))
-        .catch(err => console.error('Video play failed:', err));
+      vid.play().catch(err => console.error('Video play failed:', err));
     }
   };
 
@@ -359,7 +361,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
-        style={{ zIndex: 9999, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none', overflow: 'hidden' }}
+        style={{ zIndex: 9999, paddingTop: '72px', paddingBottom: '40px', pointerEvents: 'none', overflowY: 'auto' }}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -368,7 +370,6 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="relative w-full mx-4 rounded-lg overflow-visible"
           style={{
-            maxHeight: 'calc(100vh - 112px)',
             width: '100%',
             maxWidth: '112rem',
             background: 'transparent',
@@ -380,8 +381,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
           {/* ── GENERATING STATE: mini progress cards ─────────────── */}
           {isGenerating && (
             <div
-              className="relative overflow-y-auto px-4"
-              style={{ marginTop: '50px', zIndex: 50, flex: 1, paddingTop: '60px', paddingBottom: '60px' }}
+              className="relative px-4"
+              style={{ marginTop: '50px', zIndex: 50, paddingTop: '60px', paddingBottom: '60px' }}
             >
               <div
                 className="grid gap-6 w-full mx-auto"
@@ -516,7 +517,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="flex-1 overflow-y-auto px-6"
+              className="px-6"
               style={{ paddingTop: '28px', paddingBottom: '100px' }}
             >
               <div style={getGridStyle()}>

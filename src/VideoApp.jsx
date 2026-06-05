@@ -376,8 +376,8 @@ function App({ onBeforeGenerate }) {
       {/* Animated Background */}
       <AnimatedBackground />
 
-      <div className="fixed inset-0 flex justify-center">
-        <div className={`w-full transition-all duration-300 overflow-auto ${page2GridMode < 2 ? 'max-w-6xl' : ''}`}>
+      <div className="fixed inset-0 flex justify-center overflow-auto">
+        <div className={`w-full transition-all duration-300 ${page2GridMode < 2 ? 'max-w-6xl' : ''}`}>
       {/* Drag Overlay */}
       <AnimatePresence>
         {isDragOver && (

@@ -55,9 +55,8 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
 
   const togglePlay = (id) => {
     setPlayingIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
-      return next;
+      if (prev.has(id)) return new Set();
+      return new Set([id]);
     });
   };
 
@@ -122,7 +121,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90"
+      className="fixed inset-0 flex flex-col items-center justify-start bg-space-dark/90 overflow-y-auto"
       style={{ zIndex: 999998, paddingTop: '72px', paddingBottom: '40px' }}
     >
       {/* Download Window - Same structure as LoadingWindow */}
@@ -153,7 +152,7 @@ const DownloadPage = ({ onDownloadAll, onBackToFileManagement }) => {
         </div>
 
         {/* Videos Grid - Same layout as LoadingWindow but with completed videos */}
-        <div className="relative max-h-96 overflow-y-auto mb-8 px-4" style={{ marginTop: '20px', zIndex: 50 }}>
+        <div className="relative mb-8 px-4" style={{ marginTop: '20px', zIndex: 50 }}>
           <div 
             className="grid gap-6 w-full mx-auto"
             style={{
