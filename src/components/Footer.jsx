@@ -175,28 +175,42 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               disabled={!!downloadProgress}
               onClick={async () => {
                 if (downloadProgress) return;
-                for (let i = 0; i < generatedVideos.length; i++) {
-                  setDownloadProgress({ current: i + 1, total: generatedVideos.length });
-                  const video = generatedVideos[i];
-                  try {
-                    // Fetch a fresh blob for each video so Safari treats each as a unique download
-                    const response = await fetch(video.url);
-                    const blob = await response.blob();
-                    const freshUrl = URL.createObjectURL(blob);
+                const isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS|Android/i.test(navigator.userAgent);
+
+                if (isSafari) {
+                  // Safari: sequential downloads — one at a time with a delay so Safari
+                  // doesn't cancel previous downloads when a new one starts
+                  for (let i = 0; i < generatedVideos.length; i++) {
+                    setDownloadProgress({ current: i + 1, total: generatedVideos.length });
+                    const video = generatedVideos[i];
+                    try {
+                      const response = await fetch(video.url);
+                      const blob = await response.blob();
+                      const freshUrl = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = freshUrl;
+                      link.download = video.filename;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      await new Promise(resolve => setTimeout(resolve, 1500));
+                      URL.revokeObjectURL(freshUrl);
+                    } catch (err) {
+                      console.error('Download error:', err);
+                    }
+                  }
+                  setDownloadProgress(null);
+                } else {
+                  // Chrome / Firefox: instant simultaneous downloads work fine
+                  generatedVideos.forEach(video => {
                     const link = document.createElement('a');
-                    link.href = freshUrl;
+                    link.href = video.url;
                     link.download = video.filename;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    // Hold the URL alive long enough for Safari to start the download, then release
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    URL.revokeObjectURL(freshUrl);
-                  } catch (err) {
-                    console.error('Download error:', err);
-                  }
+                  });
                 }
-                setDownloadProgress(null);
               }}
               className="generate-btn-subtle-particles scale-90 sm:scale-100"
               style={downloadProgress ? { opacity: 0.75, cursor: 'default' } : {}}
