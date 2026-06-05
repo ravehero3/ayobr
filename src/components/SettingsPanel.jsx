@@ -26,58 +26,40 @@ const SECTION_LABEL = {
   marginBottom: 10,
 };
 
-const AlienHead = ({ active }) => (
-  <svg width="14" height="14" viewBox="0 0 24 28" fill="currentColor">
-    <ellipse cx="12" cy="15" rx="10" ry="13" />
-    <ellipse cx="8"  cy="13" rx="3.2" ry="4"   fill={active ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)'} />
-    <ellipse cx="16" cy="13" rx="3.2" ry="4"   fill={active ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)'} />
-    <ellipse cx="8"  cy="13.5" rx="1.8" ry="2.2" fill={active ? 'rgba(0,0,0,0.5)'   : 'rgba(0,0,0,0.65)'} />
-    <ellipse cx="16" cy="13.5" rx="1.8" ry="2.2" fill={active ? 'rgba(0,0,0,0.5)'   : 'rgba(0,0,0,0.65)'} />
-    <rect x="9" y="20.5" width="6" height="1.1" rx="0.55" fill={active ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'} />
+const StarIcon = ({ active }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill={active ? '#ffffff' : 'none'}
+    stroke={active ? '#ffffff' : 'rgba(255,255,255,0.55)'} strokeWidth={active ? 0 : 1.5}
+    strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
   </svg>
 );
 
-const IMAGE_LAYOUTS = [
-  {
-    key: 'full',
-    label: 'Celá plocha',
-    sub: 'Vyplní rámeček',
-    icon: (active) => (
-      <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
-        <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
-          stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
-        <rect x="4" y="3.5" width="44" height="25" rx="1.5"
-          fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
-      </svg>
-    ),
-  },
-  {
-    key: 'padded',
-    label: 'S okraji',
-    sub: '100px nahoře/dole',
-    icon: (active) => (
-      <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
-        <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
-          stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
-        <rect x="4" y="7.5" width="44" height="17" rx="1.5"
-          fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
-      </svg>
-    ),
-  },
-  {
-    key: 'thumbnail',
-    label: 'Miniatura',
-    sub: '250px výška',
-    icon: (active) => (
-      <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
-        <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
-          stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
-        <rect x="15" y="11.5" width="22" height="9" rx="1.5"
-          fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
-      </svg>
-    ),
-  },
-];
+const IMAGE_LAYOUT_ICONS = {
+  full: (active) => (
+    <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
+      <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
+        stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
+      <rect x="4" y="3.5" width="44" height="25" rx="1.5"
+        fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
+    </svg>
+  ),
+  padded: (active) => (
+    <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
+      <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
+        stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
+      <rect x="4" y="7.5" width="44" height="17" rx="1.5"
+        fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
+    </svg>
+  ),
+  thumbnail: (active) => (
+    <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
+      <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
+        stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
+      <rect x="15" y="11.5" width="22" height="9" rx="1.5"
+        fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
+    </svg>
+  ),
+};
 
 // ── Preview frame dimensions: explicit pixels so the bg colour always renders ──
 const getFrameDims = (resolution) => {
@@ -188,6 +170,13 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
   const { w: frameW, h: frameH } = getFrameDims(selRes);
 
+  // ── Image layout options (translated) ─────────────────────────────────────
+  const imageLayouts = [
+    { key: 'full',      label: t('settings.layout.full'),      sub: t('settings.layout.full.sub'),      icon: IMAGE_LAYOUT_ICONS.full },
+    { key: 'padded',    label: t('settings.layout.padded'),    sub: t('settings.layout.padded.sub'),    icon: IMAGE_LAYOUT_ICONS.padded },
+    { key: 'thumbnail', label: t('settings.layout.thumbnail'), sub: t('settings.layout.thumbnail.sub'), icon: IMAGE_LAYOUT_ICONS.thumbnail },
+  ];
+
   // ── Shared card style factory ──────────────────────────────────────────────
   const optCard = (selected, locked = false) => ({
     flex: 1,
@@ -256,7 +245,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
               {/* ── Preview ──────────────────────────────────────────────────── */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p style={SECTION_LABEL}>Náhled</p>
+                <p style={SECTION_LABEL}>{t('settings.preview')}</p>
 
                 {/* Outer náhled — always black, full card width */}
                 <div style={{ width: '100%', height: PREVIEW_H, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
@@ -276,7 +265,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       <img
                         key={`${selLay}-${imgUrl}-${selRes}`}
                         src={imgUrl}
-                        alt="náhled"
+                        alt={t('settings.preview')}
                         style={previewImgStyle()}
                       />
                     ) : (
@@ -286,7 +275,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <polyline points="21 15 16 10 5 21" />
                         </svg>
-                        <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.18)', fontSize: 11 }}>Nahrajte obrázek na str. 2</span>
+                        <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.18)', fontSize: 11 }}>{t('settings.noImage')}</span>
                       </div>
                     )}
                   </div>
@@ -371,12 +360,10 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                           {hasAlien && (
                             <button
                               onClick={isHd ? toggleHd : toggleFhd}
-                              title={isHd ? (hdAlt ? 'Přepnout na HD 720p' : 'Přepnout na Square 1:1') : (fhdAlt ? 'Přepnout na Full HD' : 'Přepnout na Ultra-Wide 21:9')}
-                              style={{ position: 'absolute', top: 6, left: 6, width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', color: alienOn ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.22)', padding: 0, borderRadius: 4, transition: 'color 0.18s' }}
-                              onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.color = alienOn ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.22)'; }}
+                              title={isHd ? (hdAlt ? t('settings.toggle.toHD') : t('settings.toggle.toSquare')) : (fhdAlt ? t('settings.toggle.toFullHD') : t('settings.toggle.toUltraWide'))}
+                              style={{ position: 'absolute', top: 6, left: 6, width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, borderRadius: 4, transition: 'opacity 0.18s' }}
                             >
-                              <AlienHead active={alienOn} />
+                              <StarIcon active={alienOn} />
                             </button>
                           )}
                           {/* Badge */}
@@ -393,9 +380,9 @@ const SettingsPanel = ({ isOpen, onClose }) => {
 
                 {/* ─ Column 3: Pozice obrázku ────────────────────────────────── */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <p style={SECTION_LABEL}>Pozice obrázku</p>
+                  <p style={SECTION_LABEL}>{t('settings.imagePosition')}</p>
                   <div style={{ display: 'flex', gap: ITEM_GAP }}>
-                    {IMAGE_LAYOUTS.map(({ key, label, sub, icon }) => {
+                    {imageLayouts.map(({ key, label, sub, icon }) => {
                       const active = selLay === key;
                       return (
                         <motion.div

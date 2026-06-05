@@ -126,6 +126,25 @@ const Footer = ({ onGenerateVideos, onStop }) => {
               </svg>
             </motion.button>
           )}
+
+          {/* View options button — moved to left, only on page 2 */}
+          {!isOnPage3 && (
+            <motion.button
+              onClick={() => setIsViewOptionsOpen(v => !v)}
+              className="hidden md:flex p-2 rounded-lg hover:bg-white/5 transition-all"
+              title={t('view.title')}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                style={{ color: isViewOptionsOpen ? '#ffffff' : 'rgba(255,255,255,0.35)', transition: 'color 0.2s' }}>
+                <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
+                <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
+                <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="1.8"/>
+                <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="1.8"/>
+              </svg>
+            </motion.button>
+          )}
         </div>
 
         {/* Center - Status or Action Button */}
@@ -173,22 +192,6 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         <div className="flex items-center gap-1">
           {!isOnPage3 ? (
             <>
-              {/* View options button */}
-              <motion.button
-                onClick={() => setIsViewOptionsOpen(v => !v)}
-                className="relative p-2 rounded-lg hover:bg-white/5 transition-all"
-                title="Zobrazení"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  style={{ color: isViewOptionsOpen ? '#ffffff' : 'rgba(255,255,255,0.4)', transition: 'color 0.2s' }}>
-                  <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
-                  <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth="1.8"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth="1.8"/>
-                  <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth="1.8"/>
-                </svg>
-              </motion.button>
               {/* Video settings button */}
               <motion.button
                 onClick={() => setIsSettingsOpen(true)}
