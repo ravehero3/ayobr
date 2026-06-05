@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
-import JSZip from 'jszip';
 
 function VideoPreview({ src, playing, onTogglePlay, width, height }) {
   const videoRef = useRef(null);

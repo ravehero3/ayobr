@@ -13,6 +13,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
   const blurEnabled = isAnimEnabled('backdrop_blur');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isViewOptionsOpen, setIsViewOptionsOpen] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(null);
   const completePairs = pairs.filter(pair => pair.audio && pair.image);
   const hasFiles = pairs.some(pair => pair.audio || pair.image);
 
@@ -171,19 +172,38 @@ const Footer = ({ onGenerateVideos, onStop }) => {
             </button>
           ) : (
             <button
-              onClick={() => {
-                generatedVideos.forEach(video => {
-                  const link = document.createElement('a');
-                  link.href = video.url;
-                  link.download = video.filename;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                });
+              disabled={!!downloadProgress}
+              onClick={async () => {
+                if (downloadProgress) return;
+                for (let i = 0; i < generatedVideos.length; i++) {
+                  setDownloadProgress({ current: i + 1, total: generatedVideos.length });
+                  const video = generatedVideos[i];
+                  try {
+                    // Fetch a fresh blob for each video so Safari treats each as a unique download
+                    const response = await fetch(video.url);
+                    const blob = await response.blob();
+                    const freshUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = freshUrl;
+                    link.download = video.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    // Hold the URL alive long enough for Safari to start the download, then release
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    URL.revokeObjectURL(freshUrl);
+                  } catch (err) {
+                    console.error('Download error:', err);
+                  }
+                }
+                setDownloadProgress(null);
               }}
               className="generate-btn-subtle-particles scale-90 sm:scale-100"
+              style={downloadProgress ? { opacity: 0.75, cursor: 'default' } : {}}
             >
-              {t('app.downloadAll')}
+              {downloadProgress
+                ? `${downloadProgress.current} / ${downloadProgress.total}`
+                : t('app.downloadAll')}
             </button>
           )}
         </div>

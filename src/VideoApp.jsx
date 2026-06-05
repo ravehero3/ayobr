@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import JSZip from 'jszip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/appStore';
 import { usePairingLogic } from './hooks/usePairingLogic';
