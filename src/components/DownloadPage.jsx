@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
+import JSZip from 'jszip';
 
 function VideoPreview({ src, playing, onTogglePlay, width, height }) {
   const videoRef = useRef(null);
@@ -27,7 +28,6 @@ function VideoPreview({ src, playing, onTogglePlay, width, height }) {
         preload="auto"
         muted
         playsInline
-        controls={playing}
         style={{
           position: 'absolute',
           inset: 0,
@@ -39,19 +39,26 @@ function VideoPreview({ src, playing, onTogglePlay, width, height }) {
         }}
       />
 
-      {!playing && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onTogglePlay(); }}
-          className="absolute inset-0 w-full h-full flex items-center justify-center group/play"
-          style={{ background: 'rgba(0,0,0,0.25)', zIndex: 5 }}
-        >
-          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center group-hover/play:bg-white/35 transition-all">
+      <button
+        onClick={(e) => { e.stopPropagation(); onTogglePlay(); }}
+        className="absolute inset-0 w-full h-full flex items-center justify-center group/play"
+        style={{ background: playing ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.25)', zIndex: 5, opacity: playing ? 0 : 1, transition: 'opacity 0.2s, background 0.2s' }}
+        onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(0,0,0,0.25)'; }}
+        onMouseLeave={e => { if (playing) { e.currentTarget.style.opacity = '0'; e.currentTarget.style.background = 'rgba(0,0,0,0)'; } }}
+      >
+        <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center group-hover/play:bg-white/35 transition-all">
+          {playing ? (
+            <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 10 10">
+              <rect x="1" y="0" width="3" height="10" rx="0.5" />
+              <rect x="6" y="0" width="3" height="10" rx="0.5" />
+            </svg>
+          ) : (
             <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
             </svg>
-          </div>
-        </button>
-      )}
+          )}
+        </div>
+      </button>
 
       <div
         className="absolute top-1 right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.5)]"

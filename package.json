@@ -7,7 +7,7 @@
     "dev": "node_modules/.bin/webpack serve --config webpack.config.js",
     "server": "node server/index.js",
     "start": "node server/index.js",
-    "build": "NODE_ENV=production node_modules/.bin/webpack --config webpack.config.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js dist/ffmpeg-core.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm dist/ffmpeg-core.wasm && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.worker.js dist/ffmpeg-core.worker.js 2>/dev/null || true && cp node_modules/@ffmpeg/ffmpeg/dist/umd/ffmpeg.js dist/ffmpeg-lib.js && cp node_modules/@ffmpeg/ffmpeg/dist/umd/814.ffmpeg.js dist/814.ffmpeg.js && cp robots.txt sitemap.xml manifest.json _redirects _headers dist/ 2>/dev/null || true && test -f dist/ffmpeg-core.wasm && echo 'FFmpeg WASM copied OK' || (echo 'ERROR: dist/ffmpeg-core.wasm missing' && exit 1)",
+    "build": "NODE_ENV=production node_modules/.bin/webpack --config webpack.config.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js dist/ffmpeg-core.js && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm dist/ffmpeg-core.wasm && cp node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.worker.js dist/ffmpeg-core.worker.js 2>/dev/null || true && cp node_modules/@ffmpeg/ffmpeg/dist/umd/ffmpeg.js dist/ffmpeg-lib.js && cp node_modules/@ffmpeg/ffmpeg/dist/umd/814.ffmpeg.js dist/814.ffmpeg.js && cp robots.txt sitemap.xml manifest.json _redirects _headers dist/ 2>/dev/null || true && cp favicon.png dist/favicon.png 2>/dev/null || true && test -f dist/ffmpeg-core.wasm && echo 'FFmpeg WASM copied OK' || (echo 'ERROR: dist/ffmpeg-core.wasm missing' && exit 1)",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -37,6 +37,7 @@
     "file-loader": "^6.2.0",
     "framer-motion": "^12.38.0",
     "html-webpack-plugin": "^5.6.7",
+    "jszip": "^3.10.1",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.10",

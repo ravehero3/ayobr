@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import JSZip from 'jszip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/appStore';
 import { usePairingLogic } from './hooks/usePairingLogic';
@@ -334,7 +335,6 @@ function App({ onBeforeGenerate }) {
     }
 
     if (generatedVideos.length === 1) {
-      // Single video download
       const video = generatedVideos[0];
       const link = document.createElement('a');
       link.href = video.url;
@@ -343,17 +343,22 @@ function App({ onBeforeGenerate }) {
       link.click();
       document.body.removeChild(link);
     } else {
-      // Multiple videos - create ZIP (simplified approach)
-      for (const video of generatedVideos) {
-        const link = document.createElement('a');
-        link.href = video.url;
-        link.download = video.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        // Small delay between downloads
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
+      // Bundle all videos into a single ZIP — works in Safari and all browsers
+      const zip = new JSZip();
+      await Promise.all(generatedVideos.map(async (video) => {
+        const response = await fetch(video.url);
+        const blob = await response.blob();
+        zip.file(video.filename, blob);
+      }));
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'typebeatz-videos.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
   };
 
