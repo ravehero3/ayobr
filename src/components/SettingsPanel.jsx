@@ -7,22 +7,32 @@ import { useLanguage } from '../context/LanguageContext';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 const IV = '"Figtree", sans-serif';
 
+// ── Two padding values used throughout ────────────────────────────────────────
+const CARD_PADDING  = 32;          // outer card
+const ITEM_PADDING  = '12px 8px';  // every option container
+const CARD_H        = 90;          // height of every option container (px)
+const CARD_RADIUS   = 12;          // border-radius of every option container
+const COL_GAP       = 24;          // gap between the 3 columns
+const ITEM_GAP      = 10;          // gap between cards within a column
+const PREVIEW_H     = 300;         // outer preview height (px)
+
 const SECTION_LABEL = {
   fontFamily: NM,
-  color: 'rgba(255,255,255,0.40)',
-  fontSize: 10,
+  color: 'rgba(255,255,255,0.38)',
+  fontSize: 11,
   fontWeight: 600,
-  letterSpacing: '0.03em',
-  marginBottom: 8,
+  letterSpacing: '0.02em',
+  margin: 0,
+  marginBottom: 10,
 };
 
 const AlienHead = ({ active }) => (
-  <svg width="13" height="13" viewBox="0 0 24 28" fill="currentColor">
+  <svg width="14" height="14" viewBox="0 0 24 28" fill="currentColor">
     <ellipse cx="12" cy="15" rx="10" ry="13" />
-    <ellipse cx="8" cy="13" rx="3.2" ry="4" fill={active ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)'} />
-    <ellipse cx="16" cy="13" rx="3.2" ry="4" fill={active ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)'} />
-    <ellipse cx="8" cy="13.5" rx="1.8" ry="2.2" fill={active ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.65)'} />
-    <ellipse cx="16" cy="13.5" rx="1.8" ry="2.2" fill={active ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.65)'} />
+    <ellipse cx="8"  cy="13" rx="3.2" ry="4"   fill={active ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)'} />
+    <ellipse cx="16" cy="13" rx="3.2" ry="4"   fill={active ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)'} />
+    <ellipse cx="8"  cy="13.5" rx="1.8" ry="2.2" fill={active ? 'rgba(0,0,0,0.5)'   : 'rgba(0,0,0,0.65)'} />
+    <ellipse cx="16" cy="13.5" rx="1.8" ry="2.2" fill={active ? 'rgba(0,0,0,0.5)'   : 'rgba(0,0,0,0.65)'} />
     <rect x="9" y="20.5" width="6" height="1.1" rx="0.55" fill={active ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'} />
   </svg>
 );
@@ -33,11 +43,11 @@ const IMAGE_LAYOUTS = [
     label: 'Celá plocha',
     sub: 'Vyplní rámeček',
     icon: (active) => (
-      <svg width="44" height="27" viewBox="0 0 52 32" fill="none">
+      <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
         <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
-          stroke={active ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.2)'} strokeWidth="1.5" />
+          stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
         <rect x="4" y="3.5" width="44" height="25" rx="1.5"
-          fill={active ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.08)'} />
+          fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
       </svg>
     ),
   },
@@ -46,11 +56,11 @@ const IMAGE_LAYOUTS = [
     label: 'S okraji',
     sub: '100px nahoře/dole',
     icon: (active) => (
-      <svg width="44" height="27" viewBox="0 0 52 32" fill="none">
+      <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
         <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
-          stroke={active ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.2)'} strokeWidth="1.5" />
-        <rect x="4" y="7" width="44" height="18" rx="1.5"
-          fill={active ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.08)'} />
+          stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
+        <rect x="4" y="7.5" width="44" height="17" rx="1.5"
+          fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
       </svg>
     ),
   },
@@ -59,458 +69,381 @@ const IMAGE_LAYOUTS = [
     label: 'Miniatura',
     sub: '250px výška',
     icon: (active) => (
-      <svg width="44" height="27" viewBox="0 0 52 32" fill="none">
+      <svg width="52" height="32" viewBox="0 0 52 32" fill="none">
         <rect x="0.75" y="0.75" width="50.5" height="30.5" rx="3.25"
-          stroke={active ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.2)'} strokeWidth="1.5" />
+          stroke={active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)'} strokeWidth="1.5" />
         <rect x="15" y="11.5" width="22" height="9" rx="1.5"
-          fill={active ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.08)'} />
+          fill={active ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.09)'} />
       </svg>
     ),
   },
 ];
 
+// ── Preview frame dimensions: explicit pixels so the bg colour always renders ──
+const getFrameDims = (resolution) => {
+  if (resolution === 'square')    return { w: PREVIEW_H,                             h: PREVIEW_H };
+  if (resolution === 'ultrawide') return { w: Math.round(PREVIEW_H * 2560 / 1080),  h: PREVIEW_H };
+  return                                 { w: Math.round(PREVIEW_H * 16   / 9),     h: PREVIEW_H };
+};
+
 const SettingsPanel = ({ isOpen, onClose }) => {
   const { user, featureFlags } = useAuth();
   const { t } = useLanguage();
 
-  const {
-    videoSettings,
-    pairs,
-    setVideoBackground,
-    setCustomBackground,
-    setVideoQuality,
-    setImageLayout,
-  } = useAppStore();
+  const { videoSettings, pairs, setVideoBackground, setCustomBackground, setVideoQuality, setImageLayout } = useAppStore();
 
-  const canUseFullHD = featureFlags?.high_quality || user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
-  const canUse4K = featureFlags?.ultra_quality || user?.role === 'unlimited' || user?.role === 'admin';
-  const canUseCustomBackground = user?.role === 'pro' || user?.role === 'unlimited' || user?.role === 'admin';
+  const canUseFullHD  = featureFlags?.high_quality  || ['pro','unlimited','admin'].includes(user?.role);
+  const canUse4K      = featureFlags?.ultra_quality  || ['unlimited','admin'].includes(user?.role);
+  const canUseCustomBg = ['pro','unlimited','admin'].includes(user?.role);
 
-  const clampQuality = (q) => {
-    if (q === '4k' && !canUse4K) return canUseFullHD ? 'fullhd' : 'hd';
-    if ((q === 'fullhd' || q === 'ultrawide' || q === 'square') && !canUseFullHD) return 'hd';
+  const clamp = (q) => {
+    if (q === '4k'       && !canUse4K)     return canUseFullHD ? 'fullhd' : 'hd';
+    if (['fullhd','ultrawide','square'].includes(q) && !canUseFullHD) return 'hd';
     return q;
   };
 
-  const [selectedBackground, setSelectedBackground] = useState(videoSettings.background || 'black');
-  const [selectedResolution, setSelectedResolution] = useState(() => clampQuality(videoSettings.quality || 'fullhd'));
-  const [selectedImageLayout, setSelectedImageLayout] = useState(videoSettings.imageLayout || 'full');
-  const [hdAlt, setHdAlt] = useState(() => videoSettings.quality === 'square');
-  const [fullhdAlt, setFullhdAlt] = useState(() => videoSettings.quality === 'ultrawide');
+  const [selBg,  setSelBg]  = useState(videoSettings.background || 'black');
+  const [selRes, setSelRes] = useState(() => clamp(videoSettings.quality  || 'fullhd'));
+  const [selLay, setSelLay] = useState(videoSettings.imageLayout || 'full');
+  const [hdAlt,  setHdAlt]  = useState(() => videoSettings.quality === 'square');
+  const [fhdAlt, setFhdAlt] = useState(() => videoSettings.quality === 'ultrawide');
 
+  // Sync when modal opens
   useEffect(() => {
-    if (isOpen) {
-      const q = clampQuality(videoSettings.quality || 'fullhd');
-      setSelectedBackground(videoSettings.background || 'black');
-      setSelectedResolution(q);
-      setSelectedImageLayout(videoSettings.imageLayout || 'full');
-      setHdAlt(q === 'square');
-      setFullhdAlt(q === 'ultrawide');
-    }
+    if (!isOpen) return;
+    const q = clamp(videoSettings.quality || 'fullhd');
+    setSelBg(videoSettings.background || 'black');
+    setSelRes(q);
+    setSelLay(videoSettings.imageLayout || 'full');
+    setHdAlt(q === 'square');
+    setFhdAlt(q === 'ultrawide');
   }, [isOpen]);
 
-  // Latest uploaded image from pairs for preview
-  const lastImagePair = [...pairs].reverse().find(p => p.image);
-  const lastImage = lastImagePair?.image;
-  const [lastImageUrl, setLastImageUrl] = useState(null);
+  // Latest image from pairs
+  const lastImage = [...pairs].reverse().find(p => p.image)?.image ?? null;
+  const [imgUrl, setImgUrl] = useState(null);
   useEffect(() => {
-    if (!lastImage) { setLastImageUrl(null); return; }
+    if (!lastImage) { setImgUrl(null); return; }
     const url = URL.createObjectURL(lastImage);
-    setLastImageUrl(url);
+    setImgUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [lastImage]);
 
-  const handleBackgroundChange = (background) => {
-    if (background === 'custom' && !canUseCustomBackground) return;
-    setSelectedBackground(background);
+  const changeBg  = (bg)  => { if (bg === 'custom' && !canUseCustomBg) return; setSelBg(bg); };
+  const changeRes = (res) => {
+    if (res === '4k' && !canUse4K) return;
+    if (['fullhd','ultrawide','square'].includes(res) && !canUseFullHD) return;
+    setSelRes(res);
   };
 
-  const handleResolutionChange = (resolution) => {
-    if (resolution === '4k' && !canUse4K) return;
-    if ((resolution === 'fullhd' || resolution === 'ultrawide' || resolution === 'square') && !canUseFullHD) return;
-    setSelectedResolution(resolution);
+  const toggleHd  = (e) => { e.stopPropagation(); const n = !hdAlt;  setHdAlt(n);  if (n  && selRes === 'hd'     && canUseFullHD) setSelRes('square');   if (!n  && selRes === 'square')   setSelRes('hd'); };
+  const toggleFhd = (e) => { e.stopPropagation(); const n = !fhdAlt; setFhdAlt(n); if (n  && selRes === 'fullhd' && canUseFullHD) setSelRes('ultrawide'); if (!n  && selRes === 'ultrawide') setSelRes('fullhd'); };
+
+  const onCustomUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file?.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => { setCustomBackground(ev.target.result); setSelBg('custom'); };
+    reader.readAsDataURL(file);
   };
 
-  const toggleHdAlt = (e) => {
-    e.stopPropagation();
-    const newAlt = !hdAlt;
-    setHdAlt(newAlt);
-    if (newAlt && selectedResolution === 'hd' && canUseFullHD) setSelectedResolution('square');
-    if (!newAlt && selectedResolution === 'square') setSelectedResolution('hd');
-  };
-
-  const toggleFullhdAlt = (e) => {
-    e.stopPropagation();
-    const newAlt = !fullhdAlt;
-    setFullhdAlt(newAlt);
-    if (newAlt && selectedResolution === 'fullhd' && canUseFullHD) setSelectedResolution('ultrawide');
-    if (!newAlt && selectedResolution === 'ultrawide') setSelectedResolution('fullhd');
-  };
-
-  const handleCustomBackgroundUpload = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCustomBackground(e.target.result);
-        setSelectedBackground('custom');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSave = () => {
-    setVideoBackground(selectedBackground);
-    setVideoQuality(selectedResolution);
-    setImageLayout(selectedImageLayout);
-    onClose();
-  };
-
+  const handleSave = () => { setVideoBackground(selBg); setVideoQuality(selRes); setImageLayout(selLay); onClose(); };
   const handleCancel = () => {
-    setSelectedBackground(videoSettings.background || 'black');
-    setSelectedResolution(clampQuality(videoSettings.quality || 'fullhd'));
-    setSelectedImageLayout(videoSettings.imageLayout || 'full');
+    setSelBg(videoSettings.background || 'black');
+    setSelRes(clamp(videoSettings.quality || 'fullhd'));
+    setSelLay(videoSettings.imageLayout || 'full');
     onClose();
   };
 
-  // ── Preview background — uses selectedBackground so it updates live ──────────
-  const getPreviewBgStyle = () => {
-    if (selectedBackground === 'white') return { backgroundColor: '#ffffff' };
-    if (selectedBackground === 'custom') {
-      const bgSrc = videoSettings.customBackground;
-      if (bgSrc) {
-        return {
-          backgroundImage: `url(${bgSrc})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        };
-      }
+  // ── Live preview helpers ────────────────────────────────────────────────────
+  const previewBg = () => {
+    if (selBg === 'white') return { backgroundColor: '#ffffff' };
+    if (selBg === 'custom' && videoSettings.customBackground) {
+      return { backgroundImage: `url(${videoSettings.customBackground})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' };
     }
     return { backgroundColor: '#000000' };
   };
 
-  const getPreviewAspectRatio = () => {
-    if (selectedResolution === 'square') return '1 / 1';
-    if (selectedResolution === 'ultrawide') return '2560 / 1080';
-    return '16 / 9';
-  };
-
-  const getPreviewImageStyle = () => {
-    if (selectedImageLayout === 'padded') {
-      const padPct = (100 / 1080) * 100;
-      return {
-        position: 'absolute',
-        top: `${padPct.toFixed(2)}%`,
-        left: 0, right: 0,
-        height: `${(100 - padPct * 2).toFixed(2)}%`,
-        width: '100%',
-        objectFit: 'contain',
-      };
+  const previewImgStyle = () => {
+    if (selLay === 'padded') {
+      const p = (100 / 1080) * 100;
+      return { position: 'absolute', top: `${p.toFixed(2)}%`, left: 0, right: 0, height: `${(100 - p * 2).toFixed(2)}%`, width: '100%', objectFit: 'contain' };
     }
-    if (selectedImageLayout === 'thumbnail') {
-      const thumbPct = (250 / 1080) * 100;
-      return {
-        position: 'absolute',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        maxWidth: '100%',
-        height: `${thumbPct.toFixed(2)}%`,
-        width: 'auto',
-        objectFit: 'contain',
-      };
+    if (selLay === 'thumbnail') {
+      return { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', maxWidth: '100%', height: `${((250/1080)*100).toFixed(2)}%`, width: 'auto', objectFit: 'contain' };
     }
     return { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' };
   };
 
-  // ── Resolution card definitions ───────────────────────────────────────────────
-  const hdOption = hdAlt
-    ? { key: 'square', label: 'Square', sub: '1080×1080', badge: '1:1', locked: !canUseFullHD }
-    : { key: 'hd', label: 'HD', sub: '1280×720', badge: '720p', locked: false };
-
-  const fullhdOption = fullhdAlt
-    ? { key: 'ultrawide', label: 'Ultra-Wide', sub: '2560×1080', badge: '21:9', locked: !canUseFullHD }
-    : { key: 'fullhd', label: 'Full HD', sub: '1920×1080', badge: '1080p', locked: !canUseFullHD };
-
-  const resolutionOptions = [
-    hdOption,
-    fullhdOption,
-    { key: '4k', label: '4K Ultra', sub: '3840×2160', badge: '4K', locked: !canUse4K },
+  // ── Resolution option definitions ──────────────────────────────────────────
+  const resOpts = [
+    hdAlt
+      ? { key: 'square',    label: 'Square',    sub: '1080×1080', badge: '1:1',   locked: !canUseFullHD }
+      : { key: 'hd',        label: 'HD',        sub: '1280×720',  badge: '720p',  locked: false },
+    fhdAlt
+      ? { key: 'ultrawide', label: 'Ultra-Wide', sub: '2560×1080', badge: '21:9', locked: !canUseFullHD }
+      : { key: 'fullhd',   label: 'Full HD',    sub: '1920×1080', badge: '1080p', locked: !canUseFullHD },
+    { key: '4k',    label: '4K Ultra', sub: '3840×2160', badge: '4K',    locked: !canUse4K },
   ];
+
+  const { w: frameW, h: frameH } = getFrameDims(selRes);
+
+  // ── Shared card style factory ──────────────────────────────────────────────
+  const optCard = (selected, locked = false) => ({
+    flex: 1,
+    height: CARD_H,
+    borderRadius: CARD_RADIUS,
+    cursor: locked ? 'not-allowed' : 'pointer',
+    opacity: locked ? 0.42 : 1,
+    background:  selected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.025)',
+    border:      selected ? '1.5px solid rgba(255,255,255,0.40)' : '1.5px solid rgba(255,255,255,0.08)',
+    transition: 'all 0.18s ease',
+    position: 'relative',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    padding: ITEM_PADDING,
+    boxSizing: 'border-box',
+    textAlign: 'center',
+  });
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center"
-          style={{ zIndex: 999999, pointerEvents: 'auto', padding: '20px', overflowY: 'auto' }}
+          className="fixed inset-0"
+          style={{ zIndex: 999999, pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', overflowY: 'auto' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           {/* Backdrop */}
-          <div
-            className="absolute inset-0"
-            onClick={handleCancel}
-            style={{ background: 'rgba(0,0,0,0.60)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)' }}
-          />
+          <div className="absolute inset-0" onClick={handleCancel}
+            style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }} />
 
-          {/* Single merged card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            onClick={e => e.stopPropagation()}
-            style={{
-              position: 'relative',
-              zIndex: 10,
-              width: 860,
-              background: 'rgba(10,10,12,0.88)',
-              backdropFilter: 'blur(28px)',
-              WebkitBackdropFilter: 'blur(28px)',
-              borderRadius: 20,
-              border: '1px solid rgba(255,255,255,0.07)',
-              boxShadow: '0 20px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset',
-              padding: '28px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 20,
-            }}
-          >
-            {/* ── Header row: title + action buttons ─────────────────────────── */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ fontFamily: NM, color: 'rgba(255,255,255,0.90)', fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: '-0.01em' }}>
+          {/* Card + buttons — vertical stack */}
+          <div onClick={e => e.stopPropagation()}
+            style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+
+            {/* ════ CARD ════════════════════════════════════════════════════════ */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
+              animate={{ opacity: 1, scale: 1,    y: 0  }}
+              exit={{    opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              style={{
+                width: 1200,
+                maxWidth: 'calc(100vw - 40px)',
+                background: 'rgba(10,10,12,0.90)',
+                backdropFilter: 'blur(32px)',
+                WebkitBackdropFilter: 'blur(32px)',
+                borderRadius: 20,
+                border: '1px solid rgba(255,255,255,0.07)',
+                boxShadow: '0 28px 64px rgba(0,0,0,0.78), 0 0 0 1px rgba(255,255,255,0.04) inset',
+                padding: CARD_PADDING,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: COL_GAP,
+              }}
+            >
+              {/* Title — centered */}
+              <h2 style={{ fontFamily: NM, color: 'rgba(255,255,255,0.92)', fontSize: 20, fontWeight: 700, textAlign: 'center', margin: 0, letterSpacing: '-0.02em' }}>
                 {t('settings.title')}
               </h2>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button
-                  onClick={handleCancel}
-                  style={{ fontFamily: IV, fontWeight: 400, fontSize: '14px', lineHeight: 'normal', background: '#2a2a2a', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: 9999, cursor: 'pointer', transition: 'background 0.2s, color 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#111'; e.currentTarget.style.color = '#999'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#2a2a2a'; e.currentTarget.style.color = '#fff'; }}
-                >
-                  {t('settings.cancel')}
-                </button>
-                <button
-                  onClick={handleSave}
-                  style={{ fontFamily: IV, fontWeight: 400, fontSize: '14px', lineHeight: 'normal', background: '#fff', color: '#000', border: 'none', padding: '8px 20px', borderRadius: 9999, cursor: 'pointer', transition: 'filter 0.2s ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
-                >
-                  {t('settings.save')}
-                </button>
-              </div>
-            </div>
 
-            {/* ── Preview section ──────────────────────────────────────────────── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <p style={SECTION_LABEL}>Náhled</p>
+              {/* ── Preview ──────────────────────────────────────────────────── */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <p style={SECTION_LABEL}>Náhled</p>
 
-              {/* Preview box — no rounded corners, live bg + image */}
-              <div style={{ height: 262, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.45)', borderRadius: 0, overflow: 'hidden', flexShrink: 0 }}>
-                <div
-                  style={{
-                    aspectRatio: getPreviewAspectRatio(),
-                    maxWidth: '100%',
-                    maxHeight: '262px',
+                {/* Outer náhled — always black, full card width */}
+                <div style={{ width: '100%', height: PREVIEW_H, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+
+                  {/* Inner frame — explicit pixel size; thin grey outline shows the resolution shape */}
+                  <div style={{
+                    width:  frameW,
+                    height: frameH,
                     position: 'relative',
                     overflow: 'hidden',
-                    ...getPreviewBgStyle(),
-                  }}
-                >
-                  {lastImageUrl ? (
-                    <img
-                      key={`${selectedImageLayout}-${lastImageUrl}-${selectedResolution}`}
-                      src={lastImageUrl}
-                      alt="náhled"
-                      style={getPreviewImageStyle()}
-                    />
-                  ) : (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
-                      <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>
-                        Nahrajte obrázek na str. 2
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '-4px 0' }} />
-
-            {/* ── Three equal setting columns ─────────────────────────────────── */}
-            <div style={{ display: 'flex', gap: 20 }}>
-
-              {/* Column 1 — Pozadí */}
-              <div style={{ flex: 1 }}>
-                <p style={SECTION_LABEL}>{t('settings.background')}</p>
-                <div style={{ display: 'flex', gap: 8 }}>
-
-                  {/* White */}
-                  <motion.div
-                    onClick={() => handleBackgroundChange('white')}
-                    style={{
-                      flex: 1, height: 58, borderRadius: 10, cursor: 'pointer',
-                      background: 'linear-gradient(135deg, #ffffff, #f0f0f0)',
-                      border: selectedBackground === 'white' ? '2px solid rgba(255,255,255,0.9)' : '2px solid rgba(255,255,255,0.10)',
-                      boxShadow: selectedBackground === 'white' ? '0 0 0 2px rgba(255,255,255,0.15)' : 'none',
-                      transition: 'all 0.2s ease', position: 'relative',
-                    }}
-                    whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  >
-                    {selectedBackground === 'white' && <div style={{ position: 'absolute', bottom: 5, right: 6, width: 6, height: 6, borderRadius: '50%', background: '#000', opacity: 0.55 }} />}
-                  </motion.div>
-
-                  {/* Black */}
-                  <motion.div
-                    onClick={() => handleBackgroundChange('black')}
-                    style={{
-                      flex: 1, height: 58, borderRadius: 10, cursor: 'pointer',
-                      background: 'linear-gradient(135deg, #1a1a1a, #000)',
-                      border: selectedBackground === 'black' ? '2px solid rgba(255,255,255,0.9)' : '2px solid rgba(255,255,255,0.10)',
-                      boxShadow: selectedBackground === 'black' ? '0 0 0 2px rgba(255,255,255,0.08)' : 'none',
-                      transition: 'all 0.2s ease', position: 'relative',
-                    }}
-                    whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  >
-                    {selectedBackground === 'black' && <div style={{ position: 'absolute', bottom: 5, right: 6, width: 6, height: 6, borderRadius: '50%', background: '#fff', opacity: 0.65 }} />}
-                  </motion.div>
-
-                  {/* Custom */}
-                  <motion.div
-                    onClick={() => canUseCustomBackground && document.getElementById('customBackgroundUpload').click()}
-                    style={{
-                      flex: 1, height: 58, borderRadius: 10,
-                      cursor: canUseCustomBackground ? 'pointer' : 'not-allowed',
-                      opacity: canUseCustomBackground ? 1 : 0.5,
-                      background: canUseCustomBackground && videoSettings.customBackground
-                        ? `url(${videoSettings.customBackground}) center/cover no-repeat`
-                        : 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
-                      border: selectedBackground === 'custom' ? '2px solid rgba(255,255,255,0.9)' : '2px solid rgba(255,255,255,0.10)',
-                      transition: 'all 0.2s ease',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      position: 'relative', overflow: 'hidden',
-                    }}
-                    whileHover={canUseCustomBackground ? { scale: 1.04 } : {}}
-                    whileTap={canUseCustomBackground ? { scale: 0.97 } : {}}
-                  >
-                    {canUseCustomBackground ? (
-                      <span style={{ fontFamily: NM, fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.55)', textShadow: '0 2px 6px rgba(0,0,0,0.9)', background: videoSettings.customBackground ? 'rgba(0,0,0,0.55)' : 'transparent', padding: videoSettings.customBackground ? '3px 5px' : 0, borderRadius: 4 }}>
-                        {t('settings.background.custom')}
-                      </span>
+                    outline: '1px solid rgba(255,255,255,0.20)',
+                    boxSizing: 'border-box',
+                    flexShrink: 0,
+                    ...previewBg(),
+                  }}>
+                    {imgUrl ? (
+                      <img
+                        key={`${selLay}-${imgUrl}-${selRes}`}
+                        src={imgUrl}
+                        alt="náhled"
+                        style={previewImgStyle()}
+                      />
                     ) : (
-                      <span style={{ fontFamily: NM, fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em' }}>PRO</span>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.18)', fontSize: 11 }}>Nahrajte obrázek na str. 2</span>
+                      </div>
                     )}
-                    <input
-                      type="file"
-                      id="customBackgroundUpload"
-                      accept="image/png,image/jpeg,image/jpg,image/heic,image/gif"
-                      onChange={handleCustomBackgroundUpload}
-                      style={{ display: 'none' }}
-                    />
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 
-              {/* Column 2 — Rozlišení */}
-              <div style={{ flex: 1 }}>
-                <p style={SECTION_LABEL}>{t('settings.resolution')}</p>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {resolutionOptions.map(({ key, label, sub, badge, locked }, idx) => {
-                    const isHdCard = idx === 0;
-                    const isFullhdCard = idx === 1;
-                    const hasAlien = isHdCard || isFullhdCard;
-                    const alienActive = isHdCard ? hdAlt : fullhdAlt;
-                    const isSelected = selectedResolution === key;
-                    return (
-                      <motion.div
-                        key={key}
-                        onClick={() => handleResolutionChange(key)}
-                        style={{
-                          flex: 1, padding: '8px 4px 10px', borderRadius: 10,
-                          cursor: locked ? 'not-allowed' : 'pointer',
-                          opacity: locked ? 0.45 : 1,
-                          background: isSelected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.02)',
-                          border: isSelected ? '1.5px solid rgba(255,255,255,0.38)' : '1.5px solid rgba(255,255,255,0.08)',
-                          textAlign: 'center', transition: 'all 0.2s ease', position: 'relative',
-                        }}
-                        whileHover={!locked ? { scale: 1.03 } : {}}
-                        whileTap={!locked ? { scale: 0.97 } : {}}
-                      >
-                        {locked && (
-                          <span style={{ position: 'absolute', top: -7, right: -3, fontFamily: NM, fontSize: 7, fontWeight: 700, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.07)', borderRadius: 3, padding: '1px 4px', border: '1px solid rgba(255,255,255,0.1)', letterSpacing: '0.04em' }}>PRO</span>
-                        )}
-                        {hasAlien && (
-                          <button
-                            onClick={isHdCard ? toggleHdAlt : toggleFullhdAlt}
-                            title={isHdCard
-                              ? (hdAlt ? 'Přepnout na HD 720p' : 'Přepnout na Square 1:1 (Instagram)')
-                              : (fullhdAlt ? 'Přepnout na Full HD' : 'Přepnout na Ultra-Widescreen 21:9')}
-                            style={{
-                              position: 'absolute', top: 4, left: 4,
-                              width: 16, height: 16,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              color: alienActive ? 'rgba(255,255,255,0.60)' : 'rgba(255,255,255,0.20)',
-                              padding: 0, borderRadius: 3,
-                              transition: 'color 0.2s',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.80)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color = alienActive ? 'rgba(255,255,255,0.60)' : 'rgba(255,255,255,0.20)'; }}
-                          >
-                            <AlienHead active={alienActive} />
-                          </button>
-                        )}
-                        <div style={{ width: 38, height: 18, margin: '0 auto 5px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: NM, fontWeight: 700, fontSize: 8, borderRadius: 4, background: isSelected ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }}>
-                          {badge}
-                        </div>
-                        <div style={{ fontFamily: NM, color: isSelected ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
-                        <div style={{ fontFamily: NM, color: 'rgba(255,255,255,0.28)', fontSize: 8, marginTop: 2 }}>{sub}</div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
+              {/* Divider */}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: `-${COL_GAP / 2}px 0` }} />
 
-              {/* Column 3 — Pozice obrázku */}
-              <div style={{ flex: 1 }}>
-                <p style={SECTION_LABEL}>Pozice obrázku</p>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {IMAGE_LAYOUTS.map(({ key, label, sub, icon }) => {
-                    const active = selectedImageLayout === key;
-                    return (
-                      <motion.div
-                        key={key}
-                        onClick={() => setSelectedImageLayout(key)}
-                        style={{
-                          flex: 1, padding: '10px 4px 8px', borderRadius: 10,
-                          cursor: 'pointer',
-                          background: active ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.02)',
-                          border: active ? '1.5px solid rgba(255,255,255,0.38)' : '1.5px solid rgba(255,255,255,0.08)',
-                          textAlign: 'center', transition: 'all 0.2s ease',
-                        }}
-                        whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
+              {/* ── Three equal columns ───────────────────────────────────────── */}
+              <div style={{ display: 'flex', gap: COL_GAP }}>
+
+                {/* ─ Column 1: Pozadí ────────────────────────────────────────── */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <p style={SECTION_LABEL}>{t('settings.background')}</p>
+                  <div style={{ display: 'flex', gap: ITEM_GAP }}>
+
+                    {/* White */}
+                    <motion.div
+                      onClick={() => changeBg('white')}
+                      style={{ ...optCard(selBg === 'white'), background: 'linear-gradient(135deg,#fff,#f0f0f0)', padding: 0 }}
+                      whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    >
+                      {selBg === 'white' && <div style={{ position: 'absolute', bottom: 7, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#000', opacity: 0.45 }} />}
+                    </motion.div>
+
+                    {/* Black */}
+                    <motion.div
+                      onClick={() => changeBg('black')}
+                      style={{ ...optCard(selBg === 'black'), background: 'linear-gradient(135deg,#1c1c1c,#000)', padding: 0 }}
+                      whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    >
+                      {selBg === 'black' && <div style={{ position: 'absolute', bottom: 7, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#fff', opacity: 0.55 }} />}
+                    </motion.div>
+
+                    {/* Custom */}
+                    <motion.div
+                      onClick={() => canUseCustomBg && document.getElementById('settingsBgUpload').click()}
+                      style={{
+                        ...optCard(selBg === 'custom', !canUseCustomBg),
+                        background: canUseCustomBg && videoSettings.customBackground
+                          ? `url(${videoSettings.customBackground}) center/cover no-repeat`
+                          : 'linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02))',
+                        padding: 0,
+                      }}
+                      whileHover={canUseCustomBg ? { scale: 1.03 } : {}}
+                      whileTap={canUseCustomBg ? { scale: 0.97 } : {}}
+                    >
+                      {canUseCustomBg ? (
+                        <span style={{ fontFamily: NM, fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.55)', textShadow: '0 2px 6px rgba(0,0,0,0.9)', background: videoSettings.customBackground ? 'rgba(0,0,0,0.52)' : 'transparent', padding: videoSettings.customBackground ? '3px 7px' : 0, borderRadius: 5 }}>
+                          {t('settings.background.custom')}
+                        </span>
+                      ) : (
+                        <span style={{ fontFamily: NM, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em' }}>PRO</span>
+                      )}
+                      <input type="file" id="settingsBgUpload" accept="image/png,image/jpeg,image/jpg,image/heic,image/gif" onChange={onCustomUpload} style={{ display: 'none' }} />
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* ─ Column 2: Rozlišení ─────────────────────────────────────── */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <p style={SECTION_LABEL}>{t('settings.resolution')}</p>
+                  <div style={{ display: 'flex', gap: ITEM_GAP }}>
+                    {resOpts.map(({ key, label, sub, badge, locked }, idx) => {
+                      const isHd  = idx === 0;
+                      const isFhd = idx === 1;
+                      const hasAlien = isHd || isFhd;
+                      const alienOn  = isHd ? hdAlt : fhdAlt;
+                      const isSel    = selRes === key;
+                      return (
+                        <motion.div
+                          key={key}
+                          onClick={() => changeRes(key)}
+                          style={optCard(isSel, locked)}
+                          whileHover={!locked ? { scale: 1.03 } : {}}
+                          whileTap={!locked ? { scale: 0.97 } : {}}
+                        >
+                          {locked && (
+                            <span style={{ position: 'absolute', top: -7, right: -2, fontFamily: NM, fontSize: 7, fontWeight: 700, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.07)', borderRadius: 3, padding: '1px 4px', border: '1px solid rgba(255,255,255,0.1)' }}>PRO</span>
+                          )}
+                          {hasAlien && (
+                            <button
+                              onClick={isHd ? toggleHd : toggleFhd}
+                              title={isHd ? (hdAlt ? 'Přepnout na HD 720p' : 'Přepnout na Square 1:1') : (fhdAlt ? 'Přepnout na Full HD' : 'Přepnout na Ultra-Wide 21:9')}
+                              style={{ position: 'absolute', top: 6, left: 6, width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', color: alienOn ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.22)', padding: 0, borderRadius: 4, transition: 'color 0.18s' }}
+                              onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.color = alienOn ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.22)'; }}
+                            >
+                              <AlienHead active={alienOn} />
+                            </button>
+                          )}
+                          {/* Badge */}
+                          <div style={{ width: 44, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: NM, fontWeight: 700, fontSize: 9, borderRadius: 4, background: isSel ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.72)' }}>
+                            {badge}
+                          </div>
+                          <div style={{ fontFamily: NM, color: isSel ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.58)', fontSize: 11, fontWeight: 600 }}>{label}</div>
+                          <div style={{ fontFamily: NM, color: 'rgba(255,255,255,0.27)', fontSize: 9 }}>{sub}</div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ─ Column 3: Pozice obrázku ────────────────────────────────── */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <p style={SECTION_LABEL}>Pozice obrázku</p>
+                  <div style={{ display: 'flex', gap: ITEM_GAP }}>
+                    {IMAGE_LAYOUTS.map(({ key, label, sub, icon }) => {
+                      const active = selLay === key;
+                      return (
+                        <motion.div
+                          key={key}
+                          onClick={() => setSelLay(key)}
+                          style={optCard(active)}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                        >
                           {icon(active)}
-                        </div>
-                        <div style={{ fontFamily: NM, color: active ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
-                        <div style={{ fontFamily: NM, color: 'rgba(255,255,255,0.28)', fontSize: 8, marginTop: 2, lineHeight: 1.3 }}>{sub}</div>
-                      </motion.div>
-                    );
-                  })}
+                          <div style={{ fontFamily: NM, color: active ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 600 }}>{label}</div>
+                          <div style={{ fontFamily: NM, color: 'rgba(255,255,255,0.27)', fontSize: 9, lineHeight: 1.3 }}>{sub}</div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+
+            {/* ════ BUTTONS — below the card ════════════════════════════════════ */}
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{    opacity: 0, y: 6 }}
+              transition={{ duration: 0.22, ease: 'easeOut', delay: 0.07 }}
+              style={{ display: 'flex', gap: 12 }}
+            >
+              <button
+                onClick={handleCancel}
+                style={{ fontFamily: IV, fontWeight: 400, fontSize: '15px', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.13)', padding: '10px 40px', borderRadius: 9999, cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all 0.18s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
+              >
+                {t('settings.cancel')}
+              </button>
+              <button
+                onClick={handleSave}
+                style={{ fontFamily: IV, fontWeight: 500, fontSize: '15px', background: '#fff', color: '#000', border: 'none', padding: '10px 40px', borderRadius: 9999, cursor: 'pointer', transition: 'filter 0.18s' }}
+                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
+                onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+              >
+                {t('settings.save')}
+              </button>
+            </motion.div>
+
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
