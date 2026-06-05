@@ -1,7 +1,9 @@
 /** Output size from user quality setting */
 export function getVideoDimensions(quality) {
-  if (quality === '4k') return { width: 3840, height: 2160 };
-  if (quality === 'hd') return { width: 1280, height: 720 };
+  if (quality === '4k')        return { width: 3840, height: 2160 };
+  if (quality === 'hd')        return { width: 1280, height: 720  };
+  if (quality === 'square')    return { width: 1080, height: 1080 };
+  if (quality === 'ultrawide') return { width: 2560, height: 1080 };
   return { width: 1920, height: 1080 };
 }
 

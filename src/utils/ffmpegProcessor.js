@@ -254,8 +254,10 @@ function buildArgs(imageFileName, audioFileName, outputFileName, audioDuration, 
   const imageLayout = videoSettings?.imageLayout  ?? 'full';
 
   let RW = 1920, RH = 1080;
-  if (quality === '4k') { RW = 3840; RH = 2160; }
-  else if (quality === 'hd') { RW = 1280; RH = 720; }
+  if (quality === '4k')        { RW = 3840; RH = 2160; }
+  else if (quality === 'hd')   { RW = 1280; RH = 720;  }
+  else if (quality === 'square')    { RW = 1080; RH = 1080; }
+  else if (quality === 'ultrawide') { RW = 2560; RH = 1080; }
 
   const backgroundColor = bg === 'white' ? 'white' : 'black';
 
@@ -307,8 +309,10 @@ function buildArgsWithCustomBg(imageFileName, audioFileName, bgFileName, outputF
   const quality     = videoSettings?.quality     ?? 'fullhd';
   const imageLayout = videoSettings?.imageLayout ?? 'full';
   let RW = 1920, RH = 1080;
-  if (quality === '4k') { RW = 3840; RH = 2160; }
-  else if (quality === 'hd') { RW = 1280; RH = 720; }
+  if (quality === '4k')        { RW = 3840; RH = 2160; }
+  else if (quality === 'hd')   { RW = 1280; RH = 720;  }
+  else if (quality === 'square')    { RW = 1080; RH = 1080; }
+  else if (quality === 'ultrawide') { RW = 2560; RH = 1080; }
 
   // Multi-input graphs MUST use -filter_complex, not -vf.
   let filterComplex;
@@ -531,7 +535,8 @@ export const processVideoWithFFmpeg = async (
       : buildArgs(imageFileName, audioFileName, outputFileName, audioDuration, videoSettings);
 
     const quality = videoSettings?.quality ?? 'fullhd';
-    const dims = quality === '4k' ? '3840×2160' : quality === 'hd' ? '1280×720' : '1920×1080';
+    const dimsMap = { '4k': '3840×2160', 'hd': '1280×720', 'square': '1080×1080', 'ultrawide': '2560×1080' };
+    const dims = dimsMap[quality] || '1920×1080';
     logFFmpeg('info', `FFmpeg: encoding ${pairId} · ${quality} (${dims}) · ${audioDuration.toFixed(1)}s`);
 
     if (onProgress) onProgress(45);
