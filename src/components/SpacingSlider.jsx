@@ -32,7 +32,6 @@ const SpacingSlider = () => {
           className="spacing-slider"
         />
         
-        <div className="spacing-value-display">{containerSpacing}px</div>
       </motion.div>
     </AnimatePresence>
   );

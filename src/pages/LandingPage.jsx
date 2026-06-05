@@ -964,7 +964,7 @@ function LandingNavButtons({ user, navigate, login }) {
   return (
     <>
       {user ? (
-        <>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {/* Profile picture — left of Open App button */}
           <button
             onClick={() => navigate('/app')}
@@ -991,7 +991,7 @@ function LandingNavButtons({ user, navigate, login }) {
             style={{ fontFamily: IV, fontWeight: 600, fontSize: '0.8rem', lineHeight: LH_LABEL, background: '#fff', border: 'none', color: '#000', padding: '6px 14px', borderRadius: 9999, cursor: 'pointer', filter: ctaHovered ? 'brightness(0.85)' : 'brightness(1)', transition: 'filter 0.2s ease' }}>
             {t('landing.hero.openApp')}
           </button>
-        </>
+        </div>
       ) : (
         <>
           <button onClick={() => navigate('/login')}
