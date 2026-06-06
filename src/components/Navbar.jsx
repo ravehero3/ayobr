@@ -77,7 +77,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
         <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
           <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
         </button>
-        {/* Mobile-only badge — appears below the logo, hidden on md+ */}
+        {/* Mobile-only badge — shifted 8px up and 40px right of logo */}
         {mobileBadgeLabel && (
           <span className="md:hidden" style={{
             fontFamily: NM,
@@ -91,6 +91,9 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
             borderRadius: 9999,
             padding: '1px 6px',
             lineHeight: 1.5,
+            position: 'relative',
+            top: -8,
+            left: 40,
           }}>
             {mobileBadgeLabel}
           </span>

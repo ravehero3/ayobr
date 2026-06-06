@@ -6,6 +6,7 @@ import { usePairPreparation } from './hooks/usePairPreparation';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import { useLanguage } from './context/LanguageContext';
 import { useAnimation } from './context/AnimationContext';
+import { useIsMobile } from './hooks/useIsMobile';
 import Pairs from './components/Pairs';
 import VideoPreviewCard from './components/VideoPreviewCard';
 import BatchStatusIndicator from './components/BatchStatusIndicator';
@@ -24,6 +25,7 @@ import SleepingAlien from './components/SleepingAlien';
 
 function App({ onBeforeGenerate }) {
   const { pairs, generatedVideos, isGenerating, isCancelling, setVideoGenerationState, addGeneratedVideo, setIsGenerating, clearGeneratedVideos, getCompletePairs, setPairs, getVideoGenerationState, selectCurrentPage, setCurrentPage, containerSpacing, page2GridMode, resetPageState, setIsFilesBeingDropped, ensureAutoNavigation } = useAppStore();
+  const isMobile = useIsMobile();
   const { t } = useLanguage();
   const { handleFileDrop, moveContainerUp, moveContainerDown, clearFileCache } = usePairingLogic();
   const { prepareCompletePairs } = usePairPreparation(); // Activate automatic pair preparation
@@ -436,15 +438,15 @@ function App({ onBeforeGenerate }) {
               <motion.div data-page-section="fileManagement">
                 <motion.div className="w-full flex flex-col items-center mb-8">
                   <motion.div
-                    className={`w-full mx-auto ${page2GridMode < 2 ? 'max-w-[1200px] px-4 sm:px-6' : 'px-10'}`}
+                    className={`w-full mx-auto ${page2GridMode < 2 ? 'max-w-[1200px] px-4 sm:px-6' : 'px-4 md:px-10'}`}
                     style={{
-                      display: page2GridMode >= 2 ? 'grid' : 'flex',
-                      flexDirection: page2GridMode < 2 ? 'column' : undefined,
-                      gridTemplateColumns: page2GridMode === 3 ? 'repeat(3, 1fr)' : page2GridMode === 2 ? 'repeat(2, 1fr)' : undefined,
-                      columnGap: page2GridMode >= 2 ? '24px' : undefined,
-                      rowGap: `${Math.max(containerSpacing, page2GridMode >= 2 ? 16 : 0)}px`,
-                      gap: page2GridMode < 2 ? `${containerSpacing}px` : undefined,
-                      paddingTop: page2GridMode >= 2 ? '68px' : '0px',
+                      display: (page2GridMode >= 2 && !isMobile) ? 'grid' : 'flex',
+                      flexDirection: (page2GridMode < 2 || isMobile) ? 'column' : undefined,
+                      gridTemplateColumns: isMobile ? undefined : (page2GridMode === 3 ? 'repeat(3, 1fr)' : page2GridMode === 2 ? 'repeat(2, 1fr)' : undefined),
+                      columnGap: (page2GridMode >= 2 && !isMobile) ? '24px' : undefined,
+                      rowGap: `${Math.max(containerSpacing, (page2GridMode >= 2 && !isMobile) ? 16 : 0)}px`,
+                      gap: (page2GridMode < 2 || isMobile) ? `${containerSpacing}px` : undefined,
+                      paddingTop: (page2GridMode >= 2 && !isMobile) ? '68px' : '0px',
                     }}
                   >
                     <AnimatePresence>

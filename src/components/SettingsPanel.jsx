@@ -306,10 +306,40 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                 {t('settings.title')}
               </h2>
 
-              {/* Preview — hidden on mobile */}
-              {!isMobile && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <p style={SECTION_LABEL}>{t('settings.preview')}</p>
+              {/* Preview — full-width on mobile, centred fixed-height on desktop */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <p style={SECTION_LABEL}>{t('settings.preview')}</p>
+                {isMobile ? (
+                  /* Mobile: full-width with aspect-ratio */
+                  <div style={{
+                    width: '100%',
+                    aspectRatio: selRes === 'square' ? '1' : selRes === 'ultrawide' ? '2560/1080' : '16/9',
+                    position: 'relative', overflow: 'hidden',
+                    outline: '1px solid rgba(255,255,255,0.20)',
+                    borderRadius: 6,
+                    boxSizing: 'border-box',
+                    ...previewBg(),
+                  }}>
+                    {imgUrl ? (
+                      <img
+                        key={`${selLay}-${imgUrl}-${selRes}`}
+                        src={imgUrl}
+                        alt={t('settings.preview')}
+                        style={previewImgStyle()}
+                      />
+                    ) : (
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.18)', fontSize: 10 }}>{t('settings.noImage')}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Desktop: fixed 300px height, centred */
                   <div style={{ width: '100%', height: PREVIEW_H, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
                     <div style={{
                       width: frameW, height: frameH,
@@ -337,12 +367,10 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                       )}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {!isMobile && (
-                <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: `-${COL_GAP / 2}px 0` }} />
-              )}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: `-${isMobile ? 8 : COL_GAP / 2}px 0` }} />
 
               {/* 3 sections — row on desktop, column on mobile */}
               <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 20 : COL_GAP }}>

@@ -344,9 +344,9 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
         </div>
       ) : !generatedVideo ? (
         <div 
-          className={`flex items-center relative z-10 group/pair ${isMultiCol ? 'flex-row' : 'flex-col lg:flex-row'}`}
+          className={`flex items-center relative z-10 group/pair ${(isMultiCol && !isMobile) ? 'flex-row' : 'flex-col lg:flex-row'}`}
           style={{ 
-            flexDirection: isMultiCol ? 'row' : undefined,
+            flexDirection: (isMultiCol && !isMobile) ? 'row' : undefined,
             gap: isMultiCol ? '6px' : '12px',
             paddingLeft: isMultiCol ? '6px' : '15px',
             paddingRight: isMultiCol ? '6px' : '15px',
