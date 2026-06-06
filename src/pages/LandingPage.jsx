@@ -9,10 +9,10 @@ import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303
 import alienLogo from '../assets/alien_logo_1780252226447.png';
 import alienZzz from '../assets/alien_zzz_1780258131893.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
-import screenshotUpload from '../assets/screenshot_upload_new.jpg';
-import screenshotReview from '../assets/screenshot_review_new.jpg';
-import screenshotGenerate from '../assets/screenshot_generate_new.jpg';
-import screenshotDownload from '../assets/screenshot_download.png';
+import screenshotUpload from '../assets/step1_screenshot.png';
+import screenshotReview from '../assets/step2_screenshot.png';
+import screenshotGenerate from '../assets/step3_screenshot.png';
+import screenshotDownload from '../assets/step4_screenshot.png';
 
 const NM     = "'Neue Montreal', 'Inter', sans-serif"; // legacy — prefer IV or GT_W
 const IV     = '"Figtree", sans-serif';
