@@ -390,10 +390,10 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     }
     return {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(min(360px, 100%), 1fr))',
       gap: '22px',
       width: '100%',
-      maxWidth: 'calc(100vw - 120px)',
+      maxWidth: 'calc(100vw - 48px)',
       margin: '0 auto',
     };
   };
@@ -435,13 +435,13 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               style={{ marginTop: '50px', zIndex: 50, paddingTop: '60px', paddingBottom: '60px' }}
             >
               <div
-                className="grid gap-6 w-full mx-auto"
+                className="grid gap-4 md:gap-6 w-full mx-auto"
                 style={{
-                  gridTemplateColumns: 'repeat(auto-fit, 240px)',
+                  gridTemplateColumns: 'repeat(auto-fit, min(240px, calc(50vw - 24px)))',
                   justifyContent: 'center',
                   justifyItems: 'center',
-                  maxWidth: 'calc(100vw - 160px)',
-                  padding: '0 80px',
+                  maxWidth: 'calc(100vw - 32px)',
+                  padding: '0 0',
                 }}
               >
                 {pairs.map((pair, index) => {

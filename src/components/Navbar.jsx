@@ -35,6 +35,15 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
     (user?.email ? user.email.split('@')[0] : null) ||
     '';
 
+  /* Mobile badge label — shown below the logo on small screens */
+  const mobileBadgeLabel = !user ? null
+    : isAdmin     ? 'ADMIN'
+    : isUnlimited ? 'UNLIMITED'
+    : isPro       ? 'PRO'
+    : language === 'cs'
+      ? `${creditsLeft ?? 5} kr.`
+      : `${creditsLeft ?? 5} cr.`;
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-[10000] h-16"
       style={{
@@ -45,9 +54,9 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
       }}>
       <div className="relative w-full h-full flex items-center justify-between px-4 md:px-[64px]">
 
-      {/* Centered producer name — absolutely positioned above other content */}
+      {/* Centered producer name — hidden on mobile to avoid crowding */}
       {displayName && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 20 }}>
+        <div className="absolute inset-0 hidden md:flex items-center justify-center pointer-events-none" style={{ zIndex: 20 }}>
           <span style={{
             fontFamily: NM,
             fontSize: '0.875rem',
@@ -63,75 +72,100 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
         </div>
       )}
 
-      <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative', zIndex: 30 }}>
-        <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
-      </button>
-
-      <div className="flex items-center gap-4">
-
-        {/* Free user: credit badge + upgrade button */}
-        {user && !isPaidPlan && (
-          <>
-            <div className="flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full border border-white/10 whitespace-nowrap"
-              style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM, fontSize: 'clamp(9px, 1.8vw, 12px)' }}>
-              <span className="text-gray-300">
-                {language === 'cs' 
-                  ? getCzechCreditsPhrase(creditsLeft, false) 
-                  : `${creditsLeft ?? 5} ${t('creditsLeft')}`}
-              </span>
-            </div>
-            {onUpgradePro && (
-              <button onClick={onUpgradePro} disabled={checkoutLoading}
-                className="transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-1 whitespace-nowrap"
-                style={{ fontFamily: NM, fontWeight: 600, fontSize: 'clamp(9px, 1.8vw, 13px)', lineHeight: 1.5, background: '#fff', border: 'none', color: '#000', padding: 'clamp(4px,0.8vw,6px) clamp(8px,2vw,14px)', borderRadius: 9999, cursor: 'pointer' }}>
-                {checkoutLoading ? (
-                  <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />{t('nav.opening')}</>
-                ) : t('goPro')}
-              </button>
-            )}
-          </>
-        )}
-
-        {/* PRO user: show credit count + badge */}
-        {user && isPro && (
-          <>
-            <div className="flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full border border-white/10 whitespace-nowrap"
-              style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM, fontSize: 'clamp(9px, 1.8vw, 12px)' }}>
-              <span className="text-gray-300">
-                {language === 'cs' 
-                  ? getCzechCreditsPhrase(creditsLeft, true)
-                  : `${creditsLeft ?? 31} / 31 left`}
-              </span>
-            </div>
-            <button onClick={onManageSubscription}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/20 text-white hover:border-white/50 transition-colors text-xs font-bold"
-              style={{ background: 'rgba(255,255,255,0.05)', fontFamily: NM }}>
-              PRO
-            </button>
-          </>
-        )}
-
-        {/* UNLIMITED badge */}
-        {user && isUnlimited && (
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-white/20 text-white"
-            style={{ background: 'rgba(255,255,255,0.05)', fontFamily: NM }}>
-            UNLIMITED
+      {/* Logo + mobile badge stacked below */}
+      <div className="flex flex-col items-start gap-0.5" style={{ position: 'relative', zIndex: 30 }}>
+        <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+          <img src={typebeatLogo} alt="TypeBeatz" style={{ height: 20 }} />
+        </button>
+        {/* Mobile-only badge — appears below the logo, hidden on md+ */}
+        {mobileBadgeLabel && (
+          <span className="md:hidden" style={{
+            fontFamily: NM,
+            fontSize: 8,
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            color: isPaidPlan ? 'rgba(255,255,255,0.60)' : 'rgba(255,255,255,0.38)',
+            background: isPaidPlan ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${isPaidPlan ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.09)'}`,
+            borderRadius: 9999,
+            padding: '1px 6px',
+            lineHeight: 1.5,
+          }}>
+            {mobileBadgeLabel}
           </span>
         )}
+      </div>
 
-        {/* Admin — SPRÁVCE link */}
-        {isAdmin && (
-          <button onClick={() => navigate('/admin')}
-            style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
-              background: 'none', border: '1px solid rgba(255,255,255,0.35)',
-              color: '#ffffff', padding: '5px 14px', borderRadius: 9999, cursor: 'pointer', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)'; }}>
-            Správce
-          </button>
-        )}
+      <div className="flex items-center gap-2 md:gap-4">
 
-        {/* User avatar + dropdown */}
+        {/* Desktop-only plan info + action buttons */}
+        <div className="hidden md:flex items-center gap-4">
+
+          {/* Free user: credit badge + upgrade button */}
+          {user && !isPaidPlan && (
+            <>
+              <div className="flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full border border-white/10 whitespace-nowrap"
+                style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM, fontSize: 'clamp(9px, 1.8vw, 12px)' }}>
+                <span className="text-gray-300">
+                  {language === 'cs'
+                    ? getCzechCreditsPhrase(creditsLeft, false)
+                    : `${creditsLeft ?? 5} ${t('creditsLeft')}`}
+                </span>
+              </div>
+              {onUpgradePro && (
+                <button onClick={onUpgradePro} disabled={checkoutLoading}
+                  className="transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-1 whitespace-nowrap"
+                  style={{ fontFamily: NM, fontWeight: 600, fontSize: 'clamp(9px, 1.8vw, 13px)', lineHeight: 1.5, background: '#fff', border: 'none', color: '#000', padding: 'clamp(4px,0.8vw,6px) clamp(8px,2vw,14px)', borderRadius: 9999, cursor: 'pointer' }}>
+                  {checkoutLoading ? (
+                    <><span className="inline-block w-3 h-3 border border-black/40 border-t-black rounded-full animate-spin" />{t('nav.opening')}</>
+                  ) : t('goPro')}
+                </button>
+              )}
+            </>
+          )}
+
+          {/* PRO user: show credit count + badge */}
+          {user && isPro && (
+            <>
+              <div className="flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full border border-white/10 whitespace-nowrap"
+                style={{ background: 'rgba(255,255,255,0.04)', fontFamily: NM, fontSize: 'clamp(9px, 1.8vw, 12px)' }}>
+                <span className="text-gray-300">
+                  {language === 'cs'
+                    ? getCzechCreditsPhrase(creditsLeft, true)
+                    : `${creditsLeft ?? 31} / 31 left`}
+                </span>
+              </div>
+              <button onClick={onManageSubscription}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/20 text-white hover:border-white/50 transition-colors text-xs font-bold"
+                style={{ background: 'rgba(255,255,255,0.05)', fontFamily: NM }}>
+                PRO
+              </button>
+            </>
+          )}
+
+          {/* UNLIMITED badge */}
+          {user && isUnlimited && (
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-white/20 text-white"
+              style={{ background: 'rgba(255,255,255,0.05)', fontFamily: NM }}>
+              UNLIMITED
+            </span>
+          )}
+
+          {/* Admin — SPRÁVCE link */}
+          {isAdmin && (
+            <button onClick={() => navigate('/admin')}
+              style={{ fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
+                background: 'none', border: '1px solid rgba(255,255,255,0.35)',
+                color: '#ffffff', padding: '5px 14px', borderRadius: 9999, cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)'; }}>
+              Správce
+            </button>
+          )}
+        </div>
+
+        {/* User avatar + dropdown — always visible */}
         {user ? (
           <div className="relative">
             <button onClick={() => setMenuOpen(v => !v)} className="flex items-center gap-2 group">
@@ -176,7 +210,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                       {t('nav.account')}
                     </button>
                   </div>
-                  
+
                   <div className="py-1 border-t border-white/5">
                     {!isPaidPlan && (
                       <button onClick={() => { onUpgradePro(); setMenuOpen(false); }}
@@ -207,7 +241,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
                       </button>
                     )}
                   </div>
-                  
+
                   <div className="py-1 border-t border-white/5">
                     <button onClick={logout}
                       className="w-full text-left px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">

@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 const IV = '"Figtree", sans-serif';
 
 const CARD_PADDING  = 32;
+const CARD_PADDING_MOBILE = 20;
 const ITEM_PADDING  = '12px 8px';
 const CARD_H        = 90;
 const CARD_RADIUS   = 12;
@@ -114,6 +116,7 @@ const saveStarState = (key, value) => {
 const SettingsPanel = ({ isOpen, onClose }) => {
   const { user, featureFlags } = useAuth();
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
 
   const { videoSettings, pairs, setVideoBackground, setCustomBackground, setVideoQuality, setImageLayout } = useAppStore();
 
@@ -253,12 +256,22 @@ const SettingsPanel = ({ isOpen, onClose }) => {
     textAlign: 'center',
   });
 
+  const pad = isMobile ? CARD_PADDING_MOBILE : CARD_PADDING;
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           className="fixed inset-0"
-          style={{ zIndex: 999999, pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', overflowY: 'auto' }}
+          style={{
+            zIndex: 999999,
+            pointerEvents: 'auto',
+            display: 'flex',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            justifyContent: 'center',
+            padding: isMobile ? '12px' : '20px',
+            overflowY: 'auto',
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -267,7 +280,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
             style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }} />
 
           <div onClick={e => e.stopPropagation()}
-            style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, width: '100%', maxWidth: 1200 }}>
 
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
@@ -275,61 +288,66 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               exit={{    opacity: 0, scale: 0.96, y: 16 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
               style={{
-                width: 1200,
-                maxWidth: 'calc(100vw - 40px)',
+                width: '100%',
+                maxWidth: isMobile ? '100%' : 1200,
                 background: 'rgba(10,10,12,0.90)',
                 backdropFilter: 'blur(32px)',
                 WebkitBackdropFilter: 'blur(32px)',
-                borderRadius: 20,
+                borderRadius: isMobile ? 16 : 20,
                 border: '1px solid rgba(255,255,255,0.07)',
                 boxShadow: '0 28px 64px rgba(0,0,0,0.78), 0 0 0 1px rgba(255,255,255,0.04) inset',
-                padding: CARD_PADDING,
+                padding: pad,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: COL_GAP,
+                gap: isMobile ? 16 : COL_GAP,
               }}
             >
-              <h2 style={{ fontFamily: NM, color: 'rgba(255,255,255,0.92)', fontSize: 20, fontWeight: 700, textAlign: 'center', margin: 0, letterSpacing: '-0.02em' }}>
+              <h2 style={{ fontFamily: NM, color: 'rgba(255,255,255,0.92)', fontSize: isMobile ? 17 : 20, fontWeight: 700, textAlign: 'center', margin: 0, letterSpacing: '-0.02em' }}>
                 {t('settings.title')}
               </h2>
 
-              {/* Preview */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p style={SECTION_LABEL}>{t('settings.preview')}</p>
-                <div style={{ width: '100%', height: PREVIEW_H, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                  <div style={{
-                    width: frameW, height: frameH,
-                    position: 'relative', overflow: 'hidden',
-                    outline: '1px solid rgba(255,255,255,0.20)',
-                    boxSizing: 'border-box', flexShrink: 0,
-                    ...previewBg(),
-                  }}>
-                    {imgUrl ? (
-                      <img
-                        key={`${selLay}-${imgUrl}-${selRes}`}
-                        src={imgUrl}
-                        alt={t('settings.preview')}
-                        style={previewImgStyle()}
-                      />
-                    ) : (
-                      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                          <circle cx="8.5" cy="8.5" r="1.5" />
-                          <polyline points="21 15 16 10 5 21" />
-                        </svg>
-                        <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.18)', fontSize: 11 }}>{t('settings.noImage')}</span>
-                      </div>
-                    )}
+              {/* Preview — hidden on mobile */}
+              {!isMobile && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <p style={SECTION_LABEL}>{t('settings.preview')}</p>
+                  <div style={{ width: '100%', height: PREVIEW_H, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                    <div style={{
+                      width: frameW, height: frameH,
+                      position: 'relative', overflow: 'hidden',
+                      outline: '1px solid rgba(255,255,255,0.20)',
+                      boxSizing: 'border-box', flexShrink: 0,
+                      ...previewBg(),
+                    }}>
+                      {imgUrl ? (
+                        <img
+                          key={`${selLay}-${imgUrl}-${selRes}`}
+                          src={imgUrl}
+                          alt={t('settings.preview')}
+                          style={previewImgStyle()}
+                        />
+                      ) : (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                          <span style={{ fontFamily: NM, color: 'rgba(255,255,255,0.18)', fontSize: 11 }}>{t('settings.noImage')}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: `-${COL_GAP / 2}px 0` }} />
+              {!isMobile && (
+                <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: `-${COL_GAP / 2}px 0` }} />
+              )}
 
-              <div style={{ display: 'flex', gap: COL_GAP }}>
+              {/* 3 sections — row on desktop, column on mobile */}
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 20 : COL_GAP }}>
 
-                {/* Column 1: Background */}
+                {/* Section 1: Background */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={SECTION_LABEL}>{t('settings.background')}</p>
                   <div style={{ display: 'flex', gap: ITEM_GAP }}>
@@ -373,7 +391,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* Column 2: Resolution */}
+                {/* Section 2: Resolution */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={SECTION_LABEL}>{t('settings.resolution')}</p>
                   <div style={{ display: 'flex', gap: ITEM_GAP }}>
@@ -415,7 +433,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* Column 3: Image position */}
+                {/* Section 3: Image position */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={SECTION_LABEL}>{t('settings.imagePosition')}</p>
                   <div style={{ display: 'flex', gap: ITEM_GAP }}>
@@ -447,11 +465,11 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{    opacity: 0, y: 6 }}
               transition={{ duration: 0.22, ease: 'easeOut', delay: 0.07 }}
-              style={{ display: 'flex', gap: 12 }}
+              style={{ display: 'flex', gap: 12, marginBottom: isMobile ? 12 : 0 }}
             >
               <button
                 onClick={handleCancel}
-                style={{ fontFamily: IV, fontWeight: 400, fontSize: '15px', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.13)', padding: '10px 40px', borderRadius: 9999, cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all 0.18s' }}
+                style={{ fontFamily: IV, fontWeight: 400, fontSize: isMobile ? '14px' : '15px', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.13)', padding: isMobile ? '9px 28px' : '10px 40px', borderRadius: 9999, cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all 0.18s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
               >
@@ -459,7 +477,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
               </button>
               <button
                 onClick={handleSave}
-                style={{ fontFamily: IV, fontWeight: 500, fontSize: '15px', background: '#fff', color: '#000', border: 'none', padding: '10px 40px', borderRadius: 9999, cursor: 'pointer', transition: 'filter 0.18s' }}
+                style={{ fontFamily: IV, fontWeight: 500, fontSize: isMobile ? '14px' : '15px', background: '#fff', color: '#000', border: 'none', padding: isMobile ? '9px 28px' : '10px 40px', borderRadius: 9999, cursor: 'pointer', transition: 'filter 0.18s' }}
                 onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.85)'; }}
                 onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               >

@@ -6,6 +6,7 @@ import VideoGenerationAnimation from './VideoGenerationAnimation';
 import PairMergeAnimation from './PairMergeAnimation';
 import GlassPlayButton from './GlassPlayButton';
 import { useAppStore } from '../store/appStore';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd, clearFileCache, onContainerDrag, isValidContainerDragTarget, draggedContainer, isDraggingContainer, draggedContainerType, onStartAudioDrag, onStartImageDrag, onUpdateDragPosition, onEndDrag }) => {
   const { removePair, getVideoGenerationState, setVideoGenerationState, generatedVideos, pairs, setPairs, updatePair, containerSpacing, getDisplayIndex, getPairPreparationState, videoSettings } = useAppStore();
@@ -238,6 +239,8 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
     }
   };
 
+  const isMobile = useIsMobile();
+
   const pairIndex = pairs.findIndex(p => p.id === pair.id);
   const calculatedIndex = displayIndex ?? (pairIndex >= 0 ? pairIndex + 1 : 1);
 
@@ -246,7 +249,9 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
   const isMultiCol     = gridMode >= 2;
   // Multi-col modes stack audio+image vertically (flex-col) so each fills the full
   // grid-cell width. Horizontal side-by-side layout is only used in single-column modes.
-  const containerW     = isMultiCol ? '100%' : gridMode === 1 ? '420px' : '560px';
+  // On mobile, cap single-column width so it never overflows the viewport.
+  const singleColW     = isMobile ? 'min(100%, 380px)' : (gridMode === 1 ? '420px' : '560px');
+  const containerW     = isMultiCol ? '100%' : singleColW;
   // First-pair top spacing (grid modes use paddingTop on the parent instead)
   const firstPairTop   = isMultiCol ? '0px' : (visibleCount > 1 ? '68px' : '281px');
 

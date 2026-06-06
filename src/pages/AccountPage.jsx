@@ -10,6 +10,7 @@ import userIcon from '../assets/user_1754478889614.png';
 import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import SettingsPanel from '../components/SettingsPanel';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
@@ -449,6 +450,7 @@ export default function AccountPage() {
   const { user, logout, refreshUser } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   useDocumentTitle(t('account.title'));
 
   const [sub, setSub]                         = useState(null);
@@ -647,7 +649,7 @@ export default function AccountPage() {
                 <div
                   onClick={() => setShowCropModal(true)}
                   className="relative group flex-shrink-0 cursor-pointer"
-                  style={{ width: 112, height: 112, borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.10)', background: 'rgba(255,255,255,0.04)', transition: 'border-color 0.3s' }}
+                  style={{ width: isMobile ? 80 : 112, height: isMobile ? 80 : 112, borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.10)', background: 'rgba(255,255,255,0.04)', transition: 'border-color 0.3s' }}
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.30)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)')}
                 >
