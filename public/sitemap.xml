@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>https://typebeatz.voodoo808.com/</loc>
+    <lastmod>2025-06-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://typebeatz.voodoo808.com/"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://typebeatz.voodoo808.com/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://typebeatz.voodoo808.com/"/>
+  </url>
+
+  <url>
+    <loc>https://typebeatz.voodoo808.com/upgrade</loc>
+    <lastmod>2025-06-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://typebeatz.voodoo808.com/upgrade"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://typebeatz.voodoo808.com/upgrade"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://typebeatz.voodoo808.com/upgrade"/>
+  </url>
+
+  <url>
+    <loc>https://typebeatz.voodoo808.com/terms</loc>
+    <lastmod>2025-06-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://typebeatz.voodoo808.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://typebeatz.voodoo808.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://typebeatz.voodoo808.com/terms"/>
+  </url>
+
+  <url>
+    <loc>https://typebeatz.voodoo808.com/privacy</loc>
+    <lastmod>2025-06-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://typebeatz.voodoo808.com/privacy"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://typebeatz.voodoo808.com/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://typebeatz.voodoo808.com/privacy"/>
+  </url>
+
+  <url>
+    <loc>https://typebeatz.voodoo808.com/refund</loc>
+    <lastmod>2025-06-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://typebeatz.voodoo808.com/refund"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://typebeatz.voodoo808.com/refund"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://typebeatz.voodoo808.com/refund"/>
+  </url>
+
+</urlset>

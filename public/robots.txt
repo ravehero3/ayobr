@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /upgrade
+Allow: /terms
+Allow: /privacy
+Allow: /refund
+Allow: /login
+
+Disallow: /app
+Disallow: /account
+Disallow: /admin
+Disallow: /success
+Disallow: /api/
+
+Sitemap: https://typebeatz.voodoo808.com/sitemap.xml

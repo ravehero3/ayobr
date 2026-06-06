@@ -11,6 +11,7 @@ const gopayRoutes = require('./routes/gopay');
 const { pool } = require('./db');
 const fs = require('fs');
 const { resetMonthlyCredits } = require('./storage');
+const { injectMeta } = require('./meta');
 
 function buildApp() {
   const app = express();
@@ -173,7 +174,10 @@ async function mountRoutes(app) {
   app.use(express.static(path.join(__dirname, '../public'), { maxAge: '1d' }));
 
   // Static assets: hashed filenames → cache 1 year; index.html → no cache
+  // index: false prevents express.static from auto-serving index.html for '/'
+  // so the wildcard handler below can inject per-route meta tags first.
   app.use(express.static(path.join(__dirname, '../dist'), {
+    index: false,
     maxAge: '1y',
     etag: true,
     setHeaders(res, filePath) {
@@ -191,11 +195,20 @@ async function mountRoutes(app) {
     },
   }));
 
-  // Wildcard fallback to serve index.html for SPA routing (React Router)
+  // Wildcard fallback — injects per-route meta tags before serving index.html
   app.get(/(.*)/, (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
+    const indexPath = path.join(__dirname, '../dist/index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+      if (err) return res.sendFile(indexPath);
+      const acceptLang = req.headers['accept-language'] || '';
+      const lang = acceptLang.toLowerCase().startsWith('cs') ? 'cs' : 'en';
+      const pathname = req.path.replace(/\/$/, '') || '/';
+      const modified = injectMeta(html, pathname, lang);
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(modified);
+    });
   });
 }
 
