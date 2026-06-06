@@ -1,5 +1,5 @@
 const BASE_URL = 'https://typebeatz.voodoo808.com';
-const OG_IMAGE = `${BASE_URL}/og-image.png`;
+const OG_IMAGE = `${BASE_URL}/og-image.jpg`;
 const DEFAULT_DESC_EN = 'Drop your audio and images. TypeBeatz auto-pairs them and renders all your YouTube-ready type beat videos in one click. Free to start.';
 const DEFAULT_DESC_CS = 'Nahraj audio a obrázky. TypeBeatz je automaticky spáruje a vygeneruje všechna tvá YouTube type beat videa jedním kliknutím. Zdarma k vyzkoušení.';
 
@@ -107,9 +107,9 @@ function injectMeta(html, pathname, lang) {
     `<meta property="og:title" content="${title}">`,
     `<meta property="og:description" content="${description}">`,
     `<meta property="og:image" content="${image}">`,
-    `<meta property="og:image:width" content="1024">`,
-    `<meta property="og:image:height" content="1024">`,
-    `<meta property="og:image:type" content="image/png">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
+    `<meta property="og:image:type" content="image/jpeg">`,
     `<meta property="og:site_name" content="TypeBeatz">`,
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:url" content="${canonicalUrl}">`,
