@@ -169,6 +169,9 @@ async function mountRoutes(app) {
     });
   });
 
+  // Public directory (og-image.png, favicon, etc.) — served before dist so it survives rebuilds
+  app.use(express.static(path.join(__dirname, '../public'), { maxAge: '1d' }));
+
   // Static assets: hashed filenames → cache 1 year; index.html → no cache
   app.use(express.static(path.join(__dirname, '../dist'), {
     maxAge: '1y',

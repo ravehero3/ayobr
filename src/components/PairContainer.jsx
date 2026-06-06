@@ -344,12 +344,11 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
         </div>
       ) : !generatedVideo ? (
         <div 
-          className={`flex items-center relative z-10 group/pair ${(isMultiCol && !isMobile) ? 'flex-row' : 'flex-col lg:flex-row'}`}
+          className="flex flex-row items-center relative z-10 group/pair"
           style={{ 
-            flexDirection: (isMultiCol && !isMobile) ? 'row' : undefined,
-            gap: isMultiCol ? '6px' : '12px',
-            paddingLeft: isMultiCol ? '6px' : '15px',
-            paddingRight: isMultiCol ? '6px' : '15px',
+            gap: isMultiCol ? '6px' : (isMobile ? '6px' : '12px'),
+            paddingLeft: isMultiCol ? '6px' : (isMobile ? '8px' : '15px'),
+            paddingRight: isMultiCol ? '6px' : (isMobile ? '8px' : '15px'),
             justifyContent: 'center',
             alignItems: 'center',
             width: '100%'
@@ -363,7 +362,7 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
             onDragOver={handleContainerDragOver}
             onDragLeave={handleContainerDragLeave}
             onDrop={handleContainerDrop}
-            style={isMultiCol ? { flex: 1, minWidth: 0 } : undefined}
+            style={(isMultiCol || isMobile) ? { flex: 1, minWidth: 0 } : undefined}
           >
             <div
               className="relative group/container audio-container"
@@ -371,8 +370,8 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
                 height: '180px',
                 minHeight: '180px',
                 maxHeight: '180px',
-                width: isMultiCol ? '100%' : containerW,
-                minWidth: isMultiCol ? '0' : containerW,
+                width: (isMultiCol || isMobile) ? '100%' : containerW,
+                minWidth: (isMultiCol || isMobile) ? '0' : containerW,
                 overflow: 'visible',
               }}
             >
@@ -430,9 +429,9 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
 
           {/* Connecting Bridge - Simple Plus Symbol */}
           <div
-            className={`relative z-20 flex items-center justify-center flex-shrink-0 connecting-bridge ${isMultiCol ? 'flex' : 'hidden lg:flex'}`}
+            className="relative z-20 flex items-center justify-center flex-shrink-0 connecting-bridge"
             style={{ 
-              width: isMultiCol ? '20px' : '40px', 
+              width: (isMultiCol || isMobile) ? '20px' : '40px', 
               height: '180px',
               alignItems: 'center',
               justifyContent: 'center',
@@ -460,7 +459,7 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
             onDragOver={handleContainerDragOver}
             onDragLeave={handleContainerDragLeave}
             onDrop={handleContainerDrop}
-            style={isMultiCol ? { flex: 1, minWidth: 0 } : { marginLeft: '0px' }}
+            style={(isMultiCol || isMobile) ? { flex: 1, minWidth: 0 } : undefined}
           >
             <div
               className="relative overflow-hidden group/container image-container"
@@ -468,8 +467,8 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
                 height: '180px',
                 minHeight: '180px',
                 maxHeight: '180px',
-                width: isMultiCol ? '100%' : containerW,
-                minWidth: isMultiCol ? '0' : containerW,
+                width: (isMultiCol || isMobile) ? '100%' : containerW,
+                minWidth: (isMultiCol || isMobile) ? '0' : containerW,
                 overflow: 'visible',
               }}
             >
