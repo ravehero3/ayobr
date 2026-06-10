@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
@@ -54,6 +55,7 @@ const Footer = ({ onGenerateVideos, onStop }) => {
   };
 
   return (
+    <>
     <motion.footer
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -266,11 +268,16 @@ const Footer = ({ onGenerateVideos, onStop }) => {
         </div>
       </div>
 
-      {/* Settings Panel */}
-      <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      {/* View Options Modal (page 2) */}
-      <ViewOptionsModal isOpen={isViewOptionsOpen} onClose={() => setIsViewOptionsOpen(false)} />
     </motion.footer>
+      {/* Settings Panel and View Options Modal rendered via portal to escape footer stacking context */}
+      {typeof document !== 'undefined' && createPortal(
+        <>
+          <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+          <ViewOptionsModal isOpen={isViewOptionsOpen} onClose={() => setIsViewOptionsOpen(false)} />
+        </>,
+        document.body
+      )}
+    </>
   );
 };
 

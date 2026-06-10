@@ -98,22 +98,38 @@ function ProfilePictureModal({ isOpen, currentImageUrl, onClose, onSave, saving,
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [dragging, setDragging] = useState(false);
+  const [naturalSize, setNaturalSize] = useState({ w: 0, h: 0 });
   const dragStart = useRef(null);
   const PREVIEW_SIZE = 200;
 
   useEffect(() => {
-    if (isOpen) { setImgUrl(null); setPos({ x: 0, y: 0 }); setZoom(1); }
+    if (isOpen) {
+      setImgUrl(null);
+      setPos({ x: 0, y: 0 });
+      setZoom(1);
+      setNaturalSize({ w: 0, h: 0 });
+      if (currentImageUrl) {
+        const img = new window.Image();
+        if (currentImageUrl.startsWith('http://') || currentImageUrl.startsWith('https://')) img.crossOrigin = 'anonymous';
+        img.onload = () => setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+        img.src = currentImageUrl;
+      }
+    }
   }, [isOpen]);
 
   const handleFile = (file) => {
     if (!file?.type.startsWith('image/')) return;
-    setImgUrl(URL.createObjectURL(file));
+    const url = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+    img.src = url;
+    setImgUrl(url);
     setPos({ x: 0, y: 0 });
     setZoom(1);
   };
 
   const handleMouseDown = (e) => {
-    if (!imgUrl) return;
+    if (!imgUrl && !currentImageUrl) return;
     e.preventDefault();
     dragStart.current = { mx: e.clientX, my: e.clientY, px: pos.x, py: pos.y };
     setDragging(true);
@@ -124,10 +140,32 @@ function ProfilePictureModal({ isOpen, currentImageUrl, onClose, onSave, saving,
   };
   const handleMouseUp = () => { setDragging(false); dragStart.current = null; };
 
+  const handleTouchStart = (e) => {
+    if (!imgUrl && !currentImageUrl) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    dragStart.current = { mx: touch.clientX, my: touch.clientY, px: pos.x, py: pos.y };
+    setDragging(true);
+  };
+  const handleTouchMove = (e) => {
+    if (!dragging || !dragStart.current) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    setPos({ x: dragStart.current.px + (touch.clientX - dragStart.current.mx), y: dragStart.current.py + (touch.clientY - dragStart.current.my) });
+  };
+  const handleTouchEnd = () => { setDragging(false); dragStart.current = null; };
+
   const handleWheel = (e) => {
     e.preventDefault();
     setZoom(z => Math.max(0.4, Math.min(4, z - e.deltaY * 0.002)));
   };
+
+  const srcPreviewUrl = imgUrl || currentImageUrl;
+  const coverScale = naturalSize.w > 0
+    ? Math.max(PREVIEW_SIZE / naturalSize.w, PREVIEW_SIZE / naturalSize.h)
+    : 1;
+  const scaledW = naturalSize.w > 0 ? Math.round(naturalSize.w * coverScale * zoom) : Math.round(PREVIEW_SIZE * zoom);
+  const scaledH = naturalSize.h > 0 ? Math.round(naturalSize.h * coverScale * zoom) : Math.round(PREVIEW_SIZE * zoom);
 
   const handleSave = () => {
     const srcUrl = imgUrl || currentImageUrl;
@@ -160,7 +198,6 @@ function ProfilePictureModal({ isOpen, currentImageUrl, onClose, onSave, saving,
   };
 
   if (!isOpen) return null;
-  const srcPreview = imgUrl || currentImageUrl;
 
   return (
     <AnimatePresence>
@@ -201,20 +238,26 @@ function ProfilePictureModal({ isOpen, currentImageUrl, onClose, onSave, saving,
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 onWheel={handleWheel}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 style={{
                   width: PREVIEW_SIZE, height: PREVIEW_SIZE, borderRadius: '50%',
                   overflow: 'hidden', border: '2px solid rgba(255,255,255,0.14)',
                   background: 'rgba(255,255,255,0.04)',
-                  cursor: imgUrl ? (dragging ? 'grabbing' : 'grab') : 'default',
-                  position: 'relative', userSelect: 'none',
+                  cursor: srcPreviewUrl ? (dragging ? 'grabbing' : 'grab') : 'default',
+                  position: 'relative', userSelect: 'none', touchAction: 'none',
                 }}
               >
-                {srcPreview ? (
+                {srcPreviewUrl ? (
                   <img
-                    src={srcPreview}
+                    src={srcPreviewUrl}
                     style={{
-                      position: 'absolute', width: `${100 * zoom}%`, height: `${100 * zoom}%`,
-                      objectFit: 'cover', left: '50%', top: '50%',
+                      position: 'absolute',
+                      width: scaledW,
+                      height: scaledH,
+                      left: '50%',
+                      top: '50%',
                       transform: `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px))`,
                       pointerEvents: 'none', userSelect: 'none',
                     }}
@@ -230,7 +273,7 @@ function ProfilePictureModal({ isOpen, currentImageUrl, onClose, onSave, saving,
             </div>
 
             {/* Zoom slider */}
-            {imgUrl && (
+            {srcPreviewUrl && (
               <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.68rem', flexShrink: 0 }}>
                   {isCzech ? 'Zoom' : 'Zoom'}

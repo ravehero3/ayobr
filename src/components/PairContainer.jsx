@@ -257,7 +257,7 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
 
   return (
     <motion.div className="relative mb-4" data-pair-id={pair.id} style={{ 
-      marginLeft: isMultiCol ? '0px' : '8px',
+      marginLeft: isMultiCol ? '0px' : (isMobile ? '0px' : '8px'),
       marginBottom: `${4 + Math.abs(containerSpacing)}px`,
       marginTop: isFirstPair ? firstPairTop : '0px'
     }}>
@@ -347,8 +347,8 @@ const Pairs = ({ pair, gridMode = 0, onSwap, draggedItem, onDragStart, onDragEnd
           className="flex flex-row items-center relative z-10 group/pair"
           style={{ 
             gap: isMultiCol ? '6px' : (isMobile ? '6px' : '12px'),
-            paddingLeft: isMultiCol ? '6px' : (isMobile ? '8px' : '15px'),
-            paddingRight: isMultiCol ? '6px' : (isMobile ? '8px' : '15px'),
+            paddingLeft: isMultiCol ? '6px' : (isMobile ? '2px' : '15px'),
+            paddingRight: isMultiCol ? '6px' : (isMobile ? '2px' : '15px'),
             justifyContent: 'center',
             alignItems: 'center',
             width: '100%'

@@ -2215,3 +2215,11 @@ input[type="file"] {
   visibility: hidden !important;
 }
 
+/* ── Mobile: smaller container title text ── */
+@media (max-width: 640px) {
+  .text-body-text {
+    font-size: 8px !important;
+    line-height: 1.3;
+  }
+}
+
