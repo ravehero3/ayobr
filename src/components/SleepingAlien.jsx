@@ -2,10 +2,12 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useAnimation } from '../context/AnimationContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import sleepingAlienImg from '../assets/sleeping-alien-updated.png';
 
 const SleepingAlien = () => {
   const { isAnimEnabled } = useAnimation();
+  const isMobile = useIsMobile();
   const pairs = useAppStore(state => state.pairs);
   const storeIsGenerating = useAppStore(state => state.isGenerating);
   const videoGenerationStates = useAppStore(state => state.videoGenerationStates);
@@ -31,10 +33,10 @@ const SleepingAlien = () => {
           key="sleeping-alien-container"
           style={{
             position: 'fixed',
-            left: 'calc(50% + 30px)',
-            top: 'calc(50% + 220px)',
-            width: '1200px',
-            height: '800px',
+            left: isMobile ? '50%' : 'calc(50% + 30px)',
+            top: isMobile ? 'calc(50% + 60px)' : 'calc(50% + 220px)',
+            width: isMobile ? '300px' : '1200px',
+            height: isMobile ? '200px' : '800px',
             zIndex: 10001,
             display: 'flex',
             alignItems: 'center',
@@ -59,10 +61,10 @@ const SleepingAlien = () => {
         <div
           style={{
             position: 'fixed',
-            left: 'calc(50% + 30px)',
-            top: 'calc(50% + 220px)',
-            width: '1200px',
-            height: '800px',
+            left: isMobile ? '50%' : 'calc(50% + 30px)',
+            top: isMobile ? 'calc(50% + 60px)' : 'calc(50% + 220px)',
+            width: isMobile ? '300px' : '1200px',
+            height: isMobile ? '200px' : '800px',
             zIndex: 10002,
             transform: 'translate(-50%, -50%)',
             pointerEvents: isHidden ? 'none' : 'auto',

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
 import { useLanguage } from '../context/LanguageContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import GlassPlayButton from './GlassPlayButton';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -167,7 +168,7 @@ function getSpiralPos(n) {
 const SpiralGridLayout = ({
   pairs, generatedVideos, playingIds, setPlayingIds, videoRefs,
   handlePlayPause, handleDownloadSingle, removePair, getVideoBackgroundStyle,
-  quality, imageLayout,
+  quality, imageLayout, imageBlobUrls,
 }) => {
   const containerRef = useRef(null);
   const CARD_W = 360;
@@ -275,9 +276,9 @@ const SpiralGridLayout = ({
               {/* Video area — aspect ratio matches selected quality */}
               <div className="relative w-full overflow-hidden" style={{ aspectRatio: getAspectRatioStyle(quality) }}>
                 <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
-                {pair.image && !isPlaying && (
+                {imageBlobUrls?.[pair.id] && !isPlaying && (
                   <img
-                    src={URL.createObjectURL(pair.image)}
+                    src={imageBlobUrls[pair.id]}
                     alt="Preview"
                     style={{ ...getPreviewImageStyle(imageLayout), opacity: 0.85 }}
                   />
@@ -288,7 +289,8 @@ const SpiralGridLayout = ({
                   src={generatedVideo.url}
                   className="absolute inset-0 w-full h-full object-contain"
                   style={{ display: isPlaying ? 'block' : 'none', background: 'transparent', zIndex: 10 }}
-                  controls controlsList="nodownload" preload="metadata"
+                  controls controlsList="nodownload nofullscreen" preload="metadata"
+                  playsInline
                   onEnded={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
                   onPause={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
                   onPlay={() => setPlayingIds(prev => ({ ...prev, [pair.id]: true }))}
@@ -323,8 +325,10 @@ const SpiralGridLayout = ({
 const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
   const { getVideoGenerationState, generatedVideos, isGenerating, videoSettings, removePair, resetApp } = useAppStore();
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const [playingIds, setPlayingIds] = useState({});
   const videoRefs = useRef({});
+  const [imageBlobUrls, setImageBlobUrls] = useState({});
   const [gridLayout, setGridLayoutState] = useState(() => {
     try { return localStorage.getItem('loadingGridLayout') || 'grid'; } catch { return 'grid'; }
   });
@@ -332,6 +336,42 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
     try { localStorage.setItem('loadingGridLayout', layout); } catch {}
     setGridLayoutState(layout);
   };
+
+  // Cache image blob URLs when pairs arrive — avoids memory leaks and recreating on each render
+  useEffect(() => {
+    const urls = {};
+    pairs.forEach(pair => {
+      if (pair.image) {
+        try { urls[pair.id] = URL.createObjectURL(pair.image); } catch {}
+      }
+    });
+    setImageBlobUrls(urls);
+    return () => { Object.values(urls).forEach(u => { try { URL.revokeObjectURL(u); } catch {} }); };
+  }, [pairs]);
+
+  // On screen wake (visibility change), refresh image URLs and reload any stale videos
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const urls = {};
+        pairs.forEach(pair => {
+          if (pair.image) {
+            try { urls[pair.id] = URL.createObjectURL(pair.image); } catch {}
+          }
+        });
+        setImageBlobUrls(urls);
+        // Force-reload any video that errored or became empty after sleep
+        Object.entries(videoRefs.current).forEach(([, vid]) => {
+          if (vid && (vid.error || vid.networkState === 3)) {
+            const s = vid.src;
+            if (s) { vid.src = ''; vid.src = s; vid.load(); }
+          }
+        });
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [pairs]);
 
   const handleDownloadSingle = async (video, event) => {
     if (event) event.stopPropagation();
@@ -372,7 +412,20 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
       });
       setPlayingIds({ [pairId]: true });
       vid.style.display = 'block';
-      vid.play().catch(err => console.error('Video play failed:', err));
+      // If video errored or lost data (e.g. iOS screen sleep), reload before playing
+      if (vid.error || vid.networkState === HTMLMediaElement.NETWORK_EMPTY || vid.readyState === 0) {
+        const src = vid.currentSrc || vid.getAttribute('src');
+        if (src) { vid.src = src; vid.load(); }
+      }
+      vid.play().catch(err => {
+        console.warn('Video play failed, retrying after reload:', err);
+        const src = vid.currentSrc || vid.getAttribute('src');
+        if (src) {
+          vid.src = src;
+          vid.load();
+          vid.play().catch(e2 => console.error('Video play retry failed:', e2));
+        }
+      });
     }
   };
 
@@ -490,7 +543,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                       <div className="relative h-full flex flex-col" style={{ zIndex: 5 }}>
                         <div className="text-white font-semibold mb-3 text-center"
-                          style={{ fontSize: '14px', lineHeight: '1.3', minHeight: '36px', maxHeight: '36px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 75 }}>
+                          style={{ fontSize: isMobile ? '8px' : '14px', lineHeight: '1.3', minHeight: isMobile ? '24px' : '36px', maxHeight: isMobile ? '24px' : '36px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 75 }}>
                           {(() => {
                             const t = pair.audio?.name && pair.image?.name
                               ? `${pair.audio.name.replace(/\.[^/.]+$/, '')} + ${pair.image.name.replace(/\.[^/.]+$/, '')}`
@@ -507,9 +560,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           <div className="rounded relative overflow-hidden"
                             style={{ width: pw + 'px', height: ph + 'px', flexShrink: 0 }}>
                             <div className="absolute inset-0 w-full h-full" style={{ ...getVideoBackgroundStyle(), zIndex: 1 }} />
-                            {pair.image && !isPlaying && (
+                            {imageBlobUrls[pair.id] && !isPlaying && (
                               <img
-                                src={URL.createObjectURL(pair.image)}
+                                src={imageBlobUrls[pair.id]}
                                 alt="Preview"
                                 style={{ ...getPreviewImageStyle(videoSettings.imageLayout), opacity: 0.85, zIndex: 2 }}
                               />
@@ -521,7 +574,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                                 src={videoToShow.url}
                                 className="absolute inset-0 w-full h-full object-contain"
                                 style={{ display: isPlaying ? 'block' : 'none', background: 'transparent', zIndex: 15 }}
-                                controlsList="nodownload" preload="metadata"
+                                controlsList="nodownload nofullscreen" preload="metadata"
+                                playsInline
                                 onEnded={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
                               />
                             )}
@@ -572,6 +626,7 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
               getVideoBackgroundStyle={getVideoBackgroundStyle}
               quality={videoSettings.quality}
               imageLayout={videoSettings.imageLayout}
+              imageBlobUrls={imageBlobUrls}
             />
           ) : allComplete ? (
             <motion.div
@@ -624,9 +679,9 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
 
                       <div className="relative w-full overflow-hidden rounded-t-2xl" style={{ aspectRatio: getAspectRatioStyle(videoSettings.quality) }}>
                         <div className="absolute inset-0" style={getVideoBackgroundStyle()} />
-                        {pair.image && !isPlaying && (
+                        {imageBlobUrls[pair.id] && !isPlaying && (
                           <img
-                            src={URL.createObjectURL(pair.image)}
+                            src={imageBlobUrls[pair.id]}
                             alt="Preview"
                             style={{ ...getPreviewImageStyle(videoSettings.imageLayout), opacity: 0.85 }}
                           />
@@ -637,7 +692,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
                           src={generatedVideo.url}
                           className="absolute inset-0 w-full h-full object-contain"
                           style={{ display: isPlaying ? 'block' : 'none', background: 'transparent', zIndex: 10 }}
-                          controls controlsList="nodownload" preload="metadata"
+                          controls controlsList="nodownload nofullscreen" preload="metadata"
+                          playsInline
                           onEnded={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
                           onPause={() => setPlayingIds(prev => ({ ...prev, [pair.id]: false }))}
                           onPlay={() => setPlayingIds(prev => ({ ...prev, [pair.id]: true }))}
@@ -668,8 +724,8 @@ const LoadingWindow = ({ isVisible, pairs, onClose, onStop }) => {
         </motion.div>
       </motion.div>
 
-      {/* ── Grid layout switcher (bottom-left, above footer) ─────── */}
-      {allComplete && <GridSwitcher layout={gridLayout} setLayout={setGridLayout} />}
+      {/* ── Grid layout switcher (bottom-left, above footer) — hidden on mobile ─── */}
+      {allComplete && !isMobile && <GridSwitcher layout={gridLayout} setLayout={setGridLayout} />}
     </AnimatePresence>
   );
 };
