@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { proxyImageUrl } from '../utils/imageProxy';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import alienLogo from '../assets/alien_logo_1780252226447.png';
 import alienZzzIcon from '../assets/alien_zzz_icon_1780296423141.png';
@@ -675,7 +676,7 @@ export default function AccountPage() {
             className="w-8 h-8 rounded-full overflow-hidden border border-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"
             style={{ flexShrink: 0, position: 'relative', zIndex: 30 }}
           >
-            <img src={user.profile_image_url || userIcon} alt="Profile" className="w-full h-full object-cover"
+            <img src={user.profile_image_url ? proxyImageUrl(user.profile_image_url) : userIcon} alt="Profile" className="w-full h-full object-cover"
               onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; }} />
           </button>
         </div>
@@ -696,7 +697,7 @@ export default function AccountPage() {
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.30)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)')}
                 >
-                  <img src={user.profile_image_url || userIcon} alt=""
+                  <img src={user.profile_image_url ? proxyImageUrl(user.profile_image_url) : userIcon} alt=""
                     style={{ width: '100%', height: '100%', objectFit: 'cover', ...(!user.profile_image_url ? { opacity: 0.45, padding: '18px' } : {}) }}
                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = userIcon; e.currentTarget.style.padding = '18px'; e.currentTarget.style.opacity = '0.45'; }}
                   />

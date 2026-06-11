@@ -157,6 +157,25 @@ async function mountRoutes(app) {
     res.json({});
   });
 
+  // Image proxy — allows COEP require-corp pages to load external avatar URLs
+  app.get('/api/proxy-image', async (req, res) => {
+    const url = req.query.url;
+    if (!url || !url.startsWith('https://')) return res.status(400).end();
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (!r.ok) return res.status(r.status).end();
+      const ct = r.headers.get('content-type') || 'image/jpeg';
+      if (!ct.startsWith('image/')) return res.status(400).end();
+      const buf = await r.arrayBuffer();
+      res.setHeader('Content-Type', ct);
+      res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.end(Buffer.from(buf));
+    } catch {
+      res.status(502).end();
+    }
+  });
+
   app.get('/api/ffmpeg-ready', (req, res) => {
     const wasmPath = path.join(__dirname, '../dist/ffmpeg-core.wasm');
     const jsPath = path.join(__dirname, '../dist/ffmpeg-core.js');

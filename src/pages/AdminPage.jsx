@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { proxyImageUrl } from '../utils/imageProxy';
 import { ANIMATION_KEYS } from '../context/AnimationContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
@@ -806,7 +807,7 @@ export default function AdminPage() {
             transition:'border-color 0.2s'
           }}>
             {user.profile_image_url
-              ? <img src={user.profile_image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+              ? <img src={proxyImageUrl(user.profile_image_url)} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
               : <div style={{width:'100%',height:'100%',background:'rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>
                   {(user.first_name||'A')[0]}
                 </div>
@@ -950,7 +951,7 @@ export default function AdminPage() {
                             <div style={{display:'flex',alignItems:'center',gap:10}}>
                               <div style={{width:32,height:32,borderRadius:'50%',background:'rgba(255,255,255,0.06)',
                                 border:`1px solid ${BORDER}`,overflow:'hidden',flexShrink:0}}>
-                                {u.profile_image_url&&<img src={u.profile_image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>}
+                                {u.profile_image_url&&<img src={proxyImageUrl(u.profile_image_url)} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>}
                               </div>
                               <div>
                                 <div style={{fontWeight:700,fontSize:13,color:'#fff'}}>{[u.first_name,u.last_name].filter(Boolean).join(' ')||'Anonymous'}</div>

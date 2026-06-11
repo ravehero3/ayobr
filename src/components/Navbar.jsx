@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
+import { proxyImageUrl } from '../utils/imageProxy';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
@@ -175,7 +176,7 @@ export default function Navbar({ onUpgradePro, onUpgradeUnlimited, checkoutLoadi
               <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 group-hover:border-white/50 transition-colors">
                 {user.profile_image_url ? (
                   <img
-                    src={user.profile_image_url}
+                    src={proxyImageUrl(user.profile_image_url)}
                     alt=""
                     className="w-full h-full object-cover"
                     onError={e => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
