@@ -202,6 +202,16 @@ async function upgradeUserFromPayment(userId, plan, isAnnual, paymentId) {
     plan,
     isAnnual
   });
+
+  // 4. Trigger automated customer journey (Purchase sequence)
+  setImmediate(async () => {
+    try {
+      const { triggerJourney } = require('../journeys');
+      await triggerJourney(userId, plan === 'unlimited' ? 'purchase_unlimited' : 'purchase_pro');
+    } catch (e) {
+      console.error('[journeys] Failed to trigger purchase journey:', e.message);
+    }
+  });
 }
 
 /**

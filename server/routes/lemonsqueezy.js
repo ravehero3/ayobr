@@ -440,14 +440,12 @@ router.post('/webhook', async (req, res) => {
       await setUserRole(userId, newRole);
       await setCreditsForRole(userId, newRole);
       console.log(`User ${userId} upgraded to ${newRole.toUpperCase()} via LS webhook (${eventName})`);
-      // Send purchase confirmation email (async, non-blocking)
+      // Trigger customer journey (async, non-blocking)
       setImmediate(async () => {
         try {
-          const { getUserById } = require('../storage');
-          const { sendPurchaseEmail } = require('../email');
-          const u = await getUserById(userId);
-          if (u) await sendPurchaseEmail(u, newRole);
-        } catch (e) { console.error('[email] purchase email error:', e.message); }
+          const { triggerJourney } = require('../journeys');
+          await triggerJourney(userId, newRole === 'unlimited' ? 'purchase_unlimited' : 'purchase_pro');
+        } catch (e) { console.error('[journeys] LS purchase journey error:', e.message); }
       });
     }
     else if (eventName === 'subscription_updated') {

@@ -8,6 +8,7 @@ import { subscribeFFmpegLogs, clearFFmpegLogs } from '../utils/ffmpegLogger';
 import { forceStopAllProcesses, restartFFmpeg } from '../utils/ffmpegProcessor';
 import { proxyImageUrl } from '../utils/imageProxy';
 import ModalPreviewTab from '../components/admin/ModalPreviewTab';
+import JourneyTab from '../components/admin/JourneyTab';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -868,6 +869,7 @@ export default function AdminPage() {
     {id:'overview',    label:'PŘEHLED'},
     {id:'users',       label:'UŽIVATELÉ'},
     {id:'emails',      label:'EMAILY'},
+    {id:'journeys',    label:'JOURNEYS'},
     {id:'autoEmails',  label:'AUTOMATICKÉ EMAILY'},
     {id:'newsletter',  label:'NEWSLETTER'},
     {id:'modals',      label:'MODALY'},
@@ -1936,6 +1938,11 @@ export default function AdminPage() {
                   </div>
                 </div>
               </motion.div>
+            )}
+
+            {/* ══════════ JOURNEYS (CUSTOMER AUTOMATION ENGINE) ══════════ */}
+            {tab==='journeys' && (
+              <JourneyTab />
             )}
 
             {/* ══════════ MODALY (PREVIEWS & SANDBOX) ══════════ */}

@@ -28,6 +28,22 @@ function startGopayRenewalScheduler() {
   console.log('GoPay subscription renewal scheduled (runs 06:00 UTC daily)');
 }
 
+function startJourneyScheduler() {
+  const { processJourneyQueue } = require('./journeys');
+  // Run every 15 minutes to send due follow-up emails
+  cron.schedule('*/15 * * * *', async () => {
+    try {
+      const count = await processJourneyQueue();
+      if (count > 0) {
+        console.log(`[journeys] Sent ${count} scheduled journey email(s)`);
+      }
+    } catch (err) {
+      console.error('[journeys] Error in journey queue worker:', err);
+    }
+  });
+  console.log('Customer Journey email scheduler scheduled (runs every 15 mins)');
+}
+
 const REQUIRED_ENV = ['DATABASE_URL', 'SESSION_SECRET'];
 
 function validateEnv() {
@@ -66,6 +82,7 @@ async function start() {
 
   startCreditResetScheduler();
   startGopayRenewalScheduler();
+  startJourneyScheduler();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`TypeBeatz API server running on port ${PORT}`);
     const { validateAllVariants } = require('./routes/lemonsqueezy');

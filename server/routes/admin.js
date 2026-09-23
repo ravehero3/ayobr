@@ -346,4 +346,94 @@ router.patch('/animation-settings', isAdmin, (req, res) => {
   }
 });
 
+/* ═══════════════════════════════════════════════════════════
+   CUSTOMER JOURNEYS ENDPOINTS
+═══════════════════════════════════════════════════════════ */
+const { getJourneys, saveJourneys, renderJourneyStepHTML, getJourneyStats } = require('../journeys');
+
+// Get all journeys and queue stats
+router.get('/journeys', isAdmin, async (req, res) => {
+  try {
+    const journeys = getJourneys();
+    const stats = await getJourneyStats();
+    res.json({ journeys, stats });
+  } catch (err) {
+    console.error('GET /api/admin/journeys error:', err);
+    res.status(500).json({ message: 'Failed to load journeys' });
+  }
+});
+
+// Update journeys configuration
+router.put('/journeys', isAdmin, (req, res) => {
+  try {
+    const { journeys } = req.body;
+    if (!Array.isArray(journeys)) {
+      return res.status(400).json({ message: 'Journeys must be an array' });
+    }
+    saveJourneys(journeys);
+    res.json({ success: true, message: 'Journeys saved successfully' });
+  } catch (err) {
+    console.error('PUT /api/admin/journeys error:', err);
+    res.status(500).json({ message: 'Failed to save journeys' });
+  }
+});
+
+// Send test email for a specific journey step
+router.post('/journeys/test-email', isAdmin, async (req, res) => {
+  try {
+    const { journeyId, stepId, toEmail, lang = 'cs' } = req.body;
+    const journeys = getJourneys();
+    const journey = journeys.find(j => j.id === journeyId);
+    const step = journey?.steps?.find(s => s.id === stepId);
+
+    if (!step) {
+      return res.status(404).json({ message: 'Journey step not found' });
+    }
+
+    const recipient = toEmail || req.user.email;
+    const userMock = {
+      first_name: req.user.first_name || 'Admin',
+      email: recipient,
+      language: lang
+    };
+
+    const isCzech = lang === 'cs';
+    const subject = (isCzech ? step.subject_cs : step.subject_en) || step.subject_cs;
+    const html = renderJourneyStepHTML(step, userMock, lang);
+
+    const { sendEmail } = require('../email');
+    const ok = await sendEmail({ to: recipient, subject: `[TEST] ${subject}`, html });
+
+    if (ok) {
+      res.json({ success: true, message: `Test email sent to ${recipient}` });
+    } else {
+      res.status(500).json({ message: 'Failed to send test email. Check SMTP settings.' });
+    }
+  } catch (err) {
+    console.error('POST /api/admin/journeys/test-email error:', err);
+    res.status(500).json({ message: err.message || 'Error sending test email' });
+  }
+});
+
+// Get HTML preview for a journey step
+router.get('/journeys/preview/:journeyId/:stepId', isAdmin, (req, res) => {
+  try {
+    const { journeyId, stepId } = req.params;
+    const lang = req.query.lang || 'cs';
+    const journeys = getJourneys();
+    const journey = journeys.find(j => j.id === journeyId);
+    const step = journey?.steps?.find(s => s.id === stepId);
+
+    if (!step) {
+      return res.status(404).send('Step not found');
+    }
+
+    const html = renderJourneyStepHTML(step, { first_name: 'Jan', email: 'jan@example.com', language: lang }, lang);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (err) {
+    res.status(500).send('Preview generation failed');
+  }
+});
+
 module.exports = router;
