@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import UpgradeBanner from '../components/UpgradeBanner';
 import ReferralPanel from '../components/ReferralPanel';
+import SubscriptionExpiredModal from '../components/SubscriptionExpiredModal';
 import VideoApp from '../VideoApp';
 import { initializeFFmpeg } from '../utils/ffmpegProcessor';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -19,9 +20,33 @@ export default function AppPage() {
   const [showCancelledNotice, setShowCancelledNotice] = useState(false);
   const [checkoutLoading, setCheckoutLoading]   = useState(false);
   const [showReferral, setShowReferral]         = useState(false);
+  const [showExpiredModal, setShowExpiredModal]  = useState(false);
   const { videoSettings, setVideoQuality } = useAppStore();
 
   const wasmPreloaded = useRef(false);
+
+  // Detect expired paid subscription
+  useEffect(() => {
+    if (!user) return;
+    const PAID_ROLES = ['pro', 'unlimited'];
+    if (!PAID_ROLES.includes(user.role)) return; // free/admin don't need this
+    const sub = user.subscription;
+    if (!sub) return;
+    if (sub.status === 'past_due' || (sub.current_period_end && new Date(sub.current_period_end) < new Date())) {
+      // Check if user snoozed within the last hour
+      const snoozeKey = `tb_sub_snooze_${user.id}`;
+      const snoozedAt = localStorage.getItem(snoozeKey);
+      if (snoozedAt && Date.now() - parseInt(snoozedAt, 10) < 60 * 60 * 1000) return;
+      setShowExpiredModal(true);
+    }
+  }, [user]);
+
+  const handleSnoozeExpiredModal = () => {
+    if (user?.id) {
+      localStorage.setItem(`tb_sub_snooze_${user.id}`, String(Date.now()));
+    }
+    setShowExpiredModal(false);
+  };
 
   // Enforce quality limits per plan: free → max 720p, pro → max 1080p, unlimited/admin → 4K ok
   useEffect(() => {
@@ -130,6 +155,14 @@ export default function AppPage() {
 
   return (
     <div className="relative">
+      {/* Subscription expired modal — shown for paid users whose period has ended */}
+      {showExpiredModal && user && (
+        <SubscriptionExpiredModal
+          user={user}
+          onDismiss={handleSnoozeExpiredModal}
+        />
+      )}
+
       <Navbar
         onUpgradePro={handleUpgradePro}
         onUpgradeUnlimited={handleUpgradeUnlimited}

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../auth');
-const { getUserById, getUserCredits, deductCredits, agreeToRights, getFeatureFlags, applyReferralCode, getReferralStats, updateUserProfile } = require('../storage');
+const { getUserById, getUserCredits, getSubscription, deductCredits, agreeToRights, getFeatureFlags, applyReferralCode, getReferralStats, updateUserProfile } = require('../storage');
 
 const UNLIMITED_ROLES = ['unlimited', 'admin'];
 
@@ -9,12 +9,22 @@ const UNLIMITED_ROLES = ['unlimited', 'admin'];
 router.get('/me', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user.id;
-    const [user, credits] = await Promise.all([
+    const [user, credits, subscription] = await Promise.all([
       getUserById(userId),
-      getUserCredits(userId)
+      getUserCredits(userId),
+      getSubscription(userId)
     ]);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ ...user, credits });
+    res.json({
+      ...user,
+      credits,
+      subscription: subscription ? {
+        status: subscription.status,
+        current_period_end: subscription.current_period_end,
+        plan: subscription.plan,
+        is_annual: subscription.is_annual
+      } : null
+    });
   } catch (err) {
     console.error('GET /api/user/me error:', err);
     res.status(500).json({ message: 'Server error' });

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkworkspace=self.webpackChunkworkspace||[]).push([[855],{5951(s,e,p){s.exports=p.p+"assets/images/c14c7b1e.jpg"},2177(s,e,p){s.exports=p.p+"assets/images/7b1842b3.png"}}]);
