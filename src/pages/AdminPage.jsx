@@ -6,6 +6,7 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import { subscribeFFmpegLogs, clearFFmpegLogs } from '../utils/ffmpegLogger';
 import { forceStopAllProcesses, restartFFmpeg } from '../utils/ffmpegProcessor';
+import { proxyImageUrl } from '../utils/imageProxy';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -912,15 +913,19 @@ export default function AdminPage() {
         <div style={{position:'relative'}}>
           <button onClick={()=>setMenuOpen(v=>!v)} style={{
             width:32,height:32,borderRadius:'50%',overflow:'hidden',
-            border:'1px solid rgba(255,255,255,0.2)',background:'none',cursor:'pointer',padding:0,
-            transition:'border-color 0.2s'
+            border:'1px solid rgba(255,255,255,0.2)',background:'rgba(255,255,255,0.1)',cursor:'pointer',padding:0,
+            transition:'border-color 0.2s',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',
+            fontSize:14,color:'rgba(255,255,255,0.7)',fontWeight:700
           }}>
-            {user.profile_image_url
-              ? <img src={user.profile_image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-              : <div style={{width:'100%',height:'100%',background:'rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>
-                  {(user.first_name||'A')[0]}
-                </div>
-            }
+            <span>{(user.first_name||user.email||'A')[0].toUpperCase()}</span>
+            {user.profile_image_url && (
+              <img
+                src={proxyImageUrl(user.profile_image_url)}
+                alt=""
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}}
+              />
+            )}
           </button>
 
           {menuOpen && (
@@ -1186,12 +1191,17 @@ export default function AdminPage() {
                                     width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,0.08)',
                                     border:`1px solid ${BORDER}`,overflow:'hidden',flexShrink:0,
                                     display:'flex',alignItems:'center',justifyContent:'center',
-                                    fontSize:13,fontWeight:900,color:'rgba(255,255,255,0.6)'
+                                    fontSize:13,fontWeight:900,color:'rgba(255,255,255,0.6)',
+                                    position:'relative'
                                   }}>
-                                    {u.profile_image_url ? (
-                                      <img src={u.profile_image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                                    ) : (
-                                      (u.first_name?.[0] || u.email?.[0] || 'U').toUpperCase()
+                                    <span>{(u.first_name?.[0] || u.email?.[0] || 'U').toUpperCase()}</span>
+                                    {u.profile_image_url && (
+                                      <img
+                                        src={proxyImageUrl(u.profile_image_url)}
+                                        alt=""
+                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                        style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}}
+                                      />
                                     )}
                                   </div>
                                   <div>
