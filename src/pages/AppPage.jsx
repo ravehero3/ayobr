@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import UpgradeBanner from '../components/UpgradeBanner';
 import ReferralPanel from '../components/ReferralPanel';
 import SubscriptionExpiredModal from '../components/SubscriptionExpiredModal';
+import InsufficientCreditsModal from '../components/InsufficientCreditsModal';
 import VideoApp from '../VideoApp';
 import { initializeFFmpeg } from '../utils/ffmpegProcessor';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -21,6 +22,7 @@ export default function AppPage() {
   const [checkoutLoading, setCheckoutLoading]   = useState(false);
   const [showReferral, setShowReferral]         = useState(false);
   const [showExpiredModal, setShowExpiredModal]  = useState(false);
+  const [insufficientCredits, setInsufficientCredits] = useState(null);
   const { videoSettings, setVideoQuality } = useAppStore();
 
   const wasmPreloaded = useRef(false);
@@ -137,16 +139,15 @@ export default function AppPage() {
   const handleBeforeGenerate = async (count = 1) => {
     const result = await deductCredit(count);
     if (!result.success) {
-      let msg = result.message || '';
-      if (result.errorCode === 'insufficient_credits_free') {
-        msg = t('error.insufficientCreditsFree')
-          .replace('{needed}', result.needed)
-          .replace('{remaining}', result.remaining);
-      } else if (result.errorCode === 'insufficient_credits_pro') {
-        msg = t('error.insufficientCreditsPro')
-          .replace('{needed}', result.needed)
-          .replace('{remaining}', result.remaining);
+      if (result.errorCode?.startsWith('insufficient_credits')) {
+        setInsufficientCredits({
+          needed: result.needed ?? count,
+          remaining: result.remaining ?? 0,
+          isPro: result.errorCode === 'insufficient_credits_pro',
+        });
+        return false;
       }
+      let msg = result.message || '';
       if (msg) alert(msg);
       return false;
     }
@@ -155,6 +156,24 @@ export default function AppPage() {
 
   return (
     <div className="relative">
+      {/* Insufficient credits modal */}
+      {insufficientCredits && (
+        <InsufficientCreditsModal
+          needed={insufficientCredits.needed}
+          remaining={insufficientCredits.remaining}
+          isPro={insufficientCredits.isPro}
+          onClose={() => setInsufficientCredits(null)}
+          onUpgradePro={() => {
+            setInsufficientCredits(null);
+            handleUpgradePro();
+          }}
+          onUpgradeUnlimited={() => {
+            setInsufficientCredits(null);
+            handleUpgradeUnlimited();
+          }}
+        />
+      )}
+
       {/* Subscription expired modal — shown for paid users whose period has ended */}
       {showExpiredModal && user && (
         <SubscriptionExpiredModal

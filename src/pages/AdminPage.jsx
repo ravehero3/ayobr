@@ -7,6 +7,7 @@ import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303
 import { subscribeFFmpegLogs, clearFFmpegLogs } from '../utils/ffmpegLogger';
 import { forceStopAllProcesses, restartFFmpeg } from '../utils/ffmpegProcessor';
 import { proxyImageUrl } from '../utils/imageProxy';
+import ModalPreviewTab from '../components/admin/ModalPreviewTab';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -869,6 +870,7 @@ export default function AdminPage() {
     {id:'emails',      label:'EMAILY'},
     {id:'autoEmails',  label:'AUTOMATICKÉ EMAILY'},
     {id:'newsletter',  label:'NEWSLETTER'},
+    {id:'modals',      label:'MODALY'},
     {id:'howItWorks',  label:'LANDING PAGE'},
     {id:'settings',    label:'NASTAVENÍ'},
     {id:'ffmpeg',      label:'FFMPEG DEBUG'},
@@ -1934,6 +1936,11 @@ export default function AdminPage() {
                   </div>
                 </div>
               </motion.div>
+            )}
+
+            {/* ══════════ MODALY (PREVIEWS & SANDBOX) ══════════ */}
+            {tab==='modals' && (
+              <ModalPreviewTab />
             )}
 
             {/* ══════════ LANDING PAGE (HOW IT WORKS) ══════════ */}
