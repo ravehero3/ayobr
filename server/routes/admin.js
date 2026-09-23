@@ -3,7 +3,8 @@ const router = express.Router();
 const { isAdmin } = require('../auth');
 const {
   getAllUsers, setUserRole, getFeatureFlags, updateFeatureFlag,
-  resetMonthlyCredits, getEmailOptIns, setEmailOptIn, getAdminStats, getEmailsForSegment
+  resetMonthlyCredits, resetUserMonthlyCredits, setUserCredits,
+  getEmailOptIns, setEmailOptIn, getAdminStats, getEmailsForSegment
 } = require('../storage');
 const { EMAIL_TEMPLATES, sendEmail, isSmtpConfigured } = require('../email');
 const multer = require('multer');
@@ -65,9 +66,21 @@ router.get('/users', isAdmin, async (req, res) => {
 router.get('/users/export', isAdmin, async (req, res) => {
   try {
     const users = await getAllUsers();
-    const header = 'ID,Email,First Name,Last Name,Role,Email Opt-in,Joined\n';
+    const header = 'ID,Email,First Name,Last Name,Producer Name,Role,Credits Remaining,Credits Used This Month,Last Reset At,Email Opt-in,Joined\n';
     const rows = users.map(u =>
-      [u.id, u.email || '', u.first_name || '', u.last_name || '', u.role, u.email_opt_in ? 'yes' : 'no', u.created_at || '']
+      [
+        u.id,
+        u.email || '',
+        u.first_name || '',
+        u.last_name || '',
+        u.producer_name || '',
+        u.role,
+        u.role === 'free' || u.role === 'pro' ? (u.credits_remaining ?? '') : 'unlimited',
+        u.credits_used_this_month ?? 0,
+        u.last_reset_at || '',
+        u.email_opt_in ? 'yes' : 'no',
+        u.created_at || ''
+      ]
         .map(v => `"${String(v).replace(/"/g, '""')}"`)
         .join(',')
     ).join('\n');
@@ -93,6 +106,38 @@ router.patch('/users/:userId/role', isAdmin, async (req, res) => {
   } catch (err) {
     console.error('PATCH /api/admin/users/:id/role error:', err);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reset/restart monthly credits for an individual user
+router.post('/users/:userId/reset-credits', isAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const credits = await resetUserMonthlyCredits(userId);
+    res.json({ success: true, message: 'Monthly credits renewed successfully', credits });
+  } catch (err) {
+    console.error('POST /api/admin/users/:userId/reset-credits error:', err);
+    res.status(500).json({ message: err.message || 'Server error' });
+  }
+});
+
+// Set/adjust credits for an individual user manually
+router.patch('/users/:userId/credits', isAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { creditsRemaining, creditsUsed } = req.body;
+    if (creditsRemaining === undefined || isNaN(Number(creditsRemaining))) {
+      return res.status(400).json({ message: 'Valid creditsRemaining number is required' });
+    }
+    const credits = await setUserCredits(
+      userId,
+      Number(creditsRemaining),
+      creditsUsed !== undefined && creditsUsed !== null ? Number(creditsUsed) : null
+    );
+    res.json({ success: true, message: 'Credits updated successfully', credits });
+  } catch (err) {
+    console.error('PATCH /api/admin/users/:userId/credits error:', err);
+    res.status(500).json({ message: err.message || 'Server error' });
   }
 });
 

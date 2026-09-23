@@ -1,5 +1,6 @@
 const { getApp, resetMonthlyCredits } = require('./app');
 const cron = require('node-cron');
+const { runGopayRenewal } = require('./jobs/gopayRenewal');
 
 const PORT = process.env.PORT || process.env.API_PORT || 5000;
 
@@ -13,6 +14,18 @@ function startCreditResetScheduler() {
     }
   }, { timezone: 'UTC' });
   console.log('Monthly credit reset scheduled (runs 00:00 UTC on the 1st)');
+}
+
+function startGopayRenewalScheduler() {
+  // Run daily at 06:00 UTC — catch subscriptions that expired overnight.
+  cron.schedule('0 6 * * *', async () => {
+    try {
+      await runGopayRenewal();
+    } catch (err) {
+      console.error('[gopay-renewal] Unhandled error in renewal job:', err);
+    }
+  }, { timezone: 'UTC' });
+  console.log('GoPay subscription renewal scheduled (runs 06:00 UTC daily)');
 }
 
 const REQUIRED_ENV = ['DATABASE_URL', 'SESSION_SECRET'];
@@ -52,6 +65,7 @@ async function start() {
   const app = await getApp();
 
   startCreditResetScheduler();
+  startGopayRenewalScheduler();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`TypeBeatz API server running on port ${PORT}`);
     const { validateAllVariants } = require('./routes/lemonsqueezy');

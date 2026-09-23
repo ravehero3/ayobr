@@ -141,6 +141,12 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
         type: 'ACCOUNT',
         goid: GOPAY_GOID
       },
+      // Enable ON_DEMAND recurrence so we can charge this card again each month.
+      // ON_DEMAND means we explicitly trigger each charge via the recurrence API.
+      recurrence: {
+        recurrence_cycle: 'ON_DEMAND',
+        recurrence_date_to: '2099-01-01'
+      },
       lang: 'CS'
     };
 
@@ -181,7 +187,8 @@ async function upgradeUserFromPayment(userId, plan, isAnnual, paymentId) {
   // 2. Set plan credits
   await setCreditsForRole(userId, finalRole);
 
-  // 3. Map GoPay checkout into standard subscription table to preserve structural compatibility
+  // 3. Map GoPay checkout into standard subscription table.
+  //    paymentId here is the "parent" recurrence payment ID — used for future recurring charges.
   const durationDays = isAnnual ? 365 : 30;
   const currentPeriodEnd = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
 
@@ -190,7 +197,10 @@ async function upgradeUserFromPayment(userId, plan, isAnnual, paymentId) {
     providerCustomerId: `gopay_cust_${userId}`,
     providerSubscriptionId: `gopay_sub_${paymentId}`,
     status: 'active',
-    currentPeriodEnd
+    currentPeriodEnd,
+    recurrencePaymentId: paymentId,  // Store for future ON_DEMAND recurring charges
+    plan,
+    isAnnual
   });
 }
 

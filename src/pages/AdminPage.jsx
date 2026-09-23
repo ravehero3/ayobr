@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { proxyImageUrl } from '../utils/imageProxy';
-import { ANIMATION_KEYS } from '../context/AnimationContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import typebeatLogo from '../assets/typebeatz logo 2 white version_1754509091303.png';
 import { subscribeFFmpegLogs, clearFFmpegLogs } from '../utils/ffmpegLogger';
@@ -587,11 +585,16 @@ export default function AdminPage() {
   const [landingImages, setLandingImages] = useState({});
   const [landingUploading, setLandingUploading] = useState({});
   const [landingContent, setLandingContent] = useState({ steps: [{}, {}, {}, {}] });
-  const [animSettings, setAnimSettings] = useState({});
-  const [animSaving, setAnimSaving] = useState({});
 
   // Users tab
   const [userFilter, setUserFilter] = useState('all');
+  const [userSearch, setUserSearch] = useState('');
+  const [creditActionUserId, setCreditActionUserId] = useState(null);
+  const [editCreditModalUser, setEditCreditModalUser] = useState(null);
+  const [editCreditValue, setEditCreditValue] = useState(5);
+  const [editCreditResetUsed, setEditCreditResetUsed] = useState(true);
+  const [resetAllConfirm, setResetAllConfirm] = useState(false);
+  const [resetAllBusy, setResetAllBusy] = useState(false);
 
   // Template preview modal
   const [previewTpl, setPreviewTpl] = useState(null);
@@ -643,13 +646,6 @@ export default function AdminPage() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    fetch(`${API}/animation-settings`, { credentials: 'include' })
-      .then(r => r.ok ? r.json() : {})
-      .then(data => setAnimSettings(data))
-      .catch(() => {});
-  }, []);
-
   function flash(m) { setMsg(m); setTimeout(() => setMsg(''), 3500); }
 
   /* ── User actions ── */
@@ -669,6 +665,119 @@ export default function AdminPage() {
     setUsers(p=>p.map(u=>u.id===uid?{...u,email_opt_in:!cur}:u));
   }
 
+  async function restartUserCredits(u) {
+    const quota = u.role === 'pro' ? 31 : 5;
+    if (!window.confirm(`Opravdu chceš obnovit měsíční kredity pro uživatele ${u.email || u.first_name || u.id}?\n\nRole: ${u.role.toUpperCase()}\nPočet kreditů bude nastaven na: ${quota}\nVyužito tento měsíc se vynuluje na: 0`)) {
+      return;
+    }
+    setCreditActionUserId(u.id);
+    try {
+      const res = await fetch(`${API}/users/${u.id}/reset-credits`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (res.ok && data.credits) {
+        setUsers(prev => prev.map(item => {
+          if (item.id === u.id) {
+            return {
+              ...item,
+              credits_remaining: data.credits.credits_remaining,
+              credits_used_this_month: data.credits.credits_used_this_month,
+              last_reset_at: data.credits.last_reset_at,
+            };
+          }
+          return item;
+        }));
+        flash(`Měsíční kredity pro ${u.email || u.id} obnoveny na ${data.credits.credits_remaining}`);
+      } else {
+        flash(data.message || 'Chyba při obnově kreditů');
+      }
+    } catch (err) {
+      flash('Chyba při komunikaci se serverem');
+    } finally {
+      setCreditActionUserId(null);
+    }
+  }
+
+  function openEditCreditModal(u) {
+    setEditCreditModalUser(u);
+    setEditCreditValue(u.credits_remaining ?? (u.role === 'pro' ? 31 : 5));
+    setEditCreditResetUsed(false);
+  }
+
+  async function handleSaveCustomCredits() {
+    if (!editCreditModalUser) return;
+    const num = parseInt(editCreditValue, 10);
+    if (isNaN(num) || num < 0) {
+      flash('Zadej platné kladné číslo kreditů');
+      return;
+    }
+    setCreditActionUserId(editCreditModalUser.id);
+    try {
+      const res = await fetch(`${API}/users/${editCreditModalUser.id}/credits`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          creditsRemaining: num,
+          creditsUsed: editCreditResetUsed ? 0 : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.credits) {
+        setUsers(prev => prev.map(item => {
+          if (item.id === editCreditModalUser.id) {
+            return {
+              ...item,
+              credits_remaining: data.credits.credits_remaining,
+              credits_used_this_month: data.credits.credits_used_this_month,
+              last_reset_at: data.credits.last_reset_at,
+            };
+          }
+          return item;
+        }));
+        flash(`Kredity pro ${editCreditModalUser.email || editCreditModalUser.id} uloženy (${data.credits.credits_remaining})`);
+        setEditCreditModalUser(null);
+      } else {
+        flash(data.message || 'Chyba při ukládání');
+      }
+    } catch (err) {
+      flash('Chyba při ukládání');
+    } finally {
+      setCreditActionUserId(null);
+    }
+  }
+
+  async function handleResetAllCredits() {
+    setResetAllBusy(true);
+    try {
+      const res = await fetch(`${API}/reset-credits`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        flash(data.message || 'Měsíční kredity byly všem obnoveny');
+        setResetAllConfirm(false);
+        loadAll();
+      } else {
+        flash(data.message || 'Chyba při hromadném resetu kreditů');
+      }
+    } catch (err) {
+      flash('Chyba při komunikaci se serverem');
+    } finally {
+      setResetAllBusy(false);
+    }
+  }
+
+  function copyToClipboard(text, label = 'Zkopírováno') {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+      flash(label);
+    }
+  }
+
   /* ── Flag actions ── */
   async function toggleFlag(key, plan, enabled) {
     const res = await fetch(`${API}/features`, {
@@ -676,22 +785,6 @@ export default function AdminPage() {
       credentials:'include', body:JSON.stringify({featureKey:key,plan,enabled})
     });
     if (res.ok) setFlags(p=>p.map(f=>f.feature_key===key&&f.plan===plan?{...f,enabled}:f));
-  }
-
-  async function toggleAnimSetting(key, enabled) {
-    setAnimSettings(prev => ({ ...prev, [key]: enabled }));
-    setAnimSaving(prev => ({ ...prev, [key]: true }));
-    try {
-      await fetch(`${API}/animation-settings`, {
-        method: 'PATCH', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, enabled }),
-      });
-    } catch (e) {
-      setAnimSettings(prev => ({ ...prev, [key]: !enabled }));
-    } finally {
-      setAnimSaving(prev => ({ ...prev, [key]: false }));
-    }
   }
 
   async function resetCredits() {
@@ -744,9 +837,26 @@ export default function AdminPage() {
     </div>
   );
 
-  const filteredUsers = users.filter(u=>{
-    if(userFilter==='free') return u.role==='free';
-    if(userFilter==='paid') return ['pro','unlimited','admin'].includes(u.role);
+  const totalUsersCount = users.length;
+  const freeUsersCount = users.filter(u => u.role === 'free').length;
+  const proUsersCount = users.filter(u => u.role === 'pro').length;
+  const unlimitedUsersCount = users.filter(u => ['unlimited', 'admin'].includes(u.role)).length;
+  const zeroCreditsCount = users.filter(u => !['unlimited', 'admin'].includes(u.role) && (u.credits_remaining ?? 0) <= 0).length;
+
+  const filteredUsers = users.filter(u => {
+    if (userFilter === 'free' && u.role !== 'free') return false;
+    if (userFilter === 'pro' && u.role !== 'pro') return false;
+    if (userFilter === 'unlimited' && !['unlimited', 'admin'].includes(u.role)) return false;
+    if (userFilter === 'zero_credits' && (['unlimited', 'admin'].includes(u.role) || (u.credits_remaining ?? 0) > 0)) return false;
+
+    if (userSearch.trim()) {
+      const q = userSearch.toLowerCase().trim();
+      const name = `${u.first_name || ''} ${u.last_name || ''}`.toLowerCase();
+      const prod = (u.producer_name || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const id = String(u.id || '').toLowerCase();
+      return name.includes(q) || prod.includes(q) || email.includes(q) || id.includes(q);
+    }
     return true;
   });
 
@@ -760,7 +870,6 @@ export default function AdminPage() {
     {id:'newsletter',  label:'NEWSLETTER'},
     {id:'howItWorks',  label:'LANDING PAGE'},
     {id:'settings',    label:'NASTAVENÍ'},
-    {id:'speedOpt',    label:'⚡ SPEED OPTIMIZATION'},
     {id:'ffmpeg',      label:'FFMPEG DEBUG'},
   ];
 
@@ -807,7 +916,7 @@ export default function AdminPage() {
             transition:'border-color 0.2s'
           }}>
             {user.profile_image_url
-              ? <img src={proxyImageUrl(user.profile_image_url)} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+              ? <img src={user.profile_image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
               : <div style={{width:'100%',height:'100%',background:'rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>
                   {(user.first_name||'A')[0]}
                 </div>
@@ -915,79 +1024,574 @@ export default function AdminPage() {
             {/* ══════════ UŽIVATELÉ ══════════ */}
             {tab==='users' && (
               <motion.div key="users" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12,marginBottom:28}}>
-                  <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',margin:0}}>
-                    Uživatelé <span style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.3)'}}>({filteredUsers.length})</span>
-                  </h2>
-                  <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-                    {[['all','Všichni'],['free','Free'],['paid','Platící']].map(([f,l])=>(
-                      <button key={f} onClick={()=>setUserFilter(f)} style={{fontFamily:NM,fontWeight:700,fontSize:9,
-                        letterSpacing:'0.1em',textTransform:'uppercase',padding:'6px 14px',borderRadius:9999,cursor:'pointer',
-                        border:`1px solid ${userFilter===f?BLUE:BORDER}`,
-                        background:userFilter===f?`${BLUE}20`:'transparent',
-                        color:userFilter===f?BLUE:'rgba(255,255,255,0.4)',transition:'all 0.2s'}}>{l}</button>
-                    ))}
-                    <button onClick={()=>window.open(`${API}/users/export`,'_blank')} style={{fontFamily:NM,fontWeight:700,fontSize:9,
-                      letterSpacing:'0.1em',textTransform:'uppercase',padding:'7px 16px',borderRadius:9999,cursor:'pointer',
-                      border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.6)'}}>
-                      ↓ CSV
+                {/* ── Summary Stat Chips ── */}
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12,marginBottom:24}}>
+                  <StatCard label="Celkem uživatelů" value={totalUsersCount} sub="registrovaných v DB" accent={BLUE}/>
+                  <StatCard label="Free uživatelé" value={freeUsersCount} sub="5 kreditů / měsíc" accent="rgba(255,255,255,0.4)"/>
+                  <StatCard label="PRO uživatelé" value={proUsersCount} sub="31 kreditů / měsíc" accent="#34d399"/>
+                  <StatCard label="Unlimited & Admin" value={unlimitedUsersCount} sub="neomezený přístup" accent="#60a5fa"/>
+                  <StatCard label="Vyčerpané kredity" value={zeroCreditsCount} sub="0 kreditů zbývá" accent={zeroCreditsCount > 0 ? '#ef4444' : 'rgba(255,255,255,0.2)'}/>
+                </div>
+
+                {/* ── Title & Global Actions ── */}
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:14,marginBottom:20}}>
+                  <div>
+                    <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',margin:0}}>
+                      Uživatelé <span style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.35)'}}>({filteredUsers.length} z {totalUsersCount})</span>
+                    </h2>
+                    <p style={{fontSize:11,color:'rgba(255,255,255,0.4)',margin:'4px 0 0'}}>
+                      Kompletní přehled registrovaných účtů a správa jejich měsíčních kreditů
+                    </p>
+                  </div>
+
+                  <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                    <button
+                      onClick={()=>setResetAllConfirm(true)}
+                      style={{
+                        fontFamily:NM,fontWeight:800,fontSize:10,letterSpacing:'0.08em',textTransform:'uppercase',
+                        padding:'8px 16px',borderRadius:9999,cursor:'pointer',border:'1px solid rgba(239,68,68,0.35)',
+                        background:'rgba(239,68,68,0.1)',color:'#f87171',display:'flex',alignItems:'center',gap:6,
+                        transition:'all 0.2s',boxShadow:'0 2px 10px rgba(239,68,68,0.15)'
+                      }}
+                      onMouseEnter={e=>{e.currentTarget.style.background='rgba(239,68,68,0.2)';e.currentTarget.style.borderColor='rgba(239,68,68,0.6)';}}
+                      onMouseLeave={e=>{e.currentTarget.style.background='rgba(239,68,68,0.1)';e.currentTarget.style.borderColor='rgba(239,68,68,0.35)';}}
+                    >
+                      <span>↻</span> Obnovit všem měsíční kredity
+                    </button>
+
+                    <button
+                      onClick={()=>window.open(`${API}/users/export`,'_blank')}
+                      style={{
+                        fontFamily:NM,fontWeight:700,fontSize:9,letterSpacing:'0.1em',textTransform:'uppercase',
+                        padding:'8px 16px',borderRadius:9999,cursor:'pointer',border:`1px solid ${BORDER}`,
+                        background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.7)',display:'flex',alignItems:'center',gap:6,
+                        transition:'all 0.2s'
+                      }}
+                      onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,0.1)';e.currentTarget.style.color='#fff';}}
+                      onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.05)';e.currentTarget.style.color='rgba(255,255,255,0.7)';}}
+                    >
+                      ↓ Exportovat CSV
                     </button>
                   </div>
                 </div>
+
+                {/* ── Search & Filter Controls ── */}
+                <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:20}}>
+                  <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+                    {/* Search input */}
+                    <div style={{position:'relative',flex:'1 1 300px'}}>
+                      <span style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)',color:'rgba(255,255,255,0.3)',fontSize:14,pointerEvents:'none'}}>
+                        🔍
+                      </span>
+                      <input
+                        type="text"
+                        value={userSearch}
+                        onChange={e=>setUserSearch(e.target.value)}
+                        placeholder="Hledat uživatele podle jména, e-mailu, producer name nebo ID..."
+                        style={{
+                          width:'100%',padding:'10px 38px 10px 38px',borderRadius:12,
+                          background:'rgba(255,255,255,0.04)',border:`1px solid ${userSearch ? BLUE : BORDER}`,
+                          color:'#fff',fontSize:12,outline:'none',fontFamily:NM,boxSizing:'border-box',
+                          transition:'all 0.2s'
+                        }}
+                      />
+                      {userSearch && (
+                        <button
+                          onClick={()=>setUserSearch('')}
+                          style={{
+                            position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',
+                            background:'none',border:'none',color:'rgba(255,255,255,0.4)',cursor:'pointer',fontSize:14,padding:4
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filter Pills */}
+                    <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+                      {[
+                        ['all', `Všichni (${totalUsersCount})`],
+                        ['free', `Free (${freeUsersCount})`],
+                        ['pro', `PRO (${proUsersCount})`],
+                        ['unlimited', `Unlimited (${unlimitedUsersCount})`],
+                        ['zero_credits', `⚠️ 0 kreditů (${zeroCreditsCount})`],
+                      ].map(([f,l])=>(
+                        <button
+                          key={f}
+                          onClick={()=>setUserFilter(f)}
+                          style={{
+                            fontFamily:NM,fontWeight:700,fontSize:9,letterSpacing:'0.08em',textTransform:'uppercase',
+                            padding:'7px 14px',borderRadius:9999,cursor:'pointer',
+                            border:`1px solid ${userFilter===f ? (f==='zero_credits' ? '#ef4444' : BLUE) : BORDER}`,
+                            background:userFilter===f ? (f==='zero_credits' ? 'rgba(239,68,68,0.2)' : `${BLUE}20`) : 'rgba(255,255,255,0.03)',
+                            color:userFilter===f ? (f==='zero_credits' ? '#fca5a5' : '#93c5fd') : 'rgba(255,255,255,0.45)',
+                            transition:'all 0.2s'
+                          }}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Table Container ── */}
                 <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,overflowX:'auto'}}>
-                  <table style={{width:'100%',borderCollapse:'collapse',minWidth:800}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',minWidth:950}}>
                     <thead>
                       <tr style={{background:'rgba(255,255,255,0.03)',borderBottom:`1px solid ${BORDER}`}}>
-                        {['Uživatel','Role','Kredity','E-mail opt-in','Registrace','Akce'].map(h=>(
+                        {['Uživatel','Role & Stav','Kredity','Poslední reset','E-mail opt-in','Registrace','Akce'].map(h=>(
                           <th key={h} style={{fontFamily:NM,fontSize:9,fontWeight:900,letterSpacing:'0.1em',textTransform:'uppercase',
-                            color:'rgba(255,255,255,0.3)',padding:'14px 20px',textAlign:'left'}}>{h}</th>
+                            color:'rgba(255,255,255,0.3)',padding:'14px 20px',textAlign:'left',whiteSpace:'nowrap'}}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredUsers.map((u,i)=>(
-                        <tr key={u.id} className="row-h" style={{borderBottom:i<filteredUsers.length-1?`1px solid rgba(255,255,255,0.04)`:'none',transition:'background 0.15s'}}>
-                          <td style={{padding:'14px 20px'}}>
-                            <div style={{display:'flex',alignItems:'center',gap:10}}>
-                              <div style={{width:32,height:32,borderRadius:'50%',background:'rgba(255,255,255,0.06)',
-                                border:`1px solid ${BORDER}`,overflow:'hidden',flexShrink:0}}>
-                                {u.profile_image_url&&<img src={proxyImageUrl(u.profile_image_url)} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>}
+                      {filteredUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} style={{padding:'48px 20px',textAlign:'center',color:'rgba(255,255,255,0.4)',fontSize:13}}>
+                            Žádní uživatelé neodpovídají zadanému filtru
+                            {(userSearch || userFilter !== 'all') && (
+                              <div style={{marginTop:12}}>
+                                <button
+                                  onClick={()=>{setUserSearch('');setUserFilter('all');}}
+                                  style={{
+                                    fontFamily:NM,fontSize:10,fontWeight:700,letterSpacing:'0.08em',textTransform:'uppercase',
+                                    padding:'6px 14px',borderRadius:9999,border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.06)',
+                                    color:'#fff',cursor:'pointer'
+                                  }}
+                                >
+                                  Zrušit filtry
+                                </button>
                               </div>
-                              <div>
-                                <div style={{fontWeight:700,fontSize:13,color:'#fff'}}>{[u.first_name,u.last_name].filter(Boolean).join(' ')||'Anonymous'}</div>
-                                <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:1}}>{u.email}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td style={{padding:'14px 20px'}}><Badge role={u.role}/></td>
-                          <td style={{padding:'14px 20px',fontFamily:'monospace',fontSize:12,color:'rgba(255,255,255,0.6)'}}>
-                            {u.role==='free'?(u.credits_remaining??'—'):'∞'}
-                          </td>
-                          <td style={{padding:'14px 20px'}}>
-                            <button onClick={()=>toggleOptIn(u.id,u.email_opt_in)} style={{
-                              width:40,height:22,borderRadius:11,border:'none',cursor:'pointer',
-                              transition:'background 0.2s',position:'relative',
-                              background:u.email_opt_in?BLUE:'rgba(255,255,255,0.1)'}}>
-                              <span style={{position:'absolute',top:3,width:16,height:16,borderRadius:'50%',background:'#fff',
-                                transition:'left 0.2s',left:u.email_opt_in?21:3}}/>
-                            </button>
-                          </td>
-                          <td style={{padding:'14px 20px',fontSize:10,color:'rgba(255,255,255,0.3)'}}>
-                            {u.created_at?new Date(u.created_at).toLocaleDateString('cs-CZ'):'—'}
-                          </td>
-                          <td style={{padding:'14px 20px'}}>
-                            <select value={u.role} onChange={e=>changeRole(u.id,e.target.value)} style={{
-                              background:'rgba(255,255,255,0.05)',border:`1px solid ${BORDER}`,borderRadius:8,
-                              padding:'5px 10px',color:'#fff',fontSize:9,fontWeight:900,letterSpacing:'0.08em',
-                              textTransform:'uppercase',cursor:'pointer',outline:'none'}}>
-                              {['free','pro','unlimited','admin'].map(r=><option key={r} value={r}>{r.toUpperCase()}</option>)}
-                            </select>
+                            )}
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredUsers.map((u,i)=>{
+                          const isUnlimited = ['unlimited','admin'].includes(u.role);
+                          const isPro = u.role === 'pro';
+                          const maxCredits = isPro ? 31 : 5;
+                          const remCredits = u.credits_remaining ?? (isPro ? 31 : 5);
+                          const isDepleted = !isUnlimited && remCredits <= 0;
+                          const isBusyThis = creditActionUserId === u.id;
+
+                          return (
+                            <tr key={u.id} className="row-h" style={{borderBottom:i<filteredUsers.length-1?`1px solid rgba(255,255,255,0.04)`:'none',transition:'background 0.15s'}}>
+                              {/* 1. Uživatel */}
+                              <td style={{padding:'14px 20px'}}>
+                                <div style={{display:'flex',alignItems:'center',gap:12}}>
+                                  <div style={{
+                                    width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,0.08)',
+                                    border:`1px solid ${BORDER}`,overflow:'hidden',flexShrink:0,
+                                    display:'flex',alignItems:'center',justifyContent:'center',
+                                    fontSize:13,fontWeight:900,color:'rgba(255,255,255,0.6)'
+                                  }}>
+                                    {u.profile_image_url ? (
+                                      <img src={u.profile_image_url} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                                    ) : (
+                                      (u.first_name?.[0] || u.email?.[0] || 'U').toUpperCase()
+                                    )}
+                                  </div>
+                                  <div>
+                                    <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                                      <span style={{fontWeight:800,fontSize:13,color:'#fff'}}>
+                                        {[u.first_name,u.last_name].filter(Boolean).join(' ') || 'Bez jména'}
+                                      </span>
+                                      {u.producer_name && (
+                                        <span style={{
+                                          fontSize:9,fontWeight:800,padding:'2px 6px',borderRadius:4,
+                                          background:'rgba(59,130,246,0.15)',border:'1px solid rgba(59,130,246,0.3)',
+                                          color:'#93c5fd',letterSpacing:'0.04em'
+                                        }}>
+                                          🎵 {u.producer_name}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div style={{display:'flex',alignItems:'center',gap:6,marginTop:2}}>
+                                      <span style={{fontSize:11,color:'rgba(255,255,255,0.4)'}}>{u.email || '—'}</span>
+                                      {u.email && (
+                                        <button
+                                          type="button"
+                                          title="Kopírovat e-mail"
+                                          onClick={()=>copyToClipboard(u.email, 'E-mail zkopírován')}
+                                          style={{background:'none',border:'none',padding:0,cursor:'pointer',fontSize:10,color:'rgba(255,255,255,0.3)',lineHeight:1}}
+                                        >
+                                          📋
+                                        </button>
+                                      )}
+                                    </div>
+                                    <div style={{fontSize:9,fontFamily:'monospace',color:'rgba(255,255,255,0.25)',marginTop:2}}>
+                                      ID: <span
+                                        title="Kliknutím zkopíruješ ID"
+                                        onClick={()=>copyToClipboard(u.id, 'ID uživatele zkopírováno')}
+                                        style={{cursor:'pointer',textDecoration:'underline dotted'}}
+                                      >{u.id}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* 2. Role & Stav */}
+                              <td style={{padding:'14px 20px',whiteSpace:'nowrap'}}>
+                                <div style={{display:'flex',flexDirection:'column',gap:4}}>
+                                  <div><Badge role={u.role}/></div>
+                                  {u.subscription_status && (
+                                    <span style={{
+                                      fontSize:9,fontWeight:700,letterSpacing:'0.06em',textTransform:'uppercase',
+                                      color: u.subscription_status === 'active' ? '#34d399' : 'rgba(255,255,255,0.4)'
+                                    }}>
+                                      Sub: {u.subscription_status}
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* 3. Kredity */}
+                              <td style={{padding:'14px 20px',whiteSpace:'nowrap'}}>
+                                {isUnlimited ? (
+                                  <span style={{
+                                    fontFamily:NM,fontSize:11,fontWeight:800,color:'#93c5fd',
+                                    background:'rgba(59,130,246,0.1)',padding:'4px 10px',borderRadius:9999,
+                                    border:'1px solid rgba(59,130,246,0.25)'
+                                  }}>
+                                    ∞ Neomezeno
+                                  </span>
+                                ) : (
+                                  <div>
+                                    <div style={{display:'flex',alignItems:'center',gap:6}}>
+                                      <span style={{
+                                        fontFamily:'monospace',fontSize:14,fontWeight:900,
+                                        color: isDepleted ? '#ef4444' : '#34d399'
+                                      }}>
+                                        {remCredits} / {maxCredits}
+                                      </span>
+                                      {isDepleted && (
+                                        <span style={{fontSize:9,fontWeight:800,color:'#ef4444',background:'rgba(239,68,68,0.15)',padding:'2px 5px',borderRadius:4}}>
+                                          0 zbývá
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',marginTop:3}}>
+                                      Využito: <strong style={{color:'rgba(255,255,255,0.6)'}}>{u.credits_used_this_month ?? 0}</strong>
+                                    </div>
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* 4. Poslední reset */}
+                              <td style={{padding:'14px 20px',fontSize:11,color:'rgba(255,255,255,0.4)',whiteSpace:'nowrap'}}>
+                                {u.last_reset_at ? (
+                                  <div>
+                                    <div style={{color:'rgba(255,255,255,0.7)',fontWeight:700}}>
+                                      {new Date(u.last_reset_at).toLocaleDateString('cs-CZ')}
+                                    </div>
+                                    <div style={{fontSize:9,color:'rgba(255,255,255,0.3)',marginTop:1}}>
+                                      {new Date(u.last_reset_at).toLocaleTimeString('cs-CZ', {hour:'2-digit',minute:'2-digit'})}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  'Nikdy'
+                                )}
+                              </td>
+
+                              {/* 5. E-mail opt-in */}
+                              <td style={{padding:'14px 20px'}}>
+                                <button
+                                  type="button"
+                                  onClick={()=>toggleOptIn(u.id,u.email_opt_in)}
+                                  style={{
+                                    width:40,height:22,borderRadius:11,border:'none',cursor:'pointer',
+                                    transition:'background 0.2s',position:'relative',
+                                    background:u.email_opt_in?BLUE:'rgba(255,255,255,0.1)'
+                                  }}
+                                >
+                                  <span style={{
+                                    position:'absolute',top:3,width:16,height:16,borderRadius:'50%',background:'#fff',
+                                    transition:'left 0.2s',left:u.email_opt_in?21:3
+                                  }}/>
+                                </button>
+                              </td>
+
+                              {/* 6. Registrace */}
+                              <td style={{padding:'14px 20px',fontSize:11,color:'rgba(255,255,255,0.4)',whiteSpace:'nowrap'}}>
+                                {u.created_at ? new Date(u.created_at).toLocaleDateString('cs-CZ') : '—'}
+                              </td>
+
+                              {/* 7. Akce */}
+                              <td style={{padding:'14px 20px',whiteSpace:'nowrap'}}>
+                                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                  {/* Restart/Renew Credits button */}
+                                  <button
+                                    type="button"
+                                    onClick={()=>restartUserCredits(u)}
+                                    disabled={isBusyThis || isUnlimited}
+                                    title={isUnlimited ? "Unlimited uživatelé kredity nepoužívají" : `Obnovit měsíční kredity na ${maxCredits} a vynulovat využití`}
+                                    style={{
+                                      fontFamily:NM,fontWeight:800,fontSize:10,letterSpacing:'0.06em',textTransform:'uppercase',
+                                      padding:'6px 12px',borderRadius:8,cursor: (isBusyThis || isUnlimited) ? 'not-allowed' : 'pointer',
+                                      border: `1px solid ${isDepleted ? 'rgba(239,68,68,0.4)' : `${BLUE}40`}`,
+                                      background: isDepleted ? 'rgba(239,68,68,0.15)' : `${BLUE}15`,
+                                      color: isDepleted ? '#fca5a5' : '#93c5fd',
+                                      opacity: isUnlimited ? 0.4 : (isBusyThis ? 0.6 : 1),
+                                      display:'flex',alignItems:'center',gap:4,transition:'all 0.15s'
+                                    }}
+                                  >
+                                    <span>↻</span> {isBusyThis ? '…' : 'Obnovit'}
+                                  </button>
+
+                                  {/* Custom Edit Credits button */}
+                                  <button
+                                    type="button"
+                                    onClick={()=>openEditCreditModal(u)}
+                                    disabled={isBusyThis}
+                                    title="Upravit kredity ručně (zadat libovolný počet)"
+                                    style={{
+                                      fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.06em',textTransform:'uppercase',
+                                      padding:'6px 10px',borderRadius:8,cursor:'pointer',
+                                      border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.05)',
+                                      color:'rgba(255,255,255,0.7)',transition:'all 0.15s'
+                                    }}
+                                  >
+                                    ✏️
+                                  </button>
+
+                                  {/* Role selector dropdown */}
+                                  <select
+                                    value={u.role}
+                                    onChange={e=>changeRole(u.id,e.target.value)}
+                                    style={{
+                                      background:'rgba(255,255,255,0.05)',border:`1px solid ${BORDER}`,borderRadius:8,
+                                      padding:'5px 8px',color:'#fff',fontSize:9,fontWeight:900,letterSpacing:'0.08em',
+                                      textTransform:'uppercase',cursor:'pointer',outline:'none'
+                                    }}
+                                  >
+                                    {['free','pro','unlimited','admin'].map(r=><option key={r} value={r}>{r.toUpperCase()}</option>)}
+                                  </select>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
+
+                {/* ── Edit Credits Modal ── */}
+                <AnimatePresence>
+                  {editCreditModalUser && (
+                    <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                      style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+                      <div
+                        style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(16px)'}}
+                        onClick={()=>!creditActionUserId && setEditCreditModalUser(null)}
+                      />
+                      <motion.div
+                        initial={{opacity:0,scale:0.95,y:16}} animate={{opacity:1,scale:1,y:0}} exit={{opacity:0,scale:0.95,y:16}}
+                        transition={{duration:0.22,ease:[0.16,1,0.3,1]}}
+                        style={{
+                          position:'relative',zIndex:1,width:'100%',maxWidth:460,background:'#080d1a',
+                          border:`1px solid ${BORDER}`,borderRadius:20,overflow:'hidden',display:'flex',flexDirection:'column',
+                          boxShadow:'0 24px 64px rgba(0,0,0,0.85)'
+                        }}
+                      >
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 24px',borderBottom:`1px solid ${BORDER}`}}>
+                          <div>
+                            <div style={{fontFamily:NM,fontSize:15,fontWeight:900,color:'#fff'}}>Nastavit kredity uživatele</div>
+                            <div style={{fontFamily:NM,fontSize:11,color:'rgba(255,255,255,0.4)',marginTop:2}}>
+                              {editCreditModalUser.email || [editCreditModalUser.first_name,editCreditModalUser.last_name].filter(Boolean).join(' ') || editCreditModalUser.id}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={()=>!creditActionUserId && setEditCreditModalUser(null)}
+                            style={{
+                              background:'rgba(255,255,255,0.06)',border:`1px solid ${BORDER}`,borderRadius:'50%',
+                              width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',
+                              cursor:'pointer',color:'#fff',fontSize:18
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div style={{padding:'22px 24px',display:'flex',flexDirection:'column',gap:18}}>
+                          {/* Current Status */}
+                          <div style={{background:'rgba(255,255,255,0.03)',border:`1px solid ${BORDER}`,borderRadius:12,padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                            <div>
+                              <div style={{fontSize:10,fontWeight:800,letterSpacing:'0.08em',color:'rgba(255,255,255,0.4)',textTransform:'uppercase'}}>Aktuální stav kreditů</div>
+                              <div style={{fontSize:14,fontWeight:900,color:'#fff',marginTop:3}}>
+                                Zbývá: <span style={{color:BLUE}}>{editCreditModalUser.credits_remaining ?? (editCreditModalUser.role === 'pro' ? 31 : 5)}</span> · Využito: <span style={{color:'rgba(255,255,255,0.7)'}}>{editCreditModalUser.credits_used_this_month ?? 0}</span>
+                              </div>
+                            </div>
+                            <Badge role={editCreditModalUser.role}/>
+                          </div>
+
+                          {/* Quick Presets */}
+                          <div>
+                            <div style={{fontSize:10,fontWeight:800,letterSpacing:'0.08em',color:'rgba(255,255,255,0.4)',textTransform:'uppercase',marginBottom:8}}>
+                              Rychlé předvolby
+                            </div>
+                            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                              {[
+                                { label: 'Free reset (5)', val: 5 },
+                                { label: 'PRO reset (31)', val: 31 },
+                                { label: '+5 kreditů', val: (editCreditModalUser.credits_remaining ?? 0) + 5 },
+                                { label: '+10 kreditů', val: (editCreditModalUser.credits_remaining ?? 0) + 10 },
+                                { label: 'Vynulovat (0)', val: 0 },
+                              ].map(p => (
+                                <button
+                                  key={p.label}
+                                  type="button"
+                                  onClick={()=>setEditCreditValue(p.val)}
+                                  style={{
+                                    fontFamily:NM,fontSize:10,fontWeight:800,padding:'6px 12px',borderRadius:8,border:`1px solid ${BORDER}`,
+                                    background: Number(editCreditValue) === p.val ? `${BLUE}25` : 'rgba(255,255,255,0.04)',
+                                    color: Number(editCreditValue) === p.val ? '#93c5fd' : 'rgba(255,255,255,0.7)',
+                                    cursor:'pointer',transition:'all 0.15s'
+                                  }}
+                                >
+                                  {p.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Value Input */}
+                          <div>
+                            <label style={{display:'block',fontSize:10,fontWeight:800,letterSpacing:'0.08em',color:'rgba(255,255,255,0.5)',textTransform:'uppercase',marginBottom:8}}>
+                              Počet zbývajících kreditů
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={editCreditValue}
+                              onChange={e=>setEditCreditValue(e.target.value)}
+                              style={{
+                                width:'100%',background:'rgba(255,255,255,0.06)',border:`1px solid ${BORDER}`,borderRadius:10,
+                                padding:'12px 14px',color:'#fff',fontSize:18,fontWeight:900,outline:'none',fontFamily:NM,boxSizing:'border-box'
+                              }}
+                            />
+                          </div>
+
+                          {/* Checkbox */}
+                          <label style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer',userSelect:'none'}}>
+                            <input
+                              type="checkbox"
+                              checked={editCreditResetUsed}
+                              onChange={e=>setEditCreditResetUsed(e.target.checked)}
+                              style={{cursor:'pointer',width:16,height:16,accentColor:BLUE}}
+                            />
+                            <span style={{fontSize:12,color:'rgba(255,255,255,0.7)'}}>
+                              Vynulovat počet vyčerpaných kreditů tento měsíc (nastavit na 0)
+                            </span>
+                          </label>
+                        </div>
+
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'flex-end',gap:10,padding:'16px 24px',borderTop:`1px solid ${BORDER}`,background:'rgba(0,0,0,0.3)'}}>
+                          <button
+                            type="button"
+                            onClick={()=>setEditCreditModalUser(null)}
+                            disabled={!!creditActionUserId}
+                            style={{
+                              fontFamily:NM,fontSize:10,fontWeight:800,letterSpacing:'0.08em',textTransform:'uppercase',
+                              padding:'10px 18px',borderRadius:9999,border:`1px solid ${BORDER}`,background:'transparent',
+                              color:'rgba(255,255,255,0.6)',cursor:'pointer'
+                            }}
+                          >
+                            Zrušit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSaveCustomCredits}
+                            disabled={!!creditActionUserId}
+                            style={{
+                              fontFamily:NM,fontSize:10,fontWeight:900,letterSpacing:'0.08em',textTransform:'uppercase',
+                              padding:'10px 22px',borderRadius:9999,border:'none',background:BLUE,color:'#fff',
+                              cursor:creditActionUserId?'not-allowed':'pointer',opacity:creditActionUserId?0.7:1,
+                              boxShadow:`0 2px 16px ${BLUE}60`
+                            }}
+                          >
+                            {creditActionUserId ? 'Ukládám…' : 'Uložit kredity'}
+                          </button>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* ── Global Reset Confirmation Modal ── */}
+                <AnimatePresence>
+                  {resetAllConfirm && (
+                    <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                      style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+                      <div
+                        style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.85)',backdropFilter:'blur(16px)'}}
+                        onClick={()=>!resetAllBusy && setResetAllConfirm(false)}
+                      />
+                      <motion.div
+                        initial={{opacity:0,scale:0.95,y:16}} animate={{opacity:1,scale:1,y:0}} exit={{opacity:0,scale:0.95,y:16}}
+                        transition={{duration:0.22,ease:[0.16,1,0.3,1]}}
+                        style={{
+                          position:'relative',zIndex:1,width:'100%',maxWidth:460,background:'#0e121e',
+                          border:`1px solid ${BORDER}`,borderRadius:20,overflow:'hidden',display:'flex',flexDirection:'column',
+                          boxShadow:'0 24px 64px rgba(0,0,0,0.85)'
+                        }}
+                      >
+                        <div style={{padding:'24px 28px',borderBottom:`1px solid ${BORDER}`}}>
+                          <div style={{
+                            width:44,height:44,borderRadius:12,background:'rgba(239,68,68,0.12)',
+                            border:'1px solid rgba(239,68,68,0.3)',display:'flex',alignItems:'center',justifyContent:'center',
+                            fontSize:20,marginBottom:14,color:'#ef4444'
+                          }}>
+                            ↻
+                          </div>
+                          <div style={{fontFamily:NM,fontSize:18,fontWeight:900,color:'#fff',marginBottom:6}}>
+                            Obnovit měsíční kredity všem uživatelům?
+                          </div>
+                          <div style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.6)',lineHeight:1.6}}>
+                            Tato akce okamžitě obnoví měsíční kredity pro všechny registrované účty:
+                            <ul style={{margin:'10px 0 0 16px',padding:0,color:'rgba(255,255,255,0.85)',fontSize:12}}>
+                              <li style={{marginBottom:4}}><strong>Free uživatelé</strong> obdrží <strong>5 kreditů</strong> (využito = 0)</li>
+                              <li style={{marginBottom:4}}><strong>PRO uživatelé</strong> obdrží <strong>31 kreditů</strong> (využito = 0)</li>
+                              <li>Datum posledního resetu bude aktualizován na dnešek</li>
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'flex-end',gap:10,padding:'16px 24px',background:'rgba(0,0,0,0.3)'}}>
+                          <button
+                            type="button"
+                            onClick={()=>setResetAllConfirm(false)}
+                            disabled={resetAllBusy}
+                            style={{
+                              fontFamily:NM,fontSize:10,fontWeight:800,letterSpacing:'0.08em',textTransform:'uppercase',
+                              padding:'10px 18px',borderRadius:9999,border:`1px solid ${BORDER}`,background:'transparent',
+                              color:'rgba(255,255,255,0.6)',cursor:'pointer'
+                            }}
+                          >
+                            Zrušit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleResetAllCredits}
+                            disabled={resetAllBusy}
+                            style={{
+                              fontFamily:NM,fontSize:10,fontWeight:900,letterSpacing:'0.08em',textTransform:'uppercase',
+                              padding:'10px 22px',borderRadius:9999,border:'none',background:'#ef4444',color:'#fff',
+                              cursor:resetAllBusy?'not-allowed':'pointer',opacity:resetAllBusy?0.7:1,
+                              boxShadow:'0 2px 16px rgba(239,68,68,0.45)'
+                            }}
+                          >
+                            {resetAllBusy ? 'Obnovuji…' : 'Ano, obnovit všem'}
+                          </button>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
@@ -1421,69 +2025,6 @@ export default function AdminPage() {
                       </button>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ══════════ SPEED OPTIMIZATION ══════════ */}
-            {tab==='speedOpt' && (
-              <motion.div key="speedOpt" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
-                <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:8}}>
-                  ⚡ Speed Optimization
-                </h2>
-                <p style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.4)',marginBottom:32,lineHeight:1.7}}>
-                  Zapni nebo vypni jednotlivé animace pro všechny uživatele v MAX módu.
-                  Uživatelé v LOW módu mají všechno automaticky vypnuté.
-                </p>
-
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:14}}>
-                  {ANIMATION_KEYS.map(({ key, label, desc }) => {
-                    const enabled = animSettings[key] !== false;
-                    const saving  = !!animSaving[key];
-                    return (
-                      <div key={key} style={{
-                        background: CARD, border:`1px solid ${BORDER}`,
-                        borderRadius:14, padding:'18px 20px',
-                        display:'flex', alignItems:'flex-start', gap:16,
-                        opacity: saving ? 0.6 : 1, transition:'opacity 0.2s',
-                      }}>
-                        <div style={{flex:1}}>
-                          <div style={{fontFamily:NM,fontSize:13,fontWeight:700,color:'#fff',marginBottom:4,letterSpacing:'-0.01em'}}>
-                            {label}
-                          </div>
-                          <div style={{fontFamily:NM,fontSize:11,color:'rgba(255,255,255,0.35)',lineHeight:1.6}}>
-                            {desc}
-                          </div>
-                        </div>
-                        {/* Toggle switch */}
-                        <div
-                          onClick={() => !saving && toggleAnimSetting(key, !enabled)}
-                          style={{
-                            flexShrink:0, width:44, height:24, borderRadius:12,
-                            cursor: saving ? 'not-allowed' : 'pointer',
-                            background: enabled ? BLUE : 'rgba(255,255,255,0.12)',
-                            border:`1px solid ${enabled ? BLUE : 'rgba(255,255,255,0.15)'}`,
-                            position:'relative', transition:'background 0.25s, border-color 0.25s',
-                            marginTop:2,
-                          }}
-                        >
-                          <div style={{
-                            position:'absolute', top:3,
-                            left: enabled ? 21 : 3,
-                            width:16, height:16, borderRadius:'50%',
-                            background:'#fff', transition:'left 0.25s',
-                            boxShadow:'0 1px 4px rgba(0,0,0,0.35)',
-                          }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div style={{marginTop:28,padding:'14px 18px',borderRadius:12,background:`${BLUE}08`,border:`1px solid ${BLUE}20`}}>
-                  <p style={{fontFamily:NM,fontSize:11,color:'rgba(255,255,255,0.4)',margin:0,lineHeight:1.7}}>
-                    💡 Tato nastavení jsou globální výchozí hodnoty. Uživatelé si mohou zapnout LOW mód v Nastavení aplikace (ikona ozubeného kola), čímž přepíší tato nastavení a vypnou vše.
-                  </p>
                 </div>
               </motion.div>
             )}

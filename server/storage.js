@@ -129,7 +129,10 @@ async function getUserById(id) {
 
 async function getAllUsers() {
   const result = await pool.query(`
-    SELECT u.*, c.credits_remaining, c.credits_used_this_month, c.last_reset_at,
+    SELECT u.*,
+           COALESCE(c.credits_remaining, CASE WHEN u.role = 'pro' THEN 31 WHEN u.role = 'free' THEN 5 ELSE 0 END) AS credits_remaining,
+           COALESCE(c.credits_used_this_month, 0) AS credits_used_this_month,
+           c.last_reset_at,
            s.status as subscription_status, s.current_period_end
     FROM users u
     LEFT JOIN credits c ON c.user_id = u.id
@@ -209,20 +212,83 @@ async function getSubscription(userId) {
 }
 
 async function upsertSubscription(data) {
-  const { userId, providerCustomerId, providerSubscriptionId, status, currentPeriodEnd } = data;
+  const {
+    userId, providerCustomerId, providerSubscriptionId, status, currentPeriodEnd,
+    recurrencePaymentId, plan, isAnnual
+  } = data;
   const result = await pool.query(
-    `INSERT INTO subscriptions (user_id, provider_customer_id, provider_subscription_id, status, current_period_end, updated_at)
-     VALUES ($1, $2, $3, $4, $5, NOW())
+    `INSERT INTO subscriptions
+       (user_id, provider_customer_id, provider_subscription_id, status, current_period_end,
+        recurrence_payment_id, plan, is_annual, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
      ON CONFLICT (user_id) DO UPDATE SET
        provider_customer_id = EXCLUDED.provider_customer_id,
        provider_subscription_id = EXCLUDED.provider_subscription_id,
        status = EXCLUDED.status,
        current_period_end = EXCLUDED.current_period_end,
+       recurrence_payment_id = COALESCE(EXCLUDED.recurrence_payment_id, subscriptions.recurrence_payment_id),
+       plan = COALESCE(EXCLUDED.plan, subscriptions.plan),
+       is_annual = COALESCE(EXCLUDED.is_annual, subscriptions.is_annual),
        updated_at = NOW()
      RETURNING *`,
-    [userId, providerCustomerId, providerSubscriptionId, status, currentPeriodEnd]
+    [userId, providerCustomerId, providerSubscriptionId, status, currentPeriodEnd,
+     recurrencePaymentId || null, plan || null, isAnnual ?? false]
   );
   return result.rows[0];
+}
+
+/**
+ * Returns subscriptions that are active (or past_due) but have passed their period end,
+ * and have a recurrence_payment_id (i.e. are GoPay recurring subscriptions).
+ */
+async function getExpiredActiveSubscriptions() {
+  const result = await pool.query(`
+    SELECT s.*, u.email, u.first_name, u.role
+    FROM subscriptions s
+    JOIN users u ON u.id = s.user_id
+    WHERE s.status IN ('active', 'past_due')
+      AND s.current_period_end < NOW()
+      AND s.recurrence_payment_id IS NOT NULL
+    ORDER BY s.current_period_end ASC
+  `);
+  return result.rows;
+}
+
+/**
+ * Called when a recurring charge succeeds — extend the period and reset credits.
+ */
+async function renewSubscription(userId, newPaymentId, durationDays, plan) {
+  const newPeriodEnd = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+  await pool.query(
+    `UPDATE subscriptions
+     SET status = 'active',
+         provider_subscription_id = $2,
+         recurrence_payment_id = $2,
+         current_period_end = $3,
+         updated_at = NOW()
+     WHERE user_id = $1`,
+    [userId, newPaymentId, newPeriodEnd]
+  );
+  // Reset credits for the new period
+  const finalPlan = plan || 'pro';
+  await setCreditsForRole(userId, finalPlan);
+  console.log(`[gopay-renewal] Subscription renewed for user ${userId} until ${newPeriodEnd.toISOString()}`);
+}
+
+/**
+ * Called when a recurring charge fails — downgrade user to free.
+ */
+async function downgradeExpiredSubscription(userId) {
+  await pool.query(
+    `UPDATE subscriptions SET status = 'past_due', updated_at = NOW() WHERE user_id = $1`,
+    [userId]
+  );
+  await pool.query(
+    `UPDATE users SET role = 'free', updated_at = NOW() WHERE id = $1`,
+    [userId]
+  );
+  await setCreditsForRole(userId, 'free');
+  console.log(`[gopay-renewal] User ${userId} downgraded to free after failed renewal`);
 }
 
 async function resetMonthlyCredits() {
@@ -245,6 +311,41 @@ async function resetMonthlyCredits() {
      WHERE user_id IN (SELECT id FROM users WHERE role = 'pro')`
   );
   return freeResult.rowCount + proResult.rowCount;
+}
+
+async function resetUserMonthlyCredits(userId) {
+  const user = await getUserById(userId);
+  if (!user) throw new Error('User not found');
+  const defaultCredits = user.role === 'pro' ? 31 : 5;
+  const result = await pool.query(
+    `INSERT INTO credits (user_id, credits_remaining, credits_used_this_month, last_reset_at, updated_at)
+     VALUES ($1, $2, 0, NOW(), NOW())
+     ON CONFLICT (user_id) DO UPDATE SET
+       credits_remaining = $2,
+       credits_used_this_month = 0,
+       last_reset_at = NOW(),
+       updated_at = NOW()
+     RETURNING *`,
+    [userId, defaultCredits]
+  );
+  return result.rows[0];
+}
+
+async function setUserCredits(userId, creditsRemaining, creditsUsed = null) {
+  const user = await getUserById(userId);
+  if (!user) throw new Error('User not found');
+  const remaining = Math.max(0, parseInt(creditsRemaining, 10) || 0);
+  const result = await pool.query(
+    `INSERT INTO credits (user_id, credits_remaining, credits_used_this_month, last_reset_at, updated_at)
+     VALUES ($1, $2, COALESCE($3, 0), NOW(), NOW())
+     ON CONFLICT (user_id) DO UPDATE SET
+       credits_remaining = $2,
+       credits_used_this_month = CASE WHEN $3::integer IS NOT NULL THEN $3::integer ELSE credits.credits_used_this_month END,
+       updated_at = NOW()
+     RETURNING *`,
+    [userId, remaining, creditsUsed !== null && creditsUsed !== undefined ? parseInt(creditsUsed, 10) : null]
+  );
+  return result.rows[0];
 }
 
 /* Set credits when a user's role changes (e.g. on subscription activation) */
@@ -414,7 +515,8 @@ module.exports = {
   getUserCredits, deductCredit, deductCredits,
   setUserRole, agreeToRights,
   getSubscription, upsertSubscription,
-  resetMonthlyCredits, setCreditsForRole,
+  resetMonthlyCredits, resetUserMonthlyCredits, setUserCredits, setCreditsForRole,
+  getExpiredActiveSubscriptions, renewSubscription, downgradeExpiredSubscription,
   ensureReferralCode, applyReferralCode, getReferralStats,
   updateUserProfile, getFeatureFlags, updateFeatureFlag,
   getEmailOptIns, setEmailOptIn, getAdminStats, logEmailSent, getEmailsForSegment,
