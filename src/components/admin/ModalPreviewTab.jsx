@@ -4,16 +4,19 @@ import SubscriptionExpiredModal from '../SubscriptionExpiredModal';
 import UserDetailsModal from '../UserDetailsModal';
 import InsufficientCreditsModal from '../InsufficientCreditsModal';
 import ReferralPanel from '../ReferralPanel';
+import ScreenSizeWarning from '../ScreenSizeWarning';
+import starsBg from '../../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 const BLUE = '#3b82f6';
-const BLUE2 = '#0ea5e9';
 const CARD = 'rgba(255,255,255,0.03)';
 const BORDER = 'rgba(255,255,255,0.08)';
 
 export default function ModalPreviewTab() {
   const [selectedModalId, setSelectedModalId] = useState('subscription_expired');
   const [activeFullscreenModal, setActiveFullscreenModal] = useState(null);
+  const [previewLang, setPreviewLang] = useState('cs'); // 'cs' | 'en'
+  const isCzech = previewLang === 'cs';
 
   // ── Sandbox State: Subscription Expired ──
   const [subPlan, setSubPlan] = useState('pro'); // 'pro' | 'unlimited'
@@ -37,58 +40,88 @@ export default function ModalPreviewTab() {
   const MODALS = [
     {
       id: 'subscription_expired',
-      name: 'Vypršené předplatné',
+      name: isCzech ? 'Vypršené předplatné' : 'Expired Subscription',
       badge: 'KRITICKÉ',
       badgeColor: '#ef4444',
-      target: 'PRO & UNLIMITED uživatelé',
-      trigger: 'Období předplatného vypršelo (current_period_end < now) nebo selhala automatická obnova GoPay',
+      target: isCzech ? 'PRO & UNLIMITED uživatelé' : 'PRO & UNLIMITED users',
+      trigger: isCzech
+        ? 'Období předplatného vypršelo (current_period_end < now) nebo selhala automatická obnova'
+        : 'Subscription period ended (current_period_end < now) or automatic renewal failed',
       componentName: 'SubscriptionExpiredModal.jsx',
-      actions: ['Obnovit předplatné (přesměruje na /upgrade)', 'Odložit o 1 hodinu (uloží timestamp do localStorage)'],
-      description: 'Zobrazuje se přes celou obrazovku při přihlášení do aplikace, pokud má uživatel neaktivní/prošlé předplatné. Dynamicky zobrazuje správnou cenu a interval (měsíční vs roční).',
+      actions: isCzech
+        ? ['Obnovit předplatné (směruje na /upgrade)', 'Odložit o 1 hodinu (uloží timestamp)']
+        : ['Renew subscription (redirects to /upgrade)', 'Remind me in 1 hour (stores timestamp)'],
+      description: isCzech
+        ? 'Zobrazuje se přes celou obrazovku při přihlášení do aplikace, pokud má uživatel neaktivní/prošlé předplatné. Design sjednocen s Upgrade stránkou (hvězdná záře, Neue Montreal, zaoblená tlačítka).'
+        : 'Shown full-screen upon login if paid period lapsed. Styled identically to the Upgrade page (stars glow, Neue Montreal, pill buttons).',
     },
     {
       id: 'user_details',
-      name: 'Objednávkový formulář GoPay',
+      name: isCzech ? 'Objednávka GoPay (Jméno uživatele)' : 'Checkout Details (Name Prompt)',
       badge: 'UPGRADE',
       badgeColor: '#3b82f6',
-      target: 'Všichni uživatelé při upgradu',
-      trigger: 'Kliknutí na tlačítko "Přejít na PRO / Unlimited" na stránce /upgrade před přesměrováním do platební brány',
+      target: isCzech ? 'Všichni uživatelé při upgradu' : 'All users at upgrade',
+      trigger: isCzech
+        ? 'Kliknutí na tlačítko "Přejít na PRO / Unlimited" na stránce /upgrade před přesměrováním'
+        : 'Clicking "Get Pro / Go Unlimited" on /upgrade before redirecting to payment gateway',
       componentName: 'UserDetailsModal.jsx',
-      actions: ['Odeslat formulář (přesměrování na GoPay)', 'Zavřít modal (křížek / kliknutí mimo)'],
-      description: 'Vyžaduje vyplnění křestního jména, příjmení a volitelného jména producenta pro GoPay platební bránu.',
+      actions: isCzech
+        ? ['Odeslat formulář (přesměrování na platební bránu)', 'Zavřít modal (×)']
+        : ['Submit form (redirect to gateway)', 'Close modal (×)'],
+      description: isCzech
+        ? 'Formulář sbírající křestní jméno, příjmení a jméno producenta. Vyžadováno GoPay platební bránou.'
+        : 'Collects first name, last name, and optional producer name required for payment processing.',
     },
     {
       id: 'insufficient_credits',
-      name: 'Nedostatek kreditů',
+      name: isCzech ? 'Nedostatek kreditů' : 'Insufficient Credits',
       badge: 'LIMIT',
       badgeColor: '#a78bfa',
-      target: 'FREE i PRO uživatelé',
-      trigger: 'Kliknutí na generování videa, pokud uživateli zbývá méně kreditů, než je potřeba pro zvolenou dávku',
+      target: isCzech ? 'FREE i PRO uživatelé' : 'FREE and PRO users',
+      trigger: isCzech
+        ? 'Pokus o vygenerování videa, pokud uživateli zbývá méně kreditů, než je potřeba pro dávku'
+        : 'Attempting to generate a video when remaining credits are lower than required batch count',
       componentName: 'InsufficientCreditsModal.jsx',
-      actions: ['Přejít na PRO (199 Kč/měs)', 'Získat Unlimited (399 Kč/měs)', 'Zavřít'],
-      description: 'Elegantní tmavé okno informující o vyčerpání limitu kreditů s přímými možnostmi upgradu na vyšší plán.',
+      actions: isCzech
+        ? ['Přejít na PRO (199 Kč/měs)', 'Získat Neomezený (399 Kč/měs)', 'Zavřít']
+        : ['Upgrade to PRO ($9.99/mo)', 'Go Unlimited ($19.99/mo)', 'Close'],
+      description: isCzech
+        ? 'Nahrazuje zastaralé hlášky moderním dialogem se skleněným gradientem a přímým odkazem na upgrade.'
+        : 'Replaces raw alerts with a sleek glassmorphic modal offering one-click upgrades.',
     },
     {
       id: 'referral_panel',
-      name: 'Doporučovací program',
+      name: isCzech ? 'Doporučovací program' : 'Referral Program',
       badge: 'GROWTH',
       badgeColor: '#10b981',
-      target: 'Všichni přihlášení uživatelé',
-      trigger: 'Kliknutí na "Pozvat přátele" v hlavní navigaci aplikace',
+      target: isCzech ? 'Všichni přihlášení uživatelé' : 'All logged-in users',
+      trigger: isCzech
+        ? 'Kliknutí na "Pozvat přátele" v horní navigaci aplikace'
+        : 'Clicking "Invite friends" in the top navbar',
       componentName: 'ReferralPanel.jsx',
-      actions: ['Kopírovat unikátní referral link', 'Zavřít panel'],
-      description: 'Zobrazuje referral odkaz a statistiky pozvaných uživatelů (+1 bonusový kredit pro zvacího i nového uživatele).',
+      actions: isCzech
+        ? ['Kopírovat unikátní referral link', 'Zavřít panel']
+        : ['Copy unique referral link', 'Close panel'],
+      description: isCzech
+        ? 'Panel pro sdílení referral linku. Zobrazuje počet doporučených přátel a odměnu +1 kredit.'
+        : 'Referral sharing panel. Displays referred count and +1 credit bonus explanation.',
     },
     {
       id: 'screen_size_warning',
-      name: 'Optimalizace pro Desktop',
+      name: isCzech ? 'Optimalizace pro Desktop' : 'Desktop Optimization',
       badge: 'RESPONSIVE',
       badgeColor: '#f59e0b',
-      target: 'Mobilní návštěvníci (< 1280x800)',
-      trigger: 'Otevření aplikace na zařízení s malým rozlišením',
+      target: isCzech ? 'Mobilní návštěvníci (< 1280×800)' : 'Mobile visitors (< 1280×800)',
+      trigger: isCzech
+        ? 'Otevření aplikace na zařízení s malým rozlišením'
+        : 'Opening the generator on low resolution screens',
       componentName: 'ScreenSizeWarning.jsx',
-      actions: ['Pokračovat i tak (uloží dočasnou volbu)'],
-      description: 'Informuje mobilní návštěvníky, že TypeBeatz je nejlepší používat na desktopu z důvodu drag-and-drop a renderovacích nástrojů.',
+      actions: isCzech
+        ? ['Pokračovat i tak (uloží volbu do localStorage)']
+        : ['Continue anyway (saves preference to localStorage)'],
+      description: isCzech
+        ? 'Upozornění v designu Upgrade stránky informující o doporučeném rozlišení pro drag-and-drop nástroje.'
+        : 'Warning informing mobile visitors that desktop provides the optimal drag-and-drop workflow.',
     },
   ];
 
@@ -109,26 +142,58 @@ export default function ModalPreviewTab() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-      {/* ── Header ── */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <h2 style={{ fontFamily: NM, fontSize: 24, fontWeight: 900, letterSpacing: '-0.03em', margin: 0, color: '#fff' }}>
-              Uživatelské modaly & dialogy
-            </h2>
-            <p style={{ fontFamily: NM, fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '6px 0 0', lineHeight: 1.6 }}>
-              Interaktivní sandbox a přehled všech dialogových oken, která se zobrazují uživatelům podle stavu jejich předplatného, plateb a kreditů.
-            </p>
+      {/* ── Header with Language Toggle ── */}
+      <div style={{ marginBottom: 28, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <h2 style={{ fontFamily: NM, fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: '#fff' }}>
+            Uživatelské modaly & dialogy
+          </h2>
+          <p style={{ fontFamily: NM, fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '6px 0 0', lineHeight: 1.6 }}>
+            Všechny modaly nyní striktně sdílejí jednotný designový jazyk stránky <strong>Upgrade</strong> (tmavý gradient, hvězdná záře, Neue Montreal a zaoblená tlačítka).
+          </p>
+        </div>
+
+        {/* Global Language Switcher for Preview */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            background: 'rgba(255,255,255,0.05)', border: `1px solid ${BORDER}`,
+            borderRadius: 9999, padding: 4
+          }}>
+            <button
+              onClick={() => setPreviewLang('cs')}
+              style={{
+                fontFamily: NM, fontWeight: 700, fontSize: 11, letterSpacing: '0.04em',
+                padding: '7px 16px', borderRadius: 9999, cursor: 'pointer', border: 'none',
+                background: isCzech ? '#fff' : 'transparent',
+                color: isCzech ? '#000' : 'rgba(255,255,255,0.5)',
+                transition: 'all 0.2s',
+              }}
+            >
+              🇨🇿 Čeština
+            </button>
+            <button
+              onClick={() => setPreviewLang('en')}
+              style={{
+                fontFamily: NM, fontWeight: 700, fontSize: 11, letterSpacing: '0.04em',
+                padding: '7px 16px', borderRadius: 9999, cursor: 'pointer', border: 'none',
+                background: !isCzech ? '#fff' : 'transparent',
+                color: !isCzech ? '#000' : 'rgba(255,255,255,0.5)',
+                transition: 'all 0.2s',
+              }}
+            >
+              🇬🇧 English
+            </button>
           </div>
 
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            padding: '6px 14px', borderRadius: 9999,
+            padding: '7px 14px', borderRadius: 9999,
             background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)'
           }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', boxShadow: '0 0 8px #3b82f6' }} />
-            <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 800, color: '#93c5fd', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              {MODALS.length} aktivních modalů
+            <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: '#93c5fd', letterSpacing: '0.04em' }}>
+              {MODALS.length} sjednocených modalů
             </span>
           </div>
         </div>
@@ -143,9 +208,9 @@ export default function ModalPreviewTab() {
               key={m.id}
               onClick={() => setSelectedModalId(m.id)}
               style={{
-                background: active ? 'rgba(59,130,246,0.12)' : CARD,
-                border: `1px solid ${active ? BLUE : BORDER}`,
-                borderRadius: 14,
+                background: active ? 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))' : CARD,
+                border: `1px solid ${active ? 'rgba(255,255,255,0.25)' : BORDER}`,
+                borderRadius: 16,
                 padding: '16px 18px',
                 textAlign: 'left',
                 cursor: 'pointer',
@@ -154,24 +219,24 @@ export default function ModalPreviewTab() {
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 minHeight: 104,
-                boxShadow: active ? `0 4px 20px ${BLUE}25` : 'none',
+                boxShadow: active ? '0 10px 30px -10px rgba(59,130,246,0.3)' : 'none',
               }}
               onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = BORDER; }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span style={{
-                  fontFamily: NM, fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase',
+                  fontFamily: NM, fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
                   padding: '3px 8px', borderRadius: 9999,
                   background: `${m.badgeColor}15`, border: `1px solid ${m.badgeColor}40`, color: m.badgeColor
                 }}>
                   {m.badge}
                 </span>
-                <span style={{ fontFamily: NM, fontSize: 11, color: active ? BLUE : 'rgba(255,255,255,0.2)' }}>
-                  {active ? '● Vybráno' : 'Zobrazit →'}
+                <span style={{ fontFamily: NM, fontSize: 11, color: active ? '#fff' : 'rgba(255,255,255,0.2)' }}>
+                  {active ? '● Aktivní' : 'Náhled →'}
                 </span>
               </div>
-              <div style={{ fontFamily: NM, fontSize: 14, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
+              <div style={{ fontFamily: NM, fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
                 {m.name}
               </div>
               <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>
@@ -183,25 +248,26 @@ export default function ModalPreviewTab() {
       </div>
 
       {/* ── Main Interactive Split: Sandbox Controls & Canvas Preview ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 360px) 1fr', gap: 24, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 350px) 1fr', gap: 24, alignItems: 'start' }}>
 
         {/* ── LEFT: Control Sandbox & Specs ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Sandbox Controls Card */}
-          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 22 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
-                🎛 Interaktivní nastavení náhledu
-              </div>
+          <div style={{
+            background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
+            border: `1px solid ${BORDER}`, borderRadius: 20, padding: 22
+          }}>
+            <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>
+              🎛 Parametry testovacího prostředí
             </div>
 
             {/* Custom controls based on active modal */}
             {selectedModalId === 'subscription_expired' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
-                    Předplatitelský plán
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
+                    Tarif předplatného
                   </label>
                   <div style={{ display: 'flex', gap: 6 }}>
                     {['pro', 'unlimited'].map(p => (
@@ -209,35 +275,35 @@ export default function ModalPreviewTab() {
                         key={p}
                         onClick={() => setSubPlan(p)}
                         style={{
-                          flex: 1, padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                          fontFamily: NM, fontSize: 11, fontWeight: 800, textTransform: 'uppercase',
+                          flex: 1, padding: '8px 10px', borderRadius: 9999, border: 'none', cursor: 'pointer',
+                          fontFamily: NM, fontSize: 11, fontWeight: 700, textTransform: 'uppercase',
                           background: subPlan === p ? '#fff' : 'rgba(255,255,255,0.06)',
                           color: subPlan === p ? '#000' : 'rgba(255,255,255,0.5)',
                         }}
                       >
-                        {p === 'pro' ? 'PRO (199 Kč)' : 'UNLIMITED (399 Kč)'}
+                        {p === 'pro' ? (isCzech ? 'PRO (199 Kč)' : 'PRO ($9.99)') : (isCzech ? 'UNLIMITED (399 Kč)' : 'UNLIMITED ($19.99)')}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                     Fakturační období
                   </label>
                   <div style={{ display: 'flex', gap: 6 }}>
                     {[
-                      { label: 'Měsíční', val: false },
-                      { label: 'Roční (12 měs)', val: true },
+                      { label: isCzech ? 'Měsíční' : 'Monthly', val: false },
+                      { label: isCzech ? 'Roční' : 'Annual', val: true },
                     ].map(opt => (
                       <button
                         key={opt.label}
                         onClick={() => setSubIsAnnual(opt.val)}
                         style={{
-                          flex: 1, padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                          fontFamily: NM, fontSize: 11, fontWeight: 800,
-                          background: subIsAnnual === opt.val ? BLUE : 'rgba(255,255,255,0.06)',
-                          color: '#fff',
+                          flex: 1, padding: '8px 10px', borderRadius: 9999, border: 'none', cursor: 'pointer',
+                          fontFamily: NM, fontSize: 11, fontWeight: 700,
+                          background: subIsAnnual === opt.val ? '#fff' : 'rgba(255,255,255,0.06)',
+                          color: subIsAnnual === opt.val ? '#000' : 'rgba(255,255,255,0.5)',
                         }}
                       >
                         {opt.label}
@@ -247,8 +313,8 @@ export default function ModalPreviewTab() {
                 </div>
 
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
-                    Uživatel (Křestní jméno)
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
+                    Křestní jméno
                   </label>
                   <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                     {['Sentiv', 'Pavel', 'Matyáš'].map(name => (
@@ -256,8 +322,8 @@ export default function ModalPreviewTab() {
                         key={name}
                         onClick={() => setSubUserName(name)}
                         style={{
-                          flex: 1, padding: '6px 8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
-                          cursor: 'pointer', fontFamily: NM, fontSize: 10, fontWeight: 700,
+                          flex: 1, padding: '6px 8px', borderRadius: 9999, border: '1px solid rgba(255,255,255,0.1)',
+                          cursor: 'pointer', fontFamily: NM, fontSize: 10, fontWeight: 600,
                           background: subUserName === name ? 'rgba(255,255,255,0.15)' : 'transparent',
                           color: '#fff',
                         }}
@@ -272,7 +338,7 @@ export default function ModalPreviewTab() {
                     onChange={e => setSubUserName(e.target.value)}
                     placeholder="Vlastní jméno..."
                     style={{
-                      width: '100%', padding: '8px 12px', borderRadius: 8,
+                      width: '100%', padding: '10px 12px', borderRadius: 10,
                       background: 'rgba(255,255,255,0.05)', border: `1px solid ${BORDER}`,
                       color: '#fff', fontSize: 12, outline: 'none', boxSizing: 'border-box'
                     }}
@@ -280,7 +346,7 @@ export default function ModalPreviewTab() {
                 </div>
 
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                     Datum vypršení
                   </label>
                   <input
@@ -288,7 +354,7 @@ export default function ModalPreviewTab() {
                     value={subExpirePreset}
                     onChange={e => setSubExpirePreset(e.target.value)}
                     style={{
-                      width: '100%', padding: '8px 12px', borderRadius: 8,
+                      width: '100%', padding: '10px 12px', borderRadius: 10,
                       background: 'rgba(255,255,255,0.05)', border: `1px solid ${BORDER}`,
                       color: '#fff', fontSize: 12, outline: 'none', boxSizing: 'border-box'
                     }}
@@ -300,7 +366,7 @@ export default function ModalPreviewTab() {
             {selectedModalId === 'user_details' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                     Cílový tarif
                   </label>
                   <div style={{ display: 'flex', gap: 6 }}>
@@ -309,8 +375,8 @@ export default function ModalPreviewTab() {
                         key={p}
                         onClick={() => setDetailsPlan(p)}
                         style={{
-                          flex: 1, padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                          fontFamily: NM, fontSize: 11, fontWeight: 800, textTransform: 'uppercase',
+                          flex: 1, padding: '8px 10px', borderRadius: 9999, border: 'none', cursor: 'pointer',
+                          fontFamily: NM, fontSize: 11, fontWeight: 700, textTransform: 'uppercase',
                           background: detailsPlan === p ? '#fff' : 'rgba(255,255,255,0.06)',
                           color: detailsPlan === p ? '#000' : 'rgba(255,255,255,0.5)',
                         }}
@@ -322,7 +388,7 @@ export default function ModalPreviewTab() {
                 </div>
 
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                     Předvyplněné Jméno a Příjmení
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -332,7 +398,7 @@ export default function ModalPreviewTab() {
                       onChange={e => setDetailsFirstName(e.target.value)}
                       placeholder="Jméno"
                       style={{
-                        padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.05)',
+                        padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                         border: `1px solid ${BORDER}`, color: '#fff', fontSize: 11, outline: 'none'
                       }}
                     />
@@ -342,7 +408,7 @@ export default function ModalPreviewTab() {
                       onChange={e => setDetailsLastName(e.target.value)}
                       placeholder="Příjmení"
                       style={{
-                        padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.05)',
+                        padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                         border: `1px solid ${BORDER}`, color: '#fff', fontSize: 11, outline: 'none'
                       }}
                     />
@@ -350,7 +416,7 @@ export default function ModalPreviewTab() {
                 </div>
 
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                     Jméno producenta
                   </label>
                   <input
@@ -359,7 +425,7 @@ export default function ModalPreviewTab() {
                     onChange={e => setDetailsProducerName(e.target.value)}
                     placeholder="Např. DJ Beats"
                     style={{
-                      width: '100%', padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.05)',
+                      width: '100%', padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                       border: `1px solid ${BORDER}`, color: '#fff', fontSize: 11, outline: 'none', boxSizing: 'border-box'
                     }}
                   />
@@ -370,21 +436,21 @@ export default function ModalPreviewTab() {
             {selectedModalId === 'insufficient_credits' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                     Role uživatele
                   </label>
                   <div style={{ display: 'flex', gap: 6 }}>
                     {[
-                      { label: 'FREE (5 kr/měs)', val: false },
-                      { label: 'PRO (31 kr/měs)', val: true },
+                      { label: isCzech ? 'FREE (5 kr)' : 'FREE (5 cr)', val: false },
+                      { label: isCzech ? 'PRO (31 kr)' : 'PRO (31 cr)', val: true },
                     ].map(opt => (
                       <button
                         key={opt.label}
                         onClick={() => setCredIsPro(opt.val)}
                         style={{
-                          flex: 1, padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                          fontFamily: NM, fontSize: 11, fontWeight: 800,
-                          background: credIsPro === opt.val ? '#a78bfa' : 'rgba(255,255,255,0.06)',
+                          flex: 1, padding: '8px 10px', borderRadius: 9999, border: 'none', cursor: 'pointer',
+                          fontFamily: NM, fontSize: 11, fontWeight: 700,
+                          background: credIsPro === opt.val ? '#fff' : 'rgba(255,255,255,0.06)',
                           color: credIsPro === opt.val ? '#000' : 'rgba(255,255,255,0.5)',
                         }}
                       >
@@ -396,7 +462,7 @@ export default function ModalPreviewTab() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <div>
-                    <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                       Potřebné kredity
                     </label>
                     <input
@@ -406,13 +472,13 @@ export default function ModalPreviewTab() {
                       value={credNeeded}
                       onChange={e => setCredNeeded(parseInt(e.target.value, 10) || 1)}
                       style={{
-                        width: '100%', padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.05)',
+                        width: '100%', padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                         border: `1px solid ${BORDER}`, color: '#fff', fontSize: 12, outline: 'none', boxSizing: 'border-box'
                       }}
                     />
                   </div>
                   <div>
-                    <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
                       Zbývající kredity
                     </label>
                     <input
@@ -422,7 +488,7 @@ export default function ModalPreviewTab() {
                       value={credRemaining}
                       onChange={e => setCredRemaining(parseInt(e.target.value, 10) || 0)}
                       style={{
-                        width: '100%', padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.05)',
+                        width: '100%', padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                         border: `1px solid ${BORDER}`, color: '#fff', fontSize: 12, outline: 'none', boxSizing: 'border-box'
                       }}
                     />
@@ -431,45 +497,35 @@ export default function ModalPreviewTab() {
               </div>
             )}
 
-            {selectedModalId === 'referral_panel' && (
-              <div style={{ fontFamily: NM, fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
-                Panel využívá přímé napojení na <code>/api/user/referral</code>. V živém náhledu můžete otestovat kopírování odkazu i zobrazení přidaných kreditů.
-              </div>
-            )}
-
-            {selectedModalId === 'screen_size_warning' && (
-              <div style={{ fontFamily: NM, fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
-                Upozornění se v ostrém provozu zobrazuje uživatelům s viewportem menším než 1280×800 pixelů.
-              </div>
-            )}
-
-            {/* Launch Fullscreen Button */}
+            {/* Launch Fullscreen Button matching UpgradePage */}
             <button
               onClick={() => setActiveFullscreenModal(selectedModalId)}
               style={{
-                marginTop: 20, width: '100%', height: 44, borderRadius: 12, border: 'none', cursor: 'pointer',
-                background: 'linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%)',
-                color: '#fff', fontFamily: NM, fontWeight: 900, fontSize: 11, letterSpacing: '0.08em',
-                textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 4px 16px rgba(59,130,246,0.3)', transition: 'all 0.2s',
+                marginTop: 22, width: '100%', height: 46, borderRadius: 9999, border: 'none', cursor: 'pointer',
+                background: '#fff', color: '#000', fontFamily: NM, fontWeight: 700, fontSize: 12, letterSpacing: '0.04em',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'transform 0.15s',
               }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
               <span>🔍</span>
-              <span>Spustit živý fullscreen náhled</span>
+              <span>{isCzech ? 'Spustit živý 1:1 náhled' : 'Launch live 1:1 preview'}</span>
             </button>
           </div>
 
           {/* Technical Specs Card */}
-          <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 22 }}>
-            <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 14 }}>
-              📋 Technická specifikace
+          <div style={{
+            background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
+            border: `1px solid ${BORDER}`, borderRadius: 20, padding: 22
+          }}>
+            <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 14 }}>
+              📋 {isCzech ? 'Technická specifikace' : 'Technical Specs'}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+                <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
                   Soubor komponenty
                 </div>
                 <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#93c5fd', marginTop: 2 }}>
@@ -478,7 +534,7 @@ export default function ModalPreviewTab() {
               </div>
 
               <div>
-                <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+                <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
                   Aktivační podmínka (Trigger)
                 </div>
                 <div style={{ fontFamily: NM, fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 2, lineHeight: 1.5 }}>
@@ -487,14 +543,12 @@ export default function ModalPreviewTab() {
               </div>
 
               <div>
-                <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
-                  Dostupné uživatelské akce
+                <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+                  Jazykové verze
                 </div>
-                <ul style={{ margin: '4px 0 0', paddingLeft: 16, fontFamily: NM, fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
-                  {currentModal.actions.map((act, i) => (
-                    <li key={i}>{act}</li>
-                  ))}
-                </ul>
+                <div style={{ fontFamily: NM, fontSize: 11, color: '#34d399', marginTop: 2 }}>
+                  ✓ 🇨🇿 Čeština &nbsp;•&nbsp; ✓ 🇬🇧 English
+                </div>
               </div>
             </div>
           </div>
@@ -503,11 +557,11 @@ export default function ModalPreviewTab() {
 
         {/* ── RIGHT: Device Frame & Scaled Preview Stage ── */}
         <div style={{
-          background: 'rgba(10,12,18,0.95)', border: `1px solid ${BORDER}`,
+          background: '#000', border: `1px solid ${BORDER}`,
           borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column',
-          boxShadow: '0 24px 60px -10px rgba(0,0,0,0.7)'
+          boxShadow: '0 24px 60px -10px rgba(0,0,0,0.85)'
         }}>
-          {/* Mock Browser/Device Header */}
+          {/* Header */}
           <div style={{
             padding: '12px 18px', borderBottom: `1px solid ${BORDER}`,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -517,113 +571,100 @@ export default function ModalPreviewTab() {
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b' }} />
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981' }} />
-              <span style={{ marginLeft: 10, fontFamily: NM, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
-                TypeBeatz UI Simulator — {currentModal.name}
+              <span style={{ marginLeft: 10, fontFamily: NM, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+                TypeBeatz UI Simulator — {currentModal.name} ({isCzech ? 'Čeština' : 'English'})
               </span>
             </div>
 
             <button
               onClick={() => setActiveFullscreenModal(selectedModalId)}
               style={{
-                background: 'rgba(255,255,255,0.05)', border: `1px solid ${BORDER}`,
-                borderRadius: 8, padding: '4px 10px', color: '#fff', cursor: 'pointer',
-                fontFamily: NM, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase'
+                background: 'rgba(255,255,255,0.08)', border: `1px solid ${BORDER}`,
+                borderRadius: 9999, padding: '4px 12px', color: '#fff', cursor: 'pointer',
+                fontFamily: NM, fontSize: 10, fontWeight: 700, letterSpacing: '0.04em'
               }}
             >
-              Otevřít 1:1 ↗
+              1:1 ↗
             </button>
           </div>
 
-          {/* Canvas container with scaled interactive render */}
+          {/* Canvas container with UpgradePage ambient background */}
           <div style={{
-            position: 'relative', minHeight: 640, overflow: 'hidden',
+            position: 'relative', minHeight: 620, overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'radial-gradient(circle at center, rgba(30,58,138,0.12) 0%, rgba(0,0,0,0.98) 75%)',
+            background: '#000',
             padding: 24
           }}>
-            {/* Ambient simulated grid background */}
+            {/* Ambient stars backdrop from UpgradePage */}
             <div style={{
-              position: 'absolute', inset: 0, opacity: 0.08, pointerEvents: 'none',
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)',
-              backgroundSize: '32px 32px'
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${starsBg})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              opacity: 0.25, pointerEvents: 'none',
+              maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 30%, transparent 80%)',
+              WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 30%, transparent 80%)'
+            }} />
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+              width: 450, height: 450, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)',
+              filter: 'blur(50px)', pointerEvents: 'none'
             }} />
 
             {/* Embedded Live Component View */}
             <div style={{
-              position: 'relative', width: '100%', maxWidth: 520, zIndex: 1,
-              transform: 'scale(0.96)', transformOrigin: 'center center'
+              position: 'relative', width: '100%', maxWidth: 480, zIndex: 1,
+              transform: 'scale(0.95)', transformOrigin: 'center center'
             }}>
               {selectedModalId === 'subscription_expired' && (
-                <div style={{ position: 'relative' }}>
-                  <SubscriptionExpiredModal
-                    user={mockSubUser}
-                    onDismiss={() => alert('Odloženo na 1 hodinu (simulace)')}
-                  />
-                </div>
+                <SubscriptionExpiredModal
+                  user={mockSubUser}
+                  lang={previewLang}
+                  onDismiss={() => alert(isCzech ? 'Odloženo na 1 hodinu' : 'Reminded in 1 hour')}
+                />
               )}
 
               {selectedModalId === 'user_details' && (
-                <div style={{ position: 'relative' }}>
-                  <UserDetailsModal
-                    plan={detailsPlan}
-                    interval={detailsInterval}
-                    initialValues={{
-                      firstName: detailsFirstName,
-                      lastName: detailsLastName,
-                      producerName: detailsProducerName
-                    }}
-                    onClose={() => alert('Zavřeno')}
-                    onSubmit={(vals) => alert(`Odesláno na GoPay: ${JSON.stringify(vals)}`)}
-                  />
-                </div>
+                <UserDetailsModal
+                  plan={detailsPlan}
+                  interval={detailsInterval}
+                  lang={previewLang}
+                  initialValues={{
+                    firstName: detailsFirstName,
+                    lastName: detailsLastName,
+                    producerName: detailsProducerName
+                  }}
+                  onClose={() => alert(isCzech ? 'Zavřeno' : 'Closed')}
+                  onSubmit={(vals) => alert(`Submit: ${JSON.stringify(vals)}`)}
+                />
               )}
 
               {selectedModalId === 'insufficient_credits' && (
-                <div style={{ position: 'relative' }}>
-                  <InsufficientCreditsModal
-                    needed={credNeeded}
-                    remaining={credRemaining}
-                    isPro={credIsPro}
-                    onClose={() => alert('Zavřeno')}
-                    onUpgradePro={() => alert('Přesměrování na PRO upgrade')}
-                    onUpgradeUnlimited={() => alert('Přesměrování na Unlimited upgrade')}
-                  />
-                </div>
+                <InsufficientCreditsModal
+                  needed={credNeeded}
+                  remaining={credRemaining}
+                  isPro={credIsPro}
+                  lang={previewLang}
+                  onClose={() => alert(isCzech ? 'Zavřeno' : 'Closed')}
+                  onUpgradePro={() => alert('Upgrade PRO')}
+                  onUpgradeUnlimited={() => alert('Upgrade Unlimited')}
+                />
               )}
 
               {selectedModalId === 'referral_panel' && (
-                <div style={{ position: 'relative' }}>
-                  <ReferralPanel onClose={() => alert('Zavřeno')} />
-                </div>
+                <ReferralPanel
+                  lang={previewLang}
+                  mockStats={{ code: 'VIP808', uses: 3 }}
+                  onClose={() => alert(isCzech ? 'Zavřeno' : 'Closed')}
+                />
               )}
 
               {selectedModalId === 'screen_size_warning' && (
-                <div style={{
-                  background: '#000', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 20, padding: 32, textAlign: 'center', boxShadow: '0 25px 60px rgba(0,0,0,0.8)'
-                }}>
-                  <div style={{ color: '#eab308', marginBottom: 18 }}>
-                    <svg style={{ width: 44, height: 44, margin: '0 auto' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h2 style={{ fontFamily: NM, fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 10 }}>
-                    Best on Desktop
-                  </h2>
-                  <p style={{ fontFamily: NM, fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 24 }}>
-                    TypeBeatz is a powerful batch video generator best experienced on a larger screen. You can continue on mobile, but some features like drag-and-drop may be limited.
-                  </p>
-                  <button
-                    onClick={() => alert('Pokračovat (simulace)')}
-                    style={{
-                      width: '100%', height: 44, borderRadius: 12,
-                      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                      color: '#fff', fontFamily: NM, fontWeight: 700, fontSize: 13, cursor: 'pointer'
-                    }}
-                  >
-                    Continue anyway
-                  </button>
-                </div>
+                <ScreenSizeWarning
+                  lang={previewLang}
+                  forceShow={true}
+                  onDismiss={() => alert(isCzech ? 'Pokračovat i tak' : 'Continue anyway')}
+                />
               )}
             </div>
           </div>
@@ -639,26 +680,26 @@ export default function ModalPreviewTab() {
             <div style={{
               position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
               zIndex: 1000001, display: 'flex', alignItems: 'center', gap: 12,
-              background: 'rgba(15,20,35,0.92)', border: '1px solid rgba(255,255,255,0.18)',
-              borderRadius: 9999, padding: '8px 18px', backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.6)'
+              background: 'rgba(8,8,12,0.95)', border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 9999, padding: '8px 18px', backdropFilter: 'blur(24px)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.8)'
             }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 10px #34d399' }} />
-              <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                Živý náhled: {MODALS.find(m => m.id === activeFullscreenModal)?.name}
+              <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: '#fff', letterSpacing: '0.04em' }}>
+                {MODALS.find(m => m.id === activeFullscreenModal)?.name} ({isCzech ? '🇨🇿 CS' : '🇬🇧 EN'})
               </span>
               <button
                 onClick={() => setActiveFullscreenModal(null)}
                 style={{
                   background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
                   borderRadius: 9999, padding: '4px 12px', color: '#fff', cursor: 'pointer',
-                  fontFamily: NM, fontSize: 10, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  fontFamily: NM, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
                   marginLeft: 8, transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#ef4444'}
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
               >
-                ✕ Ukončit náhled (Zavřít)
+                ✕ Zavřít náhled
               </button>
             </div>
 
@@ -666,6 +707,7 @@ export default function ModalPreviewTab() {
             {activeFullscreenModal === 'subscription_expired' && (
               <SubscriptionExpiredModal
                 user={mockSubUser}
+                lang={previewLang}
                 onDismiss={() => setActiveFullscreenModal(null)}
               />
             )}
@@ -674,6 +716,7 @@ export default function ModalPreviewTab() {
               <UserDetailsModal
                 plan={detailsPlan}
                 interval={detailsInterval}
+                lang={previewLang}
                 initialValues={{
                   firstName: detailsFirstName,
                   lastName: detailsLastName,
@@ -681,7 +724,7 @@ export default function ModalPreviewTab() {
                 }}
                 onClose={() => setActiveFullscreenModal(null)}
                 onSubmit={(vals) => {
-                  alert(`Odesláno na GoPay: ${JSON.stringify(vals)}`);
+                  alert(`Odesláno: ${JSON.stringify(vals)}`);
                   setActiveFullscreenModal(null);
                 }}
               />
@@ -692,52 +735,33 @@ export default function ModalPreviewTab() {
                 needed={credNeeded}
                 remaining={credRemaining}
                 isPro={credIsPro}
+                lang={previewLang}
                 onClose={() => setActiveFullscreenModal(null)}
                 onUpgradePro={() => {
-                  alert('Kliknuto na Upgrade PRO');
+                  alert('Upgrade PRO');
                   setActiveFullscreenModal(null);
                 }}
                 onUpgradeUnlimited={() => {
-                  alert('Kliknuto na Upgrade Unlimited');
+                  alert('Upgrade Unlimited');
                   setActiveFullscreenModal(null);
                 }}
               />
             )}
 
             {activeFullscreenModal === 'referral_panel' && (
-              <ReferralPanel onClose={() => setActiveFullscreenModal(null)} />
+              <ReferralPanel
+                lang={previewLang}
+                mockStats={{ code: 'VIP808', uses: 3 }}
+                onClose={() => setActiveFullscreenModal(null)}
+              />
             )}
 
             {activeFullscreenModal === 'screen_size_warning' && (
-              <div style={{
-                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 1000000
-              }}>
-                <div style={{
-                  background: '#000', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 20, padding: 36, maxWidth: 440, textAlign: 'center', boxShadow: '0 30px 80px rgba(0,0,0,0.9)'
-                }}>
-                  <div style={{ color: '#eab308', marginBottom: 18 }}>
-                    <svg style={{ width: 48, height: 48, margin: '0 auto' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h2 style={{ fontFamily: NM, fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 12 }}>Best on Desktop</h2>
-                  <p style={{ fontFamily: NM, fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 24 }}>
-                    TypeBeatz is a powerful batch video generator best experienced on a larger screen. You can continue on mobile, but some features like drag-and-drop may be limited.
-                  </p>
-                  <button
-                    onClick={() => setActiveFullscreenModal(null)}
-                    style={{
-                      width: '100%', height: 46, borderRadius: 12,
-                      background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
-                      color: '#fff', fontFamily: NM, fontWeight: 700, fontSize: 13, cursor: 'pointer'
-                    }}
-                  >
-                    Continue anyway
-                  </button>
-                </div>
-              </div>
+              <ScreenSizeWarning
+                lang={previewLang}
+                forceShow={true}
+                onDismiss={() => setActiveFullscreenModal(null)}
+              />
             )}
           </div>
         )}

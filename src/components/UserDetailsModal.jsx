@@ -2,17 +2,19 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
-export default function UserDetailsModal({ plan, interval, onClose, onSubmit, loading, initialValues }) {
+export default function UserDetailsModal({ plan, interval, onClose, onSubmit, loading, initialValues, lang }) {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const currentLang = lang || language || 'cs';
+  const isCzech = currentLang === 'cs';
+
   const [firstName, setFirstName] = useState(initialValues?.firstName ?? user?.first_name ?? '');
   const [lastName, setLastName] = useState(initialValues?.lastName ?? user?.last_name ?? '');
   const [producerName, setProducerName] = useState(initialValues?.producerName ?? user?.producer_name ?? '');
-
-  const isCzech = language === 'cs';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ export default function UserDetailsModal({ plan, interval, onClose, onSubmit, lo
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
         onClick={onClose} />
       <motion.div initial={{ opacity: 0, y: 32, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 24, scale: 0.96 }} transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -38,11 +40,26 @@ export default function UserDetailsModal({ plan, interval, onClose, onSubmit, lo
           position: 'relative', zIndex: 1, width: '100%', maxWidth: 440,
           background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
           border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20, padding: '36px 32px',
-          boxShadow: '0 40px 80px -20px rgba(0,0,0,0.8)',
+          boxShadow: '0 40px 80px -20px rgba(0,0,0,0.85)',
+          overflow: 'hidden',
         }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+        {/* Subtle ambient glow matching UpgradePage */}
+        <div style={{
+          position: 'absolute', top: -30, left: '50%', transform: 'translateX(-50%)',
+          width: '120%', height: 200,
+          background: 'rgba(59,130,246,0.18)', filter: 'blur(60px)',
+          zIndex: 0, pointerEvents: 'none', borderRadius: '50%'
+        }} />
 
-        <div style={{ marginBottom: 28 }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 16, right: 16, zIndex: 10,
+          background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)',
+          cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4, transition: 'color 0.2s'
+        }}
+        onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+        onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}>×</button>
+
+        <div style={{ position: 'relative', zIndex: 1, marginBottom: 28 }}>
           <h2 style={{ fontFamily: NM, fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: 6, letterSpacing: '-0.03em' }}>
             {isCzech ? 'Ještě jeden krok' : 'One last step'}
           </h2>
@@ -51,7 +68,7 @@ export default function UserDetailsModal({ plan, interval, onClose, onSubmit, lo
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
             <label style={labelStyle}>{isCzech ? 'JMÉNO *' : 'FIRST NAME *'}</label>
             <input style={inputStyle} value={firstName} onChange={e => setFirstName(e.target.value)}
@@ -80,7 +97,7 @@ export default function UserDetailsModal({ plan, interval, onClose, onSubmit, lo
               background: '#fff', color: '#000', fontFamily: NM, fontWeight: 700, fontSize: '0.9rem',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: (!firstName.trim() || !lastName.trim()) ? 0.5 : 1,
-              transition: 'opacity 0.2s, transform 0.1s',
+              transition: 'opacity 0.2s, transform 0.15s',
             }}
             onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.transform = 'scale(1.02)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>

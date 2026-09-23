@@ -2,10 +2,9 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
-const BLUE = '#3b82f6';
-const BLUE2 = '#0ea5e9';
 
 export default function InsufficientCreditsModal({
   needed = 1,
@@ -14,10 +13,12 @@ export default function InsufficientCreditsModal({
   onClose,
   onUpgradePro,
   onUpgradeUnlimited,
+  lang,
 }) {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const isCzech = language === 'cs';
+  const currentLang = lang || language || 'cs';
+  const isCzech = currentLang === 'cs';
 
   // Prevent background scrolling while open
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function InsufficientCreditsModal({
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 16,
       }}>
-        {/* Backdrop */}
+        {/* Backdrop blur */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -51,166 +52,161 @@ export default function InsufficientCreditsModal({
           onClick={onClose}
           style={{
             position: 'absolute', inset: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
+            background: 'rgba(0, 0, 0, 0.75)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
           }}
         />
 
-        {/* Modal card */}
+        {/* Modal card styled identically to UpgradePage */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 24 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 24 }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, y: 32, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 24, scale: 0.96 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
             position: 'relative', zIndex: 1,
-            width: '100%', maxWidth: 460,
-            background: 'linear-gradient(180deg, rgba(14,14,20,0.98) 0%, rgba(6,10,24,0.98) 100%)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 24,
-            padding: '36px 32px 32px',
-            boxShadow: '0 40px 100px -20px rgba(0,0,0,0.9), 0 0 50px -10px rgba(59,130,246,0.15)',
-            textAlign: 'center',
+            width: '100%', maxWidth: 440,
+            background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 20,
+            padding: '36px 32px 30px',
+            boxShadow: '0 40px 80px -20px rgba(0,0,0,0.85)',
             overflow: 'hidden',
           }}
         >
-          {/* Subtle top ambient glow */}
+          {/* Ambient background glow & stars like Pro card in UpgradePage */}
           <div style={{
-            position: 'absolute', top: -50, left: '50%', transform: 'translateX(-50%)',
-            width: 260, height: 120, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%)',
-            pointerEvents: 'none', filter: 'blur(24px)'
+            position: 'absolute', top: -30, left: '50%', transform: 'translateX(-50%)',
+            width: '120%', height: 240,
+            background: 'rgba(59,130,246,0.22)',
+            filter: 'blur(70px)',
+            zIndex: 0, pointerEvents: 'none', borderRadius: '50%'
+          }} />
+          <div style={{
+            position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)',
+            width: '110%', height: 200,
+            backgroundImage: `url(${starsBg})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            opacity: 0.45, zIndex: 0, pointerEvents: 'none', borderRadius: '50%',
+            maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 65%)',
+            WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 65%)'
           }} />
 
           {/* Close button */}
           <button
             onClick={onClose}
             style={{
-              position: 'absolute', top: 18, right: 18,
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '50%', width: 32, height: 32,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'rgba(255,255,255,0.4)',
-              fontSize: 16, transition: 'all 0.2s',
+              position: 'absolute', top: 16, right: 16, zIndex: 10,
+              background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)',
+              cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4, transition: 'color 0.2s'
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+            onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
           >
             ×
           </button>
 
-          {/* Badge */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
-            borderRadius: 9999, padding: '4px 12px', marginBottom: 18
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} />
-            <span style={{
-              fontFamily: NM, fontSize: 10, fontWeight: 900,
-              letterSpacing: '0.12em', textTransform: 'uppercase', color: '#f87171'
+          {/* Heading & Subtitle */}
+          <div style={{ position: 'relative', zIndex: 1, marginBottom: 20 }}>
+            <h2 style={{
+              fontFamily: NM, fontSize: '1.4rem', fontWeight: 700,
+              letterSpacing: '-0.03em', color: '#fff', margin: '0 0 6px', lineHeight: 1.2
             }}>
-              {isCzech ? 'Nedostatek kreditů' : 'Out of credits'}
-            </span>
+              {isCzech ? 'Nedostatek kreditů' : 'Limit reached'}
+            </h2>
+            <p style={{
+              fontFamily: NM, fontSize: '0.85rem', color: 'rgba(255,255,255,0.35)',
+              lineHeight: 1.6, margin: 0
+            }}>
+              {isPro
+                ? (isCzech
+                    ? `Pro toto generování potřebujete ${needed} ${needed === 1 ? 'kredit' : needed < 5 ? 'kredity' : 'kreditů'}, ale zbývá vám ${remaining}. Přejděte na Neomezený plán a tvořte bez limitů.`
+                    : `You need ${needed} credit${needed > 1 ? 's' : ''} but only have ${remaining} left. Upgrade to Unlimited for unlimited video creation.`
+                  )
+                : (isCzech
+                    ? `Pro toto video potřebujete ${needed} ${needed === 1 ? 'kredit' : needed < 5 ? 'kredity' : 'kreditů'}, ale zbývá vám ${remaining}. Přejděte na vyšší plán a tvořte dál.`
+                    : `You need ${needed} credit${needed > 1 ? 's' : ''} but only have ${remaining} left. Upgrade your plan to continue rendering.`
+                  )
+              }
+            </p>
           </div>
 
-          {/* Heading */}
-          <h2 style={{
-            fontFamily: NM, fontSize: 24, fontWeight: 900,
-            letterSpacing: '-0.03em', color: '#fff', margin: '0 0 10px', lineHeight: 1.2
-          }}>
-            {isCzech ? 'Vyčerpali jste všechny kredity' : 'You’ve reached your limit'}
-          </h2>
+          {/* Inner divider */}
+          <div style={{ position: 'relative', zIndex: 1, width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
 
-          {/* Subtitle / Explanation */}
-          <p style={{
-            fontFamily: NM, fontSize: 13, color: 'rgba(255,255,255,0.55)',
-            lineHeight: 1.6, margin: '0 0 22px'
-          }}>
-            {isPro
-              ? (isCzech
-                  ? `Pro tuto akci potřebujete ${needed} ${needed === 1 ? 'kredit' : needed < 5 ? 'kredity' : 'kreditů'}, ale máte k dispozici ${remaining}. Upgradujte na Unlimited pro neomezenou tvorbu.`
-                  : `You need ${needed} credit${needed > 1 ? 's' : ''} but only have ${remaining} left. Upgrade to Unlimited for unlimited renders.`
-                )
-              : (isCzech
-                  ? `Pro toto video potřebujete ${needed} ${needed === 1 ? 'kredit' : needed < 5 ? 'kredity' : 'kreditů'}, ale máte k dispozici ${remaining}. Přejděte na vyšší plán a tvořte dál.`
-                  : `You need ${needed} credit${needed > 1 ? 's' : ''} but only have ${remaining} left. Upgrade to PRO or Unlimited to keep creating.`
-                )
-            }
-          </p>
-
-          {/* Credit status chip */}
+          {/* Status info box */}
           <div style={{
-            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', marginBottom: 24
+            position: 'relative', zIndex: 1,
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 12, padding: '14px 18px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            marginBottom: 24
           }}>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
-                {isCzech ? 'Stav účtu' : 'Account status'}
+            <div>
+              <div style={{ fontFamily: NM, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isCzech ? 'Aktuální plán' : 'Current plan'}
               </div>
-              <div style={{ fontFamily: NM, fontSize: 12, color: '#fff', fontWeight: 700, marginTop: 2 }}>
-                {isPro ? 'Plán PRO (31 kreditů/měs)' : 'Plán FREE (5 kreditů/měs)'}
+              <div style={{ fontFamily: NM, fontSize: '0.9rem', color: '#fff', fontWeight: 600, marginTop: 2 }}>
+                {isPro ? (isCzech ? 'Plán PRO (31 videí/měs)' : 'Plan PRO (31 videos/mo)') : (isCzech ? 'Plán FREE (5 videí/měs)' : 'Plan FREE (5 videos/mo)')}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+              <div style={{ fontFamily: NM, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {isCzech ? 'Zbývá' : 'Remaining'}
               </div>
-              <div style={{ fontFamily: NM, fontSize: 14, color: '#ef4444', fontWeight: 900, marginTop: 1 }}>
-                {remaining} / {needed} {isCzech ? 'potřebných' : 'needed'}
+              <div style={{ fontFamily: NM, fontSize: '1rem', color: '#fff', fontWeight: 700, marginTop: 2 }}>
+                {remaining} <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', fontWeight: 400 }}>/ {needed}</span>
               </div>
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {/* Primary Upgrade to Unlimited */}
+          {/* Action buttons with UpgradePage pill styling */}
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* Primary button: solid white pill */}
             <button
               onClick={handleUnlimited}
               style={{
-                width: '100%', height: 48, borderRadius: 12, border: 'none', cursor: 'pointer',
-                background: 'linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%)',
-                color: '#fff', fontFamily: NM, fontWeight: 900, fontSize: 12, letterSpacing: '0.08em',
-                textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 4px 20px rgba(59,130,246,0.35)', transition: 'all 0.2s',
+                width: '100%', height: 46, borderRadius: 9999, border: 'none', cursor: 'pointer',
+                background: '#fff', color: '#000', fontFamily: NM, fontWeight: 700, fontSize: '0.9rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'transform 0.15s, opacity 0.15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(59,130,246,0.5)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(59,130,246,0.35)'; }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <span>⚡</span>
-              <span>{isCzech ? 'Získat Unlimited — 399 Kč / měs' : 'Get Unlimited — 399 CZK / mo'}</span>
+              {isCzech ? 'Získat Neomezený — 399 Kč / měs →' : 'Go Unlimited — $19.99 / mo →'}
             </button>
 
-            {/* Pro Option (only shown if not already pro) */}
+            {/* Pro Option (only shown if free) */}
             {!isPro && (
               <button
                 onClick={handlePro}
                 style={{
-                  width: '100%', height: 44, borderRadius: 12,
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                  color: '#fff', fontFamily: NM, fontWeight: 800, fontSize: 11, letterSpacing: '0.08em',
-                  textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s',
+                  width: '100%', height: 40, borderRadius: 9999, cursor: 'pointer',
+                  background: 'transparent', color: 'rgba(255,255,255,0.7)',
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  fontFamily: NM, fontWeight: 600, fontSize: '0.85rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; }}
               >
-                {isCzech ? 'Plán PRO (31 videí) — 199 Kč / měs' : 'Plan PRO (31 videos) — 199 CZK / mo'}
+                {isCzech ? 'Přejít na PRO (31 videí) — 199 Kč / měs' : 'Upgrade to PRO (31 videos) — $9.99 / mo'}
               </button>
             )}
 
-            {/* Later / dismiss */}
+            {/* Dismiss text */}
             <button
               onClick={onClose}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: NM, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)',
-                padding: '8px 0', transition: 'color 0.2s', marginTop: 4
+                fontFamily: NM, fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)',
+                padding: '6px 0', marginTop: 2, transition: 'color 0.2s', textAlign: 'center'
               }}
-              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
             >
               {isCzech ? 'Zavřít a pokračovat později' : 'Close and continue later'}
             </button>

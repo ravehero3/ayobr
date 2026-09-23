@@ -1,267 +1,250 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
+import starsBg from '../assets/stars_background_voodoo808_1778087733997.jpg';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 
-// Animated orbital ring decoration
-function OrbitalRing({ size, opacity, duration, delay }) {
-  return (
-    <div style={{
-      position: 'absolute', inset: 0,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      pointerEvents: 'none'
-    }}>
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration, repeat: Infinity, ease: 'linear', delay }}
-        style={{
-          width: size, height: size, borderRadius: '50%',
-          border: `1px solid rgba(59,130,246,${opacity})`,
-          flexShrink: 0
-        }}
-      />
-    </div>
-  );
-}
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
 
-/**
- * SubscriptionExpiredModal
- *
- * Shows when a paid user's subscription period has expired.
- * Fully in Czech, matches the TypeBeatz design aesthetic.
- *
- * Props:
- *  - user: the current auth user object (must have .role, .first_name, .subscription)
- *  - onDismiss: optional callback to temporarily dismiss (snooze)
- */
-export default function SubscriptionExpiredModal({ user, onDismiss }) {
+export default function SubscriptionExpiredModal({ user, onDismiss, lang }) {
   const navigate = useNavigate();
-  const overlayRef = useRef(null);
+  const { language } = useLanguage();
+  const currentLang = lang || language || 'cs';
+  const isCzech = currentLang === 'cs';
 
   const firstName = user?.first_name || '';
-  const planLabel = user?.subscription?.plan === 'unlimited' ? 'Neomezený' : 'Pro';
+  const plan = user?.subscription?.plan || user?.role || 'pro';
   const isAnnual = user?.subscription?.is_annual;
+  const isUnlimited = plan === 'unlimited';
+  const planLabel = isUnlimited
+    ? (isCzech ? 'Neomezený' : 'Unlimited')
+    : 'Pro';
+
   const expiredDate = user?.subscription?.current_period_end
     ? new Date(user.subscription.current_period_end)
     : null;
   const expiredLabel = expiredDate
-    ? expiredDate.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? expiredDate.toLocaleDateString(isCzech ? 'cs-CZ' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
-  // Derive correct price string for this user's plan
-  const priceLabel = (() => {
-    const plan = user?.subscription?.plan;
-    if (isAnnual) {
-      if (plan === 'unlimited') return '3\u202f588 Kč / rok (299 Kč × 12)';
-      return '1\u202f788 Kč / rok (149 Kč × 12)';
+  // Derive prices
+  const priceDisplay = (() => {
+    if (isCzech) {
+      if (isAnnual) {
+        return isUnlimited ? '3 588 Kč' : '1 788 Kč';
+      }
+      return isUnlimited ? '399 Kč' : '199 Kč';
     } else {
-      if (plan === 'unlimited') return '399 Kč / měsíc';
-      return '199 Kč / měsíc';
+      if (isAnnual) {
+        return isUnlimited ? '$179.99' : '$89.99';
+      }
+      return isUnlimited ? '$19.99' : '$9.99';
     }
   })();
 
-  const renewalNote = isAnnual
-    ? 'Roční plán — žádné měsíční upomínky, automaticky se obnoví za rok'
-    : 'Automaticky se obnoví každý měsíc, bez nutnosti cokoliv klikat';
+  const periodLabel = isAnnual
+    ? (isCzech ? '/ rok' : '/ year')
+    : (isCzech ? '/ měsíc' : '/ month');
 
-  // Block scroll while modal is open
+  const subPriceNote = isAnnual
+    ? (isCzech ? '(úspora až 3 měsíce zdarma)' : '(save up to 3 months free)')
+    : (isCzech ? 'obnova každý měsíc' : 'billed monthly');
+
+  // Block scroll
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
   }, []);
 
+  const features = isCzech
+    ? [
+        'Všechna existující videa a nastavení zůstávají zachována',
+        'Okamžitý plný přístup k hromadnému generátoru ihned po obnově',
+        isAnnual
+          ? 'Roční plán — žádné měsíční upomínky, automatická obnova za rok'
+          : 'Předplatné lze kdykoli zrušit jedním kliknutím bez poplatků',
+      ]
+    : [
+        'All your existing videos and presets are completely safe',
+        'Immediate full access to the batch generator upon renewal',
+        isAnnual
+          ? 'Annual plan — no monthly prompts, automatic renewal next year'
+          : 'Cancel anytime with one click, no hidden fees',
+      ];
+
   return (
     <AnimatePresence>
-      <motion.div
-        key="sub-expired-overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        ref={overlayRef}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 9998,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '16px',
-          background: 'rgba(0,0,0,0.85)',
-          backdropFilter: 'blur(18px)',
-          WebkitBackdropFilter: 'blur(18px)',
-        }}
-      >
-        {/* Background ambient glow */}
-        <div style={{
-          position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none'
-        }}>
-          <div style={{
-            position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
-            width: 600, height: 600, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)',
-            filter: 'blur(40px)'
-          }} />
-          <div style={{
-            position: 'absolute', bottom: '10%', left: '30%',
-            width: 400, height: 400, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)',
-            filter: 'blur(60px)'
-          }} />
-        </div>
-
-        {/* Card */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 16
+      }}>
+        {/* Backdrop blur */}
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onDismiss}
+          style={{
+            position: 'absolute', inset: 0,
+            background: 'rgba(0,0,0,0.75)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+        />
+
+        {/* Modal Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 32, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.96 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            position: 'relative', width: '100%', maxWidth: 500,
-            background: 'linear-gradient(135deg, rgba(8,10,20,0.98) 0%, rgba(4,14,50,0.96) 100%)',
-            border: '1px solid rgba(59,130,246,0.2)',
-            borderRadius: 24,
-            padding: '44px 40px 36px',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px -20px rgba(0,0,20,0.9), 0 0 80px -20px rgba(59,130,246,0.12)',
+            position: 'relative', zIndex: 1, width: '100%', maxWidth: 460,
+            background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 20,
+            padding: '36px 32px 30px',
+            boxShadow: '0 40px 80px -20px rgba(0,0,0,0.85)',
             overflow: 'hidden',
           }}
         >
-          {/* Subtle orbital rings decoration behind card content */}
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 24, pointerEvents: 'none' }}>
-            <OrbitalRing size={280} opacity={0.06} duration={22} delay={0} />
-            <OrbitalRing size={380} opacity={0.04} duration={35} delay={3} />
-          </div>
-
-          {/* Top icon */}
+          {/* Ambient background glow & stars like Pro card in UpgradePage */}
           <div style={{
-            position: 'relative', zIndex: 1,
-            display: 'flex', justifyContent: 'center', marginBottom: 28
-          }}>
-            <motion.div
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              style={{
-                width: 64, height: 64, borderRadius: '50%',
-                background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))',
-                border: '1px solid rgba(59,130,246,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 30px rgba(59,130,246,0.15)',
-              }}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(147,197,253,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </motion.div>
-          </div>
+            position: 'absolute', top: -30, left: '50%', transform: 'translateX(-50%)',
+            width: '120%', height: 260,
+            background: 'rgba(59,130,246,0.22)',
+            filter: 'blur(70px)',
+            zIndex: 0, pointerEvents: 'none', borderRadius: '50%'
+          }} />
+          <div style={{
+            position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)',
+            width: '110%', height: 220,
+            backgroundImage: `url(${starsBg})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            opacity: 0.45, zIndex: 0, pointerEvents: 'none', borderRadius: '50%',
+            maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 65%)',
+            WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 65%)'
+          }} />
 
-          {/* Headline */}
-          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginBottom: 20 }}>
+          {/* Close button */}
+          {onDismiss && (
+            <button
+              onClick={onDismiss}
+              style={{
+                position: 'absolute', top: 16, right: 16, zIndex: 10,
+                background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)',
+                cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4, transition: 'color 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+            >
+              ×
+            </button>
+          )}
+
+          {/* Header */}
+          <div style={{ position: 'relative', zIndex: 1, marginBottom: 20 }}>
             <h2 style={{
-              fontFamily: NM, fontSize: '1.55rem', fontWeight: 800,
-              color: '#fff', letterSpacing: '-0.04em', marginBottom: 10, lineHeight: 1.2
+              fontFamily: NM, fontSize: '1.4rem', fontWeight: 700,
+              color: '#fff', marginBottom: 6, letterSpacing: '-0.03em', lineHeight: 1.2
             }}>
-              {firstName ? `${firstName}, tvoje předplatné` : 'Tvoje předplatné'}{' '}
-              <span style={{
-                background: 'linear-gradient(90deg, #60a5fa, #a78bfa)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-              }}>
-                vypršelo
-              </span>
+              {isCzech
+                ? (firstName ? `${firstName}, vaše předplatné vypršelo` : 'Vaše předplatné vypršelo')
+                : (firstName ? `${firstName}, your subscription has expired` : 'Your subscription has expired')}
             </h2>
             <p style={{
-              fontFamily: NM, fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)',
-              lineHeight: 1.65, maxWidth: 380, margin: '0 auto'
+              fontFamily: NM, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)',
+              lineHeight: 1.6, margin: 0
             }}>
-              Tvůj plán <strong style={{ color: 'rgba(255,255,255,0.7)' }}>TypeBeatz {planLabel}</strong>
-              {expiredLabel ? (
-                <> skončil dne <strong style={{ color: 'rgba(255,255,255,0.7)' }}>{expiredLabel}</strong>.</>
-              ) : ' již není aktivní.'}
-              {' '}Pro pokračování ve tvorbě videí obnov své předplatné.
+              {isCzech
+                ? `Plán TypeBeatz ${planLabel}${expiredLabel ? ` skončil dne ${expiredLabel}` : ' není aktivní'}. Pro pokračování ve tvorbě videí obnovte své předplatné.`
+                : `Your TypeBeatz ${planLabel} plan${expiredLabel ? ` ended on ${expiredLabel}` : ' is inactive'}. Renew to continue rendering high-resolution videos.`}
             </p>
           </div>
 
-          {/* Info box */}
-          <div style={{
-            position: 'relative', zIndex: 1,
-            background: 'rgba(59,130,246,0.06)',
-            border: '1px solid rgba(59,130,246,0.15)',
-            borderRadius: 12, padding: '14px 18px',
-            marginBottom: 28,
-          }}>
-            <ul style={{
-              listStyle: 'none', margin: 0, padding: 0,
-              display: 'flex', flexDirection: 'column', gap: 8
-            }}>
-              {[
-                'Tvá existující videa a nastavení jsou v bezpečí',
-                'Po obnovení okamžitě znovu získáš plný přístup',
-                renewalNote,
-                'Kdykoli lze zrušit bez poplatků',
-              ].map((item, i) => (
-                <li key={i} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: 10,
-                  fontFamily: NM, fontSize: '0.83rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.5
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  {item}
-                </li>
-              ))}
-            </ul>
+          {/* Inner divider */}
+          <div style={{ position: 'relative', zIndex: 1, width: '100%', height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+
+          {/* Price display matching UpgradePage */}
+          <div style={{ position: 'relative', zIndex: 1, marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ fontFamily: NM, fontWeight: 600, fontSize: '2rem', letterSpacing: '-0.03em', color: '#fff' }}>
+                {priceDisplay}
+              </span>
+              <span style={{ fontFamily: NM, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)' }}>
+                {periodLabel}
+              </span>
+              <span style={{ fontFamily: NM, fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginLeft: 4 }}>
+                {subPriceNote}
+              </span>
+            </div>
           </div>
 
-          {/* CTA buttons */}
+          {/* Features list matching UpgradePage */}
+          <ul style={{
+            position: 'relative', zIndex: 1,
+            listStyle: 'none', padding: 0, margin: '0 0 28px',
+            display: 'flex', flexDirection: 'column', gap: 12
+          }}>
+            {features.map((text, i) => (
+              <li key={i} style={{
+                fontFamily: NM, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)',
+                lineHeight: 1.5, display: 'flex', alignItems: 'flex-start', gap: 10
+              }}>
+                <span style={{ color: '#fff', display: 'flex', alignItems: 'center', flexShrink: 0, marginTop: 2 }}>
+                  <CheckIcon />
+                </span>
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Action buttons matching UpgradePage pill styling */}
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            {/* Primary button: solid white pill */}
+            <button
               onClick={() => navigate('/upgrade')}
               style={{
-                width: '100%', padding: '14px 24px', borderRadius: 12,
-                background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
-                border: 'none', cursor: 'pointer',
-                fontFamily: NM, fontSize: '0.9rem', fontWeight: 800,
-                letterSpacing: '0.02em', color: '#fff',
-                boxShadow: '0 4px 24px rgba(59,130,246,0.35)',
-                transition: 'box-shadow 0.2s',
+                width: '100%', height: 46, borderRadius: 9999, border: 'none', cursor: 'pointer',
+                background: '#fff', color: '#000', fontFamily: NM, fontWeight: 700, fontSize: '0.9rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'transform 0.15s, opacity 0.15s',
               }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              Obnovit předplatné
-            </motion.button>
+              {isCzech ? 'Obnovit předplatné →' : 'Renew subscription →'}
+            </button>
 
+            {/* Secondary button: subtle ghost pill */}
             {onDismiss && (
               <button
                 onClick={onDismiss}
                 style={{
-                  width: '100%', padding: '12px 24px', borderRadius: 12,
-                  background: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  cursor: 'pointer',
-                  fontFamily: NM, fontSize: '0.83rem', fontWeight: 500,
-                  color: 'rgba(255,255,255,0.3)',
-                  transition: 'color 0.2s, border-color 0.2s',
+                  width: '100%', height: 40, borderRadius: 9999, cursor: 'pointer',
+                  background: 'transparent', color: 'rgba(255,255,255,0.5)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  fontFamily: NM, fontWeight: 600, fontSize: '0.82rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
               >
-                Připomenout mi za hodinu
+                {isCzech ? 'Připomenout za 1 hodinu' : 'Remind me in 1 hour'}
               </button>
             )}
           </div>
-
-          {/* Fine print */}
-          <p style={{
-            position: 'relative', zIndex: 1,
-            textAlign: 'center', marginTop: 20,
-            fontFamily: NM, fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)',
-            lineHeight: 1.6
-          }}>
-            TypeBeatz {planLabel} • {priceLabel}
-            {isAnnual && <> • <span style={{color:'rgba(147,197,253,0.5)'}}>Roční plán — úspora až 3 měsíce zdarma</span></>}
-            <br />Bezpečná platba přes GoPay
-          </p>
         </motion.div>
-      </motion.div>
+      </div>
     </AnimatePresence>
   );
 }
