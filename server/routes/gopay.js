@@ -84,18 +84,18 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
 
     if (plan === 'unlimited') {
       if (isAnnual) {
-        amountHellers = 418800; // 349 Kč * 12 = 4,188 Kč (Annual)
+        amountHellers = 358800; // 299 Kč × 12 = 3,588 Kč (Annual — charged upfront)
         planLabel = 'Neomezený (Roční)';
       } else {
-        amountHellers = 42900; // 429 Kč (Monthly)
+        amountHellers = 39900; // 399 Kč (Monthly)
         planLabel = 'Neomezený (Měsíční)';
       }
     } else {
       if (isAnnual) {
-        amountHellers = 214800; // 179 Kč * 12 = 2,148 Kč (Annual)
+        amountHellers = 178800; // 149 Kč × 12 = 1,788 Kč (Annual — charged upfront)
         planLabel = 'Pro (Roční)';
       } else {
-        amountHellers = 22900; // 229 Kč (Monthly)
+        amountHellers = 19900; // 199 Kč (Monthly)
         planLabel = 'Pro (Měsíční)';
       }
     }

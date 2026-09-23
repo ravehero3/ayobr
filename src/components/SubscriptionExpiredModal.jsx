@@ -41,12 +41,29 @@ export default function SubscriptionExpiredModal({ user, onDismiss }) {
 
   const firstName = user?.first_name || '';
   const planLabel = user?.subscription?.plan === 'unlimited' ? 'Neomezený' : 'Pro';
+  const isAnnual = user?.subscription?.is_annual;
   const expiredDate = user?.subscription?.current_period_end
     ? new Date(user.subscription.current_period_end)
     : null;
   const expiredLabel = expiredDate
     ? expiredDate.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
+
+  // Derive correct price string for this user's plan
+  const priceLabel = (() => {
+    const plan = user?.subscription?.plan;
+    if (isAnnual) {
+      if (plan === 'unlimited') return '3\u202f588 Kč / rok (299 Kč × 12)';
+      return '1\u202f788 Kč / rok (149 Kč × 12)';
+    } else {
+      if (plan === 'unlimited') return '399 Kč / měsíc';
+      return '199 Kč / měsíc';
+    }
+  })();
+
+  const renewalNote = isAnnual
+    ? 'Roční plán — žádné měsíční upomínky, automaticky se obnoví za rok'
+    : 'Automaticky se obnoví každý měsíc, bez nutnosti cokoliv klikat';
 
   // Block scroll while modal is open
   useEffect(() => {
@@ -177,7 +194,7 @@ export default function SubscriptionExpiredModal({ user, onDismiss }) {
               {[
                 'Tvá existující videa a nastavení jsou v bezpečí',
                 'Po obnovení okamžitě znovu získáš plný přístup',
-                'Nové předplatné bude automaticky obnovováno každý měsíc',
+                renewalNote,
                 'Kdykoli lze zrušit bez poplatků',
               ].map((item, i) => (
                 <li key={i} style={{
@@ -239,7 +256,8 @@ export default function SubscriptionExpiredModal({ user, onDismiss }) {
             fontFamily: NM, fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)',
             lineHeight: 1.6
           }}>
-            Předplatné TypeBeatz • 229 Kč / měsíc (Pro) nebo 429 Kč / měsíc (Neomezený)
+            TypeBeatz {planLabel} • {priceLabel}
+            {isAnnual && <> • <span style={{color:'rgba(147,197,253,0.5)'}}>Roční plán — úspora až 3 měsíce zdarma</span></>}
             <br />Bezpečná platba přes GoPay
           </p>
         </motion.div>

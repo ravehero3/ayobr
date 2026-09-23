@@ -99,13 +99,13 @@ async function chargeRecurrence(parentPaymentId, amountHellers, orderNumber, ord
 function getPlanAmount(plan, isAnnual) {
   if (plan === 'unlimited') {
     return isAnnual
-      ? { amountHellers: 418800, label: 'Neomezený (Roční)' }
-      : { amountHellers: 42900,  label: 'Neomezený (Měsíční)' };
+      ? { amountHellers: 358800, label: 'Neomezený (Roční)' }   // 299 Kč × 12 = 3,588 Kč
+      : { amountHellers: 39900,  label: 'Neomezený (Měsíční)' }; // 399 Kč
   }
   // default to pro
   return isAnnual
-    ? { amountHellers: 214800, label: 'Pro (Roční)' }
-    : { amountHellers: 22900,  label: 'Pro (Měsíční)' };
+    ? { amountHellers: 178800, label: 'Pro (Roční)' }   // 149 Kč × 12 = 1,788 Kč
+    : { amountHellers: 19900,  label: 'Pro (Měsíční)' }; // 199 Kč
 }
 
 /**
