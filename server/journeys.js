@@ -68,11 +68,10 @@ function renderJourneyStepHTML(step, user = { first_name: 'Jan', email: 'jan@exa
   const ctaText = (isCzech ? step.cta_text_cs : step.cta_text_en) || (isCzech ? 'Přejít do aplikace →' : 'Open TypeBeatz →');
   const ctaUrl = step.cta_url ? (step.cta_url.startsWith('http') ? step.cta_url : `${appUrl}${step.cta_url}`) : `${appUrl}/app`;
 
-  // Format body paragraphs
   const paragraphs = rawBody
     .split('\n')
     .filter(p => p.trim())
-    .map(p => `<p style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,0.65);line-height:1.7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">${p.replace('{{firstName}}', name)}</p>`)
+    .map(p => `<p style="margin:0 0 18px;font-size:15px;color:rgba(255,255,255,0.5);line-height:1.75;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:400;">${p.replace('{{firstName}}', name)}</p>`)
     .join('');
 
   return `<!DOCTYPE html>
@@ -82,55 +81,95 @@ function renderJourneyStepHTML(step, user = { first_name: 'Jan', email: 'jan@exa
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TypeBeatz</title>
 </head>
-<body style="margin:0;padding:0;background:#000000;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#000000;min-height:100vh">
+<!--
+  Email design mirrors the TypeBeatz UpgradePage:
+  - Pure #000 background
+  - Deep navy glass card: linear-gradient(to bottom, rgba(1,5,10,0.95), rgba(7,30,87,0.9))
+  - Thin rgba(255,255,255,0.07) borders
+  - Editorial weight 400-600 typography, -0.04em tracking on headings
+  - White pill CTA (solid primary)
+  - Subtle blue glow orb (not a stripe)
+  - Minimal monochrome badge
+-->
+<body style="margin:0;padding:0;background:#000000;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#000000;">
   <tr>
-    <td align="center" style="padding:48px 16px">
-      <!-- Container card -->
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:540px;background:linear-gradient(180deg, #090b14 0%, #04091e 100%);border:1px solid rgba(255,255,255,0.12);border-radius:22px;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,0.85)">
-        <!-- Top accent line -->
-        <tr><td height="4" style="background:linear-gradient(90deg, #3b82f6, #0ea5e9, #a78bfa);font-size:0;line-height:0">&nbsp;</td></tr>
+    <td align="center" style="padding:48px 16px;">
+
+      <!-- Outer glow — mimics the blue radial glow behind PRO card on UpgradePage -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
         <tr>
-          <td style="padding:40px 36px 36px">
-            <!-- Brand -->
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px">
-              <tr>
-                <td>
-                  <span style="font-size:16px;font-weight:900;letter-spacing:-0.03em;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">TypeBeatz</span>
-                </td>
-                <td align="right">
-                  <span style="display:inline-block;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#93c5fd;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">${badgeText}</span>
-                </td>
-              </tr>
-            </table>
+          <td>
+            <!-- Glow orb (table cell trick for email clients) -->
+            <div style="position:relative;">
 
-            <!-- Title -->
-            <h1 style="margin:0 0 16px;font-size:24px;font-weight:800;letter-spacing:-0.03em;line-height:1.25;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">${title.replace('{{firstName}}', name)}</h1>
+              <!-- Main card -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                style="background:linear-gradient(180deg, rgba(1,5,10,0.98) 0%, rgba(7,30,87,0.92) 100%);border:1px solid rgba(255,255,255,0.1);border-radius:20px;overflow:hidden;box-shadow:0 0 80px rgba(59,130,246,0.18), 0 30px 60px rgba(0,0,0,0.9);">
 
-            <!-- Divider -->
-            <div style="height:1px;background:rgba(255,255,255,0.08);margin:20px 0 24px"></div>
+                <tr>
+                  <td style="padding:44px 40px 40px;">
 
-            <!-- Body -->
-            <div style="margin-bottom:32px">
-              ${paragraphs}
+                    <!-- Brand wordmark -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:36px;">
+                      <tr>
+                        <td>
+                          <span style="font-size:15px;font-weight:600;letter-spacing:-0.03em;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">TypeBeatz</span>
+                        </td>
+                        <td align="right">
+                          <!-- Minimal monochrome badge pill — matches ghost outline CTA style from UpgradePage -->
+                          <span style="display:inline-block;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.45);border:1px solid rgba(255,255,255,0.14);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">${badgeText}</span>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Thin divider -->
+                    <div style="height:1px;background:rgba(255,255,255,0.07);margin-bottom:32px;"></div>
+
+                    <!-- Headline — matches UpgradePage h1: weight 700, -0.04em tracking -->
+                    <h1 style="margin:0 0 20px;font-size:26px;font-weight:700;letter-spacing:-0.04em;line-height:1.15;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">${(title || '').replace('{{firstName}}', name)}</h1>
+
+                    <!-- Body copy — matches UpgradePage desc: weight 400, rgba(255,255,255,0.32) muted -->
+                    <div style="margin-bottom:36px;">
+                      ${paragraphs}
+                    </div>
+
+                    <!-- Thin divider -->
+                    <div style="height:1px;background:rgba(255,255,255,0.07);margin-bottom:32px;"></div>
+
+                    <!-- CTA — exactly matches UpgradePage solid pill button: white bg, black text, border-radius 9999 -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+                      <tr>
+                        <td align="center" style="border-radius:9999px;background:#ffffff;">
+                          <a href="${ctaUrl}"
+                            style="display:inline-block;padding:13px 48px;border-radius:9999px;font-weight:600;font-size:14px;text-decoration:none;letter-spacing:-0.01em;background:#ffffff;color:#000000;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                            ${ctaText}
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+
+                <!-- Footer row inside card -->
+                <tr>
+                  <td style="padding:0 40px 32px;">
+                    <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:20px;"></div>
+                    <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.2);text-align:center;line-height:1.7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:400;">
+                      © ${new Date().getFullYear()} TypeBeatz<br>
+                      ${isCzech ? 'Automatická zpráva odeslaná na základě tvé aktivity.' : 'Automated message sent based on your activity.'}<br>
+                      <span style="color:rgba(255,255,255,0.12);">${user?.email || ''}</span>
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
             </div>
-
-            <!-- CTA button (matching UpgradePage pill button) -->
-            <div style="text-align:center;margin:32px 0 16px">
-              <a href="${ctaUrl}" style="display:inline-block;padding:14px 44px;border-radius:9999px;font-weight:700;font-size:14px;text-decoration:none;letter-spacing:0.02em;background:#ffffff;color:#000000;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;box-shadow:0 4px 20px rgba(255,255,255,0.15)">
-                ${ctaText}
-              </a>
-            </div>
-
-            <!-- Footer -->
-            <div style="height:1px;background:rgba(255,255,255,0.06);margin:32px 0 20px"></div>
-            <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.25);text-align:center;line-height:1.6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">
-              © ${new Date().getFullYear()} TypeBeatz • ${isCzech ? 'Automatická zpráva pro' : 'Automated message for'} ${user?.email || 'user'}<br>
-              ${isCzech ? 'Tento e-mail byl odeslán na základě tvé aktivity na TypeBeatz.' : 'This message was sent based on your activity at TypeBeatz.'}
-            </p>
           </td>
         </tr>
       </table>
+
     </td>
   </tr>
 </table>
