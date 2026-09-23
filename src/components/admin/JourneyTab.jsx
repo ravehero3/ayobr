@@ -153,13 +153,16 @@ export default function JourneyTab() {
           journeyId: currentJourney.id,
           stepId: currentStep.id,
           targetEmail: testEmail,
+          toEmail: testEmail,
           lang: previewLang,
+          step: currentStep,
+          journeys: journeys,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Nepodařilo se odeslat test');
-      setTestResult({ type: 'success', text: `Testovací e-mail byl úspěšně odeslán na ${testEmail}! 📬` });
-      setTimeout(() => setTestResult(null), 5000);
+      setTestResult({ type: 'success', text: `Testovací e-mail byl úspěšně odeslán na ${testEmail}! 📬 (s vašimi aktuálními úpravami textů)` });
+      setTimeout(() => setTestResult(null), 6000);
     } catch (err) {
       setTestResult({ type: 'error', text: err.message });
     } finally {
@@ -718,6 +721,43 @@ export default function JourneyTab() {
                 />
               </div>
             </div>
+
+            {/* Direct Save Button inside editor */}
+            <div style={{ marginTop: 24, paddingTop: 18, borderTop: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                {saveMessage ? (
+                  <span style={{ color: saveMessage.type === 'success' ? '#34d399' : '#ef4444', fontWeight: 700 }}>
+                    {saveMessage.text}
+                  </span>
+                ) : (
+                  'Změny se uloží do databáze a projeví se ve všech nově odesílaných e-mailech.'
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: 9999,
+                  background: '#fff',
+                  color: '#000',
+                  border: 'none',
+                  fontFamily: NM,
+                  fontWeight: 800,
+                  fontSize: 11,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 4px 16px rgba(255,255,255,0.2)',
+                  opacity: saving ? 0.6 : 1,
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {saving ? 'Ukládám...' : '💾 Uložit úpravy'}
+              </button>
+            </div>
           </div>
 
           {/* ════ RIGHT COLUMN: LIVE EMAIL PREVIEW & TEST SEND ════ */}
@@ -787,56 +827,55 @@ export default function JourneyTab() {
                 <div style={{
                   maxWidth: 440,
                   margin: '0 auto',
-                  background: 'linear-gradient(180deg, #090b14 0%, #04091e 100%)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'linear-gradient(180deg, rgba(1,5,10,0.98) 0%, rgba(7,30,87,0.92) 100%)',
+                  border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: 18,
                   overflow: 'hidden',
-                  boxShadow: '0 15px 40px rgba(0,0,0,0.9)',
+                  boxShadow: '0 0 50px rgba(59,130,246,0.18), 0 20px 40px rgba(0,0,0,0.9)',
                 }}>
-                  {/* Top gradient stripe */}
-                  <div style={{ height: 3, background: 'linear-gradient(90deg, #3b82f6, #0ea5e9, #a78bfa)' }} />
-
-                  <div style={{ padding: '28px 24px 24px' }}>
+                  <div style={{ padding: '32px 28px 24px' }}>
                     {/* Header */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                      <span style={{ fontSize: 15, fontWeight: 900, color: '#fff' }}>TypeBeatz</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                      <img src="/typebeatz-logo.png" alt="TypeBeatz" style={{ height: 22, width: 'auto', display: 'block' }} />
                       <span style={{
                         fontSize: 8,
                         fontWeight: 800,
                         letterSpacing: '0.12em',
                         textTransform: 'uppercase',
-                        color: '#93c5fd',
-                        background: 'rgba(59,130,246,0.15)',
-                        border: '1px solid rgba(59,130,246,0.3)',
+                        color: 'rgba(255,255,255,0.45)',
+                        border: '1px solid rgba(255,255,255,0.14)',
                         borderRadius: 9999,
                         padding: '3px 10px',
                       }}>
-                        {currentStep.badge || 'INFO'}
+                        {currentStep.badge || 'TYPEBEATZ'}
                       </span>
                     </div>
 
+                    {/* Thin divider */}
+                    <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '0 0 20px' }} />
+
                     {/* Title */}
-                    <h3 style={{ fontSize: 19, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.3, color: '#fff', margin: '0 0 14px' }}>
+                    <h3 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.2, color: '#fff', margin: '0 0 16px' }}>
                       {(previewLang === 'cs' ? (currentStep.title_cs || '') : (currentStep.title_en || '')).replace('{{firstName}}', 'Jan')}
                     </h3>
 
-                    {/* Divider */}
-                    <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '14px 0 16px' }} />
-
                     {/* Body */}
-                    <p style={{ fontSize: 12, lineHeight: 1.7, color: 'rgba(255,255,255,0.7)', margin: '0 0 24px', whiteSpace: 'pre-line' }}>
+                    <p style={{ fontSize: 13, lineHeight: 1.7, color: 'rgba(255,255,255,0.5)', margin: '0 0 24px', whiteSpace: 'pre-line', fontWeight: 400 }}>
                       {(previewLang === 'cs' ? (currentStep.body_cs || '') : (currentStep.body_en || '')).replace('{{firstName}}', 'Jan')}
                     </p>
 
+                    {/* Thin divider */}
+                    <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '0 0 24px' }} />
+
                     {/* CTA button */}
-                    <div style={{ textAlign: 'center', margin: '24px 0 14px' }}>
+                    <div style={{ textAlign: 'center', margin: '0 0 16px' }}>
                       <span style={{
                         display: 'inline-block',
-                        padding: '11px 32px',
+                        padding: '12px 36px',
                         borderRadius: 9999,
-                        fontWeight: 800,
-                        fontSize: 12,
-                        letterSpacing: '0.02em',
+                        fontWeight: 600,
+                        fontSize: 13,
+                        letterSpacing: '-0.01em',
                         background: '#ffffff',
                         color: '#000000',
                         boxShadow: '0 4px 18px rgba(255,255,255,0.15)',
@@ -847,9 +886,9 @@ export default function JourneyTab() {
 
                     {/* Footer */}
                     <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '24px 0 14px' }} />
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.25)', textAlign: 'center', lineHeight: 1.5 }}>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.2)', textAlign: 'center', lineHeight: 1.6, fontWeight: 400 }}>
                       © {new Date().getFullYear()} TypeBeatz • jan@example.com<br />
-                      {previewLang === 'cs' ? 'Automatická zpráva po nákupu na TypeBeatz.' : 'Automated message from TypeBeatz.'}
+                      {previewLang === 'cs' ? 'Automatická zpráva odeslaná na základě tvé aktivity.' : 'Automated message sent based on your activity.'}
                     </p>
                   </div>
                 </div>

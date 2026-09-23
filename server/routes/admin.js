@@ -364,13 +364,13 @@ router.get('/journeys', isAdmin, async (req, res) => {
 });
 
 // Update journeys configuration
-router.put('/journeys', isAdmin, (req, res) => {
+router.put('/journeys', isAdmin, async (req, res) => {
   try {
     const { journeys } = req.body;
     if (!Array.isArray(journeys)) {
       return res.status(400).json({ message: 'Journeys must be an array' });
     }
-    saveJourneys(journeys);
+    await saveJourneys(journeys);
     res.json({ success: true, message: 'Journeys saved successfully' });
   } catch (err) {
     console.error('PUT /api/admin/journeys error:', err);
@@ -381,16 +381,22 @@ router.put('/journeys', isAdmin, (req, res) => {
 // Send test email for a specific journey step
 router.post('/journeys/test-email', isAdmin, async (req, res) => {
   try {
-    const { journeyId, stepId, toEmail, lang = 'cs' } = req.body;
+    const { journeyId, stepId, toEmail, targetEmail, lang = 'cs', step: stepOverride, journeys: journeysOverride } = req.body;
+
+    // If whole updated journeys array is provided, persist it immediately
+    if (Array.isArray(journeysOverride)) {
+      await saveJourneys(journeysOverride);
+    }
+
     const journeys = getJourneys();
     const journey = journeys.find(j => j.id === journeyId);
-    const step = journey?.steps?.find(s => s.id === stepId);
+    const step = stepOverride || journey?.steps?.find(s => s.id === stepId);
 
     if (!step) {
       return res.status(404).json({ message: 'Journey step not found' });
     }
 
-    const recipient = toEmail || req.user.email;
+    const recipient = targetEmail || toEmail || req.user.email;
     const userMock = {
       first_name: req.user.first_name || 'Admin',
       email: recipient,

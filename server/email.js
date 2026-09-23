@@ -9,9 +9,9 @@ function getTransporter() {
   return nodemailer.createTransport({ host, port, secure: port === 465, auth: { user, pass } });
 }
 
-const FROM    = process.env.EMAIL_FROM || 'TypeBeatz <noreply@typebeatz.com>';
+const FROM    = process.env.EMAIL_FROM || 'TypeBeatz <typebeatz@voodoo808.com>';
 const APP_URL = process.env.APP_URL
-  || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'https://typebeatz.com');
+  || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'https://typebeatz.voodoo808.com');
 
 /* ═══════════════════════════════════════════════════════════
    TRANSLATIONS  (cs = Czech, en = English)
@@ -230,8 +230,10 @@ ${preheader ? `<div style="display:none;max-height:0;overflow:hidden;font-size:1
           <td style="padding:0 4px 32px">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td>
-                  <span style="font-size:15px;font-weight:900;letter-spacing:0.22em;color:#ffffff;text-transform:uppercase;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">TYPEBEATZ</span>
+                <td valign="middle" align="left">
+                  <a href="${APP_URL}" style="text-decoration:none;display:inline-block;" target="_blank">
+                    <img src="${APP_URL}/typebeatz-logo.png" alt="TypeBeatz" width="128" height="28" style="display:block;border:0;outline:none;text-decoration:none;height:28px;width:128px;max-width:128px;-ms-interpolation-mode:bicubic;" />
+                  </a>
                 </td>
                 <td align="right" style="vertical-align:middle">
                   <span style="font-size:8px;color:rgba(255,255,255,0.25);letter-spacing:0.14em;text-transform:uppercase;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">${strings.tagline}</span>

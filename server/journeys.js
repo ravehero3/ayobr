@@ -6,7 +6,9 @@ const { sendEmail } = require('./email');
 const DATA_DIR = path.join(__dirname, 'data');
 const JOURNEYS_FILE = path.join(DATA_DIR, 'journeys.json');
 
-// Ensure database table for scheduled journey queue exists
+let _cachedJourneys = null;
+
+// Ensure database table for scheduled journey queue and settings exists
 async function initJourneyDB() {
   try {
     await pool.query(`
@@ -21,7 +23,32 @@ async function initJourneyDB() {
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_journey_queue_status_sched ON journey_queue(status, scheduled_for);
+
+      CREATE TABLE IF NOT EXISTS journey_settings (
+        id VARCHAR PRIMARY KEY,
+        data JSONB NOT NULL,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
     `);
+
+    // Load from DB if present
+    const res = await pool.query(`SELECT data FROM journey_settings WHERE id = 'active_journeys'`);
+    if (res.rows.length > 0 && Array.isArray(res.rows[0].data)) {
+      _cachedJourneys = res.rows[0].data;
+      console.log(`[journeys] Loaded ${_cachedJourneys.length} journeys from database.`);
+    } else {
+      // Seed from JSON file into DB
+      if (fs.existsSync(JOURNEYS_FILE)) {
+        const fileData = JSON.parse(fs.readFileSync(JOURNEYS_FILE, 'utf8'));
+        _cachedJourneys = fileData;
+        await pool.query(`
+          INSERT INTO journey_settings (id, data, updated_at)
+          VALUES ('active_journeys', $1, NOW())
+          ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+        `, [JSON.stringify(fileData)]);
+        console.log(`[journeys] Seeded ${fileData.length} journeys from file into database.`);
+      }
+    }
   } catch (err) {
     console.error('[journeys] DB init error:', err.message);
   }
@@ -31,12 +58,16 @@ async function initJourneyDB() {
 initJourneyDB().catch(console.error);
 
 /**
- * Load all customer journeys from journeys.json
+ * Load all customer journeys
  */
 function getJourneys() {
+  if (_cachedJourneys && Array.isArray(_cachedJourneys) && _cachedJourneys.length > 0) {
+    return _cachedJourneys;
+  }
   try {
     if (fs.existsSync(JOURNEYS_FILE)) {
-      return JSON.parse(fs.readFileSync(JOURNEYS_FILE, 'utf8'));
+      _cachedJourneys = JSON.parse(fs.readFileSync(JOURNEYS_FILE, 'utf8'));
+      return _cachedJourneys;
     }
   } catch (e) {
     console.error('[journeys] Error reading journeys.json:', e.message);
@@ -45,13 +76,29 @@ function getJourneys() {
 }
 
 /**
- * Save customer journeys to journeys.json
+ * Save customer journeys to memory cache, file backup, and PostgreSQL database
  */
-function saveJourneys(journeys) {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+async function saveJourneys(journeys) {
+  _cachedJourneys = journeys;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(JOURNEYS_FILE, JSON.stringify(journeys, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[journeys] Error saving to journeys.json:', e.message);
   }
-  fs.writeFileSync(JOURNEYS_FILE, JSON.stringify(journeys, null, 2), 'utf8');
+
+  try {
+    await pool.query(`
+      INSERT INTO journey_settings (id, data, updated_at)
+      VALUES ('active_journeys', $1, NOW())
+      ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+    `, [JSON.stringify(journeys)]);
+    console.log(`[journeys] ✓ Successfully saved ${journeys.length} journeys to database.`);
+  } catch (err) {
+    console.error('[journeys] DB save error:', err.message);
+  }
 }
 
 /**
@@ -84,11 +131,12 @@ function renderJourneyStepHTML(step, user = { first_name: 'Jan', email: 'jan@exa
 <!--
   Email design mirrors the TypeBeatz UpgradePage:
   - Pure #000 background
-  - Deep navy glass card: linear-gradient(to bottom, rgba(1,5,10,0.95), rgba(7,30,87,0.9))
-  - Thin rgba(255,255,255,0.07) borders
-  - Editorial weight 400-600 typography, -0.04em tracking on headings
+  - Deep navy glass card: linear-gradient(180deg, rgba(1,5,10,0.98) 0%, rgba(7,30,87,0.92) 100%)
+  - Official TypeBeatz logo in header
+  - Thin rgba(255,255,255,0.1) borders
+  - Editorial weight 400-700 typography, -0.04em tracking on headings
   - White pill CTA (solid primary)
-  - Subtle blue glow orb (not a stripe)
+  - Subtle blue glow shadow
   - Minimal monochrome badge
 -->
 <body style="margin:0;padding:0;background:#000000;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
@@ -96,11 +144,10 @@ function renderJourneyStepHTML(step, user = { first_name: 'Jan', email: 'jan@exa
   <tr>
     <td align="center" style="padding:48px 16px;">
 
-      <!-- Outer glow — mimics the blue radial glow behind PRO card on UpgradePage -->
+      <!-- Outer card container -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
         <tr>
           <td>
-            <!-- Glow orb (table cell trick for email clients) -->
             <div style="position:relative;">
 
               <!-- Main card -->
@@ -110,14 +157,16 @@ function renderJourneyStepHTML(step, user = { first_name: 'Jan', email: 'jan@exa
                 <tr>
                   <td style="padding:44px 40px 40px;">
 
-                    <!-- Brand wordmark -->
+                    <!-- Brand Header: Logo + Badge -->
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:36px;">
                       <tr>
-                        <td>
-                          <span style="font-size:15px;font-weight:600;letter-spacing:-0.03em;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">TypeBeatz</span>
+                        <td valign="middle" align="left">
+                          <a href="${appUrl}" style="text-decoration:none;display:inline-block;" target="_blank">
+                            <img src="${appUrl}/typebeatz-logo.png" alt="TypeBeatz" width="128" height="28" style="display:block;border:0;outline:none;text-decoration:none;height:28px;width:128px;max-width:128px;-ms-interpolation-mode:bicubic;" />
+                          </a>
                         </td>
-                        <td align="right">
-                          <!-- Minimal monochrome badge pill — matches ghost outline CTA style from UpgradePage -->
+                        <td valign="middle" align="right">
+                          <!-- Minimal monochrome badge pill -->
                           <span style="display:inline-block;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.45);border:1px solid rgba(255,255,255,0.14);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">${badgeText}</span>
                         </td>
                       </tr>
