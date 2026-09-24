@@ -141,7 +141,7 @@ export default function JourneyTab() {
   // Send test email
   const handleSendTest = async () => {
     if (!testEmail || !testEmail.includes('@')) {
-      alert('Zadej platnou e-mailovou adresu');
+      alert('Zadejte platnou e-mailovou adresu');
       return;
     }
     try {
@@ -196,7 +196,7 @@ export default function JourneyTab() {
             Customer Journey Editor
           </h2>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 6, maxWidth: 680, lineHeight: 1.6 }}>
-            Nastav automatické uvítací a post-purchase e-mailové sekvence s časovým odstupem (např. ihned po nákupu, za 48 hodin nebo za 7 dní).
+            Nastavte automatické uvítací a post-purchase e-mailové sekvence s časovým odstupem (např. ihned po nákupu, za 48 hodin nebo za 7 dní).
           </p>
         </div>
 

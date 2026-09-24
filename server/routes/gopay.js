@@ -139,7 +139,7 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
       },
       target: {
         type: 'ACCOUNT',
-        goid: GOPAY_GOID
+        goid: !isNaN(Number(GOPAY_GOID)) ? Number(GOPAY_GOID) : GOPAY_GOID
       },
       // Enable ON_DEMAND recurrence so we can charge this card again each month.
       // ON_DEMAND means we explicitly trigger each charge via the recurrence API.
@@ -150,7 +150,7 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
       lang: 'CS'
     };
 
-    const response = await fetch(`${GOPAY_BASE_URL}/payments/payment`, {
+    let response = await fetch(`${GOPAY_BASE_URL}/payments/payment`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -160,10 +160,35 @@ router.post('/create-payment', isAuthenticated, async (req, res) => {
       body: JSON.stringify(payload)
     });
 
+    // If payment creation failed with recurrence enabled, try without recurrence as fallback
+    // (GoPay accounts require explicit activation from GoPay support to allow recurring payments)
+    if (!response.ok && payload.recurrence) {
+      const errorText = await response.text();
+      console.warn('GoPay payment with recurrence failed, retrying without recurrence:', errorText);
+      const fallbackPayload = { ...payload };
+      delete fallbackPayload.recurrence;
+      response = await fetch(`${GOPAY_BASE_URL}/payments/payment`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(fallbackPayload)
+      });
+    }
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('GoPay Payment Creation Failure:', errorText);
-      return res.status(502).json({ message: 'GoPay gateway payment creation failed.' });
+      let errMsg = 'GoPay gateway payment creation failed.';
+      try {
+        const parsed = JSON.parse(errorText);
+        if (parsed.errors && parsed.errors[0]?.message) {
+          errMsg = parsed.errors[0].message;
+        }
+      } catch (_) {}
+      return res.status(502).json({ message: errMsg });
     }
 
     const paymentResult = await response.json();

@@ -9,14 +9,19 @@ import { forceStopAllProcesses, restartFFmpeg } from '../utils/ffmpegProcessor';
 import { proxyImageUrl } from '../utils/imageProxy';
 import ModalPreviewTab from '../components/admin/ModalPreviewTab';
 import JourneyTab from '../components/admin/JourneyTab';
-import { ClockIcon, StopIcon, SearchIcon, XIcon, AlertIcon, MusicIcon, CopyIcon, EditIcon, ZapIcon, CheckIcon, FileTextIcon } from '../components/admin/AdminIcons';
+import {
+  ClockIcon, StopIcon, SearchIcon, XIcon, AlertIcon, MusicIcon, CopyIcon, EditIcon,
+  ZapIcon, CheckIcon, FileTextIcon, DownloadIcon, RefreshIcon, UsersIcon, MailIcon,
+  BarChartIcon, SettingsIcon, BugIcon, ArrowRightIcon, LayersIcon, ImageIcon, SendIcon
+} from '../components/admin/AdminIcons';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 const BLUE = '#3b82f6';
 const BLUE2 = '#0ea5e9';
-const CARD = 'rgba(255,255,255,0.03)';
-const BORDER = 'rgba(255,255,255,0.08)';
+const CARD = 'linear-gradient(180deg, rgba(1,5,10,0.95) 0%, rgba(7,30,87,0.85) 100%)';
+const CARD_SIMPLE = 'rgba(255,255,255,0.03)';
+const BORDER = 'rgba(255,255,255,0.1)';
 const BG = '#000';
 
 /* ── Tiny helpers ─────────────────────────────────────────── */
@@ -41,16 +46,28 @@ function Pill({ label, active, onClick }) {
 
 function StatCard({ label, value, sub, accent }) {
   return (
-    <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:16, padding:'24px 28px',
-      borderLeft:`3px solid ${accent||BLUE}`, position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', top:-20, right:-20, width:80, height:80, borderRadius:'50%',
-        background:accent||BLUE, opacity:0.06, filter:'blur(16px)' }} />
-      <div style={{ fontFamily:NM, fontSize:'2.2rem', fontWeight:900, letterSpacing:'-0.04em', color:'#fff', lineHeight:1 }}>
+    <div style={{
+      background: CARD,
+      border: `1px solid ${BORDER}`,
+      borderRadius: 16,
+      padding: '24px 28px',
+      borderLeft: `3px solid ${accent || BLUE}`,
+      position: 'relative',
+      overflow: 'hidden',
+      backdropFilter: 'blur(32px)',
+      WebkitBackdropFilter: 'blur(32px)',
+      boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5)',
+    }}>
+      <div style={{
+        position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%',
+        background: accent || BLUE, opacity: 0.12, filter: 'blur(20px)', pointerEvents: 'none'
+      }} />
+      <div style={{ fontFamily: NM, fontSize: '2.2rem', fontWeight: 900, letterSpacing: '-0.04em', color: '#fff', lineHeight: 1 }}>
         {value ?? '—'}
       </div>
-      <div style={{ fontFamily:NM, fontSize:10, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase',
-        color:'rgba(255,255,255,0.4)', marginTop:8 }}>{label}</div>
-      {sub && <div style={{ fontFamily:NM, fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:4 }}>{sub}</div>}
+      <div style={{ fontFamily: NM, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+        color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>{label}</div>
+      {sub && <div style={{ fontFamily: NM, fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>{sub}</div>}
     </div>
   );
 }
@@ -96,8 +113,9 @@ function EmailPreviewCard({ tpl, onOpen }) {
   };
   return (
     <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:18, overflow:'hidden',
+      backdropFilter:'blur(32px)', WebkitBackdropFilter:'blur(32px)', boxShadow:'0 20px 40px -10px rgba(0,0,0,0.5)',
       transition:'all 0.2s', cursor:'pointer' }} onClick={onOpen}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor=`${BLUE}60`;e.currentTarget.style.transform='translateY(-2px)';}}
+      onMouseEnter={e=>{e.currentTarget.style.borderColor=`${BLUE}80`;e.currentTarget.style.transform='translateY(-2px)';}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor=BORDER;e.currentTarget.style.transform='translateY(0)';}}>
       {/* Card header */}
       <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${BORDER}` }}>
@@ -130,8 +148,9 @@ function EmailPreviewCard({ tpl, onOpen }) {
           background:'linear-gradient(to top, rgba(0,0,0,0.95), transparent)' }} />
         <div style={{ position:'absolute', bottom:12, left:0, right:0, textAlign:'center' }}>
           <span style={{ fontFamily:NM, fontSize:9, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase',
-            color:BLUE, background:`${BLUE}15`, border:`1px solid ${BLUE}25`, borderRadius:6, padding:'4px 10px' }}>
-            Kliknout pro náhled →
+            color:BLUE, background:`${BLUE}15`, border:`1px solid ${BLUE}25`, borderRadius:6, padding:'4px 10px',
+            display:'inline-flex', alignItems:'center', gap:4 }}>
+            Kliknout pro náhled <ArrowRightIcon size={9} color={BLUE} />
           </span>
         </div>
       </div>
@@ -152,7 +171,7 @@ function SmtpBanner({ configured }) {
       <span style={{ fontFamily:NM, fontSize:11, fontWeight:700, color: configured ? '#34d399' : '#fbbf24' }}>
         {configured
           ? 'SMTP nakonfigurováno — automatické e-maily jsou aktivní'
-          : 'SMTP není nakonfigurováno — e-maily se neodesílají. Nastav SMTP_HOST, SMTP_USER, SMTP_PASS v prostředí.'}
+          : 'SMTP není nakonfigurováno — e-maily se neodesílají. Nastavte SMTP_HOST, SMTP_USER, SMTP_PASS v prostředí.'}
       </span>
     </div>
   );
@@ -162,17 +181,17 @@ function SmtpBanner({ configured }) {
    How It Works image manager sub-component
 ════════════════════════════════════════════════════════════ */
 const SLOT_LABELS = [
-  { slot: '1', title: 'Krok 1 — Nahraj soubory', desc: 'Screenshot stránky s nahráváním' },
-  { slot: '2', title: 'Krok 2 — Zkontroluj páry', desc: 'Screenshot stránky s páry' },
-  { slot: '3', title: 'Krok 3 — Generuj videa', desc: 'Screenshot generování' },
-  { slot: '4', title: 'Krok 4 — Stáhni výsledky', desc: 'Screenshot ke stažení' },
+  { slot: '1', title: 'Krok 1 — Nahrání souborů', desc: 'Screenshot stránky s nahráváním' },
+  { slot: '2', title: 'Krok 2 — Kontrola párů', desc: 'Screenshot stránky s páry' },
+  { slot: '3', title: 'Krok 3 — Generování videí', desc: 'Screenshot generování' },
+  { slot: '4', title: 'Krok 4 — Stažení výsledků', desc: 'Screenshot ke stažení' },
 ];
 
 const STEP_KEYS = [
-  { key: 'step1', label: 'Krok 1 — Nahraj soubory' },
-  { key: 'step2', label: 'Krok 2 — Zkontroluj páry' },
-  { key: 'step3', label: 'Krok 3 — Generuj videa' },
-  { key: 'step4', label: 'Krok 4 — Stáhni výsledky' },
+  { key: 'step1', label: 'Krok 1 — Nahrání souborů' },
+  { key: 'step2', label: 'Krok 2 — Kontrola párů' },
+  { key: 'step3', label: 'Krok 3 — Generování videí' },
+  { key: 'step4', label: 'Krok 4 — Stažení výsledků' },
 ];
 
 function HowItWorksTextEditor({ landingContent, setLandingContent, flash }) {
@@ -517,8 +536,9 @@ function FFmpegDebugTab() {
           fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
           padding:'9px 20px',borderRadius:9999,cursor:restarting?'not-allowed':'pointer',
           border:`1px solid ${BLUE}40`,background:`${BLUE}08`,color:BLUE,
-          opacity:restarting?0.5:1,transition:'all 0.2s'}}>
-          {restarting ? 'Restartuji…' : 'Restart FFmpeg'}
+          opacity:restarting?0.5:1,transition:'all 0.2s',display:'inline-flex',alignItems:'center',gap:6}}>
+          {!restarting && <RefreshIcon size={10} color={BLUE} />}
+          <span>{restarting ? 'Restartuji…' : 'Restart FFmpeg'}</span>
         </button>
         <button onClick={() => clearFFmpegLogs()} style={{
           fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
@@ -721,7 +741,7 @@ export default function AdminPage() {
     if (!editCreditModalUser) return;
     const num = parseInt(editCreditValue, 10);
     if (isNaN(num) || num < 0) {
-      flash('Zadej platné kladné číslo kreditů');
+      flash('Zadejte platné kladné číslo kreditů');
       return;
     }
     setCreditActionUserId(editCreditModalUser.id);
@@ -874,16 +894,16 @@ export default function AdminPage() {
   const s = stats?.totals;
 
   const TABS = [
-    {id:'overview',    label:'PŘEHLED'},
-    {id:'users',       label:'UŽIVATELÉ'},
-    {id:'emails',      label:'EMAILY'},
-    {id:'journeys',    label:'JOURNEYS'},
-    {id:'autoEmails',  label:'AUTOMATICKÉ EMAILY'},
-    {id:'newsletter',  label:'NEWSLETTER'},
-    {id:'modals',      label:'MODALY'},
-    {id:'howItWorks',  label:'LANDING PAGE'},
-    {id:'settings',    label:'NASTAVENÍ'},
-    {id:'ffmpeg',      label:'FFMPEG DEBUG'},
+    {id:'overview',   label:'PŘEHLED',            icon: <BarChartIcon size={12} />},
+    {id:'users',      label:'UŽIVATELÉ',           icon: <UsersIcon size={12} />},
+    {id:'emails',     label:'EMAILY',              icon: <MailIcon size={12} />},
+    {id:'journeys',   label:'JOURNEYS',            icon: <ZapIcon size={12} />},
+    {id:'autoEmails', label:'AUTOMATICKÉ EMAILY',  icon: <FileTextIcon size={12} />},
+    {id:'newsletter', label:'NEWSLETTER',          icon: <SendIcon size={12} />},
+    {id:'modals',     label:'MODALY',              icon: <LayersIcon size={12} />},
+    {id:'howItWorks', label:'LANDING PAGE',        icon: <ImageIcon size={12} />},
+    {id:'settings',   label:'NASTAVENÍ',           icon: <SettingsIcon size={12} />},
+    {id:'ffmpeg',     label:'FFMPEG DEBUG',        icon: <BugIcon size={12} />},
   ];
 
   /* ════════════════ RENDER ════════════════ */
@@ -995,17 +1015,23 @@ export default function AdminPage() {
 
         {/* ══════════ CENTERED TAB BAR ══════════ */}
         <div style={{display:'flex',justifyContent:'center',marginBottom:44}}>
-          <div style={{display:'flex',gap:4,background:'rgba(255,255,255,0.03)',
-            border:`1px solid ${BORDER}`,borderRadius:16,padding:4,flexWrap:'wrap',justifyContent:'center'}}>
+          <div style={{
+            display:'flex',gap:4,background:'rgba(255,255,255,0.04)',
+            backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',
+            border:`1px solid ${BORDER}`,borderRadius:16,padding:4,flexWrap:'wrap',justifyContent:'center'
+          }}>
             {TABS.map(t=>(
               <button key={t.id} onClick={()=>setTab(t.id)} style={{
                 fontFamily:NM,fontWeight:900,fontSize:9,letterSpacing:'0.12em',textTransform:'uppercase',
                 padding:'9px 16px',borderRadius:10,cursor:'pointer',border:'none',transition:'all 0.2s',
                 background: tab===t.id ? '#fff' : 'transparent',
-                color: tab===t.id ? '#000' : 'rgba(255,255,255,0.35)',
-                boxShadow: tab===t.id ? '0 2px 12px rgba(0,0,0,0.4)' : 'none',
-                whiteSpace:'nowrap'
+                color: tab===t.id ? '#000' : 'rgba(255,255,255,0.4)',
+                boxShadow: tab===t.id ? '0 2px 14px rgba(0,0,0,0.5)' : 'none',
+                whiteSpace:'nowrap',display:'inline-flex',alignItems:'center',gap:6
               }}>
+                <span style={{opacity: tab===t.id ? 1 : 0.6, display:'flex', alignItems:'center'}}>
+                  {React.cloneElement(t.icon, { color: tab===t.id ? '#000' : 'rgba(255,255,255,0.6)' })}
+                </span>
                 {t.label}
               </button>
             ))}
@@ -1030,7 +1056,7 @@ export default function AdminPage() {
                   <StatCard label="Platící uživatelé" value={s?.paid_users??0} sub="PRO + UNLIMITED" accent="#34d399"/>
                   <StatCard label="E-mail odběratelé" value={s?.email_optins??0} sub="opt-in zapnutý" accent="#a78bfa"/>
                 </div>
-                <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,padding:'24px 24px 16px'}}>
+                <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,padding:'24px 24px 16px',backdropFilter:'blur(32px)',WebkitBackdropFilter:'blur(32px)',boxShadow:'0 20px 40px -10px rgba(0,0,0,0.5)'}}>
                   <div style={{fontFamily:NM,fontSize:10,fontWeight:700,letterSpacing:'0.1em',textTransform:'uppercase',
                     color:'rgba(255,255,255,0.35)',marginBottom:20}}>Registrace za posledních 30 dní</div>
                   <SignupChart daily={stats?.daily}/>
@@ -1073,7 +1099,7 @@ export default function AdminPage() {
                       onMouseEnter={e=>{e.currentTarget.style.background='rgba(239,68,68,0.2)';e.currentTarget.style.borderColor='rgba(239,68,68,0.6)';}}
                       onMouseLeave={e=>{e.currentTarget.style.background='rgba(239,68,68,0.1)';e.currentTarget.style.borderColor='rgba(239,68,68,0.35)';}}
                     >
-                      <span>↻</span> Obnovit všem měsíční kredity
+                      <RefreshIcon size={12} color="#f87171" /> Obnovit všem měsíční kredity
                     </button>
 
                     <button
@@ -1087,7 +1113,7 @@ export default function AdminPage() {
                       onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,0.1)';e.currentTarget.style.color='#fff';}}
                       onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.05)';e.currentTarget.style.color='rgba(255,255,255,0.7)';}}
                     >
-                      ↓ Exportovat CSV
+                      <DownloadIcon size={12} color="rgba(255,255,255,0.7)" /> Exportovat CSV
                     </button>
                   </div>
                 </div>
@@ -1156,7 +1182,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* ── Table Container ── */}
-                <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,overflowX:'auto'}}>
+                <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,overflowX:'auto',backdropFilter:'blur(32px)',WebkitBackdropFilter:'blur(32px)',boxShadow:'0 20px 40px -10px rgba(0,0,0,0.5)'}}>
                   <table style={{width:'100%',borderCollapse:'collapse',minWidth:950}}>
                     <thead>
                       <tr style={{background:'rgba(255,255,255,0.03)',borderBottom:`1px solid ${BORDER}`}}>
@@ -1363,7 +1389,7 @@ export default function AdminPage() {
                                       display:'flex',alignItems:'center',gap:4,transition:'all 0.15s'
                                     }}
                                   >
-                                    <span>↻</span> {isBusyThis ? '…' : 'Obnovit'}
+                                    <RefreshIcon size={10} color={isDepleted ? '#fca5a5' : '#93c5fd'} /> {isBusyThis ? '…' : 'Obnovit'}
                                   </button>
 
                                   {/* Custom Edit Credits button */}
@@ -1570,9 +1596,9 @@ export default function AdminPage() {
                           <div style={{
                             width:44,height:44,borderRadius:12,background:'rgba(239,68,68,0.12)',
                             border:'1px solid rgba(239,68,68,0.3)',display:'flex',alignItems:'center',justifyContent:'center',
-                            fontSize:20,marginBottom:14,color:'#ef4444'
+                            marginBottom:14,color:'#ef4444'
                           }}>
-                            ↻
+                            <RefreshIcon size={20} color="#ef4444" />
                           </div>
                           <div style={{fontFamily:NM,fontSize:18,fontWeight:900,color:'#fff',marginBottom:6}}>
                             Obnovit měsíční kredity všem uživatelům?
@@ -1633,8 +1659,9 @@ export default function AdminPage() {
                   </div>
                   <button onClick={()=>window.open(`${API}/emails/export`,'_blank')} style={{fontFamily:NM,fontWeight:700,fontSize:9,
                     letterSpacing:'0.1em',textTransform:'uppercase',padding:'10px 20px',borderRadius:9999,cursor:'pointer',
-                    border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.6)'}}>
-                    ↓ Stáhnout .CSV
+                    border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.7)',
+                    display:'inline-flex',alignItems:'center',gap:6,transition:'all 0.2s'}}>
+                    <DownloadIcon size={12} color="rgba(255,255,255,0.7)" /> Stáhnout .CSV
                   </button>
                 </div>
                 <div style={{display:'flex',gap:12,marginBottom:24,flexWrap:'wrap'}}>
@@ -1646,7 +1673,7 @@ export default function AdminPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,overflowX:'auto'}}>
+                <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,overflowX:'auto',backdropFilter:'blur(32px)',WebkitBackdropFilter:'blur(32px)',boxShadow:'0 20px 40px -10px rgba(0,0,0,0.5)'}}>
                   <table style={{width:'100%',borderCollapse:'collapse',minWidth:560}}>
                     <thead>
                       <tr style={{background:'rgba(255,255,255,0.03)',borderBottom:`1px solid ${BORDER}`}}>
@@ -1749,7 +1776,7 @@ export default function AdminPage() {
                 <div style={{marginBottom:28}}>
                   <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:6}}>E-mailová kampaň</h2>
                   <p style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.4)',margin:0}}>
-                    Pošli personalizovaný e-mail segmentu uživatelů.
+                    Odešlete personalizovaný e-mail segmentu uživatelů.
                   </p>
                 </div>
 
@@ -1767,7 +1794,7 @@ export default function AdminPage() {
                       <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
                         {[
                           {id:'all',       label:'Všichni',    count:segmentCounts.all,     desc:'Všichni opt-in uživatelé'},
-                          {id:'free',      label:'Free',       count:segmentCounts.free,    desc:'Uživatelé zdarma — připomeň jim upgrade'},
+                          {id:'free',      label:'Free',       count:segmentCounts.free,    desc:'Uživatelé zdarma — připomenutí upgrade'},
                           {id:'pro',       label:'PRO',        count:segmentCounts.pro,     desc:'PRO zákazníci'},
                           {id:'unlimited', label:'Unlimited',  count:segmentCounts.unlimited,desc:'Unlimited zákazníci'},
                         ].map(seg=>(
@@ -1909,9 +1936,12 @@ export default function AdminPage() {
                           disabled={!nlSubject||(nlMode==='template'&&!nlTplId)||(nlMode==='custom'&&!nlCustomHtml)||segmentCounts[nlSegment]===0}
                           style={{fontFamily:NM,fontWeight:900,fontSize:13,letterSpacing:'0.05em',
                             padding:'14px 32px',borderRadius:9999,cursor:'pointer',border:'none',
-                            background:'#fff',color:'#000',transition:'opacity 0.2s',
-                            opacity:(!nlSubject||(nlMode==='template'&&!nlTplId)||(nlMode==='custom'&&!nlCustomHtml)||segmentCounts[nlSegment]===0)?0.4:1}}>
-                          Odeslat kampaň →
+                            background:'#fff',color:'#000',transition:'all 0.2s',
+                            display:'inline-flex',alignItems:'center',gap:8,
+                            opacity:(!nlSubject||(nlMode==='template'&&!nlTplId)||(nlMode==='custom'&&!nlCustomHtml)||segmentCounts[nlSegment]===0)?0.4:1}}
+                          onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'}
+                          onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
+                          Odeslat kampaň <SendIcon size={12} color="#000" />
                         </button>
                       )}
                     </div>
@@ -1937,7 +1967,7 @@ export default function AdminPage() {
                             height:'100%',color:'rgba(255,255,255,0.15)',gap:12}}>
                             <span style={{fontSize:14,color:'rgba(255,255,255,0.3)'}}>E-mail</span>
                             <span style={{fontFamily:NM,fontSize:12}}>
-                              {nlMode==='template' ? 'Vyber šablonu pro náhled' : 'Napiš HTML pro náhled'}
+                              {nlMode==='template' ? 'Vyberte šablonu pro náhled' : 'Napište HTML pro náhled'}
                             </span>
                           </div>
                         )}
@@ -1972,7 +2002,7 @@ export default function AdminPage() {
               <motion.div key="howItWorks" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}>
                 <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:8}}>Landing Page — Jak to funguje</h2>
                 <p style={{fontFamily:NM,fontSize:12,color:'rgba(255,255,255,0.4)',marginBottom:28,lineHeight:1.7}}>
-                  Nahraj vlastní screenshoty a uprav texty pro sekci „Jak to funguje". Prázdné pole textu = výchozí přeložený text.
+                  Nahrajte vlastní screenshoty a upravte texty pro sekci „Jak to funguje“. Prázdné pole textu = výchozí přeložený text.
                 </p>
                 <HowItWorksImageManager
                   landingImages={landingImages}
@@ -2050,6 +2080,7 @@ export default function AdminPage() {
                   <div>
                     <h2 style={{fontFamily:NM,fontSize:22,fontWeight:900,letterSpacing:'-0.03em',marginBottom:12}}>Správa kreditů</h2>
                     <div style={{background:CARD,border:`1px solid ${BORDER}`,borderRadius:14,padding:'20px 24px',
+                      backdropFilter:'blur(32px)',WebkitBackdropFilter:'blur(32px)',boxShadow:'0 20px 40px -10px rgba(0,0,0,0.5)',
                       display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:16}}>
                       <div>
                         <div style={{fontFamily:NM,fontSize:13,fontWeight:700,color:'#fff',marginBottom:4}}>Ruční reset kreditů</div>
@@ -2057,11 +2088,13 @@ export default function AdminPage() {
                           Free → 5 · PRO → 31 · Automaticky 1. každého měsíce
                         </div>
                       </div>
-                      <button onClick={resetCredits} style={{fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',
+                      <button onClick={resetCredits} style={{fontFamily:NM,fontWeight:900,fontSize:10,letterSpacing:'0.1em',
                         textTransform:'uppercase',padding:'10px 20px',borderRadius:9999,cursor:'pointer',
-                        border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.06)',color:'#fff',transition:'all 0.2s'}}
-                        onMouseEnter={e=>{e.target.style.background='#fff';e.target.style.color='#000';}}
-                        onMouseLeave={e=>{e.target.style.background='rgba(255,255,255,0.06)';e.target.style.color='#fff';}}>
+                        border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.06)',color:'#fff',transition:'all 0.2s',
+                        display:'inline-flex',alignItems:'center',gap:6}}
+                        onMouseEnter={e=>{e.currentTarget.style.background='#fff';e.currentTarget.style.color='#000';}}
+                        onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.06)';e.currentTarget.style.color='#fff';}}>
+                        <RefreshIcon size={12} />
                         Resetovat kredity
                       </button>
                     </div>
