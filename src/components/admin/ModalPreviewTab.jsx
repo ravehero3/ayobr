@@ -6,6 +6,7 @@ import InsufficientCreditsModal from '../InsufficientCreditsModal';
 import ReferralPanel from '../ReferralPanel';
 import ScreenSizeWarning from '../ScreenSizeWarning';
 import starsBg from '../../assets/stars_background_voodoo808_1778087733997.jpg';
+import { SlidersIcon, SearchIcon, FileTextIcon, ExternalLinkIcon, XIcon, CheckIcon } from './AdminIcons';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 const BLUE = '#3b82f6';
@@ -170,7 +171,7 @@ export default function ModalPreviewTab() {
                 transition: 'all 0.2s',
               }}
             >
-              🇨🇿 Čeština
+              CZ Čeština
             </button>
             <button
               onClick={() => setPreviewLang('en')}
@@ -182,7 +183,7 @@ export default function ModalPreviewTab() {
                 transition: 'all 0.2s',
               }}
             >
-              🇬🇧 English
+              EN English
             </button>
           </div>
 
@@ -258,8 +259,9 @@ export default function ModalPreviewTab() {
             background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
             border: `1px solid ${BORDER}`, borderRadius: 20, padding: 22
           }}>
-            <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>
-              🎛 Parametry testovacího prostředí
+            <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <SlidersIcon size={12} color="rgba(255,255,255,0.4)" />
+              <span>Parametry testovacího prostředí</span>
             </div>
 
             {/* Custom controls based on active modal */}
@@ -509,7 +511,7 @@ export default function ModalPreviewTab() {
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <span>🔍</span>
+              <SearchIcon size={13} color="#000" />
               <span>{isCzech ? 'Spustit živý 1:1 náhled' : 'Launch live 1:1 preview'}</span>
             </button>
           </div>
@@ -519,8 +521,9 @@ export default function ModalPreviewTab() {
             background: 'linear-gradient(to bottom, rgba(8,8,12,0.98), rgba(4,14,50,0.98))',
             border: `1px solid ${BORDER}`, borderRadius: 20, padding: 22
           }}>
-            <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 14 }}>
-              📋 {isCzech ? 'Technická specifikace' : 'Technical Specs'}
+            <div style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FileTextIcon size={12} color="rgba(255,255,255,0.4)" />
+              <span>{isCzech ? 'Technická specifikace' : 'Technical Specs'}</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -546,8 +549,12 @@ export default function ModalPreviewTab() {
                 <div style={{ fontFamily: NM, fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
                   Jazykové verze
                 </div>
-                <div style={{ fontFamily: NM, fontSize: 11, color: '#34d399', marginTop: 2 }}>
-                  ✓ 🇨🇿 Čeština &nbsp;•&nbsp; ✓ 🇬🇧 English
+                <div style={{ fontFamily: NM, fontSize: 11, color: '#34d399', marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CheckIcon size={11} color="#34d399" />
+                  <span>CZ Čeština</span>
+                  <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
+                  <CheckIcon size={11} color="#34d399" />
+                  <span>EN English</span>
                 </div>
               </div>
             </div>
@@ -581,10 +588,12 @@ export default function ModalPreviewTab() {
               style={{
                 background: 'rgba(255,255,255,0.08)', border: `1px solid ${BORDER}`,
                 borderRadius: 9999, padding: '4px 12px', color: '#fff', cursor: 'pointer',
-                fontFamily: NM, fontSize: 10, fontWeight: 700, letterSpacing: '0.04em'
+                fontFamily: NM, fontSize: 10, fontWeight: 700, letterSpacing: '0.04em',
+                display: 'inline-flex', alignItems: 'center', gap: 5
               }}
             >
-              1:1 ↗
+              <span>1:1</span>
+              <ExternalLinkIcon size={10} color="#fff" />
             </button>
           </div>
 
@@ -686,7 +695,7 @@ export default function ModalPreviewTab() {
             }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 10px #34d399' }} />
               <span style={{ fontFamily: NM, fontSize: 11, fontWeight: 700, color: '#fff', letterSpacing: '0.04em' }}>
-                {MODALS.find(m => m.id === activeFullscreenModal)?.name} ({isCzech ? '🇨🇿 CS' : '🇬🇧 EN'})
+                {MODALS.find(m => m.id === activeFullscreenModal)?.name} ({isCzech ? 'CS' : 'EN'})
               </span>
               <button
                 onClick={() => setActiveFullscreenModal(null)}
@@ -694,12 +703,13 @@ export default function ModalPreviewTab() {
                   background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
                   borderRadius: 9999, padding: '4px 12px', color: '#fff', cursor: 'pointer',
                   fontFamily: NM, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
-                  marginLeft: 8, transition: 'all 0.2s',
+                  marginLeft: 8, transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: 6
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#ef4444'}
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
               >
-                ✕ Zavřít náhled
+                <XIcon size={11} color="#fff" />
+                <span>Zavřít náhled</span>
               </button>
             </div>
 

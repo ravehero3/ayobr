@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ClockIcon, SaveIcon, ZapIcon, SendIcon } from './AdminIcons';
 
 const NM = "'Neue Montreal', 'Inter', sans-serif";
 const BLUE = '#3b82f6';
@@ -77,8 +78,8 @@ export default function JourneyTab() {
       delay_hours: defaultDelay,
       enabled: true,
       badge: 'NÁSLEDNÁ PÉČE',
-      subject_cs: 'Jak se ti daří s TypeBeatz? 👋',
-      subject_en: 'How is your experience with TypeBeatz? 👋',
+      subject_cs: 'Jak se ti daří s TypeBeatz?',
+      subject_en: 'How is your experience with TypeBeatz?',
       title_cs: 'Máme pro tebe další inspiraci',
       title_en: 'Here is some more inspiration for you',
       body_cs: 'Chtěli jsme se ujistit, že všechno funguje na jedničku. Pokud potřebuješ s čímkoliv poradit, stačí odpovědět na tento e-mail.',
@@ -128,7 +129,7 @@ export default function JourneyTab() {
         body: JSON.stringify({ journeys }),
       });
       if (!res.ok) throw new Error('Uložení selhalo');
-      setSaveMessage({ type: 'success', text: 'Změny v sekvencích byly úspěšně uloženy! 🚀' });
+      setSaveMessage({ type: 'success', text: 'Změny v sekvencích byly úspěšně uloženy!' });
       setTimeout(() => setSaveMessage(null), 4000);
     } catch (err) {
       setSaveMessage({ type: 'error', text: 'Chyba při ukládání: ' + err.message });
@@ -161,7 +162,7 @@ export default function JourneyTab() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Nepodařilo se odeslat test');
-      setTestResult({ type: 'success', text: `Testovací e-mail byl úspěšně odeslán na ${testEmail}! 📬 (s vašimi aktuálními úpravami textů)` });
+      setTestResult({ type: 'success', text: `Testovací e-mail byl úspěšně odeslán na ${testEmail} (s vašimi aktuálními úpravami textů)` });
       setTimeout(() => setTestResult(null), 6000);
     } catch (err) {
       setTestResult({ type: 'error', text: err.message });
@@ -224,9 +225,13 @@ export default function JourneyTab() {
               boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
               opacity: saving ? 0.6 : 1,
               transition: 'all 0.2s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
             }}
           >
-            {saving ? 'Ukládám...' : '💾 Uložit všechny změny'}
+            <SaveIcon size={13} color="#000" />
+            <span>{saving ? 'Ukládám...' : 'Uložit všechny změny'}</span>
           </button>
         </div>
       </div>
@@ -355,8 +360,9 @@ export default function JourneyTab() {
             textAlign: 'center',
             minWidth: 140,
           }}>
-            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#93c5fd' }}>
-              ⚡ SPÚŠTĚCÍ UDÁLOST
+            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#93c5fd', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+              <ZapIcon size={10} color="#93c5fd" />
+              <span>SPÚŠTĚCÍ UDÁLOST</span>
             </div>
             <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', marginTop: 4 }}>
               Aktivace plánu
@@ -373,8 +379,9 @@ export default function JourneyTab() {
               <React.Fragment key={step.id || idx}>
                 {/* Arrow & Delay badge */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '0 4px' }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', color: '#60a5fa', background: 'rgba(59,130,246,0.12)', padding: '2px 8px', borderRadius: 9999, border: '1px solid rgba(59,130,246,0.25)', whiteSpace: 'nowrap' }}>
-                    ⏱ {delayLabel}
+                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', color: '#60a5fa', background: 'rgba(59,130,246,0.12)', padding: '2px 8px', borderRadius: 9999, border: '1px solid rgba(59,130,246,0.25)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <ClockIcon size={10} color="#60a5fa" />
+                    <span>{delayLabel}</span>
                   </div>
                   <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 16, lineHeight: 1 }}>→</div>
                 </div>
@@ -557,7 +564,7 @@ export default function JourneyTab() {
                     cursor: 'pointer',
                   }}
                 >
-                  🇨🇿 Čeština
+                  CZ Čeština
                 </button>
                 <button
                   type="button"
@@ -573,7 +580,7 @@ export default function JourneyTab() {
                     cursor: 'pointer',
                   }}
                 >
-                  🇬🇧 English
+                  EN English
                 </button>
               </div>
             </div>
@@ -753,9 +760,13 @@ export default function JourneyTab() {
                   opacity: saving ? 0.6 : 1,
                   whiteSpace: 'nowrap',
                   transition: 'all 0.2s',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 7,
                 }}
               >
-                {saving ? 'Ukládám...' : '💾 Uložit úpravy'}
+                <SaveIcon size={12} color="#000" />
+                <span>{saving ? 'Ukládám...' : 'Uložit úpravy'}</span>
               </button>
             </div>
           </div>
@@ -930,9 +941,13 @@ export default function JourneyTab() {
                       fontSize: 11,
                       cursor: sendingTest ? 'not-allowed' : 'pointer',
                       whiteSpace: 'nowrap',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
                     }}
                   >
-                    {sendingTest ? 'Odesílám...' : 'Odeslat test'}
+                    <SendIcon size={12} color="#93c5fd" />
+                    <span>{sendingTest ? 'Odesílám...' : 'Odeslat test'}</span>
                   </button>
                 </div>
                 {testResult && (

@@ -9,6 +9,7 @@ import { forceStopAllProcesses, restartFFmpeg } from '../utils/ffmpegProcessor';
 import { proxyImageUrl } from '../utils/imageProxy';
 import ModalPreviewTab from '../components/admin/ModalPreviewTab';
 import JourneyTab from '../components/admin/JourneyTab';
+import { ClockIcon, StopIcon, SearchIcon, XIcon, AlertIcon, MusicIcon, CopyIcon, EditIcon } from '../components/admin/AdminIcons';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -107,8 +108,9 @@ function EmailPreviewCard({ tpl, onOpen }) {
             </div>
           </div>
         </div>
-        <div style={{ fontFamily:NM, fontSize:11, color:'rgba(255,255,255,0.4)', lineHeight:1.6 }}>
-          ⏱ {tpl.trigger}
+        <div style={{ fontFamily:NM, fontSize:11, color:'rgba(255,255,255,0.4)', lineHeight:1.6, display:'flex', alignItems:'center', gap:6 }}>
+          <ClockIcon size={12} color="rgba(255,255,255,0.4)" />
+          <span>{tpl.trigger}</span>
         </div>
       </div>
       {/* Scaled iframe preview */}
@@ -502,8 +504,9 @@ function FFmpegDebugTab() {
           fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
           padding:'9px 20px',borderRadius:9999,cursor:stopping?'not-allowed':'pointer',
           border:'1px solid rgba(248,113,113,0.4)',background:'rgba(248,113,113,0.08)',color:'#f87171',
-          opacity:stopping?0.5:1,transition:'all 0.2s'}}>
-          {stopping ? 'Zastavuji…' : '⏹ Force Stop FFmpeg'}
+          opacity:stopping?0.5:1,transition:'all 0.2s',display:'inline-flex',alignItems:'center',gap:6}}>
+          {!stopping && <StopIcon size={10} color="#f87171" />}
+          <span>{stopping ? 'Zastavuji…' : 'Force Stop FFmpeg'}</span>
         </button>
         <button onClick={handleRestart} disabled={restarting} style={{
           fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.1em',textTransform:'uppercase',
@@ -1089,8 +1092,8 @@ export default function AdminPage() {
                   <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
                     {/* Search input */}
                     <div style={{position:'relative',flex:'1 1 300px'}}>
-                      <span style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)',color:'rgba(255,255,255,0.3)',fontSize:14,pointerEvents:'none'}}>
-                        🔍
+                      <span style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)',color:'rgba(255,255,255,0.4)',display:'flex',alignItems:'center',pointerEvents:'none'}}>
+                        <SearchIcon size={13} color="rgba(255,255,255,0.4)" />
                       </span>
                       <input
                         type="text"
@@ -1109,10 +1112,11 @@ export default function AdminPage() {
                           onClick={()=>setUserSearch('')}
                           style={{
                             position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',
-                            background:'none',border:'none',color:'rgba(255,255,255,0.4)',cursor:'pointer',fontSize:14,padding:4
+                            background:'none',border:'none',color:'rgba(255,255,255,0.4)',cursor:'pointer',fontSize:12,padding:4,
+                            display:'flex',alignItems:'center',justifyContent:'center'
                           }}
                         >
-                          ✕
+                          <XIcon size={12} color="rgba(255,255,255,0.5)" />
                         </button>
                       )}
                     </div>
@@ -1124,7 +1128,7 @@ export default function AdminPage() {
                         ['free', `Free (${freeUsersCount})`],
                         ['pro', `PRO (${proUsersCount})`],
                         ['unlimited', `Unlimited (${unlimitedUsersCount})`],
-                        ['zero_credits', `⚠️ 0 kreditů (${zeroCreditsCount})`],
+                        ['zero_credits', `0 kreditů (${zeroCreditsCount})`],
                       ].map(([f,l])=>(
                         <button
                           key={f}
@@ -1135,10 +1139,11 @@ export default function AdminPage() {
                             border:`1px solid ${userFilter===f ? (f==='zero_credits' ? '#ef4444' : BLUE) : BORDER}`,
                             background:userFilter===f ? (f==='zero_credits' ? 'rgba(239,68,68,0.2)' : `${BLUE}20`) : 'rgba(255,255,255,0.03)',
                             color:userFilter===f ? (f==='zero_credits' ? '#fca5a5' : '#93c5fd') : 'rgba(255,255,255,0.45)',
-                            transition:'all 0.2s'
+                            transition:'all 0.2s',display:'inline-flex',alignItems:'center',gap:5
                           }}
                         >
-                          {l}
+                          {f === 'zero_credits' && <AlertIcon size={10} color={userFilter === f ? '#fca5a5' : '#ef4444'} />}
+                          <span>{l}</span>
                         </button>
                       ))}
                     </div>
@@ -1217,9 +1222,10 @@ export default function AdminPage() {
                                         <span style={{
                                           fontSize:9,fontWeight:800,padding:'2px 6px',borderRadius:4,
                                           background:'rgba(59,130,246,0.15)',border:'1px solid rgba(59,130,246,0.3)',
-                                          color:'#93c5fd',letterSpacing:'0.04em'
+                                          color:'#93c5fd',letterSpacing:'0.04em',display:'inline-flex',alignItems:'center',gap:4
                                         }}>
-                                          🎵 {u.producer_name}
+                                          <MusicIcon size={10} color="#93c5fd" />
+                                          <span>{u.producer_name}</span>
                                         </span>
                                       )}
                                     </div>
@@ -1230,9 +1236,9 @@ export default function AdminPage() {
                                           type="button"
                                           title="Kopírovat e-mail"
                                           onClick={()=>copyToClipboard(u.email, 'E-mail zkopírován')}
-                                          style={{background:'none',border:'none',padding:0,cursor:'pointer',fontSize:10,color:'rgba(255,255,255,0.3)',lineHeight:1}}
+                                          style={{background:'none',border:'none',padding:0,cursor:'pointer',color:'rgba(255,255,255,0.35)',display:'inline-flex',alignItems:'center'}}
                                         >
-                                          📋
+                                          <CopyIcon size={11} color="rgba(255,255,255,0.4)" />
                                         </button>
                                       )}
                                     </div>
@@ -1365,10 +1371,11 @@ export default function AdminPage() {
                                       fontFamily:NM,fontWeight:700,fontSize:10,letterSpacing:'0.06em',textTransform:'uppercase',
                                       padding:'6px 10px',borderRadius:8,cursor:'pointer',
                                       border:`1px solid ${BORDER}`,background:'rgba(255,255,255,0.05)',
-                                      color:'rgba(255,255,255,0.7)',transition:'all 0.15s'
+                                      color:'rgba(255,255,255,0.7)',transition:'all 0.15s',
+                                      display:'inline-flex',alignItems:'center',justifyContent:'center'
                                     }}
                                   >
-                                    ✏️
+                                    <EditIcon size={11} color="rgba(255,255,255,0.7)" />
                                   </button>
 
                                   {/* Role selector dropdown */}
