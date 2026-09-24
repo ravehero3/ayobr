@@ -19,14 +19,14 @@ const APP_URL = process.env.APP_URL
 ═══════════════════════════════════════════════════════════ */
 const T = {
   cs: {
-    footerNote:       'Obdržel jsi tento e-mail, protože jsi se zaregistroval na TypeBeatz.',
+    footerNote:       'Obdržel jste tento e-mail na základě Vaší registrace na TypeBeatz.',
     footerCopyright:  `© ${new Date().getFullYear()} TypeBeatz`,
     tagline:          'Type Beat Generator',
     // Welcome
     welcomeBadge:     'NOVÝ ČLEN',
-    welcomeTitle:     name => `Vítej v TypeBeatz, ${name}`,
-    welcomeSub:       'Jsi nastavený a připravený generovat type beat videa přímo v prohlížeči — bez instalace, bez serveru.',
-    welcomePlanHdr:   'CO MÁŠ K DISPOZICI ZDARMA:',
+    welcomeTitle:     name => name ? `Vítejte v TypeBeatz, ${name}` : 'Vítejte v TypeBeatz',
+    welcomeSub:       'Váš účet je připraven pro generování type beat videí přímo v prohlížeči — bez instalace, bez serveru.',
+    welcomePlanHdr:   'CO MÁTE K DISPOZICI ZDARMA:',
     welcomeFeatures:  [
       '5 videí každý měsíc',
       'Kredity se resetují 1. každého měsíce',
@@ -35,42 +35,42 @@ const T = {
       '720p kvalita výstupu',
     ],
     welcomeCTA:       'Začít generovat →',
-    welcomeSubject:   'Vítej v TypeBeatz',
+    welcomeSubject:   'Vítejte v TypeBeatz',
     // PRO purchase
     proBadge:         'PLATBA POTVRZENA',
-    proTitle:         'Tvůj PRO plán je aktivní',
-    proSub:           name => `Díky za podporu TypeBeatz, ${name}. Máš plný přístup ke všemu, co PRO nabízí.`,
-    proPlanHdr:       'VÝHODY TVÉHO PRO PLÁNU:',
+    proTitle:         'Váš PRO plán je aktivní',
+    proSub:           name => name ? `Děkujeme za podporu TypeBeatz, ${name}. Máte plný přístup ke všemu, co PRO nabízí.` : 'Děkujeme za podporu TypeBeatz. Máte plný přístup ke všemu, co PRO nabízí.',
+    proPlanHdr:       'VÝHODY VAŠEHO PRO PLÁNU:',
     proFeatures:      [
       'Až 31 videí každý měsíc',
       'HD 1080p — připraveno pro YouTube',
-      'Vlastní fotopozadí pro tvůj branding',
+      'Vlastní fotopozadí pro Váš branding',
       'Párování audia a vizuálu jedním klikem',
       'Zrušení kdykoliv',
     ],
     proPrice:         '$9 / měsíc',
     proCTA:           'Přejít do aplikace →',
-    proSubject:       'Tvůj TypeBeatz PRO je aktivní',
+    proSubject:       'Váš TypeBeatz PRO je aktivní',
     // UNLIMITED purchase
     unlimitedBadge:   'PLATBA POTVRZENA',
-    unlimitedTitle:   'Tvůj UNLIMITED plán je aktivní',
-    unlimitedSub:     name => `Díky za podporu TypeBeatz, ${name}. Máš neomezený přístup ke všemu, co TypeBeatz nabízí.`,
-    unlimitedPlanHdr: 'VÝHODY TVÉHO UNLIMITED PLÁNU:',
+    unlimitedTitle:   'Váš UNLIMITED plán je aktivní',
+    unlimitedSub:     name => name ? `Děkujeme za podporu TypeBeatz, ${name}. Máte neomezený přístup ke všemu, co TypeBeatz nabízí.` : 'Děkujeme za podporu TypeBeatz. Máte neomezený přístup ke všemu, co TypeBeatz nabízí.',
+    unlimitedPlanHdr: 'VÝHODY VAŠEHO UNLIMITED PLÁNU:',
     unlimitedFeatures:[
       'Neomezená videa — žádné limity, nikdy',
-      'Až 4K kvalita — vynikni na YouTube',
-      'Vlastní fotopozadí pro tvůj branding',
+      'Až 4K kvalita — vynikněte na YouTube',
+      'Vlastní fotopozadí pro Váš branding',
       'Párování audia a vizuálu jedním klikem',
       'Zrušení kdykoliv',
     ],
     unlimitedPrice:   '$19 / měsíc',
     unlimitedCTA:     'Přejít do aplikace →',
-    unlimitedSubject: 'Tvůj TypeBeatz UNLIMITED je aktivní',
+    unlimitedSubject: 'Váš TypeBeatz UNLIMITED je aktivní',
     // Credit limit
     creditBadge:      'LIMIT DOSAŽEN',
-    creditTitle:      'Tvoje bezplatné kredity jsou vyčerpány',
-    creditSub:        name => `Skvělá práce, ${name}! Tento měsíc jsi využil všechny své bezplatné kredity.`,
-    creditUpgrade:    'Upgraduj svůj účet a pokračuj v tvorbě videí bez omezení.',
+    creditTitle:      'Vaše bezplatné kredity jsou vyčerpány',
+    creditSub:        name => name ? `Skvělá práce, ${name}! Tento měsíc jste využil všechny své bezplatné kredity.` : 'Tento měsíc jste využil všechny své bezplatné kredity.',
+    creditUpgrade:    'Upgradujte svůj účet a pokračujte v tvorbě videí bez omezení.',
     creditCompHdr:    'DOPORUČENÉ PLÁNY:',
     creditProLabel:   'PRO',
     creditProDesc:    '31 videí/měsíc · HD 1080p · YouTube ready',
@@ -79,7 +79,7 @@ const T = {
     creditUlDesc:     'Neomezená videa · 4K kvalita · vlastní pozadí',
     creditUlPrice:    'od $19/měsíc',
     creditCTA:        'Upgradovat plán →',
-    creditSubject:    'Tvoje kredity TypeBeatz jsou vyčerpány',
+    creditSubject:    'Vaše kredity TypeBeatz jsou vyčerpány',
   },
   en: {
     footerNote:       'You received this email because you registered at TypeBeatz.',
@@ -215,7 +215,7 @@ function base({
   const isCzech = (user?.language || 'cs') === 'cs';
   const recipientEmail = user?.email || '';
   const footerNote = strings.footerNote || (isCzech
-    ? 'Obdržel jsi tento e-mail, protože jsi se zaregistroval na TypeBeatz.'
+    ? 'Obdržel jste tento e-mail na základě Vaší registrace na TypeBeatz.'
     : 'You received this email because you registered at TypeBeatz.');
 
   return `<!DOCTYPE html>
@@ -321,7 +321,7 @@ ${preheader ? `<div style="display:none;max-height:0;overflow:hidden;font-size:1
 ═══════════════════════════════════════════════════════════ */
 function welcomeHTML(user) {
   const s    = t(user);
-  const name = user?.first_name || (user?.language === 'en' ? 'producer' : 'hudebníku');
+  const name = user?.first_name || '';
   const title = s.welcomeTitle(name);
   const bodyContent = `
     ${subtext(s.welcomeSub)}
@@ -346,7 +346,7 @@ function welcomeHTML(user) {
 ═══════════════════════════════════════════════════════════ */
 function purchaseProHTML(user) {
   const s    = t(user);
-  const name = user?.first_name || (user?.language === 'en' ? 'producer' : 'hudebníku');
+  const name = user?.first_name || '';
   const title = s.proTitle;
   const bodyContent = `
     ${subtext(s.proSub(name))}
@@ -372,7 +372,7 @@ function purchaseProHTML(user) {
 ═══════════════════════════════════════════════════════════ */
 function purchaseUnlimitedHTML(user) {
   const s    = t(user);
-  const name = user?.first_name || (user?.language === 'en' ? 'producer' : 'hudebníku');
+  const name = user?.first_name || '';
   const title = s.unlimitedTitle;
   const bodyContent = `
     ${subtext(s.unlimitedSub(name))}
@@ -398,7 +398,7 @@ function purchaseUnlimitedHTML(user) {
 ═══════════════════════════════════════════════════════════ */
 function creditLimitHTML(user) {
   const s    = t(user);
-  const name = user?.first_name || (user?.language === 'en' ? 'producer' : 'hudebníku');
+  const name = user?.first_name || '';
   const title = s.creditTitle;
   const bodyContent = `
     ${subtext(s.creditSub(name))}
@@ -501,28 +501,28 @@ const EMAIL_TEMPLATES = [
     id:      'welcome',
     name:    'Uvítací e-mail',
     trigger: 'Při registraci nového uživatele',
-    subject: 'Vítej v TypeBeatz',
+    subject: 'Vítejte v TypeBeatz',
     getHTML: (u = { first_name: 'Jan', email: 'jan@example.com', language: 'cs' }) => welcomeHTML(u),
   },
   {
     id:      'purchase_pro',
     name:    'Potvrzení nákupu PRO',
     trigger: 'Při aktivaci PRO předplatného',
-    subject: 'Tvůj TypeBeatz PRO je aktivní',
+    subject: 'Váš TypeBeatz PRO je aktivní',
     getHTML: (u = { first_name: 'Jan', email: 'jan@example.com', language: 'cs' }) => purchaseProHTML(u),
   },
   {
     id:      'purchase_unlimited',
     name:    'Potvrzení nákupu UNLIMITED',
     trigger: 'Při aktivaci UNLIMITED předplatného',
-    subject: 'Tvůj TypeBeatz UNLIMITED je aktivní',
+    subject: 'Váš TypeBeatz UNLIMITED je aktivní',
     getHTML: (u = { first_name: 'Jan', email: 'jan@example.com', language: 'cs' }) => purchaseUnlimitedHTML(u),
   },
   {
     id:      'credit_limit',
     name:    'Dosažení limitu kreditů',
     trigger: 'Když FREE uživatel vyčerpá všechny kredity',
-    subject: 'Tvoje kredity TypeBeatz jsou vyčerpány',
+    subject: 'Vaše kredity TypeBeatz jsou vyčerpány',
     getHTML: (u = { first_name: 'Jan', email: 'jan@example.com', language: 'cs' }) => creditLimitHTML(u),
   },
 ];

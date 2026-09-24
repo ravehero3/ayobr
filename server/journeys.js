@@ -106,7 +106,7 @@ async function saveJourneys(journeys) {
  */
 function renderJourneyStepHTML(step, user = { first_name: 'Jan', email: 'jan@example.com', language: 'cs' }, lang = 'cs') {
   const isCzech = (lang || user?.language || 'cs') === 'cs';
-  const name = user?.first_name || (isCzech ? 'hudebníku' : 'producer');
+  const name = user?.first_name || '';
   const appUrl = process.env.APP_URL || 'https://typebeatz.voodoo808.com';
 
   const badgeText = isCzech ? (step.badge_cs || step.badge || 'TYPEBEATZ') : (step.badge_en || step.badge || 'TYPEBEATZ');
@@ -207,7 +207,7 @@ function renderJourneyStepHTML(step, user = { first_name: 'Jan', email: 'jan@exa
                     <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:20px;"></div>
                     <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.2);text-align:center;line-height:1.7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:400;">
                       © ${new Date().getFullYear()} TypeBeatz<br>
-                      ${isCzech ? 'Automatická zpráva odeslaná na základě tvé aktivity.' : 'Automated message sent based on your activity.'}<br>
+                      ${isCzech ? 'Automatická zpráva odeslaná na základě Vaší aktivity.' : 'Automated message sent based on your activity.'}<br>
                       <span style="color:rgba(255,255,255,0.12);">${user?.email || ''}</span>
                     </p>
                   </td>
