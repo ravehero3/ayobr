@@ -9,7 +9,7 @@ import { forceStopAllProcesses, restartFFmpeg } from '../utils/ffmpegProcessor';
 import { proxyImageUrl } from '../utils/imageProxy';
 import ModalPreviewTab from '../components/admin/ModalPreviewTab';
 import JourneyTab from '../components/admin/JourneyTab';
-import { ClockIcon, StopIcon, SearchIcon, XIcon, AlertIcon, MusicIcon, CopyIcon, EditIcon } from '../components/admin/AdminIcons';
+import { ClockIcon, StopIcon, SearchIcon, XIcon, AlertIcon, MusicIcon, CopyIcon, EditIcon, ZapIcon, CheckIcon, FileTextIcon } from '../components/admin/AdminIcons';
 
 const API = '/api/admin';
 const NM = "'Neue Montreal', 'Inter', sans-serif";
@@ -88,7 +88,12 @@ function SignupChart({ daily }) {
 
 /* ── Email template scaled preview ───────────────────────── */
 function EmailPreviewCard({ tpl, onOpen }) {
-  const icons = { welcome:'W', purchase_pro:'P', purchase_unlimited:'U', credit_limit:'C' };
+  const iconMap = {
+    welcome: <ZapIcon size={16} color={BLUE} />,
+    purchase_pro: <CheckIcon size={16} color={BLUE} />,
+    purchase_unlimited: <CheckIcon size={16} color={BLUE} />,
+    credit_limit: <AlertIcon size={16} color={BLUE} />,
+  };
   return (
     <div style={{ background:CARD, border:`1px solid ${BORDER}`, borderRadius:18, overflow:'hidden',
       transition:'all 0.2s', cursor:'pointer' }} onClick={onOpen}
@@ -98,8 +103,8 @@ function EmailPreviewCard({ tpl, onOpen }) {
       <div style={{ padding:'20px 20px 16px', borderBottom:`1px solid ${BORDER}` }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
           <div style={{ width:36, height:36, borderRadius:10, background:`${BLUE}15`, border:`1px solid ${BLUE}25`,
-            display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color:BLUE }}>
-            {icons[tpl.id] || 'E'}
+            display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            {iconMap[tpl.id] || <FileTextIcon size={16} color={BLUE} />}
           </div>
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:NM, fontSize:13, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>{tpl.name}</div>
@@ -1803,13 +1808,18 @@ export default function AdminPage() {
                       {nlMode==='template' ? (
                         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:10}}>
                           {templates.map(tpl=>{
-                            const icons={welcome:'W',purchase_pro:'P',purchase_unlimited:'U',credit_limit:'C'};
+                            const iconMap = {
+                              welcome: <ZapIcon size={14} color={BLUE} />,
+                              purchase_pro: <CheckIcon size={14} color={BLUE} />,
+                              purchase_unlimited: <CheckIcon size={14} color={BLUE} />,
+                              credit_limit: <AlertIcon size={14} color={BLUE} />,
+                            };
                             const active = nlTplId===tpl.id;
                             return (
                               <button key={tpl.id} onClick={()=>handleSelectTpl(tpl.id)} style={{
                                 textAlign:'left',padding:'14px',borderRadius:12,cursor:'pointer',border:`1px solid ${active?BLUE:BORDER}`,
                                 background:active?`${BLUE}15`:CARD,transition:'all 0.2s'}}>
-                                <div style={{fontSize:11,fontWeight:700,color:BLUE,marginBottom:6}}>{icons[tpl.id]||'E'}</div>
+                                <div style={{marginBottom:6,display:'flex',alignItems:'center'}}>{iconMap[tpl.id]||<FileTextIcon size={14} color={BLUE} />}</div>
                                 <div style={{fontFamily:NM,fontSize:11,fontWeight:800,color:active?'#fff':'rgba(255,255,255,0.7)',marginBottom:4}}>{tpl.name}</div>
                                 <div style={{fontFamily:NM,fontSize:9,color:'rgba(255,255,255,0.3)',lineHeight:1.5}}>{tpl.trigger}</div>
                               </button>
